@@ -1527,7 +1527,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine($"var typedInstance = ({className})instance;");
-        writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+        
+        // Only declare context if it's needed (when hasCancellationToken is true)
+        if (hasCancellationToken)
+        {
+            writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+        }
 
         if (parametersFromArgs.Length == 0)
         {
@@ -1619,7 +1624,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+        
+        // Only declare context if it's needed (when hasCancellationToken is true and there are parameters)
+        if (hasCancellationToken && parametersFromArgs.Length > 0)
+        {
+            writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+        }
 
         if (parametersFromArgs.Length == 0)
         {

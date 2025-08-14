@@ -83,7 +83,6 @@ internal sealed class Tests_NullTest_TestSource_GUID : global::TUnit.Core.Interf
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1692.Tests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -95,7 +94,6 @@ internal sealed class Tests_NullTest_TestSource_GUID : global::TUnit.Core.Interf
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

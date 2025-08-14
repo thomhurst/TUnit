@@ -71,13 +71,11 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1889.DerivedTest)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Test1();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 instance.Test1();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -183,7 +181,6 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1889.DerivedTest)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -196,7 +193,6 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -311,7 +307,6 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1889.DerivedTest)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -324,7 +319,6 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

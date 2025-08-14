@@ -169,7 +169,6 @@ internal sealed class DataSourceClassCombinedWithDataSourceMethod_DataSourceClas
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -182,7 +181,6 @@ internal sealed class DataSourceClassCombinedWithDataSourceMethod_DataSourceClas
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

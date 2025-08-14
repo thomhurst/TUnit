@@ -92,7 +92,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_TestSource_G
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -105,7 +104,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_TestSource_G
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -228,7 +226,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method2_TestSource_
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -241,7 +238,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method2_TestSource_
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -364,7 +360,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_WithAction_T
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -377,7 +372,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_WithAction_T
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -518,7 +512,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method3_TestSource_
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -531,7 +524,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method3_TestSource_
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -703,7 +695,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -716,7 +707,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -839,7 +829,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_WithBaseReturn_Test
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -852,7 +841,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_WithBaseReturn_Test
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -985,7 +973,6 @@ internal sealed class MethodDataSourceDrivenTests_EnumerableFuncArrayTest_TestSo
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -997,7 +984,6 @@ internal sealed class MethodDataSourceDrivenTests_EnumerableFuncArrayTest_TestSo
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

@@ -85,7 +85,6 @@ internal sealed class ArgumentWithImplicitConverterTests_Explicit_TestSource_GUI
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ArgumentWithImplicitConverterTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -98,7 +97,6 @@ internal sealed class ArgumentWithImplicitConverterTests_Explicit_TestSource_GUI
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -214,7 +212,6 @@ internal sealed class ArgumentWithImplicitConverterTests_Implicit_TestSource_GUI
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ArgumentWithImplicitConverterTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -227,7 +224,6 @@ internal sealed class ArgumentWithImplicitConverterTests_Implicit_TestSource_GUI
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

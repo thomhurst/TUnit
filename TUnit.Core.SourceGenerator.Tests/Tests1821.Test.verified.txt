@@ -95,7 +95,6 @@ internal sealed class Tests_MethodDataSource_TestSource_GUID : global::TUnit.Cor
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1821.Tests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -107,7 +106,6 @@ internal sealed class Tests_MethodDataSource_TestSource_GUID : global::TUnit.Cor
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -232,7 +230,6 @@ internal sealed class Tests_MatrixDataSource_TestSource_GUID : global::TUnit.Cor
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1821.Tests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -244,7 +241,6 @@ internal sealed class Tests_MatrixDataSource_TestSource_GUID : global::TUnit.Cor
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

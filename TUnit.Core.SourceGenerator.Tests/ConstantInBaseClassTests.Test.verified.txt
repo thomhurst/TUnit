@@ -81,7 +81,6 @@ internal sealed class ConstantInBaseClassTests_SomeTest_TestSource_GUID : global
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -93,7 +92,6 @@ internal sealed class ConstantInBaseClassTests_SomeTest_TestSource_GUID : global
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

@@ -85,12 +85,10 @@ internal sealed class ClassAndMethodArgumentsTests_Simple_TestSource_GUID : glob
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ClassAndMethodArgumentsTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.Simple();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 await instance.Simple();
             },
         };
@@ -211,7 +209,6 @@ internal sealed class ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GU
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ClassAndMethodArgumentsTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -223,7 +220,6 @@ internal sealed class ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GU
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -351,7 +347,6 @@ internal sealed class ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_G
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ClassAndMethodArgumentsTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -363,7 +358,6 @@ internal sealed class ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_G
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

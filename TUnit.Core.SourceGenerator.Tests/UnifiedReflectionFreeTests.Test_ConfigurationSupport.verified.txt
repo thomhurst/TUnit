@@ -69,13 +69,11 @@ internal sealed class ConfigurationTest_TestWithConfiguration_TestSource_GUID : 
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ConfigurationTest)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.TestWithConfiguration();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 instance.TestWithConfiguration();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },

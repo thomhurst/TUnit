@@ -373,7 +373,6 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 3:
@@ -386,7 +385,6 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 3:

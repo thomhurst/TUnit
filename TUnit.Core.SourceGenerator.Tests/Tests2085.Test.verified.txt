@@ -81,7 +81,6 @@ internal sealed class Tests_Double_SpecialConsts_TestSource_GUID : global::TUnit
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._2085.Tests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -93,7 +92,6 @@ internal sealed class Tests_Double_SpecialConsts_TestSource_GUID : global::TUnit
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -204,7 +202,6 @@ internal sealed class Tests_Float_SpecialConsts_TestSource_GUID : global::TUnit.
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._2085.Tests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -216,7 +213,6 @@ internal sealed class Tests_Float_SpecialConsts_TestSource_GUID : global::TUnit.
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

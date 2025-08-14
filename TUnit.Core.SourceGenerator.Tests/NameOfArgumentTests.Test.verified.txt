@@ -81,7 +81,6 @@ internal sealed class NameOfArgumentTests_TestName_TestSource_GUID : global::TUn
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.NameOfArgumentTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -93,7 +92,6 @@ internal sealed class NameOfArgumentTests_TestName_TestSource_GUID : global::TUn
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

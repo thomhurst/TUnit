@@ -101,7 +101,6 @@ internal sealed class AutoDataTests_Test1_TestSource_GUID : global::TUnit.Core.I
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.AutoDataTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 4:
@@ -113,7 +112,6 @@ internal sealed class AutoDataTests_Test1_TestSource_GUID : global::TUnit.Core.I
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 4:

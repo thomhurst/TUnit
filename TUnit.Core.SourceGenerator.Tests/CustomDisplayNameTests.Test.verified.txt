@@ -84,12 +84,10 @@ internal sealed class CustomDisplayNameTests_Test_TestSource_GUID : global::TUni
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.CustomDisplayNameTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.Test();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 await instance.Test();
             },
         };
@@ -196,12 +194,10 @@ internal sealed class CustomDisplayNameTests_Test2_TestSource_GUID : global::TUn
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.CustomDisplayNameTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.Test2();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 await instance.Test2();
             },
         };
@@ -335,7 +331,6 @@ internal sealed class CustomDisplayNameTests_Test3_TestSource_GUID : global::TUn
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.CustomDisplayNameTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 3:
@@ -347,7 +342,6 @@ internal sealed class CustomDisplayNameTests_Test3_TestSource_GUID : global::TUn
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 3:
@@ -483,7 +477,6 @@ internal sealed class CustomDisplayNameTests_MethodDataSourceTest_TestSource_GUI
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.CustomDisplayNameTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -495,7 +488,6 @@ internal sealed class CustomDisplayNameTests_MethodDataSourceTest_TestSource_GUI
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -631,7 +623,6 @@ internal sealed class CustomDisplayNameTests_TestParameterNamePrefixBug_TestSour
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.CustomDisplayNameTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:
@@ -643,7 +634,6 @@ internal sealed class CustomDisplayNameTests_TestParameterNamePrefixBug_TestSour
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:
@@ -767,7 +757,6 @@ internal sealed class CustomDisplayNameTests_PasswordTest_TestSource_GUID : glob
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.CustomDisplayNameTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -779,7 +768,6 @@ internal sealed class CustomDisplayNameTests_PasswordTest_TestSource_GUID : glob
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -893,12 +881,10 @@ internal sealed class CustomDisplayNameTests_SameClassConstantTest_TestSource_GU
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.CustomDisplayNameTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.SameClassConstantTest();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 await instance.SameClassConstantTest();
             },
         };
@@ -1005,12 +991,10 @@ internal sealed class CustomDisplayNameTests_DifferentClassConstantTest_TestSour
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.CustomDisplayNameTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.DifferentClassConstantTest();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 await instance.DifferentClassConstantTest();
             },
         };
@@ -1117,12 +1101,10 @@ internal sealed class CustomDisplayNameTests_NestedClassConstantTest_TestSource_
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.CustomDisplayNameTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.NestedClassConstantTest();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 await instance.NestedClassConstantTest();
             },
         };

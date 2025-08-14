@@ -227,7 +227,6 @@ internal sealed class Tests_Parse_InvalidString_ThrowsException_TestSource_GUID 
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1304.Tests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -239,7 +238,6 @@ internal sealed class Tests_Parse_InvalidString_ThrowsException_TestSource_GUID 
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -352,7 +350,6 @@ internal sealed class Tests_TryParse_ValidString_ReturnsAccountId_TestSource_GUI
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1304.Tests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -364,7 +361,6 @@ internal sealed class Tests_TryParse_ValidString_ReturnsAccountId_TestSource_GUI
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

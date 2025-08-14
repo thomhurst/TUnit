@@ -90,7 +90,6 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._2112.Tests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -121,7 +120,6 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -260,7 +258,6 @@ internal sealed class Tests_Test2_TestSource_GUID : global::TUnit.Core.Interface
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._2112.Tests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -291,7 +288,6 @@ internal sealed class Tests_Test2_TestSource_GUID : global::TUnit.Core.Interface
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

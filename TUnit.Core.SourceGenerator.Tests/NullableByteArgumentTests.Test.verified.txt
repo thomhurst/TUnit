@@ -83,7 +83,6 @@ internal sealed class NullableByteArgumentTests_Test_TestSource_GUID : global::T
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.NullableByteArgumentTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -96,7 +95,6 @@ internal sealed class NullableByteArgumentTests_Test_TestSource_GUID : global::T
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -217,7 +215,6 @@ internal sealed class NullableByteArgumentTests_Test2_TestSource_GUID : global::
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.NullableByteArgumentTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:
@@ -230,7 +227,6 @@ internal sealed class NullableByteArgumentTests_Test2_TestSource_GUID : global::
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:

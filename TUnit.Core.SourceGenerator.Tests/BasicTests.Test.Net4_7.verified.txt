@@ -69,13 +69,11 @@ internal sealed class BasicTests_SynchronousTest_TestSource_GUID : global::TUnit
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.BasicTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.SynchronousTest();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 instance.SynchronousTest();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -168,12 +166,10 @@ internal sealed class BasicTests_AsynchronousTest_TestSource_GUID : global::TUni
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.BasicTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.AsynchronousTest();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 await instance.AsynchronousTest();
             },
         };
@@ -265,12 +261,10 @@ internal sealed class BasicTests_ValueTaskAsynchronousTest_TestSource_GUID : glo
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.BasicTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.ValueTaskAsynchronousTest();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 await instance.ValueTaskAsynchronousTest();
             },
         };

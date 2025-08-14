@@ -80,7 +80,6 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 0:
@@ -111,7 +110,6 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 0:
@@ -240,7 +238,6 @@ internal sealed class ArgsAsArrayTests_NonParams_TestSource_GUID : global::TUnit
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -253,7 +250,6 @@ internal sealed class ArgsAsArrayTests_NonParams_TestSource_GUID : global::TUnit
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -364,7 +360,6 @@ internal sealed class ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID : global
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 0:
@@ -395,7 +390,6 @@ internal sealed class ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID : global
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 0:
@@ -524,7 +518,6 @@ internal sealed class ArgsAsArrayTests_Enumerable_TestSource_GUID : global::TUni
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -537,7 +530,6 @@ internal sealed class ArgsAsArrayTests_Enumerable_TestSource_GUID : global::TUni
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -655,7 +647,6 @@ internal sealed class ArgsAsArrayTests_Following_Non_Params_TestSource_GUID : gl
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:
@@ -668,7 +659,6 @@ internal sealed class ArgsAsArrayTests_Following_Non_Params_TestSource_GUID : gl
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:
