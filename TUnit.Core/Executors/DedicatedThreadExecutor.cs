@@ -66,7 +66,8 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 }, CancellationToken.None, TaskCreationOptions.None, taskScheduler).Unwrap();
 
                 // Try fast path first - many tests complete quickly
-                if (task.Wait(10))
+                // Use IsCompleted to avoid synchronous wait
+                if (task.IsCompleted)
                 {
                     HandleTaskCompletion(task, tcs);
                     return;

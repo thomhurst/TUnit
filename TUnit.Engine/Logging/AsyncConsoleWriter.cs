@@ -232,27 +232,18 @@ internal sealed class AsyncConsoleWriter : TextWriter
             _writeChannel.Writer.TryComplete();
             _shutdownCts.Cancel();
             
-            // Wait briefly for processor to finish using a safer pattern
-            // Use Task.Run to avoid capturing SynchronizationContext which can cause deadlocks
+            // Don't block on disposal - it can cause deadlocks
+            // Just give the processor task a brief moment to complete naturally
+            // The cancellation token will signal it to stop anyway
             try
             {
-                Task.Run(async () =>
-                {
-                    // For .NET Standard 2.0 compatibility, use Task.Delay for timeout
-                    var timeoutTask = Task.Delay(TimeSpan.FromSeconds(1));
-                    var completedTask = await Task.WhenAny(_processorTask, timeoutTask).ConfigureAwait(false);
-                    
-                    // If it was the processor task that completed, await it to observe any exceptions
-                    if (completedTask == _processorTask)
-                    {
-                        await _processorTask.ConfigureAwait(false);
-                    }
-                    // Otherwise timeout occurred, which is fine during shutdown
-                }).GetAwaiter().GetResult();
+                // Use a very short non-blocking wait to see if it's already done
+                _processorTask.Wait(1);
             }
             catch
             {
-                // Ignore any exceptions during shutdown
+                // Ignore - the task might still be running, but we've signaled shutdown
+                // and it will complete on its own
             }
             
             _shutdownCts.Dispose();
