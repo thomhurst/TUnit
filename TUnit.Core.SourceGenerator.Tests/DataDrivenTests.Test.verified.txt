@@ -85,8 +85,6 @@ internal sealed class DataDrivenTests_DataSource_Method_TestSource_GUID : global
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -99,7 +97,6 @@ internal sealed class DataDrivenTests_DataSource_Method_TestSource_GUID : global
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -222,8 +219,6 @@ internal sealed class DataDrivenTests_DataSource_Method_TestSource_GUID : global
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 2:
@@ -236,7 +231,6 @@ internal sealed class DataDrivenTests_DataSource_Method_TestSource_GUID : global
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 2:
@@ -352,8 +346,6 @@ internal sealed class DataDrivenTests_EnumValue_TestSource_GUID : global::TUnit.
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -366,7 +358,6 @@ internal sealed class DataDrivenTests_EnumValue_TestSource_GUID : global::TUnit.
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -478,8 +469,6 @@ internal sealed class DataDrivenTests_NullValue_TestSource_GUID : global::TUnit.
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -492,7 +481,6 @@ internal sealed class DataDrivenTests_NullValue_TestSource_GUID : global::TUnit.
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -604,8 +592,6 @@ internal sealed class DataDrivenTests_EmptyString_TestSource_GUID : global::TUni
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -618,7 +604,6 @@ internal sealed class DataDrivenTests_EmptyString_TestSource_GUID : global::TUni
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -730,8 +715,6 @@ internal sealed class DataDrivenTests_NonEmptyString_TestSource_GUID : global::T
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -744,7 +727,6 @@ internal sealed class DataDrivenTests_NonEmptyString_TestSource_GUID : global::T
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -860,8 +842,6 @@ internal sealed class DataDrivenTests_BooleanString_TestSource_GUID : global::TU
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -874,7 +854,6 @@ internal sealed class DataDrivenTests_BooleanString_TestSource_GUID : global::TU
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -986,8 +965,6 @@ internal sealed class DataDrivenTests_Type_TestSource_GUID : global::TUnit.Core.
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -1000,7 +977,6 @@ internal sealed class DataDrivenTests_Type_TestSource_GUID : global::TUnit.Core.
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -1112,8 +1088,6 @@ internal sealed class DataDrivenTests_IntegerArray_TestSource_GUID : global::TUn
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -1126,7 +1100,6 @@ internal sealed class DataDrivenTests_IntegerArray_TestSource_GUID : global::TUn
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -1238,8 +1211,6 @@ internal sealed class DataDrivenTests_IntMaxValue_TestSource_GUID : global::TUni
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -1252,7 +1223,6 @@ internal sealed class DataDrivenTests_IntMaxValue_TestSource_GUID : global::TUni
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:

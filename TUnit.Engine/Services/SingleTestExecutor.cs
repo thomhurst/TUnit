@@ -476,6 +476,10 @@ internal class SingleTestExecutor : ISingleTestExecutor
             var timeoutMs = (int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds;
             cts.CancelAfter(timeoutMs);
 
+            // Update the test context with the timeout-aware cancellation token
+            var originalToken = test.Context.CancellationToken;
+            test.Context.CancellationToken = cts.Token;
+
             try
             {
                 await test.InvokeTestAsync(instance, cts.Token).ConfigureAwait(false);
@@ -483,6 +487,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
             catch (OperationCanceledException) when (cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
             {
                 throw new System.TimeoutException($"Test '{test.Context.GetDisplayName()}' exceeded timeout of {timeoutMs}ms");
+            }
+            finally
+            {
+                // Restore the original token (in case it's needed elsewhere)
+                test.Context.CancellationToken = originalToken;
             }
         };
     }
