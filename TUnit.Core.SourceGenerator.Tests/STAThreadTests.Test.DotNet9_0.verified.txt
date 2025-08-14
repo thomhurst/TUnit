@@ -74,7 +74,6 @@ internal sealed class STAThreadTests_With_STA_TestSource_GUID : global::TUnit.Co
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.With_STA();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -174,7 +173,6 @@ internal sealed class STAThreadTests_Without_STA_TestSource_GUID : global::TUnit
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.Without_STA();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -275,7 +273,6 @@ internal sealed class STAThreadTests_STA_WithSimpleAwait_TestSource_GUID : globa
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.STA_WithSimpleAwait();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -376,7 +373,6 @@ internal sealed class STAThreadTests_STA_WithTaskYield_TestSource_GUID : global:
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.STA_WithTaskYield();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -477,7 +473,6 @@ internal sealed class STAThreadTests_STA_WithConfigureAwaitTrue_TestSource_GUID 
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.STA_WithConfigureAwaitTrue();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -578,7 +573,6 @@ internal sealed class STAThreadTests_STA_WithNestedAsyncCalls_TestSource_GUID : 
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.STA_WithNestedAsyncCalls();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -679,7 +673,6 @@ internal sealed class STAThreadTests_STA_WithTaskFromResult_TestSource_GUID : gl
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.STA_WithTaskFromResult();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -780,7 +773,6 @@ internal sealed class STAThreadTests_STA_WithCompletedTask_TestSource_GUID : glo
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.STA_WithCompletedTask();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -881,7 +873,6 @@ internal sealed class STAThreadTests_STA_WithTaskRun_TestSource_GUID : global::T
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.STA_WithTaskRun();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -982,7 +973,6 @@ internal sealed class STAThreadTests_STA_WithMultipleAwaits_TestSource_GUID : gl
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.STA_WithMultipleAwaits();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -1083,7 +1073,6 @@ internal sealed class STAThreadTests_STA_WithAsyncEnumerable_TestSource_GUID : g
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.STA_WithAsyncEnumerable();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -1184,7 +1173,6 @@ internal sealed class STAThreadTests_STA_WithTaskWhenAll_TestSource_GUID : globa
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.STA_WithTaskWhenAll();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -1285,7 +1273,6 @@ internal sealed class STAThreadTests_STA_WithExceptionHandling_TestSource_GUID :
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.STAThreadTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.STA_WithExceptionHandling();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
