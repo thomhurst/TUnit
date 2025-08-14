@@ -72,7 +72,6 @@ internal sealed class RepeatTests_One_TestSource_GUID : global::TUnit.Core.Inter
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.RepeatTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.One();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -173,7 +172,6 @@ internal sealed class RepeatTests_Two_TestSource_GUID : global::TUnit.Core.Inter
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.RepeatTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Two();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -273,7 +271,6 @@ internal sealed class RepeatTests_Three_TestSource_GUID : global::TUnit.Core.Int
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.RepeatTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Three();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },

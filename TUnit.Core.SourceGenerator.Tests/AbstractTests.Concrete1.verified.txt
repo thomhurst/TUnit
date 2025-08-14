@@ -70,7 +70,6 @@ internal sealed class ConcreteClass1_AssertClassName_TestSource_GUID : global::T
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.AbstractTests.ConcreteClass1)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.AssertClassName();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
