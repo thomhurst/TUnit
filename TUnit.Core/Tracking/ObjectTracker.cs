@@ -136,6 +136,8 @@ public static class ObjectTracker
         }
         
         var ownedSet = _ownedObjects.GetOrAdd(owner, _ => new HashSet<object>());
+        bool shouldRegisterCallback = false;
+        
         lock (ownedSet)
         {
             if (ownedSet.Add(owned))
@@ -143,15 +145,21 @@ public static class ObjectTracker
                 var counter = _trackedObjects.GetOrAdd(owned, _ => new Counter());
                 counter.Increment();
                 
-                // Only register disposal callback once per owner
-                if (_disposalCallbackRegistered.TryAdd(owner, true))
+                // Check if we need to register disposal callback (but do it outside the lock)
+                if (!_disposalCallbackRegistered.ContainsKey(owner))
                 {
-                    OnDisposedAsync(owner, async () =>
-                    {
-                        await ReleaseOwnedObjectsAsync(owner).ConfigureAwait(false);
-                    });
+                    shouldRegisterCallback = _disposalCallbackRegistered.TryAdd(owner, true);
                 }
             }
+        }
+        
+        // Register disposal callback OUTSIDE the lock to prevent deadlocks
+        if (shouldRegisterCallback)
+        {
+            OnDisposedAsync(owner, async () =>
+            {
+                await ReleaseOwnedObjectsAsync(owner).ConfigureAwait(false);
+            });
         }
     }
     
@@ -203,7 +211,9 @@ public static class ObjectTracker
             if (_ownedObjects.TryRemove(owner, out var ownedSet))
             {
                 List<Task> disposalTasks = new();
+                List<object> objectsToDispose = new();
                 
+                // CRITICAL FIX: Collect objects to dispose OUTSIDE the lock to prevent deadlocks
                 lock (ownedSet)
                 {
                     foreach (var owned in ownedSet)
@@ -216,11 +226,17 @@ public static class ObjectTracker
                                 // Mark as being disposed to prevent multiple disposal attempts
                                 if (_disposalInProgress.TryAdd(owned, true))
                                 {
-                                    disposalTasks.Add(GlobalContext.Current.Disposer.DisposeAsync(owned).AsTask());
+                                    objectsToDispose.Add(owned);
                                 }
                             }
                         }
                     }
+                }
+                
+                // Now create disposal tasks OUTSIDE the lock
+                foreach (var obj in objectsToDispose)
+                {
+                    disposalTasks.Add(GlobalContext.Current.Disposer.DisposeAsync(obj).AsTask());
                 }
                 
                 // Dispose all owned objects in parallel with timeout protection
