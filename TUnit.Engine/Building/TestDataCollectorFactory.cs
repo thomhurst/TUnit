@@ -21,7 +21,6 @@ public static class TestDataCollectorFactory
         }
         else
         {
-            // In reflection mode, we need to discover hooks and populate Sources dictionaries
             ReflectionHookDiscoveryService.DiscoverHooks();
             return new ReflectionTestDataCollector();
         }
@@ -42,7 +41,6 @@ public static class TestDataCollectorFactory
             return aotCollector;
         }
 
-        // Fall back to reflection mode
         ReflectionHookDiscoveryService.DiscoverHooks();
         return new ReflectionTestDataCollector();
     }

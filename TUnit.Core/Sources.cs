@@ -35,4 +35,19 @@ public static class Sources
 
     public static readonly ConcurrentQueue<Func<Task>> GlobalInitializers = [];
     public static readonly ConcurrentQueue<IPropertySource> PropertySources = [];
+
+    /// <summary>
+    /// Checks if any hooks have been registered in the Sources
+    /// </summary>
+    public static bool HasAnyHooks()
+    {
+        return !BeforeTestHooks.IsEmpty || !AfterTestHooks.IsEmpty ||
+               !BeforeEveryTestHooks.IsEmpty || !AfterEveryTestHooks.IsEmpty ||
+               !BeforeClassHooks.IsEmpty || !AfterClassHooks.IsEmpty ||
+               !BeforeEveryClassHooks.IsEmpty || !AfterEveryClassHooks.IsEmpty ||
+               !BeforeAssemblyHooks.IsEmpty || !AfterAssemblyHooks.IsEmpty ||
+               !BeforeEveryAssemblyHooks.IsEmpty || !AfterEveryAssemblyHooks.IsEmpty ||
+               !BeforeTestSessionHooks.IsEmpty || !AfterTestSessionHooks.IsEmpty ||
+               !BeforeTestDiscoveryHooks.IsEmpty || !AfterTestDiscoveryHooks.IsEmpty;
+    }
 }

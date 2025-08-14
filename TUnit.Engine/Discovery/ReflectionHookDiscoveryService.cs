@@ -4,6 +4,7 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Engine.Building;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Discovery;
 
@@ -42,9 +43,123 @@ internal static class ReflectionHookDiscoveryService
                 catch (Exception)
                 {
                     // Ignore failures in hook discovery for individual assemblies
-                    // This ensures the system remains functional even if some assemblies fail
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Process hook registration events for all hooks in Sources
+    /// </summary>
+    public static async Task ProcessHookRegistrationEventsAsync(EventReceiverOrchestrator eventReceiverOrchestrator)
+    {
+        foreach (var kvp in Sources.BeforeTestHooks)
+        {
+            foreach (var hook in kvp.Value)
+            {
+                await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+            }
+        }
+
+        foreach (var kvp in Sources.AfterTestHooks)
+        {
+            foreach (var hook in kvp.Value)
+            {
+                await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+            }
+        }
+
+        foreach (var kvp in Sources.BeforeClassHooks)
+        {
+            foreach (var hook in kvp.Value)
+            {
+                await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+            }
+        }
+
+        foreach (var kvp in Sources.AfterClassHooks)
+        {
+            foreach (var hook in kvp.Value)
+            {
+                await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+            }
+        }
+        foreach (var kvp in Sources.BeforeAssemblyHooks)
+        {
+            foreach (var hook in kvp.Value)
+            {
+                await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+            }
+        }
+
+        foreach (var kvp in Sources.AfterAssemblyHooks)
+        {
+            foreach (var hook in kvp.Value)
+            {
+                await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+            }
+        }
+        foreach (var hook in Sources.BeforeTestSessionHooks)
+        {
+            await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+        }
+
+        foreach (var hook in Sources.AfterTestSessionHooks)
+        {
+            await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+        }
+
+        foreach (var hook in Sources.BeforeTestDiscoveryHooks)
+        {
+            await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+        }
+
+        foreach (var hook in Sources.AfterTestDiscoveryHooks)
+        {
+            await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+        }
+
+        foreach (var hook in Sources.BeforeEveryTestHooks)
+        {
+            await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+        }
+
+        foreach (var hook in Sources.AfterEveryTestHooks)
+        {
+            await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+        }
+
+        foreach (var hook in Sources.BeforeEveryClassHooks)
+        {
+            await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+        }
+
+        foreach (var hook in Sources.AfterEveryClassHooks)
+        {
+            await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+        }
+
+        foreach (var hook in Sources.BeforeEveryAssemblyHooks)
+        {
+            await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+        }
+
+        foreach (var hook in Sources.AfterEveryAssemblyHooks)
+        {
+            await ProcessHookRegistrationAsync(hook, eventReceiverOrchestrator);
+        }
+    }
+
+    private static async Task ProcessHookRegistrationAsync(HookMethod hookMethod, EventReceiverOrchestrator eventReceiverOrchestrator)
+    {
+        try
+        {
+            var context = new HookRegisteredContext(hookMethod);
+            await eventReceiverOrchestrator.InvokeHookRegistrationEventReceiversAsync(context, CancellationToken.None);
+        }
+        catch (Exception)
+        {
+            // Ignore errors during hook registration event processing
         }
     }
 
