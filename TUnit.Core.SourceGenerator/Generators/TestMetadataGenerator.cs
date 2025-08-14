@@ -129,7 +129,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Find the concrete implementation of this method in the derived class
             var concreteMethod = FindConcreteMethodImplementation(classInfo.TypeSymbol, method);
-            
+
             // Calculate inheritance depth for this test
             int inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
 
@@ -159,11 +159,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             return 0;
         }
-        
+
         // Count how many levels up the inheritance chain the method is declared
         int depth = 0;
         INamedTypeSymbol? currentType = testClass.BaseType;
-        
+
         while (currentType != null)
         {
             depth++;
@@ -173,7 +173,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             currentType = currentType.BaseType;
         }
-        
+
         // This shouldn't happen in normal cases, but return the depth anyway
         return depth;
     }
@@ -361,7 +361,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate AOT-friendly invokers that use the specific types
         GenerateAotFriendlyInvokers(writer, testMethod, className, typeArguments);
-        
+
         // Add file location metadata
         writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
@@ -562,7 +562,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Inheritance depth
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
-        
+
         // File location metadata
         writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
@@ -606,7 +606,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Inheritance depth
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
-        
+
         // File location metadata
         writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
@@ -1567,7 +1567,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine($"var typedInstance = ({className})instance;");
-        writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+        
+        // Only declare context if it's needed (when hasCancellationToken is true)
+        if (hasCancellationToken)
+        {
+            writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+        }
 
         if (parametersFromArgs.Length == 0)
         {
@@ -1590,7 +1595,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional && !p.IsParams);
 
             // Generate runtime logic to handle variable argument counts
-            writer.AppendLine("// Invoke with only the arguments that were provided");
             writer.AppendLine("switch (args.Length)");
             writer.AppendLine("{");
             writer.Indent();
@@ -1660,6 +1664,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
+        
+        // Only declare context if it's needed (when hasCancellationToken is true and there are parameters)
+        if (hasCancellationToken && parametersFromArgs.Length > 0)
+        {
+            writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+        }
 
         if (parametersFromArgs.Length == 0)
         {
@@ -1682,7 +1692,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional && !p.IsParams);
 
             // Generate runtime logic to handle variable argument counts
-            writer.AppendLine("// Invoke with only the arguments that were provided");
             writer.AppendLine("switch (args.Length)");
             writer.AppendLine("{");
             writer.Indent();
@@ -1707,7 +1716,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Add CancellationToken if present
                 if (hasCancellationToken)
                 {
-                    argsToPass.Add("cancellationToken");
+                    argsToPass.Add("context?.CancellationToken ?? System.Threading.CancellationToken.None");
                 }
 
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";
@@ -4289,7 +4298,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate typed invoker
         GenerateTypedInvokers(writer, testMethod, className);
-        
+
         // Add file location metadata
         writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
