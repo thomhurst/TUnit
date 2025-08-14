@@ -58,32 +58,35 @@ public sealed class TestDependency : IEquatable<TestDependency>
         {
             var testClassType = test.TestClassType;
 
-            if (ClassType.IsGenericTypeDefinition && testClassType.IsGenericType)
+            if (ClassType.IsGenericTypeDefinition)
             {
-                if (testClassType.GetGenericTypeDefinition() != ClassType)
+                // Check if the test class type or any of its base types match the generic type definition
+                var found = false;
+                var currentType = testClassType;
+                
+                while (currentType != null && !found)
                 {
-                    var currentType = testClassType.BaseType;
-                    var found = false;
-                    while (currentType != null && !found)
+                    if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == ClassType)
                     {
-                        if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == ClassType)
-                        {
-                            found = true;
-                        }
-                        currentType = currentType.BaseType;
+                        found = true;
                     }
-                    if (!found)
-                    {
-                        return false;
-                    }
+                    currentType = currentType.BaseType;
                 }
+                
+                if (!found)
+                {
+                    return false;
+                }
+                
+                // For generic type definitions, we don't need to check arity against the test class
+                // because the test class may inherit from a closed generic version of the dependency
             }
             else if (!ClassType.IsAssignableFrom(testClassType))
             {
                 return false;
             }
 
-            if (ClassGenericArity > 0)
+            if (ClassGenericArity > 0 && !ClassType.IsGenericTypeDefinition)
             {
                 var testGenericArgs = testClassType.IsGenericType
                     ? testClassType.GetGenericArguments().Length
