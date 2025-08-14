@@ -691,6 +691,112 @@ public class EquivalentAssertionTests
     }
 
 
+    [Test]
+    public async Task Objects_With_DateTime_Properties_Can_Be_Ignored_By_Type()
+    {
+        var object1 = new MyClassWithDateTime
+        {
+            Value = "Foo",
+            CreatedAt = new DateTime(2023, 1, 1),
+            UpdatedAt = new DateTime(2023, 1, 2)
+        };
+
+        var object2 = new MyClassWithDateTime
+        {
+            Value = "Foo",
+            CreatedAt = new DateTime(2024, 12, 31),
+            UpdatedAt = new DateTime(2024, 12, 30)
+        };
+
+        await TUnitAssert.That(object1).IsEquivalentTo(object2).IgnoringMembersOfType<DateTime>();
+    }
+
+    [Test]
+    public async Task Objects_With_DateTime_Properties_Fail_Without_Ignore_By_Type()
+    {
+        var object1 = new MyClassWithDateTime
+        {
+            Value = "Foo",
+            CreatedAt = new DateTime(2023, 1, 1),
+            UpdatedAt = new DateTime(2023, 1, 2)
+        };
+
+        var object2 = new MyClassWithDateTime
+        {
+            Value = "Foo",
+            CreatedAt = new DateTime(2024, 12, 31),
+            UpdatedAt = new DateTime(2024, 12, 30)
+        };
+
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(object1).IsEquivalentTo(object2));
+
+        await TUnitAssert.That(exception!.Message).Contains("Property MyClassWithDateTime.CreatedAt did not match");
+    }
+
+    [Test]
+    public async Task Objects_With_Mixed_DateTime_Types_Can_Be_Ignored()
+    {
+        var object1 = new MyClassWithMixedDateTypes
+        {
+            Value = "Foo",
+            CreatedAt = new DateTime(2023, 1, 1),
+            UpdatedAt = new DateTimeOffset(2023, 1, 2, 0, 0, 0, TimeSpan.Zero),
+            OptionalDate = new DateTime(2023, 1, 3)
+        };
+
+        var object2 = new MyClassWithMixedDateTypes
+        {
+            Value = "Foo",
+            CreatedAt = new DateTime(2024, 12, 31),
+            UpdatedAt = new DateTimeOffset(2024, 12, 30, 0, 0, 0, TimeSpan.Zero),
+            OptionalDate = null
+        };
+
+        await TUnitAssert.That(object1).IsEquivalentTo(object2)
+            .IgnoringMembersOfType<DateTime>()
+            .IgnoringMembersOfType<DateTimeOffset>()
+            .IgnoringMembersOfType<DateTime?>();
+    }
+
+    [Test]
+    public async Task Objects_With_Fields_Can_Be_Ignored_By_Type()
+    {
+        var object1 = new MyClassWithDateTimeFields
+        {
+            value = "Foo",
+            createdAt = new DateTime(2023, 1, 1)
+        };
+
+        var object2 = new MyClassWithDateTimeFields
+        {
+            value = "Foo",
+            createdAt = new DateTime(2024, 12, 31)
+        };
+
+        await TUnitAssert.That(object1).IsEquivalentTo(object2).IgnoringMembersOfType<DateTime>();
+    }
+
+    public class MyClassWithDateTime
+    {
+        public string? Value { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    public class MyClassWithMixedDateTypes
+    {
+        public string? Value { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
+        public DateTime? OptionalDate { get; set; }
+    }
+
+    public class MyClassWithDateTimeFields
+    {
+        public string? value;
+        public DateTime createdAt;
+    }
+
     public class MyClassWithMultipleFields
     {
         public string? value;
