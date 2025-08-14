@@ -232,14 +232,18 @@ internal sealed class AsyncConsoleWriter : TextWriter
             _writeChannel.Writer.TryComplete();
             _shutdownCts.Cancel();
             
-            // Wait briefly for processor to finish
+            // Don't block on disposal - it can cause deadlocks
+            // Just give the processor task a brief moment to complete naturally
+            // The cancellation token will signal it to stop anyway
             try
             {
-                _processorTask.Wait(TimeSpan.FromSeconds(1));
+                // Use a very short non-blocking wait to see if it's already done
+                _processorTask.Wait(1);
             }
             catch
             {
-                // Ignore
+                // Ignore - the task might still be running, but we've signaled shutdown
+                // and it will complete on its own
             }
             
             _shutdownCts.Dispose();
