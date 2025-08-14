@@ -395,6 +395,13 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 test.StartTime!.Value,
                 (int)test.Context.TestDetails.Timeout.Value.TotalMilliseconds);
         }
+        else if (ex is SkipTestException skipEx)
+        {
+            test.State = TestState.Skipped;
+            test.Result = _resultFactory.CreateSkippedResult(
+                test.StartTime!.Value,
+                skipEx.Reason);
+        }
         else
         {
             test.State = TestState.Failed;
