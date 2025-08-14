@@ -177,6 +177,17 @@ public static class Compare
                 continue;
             }
 
+            // Check if field type should be ignored
+            if (actualFieldInfo?.FieldType != null && options.MemberTypesToIgnore.Contains(actualFieldInfo.FieldType))
+            {
+                continue;
+            }
+
+            if (expectedFieldInfo?.FieldType != null && options.MemberTypesToIgnore.Contains(expectedFieldInfo.FieldType))
+            {
+                continue;
+            }
+
             var actualFieldValue = actualFieldInfo?.GetValue(actual);
             var expectedFieldValue = expectedFieldInfo?.GetValue(expected);
 
@@ -222,6 +233,17 @@ public static class Compare
             var expectedPropertyInfo = expected.GetType().GetProperty(propertyName, BindingFlags);
 
             if (options.EquivalencyKind == EquivalencyKind.Partial && expectedPropertyInfo is null)
+            {
+                continue;
+            }
+
+            // Check if property type should be ignored
+            if (actualPropertyInfo?.PropertyType != null && options.MemberTypesToIgnore.Contains(actualPropertyInfo.PropertyType))
+            {
+                continue;
+            }
+
+            if (expectedPropertyInfo?.PropertyType != null && options.MemberTypesToIgnore.Contains(expectedPropertyInfo.PropertyType))
             {
                 continue;
             }
