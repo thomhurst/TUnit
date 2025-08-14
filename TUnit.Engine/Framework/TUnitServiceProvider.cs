@@ -109,6 +109,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             }
             else
             {
+                // In reflection mode, we need to discover hooks and populate Sources dictionaries
+                ReflectionHookDiscoveryService.DiscoverHooks();
                 return new ReflectionTestDataCollector();
             }
         };
