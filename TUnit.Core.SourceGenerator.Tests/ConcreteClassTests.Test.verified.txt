@@ -71,7 +71,6 @@ internal sealed class ConcreteClass2_SecondTest_TestSource_GUID : global::TUnit.
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.AbstractTests.ConcreteClass2)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.SecondTest();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -171,7 +170,6 @@ internal sealed class ConcreteClass2_AssertClassName_TestSource_GUID : global::T
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.AbstractTests.ConcreteClass2)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.AssertClassName();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -269,7 +267,6 @@ internal sealed class ConcreteClass2_SecondTest_TestSource_GUID : global::TUnit.
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.AbstractTests.ConcreteClass2)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.SecondTest();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -368,7 +365,6 @@ internal sealed class ConcreteClass1_AssertClassName_TestSource_GUID : global::T
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.AbstractTests.ConcreteClass1)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.AssertClassName();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
