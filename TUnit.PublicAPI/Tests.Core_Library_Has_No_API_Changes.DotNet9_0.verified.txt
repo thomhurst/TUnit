@@ -1926,9 +1926,9 @@ namespace .Helpers
     [.DebuggerDisplay("Count = {CurrentCount}")]
     public class Counter
     {
-        public <int>? OnCountChanged;
         public Counter() { }
         public int CurrentCount { get; }
+        public event <int>? OnCountChanged;
         public int Add(int value) { }
         public int Decrement() { }
         public int Increment() { }
@@ -2523,6 +2523,8 @@ namespace .Tracking
     public static class ObjectTracker
     {
         public static void OnDisposed(object? o,  action) { }
+        public static void OnDisposedAsync(object? o, <.> asyncAction) { }
+        public static void TrackObject(.TestContextEvents events, object? obj) { }
         public static void TrackOwnership(object owner, object owned) { }
     }
 }
