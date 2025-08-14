@@ -46,12 +46,26 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             return;
         }
 
-        var allStaticPropertiesList = new List<PropertyWithDataSource>();
+        // Use a dictionary to deduplicate static properties by their declaring type and name
+        // This prevents duplicate initialization when derived classes inherit static properties
+        var uniqueStaticProperties = new Dictionary<(INamedTypeSymbol DeclaringType, string Name), PropertyWithDataSource>(SymbolEqualityComparer.Default.ToTupleComparer());
+        
         foreach (var testClass in testClasses)
         {
-            allStaticPropertiesList.AddRange(GetStaticPropertyDataSources(testClass));
+            var properties = GetStaticPropertyDataSources(testClass);
+            foreach (var prop in properties)
+            {
+                // Static properties belong to their declaring type, not derived types
+                // Only add if we haven't seen this exact property before
+                var key = (prop.Property.ContainingType, prop.Property.Name);
+                if (!uniqueStaticProperties.ContainsKey(key))
+                {
+                    uniqueStaticProperties[key] = prop;
+                }
+            }
         }
-        var allStaticProperties = allStaticPropertiesList.ToImmutableArray();
+        
+        var allStaticProperties = uniqueStaticProperties.Values.ToImmutableArray();
 
         if (allStaticProperties.IsEmpty)
         {
