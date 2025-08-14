@@ -2407,6 +2407,8 @@ namespace .Tracking
     public static class ObjectTracker
     {
         public static void OnDisposed(object? o,  action) { }
+        public static void OnDisposedAsync(object? o, <.> asyncAction) { }
+        public static void TrackObject(.TestContextEvents events, object? obj) { }
         public static void TrackOwnership(object owner, object owned) { }
     }
 }
