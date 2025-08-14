@@ -100,7 +100,6 @@ internal sealed class StringArgumentTests_Normal_TestSource_GUID : global::TUnit
             {
                 var typedInstance = (global::TUnit.TestProject.StringArgumentTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -113,7 +112,7 @@ internal sealed class StringArgumentTests_Normal_TestSource_GUID : global::TUnit
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -240,7 +239,6 @@ internal sealed class StringArgumentTests_Nullable_TestSource_GUID : global::TUn
             {
                 var typedInstance = (global::TUnit.TestProject.StringArgumentTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -253,7 +251,7 @@ internal sealed class StringArgumentTests_Nullable_TestSource_GUID : global::TUn
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

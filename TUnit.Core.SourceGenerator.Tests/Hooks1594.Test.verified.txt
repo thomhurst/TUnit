@@ -91,6 +91,7 @@ internal sealed class MyTests_Test1_TestSource_GUID : global::TUnit.Core.Interfa
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.Test1();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },

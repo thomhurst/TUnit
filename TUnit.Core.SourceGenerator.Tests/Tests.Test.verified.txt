@@ -97,7 +97,6 @@ internal sealed class Tests_TryParse_InvalidString_ReturnsFailure_TestSource_GUI
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1304.Tests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -109,11 +108,11 @@ internal sealed class Tests_TryParse_InvalidString_ReturnsFailure_TestSource_GUI
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.TryParse_InvalidString_ReturnsFailure(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), cancellationToken);
+                        await instance.TryParse_InvalidString_ReturnsFailure(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -229,7 +228,6 @@ internal sealed class Tests_Parse_InvalidString_ThrowsException_TestSource_GUID 
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1304.Tests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -241,7 +239,7 @@ internal sealed class Tests_Parse_InvalidString_ThrowsException_TestSource_GUID 
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -355,7 +353,6 @@ internal sealed class Tests_TryParse_ValidString_ReturnsAccountId_TestSource_GUI
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1304.Tests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -367,7 +364,7 @@ internal sealed class Tests_TryParse_ValidString_ReturnsAccountId_TestSource_GUI
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

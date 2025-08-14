@@ -92,6 +92,7 @@ internal sealed class ClassDataSourceDrivenTests2_Base_Derived1_TestSource_GUID 
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.Base_Derived1();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -207,6 +208,7 @@ internal sealed class ClassDataSourceDrivenTests2_Base_Derived2_TestSource_GUID 
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.Base_Derived2();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },

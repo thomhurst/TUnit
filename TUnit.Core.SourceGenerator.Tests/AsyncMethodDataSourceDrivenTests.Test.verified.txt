@@ -103,7 +103,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Sin
             {
                 var typedInstance = (global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -115,7 +114,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Sin
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -255,7 +254,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Tup
             {
                 var typedInstance = (global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 2:
@@ -267,7 +265,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Tup
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:
@@ -400,7 +398,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Enu
             {
                 var typedInstance = (global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -412,7 +409,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Enu
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -545,7 +542,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Fun
             {
                 var typedInstance = (global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -557,7 +553,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Fun
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -691,7 +687,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Wit
             {
                 var typedInstance = (global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -703,7 +698,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Wit
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -836,7 +831,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Ext
             {
                 var typedInstance = (global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -848,7 +842,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Ext
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -981,7 +975,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_ValueTaskMethodDataSource
             {
                 var typedInstance = (global::TUnit.TestProject.AsyncMethodDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -993,7 +986,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_ValueTaskMethodDataSource
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

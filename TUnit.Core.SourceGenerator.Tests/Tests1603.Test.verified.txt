@@ -82,7 +82,6 @@ internal sealed class Tests_Casted_Integer_To_Short_Converts_TestSource_GUID : g
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1603.Tests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -94,7 +93,7 @@ internal sealed class Tests_Casted_Integer_To_Short_Converts_TestSource_GUID : g
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -206,7 +205,6 @@ internal sealed class Tests_Integer_To_Short_Converts_TestSource_GUID : global::
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1603.Tests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -218,7 +216,7 @@ internal sealed class Tests_Integer_To_Short_Converts_TestSource_GUID : global::
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

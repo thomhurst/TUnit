@@ -87,6 +87,7 @@ internal sealed class AttributeTests_MyTest_TestSource_GUID : global::TUnit.Core
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.MyTest();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },

@@ -119,6 +119,7 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test1_TestSource_GUID :
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.Test1();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -261,6 +262,7 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test2_TestSource_GUID :
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.Test2();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },

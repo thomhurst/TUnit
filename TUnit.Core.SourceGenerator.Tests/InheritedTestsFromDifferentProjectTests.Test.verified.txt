@@ -78,6 +78,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.Test();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -185,7 +186,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -198,7 +198,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -324,7 +324,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -337,7 +336,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -445,6 +444,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.VerifyInheritedCategoriesAreAvailable();
             },
         };
@@ -546,6 +546,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTest_TestSourc
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.BaseTest();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -649,6 +650,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTestWithMultip
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.BaseTestWithMultipleCategories();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -750,6 +752,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.Test();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -857,7 +860,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -870,7 +872,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -996,7 +998,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -1009,7 +1010,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -1117,6 +1118,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.VerifyInheritedCategoriesAreAvailable();
             },
         };

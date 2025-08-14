@@ -120,6 +120,7 @@ internal sealed class TimeoutCancellationTokenTests_DefaultTest_TestSource_GUID 
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.DefaultTest(cancellationToken);
             },
         };
@@ -264,6 +265,7 @@ internal sealed class TimeoutCancellationTokenTests_BasicTest_TestSource_GUID : 
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.BasicTest(cancellationToken);
             },
         };
@@ -407,6 +409,7 @@ internal sealed class TimeoutCancellationTokenTests_InheritedTimeoutAttribute_Te
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.InheritedTimeoutAttribute(cancellationToken);
             },
         };
@@ -555,7 +558,6 @@ internal sealed class TimeoutCancellationTokenTests_DataTest_TestSource_GUID : g
             {
                 var typedInstance = (global::TUnit.TestProject.TimeoutCancellationTokenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -567,11 +569,11 @@ internal sealed class TimeoutCancellationTokenTests_DataTest_TestSource_GUID : g
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.DataTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), cancellationToken);
+                        await instance.DataTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -744,7 +746,6 @@ internal sealed class TimeoutCancellationTokenTests_DataSourceTest_TestSource_GU
             {
                 var typedInstance = (global::TUnit.TestProject.TimeoutCancellationTokenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -756,11 +757,11 @@ internal sealed class TimeoutCancellationTokenTests_DataSourceTest_TestSource_GU
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.DataSourceTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), cancellationToken);
+                        await instance.DataSourceTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -913,7 +914,6 @@ internal sealed class TimeoutCancellationTokenTests_MatrixTest_TestSource_GUID :
             {
                 var typedInstance = (global::TUnit.TestProject.TimeoutCancellationTokenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -925,11 +925,11 @@ internal sealed class TimeoutCancellationTokenTests_MatrixTest_TestSource_GUID :
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.MatrixTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), cancellationToken);
+                        await instance.MatrixTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

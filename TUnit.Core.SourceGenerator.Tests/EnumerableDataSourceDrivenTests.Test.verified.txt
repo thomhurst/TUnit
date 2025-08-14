@@ -103,7 +103,6 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method_TestSour
             {
                 var typedInstance = (global::TUnit.TestProject.EnumerableDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -115,7 +114,7 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method_TestSour
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -248,7 +247,6 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method2_TestSou
             {
                 var typedInstance = (global::TUnit.TestProject.EnumerableDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -260,7 +258,7 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method2_TestSou
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -393,7 +391,6 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_
             {
                 var typedInstance = (global::TUnit.TestProject.EnumerableDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -406,7 +403,7 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

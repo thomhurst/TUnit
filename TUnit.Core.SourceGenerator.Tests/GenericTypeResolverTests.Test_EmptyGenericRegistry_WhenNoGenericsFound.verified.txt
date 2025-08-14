@@ -75,6 +75,7 @@ internal sealed class SimpleTestClass_NonGenericTest_TestSource_GUID : global::T
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.NonGenericTest();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },

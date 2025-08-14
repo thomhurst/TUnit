@@ -81,7 +81,6 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 0:
@@ -112,7 +111,7 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 0:
@@ -242,7 +241,6 @@ internal sealed class ArgsAsArrayTests_NonParams_TestSource_GUID : global::TUnit
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -255,7 +253,7 @@ internal sealed class ArgsAsArrayTests_NonParams_TestSource_GUID : global::TUnit
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -367,7 +365,6 @@ internal sealed class ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID : global
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 0:
@@ -398,7 +395,7 @@ internal sealed class ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID : global
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 0:
@@ -528,7 +525,6 @@ internal sealed class ArgsAsArrayTests_Enumerable_TestSource_GUID : global::TUni
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -541,7 +537,7 @@ internal sealed class ArgsAsArrayTests_Enumerable_TestSource_GUID : global::TUni
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -660,7 +656,6 @@ internal sealed class ArgsAsArrayTests_Following_Non_Params_TestSource_GUID : gl
             {
                 var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 2:
@@ -673,7 +668,7 @@ internal sealed class ArgsAsArrayTests_Following_Non_Params_TestSource_GUID : gl
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:

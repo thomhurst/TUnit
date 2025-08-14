@@ -82,7 +82,6 @@ internal sealed class ConstantsInInterpolatedStringsTests_SomeTest_TestSource_GU
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -94,7 +93,7 @@ internal sealed class ConstantsInInterpolatedStringsTests_SomeTest_TestSource_GU
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:

@@ -75,6 +75,7 @@ internal sealed class PriorityFilteringTests_High_1_TestSource_GUID : global::TU
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.High_1();
             },
         };
@@ -172,6 +173,7 @@ internal sealed class PriorityFilteringTests_High_2_TestSource_GUID : global::TU
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.High_2();
             },
         };
@@ -269,6 +271,7 @@ internal sealed class PriorityFilteringTests_High_3_TestSource_GUID : global::TU
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.High_3();
             },
         };
@@ -366,6 +369,7 @@ internal sealed class PriorityFilteringTests_Medium_1_TestSource_GUID : global::
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.Medium_1();
             },
         };
@@ -463,6 +467,7 @@ internal sealed class PriorityFilteringTests_Medium_2_TestSource_GUID : global::
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.Medium_2();
             },
         };
@@ -560,6 +565,7 @@ internal sealed class PriorityFilteringTests_Low_1_TestSource_GUID : global::TUn
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.Low_1();
             },
         };

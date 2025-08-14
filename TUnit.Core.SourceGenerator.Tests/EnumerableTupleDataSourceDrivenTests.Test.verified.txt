@@ -140,7 +140,6 @@ internal sealed class EnumerableTupleDataSourceDrivenTests_DataSource_TupleMetho
             {
                 var typedInstance = (global::TUnit.TestProject.EnumerableTupleDataSourceDrivenTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 3:
@@ -153,7 +152,7 @@ internal sealed class EnumerableTupleDataSourceDrivenTests_DataSource_TupleMetho
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 3:

@@ -77,6 +77,7 @@ internal sealed class ConcreteClass2_SecondTest_TestSource_GUID : global::TUnit.
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.SecondTest();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -176,6 +177,7 @@ internal sealed class ConcreteClass2_AssertClassName_TestSource_GUID : global::T
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.AssertClassName();
             },
         };
@@ -275,6 +277,7 @@ internal sealed class ConcreteClass2_SecondTest_TestSource_GUID : global::TUnit.
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 instance.SecondTest();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -373,6 +376,7 @@ internal sealed class ConcreteClass1_AssertClassName_TestSource_GUID : global::T
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.AssertClassName();
             },
         };

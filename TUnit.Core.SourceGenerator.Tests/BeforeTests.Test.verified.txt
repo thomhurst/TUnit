@@ -74,6 +74,7 @@ internal sealed class SetupTests_Test1_TestSource_GUID : global::TUnit.Core.Inte
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.Test1();
             },
         };
@@ -170,6 +171,7 @@ internal sealed class SetupTests_Test2_TestSource_GUID : global::TUnit.Core.Inte
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
+                var context = global::TUnit.Core.TestContext.Current;
                 await instance.Test2();
             },
         };

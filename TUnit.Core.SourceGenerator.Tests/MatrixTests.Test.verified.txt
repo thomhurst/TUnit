@@ -96,7 +96,6 @@ internal sealed class MatrixTests_MatrixTest_One_TestSource_GUID : global::TUnit
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 3:
@@ -108,7 +107,7 @@ internal sealed class MatrixTests_MatrixTest_One_TestSource_GUID : global::TUnit
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 3:
@@ -241,7 +240,6 @@ internal sealed class MatrixTests_MatrixTest_Two_TestSource_GUID : global::TUnit
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 4:
@@ -253,7 +251,7 @@ internal sealed class MatrixTests_MatrixTest_Two_TestSource_GUID : global::TUnit
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 4:
@@ -379,7 +377,6 @@ internal sealed class MatrixTests_MatrixTest_Enum_TestSource_GUID : global::TUni
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 3:
@@ -391,7 +388,7 @@ internal sealed class MatrixTests_MatrixTest_Enum_TestSource_GUID : global::TUni
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 3:
@@ -510,7 +507,6 @@ internal sealed class MatrixTests_AutoGenerateBools_TestSource_GUID : global::TU
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 2:
@@ -522,7 +518,7 @@ internal sealed class MatrixTests_AutoGenerateBools_TestSource_GUID : global::TU
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:
@@ -641,7 +637,6 @@ internal sealed class MatrixTests_AutoGenerateBools2_TestSource_GUID : global::T
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 2:
@@ -653,7 +648,7 @@ internal sealed class MatrixTests_AutoGenerateBools2_TestSource_GUID : global::T
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:
@@ -772,7 +767,6 @@ internal sealed class MatrixTests_ImplicitConversion_TestSource_GUID : global::T
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 2:
@@ -784,7 +778,7 @@ internal sealed class MatrixTests_ImplicitConversion_TestSource_GUID : global::T
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:
@@ -903,7 +897,6 @@ internal sealed class MatrixTests_ExcludingAutoGeneratedMatrixValues_TestSource_
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 2:
@@ -915,7 +908,7 @@ internal sealed class MatrixTests_ExcludingAutoGeneratedMatrixValues_TestSource_
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:
@@ -1027,7 +1020,6 @@ internal sealed class MatrixTests_Method1_TestSource_GUID : global::TUnit.Core.I
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -1039,7 +1031,7 @@ internal sealed class MatrixTests_Method1_TestSource_GUID : global::TUnit.Core.I
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -1151,7 +1143,6 @@ internal sealed class MatrixTests_Method2_TestSource_GUID : global::TUnit.Core.I
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -1163,7 +1154,7 @@ internal sealed class MatrixTests_Method2_TestSource_GUID : global::TUnit.Core.I
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -1275,7 +1266,6 @@ internal sealed class MatrixTests_Method3_TestSource_GUID : global::TUnit.Core.I
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -1287,7 +1277,7 @@ internal sealed class MatrixTests_Method3_TestSource_GUID : global::TUnit.Core.I
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -1399,7 +1389,6 @@ internal sealed class MatrixTests_Method4_TestSource_GUID : global::TUnit.Core.I
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -1411,7 +1400,7 @@ internal sealed class MatrixTests_Method4_TestSource_GUID : global::TUnit.Core.I
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 1:
@@ -1533,7 +1522,6 @@ internal sealed class MatrixTests_Exclusion_TestSource_GUID : global::TUnit.Core
             {
                 var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
                 var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 2:
@@ -1545,7 +1533,7 @@ internal sealed class MatrixTests_Exclusion_TestSource_GUID : global::TUnit.Core
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
+                var context = global::TUnit.Core.TestContext.Current;
                 switch (args.Length)
                 {
                     case 2:
