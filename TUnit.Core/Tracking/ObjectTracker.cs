@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using TUnit.Core.Helpers;
 
@@ -13,6 +16,8 @@ public static class ObjectTracker
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
     private static readonly ConcurrentDictionary<object, HashSet<object>> _ownedObjects = new();
+    private static readonly ConcurrentDictionary<object, bool> _disposalCallbackRegistered = new();
+    private static readonly ConcurrentDictionary<object, bool> _disposalInProgress = new();
 
     /// <summary>
     /// Tracks multiple objects for a test context and registers a single disposal handler.
@@ -117,6 +122,19 @@ public static class ObjectTracker
             return;
         }
         
+        // Prevent circular ownership - owner cannot own itself
+        if (ReferenceEquals(owner, owned))
+        {
+            return;
+        }
+        
+        // Check if this would create a circular ownership chain
+        if (IsOwnedBy(owned, owner))
+        {
+            // owned already owns owner, so we can't make owner own owned
+            return;
+        }
+        
         var ownedSet = _ownedObjects.GetOrAdd(owner, _ => new HashSet<object>());
         lock (ownedSet)
         {
@@ -125,40 +143,107 @@ public static class ObjectTracker
                 var counter = _trackedObjects.GetOrAdd(owned, _ => new Counter());
                 counter.Increment();
                 
-                OnDisposedAsync(owner, async () =>
+                // Only register disposal callback once per owner
+                if (_disposalCallbackRegistered.TryAdd(owner, true))
                 {
-                    await ReleaseOwnedObjectsAsync(owner).ConfigureAwait(false);
-                });
+                    OnDisposedAsync(owner, async () =>
+                    {
+                        await ReleaseOwnedObjectsAsync(owner).ConfigureAwait(false);
+                    });
+                }
             }
         }
     }
     
-    private static async Task ReleaseOwnedObjectsAsync(object owner)
+    private static bool IsOwnedBy(object potentialOwner, object potentialOwned)
     {
-        if (_ownedObjects.TryRemove(owner, out var ownedSet))
+        // Check if potentialOwner owns potentialOwned (directly or indirectly)
+        var visited = new HashSet<object>();
+        var stack = new Stack<object>();
+        stack.Push(potentialOwner);
+        
+        while (stack.Count > 0)
         {
-            List<Task> disposalTasks = new();
-            
-            lock (ownedSet)
+            var current = stack.Pop();
+            if (!visited.Add(current))
             {
-                foreach (var owned in ownedSet)
+                continue; // Already visited
+            }
+            
+            if (ReferenceEquals(current, potentialOwned))
+            {
+                return true; // Found circular ownership
+            }
+            
+            if (_ownedObjects.TryGetValue(current, out var ownedSet))
+            {
+                lock (ownedSet)
                 {
-                    if (_trackedObjects.TryGetValue(owned, out var counter))
+                    foreach (var owned in ownedSet)
                     {
-                        var count = counter.Decrement();
-                        if (count == 0)
-                        {
-                            disposalTasks.Add(GlobalContext.Current.Disposer.DisposeAsync(owned).AsTask());
-                        }
+                        stack.Push(owned);
                     }
                 }
             }
-            
-            // Dispose all owned objects in parallel
-            if (disposalTasks.Count > 0)
+        }
+        
+        return false;
+    }
+    
+    private static async Task ReleaseOwnedObjectsAsync(object owner)
+    {
+        // Prevent multiple concurrent disposal attempts for the same owner
+        if (!_disposalInProgress.TryAdd(owner, true))
+        {
+            return; // Already being disposed
+        }
+        
+        try
+        {
+            if (_ownedObjects.TryRemove(owner, out var ownedSet))
             {
-                await Task.WhenAll(disposalTasks).ConfigureAwait(false);
+                List<Task> disposalTasks = new();
+                
+                lock (ownedSet)
+                {
+                    foreach (var owned in ownedSet)
+                    {
+                        if (_trackedObjects.TryGetValue(owned, out var counter))
+                        {
+                            var count = counter.Decrement();
+                            if (count == 0)
+                            {
+                                // Mark as being disposed to prevent multiple disposal attempts
+                                if (_disposalInProgress.TryAdd(owned, true))
+                                {
+                                    disposalTasks.Add(GlobalContext.Current.Disposer.DisposeAsync(owned).AsTask());
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Dispose all owned objects in parallel with timeout protection
+                if (disposalTasks.Count > 0)
+                {
+                    using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(30));
+                    try
+                    {
+                        await Task.WhenAll(disposalTasks).WaitAsync(cts.Token).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Disposal timed out - log and continue
+                        System.Diagnostics.Debug.WriteLine($"Disposal of objects owned by {owner.GetType().Name} timed out after 30 seconds");
+                    }
+                }
             }
+        }
+        finally
+        {
+            // Clean up tracking dictionaries for disposed objects
+            _disposalCallbackRegistered.TryRemove(owner, out _);
+            _disposalInProgress.TryRemove(owner, out _);
         }
     }
 }
