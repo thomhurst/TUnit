@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core.Tracking;
@@ -32,7 +34,7 @@ public static class ObjectTracker
     /// </summary>
     /// <param name="events">Events for the test instance</param>
     /// <param name="obj">The object to track</param>
-    internal static void TrackObject(TestContextEvents events, object? obj)
+    public static void TrackObject(TestContextEvents events, object? obj)
     {
         if (obj == null || ShouldSkipTracking(obj))
         {
@@ -56,7 +58,7 @@ public static class ObjectTracker
 
             if (count == 0)
             {
-                await GlobalContext.Current.Disposer.DisposeAsync(obj);
+                await GlobalContext.Current.Disposer.DisposeAsync(obj).ConfigureAwait(false);
             }
         };
     }
@@ -86,6 +88,23 @@ public static class ObjectTracker
         };
     }
     
+    public static void OnDisposedAsync(object? o, Func<Task> asyncAction)
+    {
+        if(o is not IDisposable and not IAsyncDisposable)
+        {
+            return;
+        }
+
+        _trackedObjects.GetOrAdd(o, _ => new Counter())
+            .OnCountChanged += async (_, count) =>
+        {
+            if (count == 0)
+            {
+                await asyncAction().ConfigureAwait(false);
+            }
+        };
+    }
+    
     /// <summary>
     /// Tracks that an owner object owns another object.
     /// This increments the owned object's reference count.
@@ -106,18 +125,20 @@ public static class ObjectTracker
                 var counter = _trackedObjects.GetOrAdd(owned, _ => new Counter());
                 counter.Increment();
                 
-                OnDisposed(owner, () =>
+                OnDisposedAsync(owner, async () =>
                 {
-                    ReleaseOwnedObjects(owner);
+                    await ReleaseOwnedObjectsAsync(owner).ConfigureAwait(false);
                 });
             }
         }
     }
     
-    private static void ReleaseOwnedObjects(object owner)
+    private static async Task ReleaseOwnedObjectsAsync(object owner)
     {
         if (_ownedObjects.TryRemove(owner, out var ownedSet))
         {
+            List<Task> disposalTasks = new();
+            
             lock (ownedSet)
             {
                 foreach (var owned in ownedSet)
@@ -127,10 +148,16 @@ public static class ObjectTracker
                         var count = counter.Decrement();
                         if (count == 0)
                         {
-                            _ = GlobalContext.Current.Disposer.DisposeAsync(owned);
+                            disposalTasks.Add(GlobalContext.Current.Disposer.DisposeAsync(owned).AsTask());
                         }
                     }
                 }
+            }
+            
+            // Dispose all owned objects in parallel
+            if (disposalTasks.Count > 0)
+            {
+                await Task.WhenAll(disposalTasks).ConfigureAwait(false);
             }
         }
     }

@@ -179,6 +179,9 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("// Initialize the injected value");
         writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(value);");
         
+        writer.AppendLine("// Track the static property for disposal");
+        writer.AppendLine("global::TUnit.Core.Tracking.ObjectTracker.TrackObject(global::TUnit.Core.TestSessionContext.GlobalStaticPropertyContext.Events, value);");
+        
         writer.Unindent();
         writer.AppendLine("}");
         
