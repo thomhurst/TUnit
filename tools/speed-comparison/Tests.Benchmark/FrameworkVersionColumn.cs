@@ -43,6 +43,7 @@ public class FrameworkVersionColumn : IColumn
         {
             "TUnit" or "TUnit_AOT" or "Build_TUnit" => GetTUnitVersion(),
             "xUnit" or "Build_xUnit" => GetXUnitVersion(),
+            "xUnitV3" or "Build_xUnitV3" => GetXUnitV3Version(),
             "NUnit" or "Build_NUnit" => GetNUnitVersion(),
             "MSTest" or "Build_MSTest" => GetMSTestVersion(),
             _ => "Unknown"
@@ -118,6 +119,40 @@ public class FrameworkVersionColumn : IColumn
                     var content = File.ReadAllText(packagesPropsPath);
                     var match = System.Text.RegularExpressions.Regex.Match(content, 
                         @"<PackageVersion\s+Include=""xunit""\s+Version=""([^""]+)""");
+                    if (match.Success)
+                    {
+                        return match.Groups[1].Value;
+                    }
+                }
+            }
+
+            return "";
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
+    private static string GetXUnitV3Version()
+    {
+        try
+        {
+            // Get from Directory.Packages.props
+            var directory = new DirectoryInfo(Environment.CurrentDirectory);
+            while (directory != null && directory.Name != "TUnit")
+            {
+                directory = directory.Parent;
+            }
+
+            if (directory != null)
+            {
+                var packagesPropsPath = Path.Combine(directory.FullName, "Directory.Packages.props");
+                if (File.Exists(packagesPropsPath))
+                {
+                    var content = File.ReadAllText(packagesPropsPath);
+                    var match = System.Text.RegularExpressions.Regex.Match(content, 
+                        @"<PackageVersion\s+Include=""xunit\.v3\.extensibility\.core""\s+Version=""([^""]+)""");
                     if (match.Success)
                     {
                         return match.Groups[1].Value;
