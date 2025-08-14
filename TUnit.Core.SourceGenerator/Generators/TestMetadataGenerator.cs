@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
@@ -20,6 +22,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        // Check if this is a test project based on MSBuild properties
+        var isTestProjectProvider = context.AnalyzerConfigOptionsProvider
+            .Select(static (options, _) => IsTestProject(options.GlobalOptions));
+
         // Find all test methods using the more performant ForAttributeWithMetadataName
         var testMethodsProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
@@ -36,13 +42,28 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetInheritsTestsClassMetadata(ctx))
             .Where(static m => m is not null);
 
-        // Generate one source file per test method
-        context.RegisterSourceOutput(testMethodsProvider.Combine(context.CompilationProvider),
-            static (context, tuple) => GenerateTestMethodSource(context, tuple.Right, tuple.Left));
+        // Generate one source file per test method only if this is a test project
+        context.RegisterSourceOutput(testMethodsProvider.Combine(context.CompilationProvider).Combine(isTestProjectProvider),
+            static (context, tuple) => GenerateTestMethodSource(context, tuple.Left.Right, tuple.Left.Left, tuple.Right));
 
-        // Generate test methods for inherited tests
-        context.RegisterSourceOutput(inheritsTestsClassesProvider.Combine(context.CompilationProvider),
-            static (context, tuple) => GenerateInheritedTestSources(context, tuple.Right, tuple.Left));
+        // Generate test methods for inherited tests only if this is a test project
+        context.RegisterSourceOutput(inheritsTestsClassesProvider.Combine(context.CompilationProvider).Combine(isTestProjectProvider),
+            static (context, tuple) => GenerateInheritedTestSources(context, tuple.Left.Right, tuple.Left.Left, tuple.Right));
+    }
+
+    private static bool IsTestProject(AnalyzerConfigOptions globalOptions)
+    {
+        // Check if IsTestProject is explicitly set to false
+        if (globalOptions.TryGetValue("build_property.IsTestProject", out var isTestProject))
+        {
+            if (bool.TryParse(isTestProject, out var isTest))
+            {
+                return isTest;
+            }
+        }
+        
+        // Default to true if not explicitly set (backward compatibility)
+        return true;
     }
 
     private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context)
@@ -106,7 +127,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         };
     }
 
-    private static void GenerateInheritedTestSources(SourceProductionContext context, Compilation compilation, InheritsTestsClassMetadata? classInfo)
+    private static void GenerateInheritedTestSources(SourceProductionContext context, Compilation compilation, InheritsTestsClassMetadata? classInfo, bool isTestProject)
     {
         if (classInfo?.TypeSymbol == null)
         {
@@ -148,7 +169,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 InheritanceDepth = inheritanceDepth
             };
 
-            GenerateTestMethodSource(context, compilation, testMethodMetadata);
+            GenerateTestMethodSource(context, compilation, testMethodMetadata, isTestProject);
         }
     }
 
@@ -178,7 +199,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return depth;
     }
 
-    private static void GenerateTestMethodSource(SourceProductionContext context, Compilation compilation, TestMethodMetadata? testMethod)
+    private static void GenerateTestMethodSource(SourceProductionContext context, Compilation compilation, TestMethodMetadata? testMethod, bool isTestProject)
     {
         try
         {
@@ -189,7 +210,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             var writer = new CodeWriter();
             GenerateFileHeader(writer);
-            GenerateTestMetadata(writer, compilation, testMethod);
+            GenerateTestMetadata(writer, compilation, testMethod, isTestProject);
 
             var fileName = $"{testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_{Guid.NewGuid():N}.g.cs";
             context.AddSource(fileName, SourceText.From(writer.ToString(), Encoding.UTF8));
@@ -226,7 +247,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static void GenerateTestMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GenerateTestMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod, bool isTestProject)
     {
         var className = testMethod.TypeSymbol.GloballyQualified();
         var methodName = testMethod.MethodSymbol.Name;
@@ -305,8 +326,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
 
-        // Generate module initializer
-        GenerateModuleInitializer(writer, testMethod, guid);
+        // Generate module initializer only for test projects
+        if (isTestProject)
+        {
+            GenerateModuleInitializer(writer, testMethod, guid);
+        }
     }
 
     private static void GenerateSpecificGenericInstantiation(
