@@ -1620,6 +1620,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
+        writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
 
         if (parametersFromArgs.Length == 0)
         {
@@ -1667,7 +1668,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Add CancellationToken if present
                 if (hasCancellationToken)
                 {
-                    argsToPass.Add("cancellationToken");
+                    argsToPass.Add("context?.CancellationToken ?? System.Threading.CancellationToken.None");
                 }
 
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";
