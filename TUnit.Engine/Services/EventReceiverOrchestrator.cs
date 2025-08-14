@@ -225,6 +225,12 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         {
             hookContext.HookMethod.Timeout = hookContext.Timeout;
         }
+        
+        // Apply the skip reason from the context back to the hook method
+        if (!string.IsNullOrEmpty(hookContext.SkipReason) && hookContext.HookMethod != null)
+        {
+            hookContext.HookMethod.SkipReason = hookContext.SkipReason;
+        }
     }
 
 

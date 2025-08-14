@@ -3,7 +3,7 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true)]
-public class SkipAttribute : Attribute, ITestRegisteredEventReceiver
+public class SkipAttribute : Attribute, ITestRegisteredEventReceiver, IHookRegisteredEventReceiver
 {
     public string Reason { get; }
 
@@ -25,5 +25,17 @@ public class SkipAttribute : Attribute, ITestRegisteredEventReceiver
         }
     }
 
+    /// <inheritdoc />
+    public async ValueTask OnHookRegistered(HookRegisteredContext context)
+    {
+        if (await ShouldSkipHook(context))
+        {
+            // Store skip reason directly on HookRegisteredContext
+            context.SkipReason = Reason;
+        }
+    }
+
     public virtual Task<bool> ShouldSkip(TestRegisteredContext context) => Task.FromResult(true);
+    
+    public virtual Task<bool> ShouldSkipHook(HookRegisteredContext context) => Task.FromResult(true);
 }
