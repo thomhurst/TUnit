@@ -96,7 +96,6 @@ internal sealed class ClassConstructorTest_Test_TestSource_GUID : global::TUnit.
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ClassConstructorTest)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Test();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
