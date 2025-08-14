@@ -1828,9 +1828,9 @@ namespace .Helpers
     [.DebuggerDisplay("Count = {CurrentCount}")]
     public class Counter
     {
-        public <int>? OnCountChanged;
         public Counter() { }
         public int CurrentCount { get; }
+        public event <int>? OnCountChanged;
         public int Add(int value) { }
         public int Decrement() { }
         public int Increment() { }
