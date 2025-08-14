@@ -151,8 +151,6 @@ internal sealed class Tests_Eight_Args_TestSource_GUID : global::TUnit.Core.Inte
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1538.Tests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 8:
@@ -165,7 +163,6 @@ internal sealed class Tests_Eight_Args_TestSource_GUID : global::TUnit.Core.Inte
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 8:
@@ -403,8 +400,6 @@ internal sealed class Tests_SixteenArgs_TestSource_GUID : global::TUnit.Core.Int
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1538.Tests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 16:
@@ -417,7 +412,6 @@ internal sealed class Tests_SixteenArgs_TestSource_GUID : global::TUnit.Core.Int
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 16:

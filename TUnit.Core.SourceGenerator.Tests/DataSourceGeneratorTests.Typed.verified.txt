@@ -111,8 +111,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method_TestSource_G
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataSourceGeneratorTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -125,7 +123,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method_TestSource_G
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -281,8 +278,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method2_TestSource_
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataSourceGeneratorTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 3:
@@ -295,7 +290,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method2_TestSource_
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 3:
@@ -451,8 +445,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method3_TestSource_
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.DataSourceGeneratorTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 3:
@@ -465,7 +457,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method3_TestSource_
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 3:

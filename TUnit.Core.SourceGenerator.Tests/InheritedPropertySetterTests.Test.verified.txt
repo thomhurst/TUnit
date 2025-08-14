@@ -339,7 +339,6 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.PropertySetterTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.Test();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -605,7 +604,6 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedPropertySetterTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.Test();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>

@@ -69,7 +69,6 @@ internal sealed class ModuleInitializerTest_TestWithModuleInit_TestSource_GUID :
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ModuleInitializerTest)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.TestWithModuleInit();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },

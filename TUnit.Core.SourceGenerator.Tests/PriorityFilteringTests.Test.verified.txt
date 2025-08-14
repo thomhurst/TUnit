@@ -70,7 +70,6 @@ internal sealed class PriorityFilteringTests_High_1_TestSource_GUID : global::TU
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.PriorityFilteringTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.High_1();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -167,7 +166,6 @@ internal sealed class PriorityFilteringTests_High_2_TestSource_GUID : global::TU
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.PriorityFilteringTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.High_2();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -264,7 +262,6 @@ internal sealed class PriorityFilteringTests_High_3_TestSource_GUID : global::TU
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.PriorityFilteringTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.High_3();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -361,7 +358,6 @@ internal sealed class PriorityFilteringTests_Medium_1_TestSource_GUID : global::
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.PriorityFilteringTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.Medium_1();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -458,7 +454,6 @@ internal sealed class PriorityFilteringTests_Medium_2_TestSource_GUID : global::
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.PriorityFilteringTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.Medium_2();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -555,7 +550,6 @@ internal sealed class PriorityFilteringTests_Low_1_TestSource_GUID : global::TUn
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.PriorityFilteringTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.Low_1();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>

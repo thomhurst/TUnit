@@ -81,8 +81,6 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_TestSource_GUI
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -95,7 +93,6 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_TestSource_GUI
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -207,8 +204,6 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_Generic_TestSo
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -221,7 +216,6 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_Generic_TestSo
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -333,8 +327,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataS
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -346,7 +338,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataS
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -464,8 +455,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataS
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 2:
@@ -477,7 +466,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataS
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 2:
@@ -602,8 +590,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataS
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 3:
@@ -615,7 +601,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataS
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 3:
@@ -747,8 +732,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataS
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 4:
@@ -760,7 +743,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataS
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 4:
@@ -899,8 +881,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataS
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 5:
@@ -912,7 +892,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataS
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 5:

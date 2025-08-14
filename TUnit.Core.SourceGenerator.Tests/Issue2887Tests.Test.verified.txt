@@ -83,7 +83,6 @@ internal sealed class ActualTestClass_Test1_TestSource_GUID : global::TUnit.Core
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._Issue2887.ActualTestClass)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Test1();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },

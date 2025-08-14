@@ -85,8 +85,6 @@ internal sealed class EnumMemberNamesTests_SomeTest_TestSource_GUID : global::TU
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -99,7 +97,6 @@ internal sealed class EnumMemberNamesTests_SomeTest_TestSource_GUID : global::TU
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
