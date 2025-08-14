@@ -28,7 +28,7 @@ public class SkipAttribute : Attribute, ITestRegisteredEventReceiver, IHookRegis
     /// <inheritdoc />
     public async ValueTask OnHookRegistered(HookRegisteredContext context)
     {
-        if (await ShouldSkipHook(context))
+        if (await ShouldSkip(context))
         {
             // Store skip reason directly on HookRegisteredContext
             context.SkipReason = Reason;
@@ -37,5 +37,5 @@ public class SkipAttribute : Attribute, ITestRegisteredEventReceiver, IHookRegis
 
     public virtual Task<bool> ShouldSkip(TestRegisteredContext context) => Task.FromResult(true);
     
-    public virtual Task<bool> ShouldSkipHook(HookRegisteredContext context) => Task.FromResult(true);
+    public virtual Task<bool> ShouldSkip(HookRegisteredContext context) => Task.FromResult(true);
 }

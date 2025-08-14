@@ -1177,7 +1177,7 @@ namespace
         public . OnHookRegistered(.HookRegisteredContext context) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
         public virtual .<bool> ShouldSkip(.TestRegisteredContext context) { }
-        public virtual .<bool> ShouldSkipHook(.HookRegisteredContext context) { }
+        public virtual .<bool> ShouldSkip(.HookRegisteredContext context) { }
     }
     [.StackTraceHidden]
     public class SourceRegistrar
