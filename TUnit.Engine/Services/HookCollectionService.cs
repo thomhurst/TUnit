@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Hooks;
+using TUnit.Engine.Discovery;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 
@@ -26,6 +27,23 @@ internal sealed class HookCollectionService : IHookCollectionService
     public HookCollectionService(EventReceiverOrchestrator eventReceiverOrchestrator)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
+    }
+    
+    /// <summary>
+    /// Initialize and process hook registration events for hooks discovered via reflection
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", 
+        "IL2026:Using member which has 'RequiresUnreferencedCodeAttribute' can break functionality when trimming application code",
+        Justification = "Reflection mode is not used in AOT scenarios")]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", 
+        "IL3050:Using member which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling",
+        Justification = "Reflection mode is not used in AOT scenarios")]
+    public async Task InitializeAsync()
+    {
+        if (Sources.HasAnyHooks())
+        {
+            await ReflectionHookDiscoveryService.ProcessHookRegistrationEventsAsync(_eventReceiverOrchestrator);
+        }
     }
 
     private async Task ProcessHookRegistrationAsync(HookMethod hookMethod, CancellationToken cancellationToken = default)

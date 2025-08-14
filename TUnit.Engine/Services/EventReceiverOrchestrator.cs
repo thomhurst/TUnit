@@ -200,13 +200,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     public async ValueTask InvokeHookRegistrationEventReceiversAsync(HookRegisteredContext hookContext, CancellationToken cancellationToken)
     {
-        // Get event receivers from the hook method's attributes
         var eventReceivers = hookContext.HookMethod.Attributes
             .OfType<IHookRegisteredEventReceiver>()
             .OrderBy(r => r.Order)
             .ToList();
 
-        // Filter scoped attributes to ensure only the highest priority one of each type is invoked
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
 
         foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
@@ -221,10 +219,14 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             }
         }
 
-        // Apply the timeout from the context back to the hook method
         if (hookContext.Timeout.HasValue && hookContext.HookMethod != null)
         {
             hookContext.HookMethod.Timeout = hookContext.Timeout;
+        }
+        
+        if (hookContext.HookExecutor != null && hookContext.HookMethod != null)
+        {
+            hookContext.HookMethod.HookExecutor = hookContext.HookExecutor;
         }
     }
 

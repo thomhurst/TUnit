@@ -108,7 +108,11 @@ internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposabl
 
     private async Task PrepareHookOrchestrator(HookOrchestrator hookOrchestrator, List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
-        // Register all tests upfront so hook orchestrator knows total counts per class/assembly
+        if (hookOrchestrator.HookCollectionService is HookCollectionService collectionService)
+        {
+            await collectionService.InitializeAsync();
+        }
+        
         hookOrchestrator.RegisterTests(testList);
 
         await InitializeStaticPropertiesAsync(cancellationToken);
