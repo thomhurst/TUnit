@@ -103,7 +103,7 @@ public class CustomConditionalSkip : SkipAttribute
         _shouldSkip = shouldSkip;
     }
 
-    public override Task<bool> ShouldSkipHook(HookRegisteredContext context) => Task.FromResult(_shouldSkip);
+    public override Task<bool> ShouldSkip(HookRegisteredContext context) => Task.FromResult(_shouldSkip);
     
     public override Task<bool> ShouldSkip(TestRegisteredContext context) => Task.FromResult(_shouldSkip);
 }

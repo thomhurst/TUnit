@@ -52,7 +52,7 @@ public class CustomSkipHook : SkipAttribute
         _shouldSkip = shouldSkip;
     }
 
-    public override Task<bool> ShouldSkipHook(HookRegisteredContext context)
+    public override Task<bool> ShouldSkip(HookRegisteredContext context)
     {
         return Task.FromResult(_shouldSkip);
     }
