@@ -1,0 +1,132 @@
+name: Claude Auto-Fix Failed Builds
+
+on:
+  schedule:
+    # Run every hour
+    - cron: '0 * * * *'
+  workflow_dispatch: # Allow manual triggering for testing
+
+jobs:
+  find-and-fix-failed-prs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+      checks: read
+    steps:
+      - name: Find PRs with failed ModularPipeline
+        id: find-failed-prs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            
+            // Get all open PRs
+            const { data: pulls } = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            const failedPRs = [];
+            
+            for (const pr of pulls) {
+              // Get check runs for this PR
+              const { data: checkRuns } = await github.rest.checks.listForRef({
+                owner,
+                repo,
+                ref: pr.head.sha
+              });
+              
+              // Look for failed modularpipeline check (matches any OS variant)
+              const modularPipelineCheck = checkRuns.check_runs.find(
+                run => run.name.toLowerCase().startsWith('modularpipeline') && run.conclusion === 'failure'
+              );
+              
+              if (modularPipelineCheck) {
+                // Check if we've already attempted to fix this failure
+                const { data: comments } = await github.rest.issues.listComments({
+                  owner,
+                  repo,
+                  issue_number: pr.number
+                });
+                
+                const alreadyAttempted = comments.some(comment => 
+                  comment.body.includes('[Claude Auto-Fix]') && 
+                  comment.body.includes(modularPipelineCheck.id.toString())
+                );
+                
+                if (!alreadyAttempted) {
+                  failedPRs.push({
+                    number: pr.number,
+                    title: pr.title,
+                    branch: pr.head.ref,
+                    sha: pr.head.sha,
+                    checkRunId: modularPipelineCheck.id,
+                    htmlUrl: modularPipelineCheck.html_url
+                  });
+                }
+              }
+            }
+            
+            if (failedPRs.length === 0) {
+              console.log('No PRs with failed modularpipeline checks found');
+              core.setOutput('has-failed-prs', 'false');
+              return;
+            }
+            
+            console.log(`Found ${failedPRs.length} PR(s) with failed modularpipeline checks`);
+            core.setOutput('has-failed-prs', 'true');
+            core.setOutput('failed-prs', JSON.stringify(failedPRs));
+
+      - name: Process each failed PR
+        if: steps.find-failed-prs.outputs.has-failed-prs == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const failedPRs = JSON.parse('${{ steps.find-failed-prs.outputs.failed-prs }}');
+            
+            for (const pr of failedPRs) {
+              console.log(`Processing PR #${pr.number}: ${pr.title}`);
+              
+              // Post a comment on the PR to trigger Claude with the build failure details
+              const comment = `@claude [Claude Auto-Fix] Detected failed modularpipeline build (check run ${pr.checkRunId}).
+              
+              Please analyze the build failure at ${pr.htmlUrl} and commit a fix for it.
+              
+              Instructions:
+              1. Look at the build errors from the modularpipeline check
+              2. Identify the root cause of the failure
+              3. Implement and commit a fix directly to the PR branch: ${pr.branch}
+              4. Ensure the fix follows the TUnit coding standards
+              
+              Focus on fixing only the build errors - do not make unrelated changes.`;
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: comment
+              });
+              
+              console.log(`Posted auto-fix request for PR #${pr.number}`);
+              
+              // Add a small delay between PRs to avoid rate limiting
+              await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ "${{ steps.find-failed-prs.outputs.has-failed-prs }}" == "true" ]; then
+            echo "✅ Processed failed PRs for auto-fixing"
+          else
+            echo "ℹ️ No failed PRs found that need auto-fixing"
+          fi
