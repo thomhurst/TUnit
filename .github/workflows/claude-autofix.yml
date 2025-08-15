@@ -1,5 +1,9 @@
 name: Claude Auto-Fix Failed Builds
 
+# NOTE: This workflow requires a Personal Access Token (PAT) stored as CLAUDE_AUTOFIX_PAT
+# to post comments as a real user instead of github-actions bot, since Claude may not
+# respond to bot comments. The PAT needs 'repo' and 'write:discussion' permissions.
+
 on:
   schedule:
     # Run every hour
@@ -20,7 +24,8 @@ jobs:
       - name: Find and Process Failed PRs
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # Use PAT if available to post as user instead of bot, fallback to GITHUB_TOKEN
+          github-token: ${{ secrets.CLAUDE_AUTOFIX_PAT || secrets.GITHUB_TOKEN }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
