@@ -2,7 +2,9 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Executors;
 using TUnit.Core.Hooks;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
 using TUnit.Engine.Services;
 
@@ -356,7 +358,7 @@ internal static class ReflectionHookDiscoveryService
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
             RegistrationIndex = HookRegistrationIndices.GetNextBeforeTestHookIndex(),
-            HookExecutor = DefaultExecutor.Instance,
+            HookExecutor = GetHookExecutorFromMethod(method),
             InitClassType = method.DeclaringType!,
             Body = CreateInstanceHookDelegate(method)
         };
@@ -369,7 +371,7 @@ internal static class ReflectionHookDiscoveryService
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
             RegistrationIndex = HookRegistrationIndices.GetNextBeforeClassHookIndex(),
-            HookExecutor = DefaultExecutor.Instance,
+            HookExecutor = GetHookExecutorFromMethod(method),
             FilePath = "Unknown",
             LineNumber = 0,
             Body = CreateStaticHookDelegate<ClassHookContext>(method)
@@ -383,7 +385,7 @@ internal static class ReflectionHookDiscoveryService
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
             RegistrationIndex = HookRegistrationIndices.GetNextAfterClassHookIndex(),
-            HookExecutor = DefaultExecutor.Instance,
+            HookExecutor = GetHookExecutorFromMethod(method),
             FilePath = "Unknown",
             LineNumber = 0,
             Body = CreateStaticHookDelegate<ClassHookContext>(method)
@@ -397,7 +399,7 @@ internal static class ReflectionHookDiscoveryService
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
             RegistrationIndex = HookRegistrationIndices.GetNextBeforeAssemblyHookIndex(),
-            HookExecutor = DefaultExecutor.Instance,
+            HookExecutor = GetHookExecutorFromMethod(method),
             FilePath = "Unknown",
             LineNumber = 0,
             Body = CreateStaticHookDelegate<AssemblyHookContext>(method)
@@ -411,7 +413,7 @@ internal static class ReflectionHookDiscoveryService
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
             RegistrationIndex = HookRegistrationIndices.GetNextAfterAssemblyHookIndex(),
-            HookExecutor = DefaultExecutor.Instance,
+            HookExecutor = GetHookExecutorFromMethod(method),
             FilePath = "Unknown",
             LineNumber = 0,
             Body = CreateStaticHookDelegate<AssemblyHookContext>(method)
@@ -425,11 +427,31 @@ internal static class ReflectionHookDiscoveryService
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
             RegistrationIndex = HookRegistrationIndices.GetNextBeforeTestSessionHookIndex(),
-            HookExecutor = DefaultExecutor.Instance,
+            HookExecutor = GetHookExecutorFromMethod(method),
             FilePath = "Unknown",
             LineNumber = 0,
             Body = CreateStaticHookDelegate<TestSessionContext>(method)
         };
+    }
+
+    private static IHookExecutor GetHookExecutorFromMethod(MethodInfo method)
+    {
+        // Check for HookExecutorAttribute on the method
+        var hookExecutorAttr = method.GetCustomAttribute<HookExecutorAttribute>();
+        if (hookExecutorAttr != null)
+        {
+            try
+            {
+                return (IHookExecutor)Activator.CreateInstance(hookExecutorAttr.HookExecutorType)!;
+            }
+            catch
+            {
+                // Fall back to default if instantiation fails
+                return DefaultExecutor.Instance;
+            }
+        }
+        
+        return DefaultExecutor.Instance;
     }
 
     private static AfterTestSessionHookMethod CreateAfterTestSessionHookMethod(MethodInfo method, int order)
@@ -439,7 +461,7 @@ internal static class ReflectionHookDiscoveryService
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
             RegistrationIndex = HookRegistrationIndices.GetNextAfterTestSessionHookIndex(),
-            HookExecutor = DefaultExecutor.Instance,
+            HookExecutor = GetHookExecutorFromMethod(method),
             FilePath = "Unknown",
             LineNumber = 0,
             Body = CreateStaticHookDelegate<TestSessionContext>(method)
@@ -453,7 +475,7 @@ internal static class ReflectionHookDiscoveryService
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
             RegistrationIndex = HookRegistrationIndices.GetNextBeforeTestDiscoveryHookIndex(),
-            HookExecutor = DefaultExecutor.Instance,
+            HookExecutor = GetHookExecutorFromMethod(method),
             FilePath = "Unknown",
             LineNumber = 0,
             Body = CreateStaticHookDelegate<BeforeTestDiscoveryContext>(method)
@@ -467,7 +489,7 @@ internal static class ReflectionHookDiscoveryService
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
             RegistrationIndex = HookRegistrationIndices.GetNextAfterTestDiscoveryHookIndex(),
-            HookExecutor = DefaultExecutor.Instance,
+            HookExecutor = GetHookExecutorFromMethod(method),
             FilePath = "Unknown",
             LineNumber = 0,
             Body = CreateStaticHookDelegate<TestDiscoveryContext>(method)
@@ -481,7 +503,7 @@ internal static class ReflectionHookDiscoveryService
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
             RegistrationIndex = HookRegistrationIndices.GetNextBeforeEveryTestHookIndex(),
-            HookExecutor = DefaultExecutor.Instance,
+            HookExecutor = GetHookExecutorFromMethod(method),
             FilePath = "Unknown",
             LineNumber = 0,
             Body = CreateStaticHookDelegate<TestContext>(method)
@@ -495,7 +517,7 @@ internal static class ReflectionHookDiscoveryService
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
             RegistrationIndex = HookRegistrationIndices.GetNextAfterEveryTestHookIndex(),
-            HookExecutor = DefaultExecutor.Instance,
+            HookExecutor = GetHookExecutorFromMethod(method),
             FilePath = "Unknown",
             LineNumber = 0,
             Body = CreateStaticHookDelegate<TestContext>(method)
