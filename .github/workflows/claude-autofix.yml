@@ -29,7 +29,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            
+
             // Get all open PRs
             const { data: pulls } = await github.rest.pulls.list({
               owner,
@@ -37,27 +37,27 @@ jobs:
               state: 'open',
               per_page: 100
             });
-            
+
             const failedPRs = [];
-            
+
             for (const pr of pulls) {
               // Only process PRs from thomhurst or copilot
               if (pr.user.login !== 'thomhurst' && !pr.user.login.includes('copilot')) {
                 continue;
               }
-              
+
               // Get check runs for this PR
               const { data: checkRuns } = await github.rest.checks.listForRef({
                 owner,
                 repo,
                 ref: pr.head.sha
               });
-              
+
               // Look for failed modularpipeline check (matches any OS variant)
               const modularPipelineCheck = checkRuns.check_runs.find(
                 run => run.name.toLowerCase().startsWith('modularpipeline') && run.conclusion === 'failure'
               );
-              
+
               if (modularPipelineCheck) {
                 // Check if we've already attempted to fix this failure
                 const { data: comments } = await github.rest.issues.listComments({
@@ -65,12 +65,9 @@ jobs:
                   repo,
                   issue_number: pr.number
                 });
-                
-                const alreadyAttempted = comments.some(comment => 
-                  comment.body.includes('[Claude Auto-Fix]') && 
-                  comment.body.includes(modularPipelineCheck.id.toString())
-                );
-                
+
+                const alreadyAttempted = false;
+
                 if (!alreadyAttempted) {
                   failedPRs.push({
                     number: pr.number,
@@ -83,31 +80,31 @@ jobs:
                 }
               }
             }
-            
+
             if (failedPRs.length === 0) {
               console.log('No PRs with failed modularpipeline checks found');
               return;
             }
-            
+
             console.log(`Found ${failedPRs.length} PR(s) with failed modularpipeline checks`);
-            
+
             // Process each failed PR
             for (const pr of failedPRs) {
               console.log(`Processing PR #${pr.number}: ${pr.title}`);
-              
+
               // Post a comment on the PR to trigger Claude with the build failure details
               const comment = `@claude [Claude Auto-Fix] Detected failed modularpipeline build (check run ${pr.checkRunId}).
-              
+
               Please analyze the build failure at ${pr.htmlUrl} and commit a fix for it.
-              
+
               Instructions:
               1. Look at the build errors from the modularpipeline check
               2. Identify the root cause of the failure
               3. Implement and commit a fix directly to the PR branch: ${pr.branch}
               4. Ensure the fix follows the TUnit coding standards
-              
+
               Focus on fixing only the build errors - do not make unrelated changes.`;
-              
+
               try {
                 await github.rest.issues.createComment({
                   owner,
@@ -115,12 +112,12 @@ jobs:
                   issue_number: pr.number,
                   body: comment
                 });
-                
+
                 console.log(`Posted auto-fix request for PR #${pr.number}`);
               } catch (error) {
                 console.error(`Failed to post comment on PR #${pr.number}:`, error.message);
               }
-              
+
               // Add a small delay between PRs to avoid rate limiting
               await new Promise(resolve => setTimeout(resolve, 5000));
             }
