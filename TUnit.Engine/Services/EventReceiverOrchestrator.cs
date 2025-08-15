@@ -480,6 +480,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         var contexts = allTestContexts.ToList();
         _sessionTestCount = contexts.Count;
 
+        // Clear first-event tracking to ensure clean state for each test execution
+        _firstTestInAssemblyInvoked.Clear();
+        _firstTestInClassInvoked.Clear();
+        _firstTestInSessionInvoked = 0;
+
         foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.AssemblyContext.Assembly.GetName().FullName))
         {
             if (group.Key != null)
