@@ -36,6 +36,11 @@ jobs:
             const failedPRs = [];
             
             for (const pr of pulls) {
+              // Only process PRs from thomhurst or copilot
+              if (pr.user.login !== 'thomhurst' && !pr.user.login.includes('copilot')) {
+                continue;
+              }
+              
               // Get check runs for this PR
               const { data: checkRuns } = await github.rest.checks.listForRef({
                 owner,
