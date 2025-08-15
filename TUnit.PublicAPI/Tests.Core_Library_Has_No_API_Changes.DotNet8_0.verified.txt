@@ -784,9 +784,11 @@ namespace
     public class HookRegisteredContext
     {
         public HookRegisteredContext(. hookMethod) { }
+        public .? HookExecutor { get; set; }
         public . HookMethod { get; }
         public string HookName { get; }
         public ? Timeout { get; set; }
+        public void SetHookExecutor(. hookExecutor) { }
     }
     public static class HookRegistrationIndices
     {
@@ -1211,6 +1213,7 @@ namespace
         public static readonly .<<.>> GlobalInitializers;
         public static readonly .<..IPropertySource> PropertySources;
         public static readonly .<, .<..ITestSource>> TestSources;
+        public static bool HasAnyHooks() { }
     }
     [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
         " access", Justification="Reflection mode requires dynamic access")]
@@ -1823,13 +1826,18 @@ namespace .Executors
         public int Order { get; }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
-    public class HookExecutorAttribute : .TUnitAttribute
+    public class HookExecutorAttribute : .TUnitAttribute, ., .
     {
-        public HookExecutorAttribute( type) { }
+        public HookExecutorAttribute([.(..PublicParameterlessConstructor)]  type) { }
+        [.(..PublicParameterlessConstructor)]
         public  HookExecutorType { get; }
+        public int Order { get; }
+        [.("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMemberTypes" +
+            ".PublicParameterlessConstructor\' in call to target method", Justification="HookExecutorType is annotated with required DynamicallyAccessedMembers")]
+        public . OnHookRegistered(.HookRegisteredContext context) { }
     }
     [(.Assembly | .Class | .Method)]
-    public sealed class HookExecutorAttribute<T> : .
+    public sealed class HookExecutorAttribute<[.(..PublicParameterlessConstructor)]  T> : .
         where T : ., new ()
     {
         public HookExecutorAttribute() { }
@@ -2095,7 +2103,7 @@ namespace .Hooks
         public .<> Attributes { get; }
         [.(..PublicMethods)]
         public abstract  ClassType { get; }
-        public required . HookExecutor { get; init; }
+        public required . HookExecutor { get; set; }
         public required .MethodMetadata MethodInfo { get; init; }
         public string Name { get; }
         public required int Order { get; init; }
