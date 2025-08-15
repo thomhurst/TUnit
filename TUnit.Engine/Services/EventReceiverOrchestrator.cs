@@ -17,9 +17,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     private readonly TUnitFrameworkLogger _logger;
 
     // Track which assemblies/classes/sessions have had their "first" event invoked
-    private readonly ConcurrentDictionary<string, bool> _firstTestInAssemblyInvoked = new();
-    private readonly ConcurrentDictionary<Type, bool> _firstTestInClassInvoked = new();
-    private int _firstTestInSessionInvoked;
+    private readonly ConcurrentDictionary<string, Task> _firstTestInAssemblyTasks = new();
+    private readonly ConcurrentDictionary<Type, Task> _firstTestInClassTasks = new();
+    private Task? _firstTestInSessionTask;
 
     // Track remaining test counts for "last" events
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
@@ -240,10 +240,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             return;
         }
 
-        if (Interlocked.CompareExchange(ref _firstTestInSessionInvoked, 1, 0) == 0)
-        {
-            await InvokeFirstTestInSessionEventReceiversCore(context, sessionContext, cancellationToken);
-        }
+        // Use GetOrAdd to ensure exactly one task is created and all tests await it
+        var task = _firstTestInSessionTask ??= InvokeFirstTestInSessionEventReceiversCore(context, sessionContext, cancellationToken).AsTask();
+        await task;
     }
 
     private async ValueTask InvokeFirstTestInSessionEventReceiversCore(
@@ -278,10 +277,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
-        if (_firstTestInAssemblyInvoked.TryAdd(assemblyName, true))
-        {
-            await InvokeFirstTestInAssemblyEventReceiversCore(context, assemblyContext, cancellationToken);
-        }
+        // Use GetOrAdd to ensure exactly one task is created per assembly and all tests await it
+        var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName, 
+            _ => InvokeFirstTestInAssemblyEventReceiversCore(context, assemblyContext, cancellationToken).AsTask());
+        await task;
     }
 
     private async ValueTask InvokeFirstTestInAssemblyEventReceiversCore(
@@ -316,10 +315,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
 
         var classType = classContext.ClassType;
-        if (_firstTestInClassInvoked.TryAdd(classType, true))
-        {
-            await InvokeFirstTestInClassEventReceiversCore(context, classContext, cancellationToken);
-        }
+        // Use GetOrAdd to ensure exactly one task is created per class and all tests await it
+        var task = _firstTestInClassTasks.GetOrAdd(classType, 
+            _ => InvokeFirstTestInClassEventReceiversCore(context, classContext, cancellationToken).AsTask());
+        await task;
     }
 
     private async ValueTask InvokeFirstTestInClassEventReceiversCore(
@@ -481,9 +480,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         _sessionTestCount = contexts.Count;
 
         // Clear first-event tracking to ensure clean state for each test execution
-        _firstTestInAssemblyInvoked.Clear();
-        _firstTestInClassInvoked.Clear();
-        _firstTestInSessionInvoked = 0;
+        _firstTestInAssemblyTasks.Clear();
+        _firstTestInClassTasks.Clear();
+        _firstTestInSessionTask = null;
 
         foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.AssemblyContext.Assembly.GetName().FullName))
         {
