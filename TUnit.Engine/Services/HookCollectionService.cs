@@ -72,7 +72,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(cachedHooks);
         }
 
-        var hooks = BuildBeforeTestHooksAsync(testClassType).Result;
+        var hooks = BuildBeforeTestHooksAsync(testClassType).GetAwaiter().GetResult();
         _beforeTestHooksCache.TryAdd(testClassType, hooks);
         return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
     }
@@ -139,7 +139,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(cachedHooks);
         }
 
-        var hooks = BuildAfterTestHooksAsync(testClassType).Result;
+        var hooks = BuildAfterTestHooksAsync(testClassType).GetAwaiter().GetResult();
         _afterTestHooksCache.TryAdd(testClassType, hooks);
         return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
     }
@@ -205,7 +205,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(cachedHooks);
         }
 
-        var hooks = BuildBeforeEveryTestHooksAsync(testClassType).Result;
+        var hooks = BuildBeforeEveryTestHooksAsync(testClassType).GetAwaiter().GetResult();
         _beforeEveryTestHooksCache.TryAdd(testClassType, hooks);
         return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
     }
@@ -236,7 +236,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(cachedHooks);
         }
 
-        var hooks = BuildAfterEveryTestHooksAsync(testClassType).Result;
+        var hooks = BuildAfterEveryTestHooksAsync(testClassType).GetAwaiter().GetResult();
         _afterEveryTestHooksCache.TryAdd(testClassType, hooks);
         return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
     }
@@ -267,7 +267,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(cachedHooks);
         }
 
-        var hooks = BuildBeforeClassHooksAsync(testClassType).Result;
+        var hooks = BuildBeforeClassHooksAsync(testClassType).GetAwaiter().GetResult();
         _beforeClassHooksCache.TryAdd(testClassType, hooks);
         return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
     }
@@ -334,7 +334,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(cachedHooks);
         }
 
-        var hooks = BuildAfterClassHooksAsync(testClassType).Result;
+        var hooks = BuildAfterClassHooksAsync(testClassType).GetAwaiter().GetResult();
         _afterClassHooksCache.TryAdd(testClassType, hooks);
         return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
     }
@@ -693,6 +693,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         return async (context, cancellationToken) =>
         {
+            // Check if hook should be skipped
+            if (!string.IsNullOrEmpty(hook.SkipReason))
+            {
+                return; // Skip this hook execution
+            }
+            
             var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
                 hook,
                 context,
