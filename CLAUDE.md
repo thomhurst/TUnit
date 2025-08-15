@@ -1,4 +1,4 @@
-# GitHub Copilot Instructions for TUnit
+# Claude Instructions for TUnit
 
 ## IMPORTANT: Read This First
 
@@ -9,6 +9,31 @@ When assisting with TUnit development:
 4. **NEVER** use VSTest APIs - use Microsoft.Testing.Platform instead
 5. **PREFER** performance over convenience - this framework may be used by millions
 6. **FOLLOW** modern C# patterns and the coding standards outlined below
+
+## Critical Testing Requirements
+
+### Source Generator Changes
+When modifying what the source generator emits:
+1. **Run the source generator tests**:
+   ```bash
+   dotnet test TUnit.Core.SourceGenerator.Tests
+   ```
+2. **Accept any changed snapshots**:
+   - Review the `.received.txt` files to ensure changes are intentional
+   - Rename `.received.txt` files to `.verified.txt` to accept changes
+   - Commit the updated snapshots with your changes
+
+### Public API Changes
+When modifying public APIs in TUnit.Core, TUnit.Engine, or TUnit.Playwright:
+1. **Run the public API tests**:
+   ```bash
+   dotnet test TUnit.PublicAPI
+   ```
+2. **Accept new snapshots**:
+   - Review the `.received.txt` files showing the current API surface
+   - Ensure changes are intentional and necessary
+   - Rename `.received.txt` files to `.verified.txt` to accept changes
+   - Commit the updated snapshots with your changes
 
 ## Repository Overview
 
@@ -121,6 +146,8 @@ TUnit operates in two distinct execution modes that must maintain behavioral par
 - [ ] XML documentation for public APIs
 - [ ] No magic strings or numbers (use constants)
 - [ ] Proper disposal of resources
+- [ ] Source generator tests run and snapshots accepted (if applicable)
+- [ ] Public API tests run and snapshots accepted (if applicable)
 
 ## Testing and Validation
 
@@ -131,58 +158,6 @@ TUnit operates in two distinct execution modes that must maintain behavioral par
 - Analyzer tests for compile-time validation
 - Source generator snapshot tests
 - Public API snapshot tests
-
-### Source Generator Changes
-
-**CRITICAL**: When modifying what the source generator emits:
-
-1. **Run the source generator tests**:
-   ```bash
-   dotnet test TUnit.Core.SourceGenerator.Tests
-   ```
-
-2. **Accept any changed snapshots**:
-   - The test will generate `.received.txt` files showing the new generated output
-   - Review these files to ensure your changes are intentional and correct
-   - Convert the received files to verified files:
-     ```bash
-     # Windows
-     for %f in (*.received.txt) do move /Y "%f" "%~nf.verified.txt"
-     
-     # Linux/macOS
-     for file in *.received.txt; do mv "$file" "${file%.received.txt}.verified.txt"; done
-     ```
-   - Or manually rename each `.received.txt` file to `.verified.txt`
-
-3. **Commit the updated snapshots**:
-   - Include the updated `.verified.txt` files in your commit
-   - These snapshots ensure source generation consistency
-
-### Public API Changes
-
-**CRITICAL**: When modifying any public API in TUnit.Core, TUnit.Engine, or TUnit.Playwright (adding, removing, or changing public methods, properties, or types):
-
-1. **Run the Public API test**:
-   ```bash
-   dotnet test TUnit.PublicAPI
-   ```
-
-2. **Update the API snapshots**:
-   - The test will generate `.received.txt` files showing the current API surface
-   - Review these files to ensure your changes are intentional
-   - Convert the received files to verified files:
-     ```bash
-     # Windows
-     for %f in (*.received.txt) do move /Y "%f" "%~nf.verified.txt"
-     
-     # Linux/macOS
-     for file in *.received.txt; do mv "$file" "${file%.received.txt}.verified.txt"; done
-     ```
-   - Or manually rename each `.received.txt` file to `.verified.txt`
-
-3. **Commit the updated snapshots**:
-   - Include the updated `.verified.txt` files in your commit
-   - These snapshots track the public API surface and prevent accidental breaking changes
 
 ### Compatibility Testing
 - Test against multiple .NET versions (.NET 6, 8, 9+)
@@ -196,6 +171,7 @@ TUnit operates in two distinct execution modes that must maintain behavioral par
 3. **AOT/Trimming Issues**: Be careful with reflection usage and dynamic code
 4. **Thread Safety**: Ensure thread-safe patterns in concurrent test execution
 5. **Memory Leaks**: Properly dispose of resources and avoid circular references
+6. **Snapshot Test Failures**: Always review and accept snapshot changes when intentional
 
 ## Dependencies and Third-Party Libraries
 
@@ -219,6 +195,8 @@ TUnit operates in two distinct execution modes that must maintain behavioral par
 4. Are there any breaking changes or compatibility concerns?
 5. How will this behave under high load or with many tests?
 6. Does this require new analyzer rules or diagnostics?
+7. Do source generator tests need updating?
+8. Do public API tests need updating?
 
 ## IDE and Tooling
 
@@ -231,8 +209,8 @@ TUnit operates in two distinct execution modes that must maintain behavioral par
 
 ### Before Submitting Any Code:
 1. **Test Both Modes**: Verify your changes work identically in both source-generated and reflection modes
-2. **Check Source Generator**: If changing source generator output, run `dotnet test TUnit.Core.SourceGenerator.Tests` and accept snapshots
-3. **Check Public API**: If modifying TUnit.Core, TUnit.Engine, or TUnit.Playwright public APIs, run `dotnet test TUnit.PublicAPI` and accept snapshots
+2. **Check Source Generator**: If changing source generator output, run tests and accept snapshots
+3. **Check Public API**: If modifying TUnit.Core, TUnit.Engine, or TUnit.Playwright public APIs, run tests and accept snapshots
 4. **Performance Impact**: Consider if your change affects test discovery or execution performance
 5. **Breaking Changes**: Ensure no unintentional breaking changes to the public API
 6. **Documentation**: Update relevant documentation for any public API changes
