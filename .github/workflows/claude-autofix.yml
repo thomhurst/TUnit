@@ -17,8 +17,7 @@ jobs:
       actions: read
       checks: read
     steps:
-      - name: Find PRs with failed ModularPipeline
-        id: find-failed-prs
+      - name: Find and Process Failed PRs
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -77,22 +76,12 @@ jobs:
             
             if (failedPRs.length === 0) {
               console.log('No PRs with failed modularpipeline checks found');
-              core.setOutput('has-failed-prs', 'false');
               return;
             }
             
             console.log(`Found ${failedPRs.length} PR(s) with failed modularpipeline checks`);
-            core.setOutput('has-failed-prs', 'true');
-            core.setOutput('failed-prs', JSON.stringify(failedPRs));
-
-      - name: Process each failed PR
-        if: steps.find-failed-prs.outputs.has-failed-prs == 'true'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const failedPRs = JSON.parse('${{ steps.find-failed-prs.outputs.failed-prs }}');
             
+            // Process each failed PR
             for (const pr of failedPRs) {
               console.log(`Processing PR #${pr.number}: ${pr.title}`);
               
@@ -109,14 +98,18 @@ jobs:
               
               Focus on fixing only the build errors - do not make unrelated changes.`;
               
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                body: comment
-              });
-              
-              console.log(`Posted auto-fix request for PR #${pr.number}`);
+              try {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  body: comment
+                });
+                
+                console.log(`Posted auto-fix request for PR #${pr.number}`);
+              } catch (error) {
+                console.error(`Failed to post comment on PR #${pr.number}:`, error.message);
+              }
               
               // Add a small delay between PRs to avoid rate limiting
               await new Promise(resolve => setTimeout(resolve, 5000));
@@ -125,8 +118,5 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          if [ "${{ steps.find-failed-prs.outputs.has-failed-prs }}" == "true" ]; then
-            echo "✅ Processed failed PRs for auto-fixing"
-          else
-            echo "ℹ️ No failed PRs found that need auto-fixing"
-          fi
+          echo "✅ Claude Auto-Fix workflow completed"
+          echo "Check the logs above for details on processed PRs"
