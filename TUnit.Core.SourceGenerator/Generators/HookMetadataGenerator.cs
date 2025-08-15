@@ -467,7 +467,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                 var assembly = (IAssemblySymbol)assemblyGroup.Key!;
                 var assemblyName = assembly.Name;
 
-                writer.AppendLine($"var {assemblyName.Replace(".", "_")}_assembly = typeof({assemblyGroup.First().TypeSymbol.GloballyQualified()}).Assembly;");
+                writer.AppendLine($"var {assemblyName.Replace(".", "_").Replace("-", "_")}_assembly = typeof({assemblyGroup.First().TypeSymbol.GloballyQualified()}).Assembly;");
 
                 var beforeAssemblyHooks = assemblyGroup.Where(h => h.HookKind == "Before").ToList();
                 if (beforeAssemblyHooks.Any())
@@ -764,7 +764,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateAssemblyHookListPopulation(CodeWriter writer, string dictionaryName, string assemblyVarName, List<HookMethodMetadata> hooks)
     {
-        var assemblyVar = assemblyVarName.Replace(".", "_") + "_assembly";
+        var assemblyVar = assemblyVarName.Replace(".", "_").Replace("-", "_") + "_assembly";
         var hookType = GetConcreteHookType(dictionaryName, false);
         writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd({assemblyVar}, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
 
