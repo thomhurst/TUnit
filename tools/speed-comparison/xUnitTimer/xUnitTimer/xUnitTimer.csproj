@@ -10,5 +10,6 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit.v3.extensibility.core" />
     <PackageReference Include="xunit.v3.assert" />
+    <PackageReference Include="xunit.v3.runner.visualstudio" />
   </ItemGroup>
 </Project>

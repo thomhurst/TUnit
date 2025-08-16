@@ -93,5 +93,6 @@
         <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
         <PackageVersion Include="xunit.v3.assert" Version="3.0.1" />
         <PackageVersion Include="xunit.v3.extensibility.core" Version="3.0.1" />
+        <PackageVersion Include="xunit.v3.runner.visualstudio" Version="3.0.1" />
     </ItemGroup>
 </Project>
