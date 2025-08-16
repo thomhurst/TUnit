@@ -673,24 +673,19 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             return "null";
         }
 
-        // CRITICAL: This method should ONLY be called when propertyType is IArrayTypeSymbol
-        // If propertyType is not an array, the caller should extract the first element instead
-        if (propertyType is not IArrayTypeSymbol arrayPropertyType)
+        // Get the property's array element type to ensure proper typing
+        if (propertyType is IArrayTypeSymbol arrayPropertyType)
         {
-            // This is a defensive check - the caller should handle this case
-            if (arrayConstant.Values.Length > 0)
-            {
-                return FormatConstantValue(arrayConstant.Values[0]);
-            }
-            return "null";
+            // Use the element type from the property type for correct typing
+            string elementType = arrayPropertyType.ElementType.GloballyQualified();
+            var values = arrayConstant.Values.Select(FormatConstantValue);
+            return $"new {elementType}[] {{ {string.Join(", ", values)} }}";
         }
-
-        // Use the element type from the property type for correct typing
-        string elementType = arrayPropertyType.ElementType.GloballyQualified();
-
-        var values = arrayConstant.Values.Select(FormatConstantValue);
-        
-        return $"new {elementType}[] {{ {string.Join(", ", values)} }}";
+        else
+        {
+            // This shouldn't happen - defensive fallback
+            return FormatArrayValue(arrayConstant);
+        }
     }
 }
 
