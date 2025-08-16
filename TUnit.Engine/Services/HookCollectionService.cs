@@ -28,7 +28,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
     }
 
-    private async Task ProcessHookRegistrationAsync(HookMethod hookMethod, CancellationToken cancellationToken = default)
+    private void ProcessHookRegistration(HookMethod hookMethod, CancellationToken cancellationToken = default)
     {
         // Only process each hook once
         if (!_processedHooks.TryAdd(hookMethod, true))
@@ -40,7 +40,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         {
             var context = new HookRegisteredContext(hookMethod);
 
-            await _eventReceiverOrchestrator.InvokeHookRegistrationEventReceiversAsync(context, cancellationToken);
+            _eventReceiverOrchestrator.InvokeHookRegistrationEventReceiversAsync(context, cancellationToken).GetAwaiter().GetResult();
         }
         catch (Exception)
         {
@@ -65,19 +65,19 @@ internal sealed class HookCollectionService : IHookCollectionService
         ];
     }
 
-    public async ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeTestHooksAsync(Type testClassType)
+    public ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeTestHooksAsync(Type testClassType)
     {
         if (_beforeTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            return cachedHooks;
+            return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(cachedHooks);
         }
 
-        var hooks = await BuildBeforeTestHooksAsync(testClassType);
+        var hooks = BuildBeforeTestHooks(testClassType);
         _beforeTestHooksCache.TryAdd(testClassType, hooks);
-        return hooks;
+        return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
     }
 
-    private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildBeforeTestHooksAsync(Type type)
+    private IReadOnlyList<Func<TestContext, CancellationToken, Task>> BuildBeforeTestHooks(Type type)
         {
             var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)> hooks)>();
 
@@ -91,7 +91,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 {
                     foreach (var hook in sourceHooks)
                     {
-                        var hookFunc = await CreateInstanceHookDelegateAsync(hook);
+                        var hookFunc = CreateInstanceHookDelegateAsync(hook).Result;
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
                     }
                 }
@@ -104,7 +104,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                     {
                         foreach (var hook in openTypeHooks)
                         {
-                            var hookFunc = await CreateInstanceHookDelegateAsync(hook);
+                            var hookFunc = CreateInstanceHookDelegateAsync(hook).Result;
                             typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
                         }
                     }
@@ -587,12 +587,12 @@ internal sealed class HookCollectionService : IHookCollectionService
         return hooks;
     }
 
-    private async Task<Func<TestContext, CancellationToken, Task>> CreateInstanceHookDelegateAsync(InstanceHookMethod hook)
+    private Task<Func<TestContext, CancellationToken, Task>> CreateInstanceHookDelegateAsync(InstanceHookMethod hook)
     {
         // Process hook registration event receivers to handle skip attributes
-        await ProcessHookRegistrationAsync(hook);
+        ProcessHookRegistration(hook);
         
-        return async (context, cancellationToken) =>
+        var result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -609,14 +609,16 @@ internal sealed class HookCollectionService : IHookCollectionService
             
             await timeoutAction();
         };
+        
+        return Task.FromResult(result);
     }
 
-    private async Task<Func<TestContext, CancellationToken, Task>> CreateStaticHookDelegateAsync(StaticHookMethod<TestContext> hook)
+    private Task<Func<TestContext, CancellationToken, Task>> CreateStaticHookDelegateAsync(StaticHookMethod<TestContext> hook)
     {
         // Process hook registration event receivers to handle skip attributes
-        await ProcessHookRegistrationAsync(hook);
+        ProcessHookRegistration(hook);
         
-        return async (context, cancellationToken) =>
+        var result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -631,14 +633,16 @@ internal sealed class HookCollectionService : IHookCollectionService
             
             await timeoutAction();
         };
+        
+        return Task.FromResult(result);
     }
 
-    private async Task<Func<ClassHookContext, CancellationToken, Task>> CreateClassHookDelegateAsync(StaticHookMethod<ClassHookContext> hook)
+    private Task<Func<ClassHookContext, CancellationToken, Task>> CreateClassHookDelegateAsync(StaticHookMethod<ClassHookContext> hook)
     {
         // Process hook registration event receivers to handle skip attributes
-        await ProcessHookRegistrationAsync(hook);
+        ProcessHookRegistration(hook);
         
-        return async (context, cancellationToken) =>
+        var result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -653,14 +657,16 @@ internal sealed class HookCollectionService : IHookCollectionService
             
             await timeoutAction();
         };
+        
+        return Task.FromResult(result);
     }
 
-    private async Task<Func<AssemblyHookContext, CancellationToken, Task>> CreateAssemblyHookDelegateAsync(StaticHookMethod<AssemblyHookContext> hook)
+    private Task<Func<AssemblyHookContext, CancellationToken, Task>> CreateAssemblyHookDelegateAsync(StaticHookMethod<AssemblyHookContext> hook)
     {
         // Process hook registration event receivers to handle skip attributes
-        await ProcessHookRegistrationAsync(hook);
+        ProcessHookRegistration(hook);
         
-        return async (context, cancellationToken) =>
+        var result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -675,14 +681,16 @@ internal sealed class HookCollectionService : IHookCollectionService
             
             await timeoutAction();
         };
+        
+        return Task.FromResult(result);
     }
 
-    private async Task<Func<TestSessionContext, CancellationToken, Task>> CreateTestSessionHookDelegate(StaticHookMethod<TestSessionContext> hook)
+    private Task<Func<TestSessionContext, CancellationToken, Task>> CreateTestSessionHookDelegate(StaticHookMethod<TestSessionContext> hook)
     {
         // Process hook registration event receivers to handle skip attributes
-        await ProcessHookRegistrationAsync(hook);
+        ProcessHookRegistration(hook);
         
-        return async (context, cancellationToken) =>
+        var result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -697,14 +705,16 @@ internal sealed class HookCollectionService : IHookCollectionService
             
             await timeoutAction();
         };
+        
+        return Task.FromResult(result);
     }
 
-    private async Task<Func<BeforeTestDiscoveryContext, CancellationToken, Task>> CreateBeforeTestDiscoveryHookDelegateAsync(StaticHookMethod<BeforeTestDiscoveryContext> hook)
+    private Task<Func<BeforeTestDiscoveryContext, CancellationToken, Task>> CreateBeforeTestDiscoveryHookDelegateAsync(StaticHookMethod<BeforeTestDiscoveryContext> hook)
     {
         // Process hook registration event receivers to handle skip attributes
-        await ProcessHookRegistrationAsync(hook);
+        ProcessHookRegistration(hook);
         
-        return async (context, cancellationToken) =>
+        var result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -719,14 +729,16 @@ internal sealed class HookCollectionService : IHookCollectionService
             
             await timeoutAction();
         };
+        
+        return Task.FromResult(result);
     }
 
-    private async Task<Func<TestDiscoveryContext, CancellationToken, Task>> CreateTestDiscoveryHookDelegateAsync(StaticHookMethod<TestDiscoveryContext> hook)
+    private Task<Func<TestDiscoveryContext, CancellationToken, Task>> CreateTestDiscoveryHookDelegateAsync(StaticHookMethod<TestDiscoveryContext> hook)
     {
         // Process hook registration event receivers to handle skip attributes
-        await ProcessHookRegistrationAsync(hook);
+        ProcessHookRegistration(hook);
         
-        return async (context, cancellationToken) =>
+        var result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -741,6 +753,8 @@ internal sealed class HookCollectionService : IHookCollectionService
             
             await timeoutAction();
         };
+        
+        return Task.FromResult(result);
     }
 
 }
