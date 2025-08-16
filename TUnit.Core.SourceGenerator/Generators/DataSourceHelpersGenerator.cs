@@ -627,7 +627,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             return "null";
         }
 
-        // Try to get the array type, but fall back to element type inference if needed
+        // Try to get the array type from the TypedConstant itself first
         string elementType;
         if (arrayConstant.Type is IArrayTypeSymbol arrayType)
         {
@@ -635,7 +635,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         }
         else if (arrayConstant.Values.Length > 0)
         {
-            // Infer element type from the first non-null element
+            // Infer element type from the first non-null element  
             var firstElement = arrayConstant.Values.FirstOrDefault(v => !v.IsNull);
             if (firstElement.Type != null)
             {
@@ -648,7 +648,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 elementType = firstValue.Value switch
                 {
                     int => "int",
-                    string => "string",
+                    string => "string", 
                     bool => "bool",
                     double => "double",
                     float => "float",
