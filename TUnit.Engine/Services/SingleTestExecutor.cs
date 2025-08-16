@@ -4,6 +4,7 @@ using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Interfaces;
@@ -125,6 +126,14 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 test.Metadata.PropertyInjections,
                 test.Metadata.MethodMetadata,
                 test.Context.TestDetails.TestId).ConfigureAwait(false);
+
+            // Track the test instance for disposal to ensure consistency with property-injected values
+            // This ensures that test instances implementing IAsyncDisposable/IDisposable are properly disposed
+            // through the same ObjectTracker system used for other disposable objects
+            if (instance is IAsyncDisposable or IDisposable)
+            {
+                ObjectTracker.TrackObject(test.Context.Events, instance);
+            }
 
             // Note: Property-injected values are already tracked within PropertyInjectionService
             // No need to track them again here
@@ -266,18 +275,13 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             try
             {
-                // Dispose the test instance using the same pattern as normal test execution
-                if (instance is IAsyncDisposable asyncDisposableInstance)
+                // For skipped tests, also ensure the test instance is tracked for disposal
+                if (instance is IAsyncDisposable or IDisposable)
                 {
-                    await asyncDisposableInstance.DisposeAsync().ConfigureAwait(false);
-                }
-                else if (instance is IDisposable disposableInstance)
-                {
-                    disposableInstance.Dispose();
+                    ObjectTracker.TrackObject(test.Context.Events, instance);
                 }
                 
-                // Also trigger disposal of tracked objects (injected properties and constructor args)
-                // This matches the disposal pattern in ExecuteTestWithHooksAsync
+                // Trigger disposal of all tracked objects (including test instance and injected properties)
                 if (test.Context.Events.OnDispose != null)
                 {
                     foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
@@ -361,19 +365,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         finally
         {
-            // First, dispose the test instance so it can interact with injected objects during its disposal
-            if (instance is IAsyncDisposable asyncDisposableInstance)
-            {
-                await asyncDisposableInstance.DisposeAsync().ConfigureAwait(false);
-            }
-            else if (instance is IDisposable disposableInstance)
-            {
-                disposableInstance.Dispose();
-            }
-            
-            // Then trigger disposal of tracked objects (injected properties and constructor args)
-            // This happens AFTER test instance disposal to ensure the test class can use
-            // these objects in its Dispose/DisposeAsync method
+            // Trigger disposal of all tracked objects (including test instance and injected properties)
+            // The ObjectTracker system ensures proper disposal order and reference counting
             if (test.Context.Events.OnDispose != null)
             {
                 foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
