@@ -167,6 +167,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 test.Context.SkipReason = e.Message;
                 return await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
             }
+            catch (SkipTestException e)
+            {
+                test.Context.SkipReason = e.Reason;
+                return await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
+            }
             catch (Exception exception) when (_engineCancellationToken.Token.IsCancellationRequested && exception is OperationCanceledException or TaskCanceledException)
             {
                 HandleCancellation(test);
@@ -438,13 +443,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.Result = _resultFactory.CreateTimeoutResult(
                 test.StartTime!.Value,
                 (int)test.Context.TestDetails.Timeout.Value.TotalMilliseconds);
-        }
-        else if (ex is SkipTestException skipEx)
-        {
-            test.State = TestState.Skipped;
-            test.Result = _resultFactory.CreateSkippedResult(
-                test.StartTime!.Value,
-                skipEx.Reason);
         }
         else
         {
