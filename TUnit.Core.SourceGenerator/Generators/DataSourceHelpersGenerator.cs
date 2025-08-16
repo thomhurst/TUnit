@@ -351,14 +351,14 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         sb.AppendLine($"        // Initialize {propertyName} property");
         
-        if (attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
+        if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
+        {
+            GenerateArgumentsPropertyInit(sb, propInfo);
+        }
+        else if (attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") ||
             attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
         {
             GenerateAsyncDataSourcePropertyInit(sb, propInfo);
-        }
-        else if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
-        {
-            GenerateArgumentsPropertyInit(sb, propInfo);
         }
     }
 
