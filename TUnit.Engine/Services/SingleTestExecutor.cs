@@ -138,6 +138,14 @@ internal class SingleTestExecutor : ISingleTestExecutor
             // Note: Property-injected values are already tracked within PropertyInjectionService
             // No need to track them again here
 
+            // Inject properties into test attributes before they are initialized
+            // This ensures that data source generators and other attributes have their dependencies ready
+            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(
+                test.Context.TestDetails.Attributes.ToArray(), 
+                test.Context.ObjectBag, 
+                test.Context.TestDetails.MethodMetadata,
+                test.Context.Events).ConfigureAwait(false);
+
             await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken).ConfigureAwait(false);
 
             PopulateTestContextDependencies(test);
