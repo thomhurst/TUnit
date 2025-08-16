@@ -883,7 +883,7 @@ internal sealed class ConstantArgumentsTests_Decimal_TestSource_GUID : global::T
             },
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 66,
+            LineNumber = 67,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
