@@ -27,7 +27,7 @@ public class TestApp : IAsyncInitializer, IAsyncDisposable
     private WebApplicationFactory<Program>? _factory;
     
     // This property will be initialized before InitializeAsync is called
-    [DataSourceGeneratorProperty<RedisFixture>]
+    [ClassDataSource<RedisFixture>]
     public required RedisFixture Redis { get; init; }
     
     public HttpClient Client { get; private set; } = null!;
@@ -90,13 +90,13 @@ public class FullTestApp : IAsyncInitializer, IAsyncDisposable
     private WebApplicationFactory<Program>? _factory;
     
     // All these will be initialized before InitializeAsync
-    [DataSourceGeneratorProperty<RedisFixture>]
+    [ClassDataSource<RedisFixture>]
     public required RedisFixture Redis { get; init; }
     
-    [DataSourceGeneratorProperty<PostgresFixture>]
+    [ClassDataSource<PostgresFixture>]
     public required PostgresFixture Postgres { get; init; }
     
-    [DataSourceGeneratorProperty<RabbitMqFixture>]
+    [ClassDataSource<RabbitMqFixture>]
     public required RabbitMqFixture RabbitMq { get; init; }
     
     public HttpClient Client { get; private set; } = null!;
@@ -139,7 +139,7 @@ public class FullTestApp : IAsyncInitializer, IAsyncDisposable
 
 ## Key Points
 
-✅ **Automatic Initialization**: Properties marked with `[DataSourceGeneratorProperty]` are initialized before `InitializeAsync` is called
+✅ **Automatic Initialization**: Properties marked with data source attributes (like `[ClassDataSource<T>]`) are initialized before `InitializeAsync` is called
 
 ✅ **Proper Order**: TUnit handles the dependency graph and initializes in the correct order
 

@@ -42,7 +42,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
             TestCode = source.NormalizeLineEndings(),
             CodeActionValidationMode = CodeActionValidationMode.SemanticStructure,
             ReferenceAssemblies = ReferenceAssemblies.Net.Net90
-                .AddPackages([new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")]),
+                .AddPackages([new PackageIdentity("xunit.v3.extensibility.core", "3.0.1")]),
             TestState =
             {
                 AdditionalReferences =

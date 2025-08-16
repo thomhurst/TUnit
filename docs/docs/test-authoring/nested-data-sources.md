@@ -18,7 +18,7 @@ This typically leads to complex setup code with manual initialization chains.
 
 ## The Solution
 
-TUnit automatically initializes nested data sources in the correct order using the `[DataSourceGeneratorProperty]` attribute.
+TUnit automatically initializes nested data sources in the correct order using any data source attribute that implements `IDataSourceAttribute` (such as `[ClassDataSource<T>]`).
 
 ## Basic Example
 
@@ -61,7 +61,7 @@ public class TestApplication : IAsyncInitializer, IAsyncDisposable
     private WebApplicationFactory<Program>? _factory;
     
     // This property will be initialized BEFORE InitializeAsync is called
-    [DataSourceGeneratorProperty<RedisTestContainer>]
+    [ClassDataSource<RedisTestContainer>]
     public required RedisTestContainer Redis { get; init; }
     
     public HttpClient Client { get; private set; } = null!;
@@ -135,13 +135,13 @@ public class CompleteTestEnvironment : IAsyncInitializer, IAsyncDisposable
     private WebApplicationFactory<Program>? _factory;
     
     // All of these will be initialized before InitializeAsync
-    [DataSourceGeneratorProperty<RedisTestContainer>]
+    [ClassDataSource<RedisTestContainer>]
     public required RedisTestContainer Redis { get; init; }
     
-    [DataSourceGeneratorProperty<PostgresTestContainer>]
+    [ClassDataSource<PostgresTestContainer>]
     public required PostgresTestContainer Database { get; init; }
     
-    [DataSourceGeneratorProperty<LocalStackContainer>]
+    [ClassDataSource<LocalStackContainer>]
     public required LocalStackContainer LocalStack { get; init; }
     
     public HttpClient Client { get; private set; } = null!;
@@ -210,7 +210,7 @@ You can also use async data source generators that depend on initialized resourc
 public class UserTestDataAttribute : AsyncDataSourceGeneratorAttribute<UserTestData>
 {
     // This will be initialized first
-    [DataSourceGeneratorProperty<TestApplication>]
+    [ClassDataSource<TestApplication>]
     public required TestApplication App { get; init; }
     
     public override async IAsyncEnumerable<UserTestData> GenerateDataSourcesAsync(
@@ -245,7 +245,7 @@ public class UserTestDataAttribute : AsyncDataSourceGeneratorAttribute<UserTestD
 
 ## How It Works
 
-1. TUnit detects properties marked with `[DataSourceGeneratorProperty]`
+1. TUnit detects properties marked with data source attributes (like `[ClassDataSource<T>]`)
 2. It builds a dependency graph and initializes in the correct order
 3. Each object's `InitializeAsync` is called after its dependencies are ready
 4. Disposal happens in reverse order automatically
@@ -253,7 +253,7 @@ public class UserTestDataAttribute : AsyncDataSourceGeneratorAttribute<UserTestD
 ## Best Practices
 
 1. **Implement IAsyncInitializer**: For any class that needs async initialization
-2. **Use DataSourceGeneratorProperty**: To declare dependencies that must be initialized first
+2. **Use Data Source Attributes**: Use attributes like `[ClassDataSource<T>]` to declare dependencies that must be initialized first
 3. **Share Expensive Resources**: Use `SharedType` attributes to avoid creating multiple containers
 4. **Dispose Properly**: Implement `IAsyncDisposable` for cleanup
 5. **Keep Initialization Fast**: Do only essential setup in `InitializeAsync`
