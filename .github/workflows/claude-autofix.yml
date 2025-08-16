@@ -59,19 +59,33 @@ jobs:
               );
 
               if (modularPipelineCheck) {
-                // Check if we've already attempted to fix this failure
+                // Check if we've already attempted to fix this failure recently
                 const { data: comments } = await github.rest.issues.listComments({
                   owner,
                   repo,
                   issue_number: pr.number
                 });
 
-                const alreadyAttempted = comments.some(comment =>
-                  comment.body.includes('[Claude Auto-Fix]') &&
-                  comment.body.includes(modularPipelineCheck.id.toString())
-                );
+                const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+                const recentAutoFixComment = comments.find(comment => {
+                  if (!comment.body.includes('[Claude Auto-Fix]') || 
+                      !comment.body.includes(modularPipelineCheck.id.toString())) {
+                    return false;
+                  }
+                  const commentDate = new Date(comment.created_at);
+                  return commentDate > oneHourAgo;
+                });
 
-                if (!alreadyAttempted) {
+                if (recentAutoFixComment) {
+                  console.log(`Skipping PR #${pr.number} - auto-fix comment posted within last hour`);
+                } else {
+                  const hasOldComment = comments.some(comment =>
+                    comment.body.includes('[Claude Auto-Fix]') &&
+                    comment.body.includes(modularPipelineCheck.id.toString())
+                  );
+                  if (hasOldComment) {
+                    console.log(`Re-attempting PR #${pr.number} - previous auto-fix comment is older than 1 hour`);
+                  }
                   failedPRs.push({
                     number: pr.number,
                     title: pr.title,
