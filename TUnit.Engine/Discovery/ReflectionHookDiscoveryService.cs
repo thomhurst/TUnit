@@ -404,7 +404,21 @@ internal static class ReflectionHookDiscoveryService
         {
             try
             {
-                receiver.OnHookRegistered(context).AsTask().Wait();
+                var task = receiver.OnHookRegistered(context);
+                if (task.IsCompleted)
+                {
+                    // Synchronous completion
+                    if (task.IsFaulted)
+                    {
+                        // Re-throw the exception to be caught below
+                        task.GetAwaiter().GetResult();
+                    }
+                }
+                else
+                {
+                    // Asynchronous - wait for completion
+                    task.AsTask().GetAwaiter().GetResult();
+                }
             }
             catch
             {
