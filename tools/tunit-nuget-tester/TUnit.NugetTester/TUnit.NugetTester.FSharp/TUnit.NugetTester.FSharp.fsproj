@@ -8,7 +8,7 @@
         <OutputType>exe</OutputType>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <Compile Include="Program.fs"/>
     </ItemGroup>
@@ -25,5 +25,5 @@
     <ItemGroup>
         <ProjectReference Include="..\TUnit.NugetTester.Library\TUnit.NugetTester.Library.csproj" />
     </ItemGroup>
-    
+
 </Project>
