@@ -20,7 +20,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     // Track which assemblies/classes/sessions have had their "first" event invoked
     private GetOnlyDictionary<string, Task> _firstTestInAssemblyTasks = new();
     private GetOnlyDictionary<Type, Task> _firstTestInClassTasks = new();
-    private Task? _firstTestInSessionTask;
+    private GetOnlyDictionary<string, Task> _firstTestInSessionTasks = new();
 
     // Track remaining test counts for "last" events
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
@@ -241,8 +241,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             return;
         }
 
-        // Use GetOrAdd to ensure exactly one task is created and all tests await it
-        var task = _firstTestInSessionTask ??= InvokeFirstTestInSessionEventReceiversCoreAsync(context, sessionContext, cancellationToken);
+        // Use GetOrAdd to ensure exactly one task is created per session and all tests await it
+        var task = _firstTestInSessionTasks.GetOrAdd("session", 
+            _ => InvokeFirstTestInSessionEventReceiversCoreAsync(context, sessionContext, cancellationToken));
         await task;
     }
 
@@ -483,7 +484,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         // Clear first-event tracking to ensure clean state for each test execution
         _firstTestInAssemblyTasks = new GetOnlyDictionary<string, Task>();
         _firstTestInClassTasks = new GetOnlyDictionary<Type, Task>();
-        _firstTestInSessionTask = null;
+        _firstTestInSessionTasks = new GetOnlyDictionary<string, Task>();
 
         foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.AssemblyContext.Assembly.GetName().FullName))
         {
