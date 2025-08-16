@@ -418,12 +418,22 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         }
         else
         {
-            // For any other data source attributes, use runtime resolution
-            sb.AppendLine("        {");
-            sb.AppendLine($"            var dataSourceInstance = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
-            sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
-            sb.AppendLine($"            instance.{propertyName} = ({property.Type.GloballyQualified()})dataSourceInstance;");
-            sb.AppendLine("        }");
+            // Final safety check for ArgumentsAttribute - ensure it never goes to runtime resolution for arrays
+            var fullyQualifiedName = attr.AttributeClass?.GloballyQualifiedNonGeneric();
+            if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
+            {
+                // Route ArgumentsAttribute to proper compile-time handling
+                GenerateArgumentsPropertyInit(sb, propInfo);
+            }
+            else
+            {
+                // For any other data source attributes, use runtime resolution
+                sb.AppendLine("        {");
+                sb.AppendLine($"            var dataSourceInstance = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
+                sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
+                sb.AppendLine($"            instance.{propertyName} = ({property.Type.GloballyQualified()})dataSourceInstance;");
+                sb.AppendLine("        }");
+            }
         }
     }
 
@@ -431,6 +441,15 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
     {
         var property = propInfo.Property;
         var attr = propInfo.DataSourceAttribute;
+        
+        // Special check for ArgumentsAttribute that might have been missed - ensure proper array handling
+        var fullyQualifiedName = attr.AttributeClass?.GloballyQualifiedNonGeneric();
+        if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
+        {
+            // Route ArgumentsAttribute to proper compile-time handling
+            GenerateArgumentsPropertyInit(sb, propInfo);
+            return;
+        }
         
         // Use runtime resolution to ensure the data source attribute's logic is properly invoked
         // This ensures caching, sharing, and other attribute-specific behaviors work correctly
