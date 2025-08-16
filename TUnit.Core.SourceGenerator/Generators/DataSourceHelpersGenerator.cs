@@ -419,8 +419,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         else
         {
             // Final safety check for ArgumentsAttribute - ensure it never goes to runtime resolution for arrays
-            var fullyQualifiedName = attr.AttributeClass?.GloballyQualifiedNonGeneric();
-            if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
+            var attributeName = attr.AttributeClass?.GloballyQualifiedNonGeneric();
+            if (attributeName == "global::TUnit.Core.ArgumentsAttribute")
             {
                 // Route ArgumentsAttribute to proper compile-time handling
                 GenerateArgumentsPropertyInit(sb, propInfo);
