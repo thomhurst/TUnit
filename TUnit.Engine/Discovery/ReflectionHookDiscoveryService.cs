@@ -66,25 +66,7 @@ internal static class ReflectionHookDiscoveryService
     /// </summary>
     private static void ClearSourcesHooks()
     {
-        Sources.BeforeTestHooks.Clear();
-        Sources.AfterTestHooks.Clear();
-        Sources.BeforeEveryTestHooks.Clear();
-        Sources.AfterEveryTestHooks.Clear();
-        
-        Sources.BeforeClassHooks.Clear();
-        Sources.AfterClassHooks.Clear();
-        Sources.BeforeEveryClassHooks.Clear();
-        Sources.AfterEveryClassHooks.Clear();
-        
-        Sources.BeforeAssemblyHooks.Clear();
-        Sources.AfterAssemblyHooks.Clear();
-        Sources.BeforeEveryAssemblyHooks.Clear();
-        Sources.AfterEveryAssemblyHooks.Clear();
-        
-        Sources.BeforeTestSessionHooks.Clear();
-        Sources.AfterTestSessionHooks.Clear();
-        Sources.BeforeTestDiscoveryHooks.Clear();
-        Sources.AfterTestDiscoveryHooks.Clear();
+        Sources.ClearAllHooks();
     }
 
     /// <summary>
