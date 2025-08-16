@@ -386,24 +386,25 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         
         if (attr.ConstructorArguments.Length > 0)
         {
+            var argument = attr.ConstructorArguments[0];
+            
             // Check if property is an array type and we have an array argument
-            if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
-                property.Type is IArrayTypeSymbol)
+            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol)
             {
                 // Use the entire array with proper typing
-                var value = FormatArrayValue(attr.ConstructorArguments[0], property.Type);
+                var value = FormatArrayValue(argument, property.Type);
                 sb.AppendLine($"        instance.{property.Name} = {value};");
             }
-            else if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
-                     attr.ConstructorArguments[0].Values.Length > 0)
+            else if (argument.Kind == TypedConstantKind.Array && argument.Values.Length > 0)
             {
-                // Use the first element if property is not an array
-                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
+                // Property is not an array but argument is - use the first element
+                var value = FormatConstantValue(argument.Values[0]);
                 sb.AppendLine($"        instance.{property.Name} = {value};");
             }
-            else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
+            else
             {
-                var value = FormatConstantValue(attr.ConstructorArguments[0]);
+                // Argument is not an array - use it directly
+                var value = FormatConstantValue(argument);
                 sb.AppendLine($"        instance.{property.Name} = {value};");
             }
         }
@@ -484,24 +485,25 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         
         if (attr.ConstructorArguments.Length > 0)
         {
+            var argument = attr.ConstructorArguments[0];
+            
             // Check if property is an array type and we have an array argument
-            if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
-                property.Type is IArrayTypeSymbol)
+            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol)
             {
                 // Use the entire array with proper typing
-                var value = FormatArrayValue(attr.ConstructorArguments[0], property.Type);
+                var value = FormatArrayValue(argument, property.Type);
                 sb.AppendLine($"            {property.Name} = {value},");
             }
-            else if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
-                     attr.ConstructorArguments[0].Values.Length > 0)
+            else if (argument.Kind == TypedConstantKind.Array && argument.Values.Length > 0)
             {
-                // Use the first element if property is not an array
-                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
+                // Property is not an array but argument is - use the first element
+                var value = FormatConstantValue(argument.Values[0]);
                 sb.AppendLine($"            {property.Name} = {value},");
             }
-            else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
+            else
             {
-                var value = FormatConstantValue(attr.ConstructorArguments[0]);
+                // Argument is not an array - use it directly
+                var value = FormatConstantValue(argument);
                 sb.AppendLine($"            {property.Name} = {value},");
             }
         }
@@ -552,24 +554,25 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         
         if (attr.ConstructorArguments.Length > 0)
         {
+            var argument = attr.ConstructorArguments[0];
+            
             // Check if property is an array type and we have an array argument
-            if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
-                property.Type is IArrayTypeSymbol)
+            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol)
             {
                 // Use the entire array with proper typing
-                var value = FormatArrayValue(attr.ConstructorArguments[0], property.Type);
+                var value = FormatArrayValue(argument, property.Type);
                 sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = {value};");
             }
-            else if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
-                     attr.ConstructorArguments[0].Values.Length > 0)
+            else if (argument.Kind == TypedConstantKind.Array && argument.Values.Length > 0)
             {
-                // Use the first element if property is not an array
-                var value = FormatConstantValue(attr.ConstructorArguments[0].Values[0]);
+                // Property is not an array but argument is - use the first element
+                var value = FormatConstantValue(argument.Values[0]);
                 sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = {value};");
             }
-            else if (attr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
+            else
             {
-                var value = FormatConstantValue(attr.ConstructorArguments[0]);
+                // Argument is not an array - use it directly
+                var value = FormatConstantValue(argument);
                 sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = {value};");
             }
         }
