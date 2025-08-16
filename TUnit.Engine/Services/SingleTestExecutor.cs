@@ -354,9 +354,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
             // This ensures test instances and their dependencies are disposed consistently
             try 
             {
-                var disposalTasks = test.Context.Events.OnDispose.InvocationList
-                    .OrderBy(x => x.Order)
-                    .Select(async disposal =>
+                if (test.Context.Events.OnDispose != null)
+                {
+                    var disposalTasks = test.Context.Events.OnDispose.InvocationList
+                        .OrderBy(x => x.Order)
+                        .Select(async disposal =>
                     {
                         try
                         {
@@ -368,7 +370,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
                         }
                     });
 
-                await Task.WhenAll(disposalTasks).ConfigureAwait(false);
+                    await Task.WhenAll(disposalTasks).ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
