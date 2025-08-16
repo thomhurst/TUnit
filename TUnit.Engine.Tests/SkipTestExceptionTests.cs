@@ -11,7 +11,7 @@ public class SkipTestExceptionTests(TestMode testMode) : InvokableTestBase(testM
         await RunTestsWithFilter(
             "/*/*/SkipExceptionFixTest/*",
             [
-                result => result.ResultSummary.Outcome.ShouldBe("Passed"),
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(0),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
