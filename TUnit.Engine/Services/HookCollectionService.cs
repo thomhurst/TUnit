@@ -42,7 +42,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         if (Sources.HasAnyHooks())
         {
-            await ReflectionHookDiscoveryService.ProcessHookRegistrationEventsAsync(_eventReceiverOrchestrator);
+            ReflectionHookDiscoveryService.DiscoverHooks();
         }
     }
 
