@@ -37,16 +37,6 @@ public class BuildBenchmarks : BenchmarkBase
     }
     
     [Benchmark]
-    public async Task Build_xUnitV3()
-    {
-        await Cli.Wrap("dotnet")
-            .WithArguments(["build", "--no-incremental", "-c", "Release", "--framework", Framework])
-            .WithWorkingDirectory(XUnitV3Path)
-            .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
-            .ExecuteAsync();
-    }
-    
-    [Benchmark]
     public async Task Build_MSTest()
     {
         await Cli.Wrap("dotnet")
