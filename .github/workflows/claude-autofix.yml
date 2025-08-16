@@ -41,8 +41,9 @@ jobs:
             const failedPRs = [];
 
             for (const pr of pulls) {
-              // Only process PRs from thomhurst or copilot
-              if (pr.user.login !== 'thomhurst' && !pr.user.login.includes('copilot')) {
+              // Only process PRs from thomhurst or copilot (case insensitive)
+              const username = pr.user.login.toLowerCase();
+              if (username !== 'thomhurst' && !username.includes('copilot')) {
                 continue;
               }
 
