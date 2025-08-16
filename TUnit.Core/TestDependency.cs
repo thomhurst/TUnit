@@ -60,21 +60,28 @@ public sealed class TestDependency : IEquatable<TestDependency>
 
             if (ClassType.IsGenericTypeDefinition)
             {
+                // Early exit if test class type has no generic inheritance at all
+                if (!testClassType.IsGenericType && testClassType.BaseType == null)
+                {
+                    return false;
+                }
+                
                 // Quick check: if test class type is generic and matches directly, we're done
                 if (testClassType.IsGenericType && testClassType.GetGenericTypeDefinition() == ClassType)
                 {
-                    // Match found, continue to method checks
+                    // Direct match found, continue to method checks
                 }
                 else
                 {
-                    // Check if any base types match the generic type definition
+                    // Only traverse inheritance if we have a base type and it's likely to be generic
                     var found = false;
-                    var currentType = testClassType.BaseType; // Start with base type since we already checked the current type
+                    var currentType = testClassType.BaseType;
                     var depth = 0;
-                    const int maxInheritanceDepth = 50; // Safeguard against deep inheritance chains
+                    const int maxInheritanceDepth = 10; // Reduced from 50 to 10 for better performance
                     
                     while (currentType != null && !found && depth < maxInheritanceDepth)
                     {
+                        // Only check generic types to avoid unnecessary reflection calls
                         if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == ClassType)
                         {
                             found = true;
