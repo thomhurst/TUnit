@@ -1266,11 +1266,11 @@ namespace .Extensions
     }
     public static class DateOnlyIsExtensions
     {
-        public static . IsAfter(this ..IValueSource<.> valueSource, . expected, [.("expected")] string doNotPopulateThisValue = null) { }
-        public static . IsAfterOrEqualTo(this ..IValueSource<.> valueSource, . expected, [.("expected")] string doNotPopulateThisValue = null) { }
-        public static . IsBefore(this ..IValueSource<.> valueSource, . expected, [.("expected")] string doNotPopulateThisValue = null) { }
-        public static . IsBeforeOrEqualTo(this ..IValueSource<.> valueSource, . expected, [.("expected")] string doNotPopulateThisValue = null) { }
-        public static ..DateOnlyEqualToAssertionBuilderWrapper IsEqualTo(this ..IValueSource<.> valueSource, . expected, [.("expected")] string doNotPopulateThisValue1 = null) { }
+        public static .<> IsAfter(this ..IValueSource<> valueSource,  expected, [.("expected")] string doNotPopulateThisValue = null) { }
+        public static .<> IsAfterOrEqualTo(this ..IValueSource<> valueSource,  expected, [.("expected")] string doNotPopulateThisValue = null) { }
+        public static .<> IsBefore(this ..IValueSource<> valueSource,  expected, [.("expected")] string doNotPopulateThisValue = null) { }
+        public static .<> IsBeforeOrEqualTo(this ..IValueSource<> valueSource,  expected, [.("expected")] string doNotPopulateThisValue = null) { }
+        public static ..DateOnlyEqualToAssertionBuilderWrapper IsEqualTo(this ..IValueSource<> valueSource,  expected, [.("expected")] string doNotPopulateThisValue1 = null) { }
     }
     public static class DelegateCompletionExtensions
     {
