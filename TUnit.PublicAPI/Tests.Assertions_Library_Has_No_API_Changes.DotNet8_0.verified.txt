@@ -884,6 +884,11 @@ namespace .
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TActual? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
+    public static class DelegateIsNotExtensions
+    {
+        public static ..NotNullAssertionBuilderWrapper<.> IsNotNull(this ..IValueSource<.?> valueSource) { }
+        public static ..NotNullAssertionBuilderWrapper<.<T>> IsNotNull<T>(this ..IValueSource<.<T>?> valueSource) { }
+    }
     public static class DelegateExtensions
     {
         public static . CompletesWithin(this ..IDelegateSource delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null) { }
@@ -892,6 +897,18 @@ namespace .
 }
 namespace ..Conditions
 {
+    public class ActionNotNullAssertCondition : .<object>
+    {
+        public ActionNotNullAssertCondition() { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(object? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DelegateNotNullAssertCondition<T> : .<T>
+    {
+        public DelegateNotNullAssertCondition() { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(T? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
     public class EnumDoesNotHaveFlagAssertCondition<TEnum> : .<TEnum>
         where TEnum : 
     {
@@ -1371,6 +1388,8 @@ namespace .Extensions
             where TActual :  class { }
         public static ..NotNullStructAssertionBuilderWrapper<TActual> IsNotNull<TActual>(this ..IValueSource<TActual?> valueSource)
             where TActual :  struct { }
+        public static .<T> IsNotNull<T>([.] this ..IValueDelegateSource<T> valueSource) { }
+        public static . IsNotNull([.] this ..IDelegateSource delegateSource) { }
         public static .<TActual> IsNotSameReferenceAs<TActual, TExpected>(this ..IValueSource<TActual> valueSource, TExpected expected, [.("expected")] string? doNotPopulateThisValue1 = null) { }
     }
     public static class GenericSatisfiesExtensions
