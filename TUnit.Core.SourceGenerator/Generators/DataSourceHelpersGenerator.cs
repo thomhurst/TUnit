@@ -401,6 +401,19 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 var value = FormatConstantValue(argument.Values[0]);
                 sb.AppendLine($"        instance.{property.Name} = {value};");
             }
+            else if (argument.Kind == TypedConstantKind.Array)
+            {
+                // Empty array case - use appropriate empty value
+                if (property.Type is IArrayTypeSymbol arrayType)
+                {
+                    var elementType = arrayType.ElementType.GloballyQualified();
+                    sb.AppendLine($"        instance.{property.Name} = new {elementType}[0];");
+                }
+                else
+                {
+                    sb.AppendLine($"        instance.{property.Name} = default({property.Type.GloballyQualified()});");
+                }
+            }
             else
             {
                 // Argument is not an array - use it directly
@@ -500,6 +513,19 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 var value = FormatConstantValue(argument.Values[0]);
                 sb.AppendLine($"            {property.Name} = {value},");
             }
+            else if (argument.Kind == TypedConstantKind.Array)
+            {
+                // Empty array case - use appropriate empty value
+                if (property.Type is IArrayTypeSymbol arrayType)
+                {
+                    var elementType = arrayType.ElementType.GloballyQualified();
+                    sb.AppendLine($"            {property.Name} = new {elementType}[0],");
+                }
+                else
+                {
+                    sb.AppendLine($"            {property.Name} = default({property.Type.GloballyQualified()}),");
+                }
+            }
             else
             {
                 // Argument is not an array - use it directly
@@ -568,6 +594,19 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 // Property is not an array but argument is - use the first element
                 var value = FormatConstantValue(argument.Values[0]);
                 sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = {value};");
+            }
+            else if (argument.Kind == TypedConstantKind.Array)
+            {
+                // Empty array case - use appropriate empty value
+                if (property.Type is IArrayTypeSymbol arrayType)
+                {
+                    var elementType = arrayType.ElementType.GloballyQualified();
+                    sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = new {elementType}[0];");
+                }
+                else
+                {
+                    sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = default({property.Type.GloballyQualified()});");
+                }
             }
             else
             {
