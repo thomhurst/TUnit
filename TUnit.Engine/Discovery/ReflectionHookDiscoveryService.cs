@@ -33,6 +33,11 @@ internal static class ReflectionHookDiscoveryService
                 return; // Already completed discovery
             }
 
+            // Clear existing hooks to prevent duplicates from multiple discovery calls
+            ClearSourcesHooks();
+            
+            _discoveryCompleted = true; // Set completion flag early to prevent re-entry
+
             var assemblies = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(ShouldScanAssembly)
                 .ToList();
@@ -53,9 +58,33 @@ internal static class ReflectionHookDiscoveryService
                     // Ignore failures in hook discovery for individual assemblies
                 }
             }
-            
-            _discoveryCompleted = true;
         }
+    }
+
+    /// <summary>
+    /// Clears all hooks from Sources to prevent duplicates
+    /// </summary>
+    private static void ClearSourcesHooks()
+    {
+        Sources.BeforeTestHooks.Clear();
+        Sources.AfterTestHooks.Clear();
+        Sources.BeforeEveryTestHooks.Clear();
+        Sources.AfterEveryTestHooks.Clear();
+        
+        Sources.BeforeClassHooks.Clear();
+        Sources.AfterClassHooks.Clear();
+        Sources.BeforeEveryClassHooks.Clear();
+        Sources.AfterEveryClassHooks.Clear();
+        
+        Sources.BeforeAssemblyHooks.Clear();
+        Sources.AfterAssemblyHooks.Clear();
+        Sources.BeforeEveryAssemblyHooks.Clear();
+        Sources.AfterEveryAssemblyHooks.Clear();
+        
+        Sources.BeforeTestSessionHooks.Clear();
+        Sources.AfterTestSessionHooks.Clear();
+        Sources.BeforeTestDiscoveryHooks.Clear();
+        Sources.AfterTestDiscoveryHooks.Clear();
     }
 
     /// <summary>
