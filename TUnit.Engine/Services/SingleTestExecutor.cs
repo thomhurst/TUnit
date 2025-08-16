@@ -339,6 +339,16 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             await ExecuteAfterTestHooksAsync(afterTestHooks, test.Context, cancellationToken).ConfigureAwait(false);
         }
+        catch (SkipTestException afterHookSkipEx)
+        {
+            if (testException != null)
+            {
+                throw new AggregateException("Test and after hook both failed", testException, afterHookSkipEx);
+            }
+
+            test.Context.SkipReason = afterHookSkipEx.Reason;
+            test.Result = await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
+        }
         catch (Exception afterHookEx)
         {
             if (testException != null)
