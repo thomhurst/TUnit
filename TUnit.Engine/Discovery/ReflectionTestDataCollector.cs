@@ -1005,7 +1005,36 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static bool IsCompilerGenerated(Type type)
     {
-        return type.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false);
+        // If the type is not marked as compiler-generated, it's not compiler-generated
+        if (!type.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false))
+        {
+            return false;
+        }
+        
+        // If the type is compiler-generated but contains test methods, allow it
+        // This handles cases like Reqnroll-generated test classes that should be executed
+        return !HasTestMethods(type);
+    }
+    
+    private static bool HasTestMethods(Type type)
+    {
+        try
+        {
+            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            foreach (var method in methods)
+            {
+                if (method.IsDefined(typeof(TestAttribute), inherit: false))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        catch
+        {
+            // If we can't access the methods, treat it as not having test methods
+            return false;
+        }
     }
 
     private static ParameterInfo[] GetParametersWithoutCancellationToken(MethodInfo method)
