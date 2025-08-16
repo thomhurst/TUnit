@@ -351,6 +351,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         sb.AppendLine($"        // Initialize {propertyName} property");
         
+        // Check ArgumentsAttribute first to ensure proper array handling
         if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
         {
             GenerateArgumentsPropertyInit(sb, propInfo);
