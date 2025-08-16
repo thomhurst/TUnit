@@ -351,7 +351,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         sb.AppendLine($"        // Initialize {propertyName} property");
         
-        // Check ArgumentsAttribute first to ensure proper array handling
+        // Check ArgumentsAttribute first to ensure proper array handling - this must come first
+        // to prevent ArgumentsAttribute from being processed by the async data source handler
         if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
         {
             GenerateArgumentsPropertyInit(sb, propInfo);
@@ -360,6 +361,15 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             attr.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute"))
         {
             GenerateAsyncDataSourcePropertyInit(sb, propInfo);
+        }
+        else
+        {
+            // For any other data source attributes, use runtime resolution
+            sb.AppendLine("        {");
+            sb.AppendLine($"            var dataSourceInstance = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
+            sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
+            sb.AppendLine($"            instance.{propertyName} = ({property.Type.GloballyQualified()})dataSourceInstance;");
+            sb.AppendLine("        }");
         }
     }
 
