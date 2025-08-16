@@ -138,7 +138,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             // Note: Property-injected values are already tracked within PropertyInjectionService
             // No need to track them again here
 
-            // Inject properties into test attributes before they are initialized
+            // Inject properties into test attributes BEFORE they are initialized
             // This ensures that data source generators and other attributes have their dependencies ready
             await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(
                 test.Context.TestDetails.Attributes.ToArray(), 
@@ -349,8 +349,30 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         finally
         {
-            // Note: ObjectTracker will handle disposal automatically when the test context ends
-            // No need to manually trigger disposal events here as it could cause deadlocks
+            // Trigger disposal for all tracked objects to ensure proper cleanup
+            // This ensures test instances and their dependencies are disposed consistently
+            try 
+            {
+                var disposalTasks = test.Context.Events.OnDispose
+                    .OrderBy(x => x.Order)
+                    .Select(async disposal =>
+                    {
+                        try
+                        {
+                            await disposal.Action().ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            await _logger.LogErrorAsync($"Error during disposal: {ex.Message}").ConfigureAwait(false);
+                        }
+                    });
+
+                await Task.WhenAll(disposalTasks).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error during disposal cleanup: {ex.Message}").ConfigureAwait(false);
+            }
         }
 
         if (testException != null)
