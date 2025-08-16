@@ -619,12 +619,35 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
     private static string FormatArrayValue(TypedConstant arrayConstant)
     {
-        if (arrayConstant.Kind != TypedConstantKind.Array || arrayConstant.Type is not IArrayTypeSymbol arrayType)
+        if (arrayConstant.Kind != TypedConstantKind.Array)
         {
             return "null";
         }
 
-        var elementType = arrayType.ElementType.GloballyQualified();
+        // Try to get the array type, but fall back to element type inference if needed
+        string elementType;
+        if (arrayConstant.Type is IArrayTypeSymbol arrayType)
+        {
+            elementType = arrayType.ElementType.GloballyQualified();
+        }
+        else if (arrayConstant.Values.Length > 0)
+        {
+            // Infer element type from the first non-null element
+            var firstElement = arrayConstant.Values.FirstOrDefault(v => !v.IsNull);
+            if (firstElement.Type != null)
+            {
+                elementType = firstElement.Type.GloballyQualified();
+            }
+            else
+            {
+                elementType = "object";
+            }
+        }
+        else
+        {
+            elementType = "object";
+        }
+
         var values = arrayConstant.Values.Select(FormatConstantValue);
         
         return $"new {elementType}[] {{ {string.Join(", ", values)} }}";
