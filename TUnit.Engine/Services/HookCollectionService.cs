@@ -195,7 +195,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 finalHooks.AddRange(typeHooks.OrderBy(h => h.order).ThenBy(h => h.registrationIndex).Select(h => h.hook));
             }
 
-            return finalHooks;
+            return Task.FromResult<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(finalHooks);
     }
 
     public async ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeEveryTestHooksAsync(Type testClassType)
@@ -226,7 +226,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 .ThenBy(h => h.registrationIndex)
                 .Select(h => h.hook)
                 .ToList();
-            return hooks;
+            return Task.FromResult<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
     }
 
     public async ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectAfterEveryTestHooksAsync(Type testClassType)
@@ -257,7 +257,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 .ThenBy(h => h.registrationIndex)
                 .Select(h => h.hook)
                 .ToList();
-            return hooks;
+            return Task.FromResult<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
     }
 
     public async ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> CollectBeforeClassHooksAsync(Type testClassType)
@@ -324,7 +324,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             finalHooks.AddRange(typeHooks.OrderBy(h => h.order).ThenBy(h => h.registrationIndex).Select(h => h.hook));
         }
 
-        return finalHooks;
+        return Task.FromResult<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(finalHooks);
     }
 
     public async ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> CollectAfterClassHooksAsync(Type testClassType)
@@ -390,7 +390,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             finalHooks.AddRange(typeHooks.OrderBy(h => h.order).ThenBy(h => h.registrationIndex).Select(h => h.hook));
         }
 
-        return finalHooks;
+        return Task.FromResult<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(finalHooks);
     }
 
     public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectBeforeAssemblyHooksAsync(Assembly assembly)
