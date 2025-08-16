@@ -390,8 +390,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
                 property.Type is IArrayTypeSymbol)
             {
-                // Use the entire array
-                var value = FormatConstantValue(attr.ConstructorArguments[0]);
+                // Use the entire array with proper typing
+                var value = FormatArrayValue(attr.ConstructorArguments[0], property.Type);
                 sb.AppendLine($"        instance.{property.Name} = {value};");
             }
             else if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
@@ -488,8 +488,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
                 property.Type is IArrayTypeSymbol)
             {
-                // Use the entire array
-                var value = FormatConstantValue(attr.ConstructorArguments[0]);
+                // Use the entire array with proper typing
+                var value = FormatArrayValue(attr.ConstructorArguments[0], property.Type);
                 sb.AppendLine($"            {property.Name} = {value},");
             }
             else if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
@@ -556,8 +556,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
                 property.Type is IArrayTypeSymbol)
             {
-                // Use the entire array
-                var value = FormatConstantValue(attr.ConstructorArguments[0]);
+                // Use the entire array with proper typing
+                var value = FormatArrayValue(attr.ConstructorArguments[0], property.Type);
                 sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = {value};");
             }
             else if (attr.ConstructorArguments[0].Kind == TypedConstantKind.Array &&
@@ -627,6 +627,60 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         // Try to get the array type, but fall back to element type inference if needed
         string elementType;
         if (arrayConstant.Type is IArrayTypeSymbol arrayType)
+        {
+            elementType = arrayType.ElementType.GloballyQualified();
+        }
+        else if (arrayConstant.Values.Length > 0)
+        {
+            // Infer element type from the first non-null element
+            var firstElement = arrayConstant.Values.FirstOrDefault(v => !v.IsNull);
+            if (firstElement.Type != null)
+            {
+                elementType = firstElement.Type.GloballyQualified();
+            }
+            else
+            {
+                // Fallback: infer type from the value itself
+                var firstValue = arrayConstant.Values.FirstOrDefault(v => !v.IsNull);
+                elementType = firstValue.Value switch
+                {
+                    int => "int",
+                    string => "string",
+                    bool => "bool",
+                    double => "double",
+                    float => "float",
+                    long => "long",
+                    byte => "byte",
+                    char => "char",
+                    _ => "object"
+                };
+            }
+        }
+        else
+        {
+            elementType = "object";
+        }
+
+        var values = arrayConstant.Values.Select(FormatConstantValue);
+        
+        return $"new {elementType}[] {{ {string.Join(", ", values)} }}";
+    }
+
+    private static string FormatArrayValue(TypedConstant arrayConstant, ITypeSymbol propertyType)
+    {
+        if (arrayConstant.Kind != TypedConstantKind.Array)
+        {
+            return "null";
+        }
+
+        // First, try to get element type from the property type if it's an array
+        string elementType;
+        if (propertyType is IArrayTypeSymbol arrayPropertyType)
+        {
+            elementType = arrayPropertyType.ElementType.GloballyQualified();
+        }
+        // Fallback to the original logic
+        else if (arrayConstant.Type is IArrayTypeSymbol arrayType)
         {
             elementType = arrayType.ElementType.GloballyQualified();
         }
