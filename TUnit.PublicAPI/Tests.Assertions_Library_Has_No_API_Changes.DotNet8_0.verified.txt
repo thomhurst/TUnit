@@ -899,6 +899,9 @@ namespace ..Conditions
         protected override string GetExpectation() { }
         protected override .<.> GetResult(T? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
+}
+namespace ..Conditions
+{
     public class EnumDoesNotHaveFlagAssertCondition<TEnum> : .<TEnum>
         where TEnum : 
     {
