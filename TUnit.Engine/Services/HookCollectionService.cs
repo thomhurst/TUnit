@@ -327,19 +327,19 @@ internal sealed class HookCollectionService : IHookCollectionService
         return finalHooks;
     }
 
-    public ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> CollectAfterClassHooksAsync(Type testClassType)
+    public async ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> CollectAfterClassHooksAsync(Type testClassType)
     {
         if (_afterClassHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(cachedHooks);
+            return cachedHooks;
         }
 
-        var hooks = BuildAfterClassHooks(testClassType);
+        var hooks = await BuildAfterClassHooks(testClassType);
         _afterClassHooksCache.TryAdd(testClassType, hooks);
-        return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
+        return hooks;
     }
 
-    private IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> BuildAfterClassHooks(Type type)
+    private async Task<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> BuildAfterClassHooks(Type type)
     {
         var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)> hooks)>();
 
@@ -393,7 +393,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         return finalHooks;
     }
 
-    public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectBeforeAssemblyHooksAsync(Assembly assembly)
+    public async ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectBeforeAssemblyHooksAsync(Assembly assembly)
     {
         var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>();
 
@@ -411,10 +411,10 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
+        return hooks;
     }
 
-    public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectAfterAssemblyHooksAsync(Assembly assembly)
+    public async ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectAfterAssemblyHooksAsync(Assembly assembly)
     {
         var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>();
 
@@ -432,16 +432,16 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
+        return hooks;
     }
 
-    public ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> CollectBeforeTestSessionHooksAsync()
+    public async ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> CollectBeforeTestSessionHooksAsync()
     {
         var allHooks = new List<(int order, int registrationIndex, Func<TestSessionContext, CancellationToken, Task> hook)>();
 
         foreach (var hook in Sources.BeforeTestSessionHooks)
         {
-            var hookFunc = CreateTestSessionHookDelegate(hook);
+            var hookFunc = await CreateTestSessionHookDelegate(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
         }
 
@@ -451,16 +451,16 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return new ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>>(hooks);
+        return hooks;
     }
 
-    public ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> CollectAfterTestSessionHooksAsync()
+    public async ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> CollectAfterTestSessionHooksAsync()
     {
         var allHooks = new List<(int order, int registrationIndex, Func<TestSessionContext, CancellationToken, Task> hook)>();
 
         foreach (var hook in Sources.AfterTestSessionHooks)
         {
-            var hookFunc = CreateTestSessionHookDelegate(hook);
+            var hookFunc = await CreateTestSessionHookDelegate(hook);
             allHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
         }
 
@@ -470,7 +470,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return new ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>>(hooks);
+        return hooks;
     }
 
     public async ValueTask<IReadOnlyList<Func<BeforeTestDiscoveryContext, CancellationToken, Task>>> CollectBeforeTestDiscoveryHooksAsync()
@@ -677,10 +677,10 @@ internal sealed class HookCollectionService : IHookCollectionService
         };
     }
 
-    private Func<TestSessionContext, CancellationToken, Task> CreateTestSessionHookDelegate(StaticHookMethod<TestSessionContext> hook)
+    private async Task<Func<TestSessionContext, CancellationToken, Task>> CreateTestSessionHookDelegate(StaticHookMethod<TestSessionContext> hook)
     {
         // Process hook registration event receivers to handle skip attributes
-        ProcessHookRegistration(hook);
+        await ProcessHookRegistrationAsync(hook);
         
         return async (context, cancellationToken) =>
         {
