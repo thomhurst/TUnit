@@ -673,47 +673,20 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             return "null";
         }
 
-        // First, try to get element type from the property type if it's an array
-        string elementType;
-        if (propertyType is IArrayTypeSymbol arrayPropertyType)
+        // CRITICAL: This method should ONLY be called when propertyType is IArrayTypeSymbol
+        // If propertyType is not an array, the caller should extract the first element instead
+        if (propertyType is not IArrayTypeSymbol arrayPropertyType)
         {
-            elementType = arrayPropertyType.ElementType.GloballyQualified();
-        }
-        // Fallback to the original logic
-        else if (arrayConstant.Type is IArrayTypeSymbol arrayType)
-        {
-            elementType = arrayType.ElementType.GloballyQualified();
-        }
-        else if (arrayConstant.Values.Length > 0)
-        {
-            // Infer element type from the first non-null element
-            var firstElement = arrayConstant.Values.FirstOrDefault(v => !v.IsNull);
-            if (firstElement.Type != null)
+            // This is a defensive check - the caller should handle this case
+            if (arrayConstant.Values.Length > 0)
             {
-                elementType = firstElement.Type.GloballyQualified();
+                return FormatConstantValue(arrayConstant.Values[0]);
             }
-            else
-            {
-                // Fallback: infer type from the value itself
-                var firstValue = arrayConstant.Values.FirstOrDefault(v => !v.IsNull);
-                elementType = firstValue.Value switch
-                {
-                    int => "int",
-                    string => "string",
-                    bool => "bool",
-                    double => "double",
-                    float => "float",
-                    long => "long",
-                    byte => "byte",
-                    char => "char",
-                    _ => "object"
-                };
-            }
+            return "null";
         }
-        else
-        {
-            elementType = "object";
-        }
+
+        // Use the element type from the property type for correct typing
+        string elementType = arrayPropertyType.ElementType.GloballyQualified();
 
         var values = arrayConstant.Values.Select(FormatConstantValue);
         
