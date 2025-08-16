@@ -19,6 +19,7 @@ internal static class ReflectionHookDiscoveryService
 {
     private static readonly HashSet<Assembly> _scannedAssemblies = [];
     private static readonly Lock _lock = new();
+    private static bool _discoveryCompleted = false;
 
     /// <summary>
     /// Discovers hooks in all relevant assemblies and populates the Sources dictionaries
@@ -27,6 +28,11 @@ internal static class ReflectionHookDiscoveryService
     {
         lock (_lock)
         {
+            if (_discoveryCompleted)
+            {
+                return; // Already completed discovery
+            }
+
             var assemblies = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(ShouldScanAssembly)
                 .ToList();
@@ -47,6 +53,8 @@ internal static class ReflectionHookDiscoveryService
                     // Ignore failures in hook discovery for individual assemblies
                 }
             }
+            
+            _discoveryCompleted = true;
         }
     }
 
