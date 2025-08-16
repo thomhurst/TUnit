@@ -592,7 +592,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers to handle skip attributes
         await ProcessHookRegistrationAsync(hook);
         
-        var result = async (context, cancellationToken) =>
+        Func<TestContext, CancellationToken, Task> result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -618,7 +618,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers to handle skip attributes
         await ProcessHookRegistrationAsync(hook);
         
-        var result = async (context, cancellationToken) =>
+        Func<TestContext, CancellationToken, Task> result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -642,7 +642,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers to handle skip attributes
         await ProcessHookRegistrationAsync(hook);
         
-        var result = async (context, cancellationToken) =>
+        Func<ClassHookContext, CancellationToken, Task> result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -666,7 +666,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers to handle skip attributes
         await ProcessHookRegistrationAsync(hook);
         
-        var result = async (context, cancellationToken) =>
+        Func<AssemblyHookContext, CancellationToken, Task> result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -690,7 +690,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers to handle skip attributes
         await ProcessHookRegistrationAsync(hook);
         
-        var result = async (context, cancellationToken) =>
+        Func<TestSessionContext, CancellationToken, Task> result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -714,7 +714,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers to handle skip attributes
         await ProcessHookRegistrationAsync(hook);
         
-        var result = async (context, cancellationToken) =>
+        Func<BeforeTestDiscoveryContext, CancellationToken, Task> result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
@@ -738,7 +738,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         // Process hook registration event receivers to handle skip attributes
         await ProcessHookRegistrationAsync(hook);
         
-        var result = async (context, cancellationToken) =>
+        Func<TestDiscoveryContext, CancellationToken, Task> result = async (context, cancellationToken) =>
         {
             // Check if hook should be skipped
             if (!string.IsNullOrEmpty(hook.SkipReason))
