@@ -405,9 +405,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             else if (argument.Kind == TypedConstantKind.Array)
             {
                 // Empty array case - use appropriate empty value
-                if (property.Type is IArrayTypeSymbol arrayType)
+                if (property.Type is IArrayTypeSymbol emptyArrayType)
                 {
-                    var elementType = arrayType.ElementType.GloballyQualified();
+                    var elementType = emptyArrayType.ElementType.GloballyQualified();
                     sb.AppendLine($"        instance.{property.Name} = new {elementType}[0];");
                 }
                 else
@@ -518,9 +518,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             else if (argument.Kind == TypedConstantKind.Array)
             {
                 // Empty array case - use appropriate empty value
-                if (property.Type is IArrayTypeSymbol arrayType)
+                if (property.Type is IArrayTypeSymbol emptyArrayType)
                 {
-                    var elementType = arrayType.ElementType.GloballyQualified();
+                    var elementType = emptyArrayType.ElementType.GloballyQualified();
                     sb.AppendLine($"            {property.Name} = new {elementType}[0],");
                 }
                 else
@@ -601,9 +601,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             else if (argument.Kind == TypedConstantKind.Array)
             {
                 // Empty array case - use appropriate empty value
-                if (property.Type is IArrayTypeSymbol arrayType)
+                if (property.Type is IArrayTypeSymbol emptyArrayType)
                 {
-                    var elementType = arrayType.ElementType.GloballyQualified();
+                    var elementType = emptyArrayType.ElementType.GloballyQualified();
                     sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = new {elementType}[0];");
                 }
                 else
