@@ -1,7 +1,9 @@
 ﻿using Microsoft.Testing.Extensions.TrxReport.Abstractions;
+using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Extensions;
+using TUnit.Engine.Capabilities;
 
 namespace TUnit.Engine.Extensions;
 
@@ -36,14 +38,18 @@ internal static class TestExtensions
                 ..ExtractProperties(testDetails),
 
                 // Artifacts
-                ..testContext.Artifacts.Select(x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)),
-
-                // TRX Report Properties
-                new TrxFullyQualifiedTypeNameProperty(testDetails.MethodMetadata.Class?.Type.FullName ?? testDetails.ClassType?.FullName ?? "UnknownType"),
-                new TrxCategoriesProperty([..testDetails.Categories]),
+                ..testContext.Artifacts.Select(x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)),                
             ])
         };
 
+        var trxCapability = testContext.GetService<ITestFrameworkCapabilities>().GetCapability<ITrxReportCapability>();
+        if (((TrxReportCapability)trxCapability!).IsTrxEnabled)
+        {
+            // TRX Report Properties
+            testNode.WithProperty(new TrxFullyQualifiedTypeNameProperty(testDetails.MethodMetadata.Class?.Type.FullName ?? testDetails.ClassType?.FullName ?? "UnknownType"))
+                .WithProperty(new TrxCategoriesProperty([.. testDetails.Categories]));
+        }
+        
         return testNode;
     }
 
