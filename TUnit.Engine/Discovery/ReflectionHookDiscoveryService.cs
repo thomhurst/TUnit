@@ -417,8 +417,7 @@ internal static class ReflectionHookDiscoveryService
                 else
                 {
                     // For non-completed ValueTask, handle synchronously to avoid deadlocks
-                    // Use Task.Run to prevent deadlock scenarios
-                    Task.Run(async () => await task.ConfigureAwait(false)).GetAwaiter().GetResult();
+                    task.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
                 }
             }
             catch
