@@ -416,8 +416,22 @@ internal static class ReflectionHookDiscoveryService
                 }
                 else
                 {
-                    // Asynchronous - wait for completion
-                    task.AsTask().GetAwaiter().GetResult();
+                    // For non-completed ValueTask, we need to handle it carefully to avoid deadlocks
+                    // Use ConfigureAwait(false) and run synchronously in a safe way
+                    if (task.IsCompletedSuccessfully)
+                    {
+                        // Already successful, nothing to do
+                    }
+                    else if (task.IsFaulted)
+                    {
+                        // Re-throw the exception
+                        task.GetAwaiter().GetResult();
+                    }
+                    else
+                    {
+                        // For truly async operations, execute synchronously using Task.Run to avoid deadlocks
+                        Task.Run(async () => await task.ConfigureAwait(false)).GetAwaiter().GetResult();
+                    }
                 }
             }
             catch
