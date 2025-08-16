@@ -219,6 +219,12 @@ internal static class ReflectionHookDiscoveryService
 
     private static void DiscoverHooksInMethod(Type type, MethodInfo method)
     {
+        // Skip generic methods as they cannot be invoked via reflection without specific type arguments
+        if (method.ContainsGenericParameters)
+        {
+            return;
+        }
+        
         var attributes = method.GetCustomAttributes();
 
         foreach (var attribute in attributes)
