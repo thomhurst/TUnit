@@ -28,10 +28,11 @@ public class EmptyDataSourceTests
 
     /// <summary>
     /// This test should not fail with "Test instance is null" error for empty data sources
+    /// Empty data sources should execute once with no parameters
     /// </summary>
     [Test]
     [InstanceMethodDataSource(nameof(EmptyData))]
-    public async Task EmptyInstanceMethodDataSource_ShouldWork(int value)
+    public async Task EmptyInstanceMethodDataSource_ShouldWork()
     {
         // This test will only run if the fix works - empty data sources should yield one empty result
         // If the bug exists, this test won't even reach here due to "Test instance is null" error
@@ -51,10 +52,11 @@ public class EmptyDataSourceTests
 
     /// <summary>
     /// Test that empty static method data sources work correctly
+    /// Empty data sources should execute once with no parameters
     /// </summary>
     [Test]
     [MethodDataSource(nameof(StaticEmptyData))]
-    public async Task EmptyStaticMethodDataSource_ShouldWork(string value)
+    public async Task EmptyStaticMethodDataSource_ShouldWork()
     {
         // This test should reach here successfully with the fix
         await Assert.That(true).IsTrue();
