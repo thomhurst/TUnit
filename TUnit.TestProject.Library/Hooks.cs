@@ -5,12 +5,12 @@ public class Hooks
     [Before(Test)]
     public void BeforeTests(TestContext testContext)
     {
-        testContext.ObjectBag.Add("BeforeHit", true);
+        testContext.ObjectBag["BeforeHit"] = true;
     }
 
     [After(Test)]
     public void AfterTests(TestContext testContext)
     {
-        testContext.ObjectBag.Add("AfterHit", true);
+        testContext.ObjectBag["AfterHit"] = true;
     }
 }

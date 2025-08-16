@@ -16,7 +16,10 @@ public class TestSessionBeforeHooks
         var test = context.AllTests.FirstOrDefault(x =>
             x.TestDetails.TestName == nameof(TestSessionBeforeTests.EnsureBeforeEveryTestSessionHit));
 
-        test?.ObjectBag.Add("BeforeEveryTestSession", true);
+        if (test != null)
+        {
+            test.ObjectBag["BeforeEveryTestSession"] = true;
+        }
     }
 }
 

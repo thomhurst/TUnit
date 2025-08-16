@@ -17,7 +17,10 @@ public class HookExecutorTests
 
         var test = context.AllTests.FirstOrDefault(x =>
             x.TestDetails.TestName == nameof(VerifyBeforeTestSessionExecutorExecuted));
-        test?.ObjectBag.Add("BeforeTestSessionExecutorExecuted", true);
+        if (test != null)
+        {
+            test.ObjectBag["BeforeTestSessionExecutorExecuted"] = true;
+        }
     }
 
     [After(TestSession)]
@@ -92,7 +95,7 @@ public class HookExecutorTests
     {
         await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
         await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
-        context.ObjectBag.Add("BeforeTestExecutorExecuted", true);
+        context.ObjectBag["BeforeTestExecutorExecuted"] = true;
     }
 
     [After(Test)]
@@ -113,7 +116,7 @@ public class HookExecutorTests
 
         if (context.TestDetails.TestName == nameof(VerifyStaticTestHooksExecutorExecuted))
         {
-            context.ObjectBag.Add("BeforeEveryTestExecutorExecuted", true);
+            context.ObjectBag["BeforeEveryTestExecutorExecuted"] = true;
         }
     }
 

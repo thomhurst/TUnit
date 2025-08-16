@@ -15,7 +15,7 @@ public class DependsOnTests3
     {
         await Task.Delay(TimeSpan.FromSeconds(1));
 
-        TestContext.Current!.ObjectBag.Add("Test1", "1");
+        TestContext.Current!.ObjectBag["Test1"] = "1";
 
         _test1End = DateTime.UtcNow;
     }
@@ -25,7 +25,7 @@ public class DependsOnTests3
     {
         await Task.Delay(TimeSpan.FromSeconds(1));
 
-        TestContext.Current!.ObjectBag.Add("Test2", "2");
+        TestContext.Current!.ObjectBag["Test2"] = "2";
 
         _test2End = DateTime.UtcNow;
     }
