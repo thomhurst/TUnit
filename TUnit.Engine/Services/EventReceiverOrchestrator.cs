@@ -242,11 +242,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
 
         // Use GetOrAdd to ensure exactly one task is created and all tests await it
-        var task = _firstTestInSessionTask ??= InvokeFirstTestInSessionEventReceiversCore(context, sessionContext, cancellationToken).AsTask();
+        var task = _firstTestInSessionTask ??= InvokeFirstTestInSessionEventReceiversCoreAsync(context, sessionContext, cancellationToken);
         await task;
     }
 
-    private async ValueTask InvokeFirstTestInSessionEventReceiversCore(
+    private async Task InvokeFirstTestInSessionEventReceiversCoreAsync(
         TestContext context,
         TestSessionContext sessionContext,
         CancellationToken cancellationToken)
@@ -280,11 +280,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
         // Use GetOrAdd to ensure exactly one task is created per assembly and all tests await it
         var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName, 
-            _ => InvokeFirstTestInAssemblyEventReceiversCore(context, assemblyContext, cancellationToken).AsTask());
+            _ => InvokeFirstTestInAssemblyEventReceiversCoreAsync(context, assemblyContext, cancellationToken));
         await task;
     }
 
-    private async ValueTask InvokeFirstTestInAssemblyEventReceiversCore(
+    private async Task InvokeFirstTestInAssemblyEventReceiversCoreAsync(
         TestContext context,
         AssemblyHookContext assemblyContext,
         CancellationToken cancellationToken)
@@ -318,11 +318,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         var classType = classContext.ClassType;
         // Use GetOrAdd to ensure exactly one task is created per class and all tests await it
         var task = _firstTestInClassTasks.GetOrAdd(classType, 
-            _ => InvokeFirstTestInClassEventReceiversCore(context, classContext, cancellationToken).AsTask());
+            _ => InvokeFirstTestInClassEventReceiversCoreAsync(context, classContext, cancellationToken));
         await task;
     }
 
-    private async ValueTask InvokeFirstTestInClassEventReceiversCore(
+    private async Task InvokeFirstTestInClassEventReceiversCoreAsync(
         TestContext context,
         ClassHookContext classContext,
         CancellationToken cancellationToken)
