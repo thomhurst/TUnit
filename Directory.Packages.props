@@ -58,7 +58,7 @@
         <PackageVersion Include="OneOf" Version="3.0.271" />
         <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
         <PackageVersion Include="Polly" Version="8.6.2" />
-        <PackageVersion Include="Polyfill" Version="8.7.4">
+        <PackageVersion Include="Polyfill" Version="8.8.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageVersion>
@@ -82,11 +82,11 @@
         <PackageVersion Include="Testcontainers.PostgreSql" Version="4.6.0" />
         <PackageVersion Include="Testcontainers.Redis" Version="4.6.0" />
         <PackageVersion Include="trxparser" Version="0.5.0" />
-        <PackageVersion Include="Verify" Version="30.6.1" />
-        <PackageVersion Include="Verify.NUnit" Version="30.7.0" />
-        <PackageVersion Include="TUnit" Version="0.55.23" />
-        <PackageVersion Include="TUnit.Core" Version="0.55.23" />
-        <PackageVersion Include="TUnit.Assertions" Version="0.55.23" />
+        <PackageVersion Include="Verify" Version="30.7.2" />
+        <PackageVersion Include="Verify.NUnit" Version="30.7.2" />
+        <PackageVersion Include="TUnit" Version="0.56.5" />
+        <PackageVersion Include="TUnit.Core" Version="0.56.5" />
+        <PackageVersion Include="TUnit.Assertions" Version="0.56.5" />
         <PackageVersion Include="Vogen" Version="8.0.1" />
         <PackageVersion Include="xunit" Version="2.9.3" />
         <PackageVersion Include="xunit.assert" Version="2.9.3" />

@@ -252,6 +252,50 @@ internal class SingleTestExecutor : ISingleTestExecutor
         test.EndTime = DateTimeOffset.Now;
         await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
 
+        // If a test instance was created (constructor was called), we need to dispose it
+        // even though the test was skipped, to prevent resource leaks
+        var instance = test.Context.TestDetails.ClassInstance;
+        if (instance != null && 
+            instance is not SkippedTestInstance && 
+            instance is not PlaceholderInstance)
+        {
+            try
+            {
+                // Dispose the test instance using the same pattern as normal test execution
+                if (instance is IAsyncDisposable asyncDisposableInstance)
+                {
+                    await asyncDisposableInstance.DisposeAsync().ConfigureAwait(false);
+                }
+                else if (instance is IDisposable disposableInstance)
+                {
+                    disposableInstance.Dispose();
+                }
+                
+                // Also trigger disposal of tracked objects (injected properties and constructor args)
+                // This matches the disposal pattern in ExecuteTestWithHooksAsync
+                if (test.Context.Events.OnDispose != null)
+                {
+                    foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                    {
+                        try
+                        {
+                            await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log but don't throw - we still need to dispose other objects
+                            await _logger.LogErrorAsync($"Error during OnDispose event for skipped test: {ex.Message}").ConfigureAwait(false);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log disposal errors but don't fail the skipped test
+                await _logger.LogErrorAsync($"Error disposing skipped test instance: {ex.Message}").ConfigureAwait(false);
+            }
+        }
+
         return test.Result;
     }
 

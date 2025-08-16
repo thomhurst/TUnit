@@ -4,10 +4,11 @@
 
 When assisting with TUnit development:
 1. **ALWAYS** maintain behavioral parity between source-generated and reflection modes
-2. **ALWAYS** run `dotnet test TUnit.PublicAPI` when modifying public APIs
-3. **NEVER** use VSTest APIs - use Microsoft.Testing.Platform instead
-4. **PREFER** performance over convenience - this framework may be used by millions
-5. **FOLLOW** modern C# patterns and the coding standards outlined below
+2. **ALWAYS** run `dotnet test TUnit.PublicAPI` when modifying public APIs in TUnit.Core, TUnit.Engine, or TUnit.Playwright
+3. **ALWAYS** run source generator tests when changing source generator output
+4. **NEVER** use VSTest APIs - use Microsoft.Testing.Platform instead
+5. **PREFER** performance over convenience - this framework may be used by millions
+6. **FOLLOW** modern C# patterns and the coding standards outlined below
 
 ## Repository Overview
 
@@ -128,10 +129,38 @@ TUnit operates in two distinct execution modes that must maintain behavioral par
 - Integration tests for cross-component functionality
 - Performance benchmarks for critical paths
 - Analyzer tests for compile-time validation
+- Source generator snapshot tests
+- Public API snapshot tests
+
+### Source Generator Changes
+
+**CRITICAL**: When modifying what the source generator emits:
+
+1. **Run the source generator tests**:
+   ```bash
+   dotnet test TUnit.Core.SourceGenerator.Tests
+   ```
+
+2. **Accept any changed snapshots**:
+   - The test will generate `.received.txt` files showing the new generated output
+   - Review these files to ensure your changes are intentional and correct
+   - Convert the received files to verified files:
+     ```bash
+     # Windows
+     for %f in (*.received.txt) do move /Y "%f" "%~nf.verified.txt"
+     
+     # Linux/macOS
+     for file in *.received.txt; do mv "$file" "${file%.received.txt}.verified.txt"; done
+     ```
+   - Or manually rename each `.received.txt` file to `.verified.txt`
+
+3. **Commit the updated snapshots**:
+   - Include the updated `.verified.txt` files in your commit
+   - These snapshots ensure source generation consistency
 
 ### Public API Changes
 
-**CRITICAL**: When modifying any public API (adding, removing, or changing public methods, properties, or types):
+**CRITICAL**: When modifying any public API in TUnit.Core, TUnit.Engine, or TUnit.Playwright (adding, removing, or changing public methods, properties, or types):
 
 1. **Run the Public API test**:
    ```bash
@@ -202,15 +231,19 @@ TUnit operates in two distinct execution modes that must maintain behavioral par
 
 ### Before Submitting Any Code:
 1. **Test Both Modes**: Verify your changes work identically in both source-generated and reflection modes
-2. **Check Public API**: Run `dotnet test TUnit.PublicAPI` and update snapshots if needed
-3. **Performance Impact**: Consider if your change affects test discovery or execution performance
-4. **Breaking Changes**: Ensure no unintentional breaking changes to the public API
-5. **Documentation**: Update relevant documentation for any public API changes
+2. **Check Source Generator**: If changing source generator output, run `dotnet test TUnit.Core.SourceGenerator.Tests` and accept snapshots
+3. **Check Public API**: If modifying TUnit.Core, TUnit.Engine, or TUnit.Playwright public APIs, run `dotnet test TUnit.PublicAPI` and accept snapshots
+4. **Performance Impact**: Consider if your change affects test discovery or execution performance
+5. **Breaking Changes**: Ensure no unintentional breaking changes to the public API
+6. **Documentation**: Update relevant documentation for any public API changes
 
 ### Quick Commands Reference:
 ```bash
 # Run all tests
 dotnet test
+
+# Run source generator tests
+dotnet test TUnit.Core.SourceGenerator.Tests
 
 # Run public API tests
 dotnet test TUnit.PublicAPI
