@@ -762,7 +762,7 @@ internal sealed class ConstantArgumentsTests_ULong_TestSource_GUID : global::TUn
             },
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 58,
+            LineNumber = 59,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
