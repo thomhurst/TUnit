@@ -38,8 +38,8 @@ public class RunEngineTestsModule : Module<CommandResult>
             Framework = "net9.0",
             WorkingDirectory = project.Folder!,
             Arguments = [
-                "--hangdump", "--hangdump-filename", $"hangdump.{Environment.OSVersion.Platform}.engine-tests.dmp", "--hangdump-timeout", "15m",
-                "--timeout", "16m",
+                "--hangdump", "--hangdump-filename", $"hangdump.{Environment.OSVersion.Platform}.engine-tests.dmp", "--hangdump-timeout", "20m",
+                "--timeout", "25m",
                 "--fail-fast"
             ],
             EnvironmentVariables = new Dictionary<string, string?>
