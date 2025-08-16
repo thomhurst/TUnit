@@ -10,7 +10,7 @@ public class EmptyDataSourceTests
     /// <summary>
     /// Empty static data source that should yield one empty result, not zero results
     /// </summary>
-    public static IEnumerable<string> EmptyStaticDataSource()
+    public static IEnumerable<object[]> EmptyStaticDataSource()
     {
         return [];
     }
@@ -18,9 +18,9 @@ public class EmptyDataSourceTests
     /// <summary>
     /// Non-empty static data source for comparison
     /// </summary>
-    public static IEnumerable<string> NonEmptyStaticDataSource()
+    public static IEnumerable<object[]> NonEmptyStaticDataSource()
     {
-        return ["a", "b"];
+        return [["a"], ["b"]];
     }
 
     /// <summary>
