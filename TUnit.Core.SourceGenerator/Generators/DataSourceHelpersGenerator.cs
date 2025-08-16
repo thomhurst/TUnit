@@ -389,11 +389,12 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var argument = attr.ConstructorArguments[0];
             
             // Check if property is an array type and we have an array argument
-            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol)
+            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol arrayType)
             {
                 // Use the entire array with proper typing
-                var value = FormatArrayValue(argument, property.Type);
-                sb.AppendLine($"        instance.{property.Name} = {value};");
+                var elementType = arrayType.ElementType.GloballyQualified();
+                var values = argument.Values.Select(FormatConstantValue);
+                sb.AppendLine($"        instance.{property.Name} = new {elementType}[] {{ {string.Join(", ", values)} }};");
             }
             else if (argument.Kind == TypedConstantKind.Array && argument.Values.Length > 0)
             {
@@ -501,11 +502,12 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var argument = attr.ConstructorArguments[0];
             
             // Check if property is an array type and we have an array argument
-            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol)
+            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol arrayType)
             {
                 // Use the entire array with proper typing
-                var value = FormatArrayValue(argument, property.Type);
-                sb.AppendLine($"            {property.Name} = {value},");
+                var elementType = arrayType.ElementType.GloballyQualified();
+                var values = argument.Values.Select(FormatConstantValue);
+                sb.AppendLine($"            {property.Name} = new {elementType}[] {{ {string.Join(", ", values)} }},");
             }
             else if (argument.Kind == TypedConstantKind.Array && argument.Values.Length > 0)
             {
@@ -583,11 +585,12 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var argument = attr.ConstructorArguments[0];
             
             // Check if property is an array type and we have an array argument
-            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol)
+            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol arrayType)
             {
                 // Use the entire array with proper typing
-                var value = FormatArrayValue(argument, property.Type);
-                sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = {value};");
+                var elementType = arrayType.ElementType.GloballyQualified();
+                var values = argument.Values.Select(FormatConstantValue);
+                sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = new {elementType}[] {{ {string.Join(", ", values)} }};");
             }
             else if (argument.Kind == TypedConstantKind.Array && argument.Values.Length > 0)
             {
@@ -706,28 +709,6 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         var values = arrayConstant.Values.Select(FormatConstantValue);
         
         return $"new {elementType}[] {{ {string.Join(", ", values)} }}";
-    }
-
-    private static string FormatArrayValue(TypedConstant arrayConstant, ITypeSymbol propertyType)
-    {
-        if (arrayConstant.Kind != TypedConstantKind.Array)
-        {
-            return "null";
-        }
-
-        // Get the property's array element type to ensure proper typing
-        if (propertyType is IArrayTypeSymbol arrayPropertyType)
-        {
-            // Use the element type from the property type for correct typing
-            string elementType = arrayPropertyType.ElementType.GloballyQualified();
-            var values = arrayConstant.Values.Select(FormatConstantValue);
-            return $"new {elementType}[] {{ {string.Join(", ", values)} }}";
-        }
-        else
-        {
-            // This shouldn't happen - defensive fallback
-            return FormatArrayValue(arrayConstant);
-        }
     }
 }
 
