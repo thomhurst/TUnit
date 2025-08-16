@@ -45,6 +45,8 @@ internal sealed class HookOrchestrator
     }
 
     public IContextProvider GetContextProvider() => _contextProvider;
+    
+    public IHookCollectionService HookCollectionService => _hookCollectionService;
 
     /// <summary>
     /// Pre-registers all tests so we know the total count per class/assembly
