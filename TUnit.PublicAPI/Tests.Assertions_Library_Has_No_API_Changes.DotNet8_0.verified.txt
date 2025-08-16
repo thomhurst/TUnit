@@ -1386,8 +1386,8 @@ namespace .Extensions
             where TActual :  class { }
         public static ..NotNullStructAssertionBuilderWrapper<TActual> IsNotNull<TActual>(this ..IValueSource<TActual?> valueSource)
             where TActual :  struct { }
-        public static .<T> IsNotNull<T>([.] this ..IValueDelegateSource<T> valueSource) { }
-        public static . IsNotNull([.] this ..IDelegateSource delegateSource) { }
+        public static ..InvokableValueAssertionBuilder<T> IsNotNull<T>([.] this ..IValueDelegateSource<T> valueSource) { }
+        public static ..InvokableDelegateAssertionBuilder IsNotNull([.] this ..IDelegateSource delegateSource) { }
         public static .<TActual> IsNotSameReferenceAs<TActual, TExpected>(this ..IValueSource<TActual> valueSource, TExpected expected, [.("expected")] string? doNotPopulateThisValue1 = null) { }
     }
     public static class GenericSatisfiesExtensions
