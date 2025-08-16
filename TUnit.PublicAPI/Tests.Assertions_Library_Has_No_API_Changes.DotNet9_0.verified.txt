@@ -884,11 +884,6 @@ namespace .
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TActual? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
-    public static class DelegateCompletionExtensions
-    {
-        public static . CompletesWithin(this ..IDelegateSource delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null) { }
-        public static .<TActual> CompletesWithin<TActual>(this ..IValueDelegateSource<TActual> delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null) { }
-    }
 }
 namespace ..Conditions
 {
@@ -1265,6 +1260,11 @@ namespace .Extensions
             where TActual : <TActual> { }
         public static .<TActual> IsNotLessThanOrEqualTo<TActual>(this ..IValueSource<TActual> valueSource, TActual expected, [.("expected")] string doNotPopulateThisValue = null)
             where TActual : <TActual> { }
+    }
+    public static class DelegateCompletionExtensions
+    {
+        public static . CompletesWithin(this ..IDelegateSource delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null) { }
+        public static .<TActual> CompletesWithin<TActual>(this ..IValueDelegateSource<TActual> delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null) { }
     }
     public static class DateOnlyIsExtensions
     {
