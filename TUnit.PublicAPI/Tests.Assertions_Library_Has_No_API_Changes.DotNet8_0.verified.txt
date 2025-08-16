@@ -884,11 +884,6 @@ namespace .
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TActual? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
-    public static class DelegateIsNotExtensions
-    {
-        public static ..NotNullAssertionBuilderWrapper<.> IsNotNull(this ..IValueSource<.?> valueSource) { }
-        public static ..NotNullAssertionBuilderWrapper<.<T>> IsNotNull<T>(this ..IValueSource<.<T>?> valueSource) { }
-    }
     public static class DelegateCompletionExtensions
     {
         public static . CompletesWithin(this ..IDelegateSource delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null) { }
