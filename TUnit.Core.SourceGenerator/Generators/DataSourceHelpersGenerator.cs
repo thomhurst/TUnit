@@ -640,7 +640,20 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             }
             else
             {
-                elementType = "object";
+                // Fallback: infer type from the value itself
+                var firstValue = arrayConstant.Values.FirstOrDefault(v => !v.IsNull);
+                elementType = firstValue.Value switch
+                {
+                    int => "int",
+                    string => "string",
+                    bool => "bool",
+                    double => "double",
+                    float => "float",
+                    long => "long",
+                    byte => "byte",
+                    char => "char",
+                    _ => "object"
+                };
             }
         }
         else
