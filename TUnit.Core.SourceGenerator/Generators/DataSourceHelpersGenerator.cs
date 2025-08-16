@@ -297,9 +297,63 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 }
                 
                 // Resolve the value for this property
-                // Always use runtime resolution - let the data source attribute handle everything
-                sb.AppendLine($"            var value = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
-                sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
+                // Check ArgumentsAttribute first for compile-time array handling
+                var attr = propInfo.DataSourceAttribute;
+                var fullyQualifiedName = attr.AttributeClass?.GloballyQualifiedNonGeneric();
+                
+                if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
+                {
+                    // Handle ArgumentsAttribute with compile-time array support
+                    if (attr.ConstructorArguments.Length > 0)
+                    {
+                        var argument = attr.ConstructorArguments[0];
+                        
+                        // Check if property is an array type and we have an array argument
+                        if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol arrayType)
+                        {
+                            // Use the entire array with proper typing
+                            var elementType = arrayType.ElementType.GloballyQualified();
+                            var values = argument.Values.Select(FormatConstantValue);
+                            sb.AppendLine($"            var value = new {elementType}[] {{ {string.Join(", ", values)} }};");
+                        }
+                        else if (argument.Kind == TypedConstantKind.Array && argument.Values.Length > 0)
+                        {
+                            // Property is not an array but argument is - use the first element
+                            var value = FormatConstantValue(argument.Values[0]);
+                            sb.AppendLine($"            var value = {value};");
+                        }
+                        else if (argument.Kind == TypedConstantKind.Array)
+                        {
+                            // Empty array case - use appropriate empty value
+                            if (property.Type is IArrayTypeSymbol emptyArrayType)
+                            {
+                                var elementType = emptyArrayType.ElementType.GloballyQualified();
+                                sb.AppendLine($"            var value = new {elementType}[0];");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"            var value = default({property.Type.GloballyQualified()});");
+                            }
+                        }
+                        else
+                        {
+                            // Argument is not an array - use it directly
+                            var value = FormatConstantValue(argument);
+                            sb.AppendLine($"            var value = {value};");
+                        }
+                    }
+                    else
+                    {
+                        sb.AppendLine($"            var value = default({property.Type.GloballyQualified()});");
+                    }
+                }
+                else
+                {
+                    // Use runtime resolution for other data source attributes
+                    sb.AppendLine($"            var value = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
+                    sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
+                }
+                
                 sb.AppendLine($"            var backingField = instance.GetType().GetField(\"<{propertyName}>k__BackingField\", ");
                 sb.AppendLine("                global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
                 sb.AppendLine("            backingField?.SetValue(instance, value);");
