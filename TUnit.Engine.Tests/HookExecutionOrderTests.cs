@@ -1,4 +1,4 @@
-using System.Text;
+using Shouldly;
 using TUnit.Core;
 
 namespace TUnit.Engine.Tests;
@@ -24,14 +24,14 @@ public class HookExecutionOrderTests
     }
 
     [Test]
-    public async Task VerifyExecutionOrder()
+    public void VerifyExecutionOrder()
     {
         _executionOrder.Add("Test");
         
         // Verify that BeforeEvery runs before Before
-        await Assert.That(_executionOrder).HasCount().EqualTo(3);
-        await Assert.That(_executionOrder[0]).IsEqualTo("BeforeEvery");
-        await Assert.That(_executionOrder[1]).IsEqualTo("Before");
-        await Assert.That(_executionOrder[2]).IsEqualTo("Test");
+        _executionOrder.Count.ShouldBe(3);
+        _executionOrder[0].ShouldBe("BeforeEvery");
+        _executionOrder[1].ShouldBe("Before");
+        _executionOrder[2].ShouldBe("Test");
     }
 }
