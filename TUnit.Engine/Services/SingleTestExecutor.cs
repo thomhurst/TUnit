@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
