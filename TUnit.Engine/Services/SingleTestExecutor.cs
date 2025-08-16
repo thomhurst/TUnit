@@ -273,36 +273,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
             instance is not SkippedTestInstance && 
             instance is not PlaceholderInstance)
         {
-            try
+            // For skipped tests, also ensure the test instance is tracked for disposal
+            if (instance is IAsyncDisposable or IDisposable)
             {
-                // For skipped tests, also ensure the test instance is tracked for disposal
-                if (instance is IAsyncDisposable or IDisposable)
-                {
-                    ObjectTracker.TrackObject(test.Context.Events, instance);
-                }
-                
-                // Trigger disposal of all tracked objects (including test instance and injected properties)
-                if (test.Context.Events.OnDispose != null)
-                {
-                    foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
-                    {
-                        try
-                        {
-                            await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
-                        }
-                        catch (Exception ex)
-                        {
-                            // Log but don't throw - we still need to dispose other objects
-                            await _logger.LogErrorAsync($"Error during OnDispose event for skipped test: {ex.Message}").ConfigureAwait(false);
-                        }
-                    }
-                }
+                ObjectTracker.TrackObject(test.Context.Events, instance);
             }
-            catch (Exception ex)
-            {
-                // Log disposal errors but don't fail the skipped test
-                await _logger.LogErrorAsync($"Error disposing skipped test instance: {ex.Message}").ConfigureAwait(false);
-            }
+            // Note: ObjectTracker will handle disposal automatically when the test context ends
         }
 
         return test.Result;
@@ -365,23 +341,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         finally
         {
-            // Trigger disposal of all tracked objects (including test instance and injected properties)
-            // The ObjectTracker system ensures proper disposal order and reference counting
-            if (test.Context.Events.OnDispose != null)
-            {
-                foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
-                {
-                    try
-                    {
-                        await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Log but don't throw - we still need to dispose other objects
-                        await _logger.LogErrorAsync($"Error during OnDispose event: {ex.Message}").ConfigureAwait(false);
-                    }
-                }
-            }
+            // Note: ObjectTracker will handle disposal automatically when the test context ends
+            // No need to manually trigger disposal events here as it could cause deadlocks
         }
 
         if (testException != null)
