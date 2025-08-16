@@ -38,12 +38,14 @@ internal sealed class HookCollectionService : IHookCollectionService
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", 
         "IL3050:Using member which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling",
         Justification = "Reflection mode is not used in AOT scenarios")]
-    public async Task InitializeAsync()
+    public Task InitializeAsync()
     {
         if (Sources.HasAnyHooks())
         {
             ReflectionHookDiscoveryService.DiscoverHooks();
         }
+        
+        return Task.CompletedTask;
     }
 
     private async Task ProcessHookRegistrationAsync(HookMethod hookMethod, CancellationToken cancellationToken = default)
