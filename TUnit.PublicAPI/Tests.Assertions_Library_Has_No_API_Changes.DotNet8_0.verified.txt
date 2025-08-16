@@ -1264,6 +1264,14 @@ namespace .Extensions
         public static .<TActual> IsNotLessThanOrEqualTo<TActual>(this ..IValueSource<TActual> valueSource, TActual expected, [.("expected")] string doNotPopulateThisValue = null)
             where TActual : <TActual> { }
     }
+    public static class DateOnlyIsExtensions
+    {
+        public static . IsAfter(this ..IValueSource<.> valueSource, . expected, [.("expected")] string doNotPopulateThisValue = null) { }
+        public static . IsAfterOrEqualTo(this ..IValueSource<.> valueSource, . expected, [.("expected")] string doNotPopulateThisValue = null) { }
+        public static . IsBefore(this ..IValueSource<.> valueSource, . expected, [.("expected")] string doNotPopulateThisValue = null) { }
+        public static . IsBeforeOrEqualTo(this ..IValueSource<.> valueSource, . expected, [.("expected")] string doNotPopulateThisValue = null) { }
+        public static ..DateOnlyEqualToAssertionBuilderWrapper IsEqualTo(this ..IValueSource<.> valueSource, . expected, [.("expected")] string doNotPopulateThisValue1 = null) { }
+    }
     public static class DelegateCompletionExtensions
     {
         public static . CompletesWithin(this ..IDelegateSource delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null) { }
