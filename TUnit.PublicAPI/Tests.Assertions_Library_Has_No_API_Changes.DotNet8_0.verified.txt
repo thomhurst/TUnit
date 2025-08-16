@@ -887,18 +887,6 @@ namespace .
 }
 namespace ..Conditions
 {
-    public class ActionNotNullAssertCondition : .<object>
-    {
-        public ActionNotNullAssertCondition() { }
-        protected override string GetExpectation() { }
-        protected override .<.> GetResult(object? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
-    }
-    public class DelegateNotNullAssertCondition<T> : .<T>
-    {
-        public DelegateNotNullAssertCondition() { }
-        protected override string GetExpectation() { }
-        protected override .<.> GetResult(T? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
-    }
     public class EnumDoesNotHaveFlagAssertCondition<TEnum> : .<TEnum>
         where TEnum : 
     {
