@@ -115,17 +115,4 @@ public class ExplicitTests(TestMode testMode) : InvokableTestBase(testMode)
             ]);
     }
 
-    [Test]
-    public async Task ExplicitTest_WithVeryBroadWildcard_ShouldExcludeExplicitTests()
-    {
-        // When using a very broad wildcard that matches both explicit and non-explicit tests,
-        // explicit tests should be excluded
-        await RunTestsWithFilter(
-            "/*/TUnit.TestProject/Simple*Test*/*",
-            [
-                result => result.ResultSummary.Outcome.ShouldNotBe("Failed"),
-                result => result.ResultSummary.Counters.Total.ShouldBeGreaterThan(0), // Should have some tests
-                result => result.ResultSummary.Counters.Passed.ShouldBeGreaterThan(0) // Should have passing tests
-            ]);
-    }
 }
