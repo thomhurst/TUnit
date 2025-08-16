@@ -555,7 +555,17 @@ internal static class ReflectionHookDiscoveryService
         }
 
         // Check if assembly references TUnit
-        return assembly.GetReferencedAssemblies().Any(a => a.Name != null && (a.Name.StartsWith("TUnit") || a.Name == "TUnit"));
+        // Note: GetReferencedAssemblies() is not supported in AOT mode
+        try
+        {
+            return assembly.GetReferencedAssemblies().Any(a => a.Name != null && (a.Name.StartsWith("TUnit") || a.Name == "TUnit"));
+        }
+        catch (PlatformNotSupportedException)
+        {
+            // In AOT mode, GetReferencedAssemblies() is not supported
+            // Fall back to scanning all non-system assemblies
+            return true;
+        }
     }
 
     private static bool IsCompilerGenerated(Type type)
