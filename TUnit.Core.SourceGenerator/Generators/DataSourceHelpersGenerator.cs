@@ -351,8 +351,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         sb.AppendLine($"        // Initialize {propertyName} property");
         
-        // Check ArgumentsAttribute first to ensure proper array handling - this must come first
-        // to prevent ArgumentsAttribute from being processed by the async data source handler
+        // ArgumentsAttribute MUST be handled first to ensure proper compile-time array handling
+        // This prevents ArgumentsAttribute from being processed by async data source handlers
         if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
         {
             GenerateArgumentsPropertyInit(sb, propInfo);
