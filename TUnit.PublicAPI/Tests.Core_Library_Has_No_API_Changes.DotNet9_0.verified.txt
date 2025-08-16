@@ -1213,6 +1213,7 @@ namespace
         public static readonly .<<.>> GlobalInitializers;
         public static readonly .<..IPropertySource> PropertySources;
         public static readonly .<, .<..ITestSource>> TestSources;
+        public static void ClearAllHooks() { }
         public static bool HasAnyHooks() { }
     }
     [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
