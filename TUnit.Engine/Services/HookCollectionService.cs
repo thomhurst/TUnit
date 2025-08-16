@@ -69,12 +69,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         if (_beforeTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            return ValueTask.FromResult(cachedHooks);
+            return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(cachedHooks);
         }
 
         var hooks = BuildBeforeTestHooks(testClassType);
         _beforeTestHooksCache.TryAdd(testClassType, hooks);
-        return ValueTask.FromResult(hooks);
+        return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
     }
 
     private IReadOnlyList<Func<TestContext, CancellationToken, Task>> BuildBeforeTestHooks(Type type)
@@ -136,12 +136,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         if (_afterTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            return ValueTask.FromResult(cachedHooks);
+            return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(cachedHooks);
         }
 
         var hooks = BuildAfterTestHooks(testClassType);
         _afterTestHooksCache.TryAdd(testClassType, hooks);
-        return ValueTask.FromResult(hooks);
+        return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
     }
 
     private IReadOnlyList<Func<TestContext, CancellationToken, Task>> BuildAfterTestHooks(Type type)
@@ -202,12 +202,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         if (_beforeEveryTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            return ValueTask.FromResult(cachedHooks);
+            return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(cachedHooks);
         }
 
         var hooks = BuildBeforeEveryTestHooks(testClassType);
         _beforeEveryTestHooksCache.TryAdd(testClassType, hooks);
-        return ValueTask.FromResult(hooks);
+        return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
     }
 
     private IReadOnlyList<Func<TestContext, CancellationToken, Task>> BuildBeforeEveryTestHooks(Type type)
@@ -233,12 +233,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         if (_afterEveryTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            return ValueTask.FromResult(cachedHooks);
+            return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(cachedHooks);
         }
 
         var hooks = BuildAfterEveryTestHooks(testClassType);
         _afterEveryTestHooksCache.TryAdd(testClassType, hooks);
-        return ValueTask.FromResult(hooks);
+        return new ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>>(hooks);
     }
 
     private IReadOnlyList<Func<TestContext, CancellationToken, Task>> BuildAfterEveryTestHooks(Type type)
@@ -264,12 +264,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         if (_beforeClassHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            return ValueTask.FromResult(cachedHooks);
+            return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(cachedHooks);
         }
 
         var hooks = BuildBeforeClassHooks(testClassType);
         _beforeClassHooksCache.TryAdd(testClassType, hooks);
-        return ValueTask.FromResult(hooks);
+        return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
     }
 
     private IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> BuildBeforeClassHooks(Type type)
@@ -331,12 +331,12 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         if (_afterClassHooksCache.TryGetValue(testClassType, out var cachedHooks))
         {
-            return ValueTask.FromResult(cachedHooks);
+            return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(cachedHooks);
         }
 
         var hooks = BuildAfterClassHooks(testClassType);
         _afterClassHooksCache.TryAdd(testClassType, hooks);
-        return ValueTask.FromResult(hooks);
+        return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
     }
 
     private IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> BuildAfterClassHooks(Type type)
@@ -411,7 +411,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return ValueTask.FromResult<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
+        return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
     }
 
     public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectAfterAssemblyHooksAsync(Assembly assembly)
@@ -432,7 +432,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return ValueTask.FromResult<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
+        return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
     }
 
     public ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> CollectBeforeTestSessionHooksAsync()
@@ -451,7 +451,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return ValueTask.FromResult<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>>(hooks);
+        return new ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>>(hooks);
     }
 
     public ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>> CollectAfterTestSessionHooksAsync()
@@ -470,7 +470,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return ValueTask.FromResult<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>>(hooks);
+        return new ValueTask<IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>>>(hooks);
     }
 
     public ValueTask<IReadOnlyList<Func<BeforeTestDiscoveryContext, CancellationToken, Task>>> CollectBeforeTestDiscoveryHooksAsync()
@@ -489,7 +489,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return ValueTask.FromResult<IReadOnlyList<Func<BeforeTestDiscoveryContext, CancellationToken, Task>>>(hooks);
+        return new ValueTask<IReadOnlyList<Func<BeforeTestDiscoveryContext, CancellationToken, Task>>>(hooks);
     }
 
     public ValueTask<IReadOnlyList<Func<TestDiscoveryContext, CancellationToken, Task>>> CollectAfterTestDiscoveryHooksAsync()
@@ -508,7 +508,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return ValueTask.FromResult<IReadOnlyList<Func<TestDiscoveryContext, CancellationToken, Task>>>(hooks);
+        return new ValueTask<IReadOnlyList<Func<TestDiscoveryContext, CancellationToken, Task>>>(hooks);
     }
 
     public ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> CollectBeforeEveryClassHooksAsync()
@@ -527,7 +527,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return ValueTask.FromResult<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
+        return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
     }
 
     public ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> CollectAfterEveryClassHooksAsync()
@@ -546,7 +546,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return ValueTask.FromResult<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
+        return new ValueTask<IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>>(hooks);
     }
 
     public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectBeforeEveryAssemblyHooksAsync()
@@ -565,7 +565,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return ValueTask.FromResult<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
+        return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
     }
 
     public ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> CollectAfterEveryAssemblyHooksAsync()
@@ -584,7 +584,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             .Select(h => h.hook)
             .ToList();
 
-        return ValueTask.FromResult<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
+        return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
     }
 
     private Func<TestContext, CancellationToken, Task> CreateInstanceHookDelegate(InstanceHookMethod hook)
