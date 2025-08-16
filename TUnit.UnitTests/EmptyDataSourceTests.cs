@@ -6,8 +6,15 @@ namespace TUnit.UnitTests;
 /// </summary>
 public class EmptyDataSourceTests
 {
-    public IEnumerable<int> EmptyData => [];
-    public IEnumerable<int> NonEmptyData => [1, 2, 3];
+    public IEnumerable<int> EmptyData()
+    {
+        return [];
+    }
+    
+    public IEnumerable<int> NonEmptyData()
+    {
+        return [1, 2, 3];
+    }
     
     public static IEnumerable<string> StaticEmptyData()
     {
