@@ -8,7 +8,7 @@ public abstract class AbstractTestWithEmptyDataSources(object collection, IEnume
         
     [Test]
     [DisplayName("The service can be provided as singleton.")]
-    [InstanceMethodDataSource<AbstractTestWithEmptyDataSources>(nameof(SingletonServices))]
+    [InstanceMethodDataSource(nameof(SingletonServices))]
     public async Task ServiceCanBeCreatedAsSingleton(object descriptor) 
     {
         await Task.Delay(1);
@@ -16,7 +16,7 @@ public abstract class AbstractTestWithEmptyDataSources(object collection, IEnume
     
     [Test]
     [DisplayName("The service can be provided as transient.")]
-    [InstanceMethodDataSource<AbstractTestWithEmptyDataSources>(nameof(TransientServices))]
+    [InstanceMethodDataSource(nameof(TransientServices))]
     public async Task ServiceCanBeCreatedAsTransient(object descriptor) 
     {
         await Task.Delay(1);
@@ -24,7 +24,7 @@ public abstract class AbstractTestWithEmptyDataSources(object collection, IEnume
 
     [Test]
     [DisplayName("The service can be provided as scoped.")]
-    [InstanceMethodDataSource<AbstractTestWithEmptyDataSources>(nameof(ScopedServices))]
+    [InstanceMethodDataSource(nameof(ScopedServices))]
     public async Task ServiceCanBeCreatedAsScoped(object descriptor) 
     {
         await Task.Delay(1);
@@ -32,7 +32,7 @@ public abstract class AbstractTestWithEmptyDataSources(object collection, IEnume
 
     [Test]
     [DisplayName("A service matching has been registered")]
-    [InstanceMethodDataSource<AbstractTestWithEmptyDataSources>(nameof(wantedServiceDescriptors))]
+    [InstanceMethodDataSource(nameof(wantedServiceDescriptors))]
     public async Task ServiceIsRegistered(object matcher) 
     {
         await Task.Delay(1);
