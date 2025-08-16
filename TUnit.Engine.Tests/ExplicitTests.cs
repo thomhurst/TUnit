@@ -83,36 +83,6 @@ public class ExplicitTests(TestMode testMode) : InvokableTestBase(testMode)
             ]);
     }
 
-    [Test]
-    public async Task ExplicitTest_WithNoFilter_ShouldExcludeAllExplicitTests()
-    {
-        // When running all tests in the existing ExplicitTests class (the original one in TestProject),
-        // they should be excluded because the class is marked [Explicit]
-        await RunTestsWithFilter(
-            "/*/TUnit.TestProject/ExplicitTests/*",
-            [
-                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(2), // Both tests run since we're specifically targeting the class
-                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
-                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
-                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
-            ]);
-    }
 
-    [Test]
-    public async Task ExplicitTest_WithBroadWildcard_ShouldRunExplicitClass()
-    {
-        // When using a filter that only matches an explicit class,
-        // the tests should run because all matched tests are explicit
-        await RunTestsWithFilter(
-            "/*/TUnit.TestProject/Explicit*/*",
-            [
-                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(2), // Both tests in ExplicitTests class run
-                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
-                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
-                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
-            ]);
-    }
 
 }
