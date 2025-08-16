@@ -39,7 +39,7 @@ public class EmptyDataSourceTests
     /// Test that empty static method data sources work correctly
     /// </summary>
     [Test]
-    [MethodDataSource(typeof(EmptyDataSourceTests), nameof(StaticEmptyData))]
+    [MethodDataSource(nameof(StaticEmptyData))]
     public async Task EmptyStaticMethodDataSource_ShouldWork(string value)
     {
         // This test should reach here successfully with the fix
@@ -50,7 +50,7 @@ public class EmptyDataSourceTests
     /// Test that non-empty static method data sources continue to work
     /// </summary>
     [Test]
-    [MethodDataSource(typeof(EmptyDataSourceTests), nameof(StaticNonEmptyData))]
+    [MethodDataSource(nameof(StaticNonEmptyData))]
     public async Task NonEmptyStaticMethodDataSource_ShouldWork(string value)
     {
         await Assert.That(value).IsNotNull();

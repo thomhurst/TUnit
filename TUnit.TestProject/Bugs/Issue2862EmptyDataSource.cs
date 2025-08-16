@@ -33,7 +33,7 @@ public abstract class Issue2862AbstractBase
 
     [Test]
     [InstanceMethodDataSource(nameof(Even))]
-    public async Task EvenIsEven(int d) => await Assert.That(d).IsEven();
+    public async Task EvenIsEven(int d) => await Assert.That(d % 2).IsEqualTo(0);
 
     [Test]
     [InstanceMethodDataSource(nameof(Seven))] // This is empty and should NOT fail with "test instance is null"
@@ -41,5 +41,5 @@ public abstract class Issue2862AbstractBase
     
     [Test]
     [InstanceMethodDataSource(nameof(Odd))]
-    public async Task OddIsOdd(int d) => await Assert.That(d).IsOdd();
+    public async Task OddIsOdd(int d) => await Assert.That(d % 2).IsEqualTo(1);
 }
