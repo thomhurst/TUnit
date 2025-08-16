@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
+using TUnit.Assertions.Assertions.Delegates;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.Extensions;
 
-namespace TUnit.Assertions.Assertions.Delegates;
+namespace TUnit.Assertions.Extensions;
 
 public static class DelegateExtensions
 {
