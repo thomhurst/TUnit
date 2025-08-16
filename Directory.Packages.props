@@ -88,9 +88,6 @@
         <PackageVersion Include="TUnit.Core" Version="0.56.35" />
         <PackageVersion Include="TUnit.Assertions" Version="0.56.35" />
         <PackageVersion Include="Vogen" Version="8.0.1" />
-        <PackageVersion Include="xunit" Version="2.9.3" />
-        <PackageVersion Include="xunit.assert" Version="2.9.3" />
-        <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
         <PackageVersion Include="xunit.v3.assert" Version="3.0.1" />
         <PackageVersion Include="xunit.v3.extensibility.core" Version="3.0.1" />
         <PackageVersion Include="xunit.v3.runner.visualstudio" Version="3.0.1" />
