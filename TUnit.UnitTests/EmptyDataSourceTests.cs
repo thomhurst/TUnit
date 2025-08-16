@@ -6,7 +6,7 @@ namespace TUnit.UnitTests;
 /// </summary>
 public class EmptyDataSourceTests
 {
-    public IEnumerable<int> EmptyData()
+    public IEnumerable<object[]> EmptyData()
     {
         return [];
     }
@@ -16,7 +16,7 @@ public class EmptyDataSourceTests
         return [1, 2, 3];
     }
     
-    public static IEnumerable<string> StaticEmptyData()
+    public static IEnumerable<object[]> StaticEmptyData()
     {
         return [];
     }
