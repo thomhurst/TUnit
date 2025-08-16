@@ -22,6 +22,10 @@ public sealed class GlobalHooks
     [BeforeEvery(Test)]
     public static void BeforeTest(TestContext testContext)
     {
-        Console.WriteLine("Before every test");
+        // Only output for our specific test class to avoid polluting other tests
+        if (testContext.TestDetails.ClassType == typeof(HookOrderTests))
+        {
+            Console.WriteLine("Before every test");
+        }
     }
 }
