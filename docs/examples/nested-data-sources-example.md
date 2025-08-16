@@ -97,10 +97,10 @@ public class TestApplication : IAsyncInitializer, IAsyncDisposable
     private WebApplicationFactory<Program>? _factory;
     
     // These properties will be initialized by TUnit before InitializeAsync is called
-    [DataSourceGeneratorProperty<RedisTestContainer>]
+    [ClassDataSource<RedisTestContainer>]
     public required RedisTestContainer Redis { get; init; }
     
-    [DataSourceGeneratorProperty<SqlServerTestContainer>]
+    [ClassDataSource<SqlServerTestContainer>]
     public required SqlServerTestContainer SqlServer { get; init; }
     
     public HttpClient Client { get; private set; } = null!;
@@ -253,7 +253,7 @@ public class UserApiIntegrationTests
 // Data source that provides test scenarios with pre-populated data
 public class OrderTestScenarioAttribute : AsyncDataSourceGeneratorAttribute<OrderTestScenario>
 {
-    [DataSourceGeneratorProperty<TestApplication>]
+    [ClassDataSource<TestApplication>]
     public required TestApplication App { get; init; }
     
     public override async IAsyncEnumerable<OrderTestScenario> GenerateDataSourcesAsync(DataGeneratorMetadata metadata)
@@ -397,7 +397,7 @@ public class OrderProcessingTests
 
 1. **Use IAsyncInitializer**: Implement this interface for any class that needs async initialization.
 
-2. **Declare Dependencies**: Use `[DataSourceGeneratorProperty]` to declare dependencies that need to be initialized first.
+2. **Declare Dependencies**: Use data source attributes like `[ClassDataSource<T>]` to declare dependencies that need to be initialized first.
 
 3. **Share Expensive Resources**: Use `SharedType.PerClass` or `SharedType.Keyed` for resources that are expensive to create.
 
