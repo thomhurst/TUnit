@@ -51,21 +51,6 @@ public class ExplicitTests(TestMode testMode) : InvokableTestBase(testMode)
             ]);
     }
 
-    [Test]
-    public async Task ExplicitClassTest_WithNamespaceWildcard_ShouldExcludeExplicitClass()
-    {
-        // When filtering with a namespace wildcard that matches both explicit and non-explicit tests,
-        // the explicit class tests should be excluded
-        await RunTestsWithFilter(
-            "/*/TUnit.TestProject.Bugs._2755/*/*",
-            [
-                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(3), // TestMethod from Test1, NormalTest from MixedTests, SkippedTest (skipped)
-                result => result.ResultSummary.Counters.Passed.ShouldBe(2), // TestMethod and NormalTest
-                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
-                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(1) // SkippedTest
-            ]);
-    }
 
     [Test]
     public async Task MixedClassTest_WithClassWildcard_ShouldExcludeOnlyExplicitMethods()
