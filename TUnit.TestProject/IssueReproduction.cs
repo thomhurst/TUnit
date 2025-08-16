@@ -3,13 +3,14 @@ using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject;
 
+// This is the EXACT reproduction case from the GitHub issue
 public sealed class Dependency
 {
     private static int _value = 0;
     public int Value { get; } = Interlocked.Increment(ref _value);
 }
 
-public sealed class DependencyInjectionScopeTestDataSource : DependencyInjectionDataSourceAttribute<IServiceScope>
+public sealed class DependencyInjectionClassConstructor : DependencyInjectionDataSourceAttribute<IServiceScope>
 {
     private readonly IServiceProvider _serviceProvider = BuildServiceProvider();
 
@@ -28,7 +29,7 @@ public sealed class DependencyInjectionScopeTestDataSource : DependencyInjection
 }
 
 [EngineTest(ExpectedResult.Pass)]
-[DependencyInjectionScopeTestDataSource]
+[DependencyInjectionClassConstructor]
 public sealed class ActualTestClass(Dependency dependency)
 {
     [Test]
@@ -37,5 +38,9 @@ public sealed class ActualTestClass(Dependency dependency)
     public void Test1(int testNumber)
     {
         Console.WriteLine($"Test {testNumber}: Dependency Value = {dependency.Value}");
+        
+        // With our fix, each test should get a different dependency value (1 and 2)
+        // Before the fix, both would have gotten the same value (1 and 1)
+        Assert.That(dependency.Value).IsGreaterThan(0).And.IsLessThanOrEqualTo(2);
     }
 }
