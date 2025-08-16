@@ -889,7 +889,7 @@ namespace .
         public static ..NotNullAssertionBuilderWrapper<.> IsNotNull(this ..IValueSource<.?> valueSource) { }
         public static ..NotNullAssertionBuilderWrapper<.<T>> IsNotNull<T>(this ..IValueSource<.<T>?> valueSource) { }
     }
-    public static class DelegateExtensions
+    public static class DelegateCompletionExtensions
     {
         public static . CompletesWithin(this ..IDelegateSource delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null) { }
         public static .<TActual> CompletesWithin<TActual>(this ..IValueDelegateSource<TActual> delegateSource,  timeSpan, [.("timeSpan")] string? doNotPopulateThisValue = null) { }

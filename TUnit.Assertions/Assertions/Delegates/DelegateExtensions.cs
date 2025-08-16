@@ -5,7 +5,7 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Extensions;
 
-public static class DelegateExtensions
+public static class DelegateCompletionExtensions
 {
     public static InvokableDelegateAssertionBuilder CompletesWithin(this IDelegateSource delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null)
     {
