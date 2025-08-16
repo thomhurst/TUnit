@@ -253,7 +253,7 @@ internal static class ReflectionHookDiscoveryService
 
     private static InstanceHookMethod CreateInstanceHookMethod(MethodInfo method, int order)
     {
-        return new InstanceHookMethod
+        var hookMethod = new InstanceHookMethod
         {
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
@@ -262,11 +262,16 @@ internal static class ReflectionHookDiscoveryService
             InitClassType = method.DeclaringType!,
             Body = CreateInstanceHookDelegate(method)
         };
+
+        // Process hook registration events (e.g., HookExecutorAttribute)
+        ProcessHookRegistrationEvents(hookMethod, method);
+
+        return hookMethod;
     }
 
     private static BeforeClassHookMethod CreateBeforeClassHookMethod(MethodInfo method, int order)
     {
-        return new BeforeClassHookMethod
+        var hookMethod = new BeforeClassHookMethod
         {
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
@@ -276,11 +281,16 @@ internal static class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateStaticHookDelegate<ClassHookContext>(method)
         };
+
+        // Process hook registration events (e.g., HookExecutorAttribute)
+        ProcessHookRegistrationEvents(hookMethod, method);
+
+        return hookMethod;
     }
 
     private static AfterClassHookMethod CreateAfterClassHookMethod(MethodInfo method, int order)
     {
-        return new AfterClassHookMethod
+        var hookMethod = new AfterClassHookMethod
         {
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
@@ -290,11 +300,16 @@ internal static class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateStaticHookDelegate<ClassHookContext>(method)
         };
+
+        // Process hook registration events (e.g., HookExecutorAttribute)
+        ProcessHookRegistrationEvents(hookMethod, method);
+
+        return hookMethod;
     }
 
     private static BeforeAssemblyHookMethod CreateBeforeAssemblyHookMethod(MethodInfo method, int order)
     {
-        return new BeforeAssemblyHookMethod
+        var hookMethod = new BeforeAssemblyHookMethod
         {
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
@@ -304,11 +319,16 @@ internal static class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateStaticHookDelegate<AssemblyHookContext>(method)
         };
+
+        // Process hook registration events (e.g., HookExecutorAttribute)
+        ProcessHookRegistrationEvents(hookMethod, method);
+
+        return hookMethod;
     }
 
     private static AfterAssemblyHookMethod CreateAfterAssemblyHookMethod(MethodInfo method, int order)
     {
-        return new AfterAssemblyHookMethod
+        var hookMethod = new AfterAssemblyHookMethod
         {
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
@@ -318,11 +338,16 @@ internal static class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateStaticHookDelegate<AssemblyHookContext>(method)
         };
+
+        // Process hook registration events (e.g., HookExecutorAttribute)
+        ProcessHookRegistrationEvents(hookMethod, method);
+
+        return hookMethod;
     }
 
     private static BeforeTestSessionHookMethod CreateBeforeTestSessionHookMethod(MethodInfo method, int order)
     {
-        return new BeforeTestSessionHookMethod
+        var hookMethod = new BeforeTestSessionHookMethod
         {
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
@@ -332,6 +357,11 @@ internal static class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateStaticHookDelegate<TestSessionContext>(method)
         };
+
+        // Process hook registration events (e.g., HookExecutorAttribute)
+        ProcessHookRegistrationEvents(hookMethod, method);
+
+        return hookMethod;
     }
 
     private static IHookExecutor GetHookExecutorFromMethod(MethodInfo method)
@@ -354,9 +384,50 @@ internal static class ReflectionHookDiscoveryService
         return DefaultExecutor.Instance;
     }
 
+    private static void ProcessHookRegistrationEvents(HookMethod hookMethod, MethodInfo method)
+    {
+        // Find all attributes that implement IHookRegisteredEventReceiver
+        var eventReceivers = method.GetCustomAttributes()
+            .OfType<IHookRegisteredEventReceiver>()
+            .ToList();
+
+        if (eventReceivers.Count == 0)
+        {
+            return;
+        }
+
+        // Create context for hook registration
+        var context = new HookRegisteredContext(hookMethod);
+
+        // Call OnHookRegistered for each event receiver
+        foreach (var receiver in eventReceivers)
+        {
+            try
+            {
+                receiver.OnHookRegistered(context).AsTask().Wait();
+            }
+            catch
+            {
+                // Continue processing other receivers if one fails
+            }
+        }
+
+        // Apply any executor that was set via the context
+        if (context.HookExecutor != null)
+        {
+            hookMethod.HookExecutor = context.HookExecutor;
+        }
+
+        // Apply any timeout that was set via the context  
+        if (context.Timeout.HasValue)
+        {
+            hookMethod.Timeout = context.Timeout.Value;
+        }
+    }
+
     private static AfterTestSessionHookMethod CreateAfterTestSessionHookMethod(MethodInfo method, int order)
     {
-        return new AfterTestSessionHookMethod
+        var hookMethod = new AfterTestSessionHookMethod
         {
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
@@ -366,11 +437,16 @@ internal static class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateStaticHookDelegate<TestSessionContext>(method)
         };
+
+        // Process hook registration events (e.g., HookExecutorAttribute)
+        ProcessHookRegistrationEvents(hookMethod, method);
+
+        return hookMethod;
     }
 
     private static BeforeTestDiscoveryHookMethod CreateBeforeTestDiscoveryHookMethod(MethodInfo method, int order)
     {
-        return new BeforeTestDiscoveryHookMethod
+        var hookMethod = new BeforeTestDiscoveryHookMethod
         {
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
@@ -380,11 +456,16 @@ internal static class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateStaticHookDelegate<BeforeTestDiscoveryContext>(method)
         };
+
+        // Process hook registration events (e.g., HookExecutorAttribute)
+        ProcessHookRegistrationEvents(hookMethod, method);
+
+        return hookMethod;
     }
 
     private static AfterTestDiscoveryHookMethod CreateAfterTestDiscoveryHookMethod(MethodInfo method, int order)
     {
-        return new AfterTestDiscoveryHookMethod
+        var hookMethod = new AfterTestDiscoveryHookMethod
         {
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
@@ -394,11 +475,16 @@ internal static class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateStaticHookDelegate<TestDiscoveryContext>(method)
         };
+
+        // Process hook registration events (e.g., HookExecutorAttribute)
+        ProcessHookRegistrationEvents(hookMethod, method);
+
+        return hookMethod;
     }
 
     private static BeforeTestHookMethod CreateBeforeTestHookMethod(MethodInfo method, int order)
     {
-        return new BeforeTestHookMethod
+        var hookMethod = new BeforeTestHookMethod
         {
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
@@ -408,11 +494,16 @@ internal static class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateStaticHookDelegate<TestContext>(method)
         };
+
+        // Process hook registration events (e.g., HookExecutorAttribute)
+        ProcessHookRegistrationEvents(hookMethod, method);
+
+        return hookMethod;
     }
 
     private static AfterTestHookMethod CreateAfterTestHookMethod(MethodInfo method, int order)
     {
-        return new AfterTestHookMethod
+        var hookMethod = new AfterTestHookMethod
         {
             MethodInfo = ReflectionMetadataBuilder.CreateMethodMetadata(method.DeclaringType!, method),
             Order = order,
@@ -422,6 +513,11 @@ internal static class ReflectionHookDiscoveryService
             LineNumber = 0,
             Body = CreateStaticHookDelegate<TestContext>(method)
         };
+
+        // Process hook registration events (e.g., HookExecutorAttribute)
+        ProcessHookRegistrationEvents(hookMethod, method);
+
+        return hookMethod;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
