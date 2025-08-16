@@ -9,8 +9,15 @@ public class EmptyDataSourceTests
     public IEnumerable<int> EmptyData => [];
     public IEnumerable<int> NonEmptyData => [1, 2, 3];
     
-    public static IEnumerable<string> StaticEmptyData => [];
-    public static IEnumerable<string> StaticNonEmptyData => ["a", "b"];
+    public static IEnumerable<string> StaticEmptyData()
+    {
+        return [];
+    }
+    
+    public static IEnumerable<string> StaticNonEmptyData()
+    {
+        return ["a", "b"];
+    }
 
     /// <summary>
     /// This test should not fail with "Test instance is null" error for empty data sources
