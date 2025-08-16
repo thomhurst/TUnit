@@ -60,22 +60,33 @@ public sealed class TestDependency : IEquatable<TestDependency>
 
             if (ClassType.IsGenericTypeDefinition)
             {
-                // Check if the test class type or any of its base types match the generic type definition
-                var found = false;
-                var currentType = testClassType;
-                
-                while (currentType != null && !found)
+                // Quick check: if test class type is generic and matches directly, we're done
+                if (testClassType.IsGenericType && testClassType.GetGenericTypeDefinition() == ClassType)
                 {
-                    if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == ClassType)
-                    {
-                        found = true;
-                    }
-                    currentType = currentType.BaseType;
+                    // Match found, continue to method checks
                 }
-                
-                if (!found)
+                else
                 {
-                    return false;
+                    // Check if any base types match the generic type definition
+                    var found = false;
+                    var currentType = testClassType.BaseType; // Start with base type since we already checked the current type
+                    var depth = 0;
+                    const int maxInheritanceDepth = 50; // Safeguard against deep inheritance chains
+                    
+                    while (currentType != null && !found && depth < maxInheritanceDepth)
+                    {
+                        if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == ClassType)
+                        {
+                            found = true;
+                        }
+                        currentType = currentType.BaseType;
+                        depth++;
+                    }
+                    
+                    if (!found)
+                    {
+                        return false;
+                    }
                 }
                 
                 // For generic type definitions, we don't need to check arity against the test class
