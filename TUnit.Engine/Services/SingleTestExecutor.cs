@@ -323,6 +323,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.State = TestState.Passed;
             test.Result = _resultFactory.CreatePassedResult(test.StartTime!.Value);
         }
+        catch (SkipTestException ex)
+        {
+            test.Context.SkipReason = ex.Reason;
+            test.Result = await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
+            testException = ex;
+        }
         catch (Exception ex)
         {
             HandleTestFailure(test, ex);
