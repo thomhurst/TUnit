@@ -350,33 +350,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         finally
         {
-            // Trigger disposal events to ensure test instances and their dependencies are disposed immediately
-            // This maintains consistency with the disposal behavior expected by tests
-            if (test.Context.Events.OnDispose != null)
-            {
-                var disposalTasks = test.Context.Events.OnDispose.InvocationList
-                    .OrderBy(x => x.Order)
-                    .Select(async disposal =>
-                    {
-                        try
-                        {
-                            await disposal.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
-                        }
-                        catch (Exception ex)
-                        {
-                            await _logger.LogErrorAsync($"Error during disposal: {ex.Message}").ConfigureAwait(false);
-                        }
-                    });
-                    
-                try
-                {
-                    await Task.WhenAll(disposalTasks).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    await _logger.LogErrorAsync($"Error during disposal cleanup: {ex.Message}").ConfigureAwait(false);
-                }
-            }
+            // ObjectTracker handles disposal automatically when the test context ends
+            // Manual disposal event invocation is not needed and can cause deadlocks
         }
 
         if (testException != null)
