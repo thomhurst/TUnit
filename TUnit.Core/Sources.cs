@@ -50,4 +50,30 @@ public static class Sources
                !BeforeTestSessionHooks.IsEmpty || !AfterTestSessionHooks.IsEmpty ||
                !BeforeTestDiscoveryHooks.IsEmpty || !AfterTestDiscoveryHooks.IsEmpty;
     }
+
+    /// <summary>
+    /// Clears all hook collections by draining their contents
+    /// </summary>
+    public static void ClearAllHooks()
+    {
+        // Clear ConcurrentDictionary collections
+        BeforeTestHooks.Clear();
+        AfterTestHooks.Clear();
+        BeforeClassHooks.Clear();
+        AfterClassHooks.Clear();
+        BeforeAssemblyHooks.Clear();
+        AfterAssemblyHooks.Clear();
+
+        // Drain ConcurrentBag collections (no Clear method in .NET Standard 2.0)
+        while (BeforeEveryTestHooks.TryTake(out _)) { }
+        while (AfterEveryTestHooks.TryTake(out _)) { }
+        while (BeforeEveryClassHooks.TryTake(out _)) { }
+        while (AfterEveryClassHooks.TryTake(out _)) { }
+        while (BeforeEveryAssemblyHooks.TryTake(out _)) { }
+        while (AfterEveryAssemblyHooks.TryTake(out _)) { }
+        while (BeforeTestSessionHooks.TryTake(out _)) { }
+        while (AfterTestSessionHooks.TryTake(out _)) { }
+        while (BeforeTestDiscoveryHooks.TryTake(out _)) { }
+        while (AfterTestDiscoveryHooks.TryTake(out _)) { }
+    }
 }
