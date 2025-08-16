@@ -33,9 +33,6 @@ internal static class ReflectionHookDiscoveryService
                 return; // Already completed discovery
             }
 
-            // Clear existing hooks to prevent duplicates from multiple discovery calls
-            ClearSourcesHooks();
-            
             _discoveryCompleted = true; // Set completion flag early to prevent re-entry
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies()
@@ -59,14 +56,6 @@ internal static class ReflectionHookDiscoveryService
                 }
             }
         }
-    }
-
-    /// <summary>
-    /// Clears all hooks from Sources to prevent duplicates
-    /// </summary>
-    private static void ClearSourcesHooks()
-    {
-        Sources.ClearAllHooks();
     }
 
     /// <summary>
