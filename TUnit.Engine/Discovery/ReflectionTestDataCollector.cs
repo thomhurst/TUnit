@@ -99,7 +99,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         // Discover dynamic tests from DynamicTestBuilderAttribute methods
-        var dynamicTests = await DiscoverDynamicTests(testSessionId);
+        var dynamicTests = await DiscoverDynamicTests(testSessionId).ConfigureAwait(false);
         newTests.AddRange(dynamicTests);
 
         // Add to concurrent collection without locking
@@ -365,7 +365,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             // Handle generic type definitions specially
             if (type.IsGenericTypeDefinition)
             {
-                var genericTests = await DiscoverGenericTests(type);
+                var genericTests = await DiscoverGenericTests(type).ConfigureAwait(false);
                 discoveredTests.AddRange(genericTests);
                 continue;
             }
@@ -416,7 +416,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 try
                 {
-                    discoveredTests.Add(await BuildTestMetadata(type, method));
+                    discoveredTests.Add(await BuildTestMetadata(type, method).ConfigureAwait(false));
                 }
                 catch (Exception ex)
                 {
@@ -552,7 +552,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                         continue;
                     }
 
-                    testMetadata = await BuildTestMetadata(type, method);
+                    testMetadata = await BuildTestMetadata(type, method).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -612,7 +612,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         // For each data source combination, create a concrete generic type
         foreach (var dataSource in classDataSources)
         {
-            var dataItems = await GetDataFromSourceAsync(dataSource, null!); // TODO
+            var dataItems = await GetDataFromSourceAsync(dataSource, null!).ConfigureAwait(false); // TODO
 
             foreach (var dataRow in dataItems)
             {
@@ -645,7 +645,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                             // The concrete type already has its generic arguments resolved
                             // For generic types with primary constructors that were resolved from class-level data sources,
                             // we need to ensure the class data sources contain the specific data for this instantiation
-                            var testMetadata = await BuildTestMetadata(concreteType, concreteMethod, dataRow);
+                            var testMetadata = await BuildTestMetadata(concreteType, concreteMethod, dataRow).ConfigureAwait(false);
 
                             discoveredTests.Add(testMetadata);
                         }
@@ -708,7 +708,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var dataItems = await GetDataFromSourceAsync(dataSource, null!); // TODO
+            var dataItems = await GetDataFromSourceAsync(dataSource, null!).ConfigureAwait(false); // TODO
 
             foreach (var dataRow in dataItems)
             {
@@ -746,7 +746,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                             // The concrete type already has its generic arguments resolved
                             // For generic types with primary constructors that were resolved from class-level data sources,
                             // we need to ensure the class data sources contain the specific data for this instantiation
-                            var testMetadata = await BuildTestMetadata(concreteType, concreteMethod, dataRow);
+                            var testMetadata = await BuildTestMetadata(concreteType, concreteMethod, dataRow).ConfigureAwait(false);
 
                             if (successfulTests == null)
                             {
@@ -813,7 +813,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             // Get data rows from the source
             await foreach (var rowFactory in dataSource.GetDataRowsAsync(metadata))
             {
-                var dataArray = await rowFactory();
+                var dataArray = await rowFactory().ConfigureAwait(false);
                 if (dataArray != null)
                 {
                     data.Add(dataArray);
@@ -826,7 +826,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 $"Failed to get data from source: {ex.Message}", ex);
         }
 
-        return await Task.FromResult(data);
+        return await Task.FromResult(data).ConfigureAwait(false);
     }
 
     private static int CalculateInheritanceDepth(Type testClass, MethodInfo testMethod)
@@ -1531,7 +1531,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     var tests = source.CollectDynamicTests(testSessionId);
                     foreach (var dynamicTest in tests)
                     {
-                        var testMetadataList = await ConvertDynamicTestToMetadata(dynamicTest);
+                        var testMetadataList = await ConvertDynamicTestToMetadata(dynamicTest).ConfigureAwait(false);
                         dynamicTests.AddRange(testMetadataList);
                     }
                 }
@@ -1591,7 +1591,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     try
                     {
-                        var tests = await ExecuteDynamicTestBuilder(type, method, testSessionId);
+                        var tests = await ExecuteDynamicTestBuilder(type, method, testSessionId).ConfigureAwait(false);
                         dynamicTests.AddRange(tests);
                     }
                     catch (Exception ex)
@@ -1685,7 +1685,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         // Convert the dynamic tests to test metadata
         foreach (var dynamicTest in context.Tests)
         {
-            var testMetadataList = await ConvertDynamicTestToMetadata(dynamicTest);
+            var testMetadataList = await ConvertDynamicTestToMetadata(dynamicTest).ConfigureAwait(false);
             dynamicTests.AddRange(testMetadataList);
         }
 
@@ -1700,7 +1700,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             if (discoveryResult is DynamicDiscoveryResult { TestMethod: not null } dynamicResult)
             {
-                var testMetadata = await CreateMetadataFromDynamicDiscoveryResult(dynamicResult);
+                var testMetadata = await CreateMetadataFromDynamicDiscoveryResult(dynamicResult).ConfigureAwait(false);
                 testMetadataList.Add(testMetadata);
             }
         }
@@ -1743,7 +1743,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     try
                     {
-                        var testMetadata = await CreateMetadataFromDynamicDiscoveryResult(dynamicResult);
+                        var testMetadata = await CreateMetadataFromDynamicDiscoveryResult(dynamicResult).ConfigureAwait(false);
                         if (successfulTests == null)
                         {
                             successfulTests =
@@ -1893,11 +1893,11 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 if (invokeResult is Task task)
                 {
-                    await task;
+                    await task.ConfigureAwait(false);
                 }
                 else if (invokeResult is ValueTask valueTask)
                 {
-                    await valueTask;
+                    await valueTask.ConfigureAwait(false);
                 }
             }
             catch (TargetInvocationException tie)
@@ -2005,7 +2005,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                         attributes,
                         _testClass,
                         metadata.TestSessionId,
-                        testContext);
+                        testContext).ConfigureAwait(false);
 
                     if (classConstructorInstance != null)
                     {
@@ -2028,7 +2028,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
 
                 return new ExecutableTest(createInstance,
-                    async (instance, args, context, ct) => await invokeTest(instance, args))
+                    async (instance, args, context, ct) => await invokeTest(instance, args).ConfigureAwait(false))
                 {
                     TestId = modifiedContext.TestId,
                     Metadata = metadata,
