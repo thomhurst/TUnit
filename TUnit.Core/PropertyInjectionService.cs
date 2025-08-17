@@ -8,7 +8,6 @@ using TUnit.Core.Services;
 using TUnit.Core.Helpers;
 using System.Reflection;
 using System.Collections.Concurrent;
-using EnumerableAsyncProcessor.Extensions;
 
 namespace TUnit.Core;
 
@@ -503,7 +502,7 @@ public sealed class PropertyInjectionService
         var objectBag = new Dictionary<string, object?>();
 
         // Process all property data sources in parallel for performance
-        await propertyDataSources.ForEachAsync(async propertyDataSource =>
+        var propertyTasks = propertyDataSources.Select(propertyDataSource => Task.Run(async () =>
         {
             try
             {
@@ -612,7 +611,9 @@ public sealed class PropertyInjectionService
                 throw new InvalidOperationException(
                     $"Failed to resolve data source for property '{propertyDataSource.PropertyName}': {ex.Message}", ex);
             }
-        }).ProcessInParallel().ConfigureAwait(false);
+        })).ToArray();
+
+        await Task.WhenAll(propertyTasks).ConfigureAwait(false);
     }
 
     /// <summary>
