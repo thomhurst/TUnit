@@ -167,6 +167,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 test.Context.SkipReason = e.Message;
                 return await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
             }
+            catch (SkipTestException e)
+            {
+                test.Context.SkipReason = e.Reason;
+                return await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
+            }
             catch (Exception exception) when (_engineCancellationToken.Token.IsCancellationRequested && exception is OperationCanceledException or TaskCanceledException)
             {
                 HandleCancellation(test);
@@ -318,6 +323,12 @@ internal class SingleTestExecutor : ISingleTestExecutor
             test.State = TestState.Passed;
             test.Result = _resultFactory.CreatePassedResult(test.StartTime!.Value);
         }
+        catch (SkipTestException ex)
+        {
+            test.Context.SkipReason = ex.Reason;
+            test.Result = await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
+            testException = ex;
+        }
         catch (Exception ex)
         {
             HandleTestFailure(test, ex);
@@ -327,6 +338,16 @@ internal class SingleTestExecutor : ISingleTestExecutor
         try
         {
             await ExecuteAfterTestHooksAsync(afterTestHooks, test.Context, cancellationToken).ConfigureAwait(false);
+        }
+        catch (SkipTestException afterHookSkipEx)
+        {
+            if (testException != null)
+            {
+                throw new AggregateException("Test and after hook both failed", testException, afterHookSkipEx);
+            }
+
+            test.Context.SkipReason = afterHookSkipEx.Reason;
+            test.Result = await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception afterHookEx)
         {
