@@ -501,8 +501,8 @@ public sealed class PropertyInjectionService
         // This ensures consistent behavior and proper recursive injection
         var objectBag = new Dictionary<string, object?>();
 
-        // Process each property data source
-        foreach (var propertyDataSource in propertyDataSources)
+        // Process all property data sources in parallel for performance
+        var propertyTasks = propertyDataSources.Select(async propertyDataSource =>
         {
             try
             {
@@ -611,7 +611,10 @@ public sealed class PropertyInjectionService
                 throw new InvalidOperationException(
                     $"Failed to resolve data source for property '{propertyDataSource.PropertyName}': {ex.Message}", ex);
             }
-        }
+        }).ToArray();
+
+        // Wait for all properties to be injected in parallel
+        await Task.WhenAll(propertyTasks).ConfigureAwait(false);
     }
 
     /// <summary>
