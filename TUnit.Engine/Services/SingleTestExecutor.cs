@@ -131,6 +131,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             // Track the test instance for disposal to ensure consistency with property-injected values
             // This ensures that test instances implementing IAsyncDisposable/IDisposable are properly disposed
             // through the same ObjectTracker system used for other disposable objects
+            // Note: ObjectTracker.TrackObject() is idempotent - duplicate tracking is safe
             if (instance is IAsyncDisposable or IDisposable)
             {
                 ObjectTracker.TrackObject(test.Context.Events, instance);
@@ -205,20 +206,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken).ConfigureAwait(false);
                 
                 // Trigger disposal events for tracked objects after test completion
-                if (test.Context.Events.OnDispose != null)
-                {
-                    try
-                    {
-                        foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
-                        {
-                            await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        await _logger.LogErrorAsync($"Error disposing test context objects: {ex.Message}").ConfigureAwait(false);
-                    }
-                }
+                // Disposal order: Objects are disposed in ascending order (lower Order values first)
+                // This ensures dependencies are disposed before their dependents
+                await TriggerDisposalEventsAsync(test.Context, "test context objects").ConfigureAwait(false);
             }
 
             if (test.Result == null)
@@ -299,6 +289,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             instance is not PlaceholderInstance)
         {
             // For skipped tests, also ensure the test instance is tracked for disposal
+            // Note: ObjectTracker.TrackObject() is idempotent - duplicate tracking is safe
             if (instance is IAsyncDisposable or IDisposable)
             {
                 ObjectTracker.TrackObject(test.Context.Events, instance);
@@ -306,21 +297,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
 
         // Trigger disposal events for tracked objects after skipped test processing
-        if (test.Context.Events.OnDispose != null)
-        {
-            try
-            {
-                foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
-                {
-                    await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Use a simple debug trace since we don't have logger here and this is cleanup
-                System.Diagnostics.Debug.WriteLine($"Error disposing skipped test context objects: {ex.Message}");
-            }
-        }
+        // Disposal order: Objects are disposed in ascending order (lower Order values first)
+        // This ensures dependencies are disposed before their dependents
+        await TriggerDisposalEventsAsync(test.Context, "skipped test context objects").ConfigureAwait(false);
 
         return test.Result;
     }
@@ -384,22 +363,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             // Trigger disposal events for all tracked objects to ensure proper cleanup
             // This includes test instances and their injected properties that were tracked via ObjectTracker.TrackObject()
-            if (test.Context.Events.OnDispose != null)
-            {
-                try
-                {
-                    var disposalTasks = test.Context.Events.OnDispose.InvocationList
-                        .OrderBy(x => x.Order)
-                        .Select(invocation => invocation.InvokeAsync(test.Context, test.Context).AsTask());
-                    
-                    await Task.WhenAll(disposalTasks).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    await _logger.LogErrorAsync($"Error during test cleanup disposal: {ex.Message}").ConfigureAwait(false);
-                    // Don't throw - disposal errors shouldn't fail the test
-                }
-            }
+            // Disposal order: Objects are disposed in ascending order (lower Order values first)
+            // This ensures dependencies are disposed before their dependents
+            await TriggerDisposalEventsAsync(test.Context, "test cleanup disposal").ConfigureAwait(false);
         }
 
         if (testException != null)
@@ -652,5 +618,60 @@ internal class SingleTestExecutor : ISingleTestExecutor
     private string GetDependencyDisplayName(AbstractExecutableTest dependency)
     {
         return dependency.Context?.GetDisplayName() ?? $"{dependency.Context?.TestDetails.ClassType.Name}.{dependency.Context?.TestDetails.TestName}" ?? "Unknown";
+    }
+
+    /// <summary>
+    /// Triggers disposal events for tracked objects with proper error handling and aggregation.
+    /// Disposal order: Objects are disposed in ascending order (lower Order values first)
+    /// to ensure dependencies are disposed before their dependents.
+    /// </summary>
+    /// <param name="context">The test context containing disposal events</param>
+    /// <param name="operationName">Name of the operation for logging purposes</param>
+    private async Task TriggerDisposalEventsAsync(TestContext context, string operationName)
+    {
+        if (context.Events.OnDispose == null)
+        {
+            return;
+        }
+
+        var disposalExceptions = new List<Exception>();
+
+        try
+        {
+            // Dispose objects in order - lower Order values first to handle dependencies correctly
+            var orderedInvocations = context.Events.OnDispose.InvocationList.OrderBy(x => x.Order);
+            
+            foreach (var invocation in orderedInvocations)
+            {
+                try
+                {
+                    await invocation.InvokeAsync(context, context).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    // Collect disposal exceptions but continue disposing other objects
+                    disposalExceptions.Add(ex);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Catch any unexpected errors in the disposal process itself
+            disposalExceptions.Add(ex);
+        }
+
+        // Log disposal errors without failing the test
+        if (disposalExceptions.Count > 0)
+        {
+            if (disposalExceptions.Count == 1)
+            {
+                await _logger.LogErrorAsync($"Error during {operationName}: {disposalExceptions[0].Message}").ConfigureAwait(false);
+            }
+            else
+            {
+                var aggregateMessage = string.Join("; ", disposalExceptions.Select(ex => ex.Message));
+                await _logger.LogErrorAsync($"Multiple errors during {operationName}: {aggregateMessage}").ConfigureAwait(false);
+            }
+        }
     }
 }
