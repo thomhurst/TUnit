@@ -8,6 +8,7 @@ using TUnit.Core.Services;
 using TUnit.Core.Helpers;
 using System.Reflection;
 using System.Collections.Concurrent;
+using EnumerableAsyncProcessor.Extensions;
 
 namespace TUnit.Core;
 
@@ -502,7 +503,7 @@ public sealed class PropertyInjectionService
         var objectBag = new Dictionary<string, object?>();
 
         // Process all property data sources in parallel for performance
-        var propertyTasks = propertyDataSources.Select(async propertyDataSource =>
+        await propertyDataSources.ForEachAsync(async propertyDataSource =>
         {
             try
             {
@@ -519,7 +520,7 @@ public sealed class PropertyInjectionService
                 var propertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
                 if (propertyInjection == null)
                 {
-                    continue;
+                    return; // Skip this property
                 }
 
                 // Create property metadata for the data generator
@@ -602,7 +603,7 @@ public sealed class PropertyInjectionService
                         await ProcessInjectedPropertyValue(instance, value, propertyInjection.Setter, objectBag, testInformation, testContext.Events, visitedObjects);
                         // Add to TestClassInjectedPropertyArguments for tracking
                         testContext.TestDetails.TestClassInjectedPropertyArguments[propertyInjection.PropertyName] = value;
-                        break; // Only use first value
+                        return; // Only use first value
                     }
                 }
             }
@@ -611,10 +612,7 @@ public sealed class PropertyInjectionService
                 throw new InvalidOperationException(
                     $"Failed to resolve data source for property '{propertyDataSource.PropertyName}': {ex.Message}", ex);
             }
-        }).ToArray();
-
-        // Wait for all properties to be injected in parallel
-        await Task.WhenAll(propertyTasks).ConfigureAwait(false);
+        }).ProcessInParallel().ConfigureAwait(false);
     }
 
     /// <summary>
