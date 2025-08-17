@@ -203,6 +203,22 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 test.EndTime = DateTimeOffset.Now;
 
                 await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken).ConfigureAwait(false);
+                
+                // Trigger disposal events for tracked objects after test completion
+                if (test.Context.Events.OnDispose != null)
+                {
+                    try
+                    {
+                        foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                        {
+                            await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        await _logger.LogErrorAsync($"Error disposing test context objects: {ex.Message}").ConfigureAwait(false);
+                    }
+                }
             }
 
             if (test.Result == null)
@@ -287,7 +303,23 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 ObjectTracker.TrackObject(test.Context.Events, instance);
             }
-            // Note: ObjectTracker will handle disposal automatically when the test context ends
+        }
+
+        // Trigger disposal events for tracked objects after skipped test processing
+        if (test.Context.Events.OnDispose != null)
+        {
+            try
+            {
+                foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                {
+                    await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Use a simple debug trace since we don't have logger here and this is cleanup
+                System.Diagnostics.Debug.WriteLine($"Error disposing skipped test context objects: {ex.Message}");
+            }
         }
 
         return test.Result;

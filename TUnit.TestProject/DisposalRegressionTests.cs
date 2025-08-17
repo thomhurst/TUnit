@@ -9,45 +9,45 @@ namespace TUnit.TestProject;
 [EngineTest(ExpectedResult.Pass)]
 public class DisposalRegressionTests : IAsyncDisposable
 {
-    private static bool _testInstanceDisposed = false;
-    private static bool _injectedPropertyDisposed = false;
-
     [ClassDataSource<DisposableTestData>(Shared = SharedType.PerTestSession)]
     public required DisposableTestData InjectedData { get; init; }
 
     public ValueTask DisposeAsync()
     {
-        _testInstanceDisposed = true;
+        IsDisposed = true;
         return default;
     }
+
+    public bool IsDisposed { get; private set; }
 
     [Test]
     public async Task TestExecutes()
     {
-        // Reset disposal flags at start of test
-        _testInstanceDisposed = false;
-        _injectedPropertyDisposed = false;
-
         // Test should execute normally
-        await Assert.That(_testInstanceDisposed).IsFalse();
-        await Assert.That(_injectedPropertyDisposed).IsFalse();
+        await Assert.That(IsDisposed).IsFalse();
+        await Assert.That(InjectedData.IsDisposed).IsFalse();
     }
 
     [After(Class)]
-    public static async Task VerifyDisposal()
+    public static async Task VerifyDisposal(ClassHookContext context)
     {
         // After the test class is done, both the test instance and injected property should be disposed
-        await Assert.That(_testInstanceDisposed).IsTrue();
-        await Assert.That(_injectedPropertyDisposed).IsTrue();
+        foreach (var testInstance in context.Tests.Select(x => x.TestDetails.ClassInstance).OfType<DisposalRegressionTests>())
+        {
+            await Assert.That(testInstance.IsDisposed).IsTrue();
+            await Assert.That(testInstance.InjectedData.IsDisposed).IsTrue();
+        }
     }
 
     public class DisposableTestData : IAsyncDisposable
     {
         public string Value { get; set; } = "test-data";
 
+        public bool IsDisposed { get; private set; }
+
         public ValueTask DisposeAsync()
         {
-            _injectedPropertyDisposed = true;
+            IsDisposed = true;
             return default;
         }
     }
