@@ -57,29 +57,15 @@ public static class AsyncConvert
     )]
     public static async ValueTask ConvertObject(object? invoke)
     {
+        if (invoke is Delegate @delegate)
+        {
+            invoke = @delegate.DynamicInvoke();
+        }
+
         if (invoke is null)
         {
             return;
         }
-
-        if (invoke is Func<object> syncFunc)
-        {
-            syncFunc();
-            return;
-        }
-
-        if (invoke is Func<Task> asyncFunc)
-        {
-            await Convert(asyncFunc);
-            return;
-        }
-
-        if (invoke is Func<ValueTask> asyncValueFunc)
-        {
-            await Convert(asyncValueFunc);
-            return;
-        }
-
 
         if (invoke is Task task)
         {
@@ -136,7 +122,7 @@ public static class AsyncConvert
         Justification = "F# async interop requires MakeGenericMethod. F# tests in AOT scenarios should use Task-based APIs.")]
     [UnconditionalSuppressMessage("Trimming", "IL2060:Call to \'System.Reflection.MethodInfo.MakeGenericMethod\' can not be statically analyzed. It\'s not possible to guarantee the availability of requirements of the generic method.",
         Justification = "Generic method instantiation for F# async types. The type parameter comes from the F# async type itself.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", 
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
         Justification = "F# async support is optional. Tests using F# async should ensure FSharp.Core is preserved in AOT scenarios.")]
     [RequiresUnreferencedCode("F# async support requires dynamic access to FSharp.Core types.")]
     [RequiresDynamicCode("F# async support requires runtime code generation for generic method instantiation.")]
@@ -157,13 +143,13 @@ public static class AsyncConvert
 
         return new ValueTask(fSharpTask);
     }
-    
+
     /// <summary>
     /// Safely invokes F# async conversion with proper suppression for the call site.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026:Using member with RequiresUnreferencedCodeAttribute",
         Justification = "F# async is an optional feature. AOT applications should use Task-based APIs.")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Using member with RequiresDynamicCodeAttribute", 
+    [UnconditionalSuppressMessage("AOT", "IL3050:Using member with RequiresDynamicCodeAttribute",
         Justification = "F# async requires runtime code generation. This is documented as not AOT-compatible.")]
     private static async ValueTask StartAsFSharpTaskSafely(object invoke, Type type)
     {
@@ -173,7 +159,7 @@ public static class AsyncConvert
             return;
         }
     }
-    
+
     /// <summary>
     /// Checks if F# async support is available (not in AOT mode).
     /// </summary>
@@ -183,7 +169,7 @@ public static class AsyncConvert
         {
             return _isFSharpSupported.Value;
         }
-        
+
         // In AOT mode, we can't use reflection to invoke F# async methods
         // This is a runtime check that will return false in AOT scenarios
         try
