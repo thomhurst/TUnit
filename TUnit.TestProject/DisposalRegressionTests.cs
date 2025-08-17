@@ -18,7 +18,7 @@ public class DisposalRegressionTests : IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         _testInstanceDisposed = true;
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     [Test]
@@ -27,7 +27,7 @@ public class DisposalRegressionTests : IAsyncDisposable
         // Reset disposal flags at start of test
         _testInstanceDisposed = false;
         _injectedPropertyDisposed = false;
-        
+
         // Test should execute normally
         await Assert.That(_testInstanceDisposed).IsFalse();
         await Assert.That(_injectedPropertyDisposed).IsFalse();
@@ -48,7 +48,7 @@ public class DisposalRegressionTests : IAsyncDisposable
         public ValueTask DisposeAsync()
         {
             _injectedPropertyDisposed = true;
-            return ValueTask.CompletedTask;
+            return default;
         }
     }
 }
