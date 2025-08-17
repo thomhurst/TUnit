@@ -51,7 +51,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
-        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
+        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 #if NET
         if (discoveryContext != null)
         {
@@ -67,7 +67,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         var dependentTests = new List<AbstractExecutableTest>();
         var allTests = new List<AbstractExecutableTest>();
 
-        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken))
+        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false))
         {
             allTests.Add(test);
 
@@ -121,10 +121,10 @@ internal sealed class TestDiscoveryService : IDataProducer
         var contextProvider = _hookOrchestrator.GetContextProvider();
         contextProvider.TestDiscoveryContext.AddTests(allTests.Select(t => t.Context));
 
-        await _hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken);
+        await _hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
         // Register the filtered tests to invoke ITestRegisteredEventReceiver
-        await _testFilterService.RegisterTestsAsync(filteredTests);
+        await _testFilterService.RegisterTestsAsync(filteredTests).ConfigureAwait(false);
 
         // Capture the final execution context after discovery
         var finalContext = ExecutionContext.Capture();
@@ -146,7 +146,7 @@ internal sealed class TestDiscoveryService : IDataProducer
             cts.CancelAfter(DiscoveryConfiguration.DiscoveryTimeout);
         }
 
-        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, filterTypes, cancellationToken);
+        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false);
 
         foreach (var test in tests)
         {
@@ -168,7 +168,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         ITestExecutionFilter? filter,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
+        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 #if NET
         if (discoveryContext != null)
         {
@@ -190,7 +190,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         {
             try
             {
-                await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken))
+                await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false))
                 {
                     testIdToTest[test.TestId] = test;
 
@@ -198,7 +198,7 @@ internal sealed class TestDiscoveryService : IDataProducer
                     if (test.Metadata.Dependencies.Length == 0)
                     {
                         // No dependencies - stream immediately
-                        await readyTestsChannel.Writer.WriteAsync(test, cancellationToken);
+                        await readyTestsChannel.Writer.WriteAsync(test, cancellationToken).ConfigureAwait(false);
                     }
                     else
                     {
@@ -220,7 +220,7 @@ internal sealed class TestDiscoveryService : IDataProducer
                     if (AreAllDependenciesSatisfied(test, completedTests))
                     {
                         pendingDependentTests.TryRemove(test.TestId, out _);
-                        await readyTestsChannel.Writer.WriteAsync(test, cancellationToken);
+                        await readyTestsChannel.Writer.WriteAsync(test, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
@@ -232,7 +232,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         }, cancellationToken);
 
         // Yield tests as they become ready
-        await foreach (var test in readyTestsChannel.Reader.ReadAllAsync(cancellationToken))
+        await foreach (var test in readyTestsChannel.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
         {
             // Apply filter
             if (_testFilterService.MatchesTest(filter, test))
@@ -257,12 +257,12 @@ internal sealed class TestDiscoveryService : IDataProducer
             foreach (var readyTest in nowReadyTests)
             {
                 pendingDependentTests.TryRemove(readyTest.TestId, out _);
-                await readyTestsChannel.Writer.WriteAsync(readyTest, cancellationToken);
+                await readyTestsChannel.Writer.WriteAsync(readyTest, cancellationToken).ConfigureAwait(false);
             }
         }
 
         // Ensure discovery task completes
-        await discoveryTask;
+        await discoveryTask.ConfigureAwait(false);
     }
 
     private bool AreAllDependenciesSatisfied(AbstractExecutableTest test, ConcurrentDictionary<string, bool> completedTests)

@@ -30,9 +30,9 @@ internal sealed class TestBuilderPipeline
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsAsync(string testSessionId, HashSet<Type>? filterTypes)
     {
         var dataCollector = _dataCollectorFactory(filterTypes);
-        var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId);
+        var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
 
-        return await BuildTestsFromMetadataAsync(collectedMetadata);
+        return await BuildTestsFromMetadataAsync(collectedMetadata).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -47,7 +47,7 @@ internal sealed class TestBuilderPipeline
 
         // Get metadata streaming if supported
         // Fall back to non-streaming collection
-        var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId);
+        var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
 
         return await collectedMetadata
             .SelectManyAsync(BuildTestsFromSingleMetadataAsync, cancellationToken: cancellationToken)
@@ -56,7 +56,7 @@ internal sealed class TestBuilderPipeline
 
     private async IAsyncEnumerable<TestMetadata> ToAsyncEnumerable(IEnumerable<TestMetadata> metadata)
     {
-        await Task.Yield(); // Yield control once at the start to maintain async context
+        await Task.Yield().ConfigureAwait(false); // Yield control once at the start to maintain async context
         foreach (var item in metadata)
         {
             yield return item;
@@ -72,10 +72,10 @@ internal sealed class TestBuilderPipeline
                     // Check if this is a dynamic test metadata that should bypass normal test building
                     if (metadata is IDynamicTestMetadata)
                     {
-                        return await GenerateDynamicTests(metadata);
+                        return await GenerateDynamicTests(metadata).ConfigureAwait(false);
                     }
 
-                    return await _testBuilder.BuildTestsFromMetadataAsync(metadata);
+                    return await _testBuilder.BuildTestsFromMetadataAsync(metadata).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -156,7 +156,7 @@ internal sealed class TestBuilderPipeline
             context.TestDetails = testDetails;
 
             // Invoke discovery event receivers to properly handle all attribute behaviors
-            await InvokeDiscoveryEventReceiversAsync(context);
+            await InvokeDiscoveryEventReceiversAsync(context).ConfigureAwait(false);
 
             var executableTestContext = new ExecutableTestCreationContext
             {
@@ -276,7 +276,7 @@ internal sealed class TestBuilderPipeline
                     context.TestDetails = testDetails;
 
                     // Invoke discovery event receivers to properly handle all attribute behaviors
-                    await InvokeDiscoveryEventReceiversAsync(context);
+                    await InvokeDiscoveryEventReceiversAsync(context).ConfigureAwait(false);
 
                     var executableTestContext = new ExecutableTestCreationContext
                     {
@@ -295,7 +295,7 @@ internal sealed class TestBuilderPipeline
             else
             {
                 // Normal test metadata goes through the standard test builder
-                var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(resolvedMetadata);
+                var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(resolvedMetadata).ConfigureAwait(false);
                 testsToYield = new List<AbstractExecutableTest>(testsFromMetadata);
             }
         }
@@ -436,7 +436,7 @@ internal sealed class TestBuilderPipeline
             context.TestDetails.TestName,
             context);
 
-        await _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None);
+        await _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None).ConfigureAwait(false);
     }
 
 }

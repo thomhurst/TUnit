@@ -17,13 +17,9 @@ namespace TUnit.Engine.Discovery;
 [SuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The source field does not have matching annotations.")]
 public sealed class ReflectionTestDataCollector : ITestDataCollector
 {
-    private static readonly HashSet<Assembly> _scannedAssemblies =
-    [
-    ];
-    private static readonly List<TestMetadata> _discoveredTests =
-    [
-    ];
-    private static readonly Lock _lock = new();
+    private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
+    private static readonly ConcurrentBag<TestMetadata> _discoveredTests = new();
+    private static readonly Lock _resultsLock = new(); // Only for final results aggregation
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
     private static readonly ConcurrentDictionary<Type, MethodInfo[]> _typeMethodsCache = new();
 
@@ -45,7 +41,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var assemblies = assembliesList;
 
 
-        // Use async parallel processing with proper task-based approach
+        // Use throttled parallel processing to prevent thread pool exhaustion
+        // Limit to 2x processor count to avoid overwhelming the thread pool
+        var maxConcurrency = Math.Min(assemblies.Count, Environment.ProcessorCount * 2);
+        var semaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
         var tasks = new Task<List<TestMetadata>>[assemblies.Count];
 
         for (var i = 0; i < assemblies.Count; i++)
@@ -55,30 +54,36 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
             tasks[index] = Task.Run(async () =>
             {
-                lock (_lock)
+                await semaphore.WaitAsync().ConfigureAwait(false);
+                try
                 {
-                    if (!_scannedAssemblies.Add(assembly))
+                    // Use lock-free ConcurrentDictionary for assembly tracking
+                    if (!_scannedAssemblies.TryAdd(assembly, true))
                     {
                         return
                         [
                         ];
                     }
-                }
 
-                try
-                {
-                    // Now we can properly await the async method
-                    var testsInAssembly = await DiscoverTestsInAssembly(assembly).ConfigureAwait(false);
-                    return testsInAssembly;
+                    try
+                    {
+                        // Now we can properly await the async method
+                        var testsInAssembly = await DiscoverTestsInAssembly(assembly).ConfigureAwait(false);
+                        return testsInAssembly;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Create a failed test metadata for the assembly that couldn't be scanned
+                        var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
+                        return
+                        [
+                            failedTest
+                        ];
+                    }
                 }
-                catch (Exception ex)
+                finally
                 {
-                    // Create a failed test metadata for the assembly that couldn't be scanned
-                    var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
-                    return
-                    [
-                        failedTest
-                    ];
+                    semaphore.Release();
                 }
             });
         }
@@ -97,11 +102,15 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var dynamicTests = await DiscoverDynamicTests(testSessionId);
         newTests.AddRange(dynamicTests);
 
-        lock (_lock)
+        // Add to concurrent collection without locking
+        foreach (var test in newTests)
         {
-            _discoveredTests.AddRange(newTests);
+            _discoveredTests.Add(test);
+        }
 
-
+        // Only lock when creating the final result list
+        lock (_resultsLock)
+        {
             return _discoveredTests.ToList();
         }
     }
@@ -127,21 +136,17 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            lock (_lock)
+            // Use lock-free ConcurrentDictionary for assembly tracking
+            if (!_scannedAssemblies.TryAdd(assembly, true))
             {
-                if (!_scannedAssemblies.Add(assembly))
-                {
-                    continue;
-                }
+                continue;
             }
 
             // Stream tests from this assembly
             await foreach (var test in DiscoverTestsInAssemblyStreamingAsync(assembly, cancellationToken))
             {
-                lock (_lock)
-                {
-                    _discoveredTests.Add(test);
-                }
+                // Use lock-free ConcurrentBag
+                _discoveredTests.Add(test);
                 yield return test;
             }
         }
