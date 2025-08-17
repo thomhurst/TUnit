@@ -154,10 +154,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         // Stream dynamic tests
         await foreach (var dynamicTest in DiscoverDynamicTestsStreamingAsync(testSessionId, cancellationToken))
         {
-            lock (_lock)
-            {
-                _discoveredTests.Add(dynamicTest);
-            }
+            _discoveredTests.Add(dynamicTest);
             yield return dynamicTest;
         }
     }

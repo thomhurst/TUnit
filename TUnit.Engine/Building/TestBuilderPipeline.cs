@@ -56,7 +56,7 @@ internal sealed class TestBuilderPipeline
 
     private async IAsyncEnumerable<TestMetadata> ToAsyncEnumerable(IEnumerable<TestMetadata> metadata)
     {
-        await Task.Yield().ConfigureAwait(false); // Yield control once at the start to maintain async context
+        await Task.Yield(); // Yield control once at the start to maintain async context
         foreach (var item in metadata)
         {
             yield return item;
