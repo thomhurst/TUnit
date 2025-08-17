@@ -16,7 +16,13 @@ public class ConflictingDependsOnTests(TestMode testMode) : InvokableTestBase(te
                 result => result.ResultSummary.Counters.Passed.ShouldBe(0),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(2),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0),
-                result => result.Results.First(x => x.TestName.Contains("Test1")).Output?.ErrorInfo?.Message.ShouldContain("DependsOn Conflict: ConflictingDependsOnTests.Test1 > ConflictingDependsOnTests.Test2 > ConflictingDependsOnTests.Test1"),
+                result => {
+                    var errorMessage = result.Results.First(x => x.TestName.Contains("Test1")).Output?.ErrorInfo?.Message;
+                    // Due to parallelism, the conflict detection can start with either Test1 or Test2
+                    var isValidConflict = errorMessage?.Contains("DependsOn Conflict: ConflictingDependsOnTests.Test1 > ConflictingDependsOnTests.Test2 > ConflictingDependsOnTests.Test1") == true ||
+                                         errorMessage?.Contains("DependsOn Conflict: ConflictingDependsOnTests.Test2 > ConflictingDependsOnTests.Test1 > ConflictingDependsOnTests.Test2") == true;
+                    isValidConflict.ShouldBeTrue($"Expected circular dependency error but got: {errorMessage}");
+                },
             ]);
     }
 }

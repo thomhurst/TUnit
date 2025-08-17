@@ -501,8 +501,8 @@ public sealed class PropertyInjectionService
         // This ensures consistent behavior and proper recursive injection
         var objectBag = new Dictionary<string, object?>();
 
-        // Process each property data source
-        foreach (var propertyDataSource in propertyDataSources)
+        // Process all property data sources in parallel for performance
+        var propertyTasks = propertyDataSources.Select(propertyDataSource => Task.Run(async () =>
         {
             try
             {
@@ -519,7 +519,7 @@ public sealed class PropertyInjectionService
                 var propertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
                 if (propertyInjection == null)
                 {
-                    continue;
+                    return; // Skip this property
                 }
 
                 // Create property metadata for the data generator
@@ -602,7 +602,7 @@ public sealed class PropertyInjectionService
                         await ProcessInjectedPropertyValue(instance, value, propertyInjection.Setter, objectBag, testInformation, testContext.Events, visitedObjects);
                         // Add to TestClassInjectedPropertyArguments for tracking
                         testContext.TestDetails.TestClassInjectedPropertyArguments[propertyInjection.PropertyName] = value;
-                        break; // Only use first value
+                        return; // Only use first value
                     }
                 }
             }
@@ -611,7 +611,9 @@ public sealed class PropertyInjectionService
                 throw new InvalidOperationException(
                     $"Failed to resolve data source for property '{propertyDataSource.PropertyName}': {ex.Message}", ex);
             }
-        }
+        })).ToArray();
+
+        await Task.WhenAll(propertyTasks).ConfigureAwait(false);
     }
 
     /// <summary>
