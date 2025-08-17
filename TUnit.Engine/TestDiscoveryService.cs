@@ -160,8 +160,7 @@ internal sealed class TestDiscoveryService : IDataProducer
     }
 
     /// <summary>
-    /// Truly streaming test discovery that yields independent tests immediately
-    /// and progressively resolves dependent tests as their dependencies are satisfied
+    /// Simplified streaming test discovery without channels - matches source generation approach
     /// </summary>
     public async IAsyncEnumerable<AbstractExecutableTest> DiscoverTestsFullyStreamingAsync(
         string testSessionId,
@@ -179,90 +178,88 @@ internal sealed class TestDiscoveryService : IDataProducer
         // Extract types from filter for optimized discovery
         var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
 
-        // Lightweight tracking structures
-        var testIdToTest = new ConcurrentDictionary<string, AbstractExecutableTest>();
-        var pendingDependentTests = new ConcurrentDictionary<string, AbstractExecutableTest>();
-        var completedTests = new ConcurrentDictionary<string, bool>();
-        var readyTestsChannel = Channel.CreateUnbounded<AbstractExecutableTest>();
-
-        // Start discovery task that feeds the channel
-        var discoveryTask = Task.Run(async () =>
+        // Collect all tests first (like source generation mode does)
+        var allTests = new List<AbstractExecutableTest>();
+        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false))
         {
-            try
-            {
-                await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false))
-                {
-                    testIdToTest[test.TestId] = test;
+            allTests.Add(test);
+        }
 
-                    // Check if this test has dependencies
-                    if (test.Metadata.Dependencies.Length == 0)
-                    {
-                        // No dependencies - stream immediately
-                        await readyTestsChannel.Writer.WriteAsync(test, cancellationToken).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        // Has dependencies - buffer for later
-                        pendingDependentTests[test.TestId] = test;
-                    }
-                }
-
-                // Discovery complete - now resolve dependencies
-                // This is still needed for dependent tests
-                foreach (var test in pendingDependentTests.Values)
-                {
-                    _dependencyResolver.TryResolveDependencies(test);
-                }
-
-                // Queue tests whose dependencies are already satisfied
-                foreach (var test in pendingDependentTests.Values.ToList())
-                {
-                    if (AreAllDependenciesSatisfied(test, completedTests))
-                    {
-                        pendingDependentTests.TryRemove(test.TestId, out _);
-                        await readyTestsChannel.Writer.WriteAsync(test, cancellationToken).ConfigureAwait(false);
-                    }
-                }
-            }
-            finally
-            {
-                // Signal that discovery is complete
-                readyTestsChannel.Writer.TryComplete();
-            }
-        }, cancellationToken);
-
-        // Yield tests as they become ready
-        await foreach (var test in readyTestsChannel.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
+        // Resolve dependencies for all tests
+        foreach (var test in allTests)
         {
-            // Apply filter
+            _dependencyResolver.TryResolveDependencies(test);
+        }
+
+        // Separate into independent and dependent tests
+        var independentTests = new List<AbstractExecutableTest>();
+        var dependentTests = new List<AbstractExecutableTest>();
+        
+        foreach (var test in allTests)
+        {
+            if (test.Dependencies.Length == 0)
+            {
+                independentTests.Add(test);
+            }
+            else
+            {
+                dependentTests.Add(test);
+            }
+        }
+
+        // Yield independent tests first
+        foreach (var test in independentTests)
+        {
             if (_testFilterService.MatchesTest(filter, test))
             {
                 yield return test;
             }
+        }
 
-            // Mark test as completed for dependency resolution
-            completedTests[test.TestId] = true;
-
-            // Check if any pending tests now have their dependencies satisfied
-            var nowReadyTests = new List<AbstractExecutableTest>();
-            foreach (var pendingTest in pendingDependentTests.Values)
+        // Process dependent tests in dependency order
+        var yieldedTests = new HashSet<string>(independentTests.Select(t => t.TestId));
+        var remainingTests = new List<AbstractExecutableTest>(dependentTests);
+        
+        while (remainingTests.Count > 0)
+        {
+            var readyTests = new List<AbstractExecutableTest>();
+            
+            foreach (var test in remainingTests)
             {
-                if (AreAllDependenciesSatisfied(pendingTest, completedTests))
+                // Check if all dependencies have been yielded
+                var allDependenciesYielded = test.Dependencies.All(dep => yieldedTests.Contains(dep.Test.TestId));
+                
+                if (allDependenciesYielded)
                 {
-                    nowReadyTests.Add(pendingTest);
+                    readyTests.Add(test);
                 }
             }
 
-            // Queue newly ready tests
-            foreach (var readyTest in nowReadyTests)
+            // If no tests are ready, we have a circular dependency
+            if (readyTests.Count == 0 && remainingTests.Count > 0)
             {
-                pendingDependentTests.TryRemove(readyTest.TestId, out _);
-                await readyTestsChannel.Writer.WriteAsync(readyTest, cancellationToken).ConfigureAwait(false);
+                // Yield remaining tests anyway to avoid hanging
+                foreach (var test in remainingTests)
+                {
+                    if (_testFilterService.MatchesTest(filter, test))
+                    {
+                        yield return test;
+                    }
+                }
+                break;
+            }
+
+            // Yield ready tests and remove from remaining
+            foreach (var test in readyTests)
+            {
+                if (_testFilterService.MatchesTest(filter, test))
+                {
+                    yield return test;
+                }
+                yieldedTests.Add(test.TestId);
+                remainingTests.Remove(test);
             }
         }
-
-        // Ensure discovery task completes
-        await discoveryTask.ConfigureAwait(false);
     }
 
     private bool AreAllDependenciesSatisfied(AbstractExecutableTest test, ConcurrentDictionary<string, bool> completedTests)
