@@ -123,4 +123,15 @@ public static class GenericIsExtensions
         return valueSource.RegisterAssertion(new NullExpectedValueAssertCondition<TActual>()
             , []);
     }
+
+    public static CastedAssertionBuilder<TActual, TExpected> IsTypeOf<TActual, TExpected>(this IValueSource<TActual> valueSource)
+    {
+        var assertion = valueSource.RegisterAssertion(new TypeOfExpectedValueAssertCondition<TActual>(typeof(TExpected)), [typeof(TExpected).Name]);
+        return new CastedAssertionBuilder<TActual, TExpected>(assertion);
+    }
+
+    public static InvokableValueAssertionBuilder<TActual> IsNotTypeOf<TActual, TExpected>(this IValueSource<TActual> valueSource)
+    {
+        return valueSource.RegisterAssertion(new NotTypeOfExpectedValueAssertCondition<TActual>(typeof(TExpected)), [typeof(TExpected).Name]);
+    }
 }
