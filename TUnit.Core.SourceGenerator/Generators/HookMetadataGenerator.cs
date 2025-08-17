@@ -624,7 +624,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                         writer.AppendLine("if (result != null)");
                         writer.AppendLine("{");
                         writer.Indent();
-                        writer.AppendLine("await AsyncConvert.ConvertObject(() => result);");
+                        writer.AppendLine("await AsyncConvert.ConvertObject(result);");
                         writer.Unindent();
                         writer.AppendLine("}");
                     }
