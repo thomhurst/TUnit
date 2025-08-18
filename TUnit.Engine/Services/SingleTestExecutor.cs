@@ -361,11 +361,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
         }
         finally
         {
-            // Trigger disposal events for all tracked objects to ensure proper cleanup
-            // This includes test instances and their injected properties that were tracked via ObjectTracker.TrackObject()
-            // Disposal order: Objects are disposed in ascending order (lower Order values first)
-            // This ensures dependencies are disposed before their dependents
-            await TriggerDisposalEventsAsync(test.Context, "test cleanup disposal").ConfigureAwait(false);
+            // Note: Disposal events are handled by the main test executor's finally block
+            // to ensure consistent timing and avoid duplicate disposal calls
         }
 
         if (testException != null)
