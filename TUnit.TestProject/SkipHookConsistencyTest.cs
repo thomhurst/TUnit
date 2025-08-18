@@ -49,6 +49,21 @@ public class SkipHookExecutionTest
             throw new Exception($"Hooks should not execute for skipped tests. Direct: {directSkipHooks.Count}, Custom: {customSkipHooks.Count}");
         }
     }
+
+    // Instance hooks to test the InstanceHookMethod fix
+    [Before(Test)]
+    public void BeforeTest(TestContext testContext)
+    {
+        ExecutedHooks.Add($"Before: {testContext.TestDetails.TestName}");
+        Console.WriteLine($"Before executed for: {testContext.TestDetails.TestName}");
+    }
+
+    [After(Test)]
+    public void AfterTest(TestContext testContext)
+    {
+        ExecutedHooks.Add($"After: {testContext.TestDetails.TestName}");
+        Console.WriteLine($"After executed for: {testContext.TestDetails.TestName}");
+    }
 }
 
 public static class SkipHookExecutionTestHooks
