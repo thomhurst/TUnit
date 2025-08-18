@@ -51,6 +51,11 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
+        return await DiscoverTests(testSessionId, filter, cancellationToken, isForExecution: true).ConfigureAwait(false);
+    }
+
+    public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken, bool isForExecution)
+    {
         var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 #if NET
         if (discoveryContext != null)
@@ -95,27 +100,31 @@ internal sealed class TestDiscoveryService : IDataProducer
         tests.AddRange(independentTests);
         tests.AddRange(dependentTests);
 
-        // Apply filter first to get the tests we want to run
-        var filteredTests = _testFilterService.FilterTests(filter, tests);
+        // For discovery requests (IDE test explorers), return all tests including explicit ones
+        // For execution requests, apply filtering to exclude explicit tests unless explicitly targeted
+        var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, tests) : tests;
 
-        // Now find all dependencies of filtered tests and add them
-        var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
-        var queue = new Queue<AbstractExecutableTest>(filteredTests);
-
-        while (queue.Count > 0)
+        // If we applied filtering, find all dependencies of filtered tests and add them
+        if (isForExecution)
         {
-            var test = queue.Dequeue();
-            foreach (var resolvedDep in test.Dependencies)
+            var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
+            var queue = new Queue<AbstractExecutableTest>(filteredTests);
+
+            while (queue.Count > 0)
             {
-                var dependency = resolvedDep.Test;
-                if (testsToInclude.Add(dependency))
+                var test = queue.Dequeue();
+                foreach (var resolvedDep in test.Dependencies)
                 {
-                    queue.Enqueue(dependency);
+                    var dependency = resolvedDep.Test;
+                    if (testsToInclude.Add(dependency))
+                    {
+                        queue.Enqueue(dependency);
+                    }
                 }
             }
-        }
 
-        filteredTests = testsToInclude.ToList();
+            filteredTests = testsToInclude.ToList();
+        }
 
         // Populate the TestDiscoveryContext with all discovered tests before running AfterTestDiscovery hooks
         var contextProvider = _hookOrchestrator.GetContextProvider();
