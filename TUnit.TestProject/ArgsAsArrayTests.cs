@@ -62,6 +62,11 @@ public class ArgsAsArrayTests
     {
         var result = string.Join("", typeName.Select(type => type.Name));
         Console.WriteLine($"Expected: {reference}, Got: {result}");
+        // Simple assertion for verification - we expect the type name to match
+        if (reference != result)
+        {
+            throw new Exception($"Expected {reference} but got {result}");
+        }
     }
 
     public record Foo();
