@@ -15,7 +15,12 @@ internal class StandardErrorConsoleInterceptor : OptimizedConsoleInterceptor
 
     static StandardErrorConsoleInterceptor()
     {
-        DefaultError = Console.Error;
+        // Get the raw stream without SyncTextWriter synchronization wrapper
+        // BufferedTextWriter already provides thread safety, so we avoid double-locking
+        DefaultError = new StreamWriter(Console.OpenStandardError())
+        {
+            AutoFlush = true
+        };
     }
 
     public StandardErrorConsoleInterceptor(VerbosityService verbosityService) : base(verbosityService)
