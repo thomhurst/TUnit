@@ -84,9 +84,9 @@
         <PackageVersion Include="trxparser" Version="0.5.0" />
         <PackageVersion Include="Verify" Version="30.7.3" />
         <PackageVersion Include="Verify.NUnit" Version="30.7.3" />
-        <PackageVersion Include="TUnit" Version="0.56.35" />
-        <PackageVersion Include="TUnit.Core" Version="0.56.35" />
-        <PackageVersion Include="TUnit.Assertions" Version="0.56.35" />
+        <PackageVersion Include="TUnit" Version="0.56.44" />
+        <PackageVersion Include="TUnit.Core" Version="0.56.44" />
+        <PackageVersion Include="TUnit.Assertions" Version="0.56.44" />
         <PackageVersion Include="Vogen" Version="8.0.1" />
         <PackageVersion Include="xunit" Version="2.9.3" />
         <PackageVersion Include="xunit.assert" Version="2.9.3" />
