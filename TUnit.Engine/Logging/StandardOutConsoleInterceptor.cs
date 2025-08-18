@@ -15,7 +15,12 @@ internal class StandardOutConsoleInterceptor : OptimizedConsoleInterceptor
 
     static StandardOutConsoleInterceptor()
     {
-        DefaultOut = Console.Out;
+        // Get the raw stream without SyncTextWriter synchronization wrapper
+        // BufferedTextWriter already provides thread safety, so we avoid double-locking
+        DefaultOut = new StreamWriter(Console.OpenStandardOutput())
+        {
+            AutoFlush = true
+        };
     }
 
     public StandardOutConsoleInterceptor(VerbosityService verbosityService) : base(verbosityService)
