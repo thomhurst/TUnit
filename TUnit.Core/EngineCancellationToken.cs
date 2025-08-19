@@ -17,6 +17,7 @@ public class EngineCancellationToken : IDisposable
     
     private CancellationTokenSource? _forcefulExitCts;
     private volatile bool _forcefulExitStarted;
+    private bool _cancelKeyPressRegistered;
 
     /// <summary>
     /// Initializes the cancellation token with a linked token source.
@@ -27,7 +28,16 @@ public class EngineCancellationToken : IDisposable
         CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         Token = CancellationTokenSource.Token;
 
-        Console.CancelKeyPress += OnCancelKeyPress;
+        try
+        {
+            Console.CancelKeyPress += OnCancelKeyPress;
+            _cancelKeyPressRegistered = true;
+        }
+        catch (PlatformNotSupportedException)
+        {
+            // Console.CancelKeyPress is not supported on some platforms (e.g., browser-wasm)
+            // Continue without cancel key press handling
+        }
     }
     
     private void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
@@ -68,7 +78,10 @@ public class EngineCancellationToken : IDisposable
     /// </summary>
     public void Dispose()
     {
-        Console.CancelKeyPress -= OnCancelKeyPress;
+        if (_cancelKeyPressRegistered)
+        {
+            Console.CancelKeyPress -= OnCancelKeyPress;
+        }
         _forcefulExitCts?.Cancel();
         _forcefulExitCts?.Dispose();
         CancellationTokenSource.Dispose();
