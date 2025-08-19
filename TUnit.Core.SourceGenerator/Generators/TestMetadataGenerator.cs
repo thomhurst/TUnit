@@ -1977,6 +1977,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         return derivedClass.GetMembersIncludingBase().OfType<IMethodSymbol>()
             .Where(m => m.GetAttributes().Any(attr => attr.IsTestAttribute()))
+            // Exclude test methods declared directly in the derived class to avoid duplication
+            // These are already handled by the regular test method provider
+            .Where(m => !SymbolEqualityComparer.Default.Equals(m.ContainingType, derivedClass))
             .ToList();
     }
 
