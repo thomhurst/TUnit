@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace TUnit.TestProject.Bugs;
 
 public abstract class GenericTestExample<T>
@@ -19,7 +21,7 @@ public class IntGenericTests : GenericTestExample<int>
     public void AdditionalIntTest()
     {
         // This test is unexpectedly executed twice.
-        _value++;
-        Console.WriteLine($"IntGenericTests running with value: {_value}");
+        var newValue = Interlocked.Increment(ref _value);
+        Console.WriteLine($"IntGenericTests running with value: {newValue}");
     }
 }
