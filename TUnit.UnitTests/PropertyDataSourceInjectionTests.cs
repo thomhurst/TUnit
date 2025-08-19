@@ -227,3 +227,46 @@ public class DeeplyNestedService : IAsyncInitializer
     }
 }
 
+// Test for inheritance with nested data sources - reproduces the reported issue
+public class InheritedNestedDataSourceTests
+{
+    [ClassDataSource<InheritedData3>(Shared = SharedType.PerTestSession)]
+    public required InheritedData3 Data3 { get; init; }
+
+    [Test]
+    public async Task PropertyInjection_InheritedDataSource_InjectsInheritedProperties()
+    {
+        // This test reproduces the issue: Data3.Data1 should not be null
+        // The InitializeAsync of InheritedData2 should be called and Data1 should be injected
+        await Assert.That(Data3).IsNotNull();
+        await Assert.That(Data3.Data1).IsNotNull();
+        await Assert.That(Data3.Data1.SomeValue).IsEqualTo("a");
+    }
+}
+
+public class InheritedData1 : IAsyncInitializer
+{
+    public string SomeValue { get; set; } = "";
+    
+    public async Task InitializeAsync()
+    {
+        await Task.Delay(10); // Small delay for testing
+        this.SomeValue = "a";
+    }
+}
+
+public class InheritedData2 : IAsyncInitializer
+{
+    [ClassDataSource<InheritedData1>(Shared = SharedType.PerTestSession)]
+    public required InheritedData1 Data1 { get; init; }
+
+    public async Task InitializeAsync()
+    {
+        await Task.Delay(10); // Small delay for testing
+    }
+}
+
+public class InheritedData3 : InheritedData2
+{
+}
+

@@ -43,7 +43,10 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             t.ToString().Contains("AsyncDataSourceGeneratorAttribute") ||
             t.ToString().Contains("DataSourceAttribute")) == true;
 
-        return hasAttributedProperties || inheritsFromDataSource;
+        // Also include classes that have a base class (they might inherit properties with data sources)
+        var hasBaseClass = typeDecl.BaseList?.Types.Any() == true;
+
+        return hasAttributedProperties || inheritsFromDataSource || hasBaseClass;
     }
 
     private static ClassWithDataSourceProperties? GetClassWithDataSourceProperties(GeneratorSyntaxContext context)
