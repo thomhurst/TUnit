@@ -7,6 +7,15 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 {
     protected sealed override async ValueTask ExecuteAsync(Func<ValueTask> action)
     {
+        // On browser platforms, threading is not supported, so fall back to direct execution
+#if NET5_0_OR_GREATER
+        if (OperatingSystem.IsBrowser())
+        {
+            await action();
+            return;
+        }
+#endif
+
         var tcs = new TaskCompletionSource<object?>();
 
         var thread = new Thread(() =>
