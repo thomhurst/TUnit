@@ -9,7 +9,7 @@
         Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
 
     <PropertyGroup>
-        <TargetFrameworks>net472;net8.0;net9.0</TargetFrameworks>
+        <TargetFrameworks>net472;net8.0</TargetFrameworks>
 
         <OutputType>Exe</OutputType>
 
