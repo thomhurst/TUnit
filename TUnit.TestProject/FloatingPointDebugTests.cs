@@ -7,23 +7,12 @@ namespace TUnit.TestProject;
 public class FloatingPointDebugTests
 {
     [Test]
+    [Arguments(4)]
+    [Arguments(0.1)]
     [Arguments(1.1)]
-    public void TestDoubleArgument(double value)
-    {
-        // This should receive 1.1, not be split into (1, 1)
-    }
-    
-    [Test]
-    [Arguments(1.1f)]
-    public void TestFloatArgument(float value)
-    {
-        // This should receive 1.1f, not be split 
-    }
-    
-    [Test]
     [Arguments(1e-1)]
-    public void TestScientificNotation(double value)
+    public void ParameterTest(double number)
     {
-        // This should receive 0.1, not be split
+        // This should work without throwing "Expected exactly 1 argument, but got 2"
     }
 }

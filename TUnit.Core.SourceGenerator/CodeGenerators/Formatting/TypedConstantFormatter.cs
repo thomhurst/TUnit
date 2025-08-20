@@ -237,7 +237,25 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 return "double.NegativeInfinity";
             case null:
                 return "null";
+            // Use InvariantCulture for numeric types to ensure consistent formatting
+            case double d:
+                return d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            case float f:
+                return f.ToString(System.Globalization.CultureInfo.InvariantCulture) + "f";
+            case decimal dec:
+                return dec.ToString(System.Globalization.CultureInfo.InvariantCulture) + "m";
+            case long l:
+                return l.ToString(System.Globalization.CultureInfo.InvariantCulture) + "L";
+            case ulong ul:
+                return ul.ToString(System.Globalization.CultureInfo.InvariantCulture) + "UL";
+            case uint ui:
+                return ui.ToString(System.Globalization.CultureInfo.InvariantCulture) + "U";
             default:
+                // For other numeric types, use InvariantCulture
+                if (value is IFormattable formattable)
+                {
+                    return formattable.ToString(null, System.Globalization.CultureInfo.InvariantCulture);
+                }
                 return value.ToString() ?? "null";
         }
     }
