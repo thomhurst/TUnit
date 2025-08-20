@@ -103,11 +103,11 @@ public static class TypedConstantParser
                 return "null";
             // Use InvariantCulture for numeric types to ensure consistent formatting
             case double d:
-                return d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                return d.ToString(System.Globalization.CultureInfo.InvariantCulture) + "d";
             case float f:
-                return f.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                return f.ToString(System.Globalization.CultureInfo.InvariantCulture) + "f";
             case decimal dec:
-                return dec.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                return dec.ToString(System.Globalization.CultureInfo.InvariantCulture) + "m";
             default:
                 // For other numeric types, use InvariantCulture
                 if (value is IFormattable formattable)

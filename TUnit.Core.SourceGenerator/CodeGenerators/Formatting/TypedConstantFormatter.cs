@@ -239,7 +239,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 return "null";
             // Use InvariantCulture for numeric types to ensure consistent formatting
             case double d:
-                return d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                return d.ToString(System.Globalization.CultureInfo.InvariantCulture) + "d";
             case float f:
                 return f.ToString(System.Globalization.CultureInfo.InvariantCulture) + "f";
             case decimal dec:
