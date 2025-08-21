@@ -25,12 +25,10 @@ internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
         // Track all constructor and method arguments
         var allArguments = classArguments.Concat(methodArguments);
         
-        Console.WriteLine($"[TestArgumentTrackingService] Tracking {classArguments.Length} class args + {methodArguments.Length} method args for test {testContext.GetDisplayName()}");
         foreach (var obj in allArguments)
         {
             if (obj != null)
             {
-                Console.WriteLine($"[TestArgumentTrackingService] - {obj.GetType().Name} (ID: {obj.GetHashCode()})");
                 // Track each argument - for shared instances, this increments the reference count
                 // When the test ends, the count will be decremented via the test's Events.OnDispose
                 ObjectTracker.TrackObject(testContext.Events, obj);

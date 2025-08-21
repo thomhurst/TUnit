@@ -49,28 +49,19 @@ public static class ObjectTracker
         var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
 
         var newCount = counter.Increment();
-        var objType = obj.GetType().Name;
-        
-        // Add debug logging
-        Console.WriteLine($"[ObjectTracker] Tracking {objType} (ID: {obj.GetHashCode()}), new count: {newCount}");
 
         events.OnDispose += async (_, _) =>
         {
             var count = counter.Decrement();
-            
-            // Add debug logging
-            Console.WriteLine($"[ObjectTracker] Decrementing {objType} (ID: {obj.GetHashCode()}), new count: {count}");
 
             if (count < 0)
             {
-                throw new InvalidOperationException($"Reference count for object {objType} went below zero. This indicates a bug in the reference counting logic.");
+                throw new InvalidOperationException($"Reference count for object went below zero. This indicates a bug in the reference counting logic.");
             }
 
             if (count == 0)
             {
-                Console.WriteLine($"[ObjectTracker] Disposing {objType} (ID: {obj.GetHashCode()})");
                 await GlobalContext.Current.Disposer.DisposeAsync(obj).ConfigureAwait(false);
-                Console.WriteLine($"[ObjectTracker] Disposed {objType} (ID: {obj.GetHashCode()})");
             }
         };
     }

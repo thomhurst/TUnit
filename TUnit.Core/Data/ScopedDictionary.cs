@@ -28,7 +28,6 @@ public class ScopedDictionary<TScope>
     public void RemoveValue(object valueToRemove)
     {
         // Since GetOnlyDictionary doesn't support removal, we'll need to track this differently
-        // For now, log that this needs to be implemented
-        Console.WriteLine($"[ScopedDictionary] WARNING: RemoveValue called for {valueToRemove.GetType().Name}@{valueToRemove.GetHashCode():X8} but GetOnlyDictionary doesn't support removal");
+        // For now, this is a no-op but could be implemented if removal is needed
     }
 }
