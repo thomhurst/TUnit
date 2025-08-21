@@ -16,7 +16,8 @@ internal class Bugs2971NullableTypeTest : TestsBase
                 "TUnit.TestProject",
                 "Bugs",
                 "2971",
-                "AssemblyInfo.cs")]
+                "AssemblyInfo.cs")],
+            VerifyConfigurator = verify => verify.UniqueForTargetFrameworkAndVersion()
         },
         async generatedFiles =>
         {
