@@ -120,6 +120,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
             await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata,
                 test.Context.Events).ConfigureAwait(false);
 
+
+
             await PropertyInjectionService.InjectPropertiesAsync(
                 test.Context,
                 instance,
@@ -128,17 +130,10 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 test.Metadata.MethodMetadata,
                 test.Context.TestDetails.TestId).ConfigureAwait(false);
 
-            // Track the test instance for disposal to ensure consistency with property-injected values
-            // This ensures that test instances implementing IAsyncDisposable/IDisposable are properly disposed
-            // through the same ObjectTracker system used for other disposable objects
-            // Note: ObjectTracker.TrackObject() is idempotent - duplicate tracking is safe
             if (instance is IAsyncDisposable or IDisposable)
             {
                 ObjectTracker.TrackObject(test.Context.Events, instance);
             }
-
-            // Note: Property-injected values are already tracked within PropertyInjectionService
-            // No need to track them again here
 
             // Inject properties into test attributes BEFORE they are initialized
             // This ensures that data source generators and other attributes have their dependencies ready
@@ -281,15 +276,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
         test.EndTime = DateTimeOffset.Now;
         await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
 
-        // If a test instance was created (constructor was called), we need to dispose it
-        // even though the test was skipped, to prevent resource leaks
         var instance = test.Context.TestDetails.ClassInstance;
         if (instance != null && 
             instance is not SkippedTestInstance && 
             instance is not PlaceholderInstance)
         {
-            // For skipped tests, also ensure the test instance is tracked for disposal
-            // Note: ObjectTracker.TrackObject() is idempotent - duplicate tracking is safe
             if (instance is IAsyncDisposable or IDisposable)
             {
                 ObjectTracker.TrackObject(test.Context.Events, instance);

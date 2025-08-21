@@ -48,9 +48,7 @@ public static class ObjectTracker
 
         var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
 
-        counter.Increment();
-
-        var objType = obj.GetType().Name;
+        var newCount = counter.Increment();
 
         events.OnDispose += async (_, _) =>
         {
@@ -58,7 +56,7 @@ public static class ObjectTracker
 
             if (count < 0)
             {
-                throw new InvalidOperationException($"Reference count for object {objType} went below zero. This indicates a bug in the reference counting logic.");
+                throw new InvalidOperationException($"Reference count for object went below zero. This indicates a bug in the reference counting logic.");
             }
 
             if (count == 0)

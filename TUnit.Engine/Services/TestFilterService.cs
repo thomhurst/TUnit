@@ -10,7 +10,7 @@ using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Services;
 
-internal class TestFilterService(TUnitFrameworkLogger logger)
+internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentTrackingService testArgumentTrackingService)
 {
     public IReadOnlyCollection<AbstractExecutableTest> FilterTests(ITestExecutionFilter? testExecutionFilter, IReadOnlyCollection<AbstractExecutableTest> testNodes)
     {
@@ -75,6 +75,9 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
         };
 
         test.Context.InternalDiscoveredTest = discoveredTest;
+
+        // First, invoke the global test argument tracking service to track shared instances
+        await testArgumentTrackingService.OnTestRegistered(registeredContext);
 
         var eventObjects = test.Context.GetEligibleEventObjects();
 

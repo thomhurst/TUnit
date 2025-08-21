@@ -53,19 +53,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
     }
 
-    // Conditional compilation for event logging
-    [Conditional("ENABLE_TEST_EVENTS")]
-    private static void LogEventInvocation(string eventName, string testName)
-    {
-        Console.WriteLine($"[Event] {eventName} for test {testName}");
-    }
 
     // Fast-path checks with inlining
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public async ValueTask InvokeTestStartEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
-        LogEventInvocation("TestStart", context.TestDetails.TestName);
-
         // Fast path - no allocation if no receivers
         if (!_registry.HasTestStartReceivers())
         {
