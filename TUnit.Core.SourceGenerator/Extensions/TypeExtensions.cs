@@ -208,14 +208,28 @@ public static class TypeExtensions
 
     public static string GloballyQualified(this ISymbol typeSymbol)
     {
+        // Special handling for System.Nullable<> generic type definition first
+        // When Roslyn encounters System.Nullable<>, it displays it as "T?" which is not valid C# syntax
+        // Only apply this to the open generic type definition, not constructed types like Nullable<int>
+        if (typeSymbol is INamedTypeSymbol namedTypeSymbol)
+        {
+            // Check if this is the System.Nullable<> generic type definition with a type parameter
+            if ((namedTypeSymbol.SpecialType == SpecialType.System_Nullable_T || 
+                namedTypeSymbol.ConstructedFrom?.SpecialType == SpecialType.System_Nullable_T) &&
+                namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
+            {
+                return "global::System.Nullable<>";
+            }
+        }
+        
         // Only generate open generic form for types with unresolved type parameters
         // This ensures we get BaseClass<> for generic definitions but List<int> for constructed types
-        if(typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && 
-           namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
+        if(typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol2 && 
+           namedTypeSymbol2.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
         {
             var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix));
             typeBuilder.Append('<');
-            typeBuilder.Append(new string(',', namedTypeSymbol.TypeArguments.Length - 1));
+            typeBuilder.Append(new string(',', namedTypeSymbol2.TypeArguments.Length - 1));
             typeBuilder.Append('>');
 
             return typeBuilder.ToString();
