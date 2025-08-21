@@ -741,6 +741,9 @@ internal sealed class TestBuilder : ITestBuilder
                 Console.WriteLine($"[TrackDataSourceObjects] - {obj.GetType().Name} (ID: {obj.GetHashCode()})");
             }
         }
+        
+        // NOTE: This tracking happens during test building/discovery phase
+        // For shared instances, this ensures proper reference counting across multiple tests
         ObjectTracker.TrackObjectsForContext(context.Events, allObjects);
     }
 
