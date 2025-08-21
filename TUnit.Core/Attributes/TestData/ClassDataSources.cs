@@ -23,11 +23,6 @@ internal class ClassDataSources
             return new ClassDataSources();
         });
 
-        if (isNew)
-        {
-            Console.WriteLine($"[ClassDataSources] Created new ClassDataSources for session {sessionId}");
-        }
-
         return result;
     }
 
