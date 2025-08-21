@@ -208,34 +208,31 @@ public static class TypeExtensions
 
     public static string GloballyQualified(this ISymbol typeSymbol)
     {
-        // Special handling for System.Nullable<> generic type definition
-        // When Roslyn encounters System.Nullable<>, it displays it as "T?" which is not valid C# syntax
-        if (typeSymbol is INamedTypeSymbol namedTypeSymbol)
+        // Handle open generic types where type arguments are type parameters
+        // This prevents invalid C# like List<T>, Dictionary<TKey, TValue>, T? where type parameters are undefined
+        if (typeSymbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsGenericType)
         {
-            // Check if this is System.Nullable<T> where T is unbound/type parameter
-            if (namedTypeSymbol.SpecialType == SpecialType.System_Nullable_T ||
-                namedTypeSymbol.ConstructedFrom?.SpecialType == SpecialType.System_Nullable_T)
+            // Check if this is an unbound generic type or has type parameter arguments
+            bool hasTypeParameters = namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
+            bool isUnboundGeneric = namedTypeSymbol.IsUnboundGenericType;
+            
+            if (hasTypeParameters || isUnboundGeneric)
             {
-                // For the unbound generic case like System.Nullable<> or Nullable<T> where T is a type parameter
-                if (namedTypeSymbol.TypeArguments.Length == 1 && 
-                    namedTypeSymbol.TypeArguments[0].TypeKind == TypeKind.TypeParameter)
+                // Special case for System.Nullable<> - Roslyn displays it as "T?" even for open generic
+                if (namedTypeSymbol.SpecialType == SpecialType.System_Nullable_T ||
+                    namedTypeSymbol.ConstructedFrom?.SpecialType == SpecialType.System_Nullable_T)
                 {
                     return "global::System.Nullable<>";
                 }
-            }
-        }
-        
-        // Only generate open generic form for types with unresolved type parameters
-        // This ensures we get BaseClass<> for generic definitions but List<int> for constructed types
-        if(typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol2 && 
-           namedTypeSymbol2.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
-        {
-            var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix));
-            typeBuilder.Append('<');
-            typeBuilder.Append(new string(',', namedTypeSymbol2.TypeArguments.Length - 1));
-            typeBuilder.Append('>');
+                
+                // General case for other open generic types
+                var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix));
+                typeBuilder.Append('<');
+                typeBuilder.Append(new string(',', namedTypeSymbol.TypeArguments.Length - 1));
+                typeBuilder.Append('>');
 
-            return typeBuilder.ToString();
+                return typeBuilder.ToString();
+            }
         }
 
         return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);

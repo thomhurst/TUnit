@@ -5,7 +5,7 @@
 #pragma warning disable
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class Tests_SimpleTest_TestSource_9c97c20c9f124d82999b00e7d24a75b1 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class Tests_SimpleTest_TestSource_38be5ee0b5554088ba7b233e82649e27 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -18,7 +18,7 @@ internal sealed class Tests_SimpleTest_TestSource_9c97c20c9f124d82999b00e7d24a75
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.TestProject.Bugs._2971.SomeAttribute(typeof(T?))
+                new global::TUnit.TestProject.Bugs._2971.SomeAttribute(typeof(global::System.Nullable<>))
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -84,11 +84,11 @@ internal sealed class Tests_SimpleTest_TestSource_9c97c20c9f124d82999b00e7d24a75
         yield break;
     }
 }
-internal static class Tests_SimpleTest_ModuleInitializer_9c97c20c9f124d82999b00e7d24a75b1
+internal static class Tests_SimpleTest_ModuleInitializer_38be5ee0b5554088ba7b233e82649e27
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2971.Tests), new Tests_SimpleTest_TestSource_9c97c20c9f124d82999b00e7d24a75b1());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2971.Tests), new Tests_SimpleTest_TestSource_38be5ee0b5554088ba7b233e82649e27());
     }
 }

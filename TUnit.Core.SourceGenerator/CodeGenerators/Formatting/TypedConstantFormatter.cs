@@ -24,17 +24,6 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 
             case TypedConstantKind.Type:
                 var type = (ITypeSymbol)constant.Value!;
-                
-                // Special handling for System.Nullable<> when it would be displayed as "T?"
-                if (type is INamedTypeSymbol namedType &&
-                    (namedType.SpecialType == SpecialType.System_Nullable_T ||
-                     namedType.ConstructedFrom?.SpecialType == SpecialType.System_Nullable_T) &&
-                    namedType.TypeArguments.Length == 1 &&
-                    namedType.TypeArguments[0].TypeKind == TypeKind.TypeParameter)
-                {
-                    return "typeof(global::System.Nullable<>)";
-                }
-                
                 return $"typeof({type.GloballyQualified()})";
                 
             case TypedConstantKind.Array:
