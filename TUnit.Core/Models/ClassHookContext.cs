@@ -13,12 +13,6 @@ public class ClassHookContext : Context
         internal set => Contexts.Value = value;
     }
 
-    /// <summary>
-    /// Events context for class-level shared instances disposal.
-    /// This context is used for tracking disposable objects with SharedType.PerClass.
-    /// </summary>
-    public TestContextEvents Events { get; } = new TestContextEvents();
-
     internal ClassHookContext(AssemblyHookContext assemblyHookContext) : base(assemblyHookContext)
     {
         assemblyHookContext.AddClass(this);
