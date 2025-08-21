@@ -206,13 +206,13 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
             .Replace("\\r", "\\n");
 
         // Scrub GUIDs from class names and identifiers
-        // Pattern 1: ClassName_[32 hex chars]
-        var guidPattern1 = @"([A-Za-z_]\w*)_[a-fA-F0-9]{32}";
-        var scrubbedText = System.Text.RegularExpressions.Regex.Replace(result.ToString(), guidPattern1, "$1_GUID", System.Text.RegularExpressions.RegexOptions.None);
+        // Pattern 1: TestSource classes - ClassName_MethodName_TestSource_[32 hex chars]
+        var guidPattern1 = @"_TestSource_[a-fA-F0-9]{32}";
+        var scrubbedText = System.Text.RegularExpressions.Regex.Replace(result.ToString(), guidPattern1, "_TestSource_GUID", System.Text.RegularExpressions.RegexOptions.None);
 
-        // Pattern 2: ClassName_[standard GUID format]
-        var guidPattern2 = @"([A-Za-z_]\w*)_[a-fA-F0-9]{8}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{4}-?[a-fA-F0-9]{12}";
-        scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, guidPattern2, "$1_GUID", System.Text.RegularExpressions.RegexOptions.None);
+        // Pattern 2: ModuleInitializer classes - ClassName_MethodName_ModuleInitializer_[32 hex chars]
+        var guidPattern2 = @"_ModuleInitializer_[a-fA-F0-9]{32}";
+        scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, guidPattern2, "_ModuleInitializer_GUID", System.Text.RegularExpressions.RegexOptions.None);
 
         // Scrub file paths - Windows style (e.g., D:\\git\\TUnit\\)
         var windowsPathPattern = @"[A-Za-z]:\\\\[^""'\s,)]+";
