@@ -120,17 +120,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
             await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata,
                 test.Context.Events).ConfigureAwait(false);
 
-            // Track constructor and method arguments during test execution
-            // This ensures shared instances are properly reference-counted when the test actually starts
-            Console.WriteLine($"[SingleTestExecutor] Ensuring arguments are tracked for test execution: {test.Context.GetDisplayName()}");
-            var allArguments = test.ClassArguments.Concat(test.Arguments).Where(arg => arg != null);
-            foreach (var arg in allArguments)
-            {
-                Console.WriteLine($"[SingleTestExecutor] Ensuring tracking of {arg.GetType().Name} (ID: {arg.GetHashCode()}) for test execution");
-                // Track the argument to ensure proper disposal when this specific test ends
-                // This is especially important for shared instances that might be used by multiple tests
-                ObjectTracker.TrackObject(test.Context.Events, arg);
-            }
+
 
             await PropertyInjectionService.InjectPropertiesAsync(
                 test.Context,

@@ -76,6 +76,10 @@ internal class TestFilterService(TUnitFrameworkLogger logger)
 
         test.Context.InternalDiscoveredTest = discoveredTest;
 
+        // First, track test arguments using our dedicated tracking service
+        var argumentTrackingService = new TestArgumentTrackingService();
+        await argumentTrackingService.OnTestRegistered(registeredContext);
+
         var eventObjects = test.Context.GetEligibleEventObjects();
 
         foreach (var receiver in eventObjects.OfType<ITestRegisteredEventReceiver>())

@@ -571,7 +571,8 @@ internal sealed class TestBuilder : ITestBuilder
 
         context.TestDetails.ClassInstance = PlaceholderInstance.Instance;
 
-        TrackDataSourceObjects(context, testData.ClassData, testData.MethodData);
+        // Arguments will be tracked by TestArgumentTrackingService during TestRegistered event
+        // This ensures proper reference counting for shared instances
 
         await InvokeDiscoveryEventReceiversAsync(context);
 
@@ -729,23 +730,7 @@ internal sealed class TestBuilder : ITestBuilder
         return context;
     }
 
-    private static void TrackDataSourceObjects(TestContext context, object?[] classArguments, object?[] methodArguments)
-    {
-        // Track all objects at once with a single disposal handler
-        var allObjects = classArguments.Concat(methodArguments);
-        Console.WriteLine($"[TrackDataSourceObjects] Tracking {classArguments.Length} class args + {methodArguments.Length} method args for test {context.GetDisplayName()}");
-        foreach (var obj in allObjects)
-        {
-            if (obj != null)
-            {
-                Console.WriteLine($"[TrackDataSourceObjects] - {obj.GetType().Name} (ID: {obj.GetHashCode()})");
-            }
-        }
-        
-        // NOTE: This tracking happens during test building/discovery phase
-        // For shared instances, this ensures proper reference counting across multiple tests
-        ObjectTracker.TrackObjectsForContext(context.Events, allObjects);
-    }
+
 
     private async Task<AbstractExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
     {
