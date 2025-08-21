@@ -1695,6 +1695,7 @@ namespace .Enums
         Linux = 1,
         Windows = 2,
         MacOs = 4,
+        Browser = 8,
     }
     public enum Priority
     {
