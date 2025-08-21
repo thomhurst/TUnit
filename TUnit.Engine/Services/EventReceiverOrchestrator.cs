@@ -433,6 +433,25 @@ internal sealed class EventReceiverOrchestrator : IDisposable
                 await _logger.LogErrorAsync($"Error in last test in assembly event receiver: {ex.Message}");
             }
         }
+        
+        // Dispose assembly-level shared instances after all tests in assembly complete
+        if (assemblyContext.Events.OnDispose != null)
+        {
+            try
+            {
+                // Dispose objects in order - lower Order values first to handle dependencies correctly
+                var orderedInvocations = assemblyContext.Events.OnDispose.InvocationList.OrderBy(x => x.Order);
+                
+                foreach (var invocation in orderedInvocations)
+                {
+                    await invocation.InvokeAsync(assemblyContext, context);
+                }
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error disposing assembly-level shared instances for {assemblyContext.Assembly.GetName().Name}: {ex.Message}");
+            }
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -469,6 +488,25 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"Error in last test in class event receiver: {ex.Message}");
+            }
+        }
+        
+        // Dispose class-level shared instances after all tests in class complete
+        if (classContext.Events.OnDispose != null)
+        {
+            try
+            {
+                // Dispose objects in order - lower Order values first to handle dependencies correctly
+                var orderedInvocations = classContext.Events.OnDispose.InvocationList.OrderBy(x => x.Order);
+                
+                foreach (var invocation in orderedInvocations)
+                {
+                    await invocation.InvokeAsync(classContext, context);
+                }
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error disposing class-level shared instances for {classContext.ClassType.Name}: {ex.Message}");
             }
         }
     }

@@ -209,6 +209,15 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 // Disposal order: Objects are disposed in ascending order (lower Order values first)
                 // This ensures dependencies are disposed before their dependents
                 await TriggerDisposalEventsAsync(test.Context, "test context objects").ConfigureAwait(false);
+                
+                // Invoke last test events (which handle scope-level disposal)
+                var testClassContext = test.Context.ClassContext;
+                var testAssemblyContext = testClassContext.AssemblyContext;
+                var testSessionContext = testAssemblyContext.TestSessionContext;
+                
+                await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(test.Context, testClassContext, cancellationToken).ConfigureAwait(false);
+                await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(test.Context, testAssemblyContext, cancellationToken).ConfigureAwait(false);
+                await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(test.Context, testSessionContext, cancellationToken).ConfigureAwait(false);
             }
 
             if (test.Result == null)

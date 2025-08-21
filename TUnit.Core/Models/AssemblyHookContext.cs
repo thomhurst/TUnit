@@ -13,6 +13,12 @@ public class AssemblyHookContext : Context
         internal set => Contexts.Value = value;
     }
 
+    /// <summary>
+    /// Events context for assembly-level shared instances disposal.
+    /// This context is used for tracking disposable objects with SharedType.PerAssembly.
+    /// </summary>
+    public TestContextEvents Events { get; } = new TestContextEvents();
+
     internal AssemblyHookContext(TestSessionContext testSessionContext) : base(testSessionContext)
     {
         testSessionContext.AddAssembly(this);

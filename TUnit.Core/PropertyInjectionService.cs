@@ -325,7 +325,7 @@ public sealed class PropertyInjectionService
 
             if (value != null)
             {
-                await ProcessInjectedPropertyValue(instance, value, metadata.SetProperty, objectBag, methodMetadata, events, visitedObjects);
+                await ProcessInjectedPropertyValue(instance, value, metadata.SetProperty, objectBag, methodMetadata, events, visitedObjects, dataSource);
                 // Add to TestClassInjectedPropertyArguments for tracking
                 if (testContext != null)
                 {
@@ -366,7 +366,7 @@ public sealed class PropertyInjectionService
             if (value != null)
             {
                 var setter = CreatePropertySetter(property);
-                await ProcessInjectedPropertyValue(instance, value, setter, objectBag, methodMetadata, events, visitedObjects);
+                await ProcessInjectedPropertyValue(instance, value, setter, objectBag, methodMetadata, events, visitedObjects, dataSource);
                 // Add to TestClassInjectedPropertyArguments for tracking
                 if (testContext != null)
                 {
@@ -379,15 +379,19 @@ public sealed class PropertyInjectionService
 
     /// <summary>
     /// Processes a single injected property value: tracks it, initializes it, sets it on the instance.
+    /// For shared instances, tracks them at the appropriate scope level (class, assembly, session).
     /// </summary>
-    private static async Task ProcessInjectedPropertyValue(object instance, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, ConcurrentDictionary<object, byte> visitedObjects)
+    private static async Task ProcessInjectedPropertyValue(object instance, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, ConcurrentDictionary<object, byte> visitedObjects, IDataSourceAttribute? dataSource = null)
     {
         if (propertyValue == null)
         {
             return;
         }
 
-        ObjectTracker.TrackObject(events, propertyValue);
+        // Determine the appropriate scope for tracking based on SharedType
+        var trackingEvents = GetAppropriateTrackingEvents(dataSource, events);
+
+        ObjectTracker.TrackObject(trackingEvents, propertyValue);
         ObjectTracker.TrackOwnership(instance, propertyValue);
 
         if (ShouldInjectProperties(propertyValue))
@@ -400,6 +404,62 @@ public sealed class PropertyInjectionService
         }
         
         setProperty(instance, propertyValue);
+    }
+
+    /// <summary>
+    /// Gets the appropriate events context for tracking based on the data source's SharedType.
+    /// </summary>
+    private static TestContextEvents GetAppropriateTrackingEvents(IDataSourceAttribute? dataSource, TestContextEvents fallbackEvents)
+    {
+        // Check if this is a ClassDataSourceAttribute with specific SharedType
+        if (dataSource is ISharedDataSource sharedDataSource)
+        {
+            var sharedTypes = sharedDataSource.GetSharedTypes().ToArray();
+            if (sharedTypes.Length > 0)
+            {
+                var sharedType = sharedTypes[0]; // Use the first SharedType
+                
+                return sharedType switch
+                {
+                    SharedType.PerClass => GetClassTrackingEvents(),
+                    SharedType.PerAssembly => GetAssemblyTrackingEvents(),
+                    SharedType.PerTestSession => TestSessionContext.GlobalStaticPropertyContext.Events,
+                    _ => fallbackEvents
+                };
+            }
+        }
+
+        return fallbackEvents;
+    }
+
+    /// <summary>
+    /// Gets the events context for class-level tracking.
+    /// </summary>
+    private static TestContextEvents GetClassTrackingEvents()
+    {
+        var classContext = ClassHookContext.Current;
+        if (classContext != null)
+        {
+            return classContext.Events;
+        }
+
+        // Fallback to current test context if no class context available
+        return TestContext.Current?.Events ?? new TestContextEvents();
+    }
+
+    /// <summary>
+    /// Gets the events context for assembly-level tracking.
+    /// </summary>
+    private static TestContextEvents GetAssemblyTrackingEvents()
+    {
+        var assemblyContext = AssemblyHookContext.Current;
+        if (assemblyContext != null)
+        {
+            return assemblyContext.Events;
+        }
+
+        // Fallback to current test context if no assembly context available
+        return TestContext.Current?.Events ?? new TestContextEvents();
     }
 
     /// <summary>
@@ -599,7 +659,7 @@ public sealed class PropertyInjectionService
                         var visitedObjects = new ConcurrentDictionary<object, byte>(System.Collections.Generic.ReferenceEqualityComparer.Instance);
 #endif
                         visitedObjects.TryAdd(instance, 0); // Add the current instance to prevent re-processing
-                        await ProcessInjectedPropertyValue(instance, value, propertyInjection.Setter, objectBag, testInformation, testContext.Events, visitedObjects);
+                        await ProcessInjectedPropertyValue(instance, value, propertyInjection.Setter, objectBag, testInformation, testContext.Events, visitedObjects, propertyDataSource.DataSource);
                         // Add to TestClassInjectedPropertyArguments for tracking
                         testContext.TestDetails.TestClassInjectedPropertyArguments[propertyInjection.PropertyName] = value;
                         return; // Only use first value
