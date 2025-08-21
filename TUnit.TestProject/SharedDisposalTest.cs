@@ -39,8 +39,14 @@ public class DisposableSharedInstance : IAsyncDisposable
 }
 
 [ClassDataSource<DisposableSharedInstance>(Shared = SharedType.PerClass)]
-public class SharedDisposalTest(DisposableSharedInstance sharedInstance)
+public class SharedDisposalTest
 {
+    private readonly DisposableSharedInstance sharedInstance;
+    
+    public SharedDisposalTest(DisposableSharedInstance sharedInstance)
+    {
+        this.sharedInstance = sharedInstance;
+    }
     [Test]
     public async Task Test1_ShouldUseSharedInstance()
     {

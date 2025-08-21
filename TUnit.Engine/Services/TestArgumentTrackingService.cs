@@ -36,6 +36,6 @@ internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
             }
         }
         
-        return ValueTask.CompletedTask;
+        return default(ValueTask);
     }
 }

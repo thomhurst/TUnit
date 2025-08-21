@@ -58,8 +58,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public async ValueTask InvokeTestStartEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
-        LogEventInvocation("TestStart", context.TestDetails.TestName);
-
         // Fast path - no allocation if no receivers
         if (!_registry.HasTestStartReceivers())
         {
