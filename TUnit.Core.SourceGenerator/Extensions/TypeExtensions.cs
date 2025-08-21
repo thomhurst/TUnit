@@ -208,17 +208,20 @@ public static class TypeExtensions
 
     public static string GloballyQualified(this ISymbol typeSymbol)
     {
-        // Special handling for System.Nullable<> generic type definition first
+        // Special handling for System.Nullable<> generic type definition
         // When Roslyn encounters System.Nullable<>, it displays it as "T?" which is not valid C# syntax
-        // Only apply this to the open generic type definition, not constructed types like Nullable<int>
         if (typeSymbol is INamedTypeSymbol namedTypeSymbol)
         {
-            // Check if this is the System.Nullable<> generic type definition with a type parameter
-            if ((namedTypeSymbol.SpecialType == SpecialType.System_Nullable_T || 
-                namedTypeSymbol.ConstructedFrom?.SpecialType == SpecialType.System_Nullable_T) &&
-                namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
+            // Check if this is System.Nullable<T> where T is unbound/type parameter
+            if (namedTypeSymbol.SpecialType == SpecialType.System_Nullable_T ||
+                namedTypeSymbol.ConstructedFrom?.SpecialType == SpecialType.System_Nullable_T)
             {
-                return "global::System.Nullable<>";
+                // For the unbound generic case like System.Nullable<> or Nullable<T> where T is a type parameter
+                if (namedTypeSymbol.TypeArguments.Length == 1 && 
+                    namedTypeSymbol.TypeArguments[0].TypeKind == TypeKind.TypeParameter)
+                {
+                    return "global::System.Nullable<>";
+                }
             }
         }
         
