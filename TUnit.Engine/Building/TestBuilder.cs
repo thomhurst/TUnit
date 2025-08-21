@@ -733,6 +733,14 @@ internal sealed class TestBuilder : ITestBuilder
     {
         // Track all objects at once with a single disposal handler
         var allObjects = classArguments.Concat(methodArguments);
+        Console.WriteLine($"[TrackDataSourceObjects] Tracking {classArguments.Length} class args + {methodArguments.Length} method args for test {context.GetDisplayName()}");
+        foreach (var obj in allObjects)
+        {
+            if (obj != null)
+            {
+                Console.WriteLine($"[TrackDataSourceObjects] - {obj.GetType().Name} (ID: {obj.GetHashCode()})");
+            }
+        }
         ObjectTracker.TrackObjectsForContext(context.Events, allObjects);
     }
 

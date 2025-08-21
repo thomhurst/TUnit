@@ -628,8 +628,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         if (context.Events.OnDispose == null)
         {
+            Console.WriteLine($"[TriggerDisposalEventsAsync] No disposal events for {operationName}");
             return;
         }
+
+        Console.WriteLine($"[TriggerDisposalEventsAsync] Triggering disposal events for {operationName}, {context.Events.OnDispose.InvocationList.Length} handlers");
 
         var disposalExceptions = new List<Exception>();
 
@@ -642,7 +645,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 try
                 {
+                    Console.WriteLine($"[TriggerDisposalEventsAsync] Invoking disposal handler for {operationName}");
                     await invocation.InvokeAsync(context, context).ConfigureAwait(false);
+                    Console.WriteLine($"[TriggerDisposalEventsAsync] Completed disposal handler for {operationName}");
                 }
                 catch (Exception ex)
                 {
