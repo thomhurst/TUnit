@@ -102,7 +102,17 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         // For discovery requests (IDE test explorers), return all tests including explicit ones
         // For execution requests, apply filtering to exclude explicit tests unless explicitly targeted
-        var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, tests) : tests;
+        IReadOnlyCollection<AbstractExecutableTest> filteredTests;
+        if (isForExecution)
+        {
+            // Apply filtering for execution
+            filteredTests = _testFilterService.FilterTests(filter, tests);
+        }
+        else
+        {
+            // Return all tests for discovery - no filtering should be applied
+            filteredTests = tests;
+        }
 
         // If we applied filtering, find all dependencies of filtered tests and add them
         if (isForExecution)
