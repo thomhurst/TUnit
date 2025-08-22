@@ -24,7 +24,7 @@ public class Shared
     public async Task Test3(Disposable disposable)
     {
         var test1 = TestContext.Current!.GetTests(nameof(Test1))[0];
-        var previousDisposable = (AsyncDisposable) test1.TestDetails.TestMethodArguments[0]!;
+        var previousDisposable = (Disposable) test1.TestDetails.TestMethodArguments[0]!;
 
         await Assert.That(disposable).IsSameReferenceAs(previousDisposable);
     }
