@@ -58,6 +58,10 @@
         </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="ObjectTracking\Tests\MethodArgs\" />
+    </ItemGroup>
+
     <Import Project="..\TestProject.targets" />
     <Import Project="..\SourceGenerationDebug.props" />
 

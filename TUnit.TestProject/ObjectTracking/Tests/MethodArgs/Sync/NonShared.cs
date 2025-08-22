@@ -1,9 +1,9 @@
-﻿namespace TUnit.TestProject.ObjectTracking.Tests.Sync;
+﻿namespace TUnit.TestProject.ObjectTracking.Tests.MethodArgs.Sync;
 
-public class Shared
+public class NonShared
 {
     [Test]
-    [ClassDataSource<Disposable>(Shared = SharedType.PerClass)]
+    [ClassDataSource<Disposable>]
     public void Test1(Disposable disposable)
     {
     }
@@ -15,7 +15,7 @@ public class Shared
         var test1 = TestContext.Current!.GetTests(nameof(Test1))[0];
         var disposable = (Disposable) test1.TestDetails.TestMethodArguments[0]!;
 
-        await Assert.That(disposable.IsDisposed).IsFalse();
+        await Assert.That(disposable.IsDisposed).IsTrue();
     }
 
     [Test]
@@ -26,15 +26,15 @@ public class Shared
         var test1 = TestContext.Current!.GetTests(nameof(Test1))[0];
         var previousDisposable = (Disposable) test1.TestDetails.TestMethodArguments[0]!;
 
-        await Assert.That(disposable).IsSameReferenceAs(previousDisposable);
+        await Assert.That(disposable).IsNotSameReferenceAs(previousDisposable);
     }
 
     [DependsOn(nameof(Test3))]
     [Test]
     public async Task AssertExpectedDisposed2()
     {
-        var test1 = TestContext.Current!.GetTests(nameof(Test3))[0];
-        var disposable = (Disposable) test1.TestDetails.TestMethodArguments[0]!;
+        var test3 = TestContext.Current!.GetTests(nameof(Test3))[0];
+        var disposable = (Disposable) test3.TestDetails.TestMethodArguments[0]!;
 
         await Assert.That(disposable.IsDisposed).IsTrue();
     }

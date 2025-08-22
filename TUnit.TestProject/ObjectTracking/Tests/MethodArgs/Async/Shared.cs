@@ -1,4 +1,4 @@
-﻿namespace TUnit.TestProject.ObjectTracking.Tests.Async;
+﻿namespace TUnit.TestProject.ObjectTracking.Tests.MethodArgs.Async;
 
 public class Shared
 {

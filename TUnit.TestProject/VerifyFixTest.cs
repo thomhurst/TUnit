@@ -1,7 +1,4 @@
-using System.Threading.Tasks;
-using TUnit.Core;
-
-namespace VerifyFix
+namespace TUnit.TestProject
 {
     public sealed class VerifyFixTest
     {
