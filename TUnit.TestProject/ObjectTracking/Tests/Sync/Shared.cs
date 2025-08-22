@@ -21,8 +21,12 @@ public class Shared
     [Test]
     [DependsOn(nameof(AssertExpectedDisposed))]
     [ClassDataSource<Disposable>(Shared = SharedType.PerClass)]
-    public void Test3(Disposable disposable)
+    public async Task Test3(Disposable disposable)
     {
+        var test1 = TestContext.Current!.GetTests(nameof(Test1))[0];
+        var previousDisposable = (AsyncDisposable) test1.TestDetails.TestMethodArguments[0]!;
+
+        await Assert.That(disposable).IsSameReferenceAs(previousDisposable);
     }
 
     [DependsOn(nameof(Test3))]
