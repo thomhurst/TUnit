@@ -57,7 +57,7 @@
         <PackageVersion Include="NUnit3TestAdapter" Version="5.1.0" />
         <PackageVersion Include="OneOf" Version="3.0.271" />
         <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
-        <PackageVersion Include="Polly" Version="8.6.2" />
+        <PackageVersion Include="Polly" Version="8.6.3" />
         <PackageVersion Include="Polyfill" Version="8.8.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
