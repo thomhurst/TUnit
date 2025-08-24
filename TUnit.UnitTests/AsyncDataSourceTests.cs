@@ -74,6 +74,15 @@ public class AsyncDataSourceTests
         await Assert.That(text).Contains("hundred");
     }
 
+    [Test]
+    [MethodDataSource(nameof(AsyncEnumerableDataSource))]
+    public async Task TestWithAsyncEnumerableDataSource(int value, string text)
+    {
+        await Assert.That(value).IsGreaterThan(0);
+        await Assert.That(text).IsNotNull();
+        await Assert.That(text).IsNotEmpty();
+    }
+
 
 }
 

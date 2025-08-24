@@ -978,6 +978,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool IsAsyncEnumerable(ITypeSymbol type)
     {
+        // Check if the type itself is an IAsyncEnumerable<T>
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType && 
+            namedType.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>")
+        {
+            return true;
+        }
+
+        // Check if the type implements IAsyncEnumerable<T>
         return type.AllInterfaces.Any(i =>
             i.IsGenericType &&
             i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>");
