@@ -14,7 +14,7 @@ public class NonShared
     [Test]
     public async Task AssertExpectedDisposed()
     {
-        var test1 = (Shared)TestContext.Current!.GetTests(nameof(Test1))[0].TestDetails.ClassInstance;
+        var test1 = (NonShared)TestContext.Current!.GetTests(nameof(Test1))[0].TestDetails.ClassInstance;
         var disposable = test1.AsyncDisposable;
 
         await Assert.That(disposable.IsDisposed).IsTrue();
@@ -24,7 +24,7 @@ public class NonShared
     [DependsOn(nameof(AssertExpectedDisposed))]
     public async Task Test3()
     {
-        var test1 = (Shared)TestContext.Current!.GetTests(nameof(Test1))[0].TestDetails.ClassInstance;
+        var test1 = (NonShared)TestContext.Current!.GetTests(nameof(Test1))[0].TestDetails.ClassInstance;
         var disposable = test1.AsyncDisposable;
 
         await Assert.That(disposable).IsNotSameReferenceAs(AsyncDisposable);
