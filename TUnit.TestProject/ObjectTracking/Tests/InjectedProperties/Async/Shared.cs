@@ -2,8 +2,8 @@
 
 public class Shared
 {
-    [ClassDataSource<AsyncDisposable>(Shared = SharedType.PerClass)]
-    public required AsyncDisposable AsyncDisposable { get; init; }
+    [ClassDataSource<Disposable>(Shared = SharedType.PerClass)]
+    public required AsyncDisposable Disposable { get; init; }
 
     [Test]
     public void Test1()
@@ -15,7 +15,7 @@ public class Shared
     public async Task AssertExpectedDisposed()
     {
         var test1 = (Shared)TestContext.Current!.GetTests(nameof(Test1))[0].TestDetails.ClassInstance;
-        var disposable = test1.AsyncDisposable;
+        var disposable = test1.Disposable;
 
         await Assert.That(disposable.IsDisposed).IsFalse();
     }
@@ -25,18 +25,22 @@ public class Shared
     public async Task Test3()
     {
         var test1 = (Shared)TestContext.Current!.GetTests(nameof(Test1))[0].TestDetails.ClassInstance;
-        var disposable = test1.AsyncDisposable;
+        var disposable = test1.Disposable;
 
-        await Assert.That(disposable).IsSameReferenceAs(AsyncDisposable);
+        await Assert.That(disposable).IsSameReferenceAs(Disposable);
     }
 
-    [DependsOn(nameof(Test3))]
-    [Test]
-    public async Task AssertExpectedDisposed2()
+    [After(Class)]
+    public static async Task AssertExpectedDisposed2(ClassHookContext classHookContext)
     {
-        var test3 = TestContext.Current!.GetTests(nameof(Test3))[0];
-        var disposable = (AsyncDisposable) test3.TestDetails.TestMethodArguments[0]!;
+        var tests = classHookContext.Tests;
+        var test1 = (Shared)tests.FirstOrDefault(x => x.TestName == nameof(Test1))!.TestDetails.ClassInstance;
+        var test3 = (Shared)tests.FirstOrDefault(x => x.TestName == nameof(Test3))!.TestDetails.ClassInstance;
 
-        await Assert.That(disposable.IsDisposed).IsTrue();
+        var disposable1 = test1.Disposable;
+        var disposable3 = test3.Disposable;
+
+        await Assert.That(disposable3).IsSameReferenceAs(disposable1);
+        await Assert.That(disposable3.IsDisposed).IsTrue();
     }
 }
