@@ -14,20 +14,19 @@ public class Shared
     [Test]
     public async Task AssertExpectedDisposed()
     {
-        var test1 = (Shared)TestContext.Current!.GetTests(nameof(Test1))[0].TestDetails.ClassInstance;
-        var disposable = test1.Disposable;
-
-        await Assert.That(disposable.IsDisposed).IsFalse();
+        // Access the shared object from our own instance, not from Test1's instance
+        await Assert.That(Disposable.IsDisposed).IsFalse();
     }
 
     [Test]
     [DependsOn(nameof(AssertExpectedDisposed))]
     public async Task Test3()
     {
+        // Get the shared object from Test1's instance to verify it's the same reference
         var test1 = (Shared)TestContext.Current!.GetTests(nameof(Test1))[0].TestDetails.ClassInstance;
-        var disposable = test1.Disposable;
+        var disposable1 = test1.Disposable;
 
-        await Assert.That(disposable).IsSameReferenceAs(Disposable);
+        await Assert.That(Disposable).IsSameReferenceAs(disposable1);
     }
 
     [After(Class)]

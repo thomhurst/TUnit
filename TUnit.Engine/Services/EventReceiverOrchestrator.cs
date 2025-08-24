@@ -387,6 +387,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
                 await _logger.LogErrorAsync($"Error disposing global static property context: {ex.Message}");
             }
         }
+
+        // Clear SharedType.PerTestSession cached instances when session ends
+        TestDataContainer.ClearGlobalScope();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -425,6 +428,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
                 await _logger.LogErrorAsync($"Error in last test in assembly event receiver: {ex.Message}");
             }
         }
+
+        // Clear SharedType.PerAssembly cached instances when assembly ends
+        TestDataContainer.ClearAssemblyScope(context.TestDetails.ClassType.Assembly);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -433,14 +439,24 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         ClassHookContext classContext,
         CancellationToken cancellationToken)
     {
+        Console.WriteLine($"[EventReceiverOrchestrator] InvokeLastTestInClassEventReceiversAsync called for {classContext.ClassType.Name}");
+        
         if (!_registry.HasLastTestInClassReceivers())
         {
+            Console.WriteLine($"[EventReceiverOrchestrator] No last test in class receivers for {classContext.ClassType.Name}");
             return;
         }
 
         var classType = classContext.ClassType;
-        if (_classTestCounts.AddOrUpdate(classType, 0, (_, count) => count - 1) == 0)
+        var count = _classTestCounts.AddOrUpdate(classType, 0, (_, count) => count - 1);
+        Console.WriteLine($"[EventReceiverOrchestrator] Class test count for {classType.Name} is now {count}");
+        
+        if (count == 0)
         {
+            Console.WriteLine($"[EventReceiverOrchestrator] Last test in class {classType.Name} - disposing shared objects");
+            // Dispose SharedType.PerClass objects BEFORE running After(Class) hooks
+            TestDataContainer.ClearClassScope(classType);
+            
             await InvokeLastTestInClassEventReceiversCore(context, classContext, cancellationToken);
         }
     }

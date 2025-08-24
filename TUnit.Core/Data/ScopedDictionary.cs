@@ -2,6 +2,11 @@
 
 namespace TUnit.Core.Data;
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using TUnit.Core.Tracking;
+
 public class ScopedDictionary<TScope>
     where TScope : notnull
 {
@@ -13,12 +18,27 @@ public class ScopedDictionary<TScope>
 
         var obj = innerDictionary.GetOrAdd(type, factory);
 
-        ObjectTracker.OnDisposed(obj, () =>
+        // Mark shared objects so ObjectTracker knows not to dispose them immediately
+        if (obj != null)
         {
-            innerDictionary.Remove(type);
-        });
+            ObjectTracker.MarkAsShared(obj);
+        }
 
         return obj;
+    }
+
+    public void ClearScope(TScope scope)
+    {
+        _scopedContainers.Remove(scope);
+    }
+
+    public IEnumerable<object?> GetScopeValues(TScope scope)
+    {
+        if (_scopedContainers.TryGetValue(scope, out var innerDictionary))
+        {
+            return innerDictionary.Values;
+        }
+        return Enumerable.Empty<object?>();
     }
 
 }
