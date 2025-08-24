@@ -2,7 +2,7 @@
 
 public class Shared
 {
-    [ClassDataSource<Disposable>(Shared = SharedType.PerClass)]
+    [ClassDataSource<AsyncDisposable>(Shared = SharedType.PerClass)]
     public required AsyncDisposable Disposable { get; init; }
 
     [Test]
