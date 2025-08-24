@@ -73,6 +73,13 @@ public class AotConverterGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Skip conversion operators for types that are not accessible from generated code
+        // Private and internal types cannot be accessed from the TUnit.Generated namespace
+        if (!IsAccessibleFromGeneratedCode(containingType) || !IsAccessibleFromGeneratedCode(targetType))
+        {
+            return null;
+        }
+
         return new ConversionInfo
         {
             ContainingType = containingType,
@@ -81,6 +88,27 @@ public class AotConverterGenerator : IIncrementalGenerator
             IsImplicit = isImplicit,
             MethodSymbol = methodSymbol
         };
+    }
+
+    /// <summary>
+    /// Determines if a type is accessible from the generated code in TUnit.Generated namespace
+    /// </summary>
+    private static bool IsAccessibleFromGeneratedCode(ITypeSymbol typeSymbol)
+    {
+        // Public types are always accessible
+        if (typeSymbol.DeclaredAccessibility == Accessibility.Public)
+        {
+            return true;
+        }
+
+        // Internal types are accessible within the same assembly
+        if (typeSymbol.DeclaredAccessibility == Accessibility.Internal)
+        {
+            return true;
+        }
+
+        // Private, protected, and other restricted types are not accessible
+        return false;
     }
 
     private void GenerateConverters(SourceProductionContext context, ImmutableArray<ConversionInfo> conversions)
@@ -131,12 +159,30 @@ public class AotConverterGenerator : IIncrementalGenerator
             writer.Indent();
             
             writer.AppendLine("if (value == null) return null;");
-            writer.AppendLine($"if (value is {sourceTypeName} typedValue)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine($"return ({targetTypeName})typedValue;");
-            writer.Unindent();
-            writer.AppendLine("}");
+            
+            // Handle nullable types in pattern matching
+            var underlyingSourceType = conversion.SourceType.GetNullableUnderlyingType();
+            if (underlyingSourceType != null)
+            {
+                // For nullable types, pattern match against the underlying type and handle null separately
+                var underlyingTypeName = underlyingSourceType.GloballyQualified();
+                writer.AppendLine($"if (value is {underlyingTypeName} underlyingValue)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"return ({targetTypeName})({sourceTypeName})underlyingValue;");
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
+            else
+            {
+                // For non-nullable types, use standard pattern matching
+                writer.AppendLine($"if (value is {sourceTypeName} typedValue)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"return ({targetTypeName})typedValue;");
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
             writer.AppendLine("return value; // Return original value if type doesn't match");
             
             writer.Unindent();
