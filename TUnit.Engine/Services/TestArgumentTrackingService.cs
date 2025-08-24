@@ -30,8 +30,9 @@ internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
         {
             if (obj != null)
             {
-                // Track each argument - for shared instances, this increments the reference count
+                // Track each argument - this increments the reference count
                 // When the test ends, the count will be decremented via the test's Events.OnDispose
+                // The ObjectTracker will prevent double-tracking within the same test context
                 ObjectTracker.TrackObject(testContext.Events, obj);
             }
         }

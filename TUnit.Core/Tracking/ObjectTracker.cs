@@ -18,6 +18,9 @@ public static class ObjectTracker
     private static readonly ConcurrentDictionary<object, HashSet<object>> _ownedObjects = new();
     private static readonly ConcurrentDictionary<object, bool> _disposalCallbackRegistered = new();
     private static readonly ConcurrentDictionary<object, bool> _disposalInProgress = new();
+    
+    // Track which objects have already been tracked for each test context to prevent double-tracking
+    private static readonly ConcurrentDictionary<TestContextEvents, HashSet<object>> _contextTrackedObjects = new();
 
     /// <summary>
     /// Tracks multiple objects for a test context and registers a single disposal handler.
@@ -46,13 +49,45 @@ public static class ObjectTracker
             return;
         }
 
+        // Get or create the set of tracked objects for this test context
+        var contextTrackedSet = _contextTrackedObjects.GetOrAdd(events, _ => new HashSet<object>());
+        
+        // Check if we've already tracked this object for this test context
+        // This prevents double-tracking within the same test (e.g., as constructor arg AND as property)
+        bool alreadyTracked;
+        lock (contextTrackedSet)
+        {
+            alreadyTracked = !contextTrackedSet.Add(obj);
+        }
+        
+        if (alreadyTracked)
+        {
+            Console.WriteLine($"[ObjectTracker] Skipping duplicate tracking for {obj.GetType().Name} (hash: {obj.GetHashCode()}) in same test context");
+            return;
+        }
+
         var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
 
         var newCount = counter.Increment();
+        
+        // Console output for debugging
+        Console.WriteLine($"[ObjectTracker] Incremented count for {obj.GetType().Name} (hash: {obj.GetHashCode()}) to {newCount}");
 
-        events.OnDispose += async (_, _) =>
+        // Register a single disposal handler for this object in this context
+        bool handlerRegistered = false;
+        events.OnDispose += async (object sender, TestContext context) =>
         {
+            // Ensure we only decrement once per disposal event
+            if (handlerRegistered)
+            {
+                return;
+            }
+            handlerRegistered = true;
+            
             var count = counter.Decrement();
+            
+            // Console output for debugging
+            Console.WriteLine($"[ObjectTracker] Decremented count for {obj.GetType().Name} (hash: {obj.GetHashCode()}) to {count}");
 
             if (count < 0)
             {
@@ -61,9 +96,20 @@ public static class ObjectTracker
 
             if (count == 0)
             {
+                Console.WriteLine($"[ObjectTracker] Disposing {obj.GetType().Name} (hash: {obj.GetHashCode()})");
                 await GlobalContext.Current.Disposer.DisposeAsync(obj).ConfigureAwait(false);
+                _trackedObjects.TryRemove(obj, out _);
+                Console.WriteLine($"[ObjectTracker] Disposed {obj.GetType().Name} (hash: {obj.GetHashCode()})");
             }
         };
+        
+        // Clean up the context tracking when the test is done (do this separately to ensure it happens)
+        Func<object, TestContext, ValueTask> cleanupHandler = (object sender, TestContext context) =>
+        {
+            _contextTrackedObjects.TryRemove(events, out _);
+            return default(ValueTask);
+        };
+        events.OnDispose += cleanupHandler;
     }
 
     /// <summary>

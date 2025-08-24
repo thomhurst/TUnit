@@ -34,8 +34,8 @@ public class NonShared
     [Test]
     public async Task AssertExpectedDisposed2()
     {
-        var test3 = TestContext.Current!.GetTests(nameof(Test3))[0];
-        var disposable = (Disposable) test3.TestDetails.TestMethodArguments[0]!;
+        var test3 = (NonShared)TestContext.Current!.GetTests(nameof(Test3))[0].TestDetails.ClassInstance;
+        var disposable = test3.Disposable;
 
         await Assert.That(disposable.IsDisposed).IsTrue();
     }
