@@ -117,7 +117,7 @@ public class FrameworkVersionColumn : IColumn
                 {
                     var content = File.ReadAllText(packagesPropsPath);
                     var match = System.Text.RegularExpressions.Regex.Match(content, 
-                        @"<PackageVersion\s+Include=""xunit""\s+Version=""([^""]+)""");
+                        @"<PackageVersion\s+Include=""xunit\.v3\.extensibility\.core""\s+Version=""([^""]+)""");
                     if (match.Success)
                     {
                         return match.Groups[1].Value;
