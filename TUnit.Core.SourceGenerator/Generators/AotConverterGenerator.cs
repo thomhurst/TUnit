@@ -74,7 +74,6 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
 
         // Skip conversion operators for types that are not accessible from generated code
-        // Private and internal types cannot be accessed from the TUnit.Generated namespace
         if (!IsAccessibleFromGeneratedCode(containingType) || !IsAccessibleFromGeneratedCode(targetType))
         {
             return null;
