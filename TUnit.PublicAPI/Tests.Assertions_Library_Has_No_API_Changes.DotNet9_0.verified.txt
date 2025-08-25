@@ -79,6 +79,7 @@ namespace
     {
         public CompareOptions() { }
         public . EquivalencyKind { get; set; }
+        public [] MemberTypesToIgnore { get; init; }
         public string[] MembersToIgnore { get; init; }
     }
     public class ComparisonFailure : <.ComparisonFailure>
@@ -822,9 +823,11 @@ namespace .
     {
         public ..DateTimeOffsetEqualToAssertionBuilderWrapper Within( tolerance, [.("tolerance")] string doNotPopulateThis = "") { }
     }
-    public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : .<TActual>
+    public class EquivalentToAssertionBuilderWrapper<[.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties | ..NonPublicProperties)]  TActual, [.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties | ..NonPublicProperties)]  TExpected> : .<TActual>
     {
         public ..EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMember(string propertyName, [.("propertyName")] string doNotPopulateThis = "") { }
+        public ..EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMembersOfType( type) { }
+        public ..EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMembersOfType<T>() { }
         public ..EquivalentToAssertionBuilderWrapper<TActual, TExpected> WithPartialEquivalency() { }
     }
     public class GenericEqualToAssertionBuilderWrapper<TActual> : .<TActual> { }
@@ -835,9 +838,11 @@ namespace .
         public ..NotBetweenAssertionBuilderWrapper<TActual> WithExclusiveBounds() { }
         public ..NotBetweenAssertionBuilderWrapper<TActual> WithInclusiveBounds() { }
     }
-    public class NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> : .<TActual>
+    public class NotEquivalentToAssertionBuilderWrapper<[.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties | ..NonPublicProperties)]  TActual, [.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties | ..NonPublicProperties)]  TExpected> : .<TActual>
     {
         public ..NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMember(string propertyName, [.("propertyName")] string doNotPopulateThis = "") { }
+        public ..NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMembersOfType( type) { }
+        public ..NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMembersOfType<T>() { }
         public ..NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> WithPartialEquivalency() { }
     }
     public class NotNullAssertionBuilderWrapper<TActual> : .<TActual>
@@ -1028,6 +1033,8 @@ namespace ..Conditions
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TActual? actualValue, TExpected? expectedValue) { }
         public void IgnoringMember(string fieldName) { }
+        public void IgnoringMembersOfType( type) { }
+        public void IgnoringMembersOfType<T>() { }
     }
     public class NotAssignableFromExpectedValueAssertCondition<TActual> : .<TActual>
     {
@@ -1060,6 +1067,8 @@ namespace ..Conditions
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TActual? actualValue, TExpected? expectedValue) { }
         public void IgnoringMember(string fieldName) { }
+        public void IgnoringMembersOfType( type) { }
+        public void IgnoringMembersOfType<T>() { }
     }
     public class NotSameReferenceExpectedValueAssertCondition<TActual, TExpected> : .<TActual, TExpected>
     {
