@@ -38,11 +38,11 @@
         <PackageVersion Include="Microsoft.Playwright" Version="1.54.0" />
         <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="9.0.304" />
         <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.14.2" />
-        <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="1.8.2" />
-        <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="1.8.2" />
-        <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.8.2" />
-        <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.8.2" />
-        <PackageVersion Include="Microsoft.Testing.Platform" Version="1.8.2" />
+        <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="1.8.3" />
+        <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="1.8.3" />
+        <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="1.8.3" />
+        <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="1.8.3" />
+        <PackageVersion Include="Microsoft.Testing.Platform" Version="1.8.3" />
         <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.4.3" />
         <PackageVersion Include="System.Threading.Channels" Version="9.0.0" />
         <PackageVersion Include="ModularPipelines.DotNet" Version="2.47.8" />
