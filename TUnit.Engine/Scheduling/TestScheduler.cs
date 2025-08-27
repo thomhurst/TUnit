@@ -216,24 +216,23 @@ internal sealed class TestScheduler : ITestScheduler
         AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)
     {
-        var testsByClass = tests
-            .GroupBy(t => t.Context.TestDetails.ClassType)
+        // For tests with no constraint keys, they should run completely sequentially
+        // across all classes, not just within each class.
+        // We need to ensure only one test is running at a time.
+        var allTests = tests
+            .OrderByDescending(t => t.Context.ExecutionPriority)
+            .ThenBy(t =>
+            {
+                var constraint = t.Context.ParallelConstraint as NotInParallelConstraint;
+                return constraint?.Order ?? int.MaxValue / 2;
+            })
             .ToList();
 
-        foreach (var classGroup in testsByClass)
+        // Execute tests one by one to ensure they don't run in parallel
+        // Only access ExecutionTask when we're ready to run that specific test
+        foreach (var test in allTests)
         {
-            var classTests = classGroup
-                .OrderBy(t =>
-                {
-                    var constraint = t.Context.ParallelConstraint as NotInParallelConstraint;
-                    return constraint?.Order ?? int.MaxValue / 2;
-                })
-                .ToList();
-
-            foreach (var test in classTests)
-            {
-                await test.ExecutionTask.ConfigureAwait(false);
-            }
+            await test.ExecutionTask.ConfigureAwait(false);
         }
     }
 
