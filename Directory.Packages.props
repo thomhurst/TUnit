@@ -78,7 +78,7 @@
         <PackageVersion Include="System.CommandLine" Version="2.0.0-beta7.25380.108" />
         <PackageVersion Include="System.Text.Json" Version="9.0.0" />
         <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
-        <PackageVersion Include="Testcontainers.Kafka" Version="4.6.0" />
+        <PackageVersion Include="Testcontainers.Kafka" Version="4.7.0" />
         <PackageVersion Include="Testcontainers.PostgreSql" Version="4.7.0" />
         <PackageVersion Include="Testcontainers.Redis" Version="4.6.0" />
         <PackageVersion Include="trxparser" Version="0.5.0" />
