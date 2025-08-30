@@ -30,7 +30,11 @@ public abstract record HookMethod
     /// </summary>
     public TimeSpan? Timeout { get; internal set; } = TimeSpan.FromMinutes(5);
 
-    public required IHookExecutor HookExecutor { get; init; }
+    /// <summary>
+    /// Gets or sets the hook executor for this hook method. This will be set during hook registration
+    /// by the event receiver infrastructure if a HookExecutorAttribute is present.
+    /// </summary>
+    public required IHookExecutor HookExecutor { get; set; }
 
     public required int Order { get; init; }
     

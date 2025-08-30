@@ -21,6 +21,7 @@ public static class TestDataCollectorFactory
         }
         else
         {
+            ReflectionHookDiscoveryService.DiscoverHooks();
             return new ReflectionTestDataCollector();
         }
     }
@@ -40,7 +41,7 @@ public static class TestDataCollectorFactory
             return aotCollector;
         }
 
-        // Fall back to reflection mode
+        ReflectionHookDiscoveryService.DiscoverHooks();
         return new ReflectionTestDataCollector();
     }
 }
