@@ -164,9 +164,9 @@ public static class TupleArgumentHelper
                     }
                     else if (remainingArgCount == 1)
                     {
-                        // Single argument for params - can pass directly or as array
-                        var singleArgExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{paramsParam.Type.GloballyQualified()}>({argumentsArrayName}[{regularParamCount}])";
-                        argumentExpressions.Add(singleArgExpression);
+                        // Single argument for params - create array containing the single element
+                        var singleElementExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[{regularParamCount}])";
+                        argumentExpressions.Add($"new {elementType.GloballyQualified()}[] {{ {singleElementExpression} }}");
                     }
                     else
                     {
