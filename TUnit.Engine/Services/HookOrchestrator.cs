@@ -27,7 +27,15 @@ internal sealed class HookOrchestrator
     private readonly ConcurrentDictionary<string, Counter> _assemblyTestCounts = new();
     private readonly ConcurrentDictionary<Type, Counter> _classTestCounts = new();
     
-    // Cache whether hooks exist to avoid unnecessary collection
+    // Global cache for hook existence checks to avoid repeated expensive operations
+    private static readonly ConcurrentDictionary<Type, bool> _globalBeforeEveryTestHookCache = new();
+    private static readonly ConcurrentDictionary<Type, bool> _globalAfterEveryTestHookCache = new();
+    private static readonly ConcurrentDictionary<Type, bool> _globalBeforeClassHookCache = new();
+    private static readonly ConcurrentDictionary<Type, bool> _globalAfterClassHookCache = new();
+    private static readonly ConcurrentDictionary<Assembly, bool> _globalBeforeAssemblyHookCache = new();
+    private static readonly ConcurrentDictionary<Assembly, bool> _globalAfterAssemblyHookCache = new();
+    
+    // Cache initialization tasks for assemblies/classes
     private readonly GetOnlyDictionary<Type, Task<bool>> _hasBeforeEveryTestHooks = new();
     private readonly GetOnlyDictionary<Type, Task<bool>> _hasAfterEveryTestHooks = new();
     
@@ -239,10 +247,11 @@ internal sealed class HookOrchestrator
 
         // Note: Test counts are pre-registered in RegisterTests(), no increment here
 
-        // Fast path: check if we need to run hooks at all
-        var hasHooks = await _hasBeforeEveryTestHooks.GetOrAdd(testClassType, async _ => 
+        // Use global cache to check if hooks exist for this type
+        var hasHooks = _globalBeforeEveryTestHookCache.GetOrAdd(testClassType, type =>
         {
-            var hooks = await _hookCollectionService.CollectBeforeEveryTestHooksAsync(testClassType).ConfigureAwait(false);
+            // This will be called synchronously only once per type
+            var hooks = _hookCollectionService.CollectBeforeEveryTestHooksAsync(type).GetAwaiter().GetResult();
             return hooks.Count > 0;
         });
 
@@ -289,10 +298,10 @@ internal sealed class HookOrchestrator
         var assemblyName = testClassType.Assembly.GetName().Name ?? "Unknown";
         var exceptions = new List<Exception>();
 
-        // Fast path: check if we have hooks to execute
-        var hasHooks = await _hasAfterEveryTestHooks.GetOrAdd(testClassType, async _ =>
+        // Use global cache to check if hooks exist for this type
+        var hasHooks = _globalAfterEveryTestHookCache.GetOrAdd(testClassType, type =>
         {
-            var hooks = await _hookCollectionService.CollectAfterEveryTestHooksAsync(testClassType).ConfigureAwait(false);
+            var hooks = _hookCollectionService.CollectAfterEveryTestHooksAsync(type).GetAwaiter().GetResult();
             return hooks.Count > 0;
         });
 
@@ -365,6 +374,19 @@ internal sealed class HookOrchestrator
 
     private async Task<ExecutionContext?> ExecuteBeforeAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
+        // Check global cache first to avoid expensive hook collection
+        var hasHooks = _globalBeforeAssemblyHookCache.GetOrAdd(assembly, asm =>
+        {
+            var hooks = _hookCollectionService.CollectBeforeAssemblyHooksAsync(asm).GetAwaiter().GetResult();
+            var everyHooks = _hookCollectionService.CollectBeforeEveryAssemblyHooksAsync().GetAwaiter().GetResult();
+            return hooks.Count > 0 || everyHooks.Count > 0;
+        });
+
+        if (!hasHooks)
+        {
+            return null;
+        }
+
         var hooks = await _hookCollectionService.CollectBeforeAssemblyHooksAsync(assembly).ConfigureAwait(false);
 
         var assemblyContext = _contextProvider.GetOrCreateAssemblyContext(assembly);
@@ -470,6 +492,19 @@ internal sealed class HookOrchestrator
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClassType, CancellationToken cancellationToken)
     {
+        // Check global cache first to avoid expensive hook collection
+        var hasHooks = _globalBeforeClassHookCache.GetOrAdd(testClassType, type =>
+        {
+            var hooks = _hookCollectionService.CollectBeforeClassHooksAsync(type).GetAwaiter().GetResult();
+            var everyHooks = _hookCollectionService.CollectBeforeEveryClassHooksAsync().GetAwaiter().GetResult();
+            return hooks.Count > 0 || everyHooks.Count > 0;
+        });
+
+        if (!hasHooks)
+        {
+            return null;
+        }
+
         var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClassType).ConfigureAwait(false);
 
         var classContext = _contextProvider.GetOrCreateClassContext(testClassType);

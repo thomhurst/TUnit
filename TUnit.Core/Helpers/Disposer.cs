@@ -8,6 +8,7 @@ internal class Disposer(ILogger logger)
     {
         try
         {
+            
             if (obj is IAsyncDisposable asyncDisposable)
             {
                 await asyncDisposable.DisposeAsync().ConfigureAwait(false);
@@ -19,6 +20,7 @@ internal class Disposer(ILogger logger)
         }
         catch (Exception e)
         {
+            System.Diagnostics.Debug.WriteLine($"[Disposer] Failed to dispose {obj?.GetType().Name}: {e.Message}");
             if (logger != null)
             {
                 await logger.LogErrorAsync(e);

@@ -133,15 +133,13 @@ public sealed class PropertyInjectionService
                             {
                                 var propertyValue = property.GetValue(instance);
                                 if (propertyValue != null)
+                            {
+                                // Objects are already tracked when first injected, no need to track again
+                                if (ShouldInjectProperties(propertyValue))
                                 {
-                                    ObjectTracker.TrackObject(events, propertyValue);
-                                    ObjectTracker.TrackOwnership(instance, propertyValue);
-                                    
-                                    if (ShouldInjectProperties(propertyValue))
-                                    {
-                                        await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
-                                    }
+                                    await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
                                 }
+                            }
                             }
                         }
                     }
@@ -152,9 +150,7 @@ public sealed class PropertyInjectionService
                             var propertyValue = property.GetValue(instance);
                             if (propertyValue != null)
                             {
-                                ObjectTracker.TrackObject(events, propertyValue);
-                                ObjectTracker.TrackOwnership(instance, propertyValue);
-                                
+                                // Objects are already tracked when first injected, no need to track again
                                 if (ShouldInjectProperties(propertyValue))
                                 {
                                     await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
@@ -387,8 +383,9 @@ public sealed class PropertyInjectionService
             return;
         }
 
+        // Track the property value - ObjectTracker will prevent double-tracking within the same test
         ObjectTracker.TrackObject(events, propertyValue);
-        ObjectTracker.TrackOwnership(instance, propertyValue);
+        // Don't use TrackOwnership for independently tracked objects - they have their own lifecycle
 
         if (ShouldInjectProperties(propertyValue))
         {

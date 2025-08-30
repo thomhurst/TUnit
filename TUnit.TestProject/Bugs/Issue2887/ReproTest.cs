@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Interfaces;
 
-namespace TUnit.TestProject.Bugs._Issue2887;
+namespace TUnit.TestProject.Bugs.Issue2887;
 
 public interface IServiceProvider;
 

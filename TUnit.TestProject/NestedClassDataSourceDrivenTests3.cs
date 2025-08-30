@@ -3,7 +3,7 @@ using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 using TUnit.TestProject.Models;
 
-namespace TUnit.TestProject.NestedClassDataSourceDrivenTests3;
+namespace TUnit.TestProject;
 
 [EngineTest(ExpectedResult.Pass)]
 public class NestedClassDataSourceDrivenTests3

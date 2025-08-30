@@ -72,101 +72,53 @@ internal class SingleTestExecutor : ISingleTestExecutor
     {
         try
         {
+            // Quick early returns for already processed tests
             if (test is { State: TestState.Failed, Result: not null })
             {
                 return test.Result;
             }
 
+            // Set up initial test state
             TestContext.Current = test.Context;
-
             test.StartTime = DateTimeOffset.Now;
             test.State = TestState.Running;
 
-            if (!string.IsNullOrEmpty(test.Context.SkipReason))
+            // Handle skip conditions early and together
+            if (!string.IsNullOrEmpty(test.Context.SkipReason) || 
+                test.Context.TestDetails.ClassInstance is SkippedTestInstance)
             {
                 return await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
             }
 
-            if (test.Context.TestDetails.ClassInstance is SkippedTestInstance)
-            {
-                return await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
-            }
+            // Instance creation and validation - streamlined
+            var instance = await EnsureTestInstanceAsync(test).ConfigureAwait(false);
 
-            if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
-            {
-                var createdInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
-                if (createdInstance == null)
-                {
-                    throw new InvalidOperationException($"CreateInstanceAsync returned null for test {test.Context.GetDisplayName()}. This is likely a framework bug.");
-                }
-                test.Context.TestDetails.ClassInstance = createdInstance;
-            }
+            // Batch all property injection operations
+            await BatchPropertyInjectionsAsync(test, instance).ConfigureAwait(false);
 
-            var instance = test.Context.TestDetails.ClassInstance;
-
-            if (instance == null)
-            {
-                throw new InvalidOperationException(
-                    $"Test instance is null for test {test.Context.GetDisplayName()} after instance creation. ClassInstance type: {test.Context.TestDetails.ClassInstance?.GetType()?.Name ?? "null"}");
-            }
-
-            if (instance is PlaceholderInstance)
-            {
-                throw new InvalidOperationException($"Test instance is still PlaceholderInstance for test {test.Context.GetDisplayName()}. This should have been replaced.");
-            }
-
-            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata,
-                test.Context.Events).ConfigureAwait(false);
-            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata,
-                test.Context.Events).ConfigureAwait(false);
-
-
-
-            await PropertyInjectionService.InjectPropertiesAsync(
-                test.Context,
-                instance,
-                test.Metadata.PropertyDataSources,
-                test.Metadata.PropertyInjections,
-                test.Metadata.MethodMetadata,
-                test.Context.TestDetails.TestId).ConfigureAwait(false);
-
+            // Track disposable instance if needed
             if (instance is IAsyncDisposable or IDisposable)
             {
                 ObjectTracker.TrackObject(test.Context.Events, instance);
             }
 
-            // Inject properties into test attributes BEFORE they are initialized
-            // This ensures that data source generators and other attributes have their dependencies ready
-            await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(
-                test.Context.TestDetails.Attributes.ToArray(), 
-                test.Context.ObjectBag, 
-                test.Context.TestDetails.MethodMetadata,
-                test.Context.Events).ConfigureAwait(false);
-
+            // Initialize objects and check dependencies together
             await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken).ConfigureAwait(false);
-
             PopulateTestContextDependencies(test);
-
             CheckDependenciesAndThrowIfShouldSkip(test);
 
-            var classContext = test.Context.ClassContext;
-            var assemblyContext = classContext.AssemblyContext;
-            var sessionContext = assemblyContext.TestSessionContext;
-
-            await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken).ConfigureAwait(false);
-
-            await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken).ConfigureAwait(false);
-
-            await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken).ConfigureAwait(false);
-            await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+            // Batch event receiver invocations for setup phase
+            await BatchEventReceiversForSetupAsync(test, cancellationToken).ConfigureAwait(false);
 
             try
             {
+                // Final skip check after all setup
                 if (!string.IsNullOrEmpty(test.Context.SkipReason))
                 {
                     return await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
                 }
 
+                // Execute test with optimal retry handling
                 if (test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
                 {
                     await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken).ConfigureAwait(false);
@@ -198,14 +150,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
             {
                 test.EndTime = DateTimeOffset.Now;
 
-                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken).ConfigureAwait(false);
-                
-                // Trigger disposal events for tracked objects after test completion
-                // Disposal order: Objects are disposed in ascending order (lower Order values first)
-                // This ensures dependencies are disposed before their dependents
-                await TriggerDisposalEventsAsync(test.Context, "test context objects").ConfigureAwait(false);
+                // Batch cleanup operations
+                await BatchCleanupOperationsAsync(test, cancellationToken).ConfigureAwait(false);
             }
 
+            // Ensure result is set
             if (test.Result == null)
             {
                 test.State = TestState.Failed;
@@ -238,6 +187,85 @@ internal class SingleTestExecutor : ISingleTestExecutor
             };
             return test.Result;
         }
+    }
+
+    /// <summary>
+    /// Ensures test instance is created and validated efficiently
+    /// </summary>
+    private async Task<object> EnsureTestInstanceAsync(AbstractExecutableTest test)
+    {
+        var instance = test.Context.TestDetails.ClassInstance;
+        
+        if (instance is PlaceholderInstance)
+        {
+            instance = await test.CreateInstanceAsync().ConfigureAwait(false);
+            if (instance == null)
+            {
+                throw new InvalidOperationException($"CreateInstanceAsync returned null for test {test.Context.GetDisplayName()}. This is likely a framework bug.");
+            }
+            test.Context.TestDetails.ClassInstance = instance;
+        }
+        else if (instance == null)
+        {
+            throw new InvalidOperationException($"Test instance is null for test {test.Context.GetDisplayName()} after instance creation. ClassInstance type: {test.Context.TestDetails.ClassInstance?.GetType()?.Name ?? "null"}");
+        }
+
+        return instance;
+    }
+
+    /// <summary>
+    /// Batches all property injection operations for better performance
+    /// </summary>
+    private async Task BatchPropertyInjectionsAsync(AbstractExecutableTest test, object instance)
+    {
+        // Create all injection tasks and await them together
+        var injectionTasks = new Task[]
+        {
+            PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events),
+            PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events),
+            PropertyInjectionService.InjectPropertiesAsync(test.Context, instance, test.Metadata.PropertyDataSources, test.Metadata.PropertyInjections, test.Metadata.MethodMetadata, test.Context.TestDetails.TestId),
+            PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Context.TestDetails.Attributes.ToArray(), test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata, test.Context.Events)
+        };
+
+        await Task.WhenAll(injectionTasks).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Batches event receiver calls for the setup phase
+    /// </summary>
+    private async Task BatchEventReceiversForSetupAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        var classContext = test.Context.ClassContext;
+        var assemblyContext = classContext.AssemblyContext;
+        var sessionContext = assemblyContext.TestSessionContext;
+
+        // Execute setup event receivers in parallel where possible
+        var setupTasks = new Task[]
+        {
+            _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken),
+            _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken),
+            _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken)
+        };
+
+        await Task.WhenAll(setupTasks).ConfigureAwait(false);
+        
+        // Test start receivers must run after the above setup
+        await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Batches cleanup operations for better performance
+    /// </summary>
+    private async Task BatchCleanupOperationsAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
+        // Run cleanup operations in parallel where safe
+        var cleanupTasks = new Task[]
+        {
+            _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken),
+            TriggerDisposalEventsAsync(test.Context, "test context objects")
+        };
+
+        await Task.WhenAll(cleanupTasks).ConfigureAwait(false);
     }
 
     private async Task ExecuteTestWithRetries(Func<Task> testDelegate, TestContext testContext, CancellationToken cancellationToken)

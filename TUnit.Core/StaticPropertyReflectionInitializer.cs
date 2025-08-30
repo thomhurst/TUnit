@@ -44,7 +44,6 @@ public static class StaticPropertyReflectionInitializer
             catch (Exception ex)
             {
                 // Log but don't fail - some assemblies might not be accessible
-                Console.WriteLine($"Warning: Failed to scan assembly {assembly.FullName} for static properties: {ex.Message}");
             }
         }
     }
