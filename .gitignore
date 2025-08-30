@@ -425,3 +425,6 @@ nul
 
 # Claude Code settings
 .claude/settings.local.json
+
+# Serena AI assistant files
+.serena/
