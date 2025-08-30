@@ -17,6 +17,17 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     private readonly EventReceiverRegistry _registry = new();
     private readonly TUnitFrameworkLogger _logger;
 
+    // Pre-allocated buffers to avoid LINQ allocations
+    private const int DefaultReceiverBufferSize = 64;
+    private readonly ITestStartEventReceiver[] _testStartReceiverBuffer = new ITestStartEventReceiver[DefaultReceiverBufferSize];
+    private readonly ITestEndEventReceiver[] _testEndReceiverBuffer = new ITestEndEventReceiver[DefaultReceiverBufferSize];
+    private readonly ITestSkippedEventReceiver[] _testSkippedReceiverBuffer = new ITestSkippedEventReceiver[DefaultReceiverBufferSize];
+    private readonly ITestDiscoveryEventReceiver[] _testDiscoveryReceiverBuffer = new ITestDiscoveryEventReceiver[DefaultReceiverBufferSize];
+    // Event batching for improved performance
+    private readonly System.Collections.Concurrent.ConcurrentQueue<(TestContext Context, CancellationToken Token)> _pendingTestStartEvents = new();
+    private readonly System.Collections.Concurrent.ConcurrentQueue<(TestContext Context, CancellationToken Token)> _pendingTestEndEvents = new();
+    private readonly Timer? _batchProcessingTimer;
+
     // Track which assemblies/classes/sessions have had their "first" event invoked
     private GetOnlyDictionary<string, Task> _firstTestInAssemblyTasks = new();
     private GetOnlyDictionary<Type, Task> _firstTestInClassTasks = new();
@@ -30,6 +41,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     public EventReceiverOrchestrator(TUnitFrameworkLogger logger)
     {
         _logger = logger;
+        
+        // Initialize batching timer for event processing optimization
+        // Process batched events every 50ms for better throughput
+        _batchProcessingTimer = new Timer(ProcessBatchedEvents, null, TimeSpan.FromMilliseconds(50), TimeSpan.FromMilliseconds(50));
     }
 
     public async ValueTask InitializeAllEligibleObjectsAsync(TestContext context, CancellationToken cancellationToken)
@@ -69,10 +84,20 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestStartEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
+        // Try to collect receivers into pre-allocated buffer first
+        var receiverCount = CollectReceiversIntoBuffer(context, _testStartReceiverBuffer);
+        
+        IReadOnlyList<ITestStartEventReceiver> receivers;
+        if (receiverCount == -1)
+        {
+            // Buffer overflow, use fallback
+            receivers = CollectReceiversFallback<ITestStartEventReceiver>(context);
+        }
+        else
+        {
+            // Create a list view of the buffer segment to avoid allocation
+            receivers = new ArraySegment<ITestStartEventReceiver>(_testStartReceiverBuffer, 0, receiverCount);
+        }
 
         // Filter scoped attributes
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
@@ -89,11 +114,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             {
                 try
                 {
-                    await receiver.OnTestStart(context);
+                    await receiver.OnTestStart(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    await _logger.LogErrorAsync($"Error in test start event receiver: {ex.Message}");
+                    await _logger.LogErrorAsync($"Error in test start event receiver: {ex.Message}").ConfigureAwait(false);
                 }
             }
         }
@@ -112,10 +137,20 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestEndEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
+        // Try to collect receivers into pre-allocated buffer first
+        var receiverCount = CollectReceiversIntoBuffer(context, _testEndReceiverBuffer);
+        
+        IReadOnlyList<ITestEndEventReceiver> receivers;
+        if (receiverCount == -1)
+        {
+            // Buffer overflow, use fallback
+            receivers = CollectReceiversFallback<ITestEndEventReceiver>(context);
+        }
+        else
+        {
+            // Create a list view of the buffer segment to avoid allocation
+            receivers = new ArraySegment<ITestEndEventReceiver>(_testEndReceiverBuffer, 0, receiverCount);
+        }
 
         // Filter scoped attributes
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
@@ -124,11 +159,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         {
             try
             {
-                await receiver.OnTestEnd(context);
+                await receiver.OnTestEnd(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync($"Error in test end event receiver: {ex.Message}");
+                await _logger.LogErrorAsync($"Error in test end event receiver: {ex.Message}").ConfigureAwait(false);
             }
         }
     }
@@ -146,10 +181,20 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestSkippedEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestSkippedEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
+        // Try to collect receivers into pre-allocated buffer first
+        var receiverCount = CollectReceiversIntoBuffer(context, _testSkippedReceiverBuffer);
+        
+        IReadOnlyList<ITestSkippedEventReceiver> receivers;
+        if (receiverCount == -1)
+        {
+            // Buffer overflow, use fallback
+            receivers = CollectReceiversFallback<ITestSkippedEventReceiver>(context);
+        }
+        else
+        {
+            // Create a list view of the buffer segment to avoid allocation
+            receivers = new ArraySegment<ITestSkippedEventReceiver>(_testSkippedReceiverBuffer, 0, receiverCount);
+        }
 
         // Filter scoped attributes
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
@@ -158,11 +203,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         {
             try
             {
-                await receiver.OnTestSkipped(context);
+                await receiver.OnTestSkipped(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync($"Error in test skipped event receiver: {ex.Message}");
+                await _logger.LogErrorAsync($"Error in test skipped event receiver: {ex.Message}").ConfigureAwait(false);
             }
         }
     }
@@ -545,8 +590,125 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
     }
 
+    /// <summary>
+    /// Efficiently collects event receivers of the specified type without LINQ allocations
+    /// </summary>
+    private int CollectReceiversIntoBuffer<T>(TestContext context, T[] buffer) where T : class, IEventReceiver
+    {
+        var count = 0;
+        var eligibleObjects = context.GetEligibleEventObjects();
+        
+        foreach (var obj in eligibleObjects)
+        {
+            if (obj is T receiver)
+            {
+                if (count >= buffer.Length)
+                {
+                    // Buffer overflow - fall back to LINQ for simplicity
+                    // This should be rare if buffer is sized appropriately
+                    _logger.LogWarningAsync($"Receiver buffer overflow for type {typeof(T).Name}. Consider increasing buffer size.").ConfigureAwait(false);
+                    return -1; // Signal to use fallback
+                }
+                
+                buffer[count++] = receiver;
+            }
+        }
+        
+        // Sort by order in-place using Array.Sort for better performance than LINQ OrderBy
+        if (count > 1)
+        {
+            Array.Sort(buffer, 0, count, Comparer<T>.Create((x, y) => x.Order.CompareTo(y.Order)));
+        }
+        
+        return count;
+    }
+
+    /// <summary>
+    /// Fallback method using LINQ when buffer is insufficient
+    /// </summary>
+    private List<T> CollectReceiversFallback<T>(TestContext context) where T : class, IEventReceiver
+    {
+        return context.GetEligibleEventObjects()
+            .OfType<T>()
+            .OrderBy(r => r.Order)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Processes batched events for improved throughput
+    /// </summary>
+    private async void ProcessBatchedEvents(object? state)
+    {
+        // Process test start events in batch
+        var startEventBatch = new List<(TestContext Context, CancellationToken Token)>();
+        while (_pendingTestStartEvents.TryDequeue(out var startEvent) && startEventBatch.Count < 32)
+        {
+            startEventBatch.Add(startEvent);
+        }
+        
+        if (startEventBatch.Count > 0)
+        {
+            _ = Task.Run(async () =>
+            {
+                foreach (var (context, token) in startEventBatch)
+                {
+                    try
+                    {
+                        await InvokeTestStartEventReceiversCore(context, token).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        await _logger.LogErrorAsync($"Error processing batched test start event: {ex.Message}").ConfigureAwait(false);
+                    }
+                }
+            });
+        }
+
+        // Process test end events in batch
+        var endEventBatch = new List<(TestContext Context, CancellationToken Token)>();
+        while (_pendingTestEndEvents.TryDequeue(out var endEvent) && endEventBatch.Count < 32)
+        {
+            endEventBatch.Add(endEvent);
+        }
+        
+        if (endEventBatch.Count > 0)
+        {
+            _ = Task.Run(async () =>
+            {
+                foreach (var (context, token) in endEventBatch)
+                {
+                    try
+                    {
+                        await InvokeTestEndEventReceiversCore(context, token).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        await _logger.LogErrorAsync($"Error processing batched test end event: {ex.Message}").ConfigureAwait(false);
+                    }
+                }
+            });
+        }
+    }
+
+    /// <summary>
+    /// Adds test start event to batch queue for processing
+    /// </summary>
+    public void QueueTestStartEvent(TestContext context, CancellationToken cancellationToken)
+    {
+        _pendingTestStartEvents.Enqueue((context, cancellationToken));
+    }
+
+    /// <summary>
+    /// Adds test end event to batch queue for processing
+    /// </summary>
+    public void QueueTestEndEvent(TestContext context, CancellationToken cancellationToken)
+    {
+        _pendingTestEndEvents.Enqueue((context, cancellationToken));
+    }
+
     public void Dispose()
     {
+        _batchProcessingTimer?.Dispose();
         _registry?.Dispose();
     }
 }

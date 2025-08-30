@@ -10,6 +10,239 @@ using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Scheduling;
 
+internal static class WorkerPoolCalculator
+{
+    private static readonly object _lock = new object();
+    private static DateTime _lastCalculation = DateTime.MinValue;
+    private static int _cachedOptimalWorkerCount = Environment.ProcessorCount;
+    private static readonly TimeSpan CalculationCacheTime = TimeSpan.FromSeconds(5);
+
+    public static int CalculateWorkerCount(int testCount, int? requestedMax)
+    {
+        lock (_lock)
+        {
+            // Use cached value if recent
+            if (DateTime.UtcNow - _lastCalculation < CalculationCacheTime)
+            {
+                return Math.Min(requestedMax ?? _cachedOptimalWorkerCount, _cachedOptimalWorkerCount);
+            }
+
+            // Calculate based on system characteristics
+            var processorCount = Environment.ProcessorCount;
+            var availableMemory = GC.GetTotalMemory(false);
+            
+            // Base worker count on processor count
+            var baseWorkerCount = processorCount;
+            
+            // Adjust based on test count - fewer workers for small test sets
+            if (testCount < processorCount)
+            {
+                baseWorkerCount = Math.Max(1, testCount);
+            }
+            else if (testCount > processorCount * 4)
+            {
+                // Scale up for large test sets, but cap at reasonable limit
+                baseWorkerCount = Math.Min(processorCount * 2, testCount / 4);
+            }
+            
+            // Apply memory pressure adjustment
+            if (availableMemory > 500_000_000) // > 500MB available
+            {
+                baseWorkerCount = Math.Min(baseWorkerCount * 2, processorCount * 3);
+            }
+            else if (availableMemory < 100_000_000) // < 100MB available
+            {
+                baseWorkerCount = Math.Max(1, baseWorkerCount / 2);
+            }
+
+            // Respect requested maximum
+            var finalWorkerCount = requestedMax.HasValue 
+                ? Math.Min(requestedMax.Value, baseWorkerCount)
+                : baseWorkerCount;
+
+            _cachedOptimalWorkerCount = finalWorkerCount;
+            _lastCalculation = DateTime.UtcNow;
+            
+            return finalWorkerCount;
+        }
+    }
+}
+
+internal static class EfficientWorkQueue<T>
+{
+    private readonly T[] _items;
+    private readonly int _mask;
+    private volatile int _headIndex;
+    private volatile int _tailIndex;
+    private readonly object _lock = new object();
+
+    public EfficientWorkQueue(int capacity = 1024)
+    {
+        // Round up to next power of 2 for efficient masking
+        var actualCapacity = 1;
+        while (actualCapacity < capacity)
+            actualCapacity <<= 1;
+            
+        _items = new T[actualCapacity];
+        _mask = actualCapacity - 1;
+        _headIndex = 0;
+        _tailIndex = 0;
+    }
+
+    public bool TryEnqueue(T item)
+    {
+        lock (_lock)
+        {
+            var tail = _tailIndex;
+            var nextTail = (tail + 1) & _mask;
+            
+            if (nextTail == _headIndex)
+                return false; // Queue is full
+                
+            _items[tail] = item;
+            _tailIndex = nextTail;
+            return true;
+        }
+    }
+
+    public bool TryDequeue(out T item)
+    {
+        item = default!;
+        
+        var head = _headIndex;
+        if (head == _tailIndex)
+            return false; // Queue is empty
+            
+        lock (_lock)
+        {
+            // Double-check under lock
+            head = _headIndex;
+            if (head == _tailIndex)
+                return false;
+                
+            item = _items[head];
+            _items[head] = default!; // Help GC
+            _headIndex = (head + 1) & _mask;
+            return true;
+        }
+    }
+
+    public int Count
+    {
+        get
+        {
+            var tail = _tailIndex;
+            var head = _headIndex;
+            return (tail - head) & _mask;
+        }
+    }
+}
+
+internal static class WorkStealingQueue
+{
+    public static async Task ProcessWorkItems<T>(
+        IEnumerable<T> workItems,
+        Func<T, Task> processor,
+        int workerCount,
+        CancellationToken cancellationToken)
+    {
+        if (workerCount <= 0)
+            throw new ArgumentException("Worker count must be positive", nameof(workerCount));
+
+        var workArray = workItems.ToArray();
+        if (workArray.Length == 0)
+            return;
+
+        // Distribute work across multiple queues to reduce contention
+        var queueCount = Math.Min(workerCount, 4); // Max 4 queues to avoid too much overhead
+        var queues = new ConcurrentQueue<T>[queueCount];
+        
+        for (int i = 0; i < queueCount; i++)
+        {
+            queues[i] = new ConcurrentQueue<T>();
+        }
+
+        // Distribute work items across queues
+        for (int i = 0; i < workArray.Length; i++)
+        {
+            queues[i % queueCount].Enqueue(workArray[i]);
+        }
+
+        // Create workers that can steal from other queues
+        var workers = new Task[workerCount];
+        
+        for (int workerId = 0; workerId < workerCount; workerId++)
+        {
+            var primaryQueue = workerId % queueCount;
+            workers[workerId] = ProcessWithWorkStealing(queues, primaryQueue, processor, cancellationToken);
+        }
+
+        await Task.WhenAll(workers).ConfigureAwait(false);
+    }
+
+    private static async Task ProcessWithWorkStealing<T>(
+        ConcurrentQueue<T>[] queues,
+        int primaryQueueIndex,
+        Func<T, Task> processor,
+        CancellationToken cancellationToken)
+    {
+        var queueCount = queues.Length;
+        var attempts = 0;
+        const int maxEmptyAttempts = queueCount * 2;
+
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            T workItem = default!;
+            bool foundWork = false;
+
+            // Try primary queue first
+            if (queues[primaryQueueIndex].TryDequeue(out workItem))
+            {
+                foundWork = true;
+                attempts = 0;
+            }
+            else
+            {
+                // Work stealing: try other queues
+                for (int i = 1; i < queueCount; i++)
+                {
+                    var queueIndex = (primaryQueueIndex + i) % queueCount;
+                    if (queues[queueIndex].TryDequeue(out workItem))
+                    {
+                        foundWork = true;
+                        attempts = 0;
+                        break;
+                    }
+                }
+            }
+
+            if (foundWork)
+            {
+                try
+                {
+                    await processor(workItem).ConfigureAwait(false);
+                }
+                catch
+                {
+                    // Let the processor handle its own exceptions
+                    throw;
+                }
+            }
+            else
+            {
+                attempts++;
+                if (attempts >= maxEmptyAttempts)
+                {
+                    break; // All queues appear empty
+                }
+                
+                // Brief yield to avoid tight spinning
+                await Task.Yield();
+            }
+        }
+    }
+}
+
 internal sealed class TestScheduler : ITestScheduler
 {
     private readonly TUnitFrameworkLogger _logger;
@@ -88,53 +321,55 @@ internal sealed class TestScheduler : ITestScheduler
     {
         return async (test, cancellationToken) =>
         {
-            // First wait for all dependencies to complete
-            foreach (var dependency in test.Dependencies)
+            // Batch dependency checking for better performance
+            if (test.Dependencies.Count > 0)
             {
+                var dependencyTasks = new Task[test.Dependencies.Count];
+                for (int i = 0; i < test.Dependencies.Count; i++)
+                {
+                    dependencyTasks[i] = test.Dependencies[i].Test.ExecutionTask;
+                }
+                
                 try
                 {
-                    await dependency.Test.ExecutionTask.ConfigureAwait(false);
-
-                    // Check if dependency failed and we should skip
-                    if (dependency.Test.State == TestState.Failed && !dependency.ProceedOnFailure)
+                    // Wait for all dependencies at once instead of sequentially
+                    await Task.WhenAll(dependencyTasks).ConfigureAwait(false);
+                    
+                    // Quick check for failed dependencies that should cause skipping
+                    for (int i = 0; i < test.Dependencies.Count; i++)
                     {
-                        test.State = TestState.Skipped;
-                        test.Result = new TestResult
+                        var dependency = test.Dependencies[i];
+                        if (dependency.Test.State == TestState.Failed && !dependency.ProceedOnFailure)
                         {
-                            State = TestState.Skipped,
-                            Exception = new InvalidOperationException($"Skipped due to failed dependency: {dependency.Test.TestId}"),
-                            ComputerName = Environment.MachineName,
-                            Start = DateTimeOffset.UtcNow,
-                            End = DateTimeOffset.UtcNow,
-                            Duration = TimeSpan.Zero
-                        };
-                        await _messageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
-                        return;
+                            await SkipTestDueToDependency(test, dependency.Test.TestId).ConfigureAwait(false);
+                            return;
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    await _logger.LogErrorAsync($"Error waiting for dependency {dependency.Test.TestId}: {ex}").ConfigureAwait(false);
-
-                    if (!dependency.ProceedOnFailure)
+                    // Find which dependency failed and handle accordingly
+                    var shouldProceed = true;
+                    for (int i = 0; i < test.Dependencies.Count; i++)
                     {
-                        test.State = TestState.Skipped;
-                        test.Result = new TestResult
+                        var dependency = test.Dependencies[i];
+                        if (dependency.Test.ExecutionTask.IsFaulted && !dependency.ProceedOnFailure)
                         {
-                            State = TestState.Skipped,
-                            Exception = ex,
-                            ComputerName = Environment.MachineName,
-                            Start = DateTimeOffset.UtcNow,
-                            End = DateTimeOffset.UtcNow,
-                            Duration = TimeSpan.Zero
-                        };
-                        await _messageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
+                            shouldProceed = false;
+                            break;
+                        }
+                    }
+                    
+                    if (!shouldProceed)
+                    {
+                        await _logger.LogErrorAsync($"Dependency failed for test {test.TestId}: {ex}").ConfigureAwait(false);
+                        await SkipTestDueToDependency(test, "failed dependency").ConfigureAwait(false);
                         return;
                     }
                 }
             }
 
-            // Acquire parallel limit semaphore if needed
+            // Acquire parallel limit semaphore if needed - optimize for common case of no limit
             SemaphoreSlim? parallelLimitSemaphore = null;
             if (test.Context.ParallelLimiter != null)
             {
@@ -152,6 +387,21 @@ internal sealed class TestScheduler : ITestScheduler
                 parallelLimitSemaphore?.Release();
             }
         };
+    }
+
+    private async Task SkipTestDueToDependency(AbstractExecutableTest test, string dependencyInfo)
+    {
+        test.State = TestState.Skipped;
+        test.Result = new TestResult
+        {
+            State = TestState.Skipped,
+            Exception = new InvalidOperationException($"Skipped due to failed dependency: {dependencyInfo}"),
+            ComputerName = Environment.MachineName,
+            Start = DateTimeOffset.UtcNow,
+            End = DateTimeOffset.UtcNow,
+            Duration = TimeSpan.Zero
+        };
+        await _messageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
     }
 
     private async Task ExecuteGroupedTestsAsync(
@@ -241,69 +491,118 @@ internal sealed class TestScheduler : ITestScheduler
         (string Key, AbstractExecutableTest[] Tests)[] keyedTests,
         CancellationToken cancellationToken)
     {
-        // Get all unique tests
-        var allTests = new HashSet<AbstractExecutableTest>();
-        var testToKeys = new Dictionary<AbstractExecutableTest, List<string>>();
-
-        foreach (var (key, tests) in keyedTests)
+        // Calculate total unique tests efficiently
+        var testSet = new HashSet<AbstractExecutableTest>();
+        var totalEstimate = 0;
+        for (int i = 0; i < keyedTests.Length; i++)
         {
-            foreach (var test in tests)
+            totalEstimate += keyedTests[i].Tests.Length;
+            for (int j = 0; j < keyedTests[i].Tests.Length; j++)
             {
-                allTests.Add(test);
-                if (!testToKeys.TryGetValue(test, out var keys))
-                {
-                    keys =
-                    [
-                    ];
-                    testToKeys[test] = keys;
-                }
-                keys.Add(key);
+                testSet.Add(keyedTests[i].Tests[j]);
+            }
+        }
+        
+        var uniqueTests = new AbstractExecutableTest[testSet.Count];
+        testSet.CopyTo(uniqueTests);
+        
+        // Build test-to-keys mapping more efficiently using arrays instead of Lists
+        var testKeyMap = new Dictionary<AbstractExecutableTest, string[]>(uniqueTests.Length);
+        var keyCountMap = new Dictionary<AbstractExecutableTest, int>(uniqueTests.Length);
+        
+        // Count keys per test first
+        for (int i = 0; i < keyedTests.Length; i++)
+        {
+            var key = keyedTests[i].Key;
+            var tests = keyedTests[i].Tests;
+            for (int j = 0; j < tests.Length; j++)
+            {
+                var test = tests[j];
+                keyCountMap[test] = keyCountMap.GetValueOrDefault(test, 0) + 1;
+            }
+        }
+        
+        // Allocate arrays and populate
+        foreach (var kvp in keyCountMap)
+        {
+            testKeyMap[kvp.Key] = new string[kvp.Value];
+        }
+        
+        var keyIndex = new Dictionary<AbstractExecutableTest, int>(uniqueTests.Length);
+        for (int i = 0; i < keyedTests.Length; i++)
+        {
+            var key = keyedTests[i].Key;
+            var tests = keyedTests[i].Tests;
+            for (int j = 0; j < tests.Length; j++)
+            {
+                var test = tests[j];
+                var idx = keyIndex.GetValueOrDefault(test, 0);
+                testKeyMap[test][idx] = key;
+                keyIndex[test] = idx + 1;
             }
         }
 
-        // Sort tests by priority
-        var sortedTests = allTests
-            .OrderByDescending(t => t.Context.ExecutionPriority)
-            .ThenBy(t => {
-                var constraint = t.Context.ParallelConstraint as NotInParallelConstraint;
-                return constraint?.Order ?? int.MaxValue / 2;
-            })
-            .ToList();
-
-        // Track running tasks by key
-        var runningKeyedTasks = new Dictionary<string, Task>();
-
-        foreach (var test in sortedTests)
+        // Sort tests by priority without LINQ - use Array.Sort for better performance
+        Array.Sort(uniqueTests, (t1, t2) =>
         {
-            var testKeys = testToKeys[test];
+            var priority1 = t1.Context.ExecutionPriority;
+            var priority2 = t2.Context.ExecutionPriority;
+            if (priority1 != priority2)
+                return priority2.CompareTo(priority1); // Descending
+                
+            var order1 = (t1.Context.ParallelConstraint as NotInParallelConstraint)?.Order ?? int.MaxValue / 2;
+            var order2 = (t2.Context.ParallelConstraint as NotInParallelConstraint)?.Order ?? int.MaxValue / 2;
+            return order1.CompareTo(order2); // Ascending
+        });
 
-            // Wait for any running tests that share any of our constraint keys
-            var conflictingTasks = new List<Task>();
-            foreach (var key in testKeys)
+        // Track running tasks by key - use initial capacity for better performance
+        var runningKeyedTasks = new Dictionary<string, Task>(keyedTests.Length);
+        var conflictBuffer = new List<Task>(8); // Reuse buffer to avoid allocations
+
+        for (int i = 0; i < uniqueTests.Length; i++)
+        {
+            var test = uniqueTests[i];
+            var testKeys = testKeyMap[test];
+
+            // Collect conflicting tasks efficiently
+            conflictBuffer.Clear();
+            for (int j = 0; j < testKeys.Length; j++)
             {
-                if (runningKeyedTasks.TryGetValue(key, out var runningTask))
+                if (runningKeyedTasks.TryGetValue(testKeys[j], out var runningTask))
                 {
-                    conflictingTasks.Add(runningTask);
+                    conflictBuffer.Add(runningTask);
                 }
             }
 
-            if (conflictingTasks.Count > 0)
+            if (conflictBuffer.Count > 0)
             {
-                await Task.WhenAll(conflictingTasks).ConfigureAwait(false);
+                if (conflictBuffer.Count == 1)
+                {
+                    await conflictBuffer[0].ConfigureAwait(false);
+                }
+                else
+                {
+                    await Task.WhenAll(conflictBuffer).ConfigureAwait(false);
+                }
             }
 
             // Start the test execution
             var task = test.ExecutionTask;
 
             // Track this task for all its keys
-            foreach (var key in testKeys)
+            for (int j = 0; j < testKeys.Length; j++)
             {
-                runningKeyedTasks[key] = task;
+                runningKeyedTasks[testKeys[j]] = task;
             }
         }
 
-        // Wait for all tests to complete
-        await Task.WhenAll(allTests.Select(t => t.ExecutionTask)).ConfigureAwait(false);
+        // Wait for all tests to complete - use pre-allocated array
+        var allTasks = new Task[uniqueTests.Length];
+        for (int i = 0; i < uniqueTests.Length; i++)
+        {
+            allTasks[i] = uniqueTests[i].ExecutionTask;
+        }
+        await Task.WhenAll(allTasks).ConfigureAwait(false);
     }
 
     private async Task ExecuteParallelGroupAsync(
@@ -314,31 +613,32 @@ internal sealed class TestScheduler : ITestScheduler
         // Execute order groups sequentially
         foreach (var (order, tests) in orderedTests)
         {
-            if (maxParallelism.HasValue && maxParallelism.Value > 0)
+            // Calculate adaptive worker count for this group
+            var adaptiveWorkerCount = WorkerPoolCalculator.CalculateWorkerCount(tests.Length, maxParallelism);
+            
+            if (adaptiveWorkerCount > 0 && tests.Length > adaptiveWorkerCount)
             {
-                // Use worker pool pattern for parallel groups
-                var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
-                var workers = new Task[maxParallelism.Value];
-                
-                for (int i = 0; i < maxParallelism.Value; i++)
+                // Use work-stealing approach for larger groups
+                await WorkStealingQueue.ProcessWorkItems(
+                    tests,
+                    test => test.ExecutionTask,
+                    adaptiveWorkerCount,
+                    cancellationToken
+                ).ConfigureAwait(false);
+            }
+            else if (tests.Length <= 4)
+            {
+                // Sequential for very small groups
+                foreach (var test in tests)
                 {
-                    workers[i] = Task.Run(async () =>
-                    {
-                        while (testQueue.TryDequeue(out var test))
-                        {
-                            if (cancellationToken.IsCancellationRequested)
-                                break;
-                                
-                            await test.ExecutionTask.ConfigureAwait(false);
-                        }
-                    }, cancellationToken);
+                    if (cancellationToken.IsCancellationRequested)
+                        break;
+                    await test.ExecutionTask.ConfigureAwait(false);
                 }
-                
-                await Task.WhenAll(workers).ConfigureAwait(false);
             }
             else
             {
-                // No limit - start all and wait
+                // Direct parallel execution for medium groups
                 await Task.WhenAll(tests.Select(t => t.ExecutionTask)).ConfigureAwait(false);
             }
         }
@@ -349,103 +649,136 @@ internal sealed class TestScheduler : ITestScheduler
         int? maxParallelism,
         CancellationToken cancellationToken)
     {
-        if (maxParallelism.HasValue && maxParallelism.Value > 0)
+        // Calculate adaptive worker count based on system load and test characteristics
+        var adaptiveWorkerCount = WorkerPoolCalculator.CalculateWorkerCount(tests.Length, maxParallelism);
+        
+        if (adaptiveWorkerCount > 0 && tests.Length > adaptiveWorkerCount)
         {
-            // Use worker pool pattern to avoid creating too many tasks
-            // Create a fixed number of worker tasks that process tests from a queue
-            var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
-            var workers = new Task[maxParallelism.Value];
-            
-            // Create worker tasks
-            for (int i = 0; i < maxParallelism.Value; i++)
-            {
-                workers[i] = Task.Run(async () =>
-                {
-                    while (testQueue.TryDequeue(out var test))
-                    {
-                        if (cancellationToken.IsCancellationRequested)
-                            break;
-                            
-                        await test.ExecutionTask.ConfigureAwait(false);
-                    }
-                }, cancellationToken);
-            }
-            
-            await Task.WhenAll(workers).ConfigureAwait(false);
+            // Use work-stealing queue for better efficiency with many tests
+            await WorkStealingQueue.ProcessWorkItems(
+                tests,
+                test => test.ExecutionTask,
+                adaptiveWorkerCount,
+                cancellationToken
+            ).ConfigureAwait(false);
         }
         else
         {
-            // No limit - just wait for all
-            await tests.ForEachAsync(async t => await t.ExecutionTask.ConfigureAwait(false)).ProcessInParallel();
+            // For small test counts or single worker, just execute directly
+            if (adaptiveWorkerCount == 1 || tests.Length <= 4)
+            {
+                // Sequential execution is more efficient for very small sets
+                foreach (var test in tests)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                        break;
+                    await test.ExecutionTask.ConfigureAwait(false);
+                }
+            }
+            else
+            {
+                // Direct parallel execution for medium sets
+                await Task.WhenAll(tests.Select(t => t.ExecutionTask)).ConfigureAwait(false);
+            }
         }
     }
 
     private List<(AbstractExecutableTest test, List<TestDetails> dependencyChain)> DetectCircularDependencies(IList<AbstractExecutableTest> tests)
     {
+        var testCount = tests.Count;
+        if (testCount == 0)
+            return new List<(AbstractExecutableTest, List<TestDetails>)>();
+
         var circularDependencies = new List<(AbstractExecutableTest, List<TestDetails>)>();
-        var visitState = new Dictionary<string, VisitState>();
+        var visitState = new Dictionary<string, VisitState>(testCount);
         var processedCycles = new HashSet<string>();
 
-        // Build test map
-        var testMap = new Dictionary<string, AbstractExecutableTest>();
-        foreach (var test in tests)
+        // Pre-size and build test map efficiently
+        var testMap = new Dictionary<string, AbstractExecutableTest>(testCount);
+        for (int i = 0; i < testCount; i++)
         {
-            if (!testMap.ContainsKey(test.TestId))
-            {
-                testMap[test.TestId] = test;
-            }
+            var test = tests[i];
+            testMap.TryAdd(test.TestId, test); // TryAdd is faster than ContainsKey + indexer
         }
+
+        // Pre-allocate path to avoid repeated allocations
+        var currentPath = new List<AbstractExecutableTest>(16);
+        var cycleBuffer = new List<AbstractExecutableTest>(16);
+        var dependencyChainBuffer = new List<TestDetails>(16);
 
         foreach (var test in tests)
         {
             if (!visitState.ContainsKey(test.TestId))
             {
-                var currentPath = new List<AbstractExecutableTest>();
+                currentPath.Clear();
                 if (HasCycle(test, testMap, visitState, currentPath))
                 {
-                    // Extract the cycle from the path
-                    if (currentPath.Count > 0)
-                    {
-                        // The last element in currentPath is the test that completes the cycle
-                        var lastTest = currentPath[currentPath.Count - 1];
-
-                        // Find where the cycle starts (the first occurrence of the repeated element)
-                        var cycleStartIndex = -1;
-                        for (int i = 0; i < currentPath.Count - 1; i++)
-                        {
-                            if (currentPath[i].TestId == lastTest.TestId)
-                            {
-                                cycleStartIndex = i;
-                                break;
-                            }
-                        }
-
-                        if (cycleStartIndex >= 0)
-                        {
-                            // Build the dependency chain for the cycle (from start to end, inclusive)
-                            var cycleTests = currentPath.Skip(cycleStartIndex).ToList();
-                            var dependencyChain = cycleTests.Select(t => t.Context.TestDetails).ToList();
-
-                            // Create a unique key for this cycle to avoid duplicates
-                            var cycleKey = string.Join("->", cycleTests.Take(cycleTests.Count - 1).Select(t => t.TestId).OrderBy(id => id));
-
-                            if (!processedCycles.Contains(cycleKey))
-                            {
-                                processedCycles.Add(cycleKey);
-
-                                // Add all tests that are part of the cycle (excluding the duplicate at the end)
-                                foreach (var cycleTest in cycleTests.Take(cycleTests.Count - 1))
-                                {
-                                    circularDependencies.Add((cycleTest, dependencyChain));
-                                }
-                            }
-                        }
-                    }
+                    ProcessCycleEfficiently(currentPath, processedCycles, circularDependencies, 
+                                          cycleBuffer, dependencyChainBuffer);
                 }
             }
         }
 
         return circularDependencies;
+    }
+
+    private void ProcessCycleEfficiently(
+        List<AbstractExecutableTest> currentPath,
+        HashSet<string> processedCycles,
+        List<(AbstractExecutableTest, List<TestDetails>)> circularDependencies,
+        List<AbstractExecutableTest> cycleBuffer,
+        List<TestDetails> dependencyChainBuffer)
+    {
+        if (currentPath.Count == 0) return;
+
+        // Find cycle start more efficiently
+        var lastTest = currentPath[currentPath.Count - 1];
+        var cycleStartIndex = -1;
+        
+        for (int i = currentPath.Count - 2; i >= 0; i--)
+        {
+            if (currentPath[i].TestId == lastTest.TestId)
+            {
+                cycleStartIndex = i;
+                break;
+            }
+        }
+
+        if (cycleStartIndex < 0) return;
+
+        // Build cycle and dependency chain efficiently without LINQ
+        cycleBuffer.Clear();
+        dependencyChainBuffer.Clear();
+        
+        for (int i = cycleStartIndex; i < currentPath.Count - 1; i++)
+        {
+            var test = currentPath[i];
+            cycleBuffer.Add(test);
+            dependencyChainBuffer.Add(test.Context.TestDetails);
+        }
+
+        // Create cycle key efficiently using StringBuilder-like approach
+        if (cycleBuffer.Count > 0)
+        {
+            // Sort test IDs for consistent cycle key without LINQ
+            var sortedIds = new string[cycleBuffer.Count];
+            for (int i = 0; i < cycleBuffer.Count; i++)
+            {
+                sortedIds[i] = cycleBuffer[i].TestId;
+            }
+            Array.Sort(sortedIds);
+            
+            var cycleKey = string.Join("->", sortedIds);
+            
+            if (processedCycles.Add(cycleKey)) // Add returns false if already exists
+            {
+                // Add all cycle tests
+                for (int i = 0; i < cycleBuffer.Count; i++)
+                {
+                    circularDependencies.Add((cycleBuffer[i], new List<TestDetails>(dependencyChainBuffer)));
+                }
+            }
+        }
     }
 
     private bool HasCycle(

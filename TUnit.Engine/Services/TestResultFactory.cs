@@ -7,15 +7,16 @@ internal sealed class TestResultFactory : ITestResultFactory
     public TestResult CreatePassedResult(DateTimeOffset startTime)
     {
         var endTime = DateTimeOffset.Now;
-        return new TestResult
-        {
-            State = TestState.Passed,
-            Start = startTime,
-            End = endTime,
-            Duration = endTime - startTime,
-            Exception = null,
-            ComputerName = Environment.MachineName
-        };
+        var result = ObjectPools.GetTestResult();
+        
+        result.State = TestState.Passed;
+        result.Start = startTime;
+        result.End = endTime;
+        result.Duration = endTime - startTime;
+        result.Exception = null;
+        result.ComputerName = Environment.MachineName;
+        
+        return result;
     }
 
     public TestResult CreateFailedResult(DateTimeOffset startTime, Exception exception)

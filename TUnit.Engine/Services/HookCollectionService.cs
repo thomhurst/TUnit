@@ -40,7 +40,7 @@ internal sealed class HookCollectionService : IHookCollectionService
         {
             var context = new HookRegisteredContext(hookMethod);
 
-            await _eventReceiverOrchestrator.InvokeHookRegistrationEventReceiversAsync(context, cancellationToken);
+            await _eventReceiverOrchestrator.InvokeHookRegistrationEventReceiversAsync(context, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception)
         {
@@ -72,7 +72,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             return cachedHooks;
         }
 
-        var hooks = await BuildBeforeTestHooksAsync(testClassType);
+        var hooks = await BuildBeforeTestHooksAsync(testClassType).ConfigureAwait(false);
         _beforeTestHooksCache.TryAdd(testClassType, hooks);
         return hooks;
     }
@@ -91,7 +91,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 {
                     foreach (var hook in sourceHooks)
                     {
-                        var hookFunc = await CreateInstanceHookDelegateAsync(hook);
+                        var hookFunc = await CreateInstanceHookDelegateAsync(hook).ConfigureAwait(false);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
                     }
                 }
@@ -104,7 +104,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                     {
                         foreach (var hook in openTypeHooks)
                         {
-                            var hookFunc = await CreateInstanceHookDelegateAsync(hook);
+                            var hookFunc = await CreateInstanceHookDelegateAsync(hook).ConfigureAwait(false);
                             typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
                         }
                     }
@@ -139,7 +139,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             return cachedHooks;
         }
 
-        var hooks = await BuildAfterTestHooksAsync(testClassType);
+        var hooks = await BuildAfterTestHooksAsync(testClassType).ConfigureAwait(false);
         _afterTestHooksCache.TryAdd(testClassType, hooks);
         return hooks;
     }
@@ -158,7 +158,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 {
                     foreach (var hook in sourceHooks)
                     {
-                        var hookFunc = await CreateInstanceHookDelegateAsync(hook);
+                        var hookFunc = await CreateInstanceHookDelegateAsync(hook).ConfigureAwait(false);
                         typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
                     }
                 }
@@ -171,7 +171,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                     {
                         foreach (var hook in openTypeHooks)
                         {
-                            var hookFunc = await CreateInstanceHookDelegateAsync(hook);
+                            var hookFunc = await CreateInstanceHookDelegateAsync(hook).ConfigureAwait(false);
                             typeHooks.Add((hook.Order, hook.RegistrationIndex, hookFunc));
                         }
                     }
