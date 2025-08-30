@@ -484,21 +484,17 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         ClassHookContext classContext,
         CancellationToken cancellationToken)
     {
-        Console.WriteLine($"[EventReceiverOrchestrator] InvokeLastTestInClassEventReceiversAsync called for {classContext.ClassType.Name}");
         
         if (!_registry.HasLastTestInClassReceivers())
         {
-            Console.WriteLine($"[EventReceiverOrchestrator] No last test in class receivers for {classContext.ClassType.Name}");
             return;
         }
 
         var classType = classContext.ClassType;
         var count = _classTestCounts.AddOrUpdate(classType, 0, (_, count) => count - 1);
-        Console.WriteLine($"[EventReceiverOrchestrator] Class test count for {classType.Name} is now {count}");
         
         if (count == 0)
         {
-            Console.WriteLine($"[EventReceiverOrchestrator] Last test in class {classType.Name} - disposing shared objects");
             // Dispose SharedType.PerClass objects BEFORE running After(Class) hooks
             TestDataContainer.ClearClassScope(classType);
             

@@ -61,7 +61,6 @@ public class EngineCancellationToken : IDisposable
             {
                 if (!t.IsCanceled)
                 {
-                    Console.WriteLine("Forcefully terminating the process due to cancellation request.");
                     Environment.Exit(1);
                 }
             }, TaskScheduler.Default);

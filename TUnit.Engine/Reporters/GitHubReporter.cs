@@ -182,7 +182,6 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         if (newSize > MaxFileSizeInBytes)
         {
-            Console.WriteLine("Appending to the GitHub Step Summary would exceed the 1MB file size limit.");
             return Task.CompletedTask;
         }
 

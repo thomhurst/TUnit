@@ -15,7 +15,6 @@ internal static class TestDataContainer
     public static object? GetInstanceForClass(Type testClass, Type type, Func<Type, object> func)
     {
         var result = _classContainer.GetOrCreate(testClass, type, func);
-        Console.WriteLine($"[TestDataContainer] GetInstanceForClass({testClass.Name}, {type.Name}) = {result?.GetHashCode()}");
         return result;
     }
 
@@ -36,7 +35,6 @@ internal static class TestDataContainer
 
     public static void ClearClassScope(Type testClass)
     {
-        Console.WriteLine($"[TestDataContainer] Clearing class scope for {testClass.Name}");
         
         // Get all cached objects for this class and dispose them
         var cachedObjects = _classContainer.GetScopeValues(testClass);
@@ -46,13 +44,11 @@ internal static class TestDataContainer
             {
                 if (cachedObject is IDisposable disposable)
                 {
-                    Console.WriteLine($"[TestDataContainer] Disposing shared object {cachedObject.GetType().Name} (hash: {cachedObject.GetHashCode()}) for class {testClass.Name}");
                     ObjectTracker.UnmarkAsShared(cachedObject);
                     disposable.Dispose();
                 }
                 else if (cachedObject is IAsyncDisposable asyncDisposable)
                 {
-                    Console.WriteLine($"[TestDataContainer] Async disposing shared object {cachedObject.GetType().Name} (hash: {cachedObject.GetHashCode()}) for class {testClass.Name}");
                     ObjectTracker.UnmarkAsShared(cachedObject);
                     _ = Task.Run(async () => await asyncDisposable.DisposeAsync());
                 }

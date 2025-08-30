@@ -163,7 +163,6 @@ public static class CastHelper
             // Log diagnostic information for debugging single file mode issues
             if (Environment.GetEnvironmentVariable("TUNIT_DIAGNOSTIC_CAST") == "true")
             {
-                Console.WriteLine($"[CastHelper] No conversion found from {value.GetType().FullName} to {underlyingType.FullName}");
             }
             
             return (T?) value;

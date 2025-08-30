@@ -62,7 +62,6 @@ public static class ObjectTracker
         
         if (alreadyTracked)
         {
-            // Console.WriteLine($"[ObjectTracker] Skipping duplicate tracking for {obj.GetType().Name} (hash: {obj.GetHashCode()}) in test context {events.GetHashCode()}");
             return;
         }
 
@@ -71,7 +70,6 @@ public static class ObjectTracker
         var newCount = counter.Increment();
         
         // Console output for debugging
-        // Console.WriteLine($"[ObjectTracker] Incremented count for {obj.GetType().Name} (hash: {obj.GetHashCode()}) to {newCount} for test context {events.GetHashCode()}");
 
         // Register a single disposal handler for this object in this context
         bool handlerRegistered = false;
@@ -87,7 +85,6 @@ public static class ObjectTracker
             var count = counter.Decrement();
             
             // Console output for debugging
-            // Console.WriteLine($"[ObjectTracker] Decremented count for {obj.GetType().Name} (hash: {obj.GetHashCode()}) to {count} for test context {events.GetHashCode()}");
 
             if (count < 0)
             {
@@ -100,10 +97,8 @@ public static class ObjectTracker
                 // Shared objects will be disposed when their scope ends
                 if (!IsShared(obj))
                 {
-                    // Console.WriteLine($"[ObjectTracker] Disposing {obj.GetType().Name} (hash: {obj.GetHashCode()})");
                     await GlobalContext.Current.Disposer.DisposeAsync(obj).ConfigureAwait(false);
                     _trackedObjects.TryRemove(obj, out _);
-                    // Console.WriteLine($"[ObjectTracker] Disposed {obj.GetType().Name} (hash: {obj.GetHashCode()})");
                 }
             }
         };
@@ -172,7 +167,6 @@ public static class ObjectTracker
         if (obj != null)
         {
             _sharedObjects.TryAdd(obj, true);
-            Console.WriteLine($"[ObjectTracker] Marked {obj.GetType().Name} (hash: {obj.GetHashCode()}) as shared");
         }
     }
     
