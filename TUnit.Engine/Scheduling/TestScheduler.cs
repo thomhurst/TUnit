@@ -174,10 +174,9 @@ internal sealed class TestScheduler : ITestScheduler
         // 1. NotInParallel tests (global) - must run one at a time
         if (groupedTests.NotInParallel.Length > 0)
         {
-            var globalNotInParallelTask = ExecuteNotInParallelTestsAsync(
+            await ExecuteNotInParallelTestsAsync(
                 groupedTests.NotInParallel,
                 cancellationToken);
-            allTestTasks.Add(globalNotInParallelTask);
         }
 
         // 2. Keyed NotInParallel tests
@@ -319,7 +318,7 @@ internal sealed class TestScheduler : ITestScheduler
                 // Use worker pool pattern for parallel groups
                 var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
                 var workers = new Task[maxParallelism.Value];
-                
+
                 for (int i = 0; i < maxParallelism.Value; i++)
                 {
                     workers[i] = Task.Run(async () =>
@@ -328,12 +327,12 @@ internal sealed class TestScheduler : ITestScheduler
                         {
                             if (cancellationToken.IsCancellationRequested)
                                 break;
-                                
+
                             await test.ExecutionTask.ConfigureAwait(false);
                         }
                     }, cancellationToken);
                 }
-                
+
                 await Task.WhenAll(workers).ConfigureAwait(false);
             }
             else
@@ -355,7 +354,7 @@ internal sealed class TestScheduler : ITestScheduler
             // Create a fixed number of worker tasks that process tests from a queue
             var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
             var workers = new Task[maxParallelism.Value];
-            
+
             // Create worker tasks
             for (int i = 0; i < maxParallelism.Value; i++)
             {
@@ -365,12 +364,12 @@ internal sealed class TestScheduler : ITestScheduler
                     {
                         if (cancellationToken.IsCancellationRequested)
                             break;
-                            
+
                         await test.ExecutionTask.ConfigureAwait(false);
                     }
                 }, cancellationToken);
             }
-            
+
             await Task.WhenAll(workers).ConfigureAwait(false);
         }
         else
