@@ -112,6 +112,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             }
             else
             {
+                ReflectionHookDiscoveryService.DiscoverHooks();
                 return new ReflectionTestDataCollector();
             }
         };
