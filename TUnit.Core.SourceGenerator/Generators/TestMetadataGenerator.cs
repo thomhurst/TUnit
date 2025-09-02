@@ -75,14 +75,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var filePath = location.SourceTree?.FilePath;
         if (!string.IsNullOrEmpty(filePath))
         {
-            return "DEBUG_SourceTree_" + filePath;
+            return filePath;
         }
 
         // 2. Try from the syntax tree directly  
         filePath = syntaxTree.FilePath;
         if (!string.IsNullOrEmpty(filePath))
         {
-            return "DEBUG_SyntaxTree_" + filePath;
+            return filePath;
         }
 
         // 3. Try to get file path from syntax tree using GetDebuggerDisplay or other methods
@@ -102,7 +102,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // 5. Return "Unknown" as final fallback to match reflection behavior
         // This is consistent with how ReflectionTestDataCollector handles unknown file paths
-        return "FIXED_Unknown";
+        return "Unknown";
     }
 
     private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context)
