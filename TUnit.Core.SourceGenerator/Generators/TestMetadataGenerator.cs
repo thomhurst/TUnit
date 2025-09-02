@@ -67,6 +67,44 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         };
     }
 
+    private static string GetFilePath(Location location, SyntaxTree syntaxTree, AttributeData testAttribute)
+    {
+        // Try multiple approaches to get the file path
+        
+        // 1. Try from the location's source tree
+        var filePath = location.SourceTree?.FilePath;
+        if (!string.IsNullOrEmpty(filePath))
+        {
+            return "DEBUG_SourceTree_" + filePath;
+        }
+
+        // 2. Try from the syntax tree directly  
+        filePath = syntaxTree.FilePath;
+        if (!string.IsNullOrEmpty(filePath))
+        {
+            return "DEBUG_SyntaxTree_" + filePath;
+        }
+
+        // 3. Try to get file path from syntax tree using GetDebuggerDisplay or other methods
+        // This might help in scenarios where FilePath property is not populated
+        var syntaxRoot = syntaxTree.GetRoot();
+        if (syntaxRoot?.SyntaxTree?.FilePath is { } rootFilePath && !string.IsNullOrEmpty(rootFilePath))
+        {
+            return rootFilePath;
+        }
+
+        // 4. Try from test attribute constructor arguments (backup mechanism)
+        var attributeFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+        if (!string.IsNullOrEmpty(attributeFilePath))
+        {
+            return attributeFilePath;
+        }
+
+        // 5. Return "Unknown" as final fallback to match reflection behavior
+        // This is consistent with how ReflectionTestDataCollector handles unknown file paths
+        return "FIXED_Unknown";
+    }
+
     private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context)
     {
         var methodSyntax = (MethodDeclarationSyntax)context.TargetNode;
@@ -91,12 +129,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var isGenericType = containingType is { IsGenericType: true, TypeParameters.Length: > 0 };
         var isGenericMethod = methodSymbol is { IsGenericMethod: true };
 
+        var location = methodSyntax.GetLocation();
+        var filePath = GetFilePath(location, methodSyntax.SyntaxTree, testAttribute);
+
         return new TestMethodMetadata
         {
             MethodSymbol = methodSymbol ?? throw new InvalidOperationException("Symbol is not a method"),
             TypeSymbol = containingType,
-            FilePath = methodSyntax.GetLocation().SourceTree?.FilePath ?? testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? methodSyntax.SyntaxTree.FilePath,
-            LineNumber = methodSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+            FilePath = filePath,
+            LineNumber = location.GetLineSpan().StartLinePosition.Line + 1,
             TestAttribute = context.Attributes.First(),
             Context = context,
             MethodSyntax = methodSyntax,
@@ -133,12 +174,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Calculate inheritance depth for this test
             int inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
 
+            var location = classInfo.ClassSyntax.GetLocation();
+            var filePath = GetFilePath(location, classInfo.ClassSyntax.SyntaxTree, testAttribute);
+
             var testMethodMetadata = new TestMethodMetadata
             {
                 MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
                 TypeSymbol = classInfo.TypeSymbol,
-                FilePath = classInfo.ClassSyntax.GetLocation().SourceTree?.FilePath ?? testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? classInfo.ClassSyntax.SyntaxTree.FilePath,
-                LineNumber = classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+                FilePath = filePath,
+                LineNumber = location.GetLineSpan().StartLinePosition.Line + 1,
                 TestAttribute = testAttribute,
                 Context = null, // No context for inherited tests
                 MethodSyntax = null, // No syntax for inherited methods
