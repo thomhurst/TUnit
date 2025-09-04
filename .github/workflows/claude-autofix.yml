@@ -22,7 +22,7 @@ jobs:
       checks: read
     steps:
       - name: Find and Process Failed PRs
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           # Use PAT if available to post as user instead of bot, fallback to GITHUB_TOKEN
           github-token: ${{ secrets.CLAUDE_AUTOFIX_PAT || secrets.GITHUB_TOKEN }}
