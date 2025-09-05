@@ -285,8 +285,18 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             // Don't return false here, continue with other checks
         }
 
-        if (!assembly.GetReferencedAssemblies().Any(a =>
-                a.Name != null && (a.Name.StartsWith("TUnit") || a.Name == "TUnit")))
+        // Improved TUnit reference detection to handle edge cases with assemblies ending in "Tests"
+        var referencedAssemblies = assembly.GetReferencedAssemblies();
+        var hasTUnitReference = referencedAssemblies.Any(a =>
+        {
+            if (a.Name == null) return false;
+            
+            // Use case-insensitive comparison and handle both exact match and prefix match
+            return string.Equals(a.Name, "TUnit", StringComparison.OrdinalIgnoreCase) || 
+                   a.Name.StartsWith("TUnit", StringComparison.OrdinalIgnoreCase);
+        });
+
+        if (!hasTUnitReference)
         {
             return false;
         }
