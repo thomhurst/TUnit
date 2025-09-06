@@ -49,10 +49,16 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     public string Description => extension.Description;
 
     private readonly ConcurrentDictionary<string, List<TestNodeUpdateMessage>> _updates = [];
+    private static readonly Random _jitterRandom =
+#if NET
+                Random.Shared;
+#else
+                new();
+#endif
 
     public Task ConsumeAsync(IDataProducer dataProducer, IData value, CancellationToken cancellationToken)
     {
-        var testNodeUpdateMessage = (TestNodeUpdateMessage) value;
+        var testNodeUpdateMessage = (TestNodeUpdateMessage)value;
 
         _updates.GetOrAdd(testNodeUpdateMessage.TestNode.Uid.Value, []).Add(testNodeUpdateMessage);
 
@@ -173,7 +179,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         return WriteFile(stringBuilder.ToString());
     }
 
-    private Task WriteFile(string contents)
+    private async Task WriteFile(string contents)
     {
         var fileInfo = new FileInfo(_outputSummaryFilePath);
         var currentFileSize = fileInfo.Exists ? fileInfo.Length : 0;
@@ -183,14 +189,49 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         if (newSize > MaxFileSizeInBytes)
         {
             Console.WriteLine("Appending to the GitHub Step Summary would exceed the 1MB file size limit.");
-            return Task.CompletedTask;
+            return;
         }
 
-#if NET
-        return File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
-#else
-        File.AppendAllText(_outputSummaryFilePath, contents, Encoding.UTF8);
+        var maxRetries = int.TryParse(EnvironmentVariableCache.Get("TUNIT_GITHUB_ACTIONS_REPORTER_RETRY_COUNT"), out var retryCount) ? retryCount : 5;
+        var attempts = 0;
 
+        while (attempts < maxRetries)
+        {
+            attempts++;
+            try
+            {
+                await Append(_outputSummaryFilePath, contents);
+            }
+            catch (Exception ex) when (attempts < maxRetries)
+            {
+                var delay = _jitterRandom.Next(100, 300);
+                Console.WriteLine($"GitHubReporter: Append failed (attempt {attempts}/{maxRetries}). Retrying in {delay}ms. Error: {ex.Message}");
+                await Sleep(delay);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GitHubReporter: Failed to write step summary after {maxRetries} attempts: {ex.Message}");
+                return;
+            }
+        }
+    }
+
+    private static Task Sleep(int delayMs)
+    {
+#if NET 
+        return Task.Delay(delayMs);
+#else
+        System.Threading.Thread.Sleep(delayMs);
+        return Task.CompletedTask;
+#endif
+    }
+
+    private static Task Append(string filePath, string contents)
+    {
+#if NET
+        return File.AppendAllTextAsync(filePath, contents, Encoding.UTF8);
+#else
+        File.AppendAllText(filePath, contents, Encoding.UTF8);
         return Task.CompletedTask;
 #endif
     }
