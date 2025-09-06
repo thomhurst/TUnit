@@ -2,6 +2,7 @@ using Microsoft.Testing.Platform.Extensions;
 using Shouldly;
 using TUnit.Engine.Reporters;
 using System.Reflection;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Tests;
 
@@ -20,6 +21,7 @@ public class GitHubReporterTests
     public async Task IsEnabledAsync_Should_Return_False_When_TUNIT_DISABLE_GITHUB_REPORTER_Is_Set()
     {
         // Arrange
+        EnvironmentVariableCache.ClearCache(); // Clear cache to pick up new environment variables
         Environment.SetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER", "true");
         Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
         Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", CreateTempFile());
@@ -48,6 +50,7 @@ public class GitHubReporterTests
     public async Task IsEnabledAsync_Should_Return_False_When_DISABLE_GITHUB_REPORTER_Is_Set()
     {
         // Arrange
+        EnvironmentVariableCache.ClearCache(); // Clear cache to pick up new environment variables
         Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", "true");
         Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
         Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", CreateTempFile());
@@ -76,6 +79,7 @@ public class GitHubReporterTests
     public async Task IsEnabledAsync_Should_Return_False_When_Both_Environment_Variables_Are_Set()
     {
         // Arrange
+        EnvironmentVariableCache.ClearCache(); // Clear cache to pick up new environment variables
         Environment.SetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER", "true");
         Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", "true");
         Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
@@ -106,6 +110,7 @@ public class GitHubReporterTests
     public async Task IsEnabledAsync_Should_Return_False_When_GITHUB_ACTIONS_Is_Not_Set()
     {
         // Arrange
+        EnvironmentVariableCache.ClearCache(); // Clear cache to pick up new environment variables
         Environment.SetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER", null);
         Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", null);
         Environment.SetEnvironmentVariable("GITHUB_ACTIONS", null);
@@ -140,6 +145,7 @@ public class GitHubReporterTests
     public async Task WriteFile_Should_Retry_On_IOException()
     {
         // Arrange
+        EnvironmentVariableCache.ClearCache(); // Clear cache to pick up new environment variables
         Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
         var tempFile = CreateTempFile();
         Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", tempFile);
@@ -188,6 +194,7 @@ public class GitHubReporterTests
     public async Task WriteFile_Should_Handle_Permanent_File_Lock_Gracefully()
     {
         // Arrange
+        EnvironmentVariableCache.ClearCache(); // Clear cache to pick up new environment variables
         Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
         var tempFile = CreateTempFile();
         Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", tempFile);
