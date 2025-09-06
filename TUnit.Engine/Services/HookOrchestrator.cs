@@ -37,6 +37,9 @@ internal sealed class HookOrchestrator : IDisposable
 #endif
 
     // Synchronization for Before/After Class hooks across parallel groups
+    // These semaphores ensure that even though different ParallelGroups run concurrently,
+    // their BeforeClass and AfterClass hooks execute sequentially to prevent interference
+    // (e.g., database setup/cleanup conflicts)
     private readonly SemaphoreSlim _beforeClassSemaphore = new(1, 1);
     private readonly SemaphoreSlim _afterClassSemaphore = new(1, 1);
 
