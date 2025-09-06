@@ -30,6 +30,12 @@ public abstract record HookMethod
     /// </summary>
     public TimeSpan? Timeout { get; internal set; } = TimeSpan.FromMinutes(5);
 
+    /// <summary>
+    /// Gets the skip reason for this hook method. This will be set during hook registration
+    /// by the event receiver infrastructure if the hook should be skipped.
+    /// </summary>
+    public string? SkipReason { get; internal set; }
+
     public required IHookExecutor HookExecutor { get; init; }
 
     public required int Order { get; init; }
