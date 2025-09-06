@@ -248,9 +248,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         }
 
         // Separate data source properties into init-only and settable
-        var initOnlyProperties = new global::System.Collections.Generic.List<PropertyWithDataSource>();
-        var settableProperties = new global::System.Collections.Generic.List<PropertyWithDataSource>();
-        var staticProperties = new global::System.Collections.Generic.List<PropertyWithDataSource>();
+        var initOnlyProperties = new List<PropertyWithDataSource>();
+        var settableProperties = new List<PropertyWithDataSource>();
+        var staticProperties = new List<PropertyWithDataSource>();
         
         foreach (var prop in typeInfo.Properties)
         {
@@ -309,12 +309,11 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                         var argument = attr.ConstructorArguments[0];
                         
                         // Check if property is an array type and we have an array argument
-                        if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol arrayType)
+                        if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol)
                         {
                             // Use the entire array with proper typing
-                            var elementType = arrayType.ElementType.GloballyQualified();
-                            var values = argument.Values.Select(FormatConstantValue);
-                            sb.AppendLine($"            var value = new {elementType}[] {{ {string.Join(", ", values)} }};");
+                            var arrayValue = FormatArrayValue(argument, property.Type);
+                            sb.AppendLine($"            var value = {arrayValue};");
                         }
                         else if (argument.Kind == TypedConstantKind.Array && argument.Values.Length > 0)
                         {
@@ -349,59 +348,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 }
                 else
                 {
-                    // Double-check for ArgumentsAttribute before using runtime resolution
-                    if (attr.AttributeClass?.GloballyQualifiedNonGeneric() == "global::TUnit.Core.ArgumentsAttribute")
-                    {
-                        // Force ArgumentsAttribute to use compile-time handling even in init-only path
-                        if (attr.ConstructorArguments.Length > 0)
-                        {
-                            var argument = attr.ConstructorArguments[0];
-                            
-                            // Check if property is an array type and we have an array argument
-                            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol arrayType)
-                            {
-                                // Use the entire array with proper typing
-                                var elementType = arrayType.ElementType.GloballyQualified();
-                                var values = argument.Values.Select(FormatConstantValue);
-                                sb.AppendLine($"            var value = new {elementType}[] {{ {string.Join(", ", values)} }};");
-                            }
-                            else if (argument.Kind == TypedConstantKind.Array && argument.Values.Length > 0)
-                            {
-                                // Property is not an array but argument is - use the first element
-                                var value = FormatConstantValue(argument.Values[0]);
-                                sb.AppendLine($"            var value = {value};");
-                            }
-                            else if (argument.Kind == TypedConstantKind.Array)
-                            {
-                                // Empty array case - use appropriate empty value
-                                if (property.Type is IArrayTypeSymbol emptyArrayType)
-                                {
-                                    var elementType = emptyArrayType.ElementType.GloballyQualified();
-                                    sb.AppendLine($"            var value = new {elementType}[0];");
-                                }
-                                else
-                                {
-                                    sb.AppendLine($"            var value = default({property.Type.GloballyQualified()});");
-                                }
-                            }
-                            else
-                            {
-                                // Argument is not an array - use it directly
-                                var value = FormatConstantValue(argument);
-                                sb.AppendLine($"            var value = {value};");
-                            }
-                        }
-                        else
-                        {
-                            sb.AppendLine($"            var value = default({property.Type.GloballyQualified()});");
-                        }
-                    }
-                    else
-                    {
-                        // Use runtime resolution for other data source attributes
-                        sb.AppendLine($"            var value = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
-                        sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
-                    }
+                    // Use runtime resolution for other data source attributes
+                    sb.AppendLine($"            var value = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
+                    sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
                 }
                 
                 sb.AppendLine($"            var backingField = instance.GetType().GetField(\"<{propertyName}>k__BackingField\", ");
@@ -468,38 +417,18 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         }
         else
         {
-            // Final safety check for ArgumentsAttribute - ensure it never goes to runtime resolution for arrays
-            var attributeName = attr.AttributeClass?.GloballyQualifiedNonGeneric();
-            if (attributeName == "global::TUnit.Core.ArgumentsAttribute")
-            {
-                // Route ArgumentsAttribute to proper compile-time handling
-                GenerateArgumentsPropertyInit(sb, propInfo);
-            }
-            else
-            {
-                // For any other data source attributes, use runtime resolution
-                sb.AppendLine("        {");
-                sb.AppendLine($"            var dataSourceInstance = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
-                sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
-                sb.AppendLine($"            instance.{propertyName} = ({property.Type.GloballyQualified()})dataSourceInstance;");
-                sb.AppendLine("        }");
-            }
+            // For any other data source attributes, use runtime resolution
+            sb.AppendLine("        {");
+            sb.AppendLine($"            var dataSourceInstance = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
+            sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
+            sb.AppendLine($"            instance.{propertyName} = ({property.Type.GloballyQualified()})dataSourceInstance;");
+            sb.AppendLine("        }");
         }
     }
 
     private static void GenerateAsyncDataSourcePropertyInit(StringBuilder sb, PropertyWithDataSource propInfo)
     {
         var property = propInfo.Property;
-        var attr = propInfo.DataSourceAttribute;
-        
-        // Special check for ArgumentsAttribute that might have been missed - ensure proper array handling
-        var fullyQualifiedName = attr.AttributeClass?.GloballyQualifiedNonGeneric();
-        if (fullyQualifiedName == "global::TUnit.Core.ArgumentsAttribute")
-        {
-            // Route ArgumentsAttribute to proper compile-time handling
-            GenerateArgumentsPropertyInit(sb, propInfo);
-            return;
-        }
         
         // Use runtime resolution to ensure the data source attribute's logic is properly invoked
         // This ensures caching, sharing, and other attribute-specific behaviors work correctly
@@ -523,12 +452,11 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var argument = attr.ConstructorArguments[0];
             
             // Check if property is an array type and we have an array argument
-            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol arrayType)
+            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol)
             {
                 // Use the entire array with proper typing
-                var elementType = arrayType.ElementType.GloballyQualified();
-                var values = argument.Values.Select(FormatConstantValue);
-                sb.AppendLine($"        instance.{property.Name} = new {elementType}[] {{ {string.Join(", ", values)} }};");
+                var arrayValue = FormatArrayValue(argument, property.Type);
+                sb.AppendLine($"        instance.{property.Name} = {arrayValue};");
             }
             else if (argument.Kind == TypedConstantKind.Array && argument.Values.Length > 0)
             {
@@ -636,12 +564,11 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var argument = attr.ConstructorArguments[0];
             
             // Check if property is an array type and we have an array argument
-            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol arrayType)
+            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol)
             {
                 // Use the entire array with proper typing
-                var elementType = arrayType.ElementType.GloballyQualified();
-                var values = argument.Values.Select(FormatConstantValue);
-                sb.AppendLine($"            {property.Name} = new {elementType}[] {{ {string.Join(", ", values)} }},");
+                var arrayValue = FormatArrayValue(argument, property.Type);
+                sb.AppendLine($"            {property.Name} = {arrayValue},");
             }
             else if (argument.Kind == TypedConstantKind.Array && argument.Values.Length > 0)
             {
@@ -719,12 +646,11 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             var argument = attr.ConstructorArguments[0];
             
             // Check if property is an array type and we have an array argument
-            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol arrayType)
+            if (argument.Kind == TypedConstantKind.Array && property.Type is IArrayTypeSymbol)
             {
                 // Use the entire array with proper typing
-                var elementType = arrayType.ElementType.GloballyQualified();
-                var values = argument.Values.Select(FormatConstantValue);
-                sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = new {elementType}[] {{ {string.Join(", ", values)} }};");
+                var arrayValue = FormatArrayValue(argument, property.Type);
+                sb.AppendLine($"        {fullyQualifiedTypeName}.{property.Name} = {arrayValue};");
             }
             else if (argument.Kind == TypedConstantKind.Array && argument.Values.Length > 0)
             {
@@ -796,17 +722,22 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         };
     }
 
-    private static string FormatArrayValue(TypedConstant arrayConstant)
+    private static string FormatArrayValue(TypedConstant arrayConstant, ITypeSymbol? targetPropertyType = null)
     {
         if (arrayConstant.Kind != TypedConstantKind.Array)
         {
             return "null";
         }
 
-        // Try to get the array type from the TypedConstant itself first
+        // Try to get the element type from the target property type first (most reliable)
         string elementType;
-        if (arrayConstant.Type is IArrayTypeSymbol arrayType)
+        if (targetPropertyType is IArrayTypeSymbol targetArrayType)
         {
+            elementType = targetArrayType.ElementType.GloballyQualified();
+        }
+        else if (arrayConstant.Type is IArrayTypeSymbol arrayType)
+        {
+            // Try to get the array type from the TypedConstant itself
             elementType = arrayType.ElementType.GloballyQualified();
         }
         else if (arrayConstant.Values.Length > 0)
