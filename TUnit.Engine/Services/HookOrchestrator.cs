@@ -12,7 +12,7 @@ using TUnit.Engine.Logging;
 
 namespace TUnit.Engine.Services;
 
-internal sealed class HookOrchestrator
+internal sealed class HookOrchestrator : IDisposable
 {
     private readonly IHookCollectionService _hookCollectionService;
     private readonly TUnitFrameworkLogger _logger;
@@ -35,6 +35,10 @@ internal sealed class HookOrchestrator
 #if NET
     private ExecutionContext? _sessionExecutionContext;
 #endif
+
+    // Synchronization for Before/After Class hooks across parallel groups
+    private readonly SemaphoreSlim _beforeClassSemaphore = new(1, 1);
+    private readonly SemaphoreSlim _afterClassSemaphore = new(1, 1);
 
     public HookOrchestrator(IHookCollectionService hookCollectionService, TUnitFrameworkLogger logger, IContextProvider contextProvider, TUnitServiceProvider serviceProvider)
     {
@@ -470,99 +474,117 @@ internal sealed class HookOrchestrator
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClassType, CancellationToken cancellationToken)
     {
-        var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClassType).ConfigureAwait(false);
-
-        var classContext = _contextProvider.GetOrCreateClassContext(testClassType);
-
-        foreach (var hook in hooks)
+        // Use semaphore to ensure BeforeClass hooks execute sequentially across parallel groups
+        await _beforeClassSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
         {
-            try
-            {
-                classContext.RestoreExecutionContext();
-                await hook(classContext, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"BeforeClass hook failed for {testClassType.Name}: {ex.Message}").ConfigureAwait(false);
-                throw;
-            }
-        }
+            var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClassType).ConfigureAwait(false);
 
-        // Execute global BeforeEveryClass hooks
-        var everyHooks = await _hookCollectionService.CollectBeforeEveryClassHooksAsync().ConfigureAwait(false);
-        foreach (var hook in everyHooks)
-        {
-            try
-            {
-                classContext.RestoreExecutionContext();
-                await hook(classContext, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"BeforeEveryClass hook failed for {testClassType.Name}: {ex.Message}").ConfigureAwait(false);
-                throw;
-            }
-        }
+            var classContext = _contextProvider.GetOrCreateClassContext(testClassType);
 
-        // Return the context's ExecutionContext if user called AddAsyncLocalValues, otherwise null
+            foreach (var hook in hooks)
+            {
+                try
+                {
+                    classContext.RestoreExecutionContext();
+                    await hook(classContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"BeforeClass hook failed for {testClassType.Name}: {ex.Message}").ConfigureAwait(false);
+                    throw;
+                }
+            }
+
+            // Execute global BeforeEveryClass hooks
+            var everyHooks = await _hookCollectionService.CollectBeforeEveryClassHooksAsync().ConfigureAwait(false);
+            foreach (var hook in everyHooks)
+            {
+                try
+                {
+                    classContext.RestoreExecutionContext();
+                    await hook(classContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"BeforeEveryClass hook failed for {testClassType.Name}: {ex.Message}").ConfigureAwait(false);
+                    throw;
+                }
+            }
+
+            // Return the context's ExecutionContext if user called AddAsyncLocalValues, otherwise null
 #if NET
-        return classContext.ExecutionContext;
+            return classContext.ExecutionContext;
 #else
-        return null;
+            return null;
 #endif
+        }
+        finally
+        {
+            _beforeClassSemaphore.Release();
+        }
     }
 
     private async Task<ExecutionContext?> ExecuteAfterClassHooksAsync(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClassType, CancellationToken cancellationToken)
     {
-        var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClassType).ConfigureAwait(false);
-        var classContext = _contextProvider.GetOrCreateClassContext(testClassType);
-        var exceptions = new List<Exception>();
-
-        // Execute global AfterEveryClass hooks first
-        var everyHooks = await _hookCollectionService.CollectAfterEveryClassHooksAsync().ConfigureAwait(false);
-        foreach (var hook in everyHooks)
+        // Use semaphore to ensure AfterClass hooks execute sequentially across parallel groups
+        await _afterClassSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
         {
-            try
-            {
-                classContext.RestoreExecutionContext();
-                await hook(classContext, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"AfterEveryClass hook failed for {testClassType.Name}: {ex.Message}").ConfigureAwait(false);
-                exceptions.Add(ex);
-            }
-        }
+            var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClassType).ConfigureAwait(false);
+            var classContext = _contextProvider.GetOrCreateClassContext(testClassType);
+            var exceptions = new List<Exception>();
 
-        foreach (var hook in hooks)
-        {
-            try
+            // Execute global AfterEveryClass hooks first
+            var everyHooks = await _hookCollectionService.CollectAfterEveryClassHooksAsync().ConfigureAwait(false);
+            foreach (var hook in everyHooks)
             {
-                classContext.RestoreExecutionContext();
-                await hook(classContext, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    classContext.RestoreExecutionContext();
+                    await hook(classContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"AfterEveryClass hook failed for {testClassType.Name}: {ex.Message}").ConfigureAwait(false);
+                    exceptions.Add(ex);
+                }
             }
-            catch (Exception ex)
+
+            foreach (var hook in hooks)
             {
-                await _logger.LogErrorAsync($"AfterClass hook failed for {testClassType.Name}: {ex.Message}").ConfigureAwait(false);
-                exceptions.Add(ex);
+                try
+                {
+                    classContext.RestoreExecutionContext();
+                    await hook(classContext, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"AfterClass hook failed for {testClassType.Name}: {ex.Message}").ConfigureAwait(false);
+                    exceptions.Add(ex);
+                }
             }
-        }
 
-        if (exceptions.Count > 0)
-        {
-            throw exceptions.Count == 1
-                ? new HookFailedException(exceptions[0])
-                : new HookFailedException("Multiple AfterClass hooks failed", new AggregateException(exceptions));
-        }
+            if (exceptions.Count > 0)
+            {
+                throw exceptions.Count == 1
+                    ? new HookFailedException(exceptions[0])
+                    : new HookFailedException("Multiple AfterClass hooks failed", new AggregateException(exceptions));
+            }
 
-        // Return the context's ExecutionContext if user called AddAsyncLocalValues, otherwise null
+            // Return the context's ExecutionContext if user called AddAsyncLocalValues, otherwise null
 #if NET
-        return classContext.ExecutionContext;
+            return classContext.ExecutionContext;
 #else
-        return null;
+            return null;
 #endif
+        }
+        finally
+        {
+            _afterClassSemaphore.Release();
+        }
     }
 
     private async Task ExecuteBeforeEveryTestHooksAsync(Type testClassType, TestContext testContext, CancellationToken cancellationToken)
@@ -609,5 +631,11 @@ internal sealed class HookOrchestrator
                 ? new HookFailedException(exceptions[0])
                 : new HookFailedException("Multiple AfterEveryTest hooks failed", new AggregateException(exceptions));
         }
+    }
+
+    public void Dispose()
+    {
+        _beforeClassSemaphore?.Dispose();
+        _afterClassSemaphore?.Dispose();
     }
 }
