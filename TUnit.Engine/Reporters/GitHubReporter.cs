@@ -173,7 +173,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         return WriteFile(stringBuilder.ToString());
     }
 
-    private Task WriteFile(string contents)
+    private async Task WriteFile(string contents)
     {
         var fileInfo = new FileInfo(_outputSummaryFilePath);
         var currentFileSize = fileInfo.Exists ? fileInfo.Length : 0;
@@ -183,16 +183,40 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         if (newSize > MaxFileSizeInBytes)
         {
             Console.WriteLine("Appending to the GitHub Step Summary would exceed the 1MB file size limit.");
-            return Task.CompletedTask;
+            return;
         }
 
-#if NET
-        return File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
-#else
-        File.AppendAllText(_outputSummaryFilePath, contents, Encoding.UTF8);
+        const int maxRetries = 5;
+        const int baseDelayMs = 100;
+        var random = new Random();
 
-        return Task.CompletedTask;
+        for (int attempt = 0; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+#if NET
+                await File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
+#else
+                File.AppendAllText(_outputSummaryFilePath, contents, Encoding.UTF8);
 #endif
+                return; // Success - exit retry loop
+            }
+            catch (IOException) when (attempt < maxRetries)
+            {
+                // Calculate delay with exponential backoff and jitter
+                var delay = baseDelayMs * (int)Math.Pow(2, attempt);
+                var jitter = random.Next(0, delay / 2);
+                var totalDelay = delay + jitter;
+
+                await Task.Delay(totalDelay);
+            }
+            catch (IOException) when (attempt == maxRetries)
+            {
+                // Final attempt failed - log but don't throw to avoid breaking the test run
+                Console.WriteLine($"Failed to write to GitHub Step Summary after {maxRetries + 1} attempts. File may be locked by another process.");
+                return;
+            }
+        }
     }
 
     private string GetDetails(IProperty? stateProperty, PropertyBag properties)
