@@ -67,42 +67,72 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         };
     }
 
-    private static string GetFilePath(Location location, SyntaxTree syntaxTree, AttributeData testAttribute)
+    private static string GetFilePath(AttributeData testAttribute)
     {
-        // Try multiple approaches to get the file path
-        
-        // 1. Try from the location's source tree
+        // Extract filename from TestAttribute constructor arguments
+        // TestAttribute uses CallerFilePath which is passed as the first constructor argument
+        if (testAttribute.ConstructorArguments.Length > 0)
+        {
+            var argValue = testAttribute.ConstructorArguments[0];
+            
+            // If the attribute argument is not null, use its value (even if empty string)
+            if (!argValue.IsNull)
+            {
+                return argValue.Value?.ToString() ?? string.Empty;
+            }
+        }
+
+        // Return empty string as fallback to match original behavior
+        return string.Empty;
+    }
+
+    private static string GetFilePathForInheritedTest(Location location, SyntaxTree syntaxTree, AttributeData testAttribute)
+    {
+        // For inherited tests, use the class location first, then fallback to attribute args
         var filePath = location.SourceTree?.FilePath;
         if (!string.IsNullOrEmpty(filePath))
         {
             return filePath;
         }
 
-        // 2. Try from the syntax tree directly  
         filePath = syntaxTree.FilePath;
         if (!string.IsNullOrEmpty(filePath))
         {
             return filePath;
         }
 
-        // 3. Try to get file path from syntax tree using GetDebuggerDisplay or other methods
-        // This might help in scenarios where FilePath property is not populated
-        var syntaxRoot = syntaxTree.GetRoot();
-        if (syntaxRoot?.SyntaxTree?.FilePath is { } rootFilePath && !string.IsNullOrEmpty(rootFilePath))
+        // Try attribute constructor arguments as fallback
+        if (testAttribute.ConstructorArguments.Length > 0)
         {
-            return rootFilePath;
+            var argValue = testAttribute.ConstructorArguments[0];
+            if (!argValue.IsNull)
+            {
+                var attributeFilePath = argValue.Value?.ToString();
+                if (!string.IsNullOrEmpty(attributeFilePath))
+                {
+                    return attributeFilePath;
+                }
+            }
         }
 
-        // 4. Try from test attribute constructor arguments (backup mechanism)
-        var attributeFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
-        if (!string.IsNullOrEmpty(attributeFilePath))
+        // Return empty string as final fallback
+        return string.Empty;
+    }
+
+    private static int GetLineNumber(AttributeData testAttribute)
+    {
+        // Extract line number from TestAttribute constructor arguments
+        // TestAttribute uses CallerLineNumber which is passed as the second constructor argument
+        if (testAttribute.ConstructorArguments.Length > 1)
         {
-            return attributeFilePath;
+            if (testAttribute.ConstructorArguments[1].Value is int lineNumber)
+            {
+                return lineNumber;
+            }
         }
 
-        // 5. Return "Unknown" as final fallback to match reflection behavior
-        // This is consistent with how ReflectionTestDataCollector handles unknown file paths
-        return "Unknown";
+        // Return 0 as fallback
+        return 0;
     }
 
     private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context)
@@ -129,15 +159,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var isGenericType = containingType is { IsGenericType: true, TypeParameters.Length: > 0 };
         var isGenericMethod = methodSymbol is { IsGenericMethod: true };
 
-        var location = methodSyntax.GetLocation();
-        var filePath = GetFilePath(location, methodSyntax.SyntaxTree, testAttribute);
+        var filePath = GetFilePath(testAttribute);
+        var lineNumber = GetLineNumber(testAttribute);
 
         return new TestMethodMetadata
         {
             MethodSymbol = methodSymbol ?? throw new InvalidOperationException("Symbol is not a method"),
             TypeSymbol = containingType,
             FilePath = filePath,
-            LineNumber = location.GetLineSpan().StartLinePosition.Line + 1,
+            LineNumber = lineNumber,
             TestAttribute = context.Attributes.First(),
             Context = context,
             MethodSyntax = methodSyntax,
@@ -175,14 +205,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             int inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
 
             var location = classInfo.ClassSyntax.GetLocation();
-            var filePath = GetFilePath(location, classInfo.ClassSyntax.SyntaxTree, testAttribute);
+            var filePath = GetFilePathForInheritedTest(location, classInfo.ClassSyntax.SyntaxTree, testAttribute);
+            var lineNumber = location.GetLineSpan().StartLinePosition.Line + 1;
 
             var testMethodMetadata = new TestMethodMetadata
             {
                 MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
                 TypeSymbol = classInfo.TypeSymbol,
                 FilePath = filePath,
-                LineNumber = location.GetLineSpan().StartLinePosition.Line + 1,
+                LineNumber = lineNumber,
                 TestAttribute = testAttribute,
                 Context = null, // No context for inherited tests
                 MethodSyntax = null, // No syntax for inherited methods
