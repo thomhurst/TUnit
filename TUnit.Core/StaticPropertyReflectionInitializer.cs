@@ -41,7 +41,7 @@ public static class StaticPropertyReflectionInitializer
                     await InitializeStaticPropertiesForType(type);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log but don't fail - some assemblies might not be accessible
             }
