@@ -67,6 +67,74 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         };
     }
 
+    private static string GetFilePath(AttributeData testAttribute)
+    {
+        // Extract filename from TestAttribute constructor arguments
+        // TestAttribute uses CallerFilePath which is passed as the first constructor argument
+        if (testAttribute.ConstructorArguments.Length > 0)
+        {
+            var argValue = testAttribute.ConstructorArguments[0];
+            
+            // If the attribute argument is not null, use its value (even if empty string)
+            if (!argValue.IsNull)
+            {
+                return argValue.Value?.ToString() ?? string.Empty;
+            }
+        }
+
+        // Return empty string as fallback to match original behavior
+        return string.Empty;
+    }
+
+    private static string GetFilePathForInheritedTest(Location location, SyntaxTree syntaxTree, AttributeData testAttribute)
+    {
+        // For inherited tests, use the class location first, then fallback to attribute args
+        var filePath = location.SourceTree?.FilePath;
+        if (!string.IsNullOrEmpty(filePath))
+        {
+            return filePath;
+        }
+
+        filePath = syntaxTree.FilePath;
+        if (!string.IsNullOrEmpty(filePath))
+        {
+            return filePath;
+        }
+
+        // Try attribute constructor arguments as fallback
+        if (testAttribute.ConstructorArguments.Length > 0)
+        {
+            var argValue = testAttribute.ConstructorArguments[0];
+            if (!argValue.IsNull)
+            {
+                var attributeFilePath = argValue.Value?.ToString();
+                if (!string.IsNullOrEmpty(attributeFilePath))
+                {
+                    return attributeFilePath;
+                }
+            }
+        }
+
+        // Return empty string as final fallback
+        return string.Empty;
+    }
+
+    private static int GetLineNumber(AttributeData testAttribute)
+    {
+        // Extract line number from TestAttribute constructor arguments
+        // TestAttribute uses CallerLineNumber which is passed as the second constructor argument
+        if (testAttribute.ConstructorArguments.Length > 1)
+        {
+            if (testAttribute.ConstructorArguments[1].Value is int lineNumber)
+            {
+                return lineNumber;
+            }
+        }
+
+        // Return 0 as fallback
+        return 0;
+    }
+
     private static TestMethodMetadata? GetTestMethodMetadata(GeneratorAttributeSyntaxContext context)
     {
         var methodSyntax = (MethodDeclarationSyntax)context.TargetNode;
@@ -91,12 +159,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var isGenericType = containingType is { IsGenericType: true, TypeParameters.Length: > 0 };
         var isGenericMethod = methodSymbol is { IsGenericMethod: true };
 
+        var filePath = GetFilePath(testAttribute);
+        var lineNumber = GetLineNumber(testAttribute);
+
         return new TestMethodMetadata
         {
             MethodSymbol = methodSymbol ?? throw new InvalidOperationException("Symbol is not a method"),
             TypeSymbol = containingType,
-            FilePath = methodSyntax.GetLocation().SourceTree?.FilePath ?? testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? methodSyntax.SyntaxTree.FilePath,
-            LineNumber = methodSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+            FilePath = filePath,
+            LineNumber = lineNumber,
             TestAttribute = context.Attributes.First(),
             Context = context,
             MethodSyntax = methodSyntax,
@@ -133,12 +204,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Calculate inheritance depth for this test
             int inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
 
+            var location = classInfo.ClassSyntax.GetLocation();
+            var filePath = GetFilePathForInheritedTest(location, classInfo.ClassSyntax.SyntaxTree, testAttribute);
+            var lineNumber = location.GetLineSpan().StartLinePosition.Line + 1;
+
             var testMethodMetadata = new TestMethodMetadata
             {
                 MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
                 TypeSymbol = classInfo.TypeSymbol,
-                FilePath = classInfo.ClassSyntax.GetLocation().SourceTree?.FilePath ?? testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? classInfo.ClassSyntax.SyntaxTree.FilePath,
-                LineNumber = classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+                FilePath = filePath,
+                LineNumber = lineNumber,
                 TestAttribute = testAttribute,
                 Context = null, // No context for inherited tests
                 MethodSyntax = null, // No syntax for inherited methods
