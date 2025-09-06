@@ -16,7 +16,7 @@ public class TestDiscoveryAfterHooks
         var test = context.AllTests.First(x =>
             x.TestDetails.TestName == nameof(TestDiscoveryAfterTests.EnsureAfterEveryTestDiscoveryHit));
 
-        test.ObjectBag.Add("AfterEveryTestDiscoveryHit", true);
+        test.ObjectBag["AfterEveryTestDiscoveryHit"] = true;
     }
 }
 
