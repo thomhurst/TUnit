@@ -133,12 +133,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Calculate inheritance depth for this test
             int inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
 
+            // Get the location information from the actual test method, not the derived class
+            var methodSyntaxReference = method.DeclaringSyntaxReferences.FirstOrDefault();
+            var methodLocation = methodSyntaxReference?.GetSyntax().GetLocation();
+            var methodFilePath = methodLocation?.SourceTree?.FilePath ?? testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? "";
+            var methodLineNumber = methodLocation?.GetLineSpan().StartLinePosition.Line + 1 ?? 1;
+
             var testMethodMetadata = new TestMethodMetadata
             {
                 MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
                 TypeSymbol = classInfo.TypeSymbol,
-                FilePath = classInfo.ClassSyntax.GetLocation().SourceTree?.FilePath ?? testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? classInfo.ClassSyntax.SyntaxTree.FilePath,
-                LineNumber = classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+                FilePath = methodFilePath,
+                LineNumber = methodLineNumber,
                 TestAttribute = testAttribute,
                 Context = null, // No context for inherited tests
                 MethodSyntax = null, // No syntax for inherited methods
