@@ -249,6 +249,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
+        // Always exclude exact matches from the exclusion list
         if (ExcludedAssemblyNames.Contains(name))
         {
             return false;
@@ -285,8 +286,14 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
             // Don't return false here, continue with other checks
         }
 
-        if (!assembly.GetReferencedAssemblies().Any(a =>
-                a.Name != null && (a.Name.StartsWith("TUnit") || a.Name == "TUnit")))
+        // Check if the assembly references TUnit frameworks
+        // Note: This check should be case-sensitive and exact to avoid false exclusions
+        var referencedAssemblies = assembly.GetReferencedAssemblies();
+        var hasTUnitReference = referencedAssemblies.Any(a =>
+            a.Name != null && (a.Name.StartsWith("TUnit", StringComparison.Ordinal) || 
+                              string.Equals(a.Name, "TUnit", StringComparison.Ordinal)));
+        
+        if (!hasTUnitReference)
         {
             return false;
         }
