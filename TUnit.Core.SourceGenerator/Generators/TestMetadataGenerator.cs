@@ -133,8 +133,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Calculate inheritance depth for this test
             int inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
 
-            // Use the TestAttribute's CallerFilePath and CallerLineNumber for accurate source location
-            // These are automatically captured when the [Test] attribute is applied
             var filePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? 
                           classInfo.ClassSyntax.GetLocation().SourceTree?.FilePath ?? 
                           classInfo.ClassSyntax.SyntaxTree.FilePath;
