@@ -324,6 +324,13 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
             if (IsConcreteType(tupleType))
             {
                 var fullyQualifiedName = tupleType.GloballyQualified();
+                
+                // Additional safety check: skip if the generated name contains unresolved type parameters
+                if (fullyQualifiedName.Contains("<T") || fullyQualifiedName.Contains(",T") || fullyQualifiedName.Contains(" T>"))
+                {
+                    continue;
+                }
+                
                 if (!processorNameMap.ContainsKey(fullyQualifiedName))
                 {
                     var processorName = GetUniqueTupleProcessorName(tupleType, new HashSet<string>(processorNameMap.Values));
@@ -371,6 +378,12 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
             {
                 var fullyQualifiedName = tupleType.GloballyQualified();
                 
+                // Additional safety check: skip if the generated name contains unresolved type parameters
+                if (fullyQualifiedName.Contains("<T") || fullyQualifiedName.Contains(",T") || fullyQualifiedName.Contains(" T>"))
+                {
+                    continue;
+                }
+                
                 // Avoid duplicate entries by signature
                 if (processedSignatures.Add(fullyQualifiedName))
                 {
@@ -393,6 +406,13 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
             if (IsConcreteType(tupleType))
             {
                 var fullyQualifiedName = tupleType.GloballyQualified();
+                
+                // Additional safety check: skip if the generated name contains unresolved type parameters
+                if (fullyQualifiedName.Contains("<T") || fullyQualifiedName.Contains(",T") || fullyQualifiedName.Contains(" T>"))
+                {
+                    continue;
+                }
+                
                 writer.AppendLine($"typeof({fullyQualifiedName}),");
             }
         }
@@ -496,20 +516,39 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
             return false;
         }
         
+        // Filter out error types that couldn't be resolved
+        if (type.TypeKind == TypeKind.Error)
+        {
+            return false;
+        }
+        
         // Check if this is a generic type with type parameters
         if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
+            // Check for unbound generic types
+            if (namedType.IsUnboundGenericType)
+            {
+                return false;
+            }
+            
+            // Recursively check all type arguments
             foreach (var typeArg in namedType.TypeArguments)
             {
-                if (typeArg.TypeKind == TypeKind.TypeParameter)
+                if (!IsConcreteType(typeArg))
                 {
                     return false;
                 }
             }
         }
         
-        // Must have a valid name and assembly
-        if (string.IsNullOrEmpty(type.Name) || type.ContainingAssembly == null)
+        // Must have a valid name - ContainingAssembly can be null for constructed generic types
+        if (string.IsNullOrEmpty(type.Name))
+        {
+            return false;
+        }
+        
+        // Additional check for compiler-generated types that shouldn't be in generated code
+        if (type.IsCompilerGeneratedType())
         {
             return false;
         }
