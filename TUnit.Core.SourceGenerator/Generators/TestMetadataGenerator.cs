@@ -133,13 +133,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Calculate inheritance depth for this test
             int inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
 
-            // Try to get the method's actual source location instead of the class location
-            var methodLocation = GetMethodLocation(method);
-            var filePath = methodLocation?.SourceTree?.FilePath ?? 
-                          testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? 
+            // Use the TestAttribute's CallerFilePath and CallerLineNumber for accurate source location
+            // These are automatically captured when the [Test] attribute is applied
+            var filePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? 
                           classInfo.ClassSyntax.GetLocation().SourceTree?.FilePath ?? 
                           classInfo.ClassSyntax.SyntaxTree.FilePath;
-            var lineNumber = methodLocation?.GetLineSpan().StartLinePosition.Line + 1 ?? 
+            
+            var lineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 
                             classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
 
             var testMethodMetadata = new TestMethodMetadata
@@ -159,18 +159,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             GenerateTestMethodSource(context, compilation, testMethodMetadata);
         }
-    }
-
-    private static Location? GetMethodLocation(IMethodSymbol method)
-    {
-        // Try to get the method's original declaration location
-        var syntaxRef = method.DeclaringSyntaxReferences.FirstOrDefault();
-        if (syntaxRef != null)
-        {
-            var syntaxNode = syntaxRef.GetSyntax();
-            return syntaxNode.GetLocation();
-        }
-        return null;
     }
 
     private static int CalculateInheritanceDepth(INamedTypeSymbol testClass, IMethodSymbol testMethod)
