@@ -12,6 +12,7 @@ internal static class TestContextExtensions
         ..testContext.TestDetails.Attributes,
         ..testContext.TestDetails.TestMethodArguments,
         ..testContext.TestDetails.TestClassInjectedPropertyArguments.Select(x => x.Value),
+        ..testContext.ObjectBag.Values,
     ];
 
     public static IEnumerable<object> GetEligibleEventObjects(this TestContext testContext)

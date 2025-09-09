@@ -64,6 +64,10 @@ public static class ClassConstructorHelper
         var classConstructorType = classConstructorAttribute.ClassConstructorType;
         var classConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorType)!;
 
+        // Store the ClassConstructor instance in the ObjectBag so it can be used for event handling
+        var objectBagKey = $"__ClassConstructor_{classConstructorType.FullName}";
+        objectBag[objectBagKey] = classConstructor;
+
         var classConstructorMetadata = new ClassConstructorMetadata
         {
             TestSessionId = testSessionId,

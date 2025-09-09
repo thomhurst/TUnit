@@ -10,6 +10,7 @@ public sealed class TestClassConstructorEventReceiver : IClassConstructor, ITest
 
     public async Task<object> Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
     {
+        Events.Add("ClassConstructor.Create called");
         return new ClassConstructorEventReceiverTestClass();  
     }
 
@@ -40,7 +41,13 @@ public sealed class ClassConstructorEventReceiverTestClass
     {
         await Task.Delay(10);
         
-        // This should pass, but currently fails because the ClassConstructor's event receivers are not called
+        // Debug: print what events we have
+        Console.WriteLine($"Events collected: [{string.Join(", ", TestClassConstructorEventReceiver.Events)}]");
+        
+        // First, verify that the ClassConstructor.Create was called
+        await Assert.That(TestClassConstructorEventReceiver.Events).Contains("ClassConstructor.Create called");
+        
+        // This should now pass - the ClassConstructor's event receivers should be called
         await Assert.That(TestClassConstructorEventReceiver.Events).Contains("TestStart: Test_ClassConstructor_EventReceiver()");
     }
 
