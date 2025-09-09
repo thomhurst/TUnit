@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -35,6 +34,19 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var semanticModel = context.SemanticModel;
 
         if (semanticModel.GetDeclaredSymbol(typeDecl) is not INamedTypeSymbol typeSymbol || typeSymbol.IsAbstract)
+        {
+            return null;
+        }
+
+        // Skip types that are not publicly accessible to avoid accessibility issues
+        // Also check if the type is nested and ensure the containing types are also public
+        if (!IsPubliclyAccessible(typeSymbol))
+        {
+            return null;
+        }
+
+        // Skip open generic types (unbound type parameters) as they cannot be instantiated
+        if (typeSymbol.IsUnboundGenericType || typeSymbol.TypeParameters.Length > 0)
         {
             return null;
         }
@@ -90,6 +102,36 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         return property.SetMethod != null || property.SetMethod?.IsInitOnly == true;
     }
 
+    private static bool IsPubliclyAccessible(INamedTypeSymbol typeSymbol)
+    {
+        // Check if the type itself is public
+        if (typeSymbol.DeclaredAccessibility != Accessibility.Public)
+        {
+            return false;
+        }
+
+        // If it's a nested type, ensure all containing types are also public
+        // and don't have unbound type parameters
+        var containingType = typeSymbol.ContainingType;
+        while (containingType != null)
+        {
+            if (containingType.DeclaredAccessibility != Accessibility.Public)
+            {
+                return false;
+            }
+
+            // Check if the containing type has unbound type parameters
+            if (containingType.IsUnboundGenericType || containingType.TypeParameters.Length > 0)
+            {
+                return false;
+            }
+
+            containingType = containingType.ContainingType;
+        }
+
+        return true;
+    }
+
     private static void GeneratePropertyInjectionSources(SourceProductionContext context, ImmutableArray<ClassWithDataSourceProperties> classes)
     {
         if (classes.IsEmpty)
@@ -101,17 +143,23 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         WriteFileHeader(sourceBuilder);
 
+        // Deduplicate classes by symbol to prevent duplicate source generation
+        var uniqueClasses = classes
+            .GroupBy(c => c.ClassSymbol, SymbolEqualityComparer.Default)
+            .Select(g => g.First())
+            .ToImmutableArray();
+
         // Generate all property sources first with stable names
         var classNameMapping = new Dictionary<INamedTypeSymbol, string>(SymbolEqualityComparer.Default);
-        foreach (var classInfo in classes)
+        foreach (var classInfo in uniqueClasses)
         {
             var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
             classNameMapping[classInfo.ClassSymbol] = sourceClassName;
         }
 
-        GenerateModuleInitializer(sourceBuilder, classes, classNameMapping);
+        GenerateModuleInitializer(sourceBuilder, uniqueClasses, classNameMapping);
 
-        foreach (var classInfo in classes)
+        foreach (var classInfo in uniqueClasses)
         {
             GeneratePropertySource(sourceBuilder, classInfo, classNameMapping[classInfo.ClassSymbol]);
         }
@@ -310,9 +358,10 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static string GetPropertySourceClassName(INamedTypeSymbol classSymbol)
     {
-        // Use a random GUID for uniqueness
-        var guid = Guid.NewGuid();
-        return $"PropertyInjectionSource_{guid:N}";
+        // Use a deterministic hash based on the fully qualified type name for uniqueness
+        var fullTypeName = classSymbol.ToDisplayString();
+        var hash = fullTypeName.GetHashCode();
+        return $"PropertyInjectionSource_{Math.Abs(hash):x}";
     }
 
     private static string FormatTypedConstant(TypedConstant constant)
