@@ -27,6 +27,10 @@ internal sealed class HookOrchestrator
     private readonly ConcurrentDictionary<string, Counter> _assemblyTestCounts = new();
     private readonly ConcurrentDictionary<Type, Counter> _classTestCounts = new();
     
+    // Semaphores for ParallelGroup constraint ordering
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> _parallelGroupSemaphores = new();
+    private readonly ConcurrentDictionary<Type, string> _classParallelGroups = new();
+    
     // Cache whether hooks exist to avoid unnecessary collection
     private readonly GetOnlyDictionary<Type, Task<bool>> _hasBeforeEveryTestHooks = new();
     private readonly GetOnlyDictionary<Type, Task<bool>> _hasAfterEveryTestHooks = new();
@@ -89,10 +93,20 @@ internal sealed class HookOrchestrator
     /// </summary>
     private Task<ExecutionContext?> GetOrCreateBeforeClassTask(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
-        Type testClassType, Assembly assembly, CancellationToken cancellationToken)
+        Type testClassType, Assembly assembly, string? parallelGroupName, CancellationToken cancellationToken)
     {
         return _beforeClassTasks.GetOrAdd(testClassType, async _ =>
         {
+            // Acquire ParallelGroup semaphore if this class has one - ensures proper hook ordering
+            if (parallelGroupName != null)
+            {
+                var groupSemaphore = _parallelGroupSemaphores.GetOrAdd(parallelGroupName, _ => new SemaphoreSlim(1, 1));
+                await groupSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                
+                // Store the group name so we can release the semaphore later
+                _classParallelGroups.TryAdd(testClassType, parallelGroupName);
+            }
+
 #if NET
             var assemblyName = assembly.GetName().Name ?? "Unknown";
             var assemblyContext = await GetOrCreateBeforeAssemblyTask(assemblyName, assembly, cancellationToken).ConfigureAwait(false);
@@ -248,8 +262,11 @@ internal sealed class HookOrchestrator
 
         await GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken).ConfigureAwait(false);
 
+        // Check if this test belongs to a ParallelGroup
+        var parallelGroupName = GetParallelGroupName(test);
+
         // Get the cached class context (includes assembly context)
-        var classContext = await GetOrCreateBeforeClassTask(testClassType, testClassType.Assembly, cancellationToken).ConfigureAwait(false);
+        var classContext = await GetOrCreateBeforeClassTask(testClassType, testClassType.Assembly, parallelGroupName, cancellationToken).ConfigureAwait(false);
 
 #if NET
         // Batch context restoration - only restore once if we have hooks to run
@@ -276,6 +293,16 @@ internal sealed class HookOrchestrator
 #else
         return null;
 #endif
+    }
+
+    /// <summary>
+    /// Extracts the ParallelGroup name from a test's constraints, if any.
+    /// </summary>
+    private static string? GetParallelGroupName(AbstractExecutableTest test)
+    {
+        return test.Context.ParallelConstraint is ParallelGroupConstraint parallelGroup
+            ? parallelGroup.Group
+            : null;
     }
 
     public async Task OnTestCompletedAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
@@ -330,6 +357,13 @@ internal sealed class HookOrchestrator
             }
             finally
             {
+                // Release ParallelGroup semaphore if this class had one
+                if (_classParallelGroups.TryRemove(testClassType, out var parallelGroupName) &&
+                    _parallelGroupSemaphores.TryGetValue(parallelGroupName, out var groupSemaphore))
+                {
+                    groupSemaphore.Release();
+                }
+
                 // Always remove from dictionary to prevent memory leaks
                 _classTestCounts.TryRemove(testClassType, out _);
             }
