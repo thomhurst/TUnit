@@ -134,7 +134,7 @@ internal sealed class ConcreteClass2_AssertClassName_TestSource_GUID : global::T
             },
             InheritanceDepth = 2,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 3,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AbstractTests.AbstractBaseClass),
@@ -231,7 +231,7 @@ internal sealed class ConcreteClass2_SecondTest_TestSource_GUID : global::TUnit.
             },
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 11,
+            LineNumber = 3,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
@@ -329,7 +329,7 @@ internal sealed class ConcreteClass1_AssertClassName_TestSource_GUID : global::T
             },
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 3,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AbstractTests.AbstractBaseClass),
