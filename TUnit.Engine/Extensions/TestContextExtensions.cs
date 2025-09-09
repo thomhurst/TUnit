@@ -6,6 +6,7 @@ internal static class TestContextExtensions
 {
     private static IEnumerable<object?> GetInternal(TestContext testContext) =>
     [
+        testContext.ClassConstructor,
         testContext.Events,
         ..testContext.TestDetails.TestClassArguments,
         testContext.TestDetails.ClassInstance,

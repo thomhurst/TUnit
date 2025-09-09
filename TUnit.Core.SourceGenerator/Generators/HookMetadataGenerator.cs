@@ -245,8 +245,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
     {
         var hookExecutorAttribute = methodSymbol.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "HookExecutorAttribute" ||
-                                 (a.AttributeClass?.IsGenericType == true &&
-                                  a.AttributeClass?.ConstructedFrom?.Name == "HookExecutorAttribute"));
+                                 a.AttributeClass is { IsGenericType: true, ConstructedFrom.Name: "HookExecutorAttribute" });
 
         if (hookExecutorAttribute == null)
         {

@@ -1012,12 +1012,12 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             return false;
         }
-        
+
         // If the type is compiler-generated but contains test methods, allow it
         // This handles cases like Reqnroll-generated test classes that should be executed
         return !HasTestMethods(type);
     }
-    
+
     private static bool HasTestMethods(Type type)
     {
         try
