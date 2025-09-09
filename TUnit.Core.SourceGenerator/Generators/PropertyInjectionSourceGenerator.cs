@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -27,23 +26,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static bool IsClassWithDataSourceProperties(SyntaxNode node)
     {
-        if (node is not TypeDeclarationSyntax typeDecl)
-        {
-            return false;
-        }
-
-        // Include classes with properties that have attributes
-        var hasAttributedProperties = typeDecl.Members
-            .OfType<PropertyDeclarationSyntax>()
-            .Any(prop => prop.AttributeLists.Count > 0);
-
-        // Also include classes that inherit from data source attributes
-        var inheritsFromDataSource = typeDecl.BaseList?.Types.Any(t =>
-            t.ToString().Contains("DataSourceGeneratorAttribute") ||
-            t.ToString().Contains("AsyncDataSourceGeneratorAttribute") ||
-            t.ToString().Contains("DataSourceAttribute")) == true;
-
-        return hasAttributedProperties || inheritsFromDataSource;
+        return node is TypeDeclarationSyntax;
     }
 
     private static ClassWithDataSourceProperties? GetClassWithDataSourceProperties(GeneratorSyntaxContext context)
@@ -67,49 +50,32 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         // Check if this type itself implements IDataSourceAttribute (for custom data source classes)
         var implementsDataSource = typeSymbol.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default);
 
-        var currentType = typeSymbol;
         var processedProperties = new HashSet<string>();
 
-        while (currentType != null)
-        {
-            foreach (var member in currentType.GetMembers())
-            {
-                if (member is IPropertySymbol property && CanSetProperty(property))
-                {
-                    if (!processedProperties.Add(property.Name))
-                    {
-                        continue;
-                    }
+        var properties = typeSymbol.GetMembersIncludingBase()
+            .OfType<IPropertySymbol>()
+            .Where(CanSetProperty);
 
-                    foreach (var attr in property.GetAttributes())
+        foreach (var property in properties)
+        {
+            if (!processedProperties.Add(property.Name))
+            {
+                continue;
+            }
+
+            foreach (var attr in property.GetAttributes())
+            {
+                if (attr.AttributeClass != null &&
+                        attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default))
+                {
+                    propertiesWithDataSources.Add(new PropertyWithDataSourceAttribute
                     {
-                        if (attr.AttributeClass != null &&
-                            (attr.AttributeClass.IsOrInherits(dataSourceInterface) ||
-                             attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default)))
-                        {
-                            propertiesWithDataSources.Add(new PropertyWithDataSourceAttribute
-                            {
-                                Property = property,
-                                DataSourceAttribute = attr
-                            });
-                            break; // Only one data source per property
-                        }
-                    }
+                        Property = property,
+                        DataSourceAttribute = attr
+                    });
+                    break; // Only one data source per property
                 }
             }
-
-            currentType = currentType.BaseType;
-
-            if (currentType?.SpecialType == SpecialType.System_Object)
-            {
-                break;
-            }
-        }
-
-        // Include the class if it has properties with data sources OR if it implements IDataSourceAttribute
-        if (propertiesWithDataSources.Count == 0 && !implementsDataSource)
-        {
-            return null;
         }
 
         return new ClassWithDataSourceProperties
@@ -218,7 +184,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
                 // Use the property's containing type for the UnsafeAccessor, not the derived class
                 var containingType = propInfo.Property.ContainingType.ToDisplayString();
-                
+
                 sb.AppendLine("#if NET8_0_OR_GREATER");
                 sb.AppendLine($"    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
                 sb.AppendLine($"    private static extern ref {propertyType} Get{propInfo.Property.Name}BackingField({containingType} instance);");
