@@ -259,7 +259,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("        {");
         sb.AppendLine($"            PropertyName = \"{propertyName}\",");
         sb.AppendLine($"            PropertyType = typeof({propertyTypeForTypeof}),");
-        sb.AppendLine($"            ContainingType = typeof({classSymbol.ToDisplayString()}),");
+        sb.AppendLine($"            ContainingType = typeof({propInfo.Property.ContainingType.ToDisplayString()}),");
 
         // Generate CreateDataSource delegate
         sb.AppendLine("            CreateDataSource = () =>");
