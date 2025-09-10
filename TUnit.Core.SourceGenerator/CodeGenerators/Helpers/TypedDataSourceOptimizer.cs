@@ -24,8 +24,7 @@ internal static class TypedDataSourceOptimizer
         }
         
         // For multiple parameters, check if data source provides a matching tuple
-        if (dataSourceType is INamedTypeSymbol namedType && 
-            namedType.IsTupleType && 
+        if (dataSourceType is INamedTypeSymbol { IsTupleType: true } namedType && 
             namedType.TupleElements.Length == testMethod.Parameters.Length)
         {
             for (int i = 0; i < testMethod.Parameters.Length; i++)
@@ -71,7 +70,7 @@ internal static class TypedDataSourceOptimizer
             writer.AppendLine("var value = await dataFunc();");
             writer.AppendLine($"var args = new object?[] {{ value }};");
         }
-        else if (dataSourceType is INamedTypeSymbol namedType && namedType.IsTupleType)
+        else if (dataSourceType is INamedTypeSymbol { IsTupleType: true } namedType)
         {
             // Tuple - decompose without boxing
             writer.AppendLine("var tuple = await dataFunc();");

@@ -11,7 +11,7 @@ public abstract class AsyncUntypedDataSourceGeneratorAttribute : Attribute, IAsy
 
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        if (dataGeneratorMetadata.TestBuilderContext != null && dataGeneratorMetadata.TestInformation != null)
+        if (dataGeneratorMetadata is { TestBuilderContext: not null, TestInformation: not null })
         {
             await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, dataGeneratorMetadata.TestInformation, dataGeneratorMetadata.TestBuilderContext.Current.Events);
         }

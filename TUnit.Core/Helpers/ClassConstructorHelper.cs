@@ -29,10 +29,8 @@ public static class ClassConstructorHelper
         return await TryCreateInstanceWithClassConstructor(
             attributes,
             testClassType,
-            testSessionId,
-            testContext.Events,
-            testContext.ObjectBag,
-            testContext.TestDetails.MethodMetadata);
+            TestBuilderContext.FromTestContext(testContext, attributes.OfType<IDataSourceAttribute>().FirstOrDefault()),
+            testSessionId);
     }
 
     /// <summary>
@@ -41,17 +39,13 @@ public static class ClassConstructorHelper
     /// <param name="attributes">The attributes to check</param>
     /// <param name="testClassType">The type of the test class to create</param>
     /// <param name="testSessionId">The test session ID</param>
-    /// <param name="events">The test context events</param>
-    /// <param name="objectBag">The object bag</param>
-    /// <param name="methodMetadata">The method metadata</param>
+    /// <param name="testBuilderContext">The testBuilderContext</param>
     /// <returns>The created instance, or null if no ClassConstructor attribute is found</returns>
     public static async Task<object?> TryCreateInstanceWithClassConstructor(
         IReadOnlyList<Attribute> attributes,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClassType,
-        string testSessionId,
-        TestContextEvents events,
-        Dictionary<string, object?> objectBag,
-        MethodMetadata methodMetadata)
+        TestBuilderContext testBuilderContext,
+        string testSessionId)
     {
         var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
 
@@ -64,15 +58,12 @@ public static class ClassConstructorHelper
         var classConstructorType = classConstructorAttribute.ClassConstructorType;
         var classConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorType)!;
 
+        testBuilderContext.ClassConstructor = classConstructor;
+
         var classConstructorMetadata = new ClassConstructorMetadata
         {
             TestSessionId = testSessionId,
-            TestBuilderContext = new TestBuilderContext
-            {
-                Events = events,
-                ObjectBag = objectBag,
-                TestMetadata = methodMetadata
-            }
+            TestBuilderContext = testBuilderContext
         };
 
         return await classConstructor.Create(testClassType, classConstructorMetadata);
