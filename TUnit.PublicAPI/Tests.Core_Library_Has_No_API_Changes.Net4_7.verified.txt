@@ -1559,7 +1559,6 @@ namespace .Data
     {
         public ScopedDictionary() { }
         public object? GetOrCreate(TScope scope,  type, <, object?> factory) { }
-        public void RemoveValue(object valueToRemove) { }
     }
 }
 namespace .DataSources
