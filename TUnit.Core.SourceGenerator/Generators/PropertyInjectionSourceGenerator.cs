@@ -147,6 +147,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var uniqueClasses = classes
             .GroupBy(c => c.ClassSymbol, SymbolEqualityComparer.Default)
             .Select(g => g.First())
+            .Where(x => x.Properties.Length > 0)
             .ToImmutableArray();
 
         // Generate all property sources first with stable names
