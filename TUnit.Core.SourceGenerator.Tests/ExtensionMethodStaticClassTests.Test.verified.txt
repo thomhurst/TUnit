@@ -1,0 +1,17 @@
+using System;
+using System.Collections.Generic;
+using TUnit.Core;
+using TUnit.Core.Interfaces.SourceGenerator;
+using TUnit.Core.Enums;
+using System.Linq;
+
+namespace TUnit.Core;
+
+internal static class PropertyInjectionInitializer
+{
+    [global::System.Runtime.CompilerServices.ModuleInitializer]
+    public static void InitializePropertyInjectionSources()
+    {
+    }
+
+}
