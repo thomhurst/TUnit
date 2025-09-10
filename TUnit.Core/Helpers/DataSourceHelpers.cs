@@ -475,7 +475,7 @@ public static class DataSourceHelpers
         await foreach (var factory in dataRows)
         {
             var args = await factory();
-            if (args != null && args.Length > 0)
+            if (args is { Length: > 0 })
             {
                 var value = args[0];
                 

@@ -16,9 +16,9 @@
         <PackageVersion Include="FSharp.Core" Version="9.0.303" />
         <PackageVersion Include="Humanizer" Version="2.14.1" />
         <PackageVersion Include="MessagePack" Version="3.1.4" />
-        <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.8" />
-        <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
-        <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="9.0.8" />
+        <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.9" />
+        <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+        <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="9.0.9" />
         <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.0" />
         <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.14.8" />
         <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
@@ -32,11 +32,11 @@
         <PackageVersion Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" Version="1.1.2" />
         <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.7.0" />
         <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
-        <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
-        <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+        <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
+        <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
         <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
         <PackageVersion Include="Microsoft.Playwright" Version="1.55.0" />
-        <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="9.0.304" />
+        <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="9.0.305" />
         <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.14.2" />
         <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="1.8.4" />
         <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="1.8.4" />
@@ -75,7 +75,7 @@
         </PackageVersion>
         <PackageVersion Include="StreamJsonRpc" Version="2.22.11" />
         <PackageVersion Include="System.Collections.Immutable" Version="9.0.0" />
-        <PackageVersion Include="System.CommandLine" Version="2.0.0-beta7.25380.108" />
+        <PackageVersion Include="System.CommandLine" Version="2.0.0-rc.1.25451.107" />
         <PackageVersion Include="System.Text.Json" Version="9.0.0" />
         <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
         <PackageVersion Include="Testcontainers.Kafka" Version="4.7.0" />
