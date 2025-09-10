@@ -1023,28 +1023,6 @@ namespace
         public RepeatAttribute(int times) { }
         public int Times { get; }
     }
-    public class ResettableLazy<T> : 
-        where T :  class
-    {
-        protected readonly string SessionId;
-        protected <.<T>> _factory;
-        public ResettableLazy(<.<T>> factory, string sessionId, .TestBuilderContext testBuilderContext) { }
-        protected ResettableLazy(. classConstructor, string sessionId, .TestBuilderContext testBuilderContext) { }
-        public .? ClassConstructor { get; protected set; }
-        public .TestBuilderContext TestBuilderContext { get; }
-        public .<T> Value { get; }
-        public .ResettableLazy<T> Clone() { }
-        public . DisposeAsync() { }
-        public virtual . ResetLazy() { }
-        protected static . DisposeAsync(object? obj) { }
-    }
-    public class ResettableLazy<TClassConstructor, T> : .ResettableLazy<T>
-        where TClassConstructor : ., new ()
-        where T :  class
-    {
-        public ResettableLazy(string sessionId, .TestBuilderContext testBuilderContext) { }
-        public override . ResetLazy() { }
-    }
     public sealed class ResolvedDependency
     {
         public ResolvedDependency() { }
@@ -1559,7 +1537,6 @@ namespace .Data
     {
         public ScopedDictionary() { }
         public object? GetOrCreate(TScope scope,  type, <, object?> factory) { }
-        public void RemoveValue(object valueToRemove) { }
     }
 }
 namespace .DataSources
@@ -1776,11 +1753,6 @@ namespace .Executors
 }
 namespace .Extensions
 {
-    public static class ClassConstructorExtensions
-    {
-        public static .<T> Create<T>(this . classConstructor, .ClassConstructorMetadata classConstructorMetadata)
-            where T :  class { }
-    }
     public static class MetadataExtensions
     {
         public static  DeclaringType(this .MethodMetadata method) { }
@@ -1823,8 +1795,8 @@ namespace .Helpers
     {
         public static .ClassConstructorAttribute? GetClassConstructorAttribute([] attributes) { }
         public static bool HasClassConstructorAttribute([] attributes) { }
+        public static .<object?> TryCreateInstanceWithClassConstructor(.<> attributes,  testClassType, .TestBuilderContext testBuilderContext, string testSessionId) { }
         public static .<object?> TryCreateInstanceWithClassConstructor(.<> attributes,  testClassType, string testSessionId, .TestContext testContext) { }
-        public static .<object?> TryCreateInstanceWithClassConstructor(.<> attributes,  testClassType, string testSessionId, .TestContextEvents events, .<string, object?> objectBag, .MethodMetadata methodMetadata) { }
     }
     [.DebuggerDisplay("Count = {CurrentCount}")]
     public class Counter

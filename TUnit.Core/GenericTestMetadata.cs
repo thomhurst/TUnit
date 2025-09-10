@@ -26,18 +26,18 @@ public sealed class GenericTestMetadata : TestMetadata
             return (context, metadata) =>
             {
                 var genericMetadata = (GenericTestMetadata)metadata;
-                
+
                 // If we have concrete instantiations, try to use them (AOT-compatible path)
                 if (genericMetadata.ConcreteInstantiations?.Count > 0)
                 {
                     // Determine the concrete types from the test arguments
                     var inferredTypes = InferTypesFromArguments(context.Arguments, metadata);
-                    
+
                     if (inferredTypes is { Length: > 0 })
                     {
                         // Create a key from the inferred types - must match source generator format
                         var typeKey = string.Join(",", inferredTypes.Select(t => t.FullName ?? t.Name));
-                        
+
                         // Find the matching concrete instantiation
                         if (genericMetadata.ConcreteInstantiations.TryGetValue(typeKey, out var concreteMetadata))
                         {
@@ -45,7 +45,7 @@ public sealed class GenericTestMetadata : TestMetadata
                             return concreteMetadata.CreateExecutableTestFactory(context, concreteMetadata);
                         }
                     }
-                    
+
                     // If we couldn't find a match but have instantiations, throw an error
                     var availableKeys = string.Join(", ", genericMetadata.ConcreteInstantiations.Keys);
                     throw new InvalidOperationException(
@@ -53,7 +53,7 @@ public sealed class GenericTestMetadata : TestMetadata
                         $"with type arguments: {(inferredTypes?.Length > 0 ? string.Join(",", inferredTypes.Select(t => t.FullName ?? t.Name)) : "unknown")}. " +
                         $"Available: {availableKeys}");
                 }
-                
+
                 // Fall back to runtime resolution (existing logic)
                 Func<TestContext, Task<object>> createInstance = async (testContext) =>
                 {
@@ -63,9 +63,7 @@ public sealed class GenericTestMetadata : TestMetadata
                         attributes,
                         TestClassType,
                         metadata.TestSessionId,
-                        testContext.Events,
-                        testContext.ObjectBag,
-                        metadata.MethodMetadata);
+                        testContext);
 
                     if (classInstance != null)
                     {
@@ -176,33 +174,33 @@ public sealed class GenericTestMetadata : TestMetadata
             };
         }
     }
-    
+
     private static Type[]? InferTypesFromArguments(object?[]? arguments, TestMetadata metadata)
     {
         if (arguments == null || arguments.Length == 0)
             return null;
-            
+
         // For methods with generic parameters, infer types from the argument values
         var inferredTypes = new List<Type>();
-        
+
         // Get the method's generic parameters
         var methodInfo = metadata.TestClassType.GetMethod(metadata.TestMethodName);
         if (methodInfo == null || !methodInfo.IsGenericMethodDefinition)
             return null;
-            
+
         var genericParams = methodInfo.GetGenericArguments();
         var methodParams = methodInfo.GetParameters();
-        
+
         // Map argument types to generic parameters
         foreach (var genericParam in genericParams)
         {
             Type? inferredType = null;
-            
+
             // Find which method parameter uses this generic parameter
             for (int i = 0; i < methodParams.Length && i < arguments.Length; i++)
             {
                 var paramType = methodParams[i].ParameterType;
-                
+
                 // Direct match: parameter type is the generic parameter
                 if (paramType.IsGenericParameter && paramType.Name == genericParam.Name)
                 {
@@ -212,7 +210,7 @@ public sealed class GenericTestMetadata : TestMetadata
                     }
                     break;
                 }
-                
+
                 // Handle generic types like IEnumerable<T>, Func<T>, etc.
                 if (paramType.IsGenericType && arguments[i] != null)
                 {
@@ -224,16 +222,16 @@ public sealed class GenericTestMetadata : TestMetadata
                     }
                 }
             }
-            
+
             if (inferredType != null)
             {
                 inferredTypes.Add(inferredType);
             }
         }
-        
+
         return inferredTypes.Count > 0 ? inferredTypes.ToArray() : null;
     }
-    
+
     private static Type? InferTypeFromGenericParameter(Type paramType, Type argumentType, Type genericParam)
     {
         // Handle IEnumerable<T>
@@ -247,29 +245,29 @@ public sealed class GenericTestMetadata : TestMetadata
                 {
                     return argumentType.GetGenericArguments()[0];
                 }
-                
+
                 // For types that implement IEnumerable<T> but aren't directly IEnumerable<T>
                 // we can't easily determine the type parameter at runtime in an AOT-compatible way
                 // The source generator should handle this at compile time instead
                 return null;
             }
         }
-        
+
         // Handle Func<T1, T2, ...>
         if (paramType.IsGenericType && paramType.Name.StartsWith("Func`"))
         {
             var paramTypeArgs = paramType.GetGenericArguments();
             Type? actualFuncType = argumentType;
-            
+
             // If the argument is not directly a Func, check if it implements one
             if (!argumentType.IsGenericType || !argumentType.Name.StartsWith("Func`"))
             {
                 // Could be a lambda or method group - can't easily determine types at runtime
                 return null;
             }
-            
+
             var actualTypeArgs = actualFuncType.GetGenericArguments();
-            
+
             // Find which position contains our generic parameter
             for (int i = 0; i < paramTypeArgs.Length && i < actualTypeArgs.Length; i++)
             {
@@ -279,25 +277,25 @@ public sealed class GenericTestMetadata : TestMetadata
                 }
             }
         }
-        
+
         // Handle other generic types recursively
         if (paramType.IsGenericType && argumentType.IsGenericType)
         {
             var paramGenericDef = paramType.GetGenericTypeDefinition();
             var argGenericDef = argumentType.IsGenericTypeDefinition ? argumentType : argumentType.GetGenericTypeDefinition();
-            
+
             if (paramGenericDef == argGenericDef)
             {
                 var paramTypeArgs = paramType.GetGenericArguments();
                 var actualTypeArgs = argumentType.GetGenericArguments();
-                
+
                 for (int i = 0; i < paramTypeArgs.Length && i < actualTypeArgs.Length; i++)
                 {
                     if (paramTypeArgs[i].IsGenericParameter && paramTypeArgs[i].Name == genericParam.Name)
                     {
                         return actualTypeArgs[i];
                     }
-                    
+
                     // Recursive check for nested generics
                     if (paramTypeArgs[i].IsGenericType)
                     {
@@ -308,7 +306,7 @@ public sealed class GenericTestMetadata : TestMetadata
                 }
             }
         }
-        
+
         return null;
     }
 }

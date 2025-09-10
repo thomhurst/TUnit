@@ -1,4 +1,6 @@
-﻿namespace TUnit.Core;
+﻿using TUnit.Core.Interfaces;
+
+namespace TUnit.Core;
 
 /// <summary>
 /// Represents the context for building tests.
@@ -26,6 +28,8 @@ public record TestBuilderContext
     /// Gets the test method information, if available during source generation.
     /// </summary>
     public required MethodMetadata TestMetadata { get; init; }
+
+    internal IClassConstructor? ClassConstructor { get; set; }
 
     public void RegisterForInitialization(object? obj)
     {

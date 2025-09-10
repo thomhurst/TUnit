@@ -313,7 +313,7 @@ internal sealed class TestScheduler : ITestScheduler
         // Execute order groups sequentially
         foreach (var (order, tests) in orderedTests)
         {
-            if (maxParallelism.HasValue && maxParallelism.Value > 0)
+            if (maxParallelism is > 0)
             {
                 // Use worker pool pattern for parallel groups
                 var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
@@ -348,7 +348,7 @@ internal sealed class TestScheduler : ITestScheduler
         int? maxParallelism,
         CancellationToken cancellationToken)
     {
-        if (maxParallelism.HasValue && maxParallelism.Value > 0)
+        if (maxParallelism is > 0)
         {
             // Use worker pool pattern to avoid creating too many tasks
             // Create a fixed number of worker tasks that process tests from a queue

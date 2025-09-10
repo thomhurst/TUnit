@@ -853,8 +853,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (typedInterface != null)
         {
             // If the type is a tuple, extract its elements
-            if (typedInterface.TypeArguments.Length == 1 && 
-                typedInterface.TypeArguments[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+            if (typedInterface.TypeArguments is
+                [
+                    INamedTypeSymbol { IsTupleType: true } tupleType
+                ])
             {
                 typeArguments = ImmutableArray.CreateRange(tupleType.TupleElements.Select(x => x.Type));
             }

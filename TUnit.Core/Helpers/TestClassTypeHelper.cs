@@ -21,7 +21,7 @@ public static class TestClassTypeHelper
         }
 
         // For property injection, use the containing type from the property metadata (fallback)
-        if (dataGeneratorMetadata.Type == DataGeneratorType.Property && dataGeneratorMetadata.MembersToGenerate.Length > 0)
+        if (dataGeneratorMetadata is { Type: DataGeneratorType.Property, MembersToGenerate.Length: > 0 })
         {
             if (dataGeneratorMetadata.MembersToGenerate[0] is PropertyMetadata propertyMetadata)
             {
