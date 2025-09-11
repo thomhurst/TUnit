@@ -27,11 +27,11 @@ internal sealed class HookOrchestrator
     // Track active test counts for cleanup
     private readonly ConcurrentDictionary<string, Counter> _assemblyTestCounts = new();
     private readonly ConcurrentDictionary<Type, Counter> _classTestCounts = new();
-    
+
     // Cache whether hooks exist to avoid unnecessary collection
     private readonly GetOnlyDictionary<Type, Task<bool>> _hasBeforeEveryTestHooks = new();
     private readonly GetOnlyDictionary<Type, Task<bool>> _hasAfterEveryTestHooks = new();
-    
+
     // Store session context to flow to assembly/class hooks
 #if NET
     private ExecutionContext? _sessionExecutionContext;
@@ -60,7 +60,7 @@ internal sealed class HookOrchestrator
         // Group tests by class and assembly to get counts
         var testsByClass = tests.GroupBy(t => t.Metadata.TestClassType);
         var testsByAssembly = tests.GroupBy(t => t.Metadata.TestClassType.Assembly.GetName().Name ?? "Unknown");
-        
+
         // Initialize counters with the total count for each class
         foreach (var classGroup in testsByClass)
         {
@@ -68,8 +68,8 @@ internal sealed class HookOrchestrator
             var count = classGroup.Count();
             _classTestCounts.GetOrAdd(classType, _ => new Counter()).Add(count);
         }
-        
-        // Initialize counters with the total count for each assembly  
+
+        // Initialize counters with the total count for each assembly
         foreach (var assemblyGroup in testsByAssembly)
         {
             var assemblyName = assemblyGroup.Key;
@@ -252,7 +252,7 @@ internal sealed class HookOrchestrator
         // Note: Test counts are pre-registered in RegisterTests(), no increment here
 
         // Fast path: check if we need to run hooks at all
-        var hasHooks = await _hasBeforeEveryTestHooks.GetOrAdd(testClassType, async _ => 
+        var hasHooks = await _hasBeforeEveryTestHooks.GetOrAdd(testClassType, async _ =>
         {
             var hooks = await _hookCollectionService.CollectBeforeEveryTestHooksAsync(testClassType).ConfigureAwait(false);
             return hooks.Count > 0;
@@ -344,7 +344,7 @@ internal sealed class HookOrchestrator
             {
                 // Always remove from dictionary to prevent memory leaks
                 _classTestCounts.TryRemove(testClassType, out _);
-                
+
                 // Release sequential coordination for this class
                 ReleaseSequentialCoordination(testClassType, test.ExecutionContext);
             }
@@ -628,25 +628,25 @@ internal sealed class HookOrchestrator
 
     private static bool ShouldCoordinateSequentially(TestExecutionContext? executionContext)
     {
-        return executionContext?.ContextType is 
-            ExecutionContextType.NotInParallel or 
-            ExecutionContextType.KeyedNotInParallel or 
+        return executionContext?.ContextType is
+            ExecutionContextType.NotInParallel or
+            ExecutionContextType.KeyedNotInParallel or
             ExecutionContextType.ParallelGroup;
     }
 
     private async Task WaitForPreviousAfterClassTasks(Type testClassType, TestExecutionContext? executionContext, CancellationToken cancellationToken)
     {
         if (executionContext == null)
+        {
             return;
+        }
 
-        string groupKey = GetCoordinationKey(executionContext);
-        
-        // Get or create semaphore for this coordination group
+        var groupKey = GetCoordinationKey(executionContext);
+
         var semaphore = _sequentialGroupSemaphores.GetOrAdd(groupKey, _ => new SemaphoreSlim(1, 1));
-        
-        // Wait for our turn
+
         await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-        
+
         // Hold the semaphore - it will be released when AfterClass completes
         // Store the task completion source for later
         var releaseTask = new TaskCompletionSource<bool>();
@@ -667,7 +667,9 @@ internal sealed class HookOrchestrator
     private void ReleaseSequentialCoordination(Type testClassType, TestExecutionContext? executionContext)
     {
         if (executionContext == null || !ShouldCoordinateSequentially(executionContext))
+        {
             return;
+        }
 
         // Complete the pending task to signal AfterClass is done
         var key = (testClassType, executionContext.GroupKey);
@@ -677,7 +679,7 @@ internal sealed class HookOrchestrator
         }
 
         // Release the semaphore to allow next class to proceed
-        string groupKey = GetCoordinationKey(executionContext);
+        var groupKey = GetCoordinationKey(executionContext);
         if (_sequentialGroupSemaphores.TryGetValue(groupKey, out var semaphore))
         {
             semaphore.Release();
