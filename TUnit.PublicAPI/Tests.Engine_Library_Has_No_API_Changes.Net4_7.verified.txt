@@ -8,14 +8,6 @@ namespace .
         .<.<.TestMetadata>> CollectTestsAsync(string testSessionId);
     }
 }
-namespace .Building
-{
-    public static class TestDataCollectorFactory
-    {
-        public static ..ITestDataCollector Create(bool? useSourceGeneration = default, .Assembly[]? assembliesToScan = null) { }
-        public static .<..ITestDataCollector> CreateAutoDetectAsync(string testSessionId, .Assembly[]? assembliesToScan = null) { }
-    }
-}
 namespace .Capabilities
 {
     public class StopExecutionCapability : ..ICapability, .., ..
@@ -35,16 +27,6 @@ namespace .Configuration
         public static bool EnableDiagnostics { get; set; }
         public static void ConfigureFromEnvironment() { }
         public static . CreateCircuitBreaker() { }
-    }
-}
-namespace .Discovery
-{
-    public sealed class ReflectionTestDataCollector : ..ITestDataCollector
-    {
-        public ReflectionTestDataCollector() { }
-        public .<.<.TestMetadata>> CollectTestsAsync(string testSessionId) { }
-        [.(typeof(..<CollectTestsStreamingAsync>d__6))]
-        public .<.TestMetadata> CollectTestsStreamingAsync(string testSessionId, [.] .CancellationToken cancellationToken = default) { }
     }
 }
 namespace .Enums
