@@ -9,7 +9,7 @@ internal class TestableContext : Context
 {
     public TestableContext() : base(null) { }
 
-    internal override void RestoreContextAsyncLocal() { }
+    internal override void SetAsyncLocalContext() { }
 }
 
 public class ContextThreadSafetyTests

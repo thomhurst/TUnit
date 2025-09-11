@@ -47,7 +47,7 @@ public class AssemblyHookContext : Context
         }
     }
 
-    internal override void RestoreContextAsyncLocal()
+    internal override void SetAsyncLocalContext()
     {
         Current = this;
     }

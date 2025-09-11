@@ -1,4 +1,3 @@
-using System.Linq;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Tracking;

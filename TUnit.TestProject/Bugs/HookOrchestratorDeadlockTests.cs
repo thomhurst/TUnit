@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 namespace TUnit.TestProject.Bugs;
 
 /// <summary>
-/// Tests to verify that the hook orchestrator deadlock fixes are working correctly.
+/// Tests to verify that the TestOrchestrator deadlock fixes are working correctly.
 /// These tests stress-test the coordination mechanisms under high concurrency.
 /// </summary>
 public class HookOrchestratorDeadlockTests
@@ -238,7 +238,7 @@ public class DeadlockFixVerificationTests
         {
             // SUCCESS: All deadlock-prone scenarios completed without hanging
             // This indicates the coordination fixes are working properly
-            Console.WriteLine("✅ Hook orchestrator deadlock fixes verified successfully");
+            Console.WriteLine("✅ TestOrchestrator deadlock fixes verified successfully");
             Console.WriteLine("✅ Sequential coordination is working without deadlocks");
             Console.WriteLine("✅ Timeout mechanisms prevent indefinite hangs");
         }

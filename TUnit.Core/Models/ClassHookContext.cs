@@ -79,7 +79,7 @@ public class ClassHookContext : Context
         }
     }
 
-    internal override void RestoreContextAsyncLocal()
+    internal override void SetAsyncLocalContext()
     {
         Current = this;
     }

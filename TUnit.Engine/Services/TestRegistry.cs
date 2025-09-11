@@ -1,4 +1,3 @@
-using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
@@ -6,6 +5,7 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
+using TUnit.Engine.Interfaces;
 
 namespace TUnit.Engine.Services;
 
@@ -16,18 +16,18 @@ internal sealed class TestRegistry : ITestRegistry
 {
     private readonly ConcurrentQueue<PendingDynamicTest> _pendingTests = new();
     private readonly TestBuilderPipeline? _testBuilderPipeline;
-    private readonly Scheduling.TestExecutor _testExecutor;
+    private readonly ITestOrchestrator _testOrchestrator;
     private readonly CancellationToken _sessionCancellationToken;
     private readonly string? _sessionId;
 
 
     public TestRegistry(TestBuilderPipeline testBuilderPipeline,
-        Scheduling.TestExecutor testExecutor,
+        ITestOrchestrator testOrchestrator,
         string sessionId,
         CancellationToken sessionCancellationToken)
     {
         _testBuilderPipeline = testBuilderPipeline;
-        _testExecutor = testExecutor;
+        _testOrchestrator = testOrchestrator;
         _sessionId = sessionId;
         _sessionCancellationToken = sessionCancellationToken;
     }
@@ -96,7 +96,7 @@ internal sealed class TestRegistry : ITestRegistry
         foreach (var test in builtTests)
         {
             // The SingleTestExecutor will handle all execution-related message publishing
-            await _testExecutor.ExecuteTestAsync(test, _sessionCancellationToken);
+            await _testOrchestrator.ExecuteTestAsync(test, _sessionCancellationToken);
         }
     }
 

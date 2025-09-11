@@ -74,7 +74,7 @@ internal sealed class TestRequestHandler : IRequestHandler
         }
 
         // Execute tests
-        await serviceProvider.TestExecutor.ExecuteTests(
+        await serviceProvider.TestSessionCoordinator.ExecuteTests(
             allTests,
             request.Filter,
             context.MessageBus,

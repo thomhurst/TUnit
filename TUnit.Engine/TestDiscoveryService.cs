@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Threading.Channels;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
@@ -26,7 +25,7 @@ internal sealed class TestDiscoveryResult
 /// Unified test discovery service using the pipeline architecture with streaming support
 internal sealed class TestDiscoveryService : IDataProducer
 {
-    private readonly HookOrchestrator _hookOrchestrator;
+    private readonly TestExecutor _testExecutor;
     private readonly TestBuilderPipeline _testBuilderPipeline;
     private readonly TestFilterService _testFilterService;
     private readonly ConcurrentBag<AbstractExecutableTest> _cachedTests =
@@ -42,9 +41,9 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
-    public TestDiscoveryService(HookOrchestrator hookOrchestrator, TestBuilderPipeline testBuilderPipeline, TestFilterService testFilterService)
+    public TestDiscoveryService(TestExecutor testExecutor, TestBuilderPipeline testBuilderPipeline, TestFilterService testFilterService)
     {
-        _hookOrchestrator = hookOrchestrator;
+        _testExecutor = testExecutor;
         _testBuilderPipeline = testBuilderPipeline ?? throw new ArgumentNullException(nameof(testBuilderPipeline));
         _testFilterService = testFilterService;
     }
@@ -56,13 +55,7 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken, bool isForExecution)
     {
-        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
-#if NET
-        if (discoveryContext != null)
-        {
-            ExecutionContext.Restore(discoveryContext);
-        }
-#endif
+        await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
         // Extract types from filter for optimized discovery
         var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
@@ -127,10 +120,10 @@ internal sealed class TestDiscoveryService : IDataProducer
         }
 
         // Populate the TestDiscoveryContext with all discovered tests before running AfterTestDiscovery hooks
-        var contextProvider = _hookOrchestrator.GetContextProvider();
+        var contextProvider = _testExecutor.GetContextProvider();
         contextProvider.TestDiscoveryContext.AddTests(allTests.Select(t => t.Context));
 
-        await _hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
+        await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
         // Register the filtered tests to invoke ITestRegisteredEventReceiver
         await _testFilterService.RegisterTestsAsync(filteredTests).ConfigureAwait(false);
@@ -176,13 +169,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         ITestExecutionFilter? filter,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
-#if NET
-        if (discoveryContext != null)
-        {
-            ExecutionContext.Restore(discoveryContext);
-        }
-#endif
+        await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
         // Extract types from filter for optimized discovery
         var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);

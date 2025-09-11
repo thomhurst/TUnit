@@ -94,7 +94,7 @@ public class TestContext : Context
     public Priority ExecutionPriority { get; set; } = Priority.Normal;
 
     /// <summary>
-    /// Will be null until initialized by HookOrchestrator
+    /// Will be null until initialized by TestOrchestrator
     /// </summary>
     public ClassHookContext ClassContext { get; }
 
@@ -132,7 +132,7 @@ public class TestContext : Context
         return ServiceProvider.GetService(typeof(T)) as T;
     }
 
-    internal override void RestoreContextAsyncLocal()
+    internal override void SetAsyncLocalContext()
     {
         TestContexts.Value = this;
     }

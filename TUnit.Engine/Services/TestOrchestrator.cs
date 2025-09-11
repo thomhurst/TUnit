@@ -1,12 +1,9 @@
-using System.Linq;
-using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Core.Tracking;
-using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -14,25 +11,25 @@ using TUnit.Engine.Logging;
 namespace TUnit.Engine.Services;
 
 /// Handles ExecutionContext restoration for AsyncLocal support and test lifecycle management
-internal class SingleTestExecutor : ISingleTestExecutor
+internal class TestOrchestrator : ITestOrchestrator
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestResultFactory _resultFactory;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
-    private readonly IHookCollectionService _hookCollectionService;
     private readonly EngineCancellationToken _engineCancellationToken;
+    private readonly TestExecutor _testExecutor;
     private SessionUid _sessionUid;
 
-    public SingleTestExecutor(TUnitFrameworkLogger logger,
+    public TestOrchestrator(TUnitFrameworkLogger logger,
         EventReceiverOrchestrator eventReceiverOrchestrator,
-        IHookCollectionService hookCollectionService,
         EngineCancellationToken engineCancellationToken,
+        TestExecutor testExecutor,
         SessionUid sessionUid)
     {
         _logger = logger;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
-        _hookCollectionService = hookCollectionService;
         _engineCancellationToken = engineCancellationToken;
+        _testExecutor = testExecutor;
         _sessionUid = sessionUid;
         _resultFactory = new TestResultFactory();
     }
@@ -117,10 +114,9 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
             await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.ClassArguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata,
                 test.Context.Events).ConfigureAwait(false);
+
             await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(test.Arguments, test.Context.ObjectBag, test.Context.TestDetails.MethodMetadata,
                 test.Context.Events).ConfigureAwait(false);
-
-
 
             await PropertyInjectionService.InjectPropertiesAsync(
                 test.Context,
@@ -138,8 +134,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
             // Inject properties into test attributes BEFORE they are initialized
             // This ensures that data source generators and other attributes have their dependencies ready
             await PropertyInjectionService.InjectPropertiesIntoArgumentsAsync(
-                test.Context.TestDetails.Attributes.ToArray(), 
-                test.Context.ObjectBag, 
+                test.Context.TestDetails.Attributes.ToArray(),
+                test.Context.ObjectBag,
                 test.Context.TestDetails.MethodMetadata,
                 test.Context.Events).ConfigureAwait(false);
 
@@ -149,15 +145,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
             CheckDependenciesAndThrowIfShouldSkip(test);
 
-            var classContext = test.Context.ClassContext;
-            var assemblyContext = classContext.AssemblyContext;
-            var sessionContext = assemblyContext.TestSessionContext;
-
-            await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(test.Context, sessionContext, cancellationToken).ConfigureAwait(false);
-
-            await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(test.Context, assemblyContext, cancellationToken).ConfigureAwait(false);
-
-            await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(test.Context, classContext, cancellationToken).ConfigureAwait(false);
+            // Still need to invoke test start event receivers directly (this is test-specific, not lifecycle)
             await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
 
             try
@@ -169,11 +157,11 @@ internal class SingleTestExecutor : ISingleTestExecutor
 
                 if (test.Context is { RetryFunc: not null, TestDetails.RetryLimit: > 0 })
                 {
-                    await ExecuteTestWithRetries(() => ExecuteTestWithHooksAsync(test, instance, cancellationToken), test.Context, cancellationToken).ConfigureAwait(false);
+                    await ExecuteTestWithRetries(() => _testExecutor.ExecuteAsync(test, cancellationToken), test.Context, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    await ExecuteTestWithHooksAsync(test, instance, cancellationToken).ConfigureAwait(false);
+                    await _testExecutor.ExecuteAsync(test, cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (TestDependencyException e)
@@ -199,7 +187,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
                 test.EndTime = DateTimeOffset.Now;
 
                 await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context!, cancellationToken).ConfigureAwait(false);
-                
+
                 // Trigger disposal events for tracked objects after test completion
                 // Disposal order: Objects are disposed in ascending order (lower Order values first)
                 // This ensures dependencies are disposed before their dependents
@@ -277,8 +265,8 @@ internal class SingleTestExecutor : ISingleTestExecutor
         await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
 
         var instance = test.Context.TestDetails.ClassInstance;
-        if (instance != null && 
-            instance is not SkippedTestInstance && 
+        if (instance != null &&
+            instance is not SkippedTestInstance &&
             instance is not PlaceholderInstance)
         {
             if (instance is IAsyncDisposable or IDisposable)
@@ -295,126 +283,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
         return test.Result;
     }
 
-
-    private async Task ExecuteTestWithHooksAsync(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
-    {
-        var testClassType = test.Context.TestDetails.ClassType;
-        var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType).ConfigureAwait(false);
-        var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType).ConfigureAwait(false);
-
-        Exception? testException = null;
-        try
-        {
-            await ExecuteBeforeTestHooksAsync(beforeTestHooks, test.Context, cancellationToken).ConfigureAwait(false);
-
-            test.Context.RestoreExecutionContext();
-
-            await InvokeTestWithTimeout(test, instance, cancellationToken).ConfigureAwait(false);
-
-            test.State = TestState.Passed;
-            test.Result = _resultFactory.CreatePassedResult(test.StartTime!.Value);
-        }
-        catch (SkipTestException ex)
-        {
-            test.Context.SkipReason = ex.Reason;
-            test.Result = await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
-            testException = ex;
-        }
-        catch (Exception ex)
-        {
-            HandleTestFailure(test, ex);
-            testException = ex;
-        }
-
-        try
-        {
-            await ExecuteAfterTestHooksAsync(afterTestHooks, test.Context, cancellationToken).ConfigureAwait(false);
-        }
-        catch (SkipTestException afterHookSkipEx)
-        {
-            if (testException != null)
-            {
-                throw new AggregateException("Test and after hook both failed", testException, afterHookSkipEx);
-            }
-
-            test.Context.SkipReason = afterHookSkipEx.Reason;
-            test.Result = await HandleSkippedTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception afterHookEx)
-        {
-            if (testException != null)
-            {
-                throw new AggregateException("Test and after hook both failed", testException, afterHookEx);
-            }
-
-            HandleTestFailure(test, afterHookEx);
-            throw;
-        }
-        finally
-        {
-            // Note: Disposal events are handled by the main test executor's finally block
-            // to ensure consistent timing and avoid duplicate disposal calls
-        }
-
-        if (testException != null)
-        {
-            ExceptionDispatchInfo.Capture(testException).Throw();
-        }
-    }
-
-
-    private async Task ExecuteBeforeTestHooksAsync(IReadOnlyList<Func<TestContext, CancellationToken, Task>> hooks, TestContext context, CancellationToken cancellationToken)
-    {
-        RestoreHookContexts(context);
-        context.RestoreExecutionContext();
-
-        foreach (var hook in hooks)
-        {
-            try
-            {
-                await hook(context, cancellationToken).ConfigureAwait(false);
-
-                context.RestoreExecutionContext();
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in before test hook: {ex.Message}").ConfigureAwait(false);
-                throw;
-            }
-        }
-    }
-
-    private async Task ExecuteAfterTestHooksAsync(IReadOnlyList<Func<TestContext, CancellationToken, Task>> hooks, TestContext context, CancellationToken cancellationToken)
-    {
-        var exceptions = new List<Exception>();
-
-        RestoreHookContexts(context);
-
-        foreach (var hook in hooks)
-        {
-            try
-            {
-                await hook(context, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in after test hook: {ex.Message}").ConfigureAwait(false);
-                exceptions.Add(ex);
-            }
-        }
-
-        if (exceptions.Count > 0)
-        {
-            if (exceptions.Count == 1)
-            {
-                throw new HookFailedException(exceptions[0]);
-            }
-            else
-            {
-                throw new HookFailedException("Multiple after test hooks failed", new AggregateException(exceptions));
-            }
-        }
-    }
 
     private void HandleTestFailure(AbstractExecutableTest test, Exception ex)
     {
@@ -481,76 +349,6 @@ internal class SingleTestExecutor : ISingleTestExecutor
         };
     }
 
-    private async Task InvokeTestWithTimeout(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
-    {
-        var discoveredTest = test.Context.InternalDiscoveredTest;
-        var testAction = test.Context.TestDetails.Timeout.HasValue
-            ? CreateTimeoutTestAction(test, instance, cancellationToken)
-            : CreateNormalTestAction(test, instance, cancellationToken);
-
-        await InvokeWithTestExecutor(discoveredTest, test.Context, testAction).ConfigureAwait(false);
-    }
-
-    private Func<ValueTask> CreateTimeoutTestAction(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
-    {
-        return async () =>
-        {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var timeoutMs = (int)test.Context.TestDetails.Timeout!.Value.TotalMilliseconds;
-            cts.CancelAfter(timeoutMs);
-
-            // Update the test context with the timeout-aware cancellation token
-            var originalToken = test.Context.CancellationToken;
-            test.Context.CancellationToken = cts.Token;
-
-            try
-            {
-                await test.InvokeTestAsync(instance, cts.Token).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException) when (cts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
-            {
-                throw new System.TimeoutException($"Test '{test.Context.GetDisplayName()}' exceeded timeout of {timeoutMs}ms");
-            }
-            finally
-            {
-                // Restore the original token (in case it's needed elsewhere)
-                test.Context.CancellationToken = originalToken;
-            }
-        };
-    }
-
-    private Func<ValueTask> CreateNormalTestAction(AbstractExecutableTest test, object instance, CancellationToken cancellationToken)
-    {
-        return async () =>
-        {
-            await test.InvokeTestAsync(instance, cancellationToken).ConfigureAwait(false);
-        };
-    }
-
-    private async Task InvokeWithTestExecutor(DiscoveredTest? discoveredTest, TestContext context, Func<ValueTask> testAction)
-    {
-        if (discoveredTest?.TestExecutor != null)
-        {
-            await discoveredTest.TestExecutor.ExecuteTest(context, testAction).ConfigureAwait(false);
-        }
-        else
-        {
-            await testAction().ConfigureAwait(false);
-        }
-    }
-
-
-
-    private static void RestoreHookContexts(TestContext context)
-    {
-        if (context.ClassContext != null)
-        {
-            var assemblyContext = context.ClassContext.AssemblyContext;
-            AssemblyHookContext.Current = assemblyContext;
-
-            ClassHookContext.Current = context.ClassContext;
-        }
-    }
 
     private void PopulateTestContextDependencies(AbstractExecutableTest test)
     {
@@ -560,21 +358,21 @@ internal class SingleTestExecutor : ISingleTestExecutor
         ]);
         test.Context.Dependencies.AddRange(allDependencies);
     }
-    
+
     private void CollectTransitiveDependencies(AbstractExecutableTest test, HashSet<TestDetails> collected, HashSet<AbstractExecutableTest> visited)
     {
         if (!visited.Add(test))
         {
             return;
         }
-        
+
         foreach (var resolvedDependency in test.Dependencies)
         {
             var dependencyTest = resolvedDependency.Test;
             if (dependencyTest.Context?.TestDetails != null)
             {
                 collected.Add(dependencyTest.Context.TestDetails);
-                
+
                 CollectTransitiveDependencies(dependencyTest, collected, visited);
             }
         }
@@ -628,7 +426,7 @@ internal class SingleTestExecutor : ISingleTestExecutor
         {
             // Dispose objects in order - lower Order values first to handle dependencies correctly
             var orderedInvocations = context.Events.OnDispose.InvocationList.OrderBy(x => x.Order);
-            
+
             foreach (var invocation in orderedInvocations)
             {
                 try

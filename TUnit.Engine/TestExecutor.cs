@@ -1,184 +1,164 @@
-using Microsoft.Testing.Platform.CommandLine;
-using Microsoft.Testing.Platform.Logging;
-using Microsoft.Testing.Platform.Messages;
-using Microsoft.Testing.Platform.Requests;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
-using TUnit.Engine.Framework;
-using TUnit.Engine.Helpers;
-using TUnit.Engine.Interfaces;
-using TUnit.Engine.Logging;
-using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
-using ITestExecutor = TUnit.Engine.Interfaces.ITestExecutor;
 
 namespace TUnit.Engine;
 
-internal sealed class TestExecutor : ITestExecutor, IDisposable, IAsyncDisposable
+/// <summary>
+/// Simple orchestrator that composes focused services to manage test execution flow.
+/// Follows Single Responsibility Principle and SOLID principles.
+/// </summary>
+internal class TestExecutor : IDisposable
 {
-    private readonly ISingleTestExecutor _singleTestExecutor;
-    private readonly ICommandLineOptions _commandLineOptions;
-    private readonly TUnitFrameworkLogger _logger;
-    private readonly ITestScheduler _testScheduler;
-    private readonly ILoggerFactory _loggerFactory;
-    private readonly TUnitServiceProvider _serviceProvider;
-    private readonly Scheduling.TestExecutor _testExecutor;
+    private readonly HookExecutor _hookExecutor;
+    private readonly TestLifecycleCoordinator _lifecycleCoordinator;
+    private readonly BeforeHookTaskCache _beforeHookTaskCache;
     private readonly IContextProvider _contextProvider;
-    private readonly ITUnitMessageBus _messageBus;
-
     public TestExecutor(
-        ISingleTestExecutor singleTestExecutor,
-        ICommandLineOptions commandLineOptions,
-        TUnitFrameworkLogger logger,
-        ILoggerFactory? loggerFactory,
-        ITestScheduler testScheduler,
-        TUnitServiceProvider serviceProvider,
-        Scheduling.TestExecutor testExecutor,
-        IContextProvider contextProvider,
-        ITUnitMessageBus messageBus)
+        HookExecutor hookExecutor,
+        TestLifecycleCoordinator lifecycleCoordinator,
+        BeforeHookTaskCache beforeHookTaskCache,
+        IContextProvider contextProvider)
     {
-        _singleTestExecutor = singleTestExecutor;
-        _commandLineOptions = commandLineOptions;
-        _logger = logger;
-        _loggerFactory = loggerFactory ?? new NullLoggerFactory();
-        _serviceProvider = serviceProvider;
-        _testExecutor = testExecutor;
+        _hookExecutor = hookExecutor;
+        _lifecycleCoordinator = lifecycleCoordinator;
+        _beforeHookTaskCache = beforeHookTaskCache;
         _contextProvider = contextProvider;
-        _messageBus = messageBus;
-        _testScheduler = testScheduler;
     }
 
-    public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
-    public async Task ExecuteTests(
-        IEnumerable<AbstractExecutableTest> tests,
-        ITestExecutionFilter? filter,
-        IMessageBus messageBus,
-        CancellationToken cancellationToken)
+    /// <summary>
+    /// Creates a test executor delegate that wraps the provided executor with hook orchestration.
+    /// Uses focused services that follow SRP to manage lifecycle and execution.
+    /// </summary>
+    public async Task ExecuteAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {
-        var testList = tests.ToList();
-
-        var hookOrchestrator = _serviceProvider.HookOrchestrator;
-        InitializeEventReceivers(testList, cancellationToken);
+        var testClass = executableTest.Metadata.TestClassType;
+        var testAssembly = testClass.Assembly;
 
         try
         {
-            await PrepareHookOrchestrator(hookOrchestrator, testList, cancellationToken);
-            await ExecuteTestsCore(testList, _testExecutor, cancellationToken);
+            // Get or create and cache Before hooks - these run only once
+            // Note: Using the consolidated hook methods that include both hooks and event receivers
+            await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(
+                () => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(executableTest.Context, cancellationToken)).ConfigureAwait(false);
+
+            executableTest.Context.ClassContext.AssemblyContext.TestSessionContext.RestoreExecutionContext();
+
+            await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(testAssembly,
+                assembly => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(executableTest.Context, cancellationToken)).ConfigureAwait(false);
+
+            executableTest.Context.ClassContext.AssemblyContext.RestoreExecutionContext();
+
+            await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass,
+                cls => _hookExecutor.ExecuteBeforeClassHooksAsync(executableTest.Context, cancellationToken)).ConfigureAwait(false);
+
+            executableTest.Context.ClassContext.RestoreExecutionContext();
+
+            await _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+
+            executableTest.Context.RestoreExecutionContext();
+
+            await ExecuteTestAsync(executableTest, cancellationToken);
+
+            await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
-            // Execute session cleanup hooks with a separate cancellation token to ensure
-            // cleanup executes even when test execution is cancelled
-            try
-            {
-                using var cleanupCts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-                var afterSessionContext = await hookOrchestrator.ExecuteAfterTestSessionHooksAsync(cleanupCts.Token);
-#if NET
-                if (afterSessionContext != null)
-                {
-                    ExecutionContext.Restore(afterSessionContext);
-                }
-#endif
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in session cleanup hooks: {ex}");
-            }
-
-            foreach (var artifact in _contextProvider.TestSessionContext.Artifacts)
-            {
-                await _messageBus.SessionArtifact(artifact);
-            }
+            // Always decrement counters and run After hooks if we're the last test
+            await ExecuteAfterHooksBasedOnLifecycle(testClass, testAssembly, cancellationToken).ConfigureAwait(false);
         }
     }
 
-    private void InitializeEventReceivers(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
+    private static async Task ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {
-        if (_serviceProvider.GetService(typeof(EventReceiverOrchestrator)) is not EventReceiverOrchestrator eventReceiverOrchestrator)
+        if (executableTest.Context.InternalDiscoveredTest?.TestExecutor is { } testExecutor)
         {
-            return;
+            await testExecutor.ExecuteTest(executableTest.Context,
+                async () => await executableTest.InvokeTestAsync(executableTest.Context.TestDetails.ClassInstance, cancellationToken)).ConfigureAwait(false);
         }
-
-        var testContexts = testList.Select(t => t.Context);
-        eventReceiverOrchestrator.InitializeTestCounts(testContexts);
-
-        // Test registered event receivers are now invoked during discovery phase
+        else
+        {
+            await executableTest.InvokeTestAsync(executableTest.Context.TestDetails.ClassInstance, cancellationToken).ConfigureAwait(false);
+        }
     }
 
-    private async Task PrepareHookOrchestrator(HookOrchestrator hookOrchestrator, List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
+    private async Task ExecuteAfterHooksBasedOnLifecycle(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+        Type testClass, Assembly testAssembly, CancellationToken cancellationToken)
     {
-        // Register all tests upfront so hook orchestrator knows total counts per class/assembly
-        hookOrchestrator.RegisterTests(testList);
+        var flags = _lifecycleCoordinator.DecrementAndCheckAfterHooks(testClass, testAssembly);
 
-        await InitializeStaticPropertiesAsync(cancellationToken);
-
-        var sessionContext = await hookOrchestrator.ExecuteBeforeTestSessionHooksAsync(cancellationToken);
-#if NET
-        if (sessionContext != null)
+        if (flags.ShouldExecuteAfterClass)
         {
-            ExecutionContext.Restore(sessionContext);
+            await _hookExecutor.ExecuteAfterClassHooksAsync(testClass, cancellationToken).ConfigureAwait(false);
         }
-#endif
+
+        if (flags.ShouldExecuteAfterAssembly)
+        {
+            await _hookExecutor.ExecuteAfterAssemblyHooksAsync(testAssembly, cancellationToken).ConfigureAwait(false);
+        }
+
+        if (flags.ShouldExecuteAfterTestSession)
+        {
+            await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
 
-    private async Task InitializeStaticPropertiesAsync(CancellationToken cancellationToken)
+    /// <summary>
+    /// Execute session-level before hooks once at the start of test execution.
+    /// </summary>
+    public async Task ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
     {
-        try
-        {
-            // Execute all registered global initializers (including static property initialization from source generation)
-            while (Sources.GlobalInitializers.TryDequeue(out var initializer))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                await initializer();
-            }
-
-            // For reflection mode, also initialize static properties dynamically
-            if (!SourceRegistrar.IsEnabled)
-            {
-                await StaticPropertyReflectionInitializer.InitializeAllStaticPropertiesAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            await _logger.LogErrorAsync($"Error during static property initialization: {ex}");
-            throw;
-        }
+        await _hookExecutor.ExecuteBeforeTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
     }
 
-
-    private async Task ExecuteTestsCore(List<AbstractExecutableTest> testList, Scheduling.ITestExecutor executorAdapter, CancellationToken cancellationToken)
+    /// <summary>
+    /// Execute session-level after hooks once at the end of test execution.
+    /// </summary>
+    public async Task ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
-        // Combine cancellation tokens
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
-            cancellationToken,
-            _serviceProvider.FailFastCancellationSource.Token);
-
-        // Schedule and execute tests (batch approach to preserve ExecutionContext)
-        await _testScheduler.ScheduleAndExecuteAsync(testList, executorAdapter, linkedCts.Token);
+        await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    private bool _disposed;
+    /// <summary>
+    /// Register tests for lifecycle coordination. Should be called after filtering.
+    /// </summary>
+    public void RegisterTests(IEnumerable<AbstractExecutableTest> tests)
+    {
+        _lifecycleCoordinator.RegisterTests(tests);
+    }
+
+    /// <summary>
+    /// Execute discovery-level before hooks.
+    /// </summary>
+    public async Task ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    {
+        await _hookExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Execute discovery-level after hooks.
+    /// </summary>
+    public async Task ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    {
+        await _hookExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Get the context provider for accessing test contexts.
+    /// </summary>
+    public IContextProvider GetContextProvider()
+    {
+        return _contextProvider;
+    }
 
     public void Dispose()
     {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _disposed = true;
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        if (_disposed)
-        {
-            return default(ValueTask);
-        }
-
-        _disposed = true;
-
-        return default(ValueTask);
+        _lifecycleCoordinator.Dispose();
+        _beforeHookTaskCache.Dispose();
     }
 }

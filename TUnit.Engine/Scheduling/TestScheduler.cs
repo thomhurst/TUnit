@@ -35,11 +35,11 @@ internal sealed class TestScheduler : ITestScheduler
 
     public async Task ScheduleAndExecuteAsync(
         IEnumerable<AbstractExecutableTest> tests,
-        ITestExecutor executor,
+        TestRunner runner,
         CancellationToken cancellationToken)
     {
         if (tests == null) throw new ArgumentNullException(nameof(tests));
-        if (executor == null) throw new ArgumentNullException(nameof(executor));
+        if (runner == null) throw new ArgumentNullException(nameof(runner));
 
         var testList = tests as IList<AbstractExecutableTest> ?? tests.ToList();
         if (testList.Count == 0)
@@ -76,19 +76,19 @@ internal sealed class TestScheduler : ITestScheduler
 
         foreach (var test in executableTests)
         {
-            test.ExecutorDelegate = CreateTestExecutor(executor);
+            test.ExecutorDelegate = CreateTestExecutor(runner);
             test.ExecutionCancellationToken = cancellationToken;
         }
 
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
 
-        // Assign execution contexts to tests so HookOrchestrator can coordinate properly
+        // Assign execution contexts to tests for proper test coordination
         AssignExecutionContexts(groupedTests);
 
         await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
     }
 
-    private Func<AbstractExecutableTest, CancellationToken, Task> CreateTestExecutor(ITestExecutor executor)
+    private Func<AbstractExecutableTest, CancellationToken, Task> CreateTestExecutor(TestRunner runner)
     {
         return async (test, cancellationToken) =>
         {
@@ -149,7 +149,7 @@ internal sealed class TestScheduler : ITestScheduler
             try
             {
                 // Execute the actual test
-                await executor.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+                await runner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
             }
             finally
             {

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace TUnit.Core;
 
 /// <summary>
@@ -7,6 +9,7 @@ public class TestDetails
 {
     public required string TestId { get; init; }
     public required string TestName { get; init; }
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
     public required Type ClassType { get; init; }
     public required string MethodName { get; init; }
     public required object ClassInstance { get; set; }

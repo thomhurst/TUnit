@@ -80,7 +80,7 @@ public class TestSessionContext : Context
         _assemblies.Remove(assemblyContext);
     }
 
-    internal override void RestoreContextAsyncLocal()
+    internal override void SetAsyncLocalContext()
     {
         Current = this;
     }

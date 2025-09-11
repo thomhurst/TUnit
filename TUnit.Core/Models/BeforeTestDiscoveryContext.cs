@@ -29,7 +29,7 @@ public class BeforeTestDiscoveryContext : Context
     /// </summary>
     public required string? TestFilter { get; init; }
 
-    internal override void RestoreContextAsyncLocal()
+    internal override void SetAsyncLocalContext()
     {
         Current = this;
     }
