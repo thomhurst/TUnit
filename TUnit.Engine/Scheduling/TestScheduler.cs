@@ -3,6 +3,7 @@ using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
+using TUnit.Core.Models;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
@@ -80,6 +81,9 @@ internal sealed class TestScheduler : ITestScheduler
         }
 
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
+
+        // Assign execution contexts to tests so HookOrchestrator can coordinate properly
+        AssignExecutionContexts(groupedTests);
 
         await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
     }
@@ -481,6 +485,57 @@ internal sealed class TestScheduler : ITestScheduler
         visitState[test.TestId] = VisitState.Visited;
         currentPath.RemoveAt(currentPath.Count - 1);
         return false;
+    }
+
+    private void AssignExecutionContexts(GroupedTests groupedTests)
+    {
+        // Assign Parallel context to parallel tests
+        foreach (var test in groupedTests.Parallel)
+        {
+            test.ExecutionContext = new TestExecutionContext
+            {
+                ContextType = ExecutionContextType.Parallel
+            };
+        }
+
+        // Assign NotInParallel context to global sequential tests  
+        foreach (var test in groupedTests.NotInParallel)
+        {
+            test.ExecutionContext = new TestExecutionContext
+            {
+                ContextType = ExecutionContextType.NotInParallel
+            };
+        }
+
+        // Assign KeyedNotInParallel context to keyed sequential tests
+        foreach (var (key, tests) in groupedTests.KeyedNotInParallel)
+        {
+            foreach (var test in tests)
+            {
+                test.ExecutionContext = new TestExecutionContext
+                {
+                    ContextType = ExecutionContextType.KeyedNotInParallel,
+                    GroupKey = key
+                };
+            }
+        }
+
+        // Assign ParallelGroup context to parallel group tests
+        foreach (var (groupName, orderedTests) in groupedTests.ParallelGroups)
+        {
+            foreach (var (order, tests) in orderedTests)
+            {
+                foreach (var test in tests)
+                {
+                    test.ExecutionContext = new TestExecutionContext
+                    {
+                        ContextType = ExecutionContextType.ParallelGroup,
+                        GroupKey = groupName,
+                        Order = order
+                    };
+                }
+            }
+        }
     }
 
     private enum VisitState

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Models;
 
 namespace TUnit.Core;
 
@@ -30,6 +31,11 @@ public abstract class AbstractExecutableTest
 
     public ResolvedDependency[] Dependencies { get; set; } = [];
 
+    /// <summary>
+    /// Execution context information for this test, used to coordinate class hooks properly
+    /// </summary>
+    public TestExecutionContext? ExecutionContext { get; set; }
+
     public TestState State { get; set; } = TestState.NotStarted;
 
     public TestResult? Result
@@ -44,7 +50,7 @@ public abstract class AbstractExecutableTest
         set => Context.TestStart = value ?? DateTimeOffset.UtcNow;
     }
 
-    private readonly object _executionLock = new();
+    private readonly Lock _executionLock = new();
 
     internal Func<AbstractExecutableTest, CancellationToken, Task>? ExecutorDelegate { get; set; }
 

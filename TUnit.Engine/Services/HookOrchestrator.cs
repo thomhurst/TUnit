@@ -4,6 +4,7 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Helpers;
+using TUnit.Core.Models;
 using TUnit.Core.Services;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Framework;
@@ -35,6 +36,10 @@ internal sealed class HookOrchestrator
 #if NET
     private ExecutionContext? _sessionExecutionContext;
 #endif
+
+    // Coordination for sequential execution contexts
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> _sequentialGroupSemaphores = new();
+    private readonly ConcurrentDictionary<(Type classType, string? groupKey), TaskCompletionSource<bool>> _pendingAfterClassTasks = new();
 
     public HookOrchestrator(IHookCollectionService hookCollectionService, TUnitFrameworkLogger logger, IContextProvider contextProvider, TUnitServiceProvider serviceProvider)
     {
@@ -89,7 +94,7 @@ internal sealed class HookOrchestrator
     /// </summary>
     private Task<ExecutionContext?> GetOrCreateBeforeClassTask(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
-        Type testClassType, Assembly assembly, CancellationToken cancellationToken)
+        Type testClassType, Assembly assembly, TestExecutionContext? executionContext, CancellationToken cancellationToken)
     {
         return _beforeClassTasks.GetOrAdd(testClassType, async _ =>
         {
@@ -101,6 +106,13 @@ internal sealed class HookOrchestrator
                 ExecutionContext.Restore(assemblyContext);
             }
 #endif
+
+            // For sequential execution contexts, wait for previous AfterClass tasks to complete
+            if (ShouldCoordinateSequentially(executionContext))
+            {
+                await WaitForPreviousAfterClassTasks(testClassType, executionContext, cancellationToken).ConfigureAwait(false);
+            }
+
             // Now run class hooks in the assembly context
             return await ExecuteBeforeClassHooksAsync(testClassType, cancellationToken).ConfigureAwait(false);
         });
@@ -249,7 +261,7 @@ internal sealed class HookOrchestrator
         await GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken).ConfigureAwait(false);
 
         // Get the cached class context (includes assembly context)
-        var classContext = await GetOrCreateBeforeClassTask(testClassType, testClassType.Assembly, cancellationToken).ConfigureAwait(false);
+        var classContext = await GetOrCreateBeforeClassTask(testClassType, testClassType.Assembly, test.ExecutionContext, cancellationToken).ConfigureAwait(false);
 
 #if NET
         // Batch context restoration - only restore once if we have hooks to run
@@ -332,6 +344,9 @@ internal sealed class HookOrchestrator
             {
                 // Always remove from dictionary to prevent memory leaks
                 _classTestCounts.TryRemove(testClassType, out _);
+                
+                // Release sequential coordination for this class
+                ReleaseSequentialCoordination(testClassType, test.ExecutionContext);
             }
         }
 
@@ -608,6 +623,64 @@ internal sealed class HookOrchestrator
             throw exceptions.Count == 1
                 ? new HookFailedException(exceptions[0])
                 : new HookFailedException("Multiple AfterEveryTest hooks failed", new AggregateException(exceptions));
+        }
+    }
+
+    private static bool ShouldCoordinateSequentially(TestExecutionContext? executionContext)
+    {
+        return executionContext?.ContextType is 
+            ExecutionContextType.NotInParallel or 
+            ExecutionContextType.KeyedNotInParallel or 
+            ExecutionContextType.ParallelGroup;
+    }
+
+    private async Task WaitForPreviousAfterClassTasks(Type testClassType, TestExecutionContext? executionContext, CancellationToken cancellationToken)
+    {
+        if (executionContext == null)
+            return;
+
+        string groupKey = GetCoordinationKey(executionContext);
+        
+        // Get or create semaphore for this coordination group
+        var semaphore = _sequentialGroupSemaphores.GetOrAdd(groupKey, _ => new SemaphoreSlim(1, 1));
+        
+        // Wait for our turn
+        await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        
+        // Hold the semaphore - it will be released when AfterClass completes
+        // Store the task completion source for later
+        var releaseTask = new TaskCompletionSource<bool>();
+        _pendingAfterClassTasks[(testClassType, executionContext.GroupKey)] = releaseTask;
+    }
+
+    private static string GetCoordinationKey(TestExecutionContext executionContext)
+    {
+        return executionContext.ContextType switch
+        {
+            ExecutionContextType.NotInParallel => "NotInParallel",
+            ExecutionContextType.KeyedNotInParallel => $"KeyedNotInParallel:{executionContext.GroupKey}",
+            ExecutionContextType.ParallelGroup => $"ParallelGroup:{executionContext.GroupKey}:{executionContext.Order}",
+            _ => "Parallel"
+        };
+    }
+
+    private void ReleaseSequentialCoordination(Type testClassType, TestExecutionContext? executionContext)
+    {
+        if (executionContext == null || !ShouldCoordinateSequentially(executionContext))
+            return;
+
+        // Complete the pending task to signal AfterClass is done
+        var key = (testClassType, executionContext.GroupKey);
+        if (_pendingAfterClassTasks.TryRemove(key, out var taskCompletionSource))
+        {
+            taskCompletionSource.SetResult(true);
+        }
+
+        // Release the semaphore to allow next class to proceed
+        string groupKey = GetCoordinationKey(executionContext);
+        if (_sequentialGroupSemaphores.TryGetValue(groupKey, out var semaphore))
+        {
+            semaphore.Release();
         }
     }
 }
