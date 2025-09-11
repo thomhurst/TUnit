@@ -14,6 +14,7 @@ namespace
         public .ResolvedDependency[] Dependencies { get; set; }
         public ? Duration { get; }
         public ? EndTime { get; set; }
+        public .? ExecutionContext { get; set; }
         public . ExecutionTask { get; }
         public virtual .TestMetadata Metadata { get; init; }
         public .TestResult? Result { get; set; }
@@ -2270,6 +2271,20 @@ namespace .Logging
 }
 namespace .Models
 {
+    public enum ExecutionContextType
+    {
+        Parallel = 0,
+        NotInParallel = 1,
+        KeyedNotInParallel = 2,
+        ParallelGroup = 3,
+    }
+    public class TestExecutionContext : <.>
+    {
+        public TestExecutionContext() { }
+        public required . ContextType { get; init; }
+        public string? GroupKey { get; init; }
+        public int? Order { get; init; }
+    }
     public class TestExecutionData
     {
         public TestExecutionData() { }
