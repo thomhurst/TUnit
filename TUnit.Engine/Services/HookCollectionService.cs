@@ -39,7 +39,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         try
         {
             var context = new HookRegisteredContext(hookMethod);
-
             await _eventReceiverOrchestrator.InvokeHookRegistrationEventReceiversAsync(context, cancellationToken);
         }
         catch (Exception)

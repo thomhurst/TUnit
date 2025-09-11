@@ -40,6 +40,9 @@ internal sealed class HookOrchestrator : IDisposable
     // Coordination for sequential execution contexts  
     private readonly SequentialCoordinator _sequentialCoordinator = new();
     private readonly ConcurrentDictionary<Type, Task<IDisposable>> _classCoordinationTasks = new();
+    
+    // Per-class semaphores to prevent coordination deadlocks
+    private readonly ConcurrentDictionary<Type, SemaphoreSlim> _classCoordinationSemaphores = new();
 
     public HookOrchestrator(IHookCollectionService hookCollectionService, TUnitFrameworkLogger logger, IContextProvider contextProvider, TUnitServiceProvider serviceProvider)
     {
@@ -648,18 +651,73 @@ internal sealed class HookOrchestrator : IDisposable
 
     private async Task EnsureClassCoordinationAsync(Type testClassType, TestExecutionContext executionContext, CancellationToken cancellationToken)
     {
-        // Use GetOrAdd to ensure only one semaphore is acquired per class type
-        var coordinationTask = _classCoordinationTasks.GetOrAdd(testClassType, _ =>
-        {
-            return Task.Run(async () =>
-            {
-                var groupKey = SequentialCoordinator.GetCoordinationKey(executionContext);
-                return await _sequentialCoordinator.AcquireAsync(groupKey, cancellationToken).ConfigureAwait(false);
-            }, cancellationToken);
-        });
+        // Get or create a semaphore for this class type to prevent multiple concurrent coordination attempts
+        var coordinationSemaphore = _classCoordinationSemaphores.GetOrAdd(testClassType, _ => new SemaphoreSlim(1, 1));
         
-        // All tests for this class wait for the same coordination task
-        await coordinationTask.ConfigureAwait(false);
+        // Acquire the semaphore to ensure only one thread can coordinate for this class at a time
+        await coordinationSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        
+        try
+        {
+            // Check if coordination task already exists after acquiring the semaphore
+            if (_classCoordinationTasks.TryGetValue(testClassType, out var existingTask))
+            {
+                // Wait for the existing coordination task
+                await existingTask.ConfigureAwait(false);
+                return;
+            }
+            
+            // Create the coordination task without Task.Run to avoid potential deadlocks
+            var coordinationTask = CreateCoordinationTaskAsync(testClassType, executionContext, cancellationToken);
+            
+            // Add the task to the dictionary
+            if (_classCoordinationTasks.TryAdd(testClassType, coordinationTask))
+            {
+                // We successfully added the task, wait for it
+                await coordinationTask.ConfigureAwait(false);
+            }
+            else
+            {
+                // Another thread beat us to it, wait for their task
+                if (_classCoordinationTasks.TryGetValue(testClassType, out var concurrentTask))
+                {
+                    await concurrentTask.ConfigureAwait(false);
+                }
+            }
+        }
+        finally
+        {
+            coordinationSemaphore.Release();
+        }
+    }
+    
+    private async Task<IDisposable> CreateCoordinationTaskAsync(Type testClassType, TestExecutionContext executionContext, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var groupKey = SequentialCoordinator.GetCoordinationKey(executionContext);
+            
+            // Use a reasonable timeout to prevent indefinite deadlocks
+            // Default to 30 seconds, which should be more than enough for normal coordination
+            var coordinationTimeout = TimeSpan.FromSeconds(30);
+            
+            return await _sequentialCoordinator.AcquireAsync(groupKey, cancellationToken, coordinationTimeout).ConfigureAwait(false);
+        }
+        catch (TimeoutException ex)
+        {
+            // Log timeout for debugging purposes
+            await _logger.LogErrorAsync($"Coordination timeout for class {testClassType.Name}: {ex.Message}").ConfigureAwait(false);
+            
+            // Remove the failed task from the dictionary to allow retries
+            _classCoordinationTasks.TryRemove(testClassType, out _);
+            throw;
+        }
+        catch
+        {
+            // If coordination fails for any other reason, remove the failed task from the dictionary to allow retries
+            _classCoordinationTasks.TryRemove(testClassType, out _);
+            throw;
+        }
     }
 
     public void Dispose()
@@ -680,6 +738,13 @@ internal sealed class HookOrchestrator : IDisposable
 #endif
         }
         _classCoordinationTasks.Clear();
+        
+        // Dispose coordination semaphores
+        foreach (var semaphore in _classCoordinationSemaphores.Values)
+        {
+            semaphore.Dispose();
+        }
+        _classCoordinationSemaphores.Clear();
         
         // Dispose the coordinator
         _sequentialCoordinator.Dispose();
