@@ -3,6 +3,7 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
@@ -62,7 +63,17 @@ internal class TestExecutor : IDisposable
 
             executableTest.Context.RestoreExecutionContext();
 
-            await ExecuteTestAsync(executableTest, cancellationToken);
+            // Only wrap the actual test execution with timeout, not the hooks
+            var testTimeout = executableTest.Context.TestDetails.Timeout;
+            var timeoutMessage = testTimeout.HasValue 
+                ? $"Test '{executableTest.Context.TestDetails.TestName}' execution timed out after {testTimeout.Value}"
+                : null;
+
+            await TimeoutHelper.ExecuteWithTimeoutAsync(
+                ct => ExecuteTestAsync(executableTest, ct),
+                testTimeout,
+                cancellationToken,
+                timeoutMessage).ConfigureAwait(false);
 
             await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
         }
