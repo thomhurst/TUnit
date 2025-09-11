@@ -37,7 +37,7 @@ internal sealed class HookOrchestrator : IDisposable
     private ExecutionContext? _sessionExecutionContext;
 #endif
 
-    // Coordination for sequential execution contexts
+    // Coordination for sequential execution contexts  
     private readonly SequentialCoordinator _sequentialCoordinator = new();
     private readonly ConcurrentDictionary<Type, IDisposable> _classCoordinationTokens = new();
 
@@ -94,7 +94,7 @@ internal sealed class HookOrchestrator : IDisposable
     /// </summary>
     private Task<ExecutionContext?> GetOrCreateBeforeClassTask(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
-        Type testClassType, Assembly assembly, TestExecutionContext? executionContext, CancellationToken cancellationToken)
+        Type testClassType, Assembly assembly, CancellationToken cancellationToken)
     {
         return _beforeClassTasks.GetOrAdd(testClassType, async _ =>
         {
@@ -106,14 +106,6 @@ internal sealed class HookOrchestrator : IDisposable
                 ExecutionContext.Restore(assemblyContext);
             }
 #endif
-
-            // For sequential execution contexts, acquire coordination lock
-            if (ShouldCoordinateSequentially(executionContext) && executionContext != null)
-            {
-                var groupKey = SequentialCoordinator.GetCoordinationKey(executionContext);
-                var token = await _sequentialCoordinator.AcquireAsync(groupKey, cancellationToken).ConfigureAwait(false);
-                _classCoordinationTokens[testClassType] = token;
-            }
 
             // Now run class hooks in the assembly context
             return await ExecuteBeforeClassHooksAsync(testClassType, cancellationToken).ConfigureAwait(false);
@@ -262,8 +254,23 @@ internal sealed class HookOrchestrator : IDisposable
 
         await GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken).ConfigureAwait(false);
 
+        // For sequential execution contexts, acquire coordination lock before running class hooks
+        // Check if ANY test in this class needs coordination, if so, coordinate
+        if (ShouldCoordinateSequentially(test.ExecutionContext) && test.ExecutionContext != null)
+        {
+            // Try to add coordination for this class - only the first thread succeeds
+            var groupKey = SequentialCoordinator.GetCoordinationKey(test.ExecutionContext);
+            var token = await _sequentialCoordinator.AcquireAsync(groupKey, cancellationToken).ConfigureAwait(false);
+            
+            // If we can't add it (another test already did), dispose our token since we don't need it
+            if (!_classCoordinationTokens.TryAdd(testClassType, token))
+            {
+                token.Dispose();
+            }
+        }
+
         // Get the cached class context (includes assembly context)
-        var classContext = await GetOrCreateBeforeClassTask(testClassType, testClassType.Assembly, test.ExecutionContext, cancellationToken).ConfigureAwait(false);
+        var classContext = await GetOrCreateBeforeClassTask(testClassType, testClassType.Assembly, cancellationToken).ConfigureAwait(false);
 
 #if NET
         // Batch context restoration - only restore once if we have hooks to run
@@ -638,6 +645,7 @@ internal sealed class HookOrchestrator : IDisposable
             ExecutionContextType.KeyedNotInParallel or
             ExecutionContextType.ParallelGroup;
     }
+
 
     public void Dispose()
     {
