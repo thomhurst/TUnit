@@ -1,7 +1,9 @@
+using System.Collections.Concurrent;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
+using TUnit.Core.Data;
 using TUnit.Core.Exceptions;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -47,34 +49,49 @@ public sealed class TestRunner : IDataProducer
         _logger = logger;
     }
 
+    private readonly GetOnlyDictionary<string, Task> _executingTests = new();
+
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        // Check dependencies at scheduler level (early exit)
-        if (test.Dependencies.Any(dep => dep.Test.State == TestState.Failed && !dep.ProceedOnFailure))
-        {
-            test.State = TestState.Skipped;
-            test.Result = new TestResult
-            {
-                State = TestState.Skipped,
-                Start = test.StartTime,
-                End = DateTimeOffset.Now,
-                Duration = DateTimeOffset.Now - test.StartTime.GetValueOrDefault(),
-                ComputerName = Environment.MachineName,
-                Exception = new SkipTestException("Skipped due to failed dependencies")
-            };
+        // Prevent double execution with a simple lock
+        var executionTask = _executingTests.GetOrAdd(test.TestId, _ => ExecuteTestInternalAsync(test, cancellationToken));
+        await executionTask.ConfigureAwait(false);
+    }
 
-            await _tunitMessageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
-            return;
-        }
-
-        // Send initial progress message
-        test.State = TestState.Running;
-        test.StartTime = DateTimeOffset.UtcNow;
-        await _tunitMessageBus.InProgress(test.Context).ConfigureAwait(false);
-
+    private async Task ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    {
         try
         {
-            // Execute test through SingleTestExecutor (handles all the complex logic)
+            // First, execute all dependencies recursively
+            foreach (var dependency in test.Dependencies)
+            {
+                await ExecuteTestAsync(dependency.Test, cancellationToken).ConfigureAwait(false);
+
+                // Check if dependency failed and we should skip
+                if (dependency.Test.State == TestState.Failed && !dependency.ProceedOnFailure)
+                {
+                    test.State = TestState.Skipped;
+                    test.Result = new TestResult
+                    {
+                        State = TestState.Skipped,
+                        Start = DateTimeOffset.UtcNow,
+                        End = DateTimeOffset.UtcNow,
+                        Duration = TimeSpan.Zero,
+                        ComputerName = Environment.MachineName,
+                        Exception = new SkipTestException("Skipped due to failed dependencies")
+                    };
+                    await _tunitMessageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
+                    return;
+                }
+            }
+
+            // Send initial progress message
+            test.State = TestState.Running;
+            test.StartTime = DateTimeOffset.UtcNow;
+
+            await _tunitMessageBus.InProgress(test.Context).ConfigureAwait(false);
+
+            // Execute test through TestOrchestrator → TestExecutor
             var updateMessage = await _testOrchestrator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
 
             // Publish the result to the message bus
