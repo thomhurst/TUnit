@@ -39,7 +39,7 @@ internal sealed class HookOrchestrator : IDisposable
 
     // Coordination for sequential execution contexts  
     private readonly SequentialCoordinator _sequentialCoordinator = new();
-    private readonly ConcurrentDictionary<Type, IDisposable> _classCoordinationTokens = new();
+    private readonly ConcurrentDictionary<Type, Task<IDisposable>> _classCoordinationTasks = new();
 
     public HookOrchestrator(IHookCollectionService hookCollectionService, TUnitFrameworkLogger logger, IContextProvider contextProvider, TUnitServiceProvider serviceProvider)
     {
@@ -254,19 +254,10 @@ internal sealed class HookOrchestrator : IDisposable
 
         await GetOrCreateBeforeAssemblyTask(assemblyName, testClassType.Assembly, cancellationToken).ConfigureAwait(false);
 
-        // For sequential execution contexts, acquire coordination lock before running class hooks
-        // Check if ANY test in this class needs coordination, if so, coordinate
+        // For sequential execution contexts, ensure coordination is set up for this class
         if (ShouldCoordinateSequentially(test.ExecutionContext) && test.ExecutionContext != null)
         {
-            // Try to add coordination for this class - only the first thread succeeds
-            var groupKey = SequentialCoordinator.GetCoordinationKey(test.ExecutionContext);
-            var token = await _sequentialCoordinator.AcquireAsync(groupKey, cancellationToken).ConfigureAwait(false);
-            
-            // If we can't add it (another test already did), dispose our token since we don't need it
-            if (!_classCoordinationTokens.TryAdd(testClassType, token))
-            {
-                token.Dispose();
-            }
+            await EnsureClassCoordinationAsync(testClassType, test.ExecutionContext, cancellationToken).ConfigureAwait(false);
         }
 
         // Get the cached class context (includes assembly context)
@@ -355,9 +346,17 @@ internal sealed class HookOrchestrator : IDisposable
                 _classTestCounts.TryRemove(testClassType, out _);
 
                 // Release sequential coordination for this class
-                if (_classCoordinationTokens.TryRemove(testClassType, out var token))
+                if (_classCoordinationTasks.TryRemove(testClassType, out var tokenTask))
                 {
-                    token.Dispose();
+                    try
+                    {
+                        var token = await tokenTask.ConfigureAwait(false);
+                        token.Dispose();
+                    }
+                    catch
+                    {
+                        // If the coordination task failed, ignore cleanup errors
+                    }
                 }
             }
         }
@@ -647,14 +646,40 @@ internal sealed class HookOrchestrator : IDisposable
     }
 
 
+    private async Task EnsureClassCoordinationAsync(Type testClassType, TestExecutionContext executionContext, CancellationToken cancellationToken)
+    {
+        // Use GetOrAdd to ensure only one semaphore is acquired per class type
+        var coordinationTask = _classCoordinationTasks.GetOrAdd(testClassType, _ =>
+        {
+            return Task.Run(async () =>
+            {
+                var groupKey = SequentialCoordinator.GetCoordinationKey(executionContext);
+                return await _sequentialCoordinator.AcquireAsync(groupKey, cancellationToken).ConfigureAwait(false);
+            }, cancellationToken);
+        });
+        
+        // All tests for this class wait for the same coordination task
+        await coordinationTask.ConfigureAwait(false);
+    }
+
     public void Dispose()
     {
         // Dispose any remaining coordination tokens
-        foreach (var token in _classCoordinationTokens.Values)
+        foreach (var tokenTask in _classCoordinationTasks.Values)
         {
-            token?.Dispose();
+#if NET
+            if (tokenTask.IsCompletedSuccessfully)
+            {
+                tokenTask.Result.Dispose();
+            }
+#else
+            if (tokenTask.Status == TaskStatus.RanToCompletion)
+            {
+                tokenTask.Result.Dispose();
+            }
+#endif
         }
-        _classCoordinationTokens.Clear();
+        _classCoordinationTasks.Clear();
         
         // Dispose the coordinator
         _sequentialCoordinator.Dispose();
