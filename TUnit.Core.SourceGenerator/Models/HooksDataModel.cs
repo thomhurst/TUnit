@@ -48,7 +48,13 @@ public record HooksDataModel
             var hashCode = FullyQualifiedTypeName.GetHashCode();
             hashCode = (hashCode * 397) ^ MinimalTypeName.GetHashCode();
             hashCode = (hashCode * 397) ^ MethodName.GetHashCode();
-            hashCode = (hashCode * 397) ^ ParameterTypes.GetHashCode();
+            
+            // Hash array contents, not array reference
+            foreach (var paramType in ParameterTypes)
+            {
+                hashCode = (hashCode * 397) ^ paramType.GetHashCode();
+            }
+            
             hashCode = (hashCode * 397) ^ HookLevel.GetHashCode();
             return hashCode;
         }
