@@ -19,7 +19,9 @@ public class AdaptiveParallelismTests
         {
             _currentlyRunning++;
             if (_currentlyRunning > _maxConcurrent)
+            {
                 _maxConcurrent = _currentlyRunning;
+            }
         }
 
         try
@@ -45,7 +47,9 @@ public class AdaptiveParallelismTests
         {
             _currentlyRunning++;
             if (_currentlyRunning > _maxConcurrent)
+            {
                 _maxConcurrent = _currentlyRunning;
+            }
         }
 
         try

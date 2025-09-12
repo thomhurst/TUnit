@@ -75,7 +75,7 @@ internal static class EnvironmentVariableCache
     {
         EnsureInitialized();
         var result = new string?[variableNames.Length];
-        for (int i = 0; i < variableNames.Length; i++)
+        for (var i = 0; i < variableNames.Length; i++)
         {
             _cache.TryGetValue(variableNames[i], out var value);
             result[i] = value;
@@ -92,7 +92,7 @@ internal static class EnvironmentVariableCache
     public static bool HasAnyNonEmpty(params string[] variableNames)
     {
         EnsureInitialized();
-        for (int i = 0; i < variableNames.Length; i++)
+        for (var i = 0; i < variableNames.Length; i++)
         {
             _cache.TryGetValue(variableNames[i], out var value);
             if (!string.IsNullOrEmpty(value))

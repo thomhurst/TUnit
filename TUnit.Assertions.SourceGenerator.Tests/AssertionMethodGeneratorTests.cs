@@ -5,74 +5,52 @@ namespace TUnit.Assertions.SourceGenerator.Tests;
 internal class AssertionMethodGeneratorTests : TestsBase<AssertionMethodGenerator>
 {
     [Test]
-    public Task GeneratesCharIsDigitAssertion() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
-        "TUnit.Assertions.SourceGenerator.Tests",
-        "AssertionMethodGeneratorTests.GeneratesCharIsDigitAssertion.cs"),
+    public Task GeneratesCharAssertions() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions",
+            "Assertions",
+            "CharAssertionExtensions.cs"),
         async generatedFiles =>
         {
-            await Verify(generatedFiles[0]);
+            await Verify(generatedFiles);
         });
 
     [Test]
-    public Task GeneratesMultipleAssertionTypes() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
-        "TUnit.Assertions.SourceGenerator.Tests",
-        "AssertionMethodGeneratorTests.GeneratesMultipleAssertionTypes.cs"),
+    public Task GeneratesEnumAssertions() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions",
+            "Assertions",
+            "EnumAssertionExtensions.cs"),
         async generatedFiles =>
         {
-            await Verify(generatedFiles[0]);
+            await Verify(generatedFiles);
         });
 
     [Test]
-    public Task GeneratesMultipleAssertions() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
-        "TUnit.Assertions.SourceGenerator.Tests",
-        "AssertionMethodGeneratorTests.GeneratesMultipleAssertions.cs"),
+    public Task GeneratesPathAssertions() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions",
+            "Assertions",
+            "PathAssertionExtensions.cs"),
         async generatedFiles =>
         {
-            await Verify(generatedFiles[0]);
+            await Verify(generatedFiles);
         });
 
     [Test]
-    public Task GeneratesWithCustomMethodName() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
-        "TUnit.Assertions.SourceGenerator.Tests",
-        "AssertionMethodGeneratorTests.GeneratesWithCustomMethodName.cs"),
+    public Task GeneratesStringAssertions() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions",
+            "Assertions",
+            "StringAssertionExtensions.cs"),
         async generatedFiles =>
         {
-            await Verify(generatedFiles[0]);
+            await Verify(generatedFiles);
         });
 
     [Test]
-    public Task GeneratesWithMultipleParameters() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
-        "TUnit.Assertions.SourceGenerator.Tests",
-        "AssertionMethodGeneratorTests.GeneratesWithMultipleParameters.cs"),
+    public Task GeneratesUriAssertions() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions",
+            "Assertions",
+            "UriAssertionExtensions.cs"),
         async generatedFiles =>
         {
-            await Verify(generatedFiles[0]);
-        });
-
-    [Test]
-    public Task GeneratesWithTwoParameters() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
-        "TUnit.Assertions.SourceGenerator.Tests",
-        "AssertionMethodGeneratorTests.GeneratesWithTwoParameters.cs"),
-        async generatedFiles =>
-        {
-            await Verify(generatedFiles[0]);
-        });
-
-    [Test]
-    public Task GeneratesEnumIsDefinedAssertion() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
-        "TUnit.Assertions.SourceGenerator.Tests",
-        "AssertionMethodGeneratorTests.GeneratesEnumIsDefinedAssertion.cs"),
-        async generatedFiles =>
-        {
-            await Verify(generatedFiles[0]);
-        });
-
-    [Test]
-    public Task GeneratesStringMethodsAssertion() => RunTest(Path.Combine(Sourcy.Git.RootDirectory.FullName,
-        "TUnit.Assertions.SourceGenerator.Tests",
-        "AssertionMethodGeneratorTests.GeneratesStringMethodsAssertion.cs"),
-        async generatedFiles =>
-        {
-            await Verify(string.Join("\n---\n", generatedFiles));
+            await Verify(generatedFiles);
         });
 }

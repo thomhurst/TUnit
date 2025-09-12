@@ -174,7 +174,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         return (typeArgs, args) =>
         {
             // Use provided args if available, otherwise fall back to predefined args
-            var effectiveArgs = args is { Length: > 0 } ? args : (predefinedClassArgs ?? []);
+            var effectiveArgs = args is { Length: > 0 } ? args : predefinedClassArgs ?? [];
 
             if (testClass.IsGenericTypeDefinition && typeArgs.Length > 0)
             {
@@ -310,7 +310,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 };
 
                 // Create instance and test invoker for the dynamic test
-                Func<TestContext, Task<object>> createInstance = (TestContext testContext) =>
+                var createInstance = (TestContext testContext) =>
                 {
                     var instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
 

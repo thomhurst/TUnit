@@ -1,0 +1,51 @@
+﻿#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
+
+namespace TestNamespace;
+
+public class StringCharIsDigitWithStringAnd1MoreAssertCondition : BaseAssertCondition<string>
+{
+    private readonly int _index;
+    private readonly bool _negated;
+
+    public StringCharIsDigitWithStringAnd1MoreAssertCondition(int index, bool negated = false)
+    {
+        _index = index;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = char.IsDigit(actualValue, _index);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsDigit({_index})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsDigit({_index})";
+    }
+}
+
+public static partial class StringCharIndexAssertions
+{
+    public static InvokableValueAssertionBuilder<string> IsDigitAt(this IValueSource<string> valueSource, int index, [CallerArgumentExpression(nameof(index))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringCharIsDigitWithStringAnd1MoreAssertCondition(index, false),
+            [doNotPopulateThisValue1]);
+    }
+
+}

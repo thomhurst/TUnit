@@ -53,6 +53,10 @@
         <PackageReference Include="System.Collections.Immutable" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Assertions\Extensions\" />
+    </ItemGroup>
+
   <Import Project="..\Library.targets" />
 
 </Project>

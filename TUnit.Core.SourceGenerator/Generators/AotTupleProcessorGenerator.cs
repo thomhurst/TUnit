@@ -524,7 +524,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         // Handle ValueTuple's nested structure for more than 7 elements
         if (elementCount <= 7)
         {
-            for (int i = 1; i <= elementCount; i++)
+            for (var i = 1; i <= elementCount; i++)
             {
                 elements.Add($"tuple.Item{i}");
             }
@@ -532,14 +532,14 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         else
         {
             // For 8+ elements, ValueTuple nests the 8th+ items in tuple.Rest
-            for (int i = 1; i <= 7; i++)
+            for (var i = 1; i <= 7; i++)
             {
                 elements.Add($"tuple.Item{i}");
             }
             
             // Access remaining elements through Rest property
             var restCount = elementCount - 7;
-            for (int i = 1; i <= restCount; i++)
+            for (var i = 1; i <= restCount; i++)
             {
                 if (restCount == 1)
                 {
@@ -580,7 +580,7 @@ public sealed class AotTupleProcessorGenerator : IIncrementalGenerator
         var uniqueName = $"{baseProcName}_{hash}";
         
         // Ensure uniqueness
-        int counter = 1;
+        var counter = 1;
         while (processedNames.Contains(uniqueName))
         {
             uniqueName = $"{baseProcName}_{hash}_{counter++}";

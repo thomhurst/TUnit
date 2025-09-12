@@ -1,1 +1,49 @@
-﻿
+﻿#nullable disable
+
+using System;
+using System.Threading.Tasks;
+using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
+
+namespace TestNamespace;
+
+public class StringCharIsDigitWith2ParametersAssertCondition : BaseAssertCondition<string>
+{
+    private readonly int _index;
+    private readonly bool _negated;
+
+    public StringCharIsDigitWith2ParametersAssertCondition(int index, bool negated = false)
+    {
+        _index = index;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = char.IsDigit(actualValue, _index);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsDigit({_index})");
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsDigit({_index})";
+    }
+}
+
+public static partial class StringCharIndexAssertions
+{
+    public static InvokableValueAssertionBuilder<string> IsDigitAt(this IValueSource<string> valueSource, int index)
+    {
+        return valueSource.RegisterAssertion(
+            new StringCharIsDigitWith2ParametersAssertCondition(index, false),
+            []);
+    }
+
+}

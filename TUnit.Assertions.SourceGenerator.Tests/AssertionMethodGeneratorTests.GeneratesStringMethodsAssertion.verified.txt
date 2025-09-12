@@ -1,1 +1,157 @@
-﻿
+﻿#nullable disable
+
+using System;
+using System.Threading.Tasks;
+using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
+
+namespace TestNamespace;
+
+public class StringStartsWithAssertCondition : BaseAssertCondition<string>
+{
+    private readonly string _value;
+    private readonly bool _negated;
+
+    public StringStartsWithAssertCondition(string value, bool negated = false)
+    {
+        _value = value;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.StartsWith(_value);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy StartsWith({_value})");
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy StartsWith({_value})";
+    }
+}
+
+public static partial class StringMethodAssertions
+{
+    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string value)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithAssertCondition(value, false),
+            []);
+    }
+
+}
+
+---
+#nullable disable
+
+using System;
+using System.Threading.Tasks;
+using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
+
+namespace TestNamespace;
+
+public class StringStartsWithWith2ParametersAssertCondition : BaseAssertCondition<string>
+{
+    private readonly string _value;
+    private readonly System.StringComparison _comparisonType;
+    private readonly bool _negated;
+
+    public StringStartsWithWith2ParametersAssertCondition(string value, System.StringComparison comparisonType, bool negated = false)
+    {
+        _value = value;
+        _comparisonType = comparisonType;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.StartsWith(_value, _comparisonType);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy StartsWith({_value}, {_comparisonType})");
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy StartsWith({_value}, {_comparisonType})";
+    }
+}
+
+public static partial class StringMethodAssertions
+{
+    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string value, System.StringComparison comparisonType)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWith2ParametersAssertCondition(value, comparisonType, false),
+            []);
+    }
+
+}
+
+---
+#nullable disable
+
+using System;
+using System.Threading.Tasks;
+using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
+
+namespace TestNamespace;
+
+public class StringStartsWithWith3ParametersAssertCondition : BaseAssertCondition<string>
+{
+    private readonly string _value;
+    private readonly bool _ignoreCase;
+    private readonly System.Globalization.CultureInfo _culture;
+    private readonly bool _negated;
+
+    public StringStartsWithWith3ParametersAssertCondition(string value, bool ignoreCase, System.Globalization.CultureInfo culture, bool negated = false)
+    {
+        _value = value;
+        _ignoreCase = ignoreCase;
+        _culture = culture;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.StartsWith(_value, _ignoreCase, _culture);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy StartsWith({_value}, {_ignoreCase}, {_culture})");
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy StartsWith({_value}, {_ignoreCase}, {_culture})";
+    }
+}
+
+public static partial class StringMethodAssertions
+{
+    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string value, bool ignoreCase, System.Globalization.CultureInfo culture)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWith3ParametersAssertCondition(value, ignoreCase, culture, false),
+            []);
+    }
+
+}

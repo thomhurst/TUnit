@@ -37,8 +37,14 @@ internal sealed class TestScheduler : ITestScheduler
         ITestExecutor executor,
         CancellationToken cancellationToken)
     {
-        if (tests == null) throw new ArgumentNullException(nameof(tests));
-        if (executor == null) throw new ArgumentNullException(nameof(executor));
+        if (tests == null)
+        {
+            throw new ArgumentNullException(nameof(tests));
+        }
+        if (executor == null)
+        {
+            throw new ArgumentNullException(nameof(executor));
+        }
 
         var testList = tests as IList<AbstractExecutableTest> ?? tests.ToList();
         if (testList.Count == 0)
@@ -319,14 +325,16 @@ internal sealed class TestScheduler : ITestScheduler
                 var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
                 var workers = new Task[maxParallelism.Value];
 
-                for (int i = 0; i < maxParallelism.Value; i++)
+                for (var i = 0; i < maxParallelism.Value; i++)
                 {
                     workers[i] = Task.Run(async () =>
                     {
                         while (testQueue.TryDequeue(out var test))
                         {
                             if (cancellationToken.IsCancellationRequested)
+                            {
                                 break;
+                            }
 
                             await test.ExecutionTask.ConfigureAwait(false);
                         }
@@ -356,14 +364,16 @@ internal sealed class TestScheduler : ITestScheduler
             var workers = new Task[maxParallelism.Value];
 
             // Create worker tasks
-            for (int i = 0; i < maxParallelism.Value; i++)
+            for (var i = 0; i < maxParallelism.Value; i++)
             {
                 workers[i] = Task.Run(async () =>
                 {
                     while (testQueue.TryDequeue(out var test))
                     {
                         if (cancellationToken.IsCancellationRequested)
+                        {
                             break;
+                        }
 
                         await test.ExecutionTask.ConfigureAwait(false);
                     }
@@ -410,7 +420,7 @@ internal sealed class TestScheduler : ITestScheduler
 
                         // Find where the cycle starts (the first occurrence of the repeated element)
                         var cycleStartIndex = -1;
-                        for (int i = 0; i < currentPath.Count - 1; i++)
+                        for (var i = 0; i < currentPath.Count - 1; i++)
                         {
                             if (currentPath[i].TestId == lastTest.TestId)
                             {
@@ -428,10 +438,8 @@ internal sealed class TestScheduler : ITestScheduler
                             // Create a unique key for this cycle to avoid duplicates
                             var cycleKey = string.Join("->", cycleTests.Take(cycleTests.Count - 1).Select(t => t.TestId).OrderBy(id => id));
 
-                            if (!processedCycles.Contains(cycleKey))
+                            if (processedCycles.Add(cycleKey))
                             {
-                                processedCycles.Add(cycleKey);
-
                                 // Add all tests that are part of the cycle (excluding the duplicate at the end)
                                 foreach (var cycleTest in cycleTests.Take(cycleTests.Count - 1))
                                 {
@@ -461,7 +469,9 @@ internal sealed class TestScheduler : ITestScheduler
             var depTestId = dependency.Test.TestId;
 
             if (!testMap.ContainsKey(depTestId))
+            {
                 continue;
+            }
 
             if (!visitState.TryGetValue(depTestId, out var state))
             {

@@ -88,7 +88,7 @@ public static class DataSourceHelpers
         {
             var length = tuple.Length;
             var result = new object?[length];
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 result[i] = tuple[i];
             }

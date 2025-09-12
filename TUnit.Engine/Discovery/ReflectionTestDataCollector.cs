@@ -317,7 +317,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 // Some types might fail to load, but we can still use the ones that loaded successfully
                 // Optimize: Manual filtering with ArrayPool for better memory efficiency
                 var loadedTypes = rtle.Types;
-                if (loadedTypes == null) return [];
+                if (loadedTypes == null)
+                {
+                    return [];
+                }
 
                 // Use ArrayPool for temporary storage to reduce allocations
                 var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
@@ -454,7 +457,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 // Some types might fail to load, but we can still use the ones that loaded successfully
                 // Optimize: Manual filtering with ArrayPool for better memory efficiency
                 var loadedTypes = rtle.Types;
-                if (loadedTypes == null) return [];
+                if (loadedTypes == null)
+                {
+                    return [];
+                }
 
                 // Use ArrayPool for temporary storage to reduce allocations
                 var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
@@ -838,8 +844,8 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         // Count how many levels up the inheritance chain the method is declared
-        int depth = 0;
-        Type? currentType = testClass.BaseType;
+        var depth = 0;
+        var currentType = testClass.BaseType;
 
         while (currentType != null && currentType != typeof(object))
         {
@@ -861,7 +867,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         var testName = GenerateTestName(testClass, testMethod);
 
         // Calculate inheritance depth
-        int inheritanceDepth = CalculateInheritanceDepth(testClass, testMethod);
+        var inheritanceDepth = CalculateInheritanceDepth(testClass, testMethod);
 
         try
         {
@@ -1217,7 +1223,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 var parameters = ctor.GetParameters();
                 var castedArgs = new object?[parameters.Length];
 
-                for (int i = 0; i < parameters.Length && i < args.Length; i++)
+                for (var i = 0; i < parameters.Length && i < args.Length; i++)
                 {
                     var paramType = parameters[i].ParameterType;
                     var arg = args[i];
@@ -1293,7 +1299,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 var paramGenArgs = paramType.GetGenericArguments();
                 var argGenArgs = argType.GetGenericArguments();
 
-                for (int i = 0; i < paramGenArgs.Length && i < argGenArgs.Length; i++)
+                for (var i = 0; i < paramGenArgs.Length && i < argGenArgs.Length; i++)
                 {
                     InferGenericTypeMapping(paramGenArgs[i], argGenArgs[i], typeMapping);
                 }
@@ -1308,7 +1314,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                         var paramGenArgs = paramType.GetGenericArguments();
                         var ifaceGenArgs = iface.GetGenericArguments();
 
-                        for (int i = 0; i < paramGenArgs.Length && i < ifaceGenArgs.Length; i++)
+                        for (var i = 0; i < paramGenArgs.Length && i < ifaceGenArgs.Length; i++)
                         {
                             InferGenericTypeMapping(paramGenArgs[i], ifaceGenArgs[i], typeMapping);
                         }
@@ -1329,7 +1335,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     var paramGenArgs = paramType.GetGenericArguments();
                     var ifaceGenArgs = iface.GetGenericArguments();
 
-                    for (int i = 0; i < paramGenArgs.Length && i < ifaceGenArgs.Length; i++)
+                    for (var i = 0; i < paramGenArgs.Length && i < ifaceGenArgs.Length; i++)
                     {
                         InferGenericTypeMapping(paramGenArgs[i], ifaceGenArgs[i], typeMapping);
                     }
@@ -1427,7 +1433,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                     var methodParams = testMethod.GetParameters();
 
                     // Build type mapping from method parameters and actual arguments
-                    for (int j = 0; j < methodParams.Length && j < args.Length; j++)
+                    for (var j = 0; j < methodParams.Length && j < args.Length; j++)
                     {
                         var arg = args[j];
                         if (arg != null)
@@ -1440,7 +1446,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     // Create type arguments array from the mapping
                     var typeArguments = new Type[genericParams.Length];
-                    for (int i = 0; i < genericParams.Length; i++)
+                    for (var i = 0; i < genericParams.Length; i++)
                     {
                         if (typeMapping.TryGetValue(genericParams[i], out var inferredType))
                         {
@@ -1463,7 +1469,7 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 var parameters = methodToInvoke.GetParameters();
                 var castedArgs = new object?[parameters.Length];
 
-                for (int i = 0; i < parameters.Length && i < args.Length; i++)
+                for (var i = 0; i < parameters.Length && i < args.Length; i++)
                 {
                     var paramType = parameters[i].ParameterType;
                     var arg = args[i];

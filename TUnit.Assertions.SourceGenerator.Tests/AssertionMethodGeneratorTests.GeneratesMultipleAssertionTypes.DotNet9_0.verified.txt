@@ -1,0 +1,51 @@
+﻿#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
+
+namespace TestNamespace;
+
+public class CharIsDigitWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsDigitWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsDigit(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsDigit");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsDigit";
+    }
+}
+
+public static partial class CharAssertions
+{
+    public static InvokableValueAssertionBuilder<char> IsDigit(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsDigitWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotDigit(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsDigitWithCharAssertCondition(true),
+            []);
+    }
+
+}

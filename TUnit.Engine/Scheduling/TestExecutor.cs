@@ -84,7 +84,7 @@ internal sealed class TestExecutor : ITestExecutor, IDataProducer
 
         await _tunitMessageBus.InProgress(test.Context).ConfigureAwait(false);
 
-        bool hookStarted = false;
+        var hookStarted = false;
         try
         {
             if (test.Context.TestDetails.ClassInstance is PlaceholderInstance)
