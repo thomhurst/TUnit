@@ -15,8 +15,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.DisposableFieldTests_Setup_Before_Test;
-internal static class DisposableFieldTests_Setup_Before_TestInitializer
+namespace TUnit.Generated.Hooks.DisposableFieldTests_Setup_Before_Test_GUID;
+internal static class DisposableFieldTests_Setup_Before_Test_GUIDInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -91,8 +91,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.DisposableFieldTests_Blah_After_Test;
-internal static class DisposableFieldTests_Blah_After_TestInitializer
+namespace TUnit.Generated.Hooks.DisposableFieldTests_Blah_After_Test_GUID;
+internal static class DisposableFieldTests_Blah_After_Test_GUIDInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()

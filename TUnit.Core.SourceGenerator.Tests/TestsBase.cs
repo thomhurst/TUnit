@@ -214,6 +214,9 @@ public class TestsBase<TGenerator> where TGenerator : IIncrementalGenerator, new
         var guidPattern2 = @"_ModuleInitializer_[a-fA-F0-9]{32}";
         scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, guidPattern2, "_ModuleInitializer_GUID", System.Text.RegularExpressions.RegexOptions.None);
 
+        var guidPattern3 = @"_(Before|After|BeforeEvery|AfterEvery)_(Test|Class|Assembly|TestSession|TestDiscovery)_[a-fA-F0-9]{32}";
+        scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, guidPattern3, "_$1_$2_GUID", System.Text.RegularExpressions.RegexOptions.None);
+
         // Scrub file paths - Windows style (e.g., D:\\git\\TUnit\\)
         var windowsPathPattern = @"[A-Za-z]:\\\\[^""'\s,)]+";
         scrubbedText = System.Text.RegularExpressions.Regex.Replace(scrubbedText, windowsPathPattern, "PATH_SCRUBBED");

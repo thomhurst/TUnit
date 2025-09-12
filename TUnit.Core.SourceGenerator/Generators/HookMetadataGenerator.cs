@@ -161,7 +161,9 @@ public class HookMetadataGenerator : IIncrementalGenerator
             .Replace(",", "_")
             .Replace(" ", "");
 
-        return $"{safeTypeName}_{safeMethodName}_{hook.HookKind}_{hook.HookType}";
+        var guid = System.Guid.NewGuid().ToString("N");
+        
+        return $"{safeTypeName}_{safeMethodName}_{hook.HookKind}_{hook.HookType}_{guid}";
     }
 
     private static void GenerateHookRegistration(CodeWriter writer, HookMethodMetadata hook)
