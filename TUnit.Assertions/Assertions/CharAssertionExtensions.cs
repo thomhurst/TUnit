@@ -1,4 +1,5 @@
 using System;
+using System;
 using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Extensions;

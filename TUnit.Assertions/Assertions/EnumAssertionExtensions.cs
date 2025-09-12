@@ -1,11 +1,10 @@
-﻿using TUnit.Assertions.Attributes;
+using System;
+using TUnit.Assertions.Attributes;
 
-namespace TUnit.Assertions.Assertions;
+namespace TUnit.Assertions.Extensions;
 
-[CreateAssertion(typeof(Enum), nameof(Enum.IsDefined))]
-[CreateAssertion(typeof(Enum), nameof(Enum.IsDefined), CustomName = "IsNotDefined", NegateLogic = true)]
+// Enum.IsDefined is not a boolean-returning instance method, so we can't generate assertions for it
+// Enum.HasFlag is an instance method that returns boolean
 [CreateAssertion(typeof(Enum), nameof(Enum.HasFlag))]
 [CreateAssertion(typeof(Enum), nameof(Enum.HasFlag), CustomName = "DoesNotHaveFlag", NegateLogic = true)]
-[CreateAssertion(typeof(Enum), nameof(Enum.TryParse), CustomName = "CanBeParsed")]
-[CreateAssertion(typeof(Enum), nameof(Enum.TryParse), CustomName = "CannotBeParsed", NegateLogic = true)]
-public class EnumAssertionExtensions;
+public static partial class EnumAssertionExtensions;

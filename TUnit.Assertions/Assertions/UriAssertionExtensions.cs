@@ -1,6 +1,7 @@
+using System;
 using TUnit.Assertions.Attributes;
 
-namespace TUnit.Assertions.Assertions;
+namespace TUnit.Assertions.Extensions;
 
 // Properties
 [CreateAssertion(typeof(Uri), nameof(Uri.IsAbsoluteUri))]

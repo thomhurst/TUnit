@@ -1,6 +1,7 @@
-﻿using TUnit.Assertions.Attributes;
+using System;
+using TUnit.Assertions.Attributes;
 
-namespace TUnit.Assertions.Assertions;
+namespace TUnit.Assertions.Extensions;
 
 [CreateAssertion(typeof(string), nameof(string.StartsWith), CustomName = "StartsWith")]
 [CreateAssertion(typeof(string), nameof(string.EndsWith), CustomName = "EndsWith")]
