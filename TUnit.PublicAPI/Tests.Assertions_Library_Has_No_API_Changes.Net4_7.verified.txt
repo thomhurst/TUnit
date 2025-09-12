@@ -234,6 +234,12 @@ namespace .AssertConditions
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TActual? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
+    public class StaticMethodAssertCondition<T> : .<T>
+    {
+        public StaticMethodAssertCondition(<T, bool> predicate, string methodName, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(T? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
     public abstract class StringMatcher
     {
         protected StringMatcher() { }
@@ -905,20 +911,6 @@ namespace ..Conditions
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TEnum? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
-    public class EnumIsDefinedAssertCondition<TEnum> : .<TEnum>
-        where TEnum : 
-    {
-        public EnumIsDefinedAssertCondition() { }
-        protected override string GetExpectation() { }
-        protected override .<.> GetResult(TEnum? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
-    }
-    public class EnumIsNotDefinedAssertCondition<TEnum> : .<TEnum>
-        where TEnum : 
-    {
-        public EnumIsNotDefinedAssertCondition() { }
-        protected override string GetExpectation() { }
-        protected override .<.> GetResult(TEnum? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
-    }
 }
 namespace .
 {
@@ -940,10 +932,6 @@ namespace .
         public static .<TEnum> HasSameValueAs<TEnum, TExpected>(this ..IValueSource<TEnum> valueSource, TExpected expected, [.("expected")] string? doNotPopulateThisValue1 = null)
             where TEnum : 
             where TExpected :  { }
-        public static .<TEnum> IsDefined<TEnum>(this ..IValueSource<TEnum> valueSource)
-            where TEnum :  { }
-        public static .<TEnum> IsNotDefined<TEnum>(this ..IValueSource<TEnum> valueSource)
-            where TEnum :  { }
     }
 }
 namespace ..Conditions
@@ -1068,6 +1056,22 @@ namespace ..Conditions
         protected override .<.> GetResult(string? actualValue, string? expectedValue) { }
     }
 }
+namespace .Attributes
+{
+    [(.Class, AllowMultiple=true)]
+    public class CreateAssertionAttribute : 
+    {
+        public CreateAssertionAttribute( targetType, string methodName) { }
+        public CreateAssertionAttribute( targetType,  containingType, string methodName) { }
+        public ? ContainingType { get; }
+        public string? CustomName { get; set; }
+        public string MethodName { get; }
+        public bool NegateLogic { get; set; }
+        public bool RequiresGenericTypeParameter { get; set; }
+        public  TargetType { get; }
+        public bool TreatAsInstance { get; set; }
+    }
+}
 namespace .Enums
 {
     public enum CollectionOrdering
@@ -1130,6 +1134,65 @@ namespace .Exceptions
 }
 namespace .Extensions
 {
+    public class AggregateExceptionExceptionAssertionExtensionsHasMultipleInnerExceptionsWithAggregateExceptionAssertCondition : .<>
+    {
+        public AggregateExceptionExceptionAssertionExtensionsHasMultipleInnerExceptionsWithAggregateExceptionAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class AssemblyAssemblyAssertionExtensionsIsDebugBuildWithAssemblyAssertCondition : .<.Assembly>
+    {
+        public AssemblyAssemblyAssertionExtensionsIsDebugBuildWithAssemblyAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Assembly? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class AssemblyAssemblyAssertionExtensionsIsSignedWithAssemblyAssertCondition : .<.Assembly>
+    {
+        public AssemblyAssemblyAssertionExtensionsIsSignedWithAssemblyAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Assembly? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(.Assembly), "GlobalAssemblyCache")]
+    [.(typeof(.Assembly), "GlobalAssemblyCache", CustomName="IsNotInGAC", NegateLogic=true)]
+    [.(typeof(.Assembly), "IsDynamic")]
+    [.(typeof(.Assembly), "IsDynamic", CustomName="IsNotDynamic", NegateLogic=true)]
+    [.(typeof(.Assembly), "IsFullyTrusted")]
+    [.(typeof(.Assembly), "IsFullyTrusted", CustomName="IsNotFullyTrusted", NegateLogic=true)]
+    [.(typeof(.Assembly), typeof(.), "IsDebugBuild")]
+    [.(typeof(.Assembly), typeof(.), "IsDebugBuild", CustomName="IsReleaseBuild", NegateLogic=true)]
+    [.(typeof(.Assembly), typeof(.), "IsSigned")]
+    [.(typeof(.Assembly), typeof(.), "IsSigned", CustomName="IsNotSigned", NegateLogic=true)]
+    public static class AssemblyAssertionExtensions
+    {
+        public static .<.Assembly> GlobalAssemblyCache(this ..IValueSource<.Assembly> valueSource) { }
+        public static .<.Assembly> IsDebugBuild(this ..IValueSource<.Assembly> valueSource) { }
+        public static .<.Assembly> IsDynamic(this ..IValueSource<.Assembly> valueSource) { }
+        public static .<.Assembly> IsFullyTrusted(this ..IValueSource<.Assembly> valueSource) { }
+        public static .<.Assembly> IsNotDynamic(this ..IValueSource<.Assembly> valueSource) { }
+        public static .<.Assembly> IsNotFullyTrusted(this ..IValueSource<.Assembly> valueSource) { }
+        public static .<.Assembly> IsNotInGAC(this ..IValueSource<.Assembly> valueSource) { }
+        public static .<.Assembly> IsNotSigned(this ..IValueSource<.Assembly> valueSource) { }
+        public static .<.Assembly> IsReleaseBuild(this ..IValueSource<.Assembly> valueSource) { }
+        public static .<.Assembly> IsSigned(this ..IValueSource<.Assembly> valueSource) { }
+    }
+    public class AssemblyGlobalAssemblyCacheAssertCondition : .<.Assembly>
+    {
+        public AssemblyGlobalAssemblyCacheAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Assembly? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class AssemblyIsDynamicAssertCondition : .<.Assembly>
+    {
+        public AssemblyIsDynamicAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Assembly? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class AssemblyIsFullyTrustedAssertCondition : .<.Assembly>
+    {
+        public AssemblyIsFullyTrustedAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Assembly? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
     public static class BooleanIsExtensions
     {
         public static .<bool> IsEqualTo(this ..IValueSource<bool> valueSource, bool expected) { }
@@ -1150,17 +1213,199 @@ namespace .Extensions
         public static .<bool> IsNotTrue(this ..IValueSource<bool> valueSource) { }
         public static .<bool?> IsNotTrue(this ..IValueSource<bool?> valueSource) { }
     }
+    [.(typeof(.CancellationToken), "CanBeCanceled")]
+    [.(typeof(.CancellationToken), "CanBeCanceled", CustomName="CannotBeCanceled", NegateLogic=true)]
+    [.(typeof(.CancellationToken), "IsCancellationRequested")]
+    [.(typeof(.CancellationToken), "IsCancellationRequested", CustomName="IsNotCancellationRequested", NegateLogic=true)]
+    [.(typeof(.CancellationToken), typeof(.), "IsNone")]
+    [.(typeof(.CancellationToken), typeof(.), "IsNone", CustomName="IsNotNone", NegateLogic=true)]
+    public static class CancellationTokenAssertionExtensions
+    {
+        public static .<.CancellationToken> CanBeCanceled(this ..IValueSource<.CancellationToken> valueSource) { }
+        public static .<.CancellationToken> CannotBeCanceled(this ..IValueSource<.CancellationToken> valueSource) { }
+        public static .<.CancellationToken> IsCancellationRequested(this ..IValueSource<.CancellationToken> valueSource) { }
+        public static .<.CancellationToken> IsNone(this ..IValueSource<.CancellationToken> valueSource) { }
+        public static .<.CancellationToken> IsNotCancellationRequested(this ..IValueSource<.CancellationToken> valueSource) { }
+        public static .<.CancellationToken> IsNotNone(this ..IValueSource<.CancellationToken> valueSource) { }
+    }
+    public class CancellationTokenCanBeCanceledAssertCondition : .<.CancellationToken>
+    {
+        public CancellationTokenCanBeCanceledAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.CancellationToken actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CancellationTokenCancellationTokenAssertionExtensionsIsNoneWithCancellationTokenAssertCondition : .<.CancellationToken>
+    {
+        public CancellationTokenCancellationTokenAssertionExtensionsIsNoneWithCancellationTokenAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.CancellationToken actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CancellationTokenIsCancellationRequestedAssertCondition : .<.CancellationToken>
+    {
+        public CancellationTokenIsCancellationRequestedAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.CancellationToken actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(char), "IsControl")]
+    [.(typeof(char), "IsControl", CustomName="IsNotControl", NegateLogic=true)]
+    [.(typeof(char), "IsDigit")]
+    [.(typeof(char), "IsDigit", CustomName="IsNotDigit", NegateLogic=true)]
+    [.(typeof(char), "IsHighSurrogate")]
+    [.(typeof(char), "IsHighSurrogate", CustomName="IsNotHighSurrogate", NegateLogic=true)]
+    [.(typeof(char), "IsLetter")]
+    [.(typeof(char), "IsLetter", CustomName="IsNotLetter", NegateLogic=true)]
+    [.(typeof(char), "IsLetterOrDigit")]
+    [.(typeof(char), "IsLetterOrDigit", CustomName="IsNotLetterOrDigit", NegateLogic=true)]
+    [.(typeof(char), "IsLowSurrogate")]
+    [.(typeof(char), "IsLowSurrogate", CustomName="IsNotLowSurrogate", NegateLogic=true)]
+    [.(typeof(char), "IsLower")]
+    [.(typeof(char), "IsLower", CustomName="IsNotLower", NegateLogic=true)]
+    [.(typeof(char), "IsNumber")]
+    [.(typeof(char), "IsNumber", CustomName="IsNotNumber", NegateLogic=true)]
+    [.(typeof(char), "IsPunctuation")]
+    [.(typeof(char), "IsPunctuation", CustomName="IsNotPunctuation", NegateLogic=true)]
+    [.(typeof(char), "IsSeparator")]
+    [.(typeof(char), "IsSeparator", CustomName="IsNotSeparator", NegateLogic=true)]
+    [.(typeof(char), "IsSurrogate")]
+    [.(typeof(char), "IsSurrogate", CustomName="IsNotSurrogate", NegateLogic=true)]
+    [.(typeof(char), "IsSymbol")]
+    [.(typeof(char), "IsSymbol", CustomName="IsNotSymbol", NegateLogic=true)]
+    [.(typeof(char), "IsUpper")]
+    [.(typeof(char), "IsUpper", CustomName="IsNotUpper", NegateLogic=true)]
+    [.(typeof(char), "IsWhiteSpace")]
+    [.(typeof(char), "IsWhiteSpace", CustomName="IsNotWhiteSpace", NegateLogic=true)]
+    public static class CharAssertionExtensions
+    {
+        public static .<char> IsControl(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsDigit(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsHighSurrogate(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsLetter(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsLetterOrDigit(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsLowSurrogate(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsLower(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotControl(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotDigit(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotHighSurrogate(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotLetter(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotLetterOrDigit(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotLowSurrogate(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotLower(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotNumber(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotPunctuation(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotSeparator(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotSurrogate(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotSymbol(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotUpper(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNotWhiteSpace(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsNumber(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsPunctuation(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsSeparator(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsSurrogate(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsSymbol(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsUpper(this ..IValueSource<char> valueSource) { }
+        public static .<char> IsWhiteSpace(this ..IValueSource<char> valueSource) { }
+    }
+    public class CharIsControlWithCharAssertCondition : .<char>
+    {
+        public CharIsControlWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CharIsDigitWithCharAssertCondition : .<char>
+    {
+        public CharIsDigitWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
     public static class CharIsExtensions
     {
         public static .<char> IsEqualTo(this ..IValueSource<char> valueSource, char expected) { }
         public static .<char?> IsEqualTo(this ..IValueSource<char?> valueSource, char expected) { }
         public static .<char?> IsEqualTo(this ..IValueSource<char?> valueSource, char? expected) { }
     }
+    public class CharIsHighSurrogateWithCharAssertCondition : .<char>
+    {
+        public CharIsHighSurrogateWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CharIsLetterOrDigitWithCharAssertCondition : .<char>
+    {
+        public CharIsLetterOrDigitWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CharIsLetterWithCharAssertCondition : .<char>
+    {
+        public CharIsLetterWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CharIsLowSurrogateWithCharAssertCondition : .<char>
+    {
+        public CharIsLowSurrogateWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CharIsLowerWithCharAssertCondition : .<char>
+    {
+        public CharIsLowerWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
     public static class CharIsNotExtensions
     {
         public static .<char> IsNotEqualTo(this ..IValueSource<char> valueSource, char expected) { }
         public static .<char?> IsNotEqualTo(this ..IValueSource<char?> valueSource, char expected) { }
         public static .<char?> IsNotEqualTo(this ..IValueSource<char?> valueSource, char? expected) { }
+    }
+    public class CharIsNumberWithCharAssertCondition : .<char>
+    {
+        public CharIsNumberWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CharIsPunctuationWithCharAssertCondition : .<char>
+    {
+        public CharIsPunctuationWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CharIsSeparatorWithCharAssertCondition : .<char>
+    {
+        public CharIsSeparatorWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CharIsSurrogateWithCharAssertCondition : .<char>
+    {
+        public CharIsSurrogateWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CharIsSymbolWithCharAssertCondition : .<char>
+    {
+        public CharIsSymbolWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CharIsUpperWithCharAssertCondition : .<char>
+    {
+        public CharIsUpperWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CharIsWhiteSpaceWithCharAssertCondition : .<char>
+    {
+        public CharIsWhiteSpaceWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CharUriIsHexDigitWithCharAssertCondition : .<char>
+    {
+        public CharUriIsHexDigitWithCharAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(char actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
     public static class CollectionsIsExtensions
     {
@@ -1220,6 +1465,114 @@ namespace .Extensions
         public static .<TActual> IsNotLessThanOrEqualTo<TActual>(this ..IValueSource<TActual> valueSource, TActual expected, [.("expected")] string doNotPopulateThisValue = null)
             where TActual : <TActual> { }
     }
+    [.(typeof(.CultureInfo), "IsNeutralCulture")]
+    [.(typeof(.CultureInfo), "IsNeutralCulture", CustomName="IsNotNeutralCulture", NegateLogic=true)]
+    [.(typeof(.CultureInfo), "IsReadOnly")]
+    [.(typeof(.CultureInfo), "IsReadOnly", CustomName="IsNotReadOnly", NegateLogic=true)]
+    [.(typeof(.CultureInfo), typeof(.), "IsEnglish")]
+    [.(typeof(.CultureInfo), typeof(.), "IsEnglish", CustomName="IsNotEnglish", NegateLogic=true)]
+    [.(typeof(.CultureInfo), typeof(.), "IsInvariant")]
+    [.(typeof(.CultureInfo), typeof(.), "IsInvariant", CustomName="IsNotInvariant", NegateLogic=true)]
+    [.(typeof(.CultureInfo), typeof(.), "IsRightToLeft")]
+    [.(typeof(.CultureInfo), typeof(.), "IsRightToLeft", CustomName="IsLeftToRight", NegateLogic=true)]
+    public static class CultureInfoAssertionExtensions
+    {
+        public static .<.CultureInfo> IsEnglish(this ..IValueSource<.CultureInfo> valueSource) { }
+        public static .<.CultureInfo> IsInvariant(this ..IValueSource<.CultureInfo> valueSource) { }
+        public static .<.CultureInfo> IsLeftToRight(this ..IValueSource<.CultureInfo> valueSource) { }
+        public static .<.CultureInfo> IsNeutralCulture(this ..IValueSource<.CultureInfo> valueSource) { }
+        public static .<.CultureInfo> IsNotEnglish(this ..IValueSource<.CultureInfo> valueSource) { }
+        public static .<.CultureInfo> IsNotInvariant(this ..IValueSource<.CultureInfo> valueSource) { }
+        public static .<.CultureInfo> IsNotNeutralCulture(this ..IValueSource<.CultureInfo> valueSource) { }
+        public static .<.CultureInfo> IsNotReadOnly(this ..IValueSource<.CultureInfo> valueSource) { }
+        public static .<.CultureInfo> IsReadOnly(this ..IValueSource<.CultureInfo> valueSource) { }
+        public static .<.CultureInfo> IsRightToLeft(this ..IValueSource<.CultureInfo> valueSource) { }
+    }
+    public class CultureInfoCultureInfoAssertionExtensionsIsEnglishWithCultureInfoAssertCondition : .<.CultureInfo>
+    {
+        public CultureInfoCultureInfoAssertionExtensionsIsEnglishWithCultureInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.CultureInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CultureInfoCultureInfoAssertionExtensionsIsInvariantWithCultureInfoAssertCondition : .<.CultureInfo>
+    {
+        public CultureInfoCultureInfoAssertionExtensionsIsInvariantWithCultureInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.CultureInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CultureInfoCultureInfoAssertionExtensionsIsRightToLeftWithCultureInfoAssertCondition : .<.CultureInfo>
+    {
+        public CultureInfoCultureInfoAssertionExtensionsIsRightToLeftWithCultureInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.CultureInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CultureInfoIsNeutralCultureAssertCondition : .<.CultureInfo>
+    {
+        public CultureInfoIsNeutralCultureAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.CultureInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class CultureInfoIsReadOnlyAssertCondition : .<.CultureInfo>
+    {
+        public CultureInfoIsReadOnlyAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.CultureInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(), typeof(), "IsDaylightSavingTime")]
+    [.(typeof(), typeof(), "IsDaylightSavingTime", CustomName="IsNotDaylightSavingTime", NegateLogic=true)]
+    [.(typeof(), typeof(.), "IsLeapYear")]
+    [.(typeof(), typeof(.), "IsLeapYear", CustomName="IsNotLeapYear", NegateLogic=true)]
+    [.(typeof(), typeof(.), "IsToday")]
+    [.(typeof(), typeof(.), "IsToday", CustomName="IsNotToday", NegateLogic=true)]
+    [.(typeof(), typeof(.), "IsUtc")]
+    [.(typeof(), typeof(.), "IsUtc", CustomName="IsNotUtc", NegateLogic=true)]
+    [.(typeof(), typeof(.), "IsWeekend")]
+    [.(typeof(), typeof(.), "IsWeekend", CustomName="IsWeekday", NegateLogic=true)]
+    [.(typeof(), typeof(), "EqualsExact")]
+    public static class DateTimeAssertionExtensions
+    {
+        public static .<> EqualsExact(this ..IValueSource<> valueSource,  other, [.("other")] string? doNotPopulateThisValue1 = null) { }
+        public static .<> IsDaylightSavingTime(this ..IValueSource<> valueSource) { }
+        public static .<> IsLeapYear(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotDaylightSavingTime(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotLeapYear(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotToday(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotUtc(this ..IValueSource<> valueSource) { }
+        public static .<> IsToday(this ..IValueSource<> valueSource) { }
+        public static .<> IsUtc(this ..IValueSource<> valueSource) { }
+        public static .<> IsWeekday(this ..IValueSource<> valueSource) { }
+        public static .<> IsWeekend(this ..IValueSource<> valueSource) { }
+    }
+    public class DateTimeDateTimeAssertionExtensionsIsLeapYearWithDateTimeAssertCondition : .<>
+    {
+        public DateTimeDateTimeAssertionExtensionsIsLeapYearWithDateTimeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DateTimeDateTimeAssertionExtensionsIsTodayWithDateTimeAssertCondition : .<>
+    {
+        public DateTimeDateTimeAssertionExtensionsIsTodayWithDateTimeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DateTimeDateTimeAssertionExtensionsIsUtcWithDateTimeAssertCondition : .<>
+    {
+        public DateTimeDateTimeAssertionExtensionsIsUtcWithDateTimeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DateTimeDateTimeAssertionExtensionsIsWeekendWithDateTimeAssertCondition : .<>
+    {
+        public DateTimeDateTimeAssertionExtensionsIsWeekendWithDateTimeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DateTimeIsDaylightSavingTimeAssertCondition : .<>
+    {
+        public DateTimeIsDaylightSavingTimeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
     public static class DateTimeIsExtensions
     {
         public static .<> IsAfter(this ..IValueSource<> valueSource,  expected, [.("expected")] string doNotPopulateThisValue = null) { }
@@ -1228,6 +1581,12 @@ namespace .Extensions
         public static .<> IsBeforeOrEqualTo(this ..IValueSource<> valueSource,  expected, [.("expected")] string doNotPopulateThisValue = null) { }
         public static ..DateTimeEqualToAssertionBuilderWrapper IsEqualTo(this ..IValueSource<> valueSource,  expected, [.("expected")] string doNotPopulateThisValue1 = null) { }
     }
+    public class DateTimeOffsetEqualsExactWithDateTimeOffsetAssertCondition : .<>
+    {
+        public DateTimeOffsetEqualsExactWithDateTimeOffsetAssertCondition( other, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
     public static class DateTimeOffsetIsExtensions
     {
         public static .<> IsAfter(this ..IValueSource<> valueSource,  expected, [.("expected")] string doNotPopulateThisValue = null) { }
@@ -1235,6 +1594,112 @@ namespace .Extensions
         public static .<> IsBefore(this ..IValueSource<> valueSource,  expected, [.("expected")] string doNotPopulateThisValue = null) { }
         public static .<> IsBeforeOrEqualTo(this ..IValueSource<> valueSource,  expected, [.("expected")] string doNotPopulateThisValue = null) { }
         public static ..DateTimeOffsetEqualToAssertionBuilderWrapper IsEqualTo(this ..IValueSource<> valueSource,  expected, [.("expected")] string doNotPopulateThisValue1 = null) { }
+    }
+    [.(typeof(), typeof(.), "IsFriday")]
+    [.(typeof(), typeof(.), "IsFriday", CustomName="IsNotFriday", NegateLogic=true)]
+    [.(typeof(), typeof(.), "IsMonday")]
+    [.(typeof(), typeof(.), "IsMonday", CustomName="IsNotMonday", NegateLogic=true)]
+    [.(typeof(), typeof(.), "IsWeekend")]
+    [.(typeof(), typeof(.), "IsWeekend", CustomName="IsWeekday", NegateLogic=true)]
+    public static class DayOfWeekAssertionExtensions
+    {
+        public static .<> IsFriday(this ..IValueSource<> valueSource) { }
+        public static .<> IsMonday(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotFriday(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotMonday(this ..IValueSource<> valueSource) { }
+        public static .<> IsWeekday(this ..IValueSource<> valueSource) { }
+        public static .<> IsWeekend(this ..IValueSource<> valueSource) { }
+    }
+    public class DayOfWeekDayOfWeekAssertionExtensionsIsFridayWithDayOfWeekAssertCondition : .<>
+    {
+        public DayOfWeekDayOfWeekAssertionExtensionsIsFridayWithDayOfWeekAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DayOfWeekDayOfWeekAssertionExtensionsIsMondayWithDayOfWeekAssertCondition : .<>
+    {
+        public DayOfWeekDayOfWeekAssertionExtensionsIsMondayWithDayOfWeekAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DayOfWeekDayOfWeekAssertionExtensionsIsWeekendWithDayOfWeekAssertCondition : .<>
+    {
+        public DayOfWeekDayOfWeekAssertionExtensionsIsWeekendWithDayOfWeekAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(.DirectoryInfo), "Exists")]
+    [.(typeof(.DirectoryInfo), "Exists", CustomName="DoesNotExist", NegateLogic=true)]
+    [.(typeof(.DirectoryInfo), typeof(.), "HasFiles")]
+    [.(typeof(.DirectoryInfo), typeof(.), "HasFiles", CustomName="HasNoFiles", NegateLogic=true)]
+    [.(typeof(.DirectoryInfo), typeof(.), "HasSubdirectories")]
+    [.(typeof(.DirectoryInfo), typeof(.), "HasSubdirectories", CustomName="HasNoSubdirectories", NegateLogic=true)]
+    [.(typeof(.DirectoryInfo), typeof(.), "IsEmpty")]
+    [.(typeof(.DirectoryInfo), typeof(.), "IsEmpty", CustomName="IsNotEmpty", NegateLogic=true)]
+    [.(typeof(.DirectoryInfo), typeof(.), "IsHidden")]
+    [.(typeof(.DirectoryInfo), typeof(.), "IsHidden", CustomName="IsNotHidden", NegateLogic=true)]
+    [.(typeof(.DirectoryInfo), typeof(.), "IsReadOnly")]
+    [.(typeof(.DirectoryInfo), typeof(.), "IsReadOnly", CustomName="IsNotReadOnly", NegateLogic=true)]
+    [.(typeof(.DirectoryInfo), typeof(.), "IsSystem")]
+    [.(typeof(.DirectoryInfo), typeof(.), "IsSystem", CustomName="IsNotSystem", NegateLogic=true)]
+    public static class DirectoryInfoAssertionExtensions
+    {
+        public static .<.DirectoryInfo> DoesNotExist(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> Exists(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> HasFiles(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> HasNoFiles(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> HasNoSubdirectories(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> HasSubdirectories(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> IsEmpty(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> IsHidden(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> IsNotEmpty(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> IsNotHidden(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> IsNotReadOnly(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> IsNotSystem(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> IsReadOnly(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.DirectoryInfo> IsSystem(this ..IValueSource<.DirectoryInfo> valueSource) { }
+    }
+    public class DirectoryInfoDirectoryInfoAssertionExtensionsHasFilesWithDirectoryInfoAssertCondition : .<.DirectoryInfo>
+    {
+        public DirectoryInfoDirectoryInfoAssertionExtensionsHasFilesWithDirectoryInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.DirectoryInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DirectoryInfoDirectoryInfoAssertionExtensionsHasSubdirectoriesWithDirectoryInfoAssertCondition : .<.DirectoryInfo>
+    {
+        public DirectoryInfoDirectoryInfoAssertionExtensionsHasSubdirectoriesWithDirectoryInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.DirectoryInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DirectoryInfoDirectoryInfoAssertionExtensionsIsEmptyWithDirectoryInfoAssertCondition : .<.DirectoryInfo>
+    {
+        public DirectoryInfoDirectoryInfoAssertionExtensionsIsEmptyWithDirectoryInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.DirectoryInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DirectoryInfoDirectoryInfoAssertionExtensionsIsHiddenWithDirectoryInfoAssertCondition : .<.DirectoryInfo>
+    {
+        public DirectoryInfoDirectoryInfoAssertionExtensionsIsHiddenWithDirectoryInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.DirectoryInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DirectoryInfoDirectoryInfoAssertionExtensionsIsReadOnlyWithDirectoryInfoAssertCondition : .<.DirectoryInfo>
+    {
+        public DirectoryInfoDirectoryInfoAssertionExtensionsIsReadOnlyWithDirectoryInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.DirectoryInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DirectoryInfoDirectoryInfoAssertionExtensionsIsSystemWithDirectoryInfoAssertCondition : .<.DirectoryInfo>
+    {
+        public DirectoryInfoDirectoryInfoAssertionExtensionsIsSystemWithDirectoryInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.DirectoryInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class DirectoryInfoExistsAssertCondition : .<.DirectoryInfo>
+    {
+        public DirectoryInfoExistsAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.DirectoryInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
     public static class DoesExtensions
     {
@@ -1249,17 +1714,11 @@ namespace .Extensions
         public static .<.<TInner>> ContainsOnly<TInner>(this ..IValueSource<.<TInner>> valueSource, <TInner, bool> matcher, [.("matcher")] string doNotPopulateThisValue = null) { }
         public static .<TDictionary> ContainsValue<TDictionary, TValue>(this ..IValueSource<TDictionary> valueSource, TValue expected, .<TValue> equalityComparer = null, [.("expected")] string doNotPopulateThisValue = null)
             where TDictionary : .IDictionary { }
-        public static .<string> EndsWith(this ..IValueSource<string> valueSource, string expected, [.("expected")] string doNotPopulateThisValue = null) { }
-        public static .<string> EndsWith(this ..IValueSource<string> valueSource, string expected,  stringComparison, [.("expected")] string doNotPopulateThisValue1 = null, [.("stringComparison")] string doNotPopulateThisValue2 = null) { }
         public static .<string> Matches(this ..IValueSource<string> valueSource, . regex, [.("regex")] string expression = "") { }
         public static .<string> Matches(this ..IValueSource<string> valueSource, string regex, [.("regex")] string expression = "") { }
-        public static .<string> StartsWith(this ..IValueSource<string> valueSource, string expected, [.("expected")] string doNotPopulateThisValue = null) { }
-        public static .<string> StartsWith(this ..IValueSource<string> valueSource, string expected,  stringComparison, [.("expected")] string doNotPopulateThisValue1 = null, [.("stringComparison")] string doNotPopulateThisValue2 = null) { }
     }
     public static class DoesNotExtensions
     {
-        public static .<string> DoesNotContain(this ..IValueSource<string> valueSource, string expected, [.("expected")] string doNotPopulateThisValue = null) { }
-        public static .<string> DoesNotContain(this ..IValueSource<string> valueSource, string expected,  stringComparison, [.("expected")] string doNotPopulateThisValue1 = null, [.("stringComparison")] string doNotPopulateThisValue2 = null) { }
         public static .<.<TInner>> DoesNotContain<TInner>(this ..IValueSource<.<TInner>> valueSource, <TInner, bool> matcher, [.("matcher")] string? doNotPopulateThisValue = null) { }
         public static .<TActual> DoesNotContain<TActual, TInner>(this ..IValueSource<TActual> valueSource, TInner expected, .<TInner?>? equalityComparer = null, [.("expected")] string? doNotPopulateThisValue = null)
             where TActual : .<TInner> { }
@@ -1269,12 +1728,84 @@ namespace .Extensions
         public static .<.<TKey, TValue>> DoesNotContainValue<TKey, TValue>(this ..IValueSource<.<TKey, TValue>> valueSource, TValue expected, .<TValue> equalityComparer = null, [.("expected")] string doNotPopulateThisValue = null) { }
         public static .<TDictionary> DoesNotContainValue<TDictionary, TValue>(this ..IValueSource<TDictionary> valueSource, TValue expected, .<TValue> equalityComparer = null, [.("expected")] string doNotPopulateThisValue = null)
             where TDictionary : .IDictionary { }
-        public static .<string> DoesNotEndWith(this ..IValueSource<string> valueSource, string expected, [.("expected")] string doNotPopulateThisValue = null) { }
-        public static .<string> DoesNotEndWith(this ..IValueSource<string> valueSource, string expected,  stringComparison, [.("expected")] string doNotPopulateThisValue1 = null, [.("stringComparison")] string doNotPopulateThisValue2 = null) { }
         public static .<string> DoesNotMatch(this ..IValueSource<string> valueSource, . regex, [.("regex")] string expression = "") { }
         public static .<string> DoesNotMatch(this ..IValueSource<string> valueSource, string regex, [.("regex")] string expression = "") { }
-        public static .<string> DoesNotStartWith(this ..IValueSource<string> valueSource, string expected, [.("expected")] string doNotPopulateThisValue = null) { }
-        public static .<string> DoesNotStartWith(this ..IValueSource<string> valueSource, string expected,  stringComparison, [.("expected")] string doNotPopulateThisValue1 = null, [.("stringComparison")] string doNotPopulateThisValue2 = null) { }
+    }
+    [.(typeof(.Encoding), "IsSingleByte")]
+    [.(typeof(.Encoding), "IsSingleByte", CustomName="IsNotSingleByte", NegateLogic=true)]
+    [.(typeof(.Encoding), typeof(.), "IsASCII")]
+    [.(typeof(.Encoding), typeof(.), "IsASCII", CustomName="IsNotASCII", NegateLogic=true)]
+    [.(typeof(.Encoding), typeof(.), "IsBigEndianUnicode")]
+    [.(typeof(.Encoding), typeof(.), "IsBigEndianUnicode", CustomName="IsNotBigEndianUnicode", NegateLogic=true)]
+    [.(typeof(.Encoding), typeof(.), "IsUTF32")]
+    [.(typeof(.Encoding), typeof(.), "IsUTF32", CustomName="IsNotUTF32", NegateLogic=true)]
+    [.(typeof(.Encoding), typeof(.), "IsUTF8")]
+    [.(typeof(.Encoding), typeof(.), "IsUTF8", CustomName="IsNotUTF8", NegateLogic=true)]
+    [.(typeof(.Encoding), typeof(.), "IsUnicode")]
+    [.(typeof(.Encoding), typeof(.), "IsUnicode", CustomName="IsNotUnicode", NegateLogic=true)]
+    public static class EncodingAssertionExtensions
+    {
+        public static .<.Encoding> IsASCII(this ..IValueSource<.Encoding> valueSource) { }
+        public static .<.Encoding> IsBigEndianUnicode(this ..IValueSource<.Encoding> valueSource) { }
+        public static .<.Encoding> IsNotASCII(this ..IValueSource<.Encoding> valueSource) { }
+        public static .<.Encoding> IsNotBigEndianUnicode(this ..IValueSource<.Encoding> valueSource) { }
+        public static .<.Encoding> IsNotSingleByte(this ..IValueSource<.Encoding> valueSource) { }
+        public static .<.Encoding> IsNotUTF32(this ..IValueSource<.Encoding> valueSource) { }
+        public static .<.Encoding> IsNotUTF8(this ..IValueSource<.Encoding> valueSource) { }
+        public static .<.Encoding> IsNotUnicode(this ..IValueSource<.Encoding> valueSource) { }
+        public static .<.Encoding> IsSingleByte(this ..IValueSource<.Encoding> valueSource) { }
+        public static .<.Encoding> IsUTF32(this ..IValueSource<.Encoding> valueSource) { }
+        public static .<.Encoding> IsUTF8(this ..IValueSource<.Encoding> valueSource) { }
+        public static .<.Encoding> IsUnicode(this ..IValueSource<.Encoding> valueSource) { }
+    }
+    public class EncodingEncodingAssertionExtensionsIsASCIIWithEncodingAssertCondition : .<.Encoding>
+    {
+        public EncodingEncodingAssertionExtensionsIsASCIIWithEncodingAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Encoding? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class EncodingEncodingAssertionExtensionsIsBigEndianUnicodeWithEncodingAssertCondition : .<.Encoding>
+    {
+        public EncodingEncodingAssertionExtensionsIsBigEndianUnicodeWithEncodingAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Encoding? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class EncodingEncodingAssertionExtensionsIsUTF32WithEncodingAssertCondition : .<.Encoding>
+    {
+        public EncodingEncodingAssertionExtensionsIsUTF32WithEncodingAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Encoding? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class EncodingEncodingAssertionExtensionsIsUTF8WithEncodingAssertCondition : .<.Encoding>
+    {
+        public EncodingEncodingAssertionExtensionsIsUTF8WithEncodingAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Encoding? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class EncodingEncodingAssertionExtensionsIsUnicodeWithEncodingAssertCondition : .<.Encoding>
+    {
+        public EncodingEncodingAssertionExtensionsIsUnicodeWithEncodingAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Encoding? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class EncodingIsSingleByteAssertCondition : .<.Encoding>
+    {
+        public EncodingIsSingleByteAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Encoding? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(), "HasFlag")]
+    [.(typeof(), "HasFlag", CustomName="DoesNotHaveFlag", NegateLogic=true)]
+    public static class EnumAssertionExtensions
+    {
+        public static .<> DoesNotHaveFlag(this ..IValueSource<> valueSource,  flag, [.("flag")] string? doNotPopulateThisValue1 = null) { }
+        public static .<> HasFlag(this ..IValueSource<> valueSource,  flag, [.("flag")] string? doNotPopulateThisValue1 = null) { }
+    }
+    public class EnumHasFlagWithEnumAssertCondition : .<>
+    {
+        public EnumHasFlagWithEnumAssertCondition( flag, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
     public class EnumerableCount<TActual, TInner>
         where TActual : .<TInner>
@@ -1290,6 +1821,161 @@ namespace .Extensions
         public .<TActual> LessThanOrEqualTo(int expected, [.("expected")] string? doNotPopulateThisValue = null) { }
         public .<TActual> Negative() { }
         public .<TActual> Positive() { }
+    }
+    [.(typeof(), typeof(.), "HasMultipleInnerExceptions")]
+    [.(typeof(), typeof(.), "HasMultipleInnerExceptions", CustomName="HasSingleInnerException", NegateLogic=true)]
+    [.(typeof(), typeof(.), "HasData")]
+    [.(typeof(), typeof(.), "HasData", CustomName="HasNoData", NegateLogic=true)]
+    [.(typeof(), typeof(.), "HasHelpLink")]
+    [.(typeof(), typeof(.), "HasHelpLink", CustomName="HasNoHelpLink", NegateLogic=true)]
+    [.(typeof(), typeof(.), "HasInnerException")]
+    [.(typeof(), typeof(.), "HasInnerException", CustomName="HasNoInnerException", NegateLogic=true)]
+    [.(typeof(), typeof(.), "HasStackTrace")]
+    [.(typeof(), typeof(.), "HasStackTrace", CustomName="HasNoStackTrace", NegateLogic=true)]
+    public static class ExceptionAssertionExtensions
+    {
+        public static .<> HasData(this ..IValueSource<> valueSource) { }
+        public static .<> HasHelpLink(this ..IValueSource<> valueSource) { }
+        public static .<> HasInnerException(this ..IValueSource<> valueSource) { }
+        public static .<> HasMultipleInnerExceptions(this ..IValueSource<> valueSource) { }
+        public static .<> HasNoData(this ..IValueSource<> valueSource) { }
+        public static .<> HasNoHelpLink(this ..IValueSource<> valueSource) { }
+        public static .<> HasNoInnerException(this ..IValueSource<> valueSource) { }
+        public static .<> HasNoStackTrace(this ..IValueSource<> valueSource) { }
+        public static .<> HasSingleInnerException(this ..IValueSource<> valueSource) { }
+        public static .<> HasStackTrace(this ..IValueSource<> valueSource) { }
+    }
+    public class ExceptionExceptionAssertionExtensionsHasDataWithExceptionAssertCondition : .<>
+    {
+        public ExceptionExceptionAssertionExtensionsHasDataWithExceptionAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class ExceptionExceptionAssertionExtensionsHasHelpLinkWithExceptionAssertCondition : .<>
+    {
+        public ExceptionExceptionAssertionExtensionsHasHelpLinkWithExceptionAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class ExceptionExceptionAssertionExtensionsHasInnerExceptionWithExceptionAssertCondition : .<>
+    {
+        public ExceptionExceptionAssertionExtensionsHasInnerExceptionWithExceptionAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class ExceptionExceptionAssertionExtensionsHasStackTraceWithExceptionAssertCondition : .<>
+    {
+        public ExceptionExceptionAssertionExtensionsHasStackTraceWithExceptionAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(.FileInfo), "Exists")]
+    [.(typeof(.FileInfo), "Exists", CustomName="DoesNotExist", NegateLogic=true)]
+    [.(typeof(.FileInfo), "IsReadOnly")]
+    [.(typeof(.FileInfo), "IsReadOnly", CustomName="IsNotReadOnly", NegateLogic=true)]
+    [.(typeof(.FileInfo), typeof(.), "IsCompressed")]
+    [.(typeof(.FileInfo), typeof(.), "IsCompressed", CustomName="IsNotCompressed", NegateLogic=true)]
+    [.(typeof(.FileInfo), typeof(.), "IsEmpty")]
+    [.(typeof(.FileInfo), typeof(.), "IsEmpty", CustomName="IsNotEmpty", NegateLogic=true)]
+    [.(typeof(.FileInfo), typeof(.), "IsEncrypted")]
+    [.(typeof(.FileInfo), typeof(.), "IsEncrypted", CustomName="IsNotEncrypted", NegateLogic=true)]
+    [.(typeof(.FileInfo), typeof(.), "IsExecutable")]
+    [.(typeof(.FileInfo), typeof(.), "IsExecutable", CustomName="IsNotExecutable", NegateLogic=true)]
+    [.(typeof(.FileInfo), typeof(.), "IsHidden")]
+    [.(typeof(.FileInfo), typeof(.), "IsHidden", CustomName="IsNotHidden", NegateLogic=true)]
+    [.(typeof(.FileInfo), typeof(.), "IsSystem")]
+    [.(typeof(.FileInfo), typeof(.), "IsSystem", CustomName="IsNotSystem", NegateLogic=true)]
+    public static class FileInfoAssertionExtensions
+    {
+        public static .<.FileInfo> DoesNotExist(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> Exists(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsCompressed(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsEmpty(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsEncrypted(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsExecutable(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsHidden(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsNotCompressed(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsNotEmpty(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsNotEncrypted(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsNotExecutable(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsNotHidden(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsNotReadOnly(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsNotSystem(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsReadOnly(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsSystem(this ..IValueSource<.FileInfo> valueSource) { }
+    }
+    public class FileInfoExistsAssertCondition : .<.FileInfo>
+    {
+        public FileInfoExistsAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.FileInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class FileInfoFileInfoAssertionExtensionsIsCompressedWithFileInfoAssertCondition : .<.FileInfo>
+    {
+        public FileInfoFileInfoAssertionExtensionsIsCompressedWithFileInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.FileInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class FileInfoFileInfoAssertionExtensionsIsEmptyWithFileInfoAssertCondition : .<.FileInfo>
+    {
+        public FileInfoFileInfoAssertionExtensionsIsEmptyWithFileInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.FileInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class FileInfoFileInfoAssertionExtensionsIsEncryptedWithFileInfoAssertCondition : .<.FileInfo>
+    {
+        public FileInfoFileInfoAssertionExtensionsIsEncryptedWithFileInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.FileInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class FileInfoFileInfoAssertionExtensionsIsExecutableWithFileInfoAssertCondition : .<.FileInfo>
+    {
+        public FileInfoFileInfoAssertionExtensionsIsExecutableWithFileInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.FileInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class FileInfoFileInfoAssertionExtensionsIsHiddenWithFileInfoAssertCondition : .<.FileInfo>
+    {
+        public FileInfoFileInfoAssertionExtensionsIsHiddenWithFileInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.FileInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class FileInfoFileInfoAssertionExtensionsIsSystemWithFileInfoAssertCondition : .<.FileInfo>
+    {
+        public FileInfoFileInfoAssertionExtensionsIsSystemWithFileInfoAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.FileInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class FileInfoIsReadOnlyAssertCondition : .<.FileInfo>
+    {
+        public FileInfoIsReadOnlyAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.FileInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(.DirectoryInfo), "Exists")]
+    [.(typeof(.DirectoryInfo), "Exists", CustomName="DoesNotExist", NegateLogic=true)]
+    [.(typeof(.FileInfo), "Exists")]
+    [.(typeof(.FileInfo), "Exists", CustomName="DoesNotExist", NegateLogic=true)]
+    [.(typeof(.FileInfo), "IsReadOnly")]
+    [.(typeof(.FileInfo), "IsReadOnly", CustomName="IsNotReadOnly", NegateLogic=true)]
+    [.(typeof(.FileSystemInfo), "Exists")]
+    [.(typeof(.FileSystemInfo), "Exists", CustomName="DoesNotExist", NegateLogic=true)]
+    public static class FileSystemAssertionExtensions
+    {
+        public static .<.DirectoryInfo> DoesNotExist(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.FileInfo> DoesNotExist(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileSystemInfo> DoesNotExist(this ..IValueSource<.FileSystemInfo> valueSource) { }
+        public static .<.DirectoryInfo> Exists(this ..IValueSource<.DirectoryInfo> valueSource) { }
+        public static .<.FileInfo> Exists(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileSystemInfo> Exists(this ..IValueSource<.FileSystemInfo> valueSource) { }
+        public static .<.FileInfo> IsNotReadOnly(this ..IValueSource<.FileInfo> valueSource) { }
+        public static .<.FileInfo> IsReadOnly(this ..IValueSource<.FileInfo> valueSource) { }
+    }
+    public class FileSystemInfoExistsAssertCondition : .<.FileSystemInfo>
+    {
+        public FileSystemInfoExistsAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.FileSystemInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
     public static class GenericIsExtensions
     {
@@ -1337,6 +2023,23 @@ namespace .Extensions
         public static .<TActual> Satisfies<TActual, TExpected>(this ..IValueSource<TActual> valueSource, <TActual, .<TExpected>?> asyncMapper, <..IValueSource<TExpected?>, .<TExpected?>> assert, [.("asyncMapper")] string mapperExpression = "", [.("assert")] string assertionBuilderExpression = "") { }
         public static .<TActual> Satisfies<TActual, TExpected>(this ..IValueSource<TActual> valueSource, <TActual, TExpected> mapper, <..IValueSource<TExpected?>, .<TExpected?>> assert, [.("mapper")] string mapperExpression = "", [.("assert")] string assertionBuilderExpression = "") { }
     }
+    [.(typeof(), typeof(.), "IsEmpty")]
+    [.(typeof(), typeof(.), "IsEmpty", CustomName="IsNotEmpty", NegateLogic=true)]
+    [.(typeof(?), typeof(.), "IsNullOrEmpty")]
+    [.(typeof(?), typeof(.), "IsNullOrEmpty", CustomName="IsNotNullOrEmpty", NegateLogic=true)]
+    public static class GuidAssertionExtensions
+    {
+        public static .<> IsEmpty(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotEmpty(this ..IValueSource<> valueSource) { }
+        public static .<?> IsNotNullOrEmpty(this ..IValueSource<?> valueSource) { }
+        public static .<?> IsNullOrEmpty(this ..IValueSource<?> valueSource) { }
+    }
+    public class GuidGuidAssertionExtensionsIsEmptyWithGuidAssertCondition : .<>
+    {
+        public GuidGuidAssertionExtensionsIsEmptyWithGuidAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
     public static class HasExtensions
     {
         public static .<.<TInner>, TInner> HasCount<TInner>(this ..IValueSource<.<TInner>> valueSource) { }
@@ -1369,6 +2072,152 @@ namespace .Extensions
         public static ..SingleItemAssertionBuilderWrapper<.<TInner>, TInner> HasSingleItem<TInner>(this ..IValueSource<.<TInner>> valueSource) { }
         public static ..SingleItemAssertionBuilderWrapper<.<TInner>, TInner> HasSingleItem<TInner>(this ..IValueSource<.<TInner>> valueSource) { }
     }
+    [.(typeof(.HttpStatusCode), typeof(.), "IsClientError")]
+    [.(typeof(.HttpStatusCode), typeof(.), "IsClientError", CustomName="IsNotClientError", NegateLogic=true)]
+    [.(typeof(.HttpStatusCode), typeof(.), "IsError")]
+    [.(typeof(.HttpStatusCode), typeof(.), "IsError", CustomName="IsNotError", NegateLogic=true)]
+    [.(typeof(.HttpStatusCode), typeof(.), "IsInformational")]
+    [.(typeof(.HttpStatusCode), typeof(.), "IsInformational", CustomName="IsNotInformational", NegateLogic=true)]
+    [.(typeof(.HttpStatusCode), typeof(.), "IsRedirection")]
+    [.(typeof(.HttpStatusCode), typeof(.), "IsRedirection", CustomName="IsNotRedirection", NegateLogic=true)]
+    [.(typeof(.HttpStatusCode), typeof(.), "IsServerError")]
+    [.(typeof(.HttpStatusCode), typeof(.), "IsServerError", CustomName="IsNotServerError", NegateLogic=true)]
+    [.(typeof(.HttpStatusCode), typeof(.), "IsSuccess")]
+    [.(typeof(.HttpStatusCode), typeof(.), "IsSuccess", CustomName="IsNotSuccess", NegateLogic=true)]
+    public static class HttpStatusCodeAssertionExtensions
+    {
+        public static .<.HttpStatusCode> IsClientError(this ..IValueSource<.HttpStatusCode> valueSource) { }
+        public static .<.HttpStatusCode> IsError(this ..IValueSource<.HttpStatusCode> valueSource) { }
+        public static .<.HttpStatusCode> IsInformational(this ..IValueSource<.HttpStatusCode> valueSource) { }
+        public static .<.HttpStatusCode> IsNotClientError(this ..IValueSource<.HttpStatusCode> valueSource) { }
+        public static .<.HttpStatusCode> IsNotError(this ..IValueSource<.HttpStatusCode> valueSource) { }
+        public static .<.HttpStatusCode> IsNotInformational(this ..IValueSource<.HttpStatusCode> valueSource) { }
+        public static .<.HttpStatusCode> IsNotRedirection(this ..IValueSource<.HttpStatusCode> valueSource) { }
+        public static .<.HttpStatusCode> IsNotServerError(this ..IValueSource<.HttpStatusCode> valueSource) { }
+        public static .<.HttpStatusCode> IsNotSuccess(this ..IValueSource<.HttpStatusCode> valueSource) { }
+        public static .<.HttpStatusCode> IsRedirection(this ..IValueSource<.HttpStatusCode> valueSource) { }
+        public static .<.HttpStatusCode> IsServerError(this ..IValueSource<.HttpStatusCode> valueSource) { }
+        public static .<.HttpStatusCode> IsSuccess(this ..IValueSource<.HttpStatusCode> valueSource) { }
+    }
+    public class HttpStatusCodeHttpStatusCodeAssertionExtensionsIsClientErrorWithHttpStatusCodeAssertCondition : .<.HttpStatusCode>
+    {
+        public HttpStatusCodeHttpStatusCodeAssertionExtensionsIsClientErrorWithHttpStatusCodeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.HttpStatusCode actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class HttpStatusCodeHttpStatusCodeAssertionExtensionsIsErrorWithHttpStatusCodeAssertCondition : .<.HttpStatusCode>
+    {
+        public HttpStatusCodeHttpStatusCodeAssertionExtensionsIsErrorWithHttpStatusCodeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.HttpStatusCode actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class HttpStatusCodeHttpStatusCodeAssertionExtensionsIsInformationalWithHttpStatusCodeAssertCondition : .<.HttpStatusCode>
+    {
+        public HttpStatusCodeHttpStatusCodeAssertionExtensionsIsInformationalWithHttpStatusCodeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.HttpStatusCode actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class HttpStatusCodeHttpStatusCodeAssertionExtensionsIsRedirectionWithHttpStatusCodeAssertCondition : .<.HttpStatusCode>
+    {
+        public HttpStatusCodeHttpStatusCodeAssertionExtensionsIsRedirectionWithHttpStatusCodeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.HttpStatusCode actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class HttpStatusCodeHttpStatusCodeAssertionExtensionsIsServerErrorWithHttpStatusCodeAssertCondition : .<.HttpStatusCode>
+    {
+        public HttpStatusCodeHttpStatusCodeAssertionExtensionsIsServerErrorWithHttpStatusCodeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.HttpStatusCode actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class HttpStatusCodeHttpStatusCodeAssertionExtensionsIsSuccessWithHttpStatusCodeAssertCondition : .<.HttpStatusCode>
+    {
+        public HttpStatusCodeHttpStatusCodeAssertionExtensionsIsSuccessWithHttpStatusCodeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.HttpStatusCode actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(.IPAddress), "IsIPv4MappedToIPv6")]
+    [.(typeof(.IPAddress), "IsIPv4MappedToIPv6", CustomName="IsNotIPv4MappedToIPv6", NegateLogic=true)]
+    [.(typeof(.IPAddress), "IsIPv6LinkLocal")]
+    [.(typeof(.IPAddress), "IsIPv6LinkLocal", CustomName="IsNotIPv6LinkLocal", NegateLogic=true)]
+    [.(typeof(.IPAddress), "IsIPv6Multicast")]
+    [.(typeof(.IPAddress), "IsIPv6Multicast", CustomName="IsNotIPv6Multicast", NegateLogic=true)]
+    [.(typeof(.IPAddress), "IsIPv6SiteLocal")]
+    [.(typeof(.IPAddress), "IsIPv6SiteLocal", CustomName="IsNotIPv6SiteLocal", NegateLogic=true)]
+    [.(typeof(.IPAddress), typeof(.), "IsIPv4")]
+    [.(typeof(.IPAddress), typeof(.), "IsIPv4", CustomName="IsNotIPv4", NegateLogic=true)]
+    [.(typeof(.IPAddress), typeof(.), "IsIPv6")]
+    [.(typeof(.IPAddress), typeof(.), "IsIPv6", CustomName="IsNotIPv6", NegateLogic=true)]
+    [.(typeof(.IPAddress), typeof(.), "IsLoopback")]
+    [.(typeof(.IPAddress), typeof(.), "IsLoopback", CustomName="IsNotLoopback", NegateLogic=true)]
+    [.(typeof(.IPAddress), typeof(.), "IsPrivate")]
+    [.(typeof(.IPAddress), typeof(.), "IsPrivate", CustomName="IsPublic", NegateLogic=true)]
+    public static class IPAddressAssertionExtensions
+    {
+        public static .<.IPAddress> IsIPv4(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsIPv4MappedToIPv6(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsIPv6(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsIPv6LinkLocal(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsIPv6Multicast(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsIPv6SiteLocal(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsLoopback(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsNotIPv4(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsNotIPv4MappedToIPv6(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsNotIPv6(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsNotIPv6LinkLocal(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsNotIPv6Multicast(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsNotIPv6SiteLocal(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsNotLoopback(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsPrivate(this ..IValueSource<.IPAddress> valueSource) { }
+        public static .<.IPAddress> IsPublic(this ..IValueSource<.IPAddress> valueSource) { }
+    }
+    public class IPAddressIPAddressAssertionExtensionsIsIPv4WithIPAddressAssertCondition : .<.IPAddress>
+    {
+        public IPAddressIPAddressAssertionExtensionsIsIPv4WithIPAddressAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.IPAddress? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class IPAddressIPAddressAssertionExtensionsIsIPv6WithIPAddressAssertCondition : .<.IPAddress>
+    {
+        public IPAddressIPAddressAssertionExtensionsIsIPv6WithIPAddressAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.IPAddress? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class IPAddressIPAddressAssertionExtensionsIsLoopbackWithIPAddressAssertCondition : .<.IPAddress>
+    {
+        public IPAddressIPAddressAssertionExtensionsIsLoopbackWithIPAddressAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.IPAddress? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class IPAddressIPAddressAssertionExtensionsIsPrivateWithIPAddressAssertCondition : .<.IPAddress>
+    {
+        public IPAddressIPAddressAssertionExtensionsIsPrivateWithIPAddressAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.IPAddress? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class IPAddressIsIPv4MappedToIPv6AssertCondition : .<.IPAddress>
+    {
+        public IPAddressIsIPv4MappedToIPv6AssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.IPAddress? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class IPAddressIsIPv6LinkLocalAssertCondition : .<.IPAddress>
+    {
+        public IPAddressIsIPv6LinkLocalAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.IPAddress? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class IPAddressIsIPv6MulticastAssertCondition : .<.IPAddress>
+    {
+        public IPAddressIsIPv6MulticastAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.IPAddress? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class IPAddressIsIPv6SiteLocalAssertCondition : .<.IPAddress>
+    {
+        public IPAddressIsIPv6SiteLocalAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.IPAddress? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
     public static class ImmutableArrayIsExtensions
     {
         public static .<.<TInner>> IsEmpty<TInner>(this ..IValueSource<.<TInner>> valueSource) { }
@@ -1393,6 +2242,62 @@ namespace .Extensions
         public static .<.<TInner>> IsNotEquivalentTo<TInner>(this ..IValueSource<.<TInner>> valueSource, .<TInner> expected, . collectionOrdering, [.("expected")] string doNotPopulateThisValue = null, [.("collectionOrdering")] string doNotPopulateThisValue2 = null) { }
         public static .<.<TInner>> IsNotEquivalentTo<TInner>(this ..IValueSource<.<TInner>> valueSource, .<TInner> expected, .<TInner> comparer, . collectionOrdering, [.("expected")] string doNotPopulateThisValue = null, [.("collectionOrdering")] string doNotPopulateThisValue2 = null) { }
     }
+    public class NullableGuidAssertionExtensionsIsNullOrEmptyWithNullableAssertCondition : .<?>
+    {
+        public NullableGuidAssertionExtensionsIsNullOrEmptyWithNullableAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(string), typeof(.Path), "IsPathRooted", CustomName="IsNotRootedPath", NegateLogic=true)]
+    [.(typeof(string), typeof(.Path), "IsPathRooted", CustomName="IsRootedPath")]
+    public static class PathAssertionExtensions
+    {
+        public static .<string> IsNotRootedPath(this ..IValueSource<string> valueSource) { }
+        public static .<string> IsRootedPath(this ..IValueSource<string> valueSource) { }
+    }
+    [.(typeof(.), typeof(.), "HasTimeout")]
+    [.(typeof(.), typeof(.), "HasTimeout", CustomName="HasNoTimeout", NegateLogic=true)]
+    [.(typeof(.), typeof(.), "IsCaseInsensitive")]
+    [.(typeof(.), typeof(.), "IsCaseInsensitive", CustomName="IsCaseSensitive", NegateLogic=true)]
+    [.(typeof(.), typeof(.), "IsCompiled")]
+    [.(typeof(.), typeof(.), "IsCompiled", CustomName="IsNotCompiled", NegateLogic=true)]
+    [.(typeof(.), typeof(.), "IsMultiline")]
+    [.(typeof(.), typeof(.), "IsMultiline", CustomName="IsSingleline", NegateLogic=true)]
+    public static class RegexAssertionExtensions
+    {
+        public static .<.> HasNoTimeout(this ..IValueSource<.> valueSource) { }
+        public static .<.> HasTimeout(this ..IValueSource<.> valueSource) { }
+        public static .<.> IsCaseInsensitive(this ..IValueSource<.> valueSource) { }
+        public static .<.> IsCaseSensitive(this ..IValueSource<.> valueSource) { }
+        public static .<.> IsCompiled(this ..IValueSource<.> valueSource) { }
+        public static .<.> IsMultiline(this ..IValueSource<.> valueSource) { }
+        public static .<.> IsNotCompiled(this ..IValueSource<.> valueSource) { }
+        public static .<.> IsSingleline(this ..IValueSource<.> valueSource) { }
+    }
+    public class RegexRegexAssertionExtensionsHasTimeoutWithRegexAssertCondition : .<.>
+    {
+        public RegexRegexAssertionExtensionsHasTimeoutWithRegexAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class RegexRegexAssertionExtensionsIsCaseInsensitiveWithRegexAssertCondition : .<.>
+    {
+        public RegexRegexAssertionExtensionsIsCaseInsensitiveWithRegexAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class RegexRegexAssertionExtensionsIsCompiledWithRegexAssertCondition : .<.>
+    {
+        public RegexRegexAssertionExtensionsIsCompiledWithRegexAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class RegexRegexAssertionExtensionsIsMultilineWithRegexAssertCondition : .<.>
+    {
+        public RegexRegexAssertionExtensionsIsMultilineWithRegexAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
     public static class SourceExtensions
     {
         public static . RegisterAssertion<TActual>(this ..IDelegateSource delegateSource, .<TActual> assertCondition, string?[] argumentExpressions, [.] string? caller = null) { }
@@ -1400,6 +2305,147 @@ namespace .Extensions
         public static .<TToType> RegisterConversionAssertion<TToType>(this ..IDelegateSource source)
             where TToType :  { }
         public static .<TToType> RegisterConversionAssertion<TFromType, TToType>(this ..IValueSource<TFromType> source, .<TFromType, TToType> assertCondition, string?[] argumentExpressions, [.] string? caller = null) { }
+    }
+    [.(typeof(.Stream), "CanRead")]
+    [.(typeof(.Stream), "CanRead", CustomName="CannotRead", NegateLogic=true)]
+    [.(typeof(.Stream), "CanSeek")]
+    [.(typeof(.Stream), "CanSeek", CustomName="CannotSeek", NegateLogic=true)]
+    [.(typeof(.Stream), "CanWrite")]
+    [.(typeof(.Stream), "CanWrite", CustomName="CannotWrite", NegateLogic=true)]
+    [.(typeof(.Stream), typeof(.), "IsAtEnd")]
+    [.(typeof(.Stream), typeof(.), "IsAtEnd", CustomName="IsNotAtEnd", NegateLogic=true)]
+    [.(typeof(.Stream), typeof(.), "IsAtStart")]
+    [.(typeof(.Stream), typeof(.), "IsAtStart", CustomName="IsNotAtStart", NegateLogic=true)]
+    [.(typeof(.Stream), typeof(.), "IsEmpty")]
+    [.(typeof(.Stream), typeof(.), "IsEmpty", CustomName="IsNotEmpty", NegateLogic=true)]
+    public static class StreamAssertionExtensions
+    {
+        public static .<.Stream> CanRead(this ..IValueSource<.Stream> valueSource) { }
+        public static .<.Stream> CanSeek(this ..IValueSource<.Stream> valueSource) { }
+        public static .<.Stream> CanWrite(this ..IValueSource<.Stream> valueSource) { }
+        public static .<.Stream> CannotRead(this ..IValueSource<.Stream> valueSource) { }
+        public static .<.Stream> CannotSeek(this ..IValueSource<.Stream> valueSource) { }
+        public static .<.Stream> CannotWrite(this ..IValueSource<.Stream> valueSource) { }
+        public static .<.Stream> IsAtEnd(this ..IValueSource<.Stream> valueSource) { }
+        public static .<.Stream> IsAtStart(this ..IValueSource<.Stream> valueSource) { }
+        public static .<.Stream> IsEmpty(this ..IValueSource<.Stream> valueSource) { }
+        public static .<.Stream> IsNotAtEnd(this ..IValueSource<.Stream> valueSource) { }
+        public static .<.Stream> IsNotAtStart(this ..IValueSource<.Stream> valueSource) { }
+        public static .<.Stream> IsNotEmpty(this ..IValueSource<.Stream> valueSource) { }
+    }
+    public class StreamCanReadAssertCondition : .<.Stream>
+    {
+        public StreamCanReadAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Stream? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StreamCanSeekAssertCondition : .<.Stream>
+    {
+        public StreamCanSeekAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Stream? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StreamCanWriteAssertCondition : .<.Stream>
+    {
+        public StreamCanWriteAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Stream? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StreamStreamAssertionExtensionsIsAtEndWithStreamAssertCondition : .<.Stream>
+    {
+        public StreamStreamAssertionExtensionsIsAtEndWithStreamAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Stream? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StreamStreamAssertionExtensionsIsAtStartWithStreamAssertCondition : .<.Stream>
+    {
+        public StreamStreamAssertionExtensionsIsAtStartWithStreamAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Stream? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StreamStreamAssertionExtensionsIsEmptyWithStreamAssertCondition : .<.Stream>
+    {
+        public StreamStreamAssertionExtensionsIsEmptyWithStreamAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.Stream? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(string), "Contains", CustomName="DoesNotContain", NegateLogic=true)]
+    [.(typeof(string), "EndsWith", CustomName="DoesNotEndWith", NegateLogic=true)]
+    [.(typeof(string), "EndsWith", CustomName="EndsWith")]
+    [.(typeof(string), "StartsWith", CustomName="DoesNotStartWith", NegateLogic=true)]
+    [.(typeof(string), "StartsWith", CustomName="StartsWith")]
+    public static class StringAssertionExtensions
+    {
+        public static .<string> DoesNotContain(this ..IValueSource<string> valueSource, string value, [.("value")] string? doNotPopulateThisValue1 = null) { }
+        public static .<string> DoesNotEndWith(this ..IValueSource<string> valueSource, string value, [.("value")] string? doNotPopulateThisValue1 = null) { }
+        public static .<string> DoesNotEndWith(this ..IValueSource<string> valueSource, string value,  comparisonType, [.("value")] string? doNotPopulateThisValue1 = null, [.("comparisonType")] string? doNotPopulateThisValue2 = null) { }
+        public static .<string> DoesNotEndWith(this ..IValueSource<string> valueSource, string value, bool ignoreCase, .CultureInfo culture, [.("value")] string? doNotPopulateThisValue1 = null, [.("ignoreCase")] string? doNotPopulateThisValue2 = null, [.("culture")] string? doNotPopulateThisValue3 = null) { }
+        public static .<string> DoesNotStartWith(this ..IValueSource<string> valueSource, string value, [.("value")] string? doNotPopulateThisValue1 = null) { }
+        public static .<string> DoesNotStartWith(this ..IValueSource<string> valueSource, string value,  comparisonType, [.("value")] string? doNotPopulateThisValue1 = null, [.("comparisonType")] string? doNotPopulateThisValue2 = null) { }
+        public static .<string> DoesNotStartWith(this ..IValueSource<string> valueSource, string value, bool ignoreCase, .CultureInfo culture, [.("value")] string? doNotPopulateThisValue1 = null, [.("ignoreCase")] string? doNotPopulateThisValue2 = null, [.("culture")] string? doNotPopulateThisValue3 = null) { }
+        public static .<string> EndsWith(this ..IValueSource<string> valueSource, string value, [.("value")] string? doNotPopulateThisValue1 = null) { }
+        public static .<string> EndsWith(this ..IValueSource<string> valueSource, string value,  comparisonType, [.("value")] string? doNotPopulateThisValue1 = null, [.("comparisonType")] string? doNotPopulateThisValue2 = null) { }
+        public static .<string> EndsWith(this ..IValueSource<string> valueSource, string value, bool ignoreCase, .CultureInfo culture, [.("value")] string? doNotPopulateThisValue1 = null, [.("ignoreCase")] string? doNotPopulateThisValue2 = null, [.("culture")] string? doNotPopulateThisValue3 = null) { }
+        public static .<string> StartsWith(this ..IValueSource<string> valueSource, string value, [.("value")] string? doNotPopulateThisValue1 = null) { }
+        public static .<string> StartsWith(this ..IValueSource<string> valueSource, string value,  comparisonType, [.("value")] string? doNotPopulateThisValue1 = null, [.("comparisonType")] string? doNotPopulateThisValue2 = null) { }
+        public static .<string> StartsWith(this ..IValueSource<string> valueSource, string value, bool ignoreCase, .CultureInfo culture, [.("value")] string? doNotPopulateThisValue1 = null, [.("ignoreCase")] string? doNotPopulateThisValue2 = null, [.("culture")] string? doNotPopulateThisValue3 = null) { }
+    }
+    [.(typeof(.StringBuilder), typeof(.), "HasExcessCapacity")]
+    [.(typeof(.StringBuilder), typeof(.), "HasExcessCapacity", CustomName="HasNoExcessCapacity", NegateLogic=true)]
+    [.(typeof(.StringBuilder), typeof(.), "IsAtCapacity")]
+    [.(typeof(.StringBuilder), typeof(.), "IsAtCapacity", CustomName="IsNotAtCapacity", NegateLogic=true)]
+    [.(typeof(.StringBuilder), typeof(.), "IsEmpty")]
+    [.(typeof(.StringBuilder), typeof(.), "IsEmpty", CustomName="IsNotEmpty", NegateLogic=true)]
+    public static class StringBuilderAssertionExtensions
+    {
+        public static .<.StringBuilder> HasExcessCapacity(this ..IValueSource<.StringBuilder> valueSource) { }
+        public static .<.StringBuilder> HasNoExcessCapacity(this ..IValueSource<.StringBuilder> valueSource) { }
+        public static .<.StringBuilder> IsAtCapacity(this ..IValueSource<.StringBuilder> valueSource) { }
+        public static .<.StringBuilder> IsEmpty(this ..IValueSource<.StringBuilder> valueSource) { }
+        public static .<.StringBuilder> IsNotAtCapacity(this ..IValueSource<.StringBuilder> valueSource) { }
+        public static .<.StringBuilder> IsNotEmpty(this ..IValueSource<.StringBuilder> valueSource) { }
+    }
+    public class StringBuilderStringBuilderAssertionExtensionsHasExcessCapacityWithStringBuilderAssertCondition : .<.StringBuilder>
+    {
+        public StringBuilderStringBuilderAssertionExtensionsHasExcessCapacityWithStringBuilderAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.StringBuilder? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StringBuilderStringBuilderAssertionExtensionsIsAtCapacityWithStringBuilderAssertCondition : .<.StringBuilder>
+    {
+        public StringBuilderStringBuilderAssertionExtensionsIsAtCapacityWithStringBuilderAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.StringBuilder? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StringBuilderStringBuilderAssertionExtensionsIsEmptyWithStringBuilderAssertCondition : .<.StringBuilder>
+    {
+        public StringBuilderStringBuilderAssertionExtensionsIsEmptyWithStringBuilderAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.StringBuilder? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StringContainsWithStringAssertCondition : .<string>
+    {
+        public StringContainsWithStringAssertCondition(string value, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(string? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StringEndsWithWithStringAnd1MoreAssertCondition : .<string>
+    {
+        public StringEndsWithWithStringAnd1MoreAssertCondition(string value,  comparisonType, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(string? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StringEndsWithWithStringAnd2MoreAssertCondition : .<string>
+    {
+        public StringEndsWithWithStringAnd2MoreAssertCondition(string value, bool ignoreCase, .CultureInfo culture, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(string? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StringEndsWithWithStringAssertCondition : .<string>
+    {
+        public StringEndsWithWithStringAssertCondition(string value, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(string? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
     public static class StringExtensions
     {
@@ -1437,6 +2483,75 @@ namespace .Extensions
         public .<string> LessThan(int expected, [.("expected")] string? doNotPopulateThisValue = null) { }
         public .<string> LessThanOrEqualTo(int expected, [.("expected")] string? doNotPopulateThisValue = null) { }
     }
+    public class StringPathIsPathRootedWithStringAssertCondition : .<string>
+    {
+        public StringPathIsPathRootedWithStringAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(string? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StringStartsWithWithStringAnd1MoreAssertCondition : .<string>
+    {
+        public StringStartsWithWithStringAnd1MoreAssertCondition(string value,  comparisonType, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(string? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StringStartsWithWithStringAnd2MoreAssertCondition : .<string>
+    {
+        public StringStartsWithWithStringAnd2MoreAssertCondition(string value, bool ignoreCase, .CultureInfo culture, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(string? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StringStartsWithWithStringAssertCondition : .<string>
+    {
+        public StringStartsWithWithStringAssertCondition(string value, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(string? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StringUriIsHexEncodingWithStringAnd1MoreAssertCondition : .<string>
+    {
+        public StringUriIsHexEncodingWithStringAnd1MoreAssertCondition(int index, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(string? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class StringUriIsWellFormedUriStringWithStringAnd1MoreAssertCondition : .<string>
+    {
+        public StringUriIsWellFormedUriStringWithStringAnd1MoreAssertCondition( uriKind, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(string? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(.), "IsCanceled")]
+    [.(typeof(.), "IsCanceled", CustomName="IsNotCanceled", NegateLogic=true)]
+    [.(typeof(.), "IsCompleted")]
+    [.(typeof(.), "IsCompleted", CustomName="IsNotCompleted", NegateLogic=true)]
+    [.(typeof(.), "IsFaulted")]
+    [.(typeof(.), "IsFaulted", CustomName="IsNotFaulted", NegateLogic=true)]
+    public static class TaskAssertionExtensions
+    {
+        public static .<.> IsCanceled(this ..IValueSource<.> valueSource) { }
+        public static .<.> IsCompleted(this ..IValueSource<.> valueSource) { }
+        public static .<.> IsFaulted(this ..IValueSource<.> valueSource) { }
+        public static .<.> IsNotCanceled(this ..IValueSource<.> valueSource) { }
+        public static .<.> IsNotCompleted(this ..IValueSource<.> valueSource) { }
+        public static .<.> IsNotFaulted(this ..IValueSource<.> valueSource) { }
+    }
+    public class TaskIsCanceledAssertCondition : .<.>
+    {
+        public TaskIsCanceledAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TaskIsCompletedAssertCondition : .<.>
+    {
+        public TaskIsCompletedAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TaskIsFaultedAssertCondition : .<.>
+    {
+        public TaskIsFaultedAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(.? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
     public class ThrowsException<TActual, TException>
         where TException : 
     {
@@ -1467,6 +2582,21 @@ namespace .Extensions
         public static .<TActual, TException> WithParameterName<TActual, TException>(this .<TActual, TException> throwsException, string expected, [.("expected")] string? doNotPopulateThisValue = null)
             where TException :  { }
     }
+    [.(typeof(), typeof(.), "IsNegative")]
+    [.(typeof(), typeof(.), "IsNegative", CustomName="IsPositiveOrZero", NegateLogic=true)]
+    [.(typeof(), typeof(.), "IsPositive")]
+    [.(typeof(), typeof(.), "IsPositive", CustomName="IsNegativeOrZero", NegateLogic=true)]
+    [.(typeof(), typeof(.), "IsZero")]
+    [.(typeof(), typeof(.), "IsZero", CustomName="IsNotZero", NegateLogic=true)]
+    public static class TimeSpanAssertionExtensions
+    {
+        public static .<> IsNegative(this ..IValueSource<> valueSource) { }
+        public static .<> IsNegativeOrZero(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotZero(this ..IValueSource<> valueSource) { }
+        public static .<> IsPositive(this ..IValueSource<> valueSource) { }
+        public static .<> IsPositiveOrZero(this ..IValueSource<> valueSource) { }
+        public static .<> IsZero(this ..IValueSource<> valueSource) { }
+    }
     public static class TimeSpanExtensions
     {
         public static  Days(this int days) { }
@@ -1483,6 +2613,318 @@ namespace .Extensions
     public static class TimeSpanIsNotExtensions
     {
         public static .<> IsNotZero(this ..IValueSource<> valueSource) { }
+    }
+    public class TimeSpanTimeSpanAssertionExtensionsIsNegativeWithTimeSpanAssertCondition : .<>
+    {
+        public TimeSpanTimeSpanAssertionExtensionsIsNegativeWithTimeSpanAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TimeSpanTimeSpanAssertionExtensionsIsPositiveWithTimeSpanAssertCondition : .<>
+    {
+        public TimeSpanTimeSpanAssertionExtensionsIsPositiveWithTimeSpanAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TimeSpanTimeSpanAssertionExtensionsIsZeroWithTimeSpanAssertCondition : .<>
+    {
+        public TimeSpanTimeSpanAssertionExtensionsIsZeroWithTimeSpanAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult( actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(), "IsAbstract")]
+    [.(typeof(), "IsAbstract", CustomName="IsNotAbstract", NegateLogic=true)]
+    [.(typeof(), "IsArray")]
+    [.(typeof(), "IsArray", CustomName="IsNotArray", NegateLogic=true)]
+    [.(typeof(), "IsAssignableFrom")]
+    [.(typeof(), "IsAssignableFrom", CustomName="IsNotAssignableFrom", NegateLogic=true)]
+    [.(typeof(), "IsClass")]
+    [.(typeof(), "IsClass", CustomName="IsNotClass", NegateLogic=true)]
+    [.(typeof(), "IsEnum")]
+    [.(typeof(), "IsEnum", CustomName="IsNotEnum", NegateLogic=true)]
+    [.(typeof(), "IsGenericType")]
+    [.(typeof(), "IsGenericType", CustomName="IsNotGenericType", NegateLogic=true)]
+    [.(typeof(), "IsGenericTypeDefinition")]
+    [.(typeof(), "IsGenericTypeDefinition", CustomName="IsNotGenericTypeDefinition", NegateLogic=true)]
+    [.(typeof(), "IsInterface")]
+    [.(typeof(), "IsInterface", CustomName="IsNotInterface", NegateLogic=true)]
+    [.(typeof(), "IsNested")]
+    [.(typeof(), "IsNested", CustomName="IsNotNested", NegateLogic=true)]
+    [.(typeof(), "IsPrimitive")]
+    [.(typeof(), "IsPrimitive", CustomName="IsNotPrimitive", NegateLogic=true)]
+    [.(typeof(), "IsPublic")]
+    [.(typeof(), "IsPublic", CustomName="IsNotPublic", NegateLogic=true)]
+    [.(typeof(), "IsSealed")]
+    [.(typeof(), "IsSealed", CustomName="IsNotSealed", NegateLogic=true)]
+    [.(typeof(), "IsSerializable")]
+    [.(typeof(), "IsSerializable", CustomName="IsNotSerializable", NegateLogic=true)]
+    [.(typeof(), "IsValueType")]
+    [.(typeof(), "IsValueType", CustomName="IsReferenceType", NegateLogic=true)]
+    public static class TypeAssertionExtensions
+    {
+        public static .<> IsAbstract(this ..IValueSource<> valueSource) { }
+        public static .<> IsArray(this ..IValueSource<> valueSource) { }
+        public static .<> IsAssignableFrom(this ..IValueSource<> valueSource,  c, [.("c")] string? doNotPopulateThisValue1 = null) { }
+        public static .<> IsClass(this ..IValueSource<> valueSource) { }
+        public static .<> IsEnum(this ..IValueSource<> valueSource) { }
+        public static .<> IsGenericType(this ..IValueSource<> valueSource) { }
+        public static .<> IsGenericTypeDefinition(this ..IValueSource<> valueSource) { }
+        public static .<> IsInterface(this ..IValueSource<> valueSource) { }
+        public static .<> IsNested(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotAbstract(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotArray(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotAssignableFrom(this ..IValueSource<> valueSource,  c, [.("c")] string? doNotPopulateThisValue1 = null) { }
+        public static .<> IsNotClass(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotEnum(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotGenericType(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotGenericTypeDefinition(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotInterface(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotNested(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotPrimitive(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotPublic(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotSealed(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotSerializable(this ..IValueSource<> valueSource) { }
+        public static .<> IsPrimitive(this ..IValueSource<> valueSource) { }
+        public static .<> IsPublic(this ..IValueSource<> valueSource) { }
+        public static .<> IsReferenceType(this ..IValueSource<> valueSource) { }
+        public static .<> IsSealed(this ..IValueSource<> valueSource) { }
+        public static .<> IsSerializable(this ..IValueSource<> valueSource) { }
+        public static .<> IsValueType(this ..IValueSource<> valueSource) { }
+    }
+    public class TypeIsAbstractAssertCondition : .<>
+    {
+        public TypeIsAbstractAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsArrayAssertCondition : .<>
+    {
+        public TypeIsArrayAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsAssignableFromWithTypeAssertCondition : .<>
+    {
+        public TypeIsAssignableFromWithTypeAssertCondition( c, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsClassAssertCondition : .<>
+    {
+        public TypeIsClassAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsEnumAssertCondition : .<>
+    {
+        public TypeIsEnumAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsGenericTypeAssertCondition : .<>
+    {
+        public TypeIsGenericTypeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsGenericTypeDefinitionAssertCondition : .<>
+    {
+        public TypeIsGenericTypeDefinitionAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsInterfaceAssertCondition : .<>
+    {
+        public TypeIsInterfaceAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsNestedAssertCondition : .<>
+    {
+        public TypeIsNestedAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsPrimitiveAssertCondition : .<>
+    {
+        public TypeIsPrimitiveAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsPublicAssertCondition : .<>
+    {
+        public TypeIsPublicAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsSealedAssertCondition : .<>
+    {
+        public TypeIsSealedAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsSerializableAssertCondition : .<>
+    {
+        public TypeIsSerializableAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class TypeIsValueTypeAssertCondition : .<>
+    {
+        public TypeIsValueTypeAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(), "IsAbsoluteUri")]
+    [.(typeof(), "IsAbsoluteUri", CustomName="IsNotAbsoluteUri", NegateLogic=true)]
+    [.(typeof(), "IsBaseOf")]
+    [.(typeof(), "IsBaseOf", CustomName="IsNotBaseOf", NegateLogic=true)]
+    [.(typeof(), "IsDefaultPort")]
+    [.(typeof(), "IsDefaultPort", CustomName="IsNotDefaultPort", NegateLogic=true)]
+    [.(typeof(), "IsFile")]
+    [.(typeof(), "IsFile", CustomName="IsNotFile", NegateLogic=true)]
+    [.(typeof(), "IsLoopback")]
+    [.(typeof(), "IsLoopback", CustomName="IsNotLoopback", NegateLogic=true)]
+    [.(typeof(), "IsUnc")]
+    [.(typeof(), "IsUnc", CustomName="IsNotUnc", NegateLogic=true)]
+    [.(typeof(), "IsWellFormedOriginalString")]
+    [.(typeof(), "IsWellFormedOriginalString", CustomName="IsNotWellFormedOriginalString", NegateLogic=true)]
+    [.(typeof(), typeof(.), "IsHttp")]
+    [.(typeof(), typeof(.), "IsHttp", CustomName="IsNotHttp", NegateLogic=true)]
+    [.(typeof(), typeof(.), "IsHttpOrHttps")]
+    [.(typeof(), typeof(.), "IsHttpOrHttps", CustomName="IsNotHttpOrHttps", NegateLogic=true)]
+    [.(typeof(), typeof(.), "IsHttps")]
+    [.(typeof(), typeof(.), "IsHttps", CustomName="IsNotHttps", NegateLogic=true)]
+    [.(typeof(char), typeof(), "IsHexDigit")]
+    [.(typeof(char), typeof(), "IsHexDigit", CustomName="IsNotHexDigit", NegateLogic=true)]
+    [.(typeof(string), typeof(), "IsHexEncoding")]
+    [.(typeof(string), typeof(), "IsHexEncoding", CustomName="IsNotHexEncoding", NegateLogic=true)]
+    [.(typeof(string), typeof(), "IsWellFormedUriString")]
+    [.(typeof(string), typeof(), "IsWellFormedUriString", CustomName="IsNotWellFormedUriString", NegateLogic=true)]
+    public static class UriAssertionExtensions
+    {
+        public static .<> IsAbsoluteUri(this ..IValueSource<> valueSource) { }
+        public static .<> IsBaseOf(this ..IValueSource<> valueSource,  uri, [.("uri")] string? doNotPopulateThisValue1 = null) { }
+        public static .<> IsDefaultPort(this ..IValueSource<> valueSource) { }
+        public static .<> IsFile(this ..IValueSource<> valueSource) { }
+        public static .<char> IsHexDigit(this ..IValueSource<char> valueSource) { }
+        public static .<string> IsHexEncoding(this ..IValueSource<string> valueSource, int index, [.("index")] string? doNotPopulateThisValue1 = null) { }
+        public static .<> IsHttp(this ..IValueSource<> valueSource) { }
+        public static .<> IsHttpOrHttps(this ..IValueSource<> valueSource) { }
+        public static .<> IsHttps(this ..IValueSource<> valueSource) { }
+        public static .<> IsLoopback(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotAbsoluteUri(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotBaseOf(this ..IValueSource<> valueSource,  uri, [.("uri")] string? doNotPopulateThisValue1 = null) { }
+        public static .<> IsNotDefaultPort(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotFile(this ..IValueSource<> valueSource) { }
+        public static .<char> IsNotHexDigit(this ..IValueSource<char> valueSource) { }
+        public static .<string> IsNotHexEncoding(this ..IValueSource<string> valueSource, int index, [.("index")] string? doNotPopulateThisValue1 = null) { }
+        public static .<> IsNotHttp(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotHttpOrHttps(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotHttps(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotLoopback(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotUnc(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotWellFormedOriginalString(this ..IValueSource<> valueSource) { }
+        public static .<string> IsNotWellFormedUriString(this ..IValueSource<string> valueSource,  uriKind, [.("uriKind")] string? doNotPopulateThisValue1 = null) { }
+        public static .<> IsUnc(this ..IValueSource<> valueSource) { }
+        public static .<> IsWellFormedOriginalString(this ..IValueSource<> valueSource) { }
+        public static .<string> IsWellFormedUriString(this ..IValueSource<string> valueSource,  uriKind, [.("uriKind")] string? doNotPopulateThisValue1 = null) { }
+    }
+    public class UriIsAbsoluteUriAssertCondition : .<>
+    {
+        public UriIsAbsoluteUriAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class UriIsBaseOfWithUriAssertCondition : .<>
+    {
+        public UriIsBaseOfWithUriAssertCondition( uri, bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class UriIsDefaultPortAssertCondition : .<>
+    {
+        public UriIsDefaultPortAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class UriIsFileAssertCondition : .<>
+    {
+        public UriIsFileAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class UriIsLoopbackAssertCondition : .<>
+    {
+        public UriIsLoopbackAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class UriIsUncAssertCondition : .<>
+    {
+        public UriIsUncAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class UriIsWellFormedOriginalStringAssertCondition : .<>
+    {
+        public UriIsWellFormedOriginalStringAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class UriUriAssertionExtensionsIsHttpOrHttpsWithUriAssertCondition : .<>
+    {
+        public UriUriAssertionExtensionsIsHttpOrHttpsWithUriAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class UriUriAssertionExtensionsIsHttpWithUriAssertCondition : .<>
+    {
+        public UriUriAssertionExtensionsIsHttpWithUriAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class UriUriAssertionExtensionsIsHttpsWithUriAssertCondition : .<>
+    {
+        public UriUriAssertionExtensionsIsHttpsWithUriAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(), typeof(.), "IsMajorVersion")]
+    [.(typeof(), typeof(.), "IsMajorVersion", CustomName="IsNotMajorVersion", NegateLogic=true)]
+    public static class VersionAssertionExtensions
+    {
+        public static .<> IsMajorVersion(this ..IValueSource<> valueSource) { }
+        public static .<> IsNotMajorVersion(this ..IValueSource<> valueSource) { }
+    }
+    public class VersionVersionAssertionExtensionsIsMajorVersionWithVersionAssertCondition : .<>
+    {
+        public VersionVersionAssertionExtensionsIsMajorVersionWithVersionAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    [.(typeof(), "IsAlive")]
+    [.(typeof(), "IsAlive", CustomName="IsDead", NegateLogic=true)]
+    [.(typeof(), "TrackResurrection")]
+    [.(typeof(), "TrackResurrection", CustomName="DoesNotTrackResurrection", NegateLogic=true)]
+    public static class WeakReferenceAssertionExtensions
+    {
+        public static .<> DoesNotTrackResurrection(this ..IValueSource<> valueSource) { }
+        public static .<> IsAlive(this ..IValueSource<> valueSource) { }
+        public static .<> IsDead(this ..IValueSource<> valueSource) { }
+        public static .<> TrackResurrection(this ..IValueSource<> valueSource) { }
+    }
+    public class WeakReferenceIsAliveAssertCondition : .<>
+    {
+        public WeakReferenceIsAliveAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class WeakReferenceTrackResurrectionAssertCondition : .<>
+    {
+        public WeakReferenceTrackResurrectionAssertCondition(bool negated = false) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
 }
 namespace .Helpers
