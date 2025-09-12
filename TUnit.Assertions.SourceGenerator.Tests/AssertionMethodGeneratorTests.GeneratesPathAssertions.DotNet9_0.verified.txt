@@ -1,4 +1,5 @@
-﻿#nullable enable
+﻿[  
+#nullable enable
 
 using System;
 using System.Runtime.CompilerServices;
@@ -8,7 +9,7 @@ using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Extensions;
 
-namespace TestNamespace;
+namespace TUnit.Assertions.Extensions;
 
 public class StringPathIsPathRootedWithStringAssertCondition : BaseAssertCondition<string>
 {
@@ -37,13 +38,22 @@ public class StringPathIsPathRootedWithStringAssertCondition : BaseAssertConditi
     }
 }
 
-public static partial class StringPathAssertions
+public static partial class PathAssertionExtensions
 {
-    public static InvokableValueAssertionBuilder<string> IsPathRooted(this IValueSource<string> valueSource)
+    public static InvokableValueAssertionBuilder<string> IsRooted(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(
             new StringPathIsPathRootedWithStringAssertCondition(false),
             []);
     }
 
+    public static InvokableValueAssertionBuilder<string> IsNotRooted(this IValueSource<string> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new StringPathIsPathRootedWithStringAssertCondition(true),
+            []);
+    }
+
 }
+
+]

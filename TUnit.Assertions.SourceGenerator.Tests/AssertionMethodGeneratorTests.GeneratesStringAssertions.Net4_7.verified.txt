@@ -1,4 +1,5 @@
-﻿#nullable enable
+﻿[  
+#nullable enable
 
 using System;
 using System.Runtime.CompilerServices;
@@ -8,7 +9,7 @@ using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
 using TUnit.Assertions.Extensions;
 
-namespace TestNamespace;
+namespace TUnit.Assertions.Extensions;
 
 public class StringStartsWithWithStringAssertCondition : BaseAssertCondition<string>
 {
@@ -225,19 +226,12 @@ public class StringContainsWithStringAssertCondition : BaseAssertCondition<strin
     }
 }
 
-public static partial class StringMethodAssertions
+public static partial class StringAssertionExtensions
 {
     public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
     {
         return valueSource.RegisterAssertion(
             new StringStartsWithWithStringAssertCondition(value, false),
-            [doNotPopulateThisValue1]);
-    }
-
-    public static InvokableValueAssertionBuilder<string> IsNotStartsWith(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
-    {
-        return valueSource.RegisterAssertion(
-            new StringStartsWithWithStringAssertCondition(value, true),
             [doNotPopulateThisValue1]);
     }
 
@@ -248,24 +242,10 @@ public static partial class StringMethodAssertions
             [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 
-    public static InvokableValueAssertionBuilder<string> IsNotStartsWith(this IValueSource<string> valueSource, string value, System.StringComparison comparisonType, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(comparisonType))] string? doNotPopulateThisValue2 = null)
-    {
-        return valueSource.RegisterAssertion(
-            new StringStartsWithWithStringAnd1MoreAssertCondition(value, comparisonType, true),
-            [doNotPopulateThisValue1, doNotPopulateThisValue2]);
-    }
-
     public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string value, bool ignoreCase, System.Globalization.CultureInfo culture, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(ignoreCase))] string? doNotPopulateThisValue2 = null, [CallerArgumentExpression(nameof(culture))] string? doNotPopulateThisValue3 = null)
     {
         return valueSource.RegisterAssertion(
             new StringStartsWithWithStringAnd2MoreAssertCondition(value, ignoreCase, culture, false),
-            [doNotPopulateThisValue1, doNotPopulateThisValue2, doNotPopulateThisValue3]);
-    }
-
-    public static InvokableValueAssertionBuilder<string> IsNotStartsWith(this IValueSource<string> valueSource, string value, bool ignoreCase, System.Globalization.CultureInfo culture, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(ignoreCase))] string? doNotPopulateThisValue2 = null, [CallerArgumentExpression(nameof(culture))] string? doNotPopulateThisValue3 = null)
-    {
-        return valueSource.RegisterAssertion(
-            new StringStartsWithWithStringAnd2MoreAssertCondition(value, ignoreCase, culture, true),
             [doNotPopulateThisValue1, doNotPopulateThisValue2, doNotPopulateThisValue3]);
     }
 
@@ -276,24 +256,10 @@ public static partial class StringMethodAssertions
             [doNotPopulateThisValue1]);
     }
 
-    public static InvokableValueAssertionBuilder<string> IsNotEndsWith(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
-    {
-        return valueSource.RegisterAssertion(
-            new StringEndsWithWithStringAssertCondition(value, true),
-            [doNotPopulateThisValue1]);
-    }
-
     public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string value, System.StringComparison comparisonType, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(comparisonType))] string? doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(
             new StringEndsWithWithStringAnd1MoreAssertCondition(value, comparisonType, false),
-            [doNotPopulateThisValue1, doNotPopulateThisValue2]);
-    }
-
-    public static InvokableValueAssertionBuilder<string> IsNotEndsWith(this IValueSource<string> valueSource, string value, System.StringComparison comparisonType, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(comparisonType))] string? doNotPopulateThisValue2 = null)
-    {
-        return valueSource.RegisterAssertion(
-            new StringEndsWithWithStringAnd1MoreAssertCondition(value, comparisonType, true),
             [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 
@@ -304,21 +270,49 @@ public static partial class StringMethodAssertions
             [doNotPopulateThisValue1, doNotPopulateThisValue2, doNotPopulateThisValue3]);
     }
 
-    public static InvokableValueAssertionBuilder<string> IsNotEndsWith(this IValueSource<string> valueSource, string value, bool ignoreCase, System.Globalization.CultureInfo culture, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(ignoreCase))] string? doNotPopulateThisValue2 = null, [CallerArgumentExpression(nameof(culture))] string? doNotPopulateThisValue3 = null)
+    public static InvokableValueAssertionBuilder<string> DoesNotStartWith(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWithStringAssertCondition(value, true),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotStartWith(this IValueSource<string> valueSource, string value, System.StringComparison comparisonType, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(comparisonType))] string? doNotPopulateThisValue2 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWithStringAnd1MoreAssertCondition(value, comparisonType, true),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotStartWith(this IValueSource<string> valueSource, string value, bool ignoreCase, System.Globalization.CultureInfo culture, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(ignoreCase))] string? doNotPopulateThisValue2 = null, [CallerArgumentExpression(nameof(culture))] string? doNotPopulateThisValue3 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWithStringAnd2MoreAssertCondition(value, ignoreCase, culture, true),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2, doNotPopulateThisValue3]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotEndWith(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringEndsWithWithStringAssertCondition(value, true),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotEndWith(this IValueSource<string> valueSource, string value, System.StringComparison comparisonType, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(comparisonType))] string? doNotPopulateThisValue2 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringEndsWithWithStringAnd1MoreAssertCondition(value, comparisonType, true),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotEndWith(this IValueSource<string> valueSource, string value, bool ignoreCase, System.Globalization.CultureInfo culture, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(ignoreCase))] string? doNotPopulateThisValue2 = null, [CallerArgumentExpression(nameof(culture))] string? doNotPopulateThisValue3 = null)
     {
         return valueSource.RegisterAssertion(
             new StringEndsWithWithStringAnd2MoreAssertCondition(value, ignoreCase, culture, true),
             [doNotPopulateThisValue1, doNotPopulateThisValue2, doNotPopulateThisValue3]);
     }
 
-    public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
-    {
-        return valueSource.RegisterAssertion(
-            new StringContainsWithStringAssertCondition(value, false),
-            [doNotPopulateThisValue1]);
-    }
-
-    public static InvokableValueAssertionBuilder<string> IsNotContains(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    public static InvokableValueAssertionBuilder<string> DoesNotContain(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
     {
         return valueSource.RegisterAssertion(
             new StringContainsWithStringAssertCondition(value, true),
@@ -326,3 +320,5 @@ public static partial class StringMethodAssertions
     }
 
 }
+
+]

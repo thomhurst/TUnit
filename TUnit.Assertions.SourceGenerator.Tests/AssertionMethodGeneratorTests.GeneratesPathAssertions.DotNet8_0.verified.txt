@@ -1,18 +1,21 @@
-﻿#nullable disable
+﻿[  
+#nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
 
-namespace TestNamespace;
+namespace TUnit.Assertions.Extensions;
 
-public class StringPathIsPathRootedAssertCondition : BaseAssertCondition<string>
+public class StringPathIsPathRootedWithStringAssertCondition : BaseAssertCondition<string>
 {
     private readonly bool _negated;
 
-    public StringPathIsPathRootedAssertCondition(bool negated = false)
+    public StringPathIsPathRootedWithStringAssertCondition(bool negated = false)
     {
         _negated = negated;
     }
@@ -29,19 +32,28 @@ public class StringPathIsPathRootedAssertCondition : BaseAssertCondition<string>
         return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsPathRooted");
     }
 
-    protected override string GetExpectation()
+    protected internal override string GetExpectation()
     {
         return $"{(_negated ? "not " : "")}to satisfy IsPathRooted";
     }
 }
 
-public static partial class StringPathAssertions
+public static partial class PathAssertionExtensions
 {
-    public static InvokableValueAssertionBuilder<string> IsPathRooted(this IValueSource<string> valueSource)
+    public static InvokableValueAssertionBuilder<string> IsRooted(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(
-            new StringPathIsPathRootedAssertCondition(false),
+            new StringPathIsPathRootedWithStringAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<string> IsNotRooted(this IValueSource<string> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new StringPathIsPathRootedWithStringAssertCondition(true),
             []);
     }
 
 }
+
+]
