@@ -39,7 +39,11 @@ public class TestContext : Context
     public static new TestContext? Current
     {
         get => TestContexts.Value;
-        internal set => TestContexts.Value = value;
+        internal set
+        {
+            TestContexts.Value = value;
+            ClassHookContext.Current = value?.ClassContext;
+        }
     }
 
     public static IReadOnlyDictionary<string, List<string>> Parameters => InternalParametersDictionary;

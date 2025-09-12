@@ -15,7 +15,7 @@ namespace
         public ? Duration { get; }
         public ? EndTime { get; set; }
         public .? ExecutionContext { get; set; }
-        public . ExecutionTask { get; }
+        public .? ExecutionTask { get; }
         public virtual .TestMetadata Metadata { get; init; }
         public .TestResult? Result { get; set; }
         public ? StartTime { get; set; }
@@ -1387,7 +1387,7 @@ namespace
         public .<.AssemblyHookContext> Assemblies { get; }
         public required string Id { get; init; }
         public .<.ClassHookContext> TestClasses { get; }
-        public .BeforeTestDiscoveryContext TestDiscoveryContext { get; }
+        public .TestDiscoveryContext TestDiscoveryContext { get; }
         public required string? TestFilter { get; init; }
         public new static .TestSessionContext? Current { get; }
         public static .TestBuilderContext GlobalStaticPropertyContext { get; }
@@ -1659,6 +1659,12 @@ namespace .Exceptions
     public class BeforeTestSessionException : .
     {
         public BeforeTestSessionException(string message,  innerException) { }
+    }
+    public class CircularDependencyException : 
+    {
+        public CircularDependencyException() { }
+        public CircularDependencyException(string message) { }
+        public CircularDependencyException(string message,  innerException) { }
     }
     public class DependencyConflictException : . { }
     public class FailTestException : .

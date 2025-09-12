@@ -6,7 +6,11 @@ public class TestSessionContext : Context
     public static new TestSessionContext? Current
     {
         get => Contexts.Value;
-        internal set => Contexts.Value = value;
+        internal set
+        {
+            Contexts.Value = value;
+            TestDiscoveryContext.Current = value?.TestDiscoveryContext;
+        }
     }
 
     /// <summary>
@@ -47,7 +51,7 @@ public class TestSessionContext : Context
         Current = this;
     }
 
-    public BeforeTestDiscoveryContext TestDiscoveryContext => (BeforeTestDiscoveryContext) Parent!;
+    public TestDiscoveryContext TestDiscoveryContext => (TestDiscoveryContext) Parent!;
 
     public required string Id { get; init; }
 

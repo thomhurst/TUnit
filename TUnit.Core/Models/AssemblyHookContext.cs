@@ -10,7 +10,11 @@ public class AssemblyHookContext : Context
     public static new AssemblyHookContext? Current
     {
         get => Contexts.Value;
-        internal set => Contexts.Value = value;
+        internal set
+        {
+            Contexts.Value = value;
+            TestSessionContext.Current = value?.TestSessionContext;
+        }
     }
 
     internal AssemblyHookContext(TestSessionContext testSessionContext) : base(testSessionContext)

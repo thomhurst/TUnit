@@ -48,13 +48,6 @@ namespace
         public static ? ResolveType(string assemblyQualifiedName) { }
     }
 }
-namespace .Hooks
-{
-    public sealed class GeneratedHookRegistry
-    {
-        public GeneratedHookRegistry() { }
-    }
-}
 namespace 
 {
     public class BrowserTest : .PlaywrightTest

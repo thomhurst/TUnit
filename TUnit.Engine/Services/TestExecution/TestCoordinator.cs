@@ -69,6 +69,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             _contextRestorer.RestoreContext(test);
 
+            TestContext.Current = test.Context;
             test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
 
             await _testExecutor.ExecuteAsync(test, cancellationToken).ConfigureAwait(false);

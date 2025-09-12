@@ -10,7 +10,11 @@ public class ClassHookContext : Context
     public static new ClassHookContext? Current
     {
         get => Contexts.Value;
-        internal set => Contexts.Value = value;
+        internal set
+        {
+            Contexts.Value = value;
+            AssemblyHookContext.Current = value?.AssemblyContext;
+        }
     }
 
     internal ClassHookContext(AssemblyHookContext assemblyHookContext) : base(assemblyHookContext)
