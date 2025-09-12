@@ -3,7 +3,7 @@ using TUnit.Core.Enums;
 
 namespace TUnit.Engine.Services;
 
-public class LogLevelProvider(ICommandLineOptions commandLineOptions)
+internal class LogLevelProvider(ICommandLineOptions commandLineOptions)
 {
     internal static LogLevel? _logLevel;
     public LogLevel LogLevel => _logLevel ??= GetLogLevel();

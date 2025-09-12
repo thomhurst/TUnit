@@ -10,7 +10,7 @@ namespace TUnit.Engine.Services;
 /// Responsible for counter-based test lifecycle management.
 /// Follows Single Responsibility Principle - only manages test counts and lifecycle coordination.
 /// </summary>
-public sealed class TestLifecycleCoordinator : IDisposable
+internal sealed class TestLifecycleCoordinator : IDisposable
 {
     // Counter-based tracking for hook lifecycle
     private readonly ConcurrentDictionary<Type, Counter> _classTestCounts = new();
@@ -101,7 +101,7 @@ public sealed class TestLifecycleCoordinator : IDisposable
 /// <summary>
 /// Flags indicating which After hooks should be executed based on test completion counts.
 /// </summary>
-public sealed class AfterHookExecutionFlags
+internal sealed class AfterHookExecutionFlags
 {
     public bool ShouldExecuteAfterClass { get; set; }
     public bool ShouldExecuteAfterAssembly { get; set; }

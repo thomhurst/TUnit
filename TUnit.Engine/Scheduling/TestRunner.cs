@@ -1,12 +1,11 @@
-using System.Collections.Concurrent;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Data;
-using TUnit.Core.Exceptions;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.Engine.Scheduling;
 
@@ -23,6 +22,7 @@ public sealed class TestRunner : IDataProducer
     private readonly bool _isFailFastEnabled;
     private readonly CancellationTokenSource _failFastCancellationSource;
     private readonly TUnitFrameworkLogger _logger;
+    private readonly TestStateManager _testStateManager;
 
     public string Uid => "TUnit.TestExecutor";
     public string Version => "1.0.0";
@@ -38,7 +38,8 @@ public sealed class TestRunner : IDataProducer
         SessionUid sessionUid,
         bool isFailFastEnabled,
         CancellationTokenSource failFastCancellationSource,
-        TUnitFrameworkLogger logger)
+        TUnitFrameworkLogger logger,
+        TestStateManager testStateManager)
     {
         _testOrchestrator = testOrchestrator;
         _messageBus = messageBus;
@@ -47,6 +48,7 @@ public sealed class TestRunner : IDataProducer
         _isFailFastEnabled = isFailFastEnabled;
         _failFastCancellationSource = failFastCancellationSource;
         _logger = logger;
+        _testStateManager = testStateManager;
     }
 
     private readonly GetOnlyDictionary<string, Task> _executingTests = new();
@@ -67,37 +69,22 @@ public sealed class TestRunner : IDataProducer
             {
                 await ExecuteTestAsync(dependency.Test, cancellationToken).ConfigureAwait(false);
 
-                // Check if dependency failed and we should skip
                 if (dependency.Test.State == TestState.Failed && !dependency.ProceedOnFailure)
                 {
-                    test.State = TestState.Skipped;
-                    test.Result = new TestResult
-                    {
-                        State = TestState.Skipped,
-                        Start = DateTimeOffset.UtcNow,
-                        End = DateTimeOffset.UtcNow,
-                        Duration = TimeSpan.Zero,
-                        ComputerName = Environment.MachineName,
-                        Exception = new SkipTestException("Skipped due to failed dependencies")
-                    };
+                    await _testStateManager.MarkSkippedAsync(test, "Skipped due to failed dependencies").ConfigureAwait(false);
                     await _tunitMessageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
                     return;
                 }
             }
 
-            // Send initial progress message
             test.State = TestState.Running;
             test.StartTime = DateTimeOffset.UtcNow;
 
             await _tunitMessageBus.InProgress(test.Context).ConfigureAwait(false);
 
-            // Execute test through TestOrchestrator → TestExecutor
             var updateMessage = await _testOrchestrator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
 
-            // Publish the result to the message bus
             await _messageBus.PublishAsync(this, updateMessage).ConfigureAwait(false);
-
-            // Handle fail-fast logic
             if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
             {
                 await _logger.LogErrorAsync($"Test {test.TestId} failed. Triggering fail-fast cancellation.").ConfigureAwait(false);
@@ -106,17 +93,7 @@ public sealed class TestRunner : IDataProducer
         }
         catch (Exception ex)
         {
-            // Fallback error handling
-            test.State = TestState.Failed;
-            test.Result = new TestResult
-            {
-                State = TestState.Failed,
-                Start = test.StartTime,
-                End = DateTimeOffset.Now,
-                Duration = DateTimeOffset.Now - test.StartTime.GetValueOrDefault(),
-                Exception = ex,
-                ComputerName = Environment.MachineName
-            };
+            await _testStateManager.MarkFailedAsync(test, ex).ConfigureAwait(false);
 
             await _tunitMessageBus.Failed(test.Context, ex, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
             await _logger.LogErrorAsync($"Unhandled exception in test {test.TestId}: {ex}").ConfigureAwait(false);
@@ -126,8 +103,6 @@ public sealed class TestRunner : IDataProducer
                 await _logger.LogErrorAsync("Unhandled exception occurred. Triggering fail-fast cancellation.").ConfigureAwait(false);
                 _failFastCancellationSource.Cancel();
             }
-
-            throw;
         }
         finally
         {

@@ -3,7 +3,7 @@ using Microsoft.Testing.Platform.Requests;
 
 namespace TUnit.Engine.Services;
 
-public class FilterParser
+internal class FilterParser
 {
     private string? _stringFilter;
 

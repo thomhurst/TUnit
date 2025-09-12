@@ -18,7 +18,7 @@ internal sealed class HookExecutor
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
 
     public HookExecutor(
-        IHookCollectionService hookCollectionService, 
+        IHookCollectionService hookCollectionService,
         IContextProvider contextProvider,
         EventReceiverOrchestrator eventReceiverOrchestrator)
     {
@@ -32,6 +32,7 @@ internal sealed class HookExecutor
         var hooks = await _hookCollectionService.CollectBeforeTestSessionHooksAsync().ConfigureAwait(false);
         foreach (var hook in hooks)
         {
+            _contextProvider.TestSessionContext.RestoreExecutionContext();
             await hook(_contextProvider.TestSessionContext, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -44,11 +45,11 @@ internal sealed class HookExecutor
     {
         // Execute regular before session hooks
         await ExecuteBeforeTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
-        
+
         // Also execute first test in session event receivers (these run only once via internal task coordination)
         await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(
-            testContext, 
-            testContext.ClassContext.AssemblyContext.TestSessionContext, 
+            testContext,
+            testContext.ClassContext.AssemblyContext.TestSessionContext,
             cancellationToken).ConfigureAwait(false);
     }
 
@@ -57,6 +58,7 @@ internal sealed class HookExecutor
         var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync().ConfigureAwait(false);
         foreach (var hook in hooks)
         {
+            _contextProvider.TestSessionContext.RestoreExecutionContext();
             await hook(_contextProvider.TestSessionContext, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -67,6 +69,7 @@ internal sealed class HookExecutor
         foreach (var hook in hooks)
         {
             var context = _contextProvider.GetOrCreateAssemblyContext(assembly);
+            context.RestoreExecutionContext();
             await hook(context, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -78,14 +81,14 @@ internal sealed class HookExecutor
     public async Task ExecuteBeforeAssemblyHooksAsync(TestContext testContext, CancellationToken cancellationToken)
     {
         var assembly = testContext.TestDetails.ClassType.Assembly;
-        
+
         // Execute regular before assembly hooks
         await ExecuteBeforeAssemblyHooksAsync(assembly, cancellationToken).ConfigureAwait(false);
-        
+
         // Also execute first test in assembly event receivers
         await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(
-            testContext, 
-            testContext.ClassContext.AssemblyContext, 
+            testContext,
+            testContext.ClassContext.AssemblyContext,
             cancellationToken).ConfigureAwait(false);
     }
 
@@ -95,6 +98,7 @@ internal sealed class HookExecutor
         foreach (var hook in hooks)
         {
             var context = _contextProvider.GetOrCreateAssemblyContext(assembly);
+            context.RestoreExecutionContext();
             await hook(context, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -107,6 +111,7 @@ internal sealed class HookExecutor
         foreach (var hook in hooks)
         {
             var context = _contextProvider.GetOrCreateClassContext(testClass);
+            context.RestoreExecutionContext();
             await hook(context, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -118,14 +123,14 @@ internal sealed class HookExecutor
     public async Task ExecuteBeforeClassHooksAsync(TestContext testContext, CancellationToken cancellationToken)
     {
         var testClass = testContext.TestDetails.ClassType;
-        
+
         // Execute regular before class hooks
         await ExecuteBeforeClassHooksAsync(testClass, cancellationToken).ConfigureAwait(false);
-        
+
         // Also execute first test in class event receivers
         await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(
-            testContext, 
-            testContext.ClassContext, 
+            testContext,
+            testContext.ClassContext,
             cancellationToken).ConfigureAwait(false);
     }
 
@@ -137,6 +142,7 @@ internal sealed class HookExecutor
         foreach (var hook in hooks)
         {
             var context = _contextProvider.GetOrCreateClassContext(testClass);
+            context.RestoreExecutionContext();
             await hook(context, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -144,18 +150,20 @@ internal sealed class HookExecutor
     public async Task ExecuteBeforeTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassType = test.Metadata.TestClassType;
-        
+
         // Execute Before(Test) hooks specific to this test
         var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType).ConfigureAwait(false);
         foreach (var hook in beforeTestHooks)
         {
+            test.Context.RestoreExecutionContext();
             await hook(test.Context, cancellationToken).ConfigureAwait(false);
         }
-        
+
         // Execute BeforeEvery(Test) hooks (global test hooks)
         var beforeEveryTestHooks = await _hookCollectionService.CollectBeforeEveryTestHooksAsync(testClassType).ConfigureAwait(false);
         foreach (var hook in beforeEveryTestHooks)
         {
+            test.Context.RestoreExecutionContext();
             await hook(test.Context, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -163,18 +171,20 @@ internal sealed class HookExecutor
     public async Task ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassType = test.Metadata.TestClassType;
-        
+
         // Execute After(Test) hooks specific to this test
         var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType).ConfigureAwait(false);
         foreach (var hook in afterTestHooks)
         {
+            test.Context.RestoreExecutionContext();
             await hook(test.Context, cancellationToken).ConfigureAwait(false);
         }
-        
+
         // Execute AfterEvery(Test) hooks (global test hooks)
         var afterEveryTestHooks = await _hookCollectionService.CollectAfterEveryTestHooksAsync(testClassType).ConfigureAwait(false);
         foreach (var hook in afterEveryTestHooks)
         {
+            test.Context.RestoreExecutionContext();
             await hook(test.Context, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -184,6 +194,7 @@ internal sealed class HookExecutor
         var hooks = await _hookCollectionService.CollectBeforeTestDiscoveryHooksAsync().ConfigureAwait(false);
         foreach (var hook in hooks)
         {
+            _contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
             await hook(_contextProvider.BeforeTestDiscoveryContext, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -193,6 +204,7 @@ internal sealed class HookExecutor
         var hooks = await _hookCollectionService.CollectAfterTestDiscoveryHooksAsync().ConfigureAwait(false);
         foreach (var hook in hooks)
         {
+            _contextProvider.TestDiscoveryContext.RestoreExecutionContext();
             await hook(_contextProvider.TestDiscoveryContext, cancellationToken).ConfigureAwait(false);
         }
     }

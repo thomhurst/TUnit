@@ -8,7 +8,7 @@ namespace TUnit.Engine.Services;
 /// Responsible for caching Before hook tasks to ensure they run only once.
 /// Follows Single Responsibility Principle - only handles task caching.
 /// </summary>
-public sealed class BeforeHookTaskCache : IDisposable
+internal sealed class BeforeHookTaskCache : IDisposable
 {
     // Cached Before hook tasks to ensure they run only once
     private readonly ConcurrentDictionary<Type, Task> _beforeClassTasks = new();

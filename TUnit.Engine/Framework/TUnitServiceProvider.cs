@@ -18,6 +18,7 @@ using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
+using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.Engine.Framework;
 
@@ -96,18 +97,19 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         ContextProvider = Register(new ContextProvider(this, TestSessionId, Filter?.ToString()));
 
-        // Register the new focused services that follow SRP
         var hookExecutor = Register(new HookExecutor(HookCollectionService, ContextProvider, EventReceiverOrchestrator));
         var lifecycleCoordinator = Register(new TestLifecycleCoordinator());
         var beforeHookTaskCache = Register(new BeforeHookTaskCache());
 
-        // Register the refactored TestOrchestrator that composes the focused services
         TestExecutor = Register(new TestExecutor(hookExecutor, lifecycleCoordinator, beforeHookTaskCache, ContextProvider));
 
-        // Detect execution mode from command line or environment
-        var useSourceGeneration = GetUseSourceGeneration(CommandLineOptions);
+        var testExecutionGuard = Register(new TestExecutionGuard());
+        var testStateManager = Register(new TestStateManager());
+        var testMessagePublisher = Register(new TestMessagePublisher(MessageBus));
+        var testContextRestorer = Register(new TestContextRestorer());
+        var testMethodInvoker = Register(new TestMethodInvoker());
 
-        // Create data collector factory that creates collectors with filter types
+        var useSourceGeneration = GetUseSourceGeneration(CommandLineOptions);
 #pragma warning disable IL2026 // Using member which has 'RequiresUnreferencedCodeAttribute'
 #pragma warning disable IL3050 // Using member which has 'RequiresDynamicCodeAttribute'
         Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory = filterTypes =>
@@ -127,7 +129,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testBuilder = Register<ITestBuilder>(
             new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider));
 
-        // Create pipeline with all dependencies
         TestBuilderPipeline = Register(
             new TestBuilderPipeline(
                 dataCollectorFactory,
@@ -140,9 +141,17 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
 
-        // Create single test executor with ExecutionContext support
-        var testOrchestrator = Register<ITestOrchestrator>(
-            new TestOrchestrator(Logger, EventReceiverOrchestrator, CancellationToken, TestExecutor, context.Request.Session.SessionUid));
+        // Create the new TestCoordinator that orchestrates the granular services
+        var testCoordinator = Register<ITestOrchestrator>(
+            new TestCoordinator(
+                testExecutionGuard,
+                testStateManager,
+                testMessagePublisher,
+                testContextRestorer,
+                testMethodInvoker,
+                TestExecutor,
+                Logger,
+                context.Request.Session.SessionUid));
 
         // Create the HookOrchestratingTestExecutorAdapter
         // Note: We'll need to update this to handle dynamic dependencies properly
@@ -152,26 +161,30 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var testRunner = Register(
             new TestRunner(
-                testOrchestrator,
+                testCoordinator,
                 messageBus,
                 MessageBus,
                 sessionUid,
                 isFailFastEnabled,
                 FailFastCancellationSource,
-                Logger));
+                Logger,
+                testStateManager));
 
         // Create scheduler configuration from command line options
         var testGroupingService = Register<ITestGroupingService>(new TestGroupingService());
+        var circularDependencyDetector = Register(new CircularDependencyDetector());
 
         var testScheduler = Register<ITestScheduler>(new TestScheduler(
             Logger,
             testGroupingService,
             MessageBus,
             CommandLineOptions,
-            ParallelLimitLockProvider));
+            ParallelLimitLockProvider,
+            testStateManager,
+            circularDependencyDetector));
 
         TestSessionCoordinator = Register(new TestSessionCoordinator(
-            testOrchestrator,
+            testCoordinator,
             CommandLineOptions,
             Logger,
             loggerFactory,
@@ -181,7 +194,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             ContextProvider,
             MessageBus));
 
-        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testOrchestrator, TestSessionId, CancellationToken.Token));
+        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, TestSessionId, CancellationToken.Token));
 
         InitializeConsoleInterceptors();
     }

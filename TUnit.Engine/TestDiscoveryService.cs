@@ -57,6 +57,10 @@ internal sealed class TestDiscoveryService : IDataProducer
     {
         await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
+        var contextProvider = _testExecutor.GetContextProvider();
+
+        contextProvider.TestDiscoveryContext.RestoreExecutionContext();
+
         // Extract types from filter for optimized discovery
         var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
 
@@ -119,11 +123,11 @@ internal sealed class TestDiscoveryService : IDataProducer
             filteredTests = testsToInclude.ToList();
         }
 
-        // Populate the TestDiscoveryContext with all discovered tests before running AfterTestDiscovery hooks
-        var contextProvider = _testExecutor.GetContextProvider();
         contextProvider.TestDiscoveryContext.AddTests(allTests.Select(t => t.Context));
 
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
+
+        contextProvider.TestDiscoveryContext.RestoreExecutionContext();
 
         // Register the filtered tests to invoke ITestRegisteredEventReceiver
         await _testFilterService.RegisterTestsAsync(filteredTests).ConfigureAwait(false);
@@ -190,7 +194,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         // Separate into independent and dependent tests
         var independentTests = new List<AbstractExecutableTest>();
         var dependentTests = new List<AbstractExecutableTest>();
-        
+
         foreach (var test in allTests)
         {
             if (test.Dependencies.Length == 0)
@@ -215,16 +219,16 @@ internal sealed class TestDiscoveryService : IDataProducer
         // Process dependent tests in dependency order
         var yieldedTests = new HashSet<string>(independentTests.Select(t => t.TestId));
         var remainingTests = new List<AbstractExecutableTest>(dependentTests);
-        
+
         while (remainingTests.Count > 0)
         {
             var readyTests = new List<AbstractExecutableTest>();
-            
+
             foreach (var test in remainingTests)
             {
                 // Check if all dependencies have been yielded
                 var allDependenciesYielded = test.Dependencies.All(dep => yieldedTests.Contains(dep.Test.TestId));
-                
+
                 if (allDependenciesYielded)
                 {
                     readyTests.Add(test);
