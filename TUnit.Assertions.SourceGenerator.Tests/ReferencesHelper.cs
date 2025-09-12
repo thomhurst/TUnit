@@ -15,6 +15,8 @@ internal class ReferencesHelper
                 MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Assert).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Polyfill).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Uri).Assembly.Location),
             ])
             .ToList();
 }

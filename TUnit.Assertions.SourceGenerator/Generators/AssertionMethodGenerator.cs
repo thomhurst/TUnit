@@ -48,6 +48,11 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
             if (targetType != null && containingType != null && !string.IsNullOrEmpty(methodName))
             {
+                // Skip error symbols - they'll be reported as missing methods later
+            if (targetType.TypeKind == TypeKind.Error || containingType.TypeKind == TypeKind.Error)
+            {
+                continue;
+            }
                 string? customName = null;
                 if (attributeData.NamedArguments.Any(na => na.Key == "CustomName"))
                 {
