@@ -69,7 +69,7 @@ internal sealed class TestCoordinator : ITestOrchestrator
 
             _contextRestorer.RestoreContext(test);
 
-            await test.CreateInstanceAsync();
+            test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
 
             await _testExecutor.ExecuteAsync(test, cancellationToken).ConfigureAwait(false);
 

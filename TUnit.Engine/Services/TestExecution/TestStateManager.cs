@@ -18,18 +18,15 @@ internal sealed class TestStateManager
 
     public Task MarkCompletedAsync(AbstractExecutableTest test)
     {
-        if (test.Result == null)
+        test.Result ??= new TestResult
         {
-            test.Result = new TestResult
-            {
-                State = TestState.Passed,
-                Start = test.StartTime,
-                End = DateTimeOffset.UtcNow,
-                Duration = DateTimeOffset.UtcNow - test.StartTime.GetValueOrDefault(),
-                Exception = null,
-                ComputerName = Environment.MachineName
-            };
-        }
+            State = TestState.Passed,
+            Start = test.StartTime,
+            End = DateTimeOffset.UtcNow,
+            Duration = DateTimeOffset.UtcNow - test.StartTime.GetValueOrDefault(),
+            Exception = null,
+            ComputerName = Environment.MachineName
+        };
 
         test.State = test.Result.State;
         test.EndTime = DateTimeOffset.UtcNow;

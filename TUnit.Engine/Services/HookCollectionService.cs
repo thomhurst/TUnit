@@ -16,10 +16,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     private readonly ConcurrentDictionary<Type, IReadOnlyList<Func<TestContext, CancellationToken, Task>>> _afterEveryTestHooksCache = new();
     private readonly ConcurrentDictionary<Type, IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> _beforeClassHooksCache = new();
     private readonly ConcurrentDictionary<Type, IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>>> _afterClassHooksCache = new();
-    
-    // Cache for complete hook chains to avoid repeated lookups
-    private readonly ConcurrentDictionary<Type, CompleteHookChain> _completeHookChainCache = new();
-    
+
     // Cache for processed hooks to avoid re-processing event receivers
     private readonly ConcurrentDictionary<object, bool> _processedHooks = new();
 
@@ -46,22 +43,6 @@ internal sealed class HookCollectionService : IHookCollectionService
             // Ignore errors during hook registration event processing to avoid breaking hook execution
             // The EventReceiverOrchestrator already logs errors internally
         }
-    }
-    
-    private sealed class CompleteHookChain
-    {
-        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> BeforeTestHooks { get; init; } = [
-        ];
-        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> AfterTestHooks { get; init; } = [
-        ];
-        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> BeforeEveryTestHooks { get; init; } = [
-        ];
-        public IReadOnlyList<Func<TestContext, CancellationToken, Task>> AfterEveryTestHooks { get; init; } = [
-        ];
-        public IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> BeforeClassHooks { get; init; } = [
-        ];
-        public IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> AfterClassHooks { get; init; } = [
-        ];
     }
 
     public async ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeTestHooksAsync(Type testClassType)
@@ -574,7 +555,7 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         // Process hook registration event receivers
         await ProcessHookRegistrationAsync(hook);
-        
+
         return async (context, cancellationToken) =>
         {
             var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
@@ -583,7 +564,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 hook.Timeout,
                 hook.Name,
                 cancellationToken);
-            
+
             await timeoutAction();
         };
     }
@@ -592,14 +573,14 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         // Process hook registration event receivers
         await ProcessHookRegistrationAsync(hook);
-        
+
         return async (context, cancellationToken) =>
         {
             var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
                 hook,
                 context,
                 cancellationToken);
-            
+
             await timeoutAction();
         };
     }
@@ -612,7 +593,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 hook,
                 context,
                 cancellationToken);
-            
+
             await timeoutAction();
         };
     }
@@ -625,7 +606,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 hook,
                 context,
                 cancellationToken);
-            
+
             await timeoutAction();
         };
     }
@@ -638,7 +619,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 hook,
                 context,
                 cancellationToken);
-            
+
             await timeoutAction();
         };
     }
@@ -651,7 +632,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 hook,
                 context,
                 cancellationToken);
-            
+
             await timeoutAction();
         };
     }
@@ -664,7 +645,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 hook,
                 context,
                 cancellationToken);
-            
+
             await timeoutAction();
         };
     }
