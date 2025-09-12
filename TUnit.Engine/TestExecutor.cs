@@ -65,7 +65,7 @@ internal class TestExecutor : IDisposable
 
             // Only wrap the actual test execution with timeout, not the hooks
             var testTimeout = executableTest.Context.TestDetails.Timeout;
-            var timeoutMessage = testTimeout.HasValue 
+            var timeoutMessage = testTimeout.HasValue
                 ? $"Test '{executableTest.Context.TestDetails.TestName}' execution timed out after {testTimeout.Value}"
                 : null;
 
@@ -117,14 +117,6 @@ internal class TestExecutor : IDisposable
         {
             await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
         }
-    }
-
-    /// <summary>
-    /// Execute session-level before hooks once at the start of test execution.
-    /// </summary>
-    public async Task ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
-    {
-        await _hookExecutor.ExecuteBeforeTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

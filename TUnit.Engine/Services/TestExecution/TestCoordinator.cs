@@ -49,7 +49,7 @@ internal sealed class TestCoordinator : ITestOrchestrator
 
     public async Task<TestNodeUpdateMessage> ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        var wasExecuted = await _executionGuard.TryStartExecutionAsync(test.TestId, 
+        var wasExecuted = await _executionGuard.TryStartExecutionAsync(test.TestId,
             () => ExecuteTestInternalAsync(test, cancellationToken)).ConfigureAwait(false);
 
         if (!wasExecuted)
@@ -66,11 +66,13 @@ internal sealed class TestCoordinator : ITestOrchestrator
         {
             await _stateManager.MarkRunningAsync(test).ConfigureAwait(false);
             await _messagePublisher.PublishStartedAsync(test).ConfigureAwait(false);
-            
+
             _contextRestorer.RestoreContext(test);
-            
+
+            await test.CreateInstanceAsync();
+
             await _testExecutor.ExecuteAsync(test, cancellationToken).ConfigureAwait(false);
-            
+
             await _stateManager.MarkCompletedAsync(test).ConfigureAwait(false);
             await _messagePublisher.PublishCompletedAsync(test).ConfigureAwait(false);
         }
@@ -78,7 +80,6 @@ internal sealed class TestCoordinator : ITestOrchestrator
         {
             await _stateManager.MarkFailedAsync(test, ex).ConfigureAwait(false);
             await _messagePublisher.PublishFailedAsync(test, ex).ConfigureAwait(false);
-            throw;
         }
     }
 

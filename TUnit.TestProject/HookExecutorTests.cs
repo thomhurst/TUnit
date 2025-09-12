@@ -17,6 +17,7 @@ public class HookExecutorTests
 
         var test = context.AllTests.FirstOrDefault(x =>
             x.TestDetails.TestName == nameof(VerifyBeforeTestSessionExecutorExecuted));
+
         test?.ObjectBag.Add("BeforeTestSessionExecutorExecuted", true);
     }
 

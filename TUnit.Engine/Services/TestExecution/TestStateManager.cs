@@ -30,7 +30,7 @@ internal sealed class TestStateManager
                 ComputerName = Environment.MachineName
             };
         }
-        
+
         test.State = test.Result.State;
         test.EndTime = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
@@ -49,6 +49,7 @@ internal sealed class TestStateManager
             Duration = test.EndTime - test.StartTime.GetValueOrDefault(),
             ComputerName = Environment.MachineName
         };
+
         return Task.CompletedTask;
     }
 

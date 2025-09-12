@@ -48,18 +48,13 @@ internal sealed class TestDiscoveryService : IDataProducer
         _testFilterService = testFilterService;
     }
 
-    public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken)
-    {
-        return await DiscoverTests(testSessionId, filter, cancellationToken, isForExecution: true).ConfigureAwait(false);
-    }
-
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken, bool isForExecution)
     {
         await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
         var contextProvider = _testExecutor.GetContextProvider();
 
-        contextProvider.TestDiscoveryContext.RestoreExecutionContext();
+        contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
 
         // Extract types from filter for optimized discovery
         var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
