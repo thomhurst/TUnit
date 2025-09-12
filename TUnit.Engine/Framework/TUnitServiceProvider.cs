@@ -142,7 +142,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
 
         // Create the new TestCoordinator that orchestrates the granular services
-        var testCoordinator = Register<ITestOrchestrator>(
+        var testCoordinator = Register<ITestCoordinator>(
             new TestCoordinator(
                 testExecutionGuard,
                 testStateManager,

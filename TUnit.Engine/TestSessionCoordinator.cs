@@ -16,7 +16,7 @@ namespace TUnit.Engine;
 
 internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyncDisposable
 {
-    private readonly ITestOrchestrator _testOrchestrator;
+    private readonly ITestCoordinator _testCoordinator;
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestScheduler _testScheduler;
@@ -27,7 +27,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     private readonly ITUnitMessageBus _messageBus;
 
     public TestSessionCoordinator(
-        ITestOrchestrator testOrchestrator,
+        ITestCoordinator testCoordinator,
         ICommandLineOptions commandLineOptions,
         TUnitFrameworkLogger logger,
         ILoggerFactory? loggerFactory,
@@ -37,7 +37,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         IContextProvider contextProvider,
         ITUnitMessageBus messageBus)
     {
-        _testOrchestrator = testOrchestrator;
+        _testCoordinator = testCoordinator;
         _commandLineOptions = commandLineOptions;
         _logger = logger;
         _loggerFactory = loggerFactory ?? new NullLoggerFactory();

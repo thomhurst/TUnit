@@ -15,7 +15,7 @@ namespace TUnit.Engine.Scheduling;
 /// </summary>
 public sealed class TestRunner : IDataProducer
 {
-    private readonly ITestOrchestrator _testOrchestrator;
+    private readonly ITestCoordinator _testCoordinator;
     private readonly IMessageBus _messageBus;
     private readonly ITUnitMessageBus _tunitMessageBus;
     private readonly SessionUid _sessionUid;
@@ -32,7 +32,7 @@ public sealed class TestRunner : IDataProducer
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
     internal TestRunner(
-        ITestOrchestrator testOrchestrator,
+        ITestCoordinator testCoordinator,
         IMessageBus messageBus,
         ITUnitMessageBus tunitMessageBus,
         SessionUid sessionUid,
@@ -41,7 +41,7 @@ public sealed class TestRunner : IDataProducer
         TUnitFrameworkLogger logger,
         TestStateManager testStateManager)
     {
-        _testOrchestrator = testOrchestrator;
+        _testCoordinator = testCoordinator;
         _messageBus = messageBus;
         _tunitMessageBus = tunitMessageBus;
         _sessionUid = sessionUid;
@@ -82,7 +82,7 @@ public sealed class TestRunner : IDataProducer
 
             await _tunitMessageBus.InProgress(test.Context).ConfigureAwait(false);
 
-            var updateMessage = await _testOrchestrator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+            var updateMessage = await _testCoordinator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
 
             await _messageBus.PublishAsync(this, updateMessage).ConfigureAwait(false);
             if (_isFailFastEnabled && test.Result?.State == TestState.Failed)

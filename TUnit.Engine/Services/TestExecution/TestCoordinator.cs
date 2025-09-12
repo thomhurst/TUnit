@@ -12,7 +12,7 @@ namespace TUnit.Engine.Services.TestExecution;
 /// Coordinates test execution by orchestrating focused services.
 /// Single Responsibility: Test execution orchestration.
 /// </summary>
-internal sealed class TestCoordinator : ITestOrchestrator
+internal sealed class TestCoordinator : ITestCoordinator
 {
     private readonly TestExecutionGuard _executionGuard;
     private readonly TestStateManager _stateManager;
