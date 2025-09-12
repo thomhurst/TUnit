@@ -911,6 +911,20 @@ namespace ..Conditions
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TEnum? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
+    public class EnumIsDefinedAssertCondition<TEnum> : .<TEnum>
+        where TEnum :  struct, 
+    {
+        public EnumIsDefinedAssertCondition() { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(TEnum actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
+    public class EnumIsNotDefinedAssertCondition<TEnum> : .<TEnum>
+        where TEnum :  struct, 
+    {
+        public EnumIsNotDefinedAssertCondition() { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(TEnum actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
 }
 namespace .
 {
@@ -1800,6 +1814,10 @@ namespace .Extensions
     {
         public static .<> DoesNotHaveFlag(this ..IValueSource<> valueSource,  flag, [.("flag")] string? doNotPopulateThisValue1 = null) { }
         public static .<> HasFlag(this ..IValueSource<> valueSource,  flag, [.("flag")] string? doNotPopulateThisValue1 = null) { }
+        public static .<TEnum> IsDefined<TEnum>(this ..IValueSource<TEnum> valueSource)
+            where TEnum :  struct,  { }
+        public static .<TEnum> IsNotDefined<TEnum>(this ..IValueSource<TEnum> valueSource)
+            where TEnum :  struct,  { }
     }
     public class EnumHasFlagWithEnumAssertCondition : .<>
     {
@@ -1952,24 +1970,12 @@ namespace .Extensions
         protected override string GetExpectation() { }
         protected override .<.> GetResult(.FileInfo? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
-    [.(typeof(.DirectoryInfo), "Exists")]
-    [.(typeof(.DirectoryInfo), "Exists", CustomName="DoesNotExist", NegateLogic=true)]
-    [.(typeof(.FileInfo), "Exists")]
-    [.(typeof(.FileInfo), "Exists", CustomName="DoesNotExist", NegateLogic=true)]
-    [.(typeof(.FileInfo), "IsReadOnly")]
-    [.(typeof(.FileInfo), "IsReadOnly", CustomName="IsNotReadOnly", NegateLogic=true)]
     [.(typeof(.FileSystemInfo), "Exists")]
     [.(typeof(.FileSystemInfo), "Exists", CustomName="DoesNotExist", NegateLogic=true)]
     public static class FileSystemAssertionExtensions
     {
-        public static .<.DirectoryInfo> DoesNotExist(this ..IValueSource<.DirectoryInfo> valueSource) { }
-        public static .<.FileInfo> DoesNotExist(this ..IValueSource<.FileInfo> valueSource) { }
         public static .<.FileSystemInfo> DoesNotExist(this ..IValueSource<.FileSystemInfo> valueSource) { }
-        public static .<.DirectoryInfo> Exists(this ..IValueSource<.DirectoryInfo> valueSource) { }
-        public static .<.FileInfo> Exists(this ..IValueSource<.FileInfo> valueSource) { }
         public static .<.FileSystemInfo> Exists(this ..IValueSource<.FileSystemInfo> valueSource) { }
-        public static .<.FileInfo> IsNotReadOnly(this ..IValueSource<.FileInfo> valueSource) { }
-        public static .<.FileInfo> IsReadOnly(this ..IValueSource<.FileInfo> valueSource) { }
     }
     public class FileSystemInfoExistsAssertCondition : .<.FileSystemInfo>
     {

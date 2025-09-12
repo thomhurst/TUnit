@@ -3,16 +3,8 @@ using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Extensions;
 
-// FileInfo assertions
-[CreateAssertion(typeof(FileInfo), nameof(FileInfo.Exists))]
-[CreateAssertion(typeof(FileInfo), nameof(FileInfo.Exists), CustomName = "DoesNotExist", NegateLogic = true)]
-
-[CreateAssertion(typeof(FileInfo), nameof(FileInfo.IsReadOnly))]
-[CreateAssertion(typeof(FileInfo), nameof(FileInfo.IsReadOnly), CustomName = "IsNotReadOnly", NegateLogic = true)]
-
-// DirectoryInfo assertions
-[CreateAssertion(typeof(DirectoryInfo), nameof(DirectoryInfo.Exists))]
-[CreateAssertion(typeof(DirectoryInfo), nameof(DirectoryInfo.Exists), CustomName = "DoesNotExist", NegateLogic = true)]
+// FileInfo-specific assertions are in FileInfoAssertionExtensions.cs
+// DirectoryInfo-specific assertions are in DirectoryInfoAssertionExtensions.cs
 
 // FileSystemInfo common assertions (base class for both FileInfo and DirectoryInfo)
 [CreateAssertion(typeof(FileSystemInfo), nameof(FileSystemInfo.Exists))]
