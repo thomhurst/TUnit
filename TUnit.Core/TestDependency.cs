@@ -58,32 +58,53 @@ public sealed class TestDependency : IEquatable<TestDependency>
         {
             var testClassType = test.TestClassType;
 
-            if (ClassType.IsGenericTypeDefinition && testClassType.IsGenericType)
+            if (ClassType.IsGenericTypeDefinition)
             {
-                if (testClassType.GetGenericTypeDefinition() != ClassType)
+                // Early exit if test class type has no generic inheritance at all
+                if (testClassType is { IsGenericType: false, BaseType: null })
                 {
-                    var currentType = testClassType.BaseType;
+                    return false;
+                }
+                
+                // Quick check: if test class type is generic and matches directly, we're done
+                if (testClassType.IsGenericType && testClassType.GetGenericTypeDefinition() == ClassType)
+                {
+                    // Direct match found, continue to method checks
+                }
+                else
+                {
+                    // Only traverse inheritance if we have a base type and it's likely to be generic
                     var found = false;
-                    while (currentType != null && !found)
+                    var currentType = testClassType.BaseType;
+                    var depth = 0;
+                    const int maxInheritanceDepth = 10; // Reduced from 50 to 10 for better performance
+                    
+                    while (currentType != null && !found && depth < maxInheritanceDepth)
                     {
+                        // Only check generic types to avoid unnecessary reflection calls
                         if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == ClassType)
                         {
                             found = true;
                         }
                         currentType = currentType.BaseType;
+                        depth++;
                     }
+                    
                     if (!found)
                     {
                         return false;
                     }
                 }
+                
+                // For generic type definitions, we don't need to check arity against the test class
+                // because the test class may inherit from a closed generic version of the dependency
             }
             else if (!ClassType.IsAssignableFrom(testClassType))
             {
                 return false;
             }
 
-            if (ClassGenericArity > 0)
+            if (ClassGenericArity > 0 && !ClassType.IsGenericTypeDefinition)
             {
                 var testGenericArgs = testClassType.IsGenericType
                     ? testClassType.GetGenericArguments().Length

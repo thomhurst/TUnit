@@ -51,7 +51,12 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken)
     {
-        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
+        return await DiscoverTests(testSessionId, filter, cancellationToken, isForExecution: true).ConfigureAwait(false);
+    }
+
+    public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken, bool isForExecution)
+    {
+        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 #if NET
         if (discoveryContext != null)
         {
@@ -67,7 +72,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         var dependentTests = new List<AbstractExecutableTest>();
         var allTests = new List<AbstractExecutableTest>();
 
-        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken))
+        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false))
         {
             allTests.Add(test);
 
@@ -95,36 +100,40 @@ internal sealed class TestDiscoveryService : IDataProducer
         tests.AddRange(independentTests);
         tests.AddRange(dependentTests);
 
-        // Apply filter first to get the tests we want to run
-        var filteredTests = _testFilterService.FilterTests(filter, tests);
+        // For discovery requests (IDE test explorers), return all tests including explicit ones
+        // For execution requests, apply filtering to exclude explicit tests unless explicitly targeted
+        var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, tests) : tests;
 
-        // Now find all dependencies of filtered tests and add them
-        var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
-        var queue = new Queue<AbstractExecutableTest>(filteredTests);
-
-        while (queue.Count > 0)
+        // If we applied filtering, find all dependencies of filtered tests and add them
+        if (isForExecution)
         {
-            var test = queue.Dequeue();
-            foreach (var resolvedDep in test.Dependencies)
+            var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
+            var queue = new Queue<AbstractExecutableTest>(filteredTests);
+
+            while (queue.Count > 0)
             {
-                var dependency = resolvedDep.Test;
-                if (testsToInclude.Add(dependency))
+                var test = queue.Dequeue();
+                foreach (var resolvedDep in test.Dependencies)
                 {
-                    queue.Enqueue(dependency);
+                    var dependency = resolvedDep.Test;
+                    if (testsToInclude.Add(dependency))
+                    {
+                        queue.Enqueue(dependency);
+                    }
                 }
             }
-        }
 
-        filteredTests = testsToInclude.ToList();
+            filteredTests = testsToInclude.ToList();
+        }
 
         // Populate the TestDiscoveryContext with all discovered tests before running AfterTestDiscovery hooks
         var contextProvider = _hookOrchestrator.GetContextProvider();
         contextProvider.TestDiscoveryContext.AddTests(allTests.Select(t => t.Context));
 
-        await _hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken);
+        await _hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
         // Register the filtered tests to invoke ITestRegisteredEventReceiver
-        await _testFilterService.RegisterTestsAsync(filteredTests);
+        await _testFilterService.RegisterTestsAsync(filteredTests).ConfigureAwait(false);
 
         // Capture the final execution context after discovery
         var finalContext = ExecutionContext.Capture();
@@ -146,7 +155,7 @@ internal sealed class TestDiscoveryService : IDataProducer
             cts.CancelAfter(DiscoveryConfiguration.DiscoveryTimeout);
         }
 
-        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, filterTypes, cancellationToken);
+        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false);
 
         foreach (var test in tests)
         {
@@ -160,15 +169,14 @@ internal sealed class TestDiscoveryService : IDataProducer
     }
 
     /// <summary>
-    /// Truly streaming test discovery that yields independent tests immediately
-    /// and progressively resolves dependent tests as their dependencies are satisfied
+    /// Simplified streaming test discovery without channels - matches source generation approach
     /// </summary>
     public async IAsyncEnumerable<AbstractExecutableTest> DiscoverTestsFullyStreamingAsync(
         string testSessionId,
         ITestExecutionFilter? filter,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken);
+        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 #if NET
         if (discoveryContext != null)
         {
@@ -179,90 +187,88 @@ internal sealed class TestDiscoveryService : IDataProducer
         // Extract types from filter for optimized discovery
         var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
 
-        // Lightweight tracking structures
-        var testIdToTest = new ConcurrentDictionary<string, AbstractExecutableTest>();
-        var pendingDependentTests = new ConcurrentDictionary<string, AbstractExecutableTest>();
-        var completedTests = new ConcurrentDictionary<string, bool>();
-        var readyTestsChannel = Channel.CreateUnbounded<AbstractExecutableTest>();
-
-        // Start discovery task that feeds the channel
-        var discoveryTask = Task.Run(async () =>
+        // Collect all tests first (like source generation mode does)
+        var allTests = new List<AbstractExecutableTest>();
+        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false))
         {
-            try
-            {
-                await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken))
-                {
-                    testIdToTest[test.TestId] = test;
+            allTests.Add(test);
+        }
 
-                    // Check if this test has dependencies
-                    if (test.Metadata.Dependencies.Length == 0)
-                    {
-                        // No dependencies - stream immediately
-                        await readyTestsChannel.Writer.WriteAsync(test, cancellationToken);
-                    }
-                    else
-                    {
-                        // Has dependencies - buffer for later
-                        pendingDependentTests[test.TestId] = test;
-                    }
-                }
-
-                // Discovery complete - now resolve dependencies
-                // This is still needed for dependent tests
-                foreach (var test in pendingDependentTests.Values)
-                {
-                    _dependencyResolver.TryResolveDependencies(test);
-                }
-
-                // Queue tests whose dependencies are already satisfied
-                foreach (var test in pendingDependentTests.Values.ToList())
-                {
-                    if (AreAllDependenciesSatisfied(test, completedTests))
-                    {
-                        pendingDependentTests.TryRemove(test.TestId, out _);
-                        await readyTestsChannel.Writer.WriteAsync(test, cancellationToken);
-                    }
-                }
-            }
-            finally
-            {
-                // Signal that discovery is complete
-                readyTestsChannel.Writer.TryComplete();
-            }
-        }, cancellationToken);
-
-        // Yield tests as they become ready
-        await foreach (var test in readyTestsChannel.Reader.ReadAllAsync(cancellationToken))
+        // Resolve dependencies for all tests
+        foreach (var test in allTests)
         {
-            // Apply filter
+            _dependencyResolver.TryResolveDependencies(test);
+        }
+
+        // Separate into independent and dependent tests
+        var independentTests = new List<AbstractExecutableTest>();
+        var dependentTests = new List<AbstractExecutableTest>();
+        
+        foreach (var test in allTests)
+        {
+            if (test.Dependencies.Length == 0)
+            {
+                independentTests.Add(test);
+            }
+            else
+            {
+                dependentTests.Add(test);
+            }
+        }
+
+        // Yield independent tests first
+        foreach (var test in independentTests)
+        {
             if (_testFilterService.MatchesTest(filter, test))
             {
                 yield return test;
             }
+        }
 
-            // Mark test as completed for dependency resolution
-            completedTests[test.TestId] = true;
-
-            // Check if any pending tests now have their dependencies satisfied
-            var nowReadyTests = new List<AbstractExecutableTest>();
-            foreach (var pendingTest in pendingDependentTests.Values)
+        // Process dependent tests in dependency order
+        var yieldedTests = new HashSet<string>(independentTests.Select(t => t.TestId));
+        var remainingTests = new List<AbstractExecutableTest>(dependentTests);
+        
+        while (remainingTests.Count > 0)
+        {
+            var readyTests = new List<AbstractExecutableTest>();
+            
+            foreach (var test in remainingTests)
             {
-                if (AreAllDependenciesSatisfied(pendingTest, completedTests))
+                // Check if all dependencies have been yielded
+                var allDependenciesYielded = test.Dependencies.All(dep => yieldedTests.Contains(dep.Test.TestId));
+                
+                if (allDependenciesYielded)
                 {
-                    nowReadyTests.Add(pendingTest);
+                    readyTests.Add(test);
                 }
             }
 
-            // Queue newly ready tests
-            foreach (var readyTest in nowReadyTests)
+            // If no tests are ready, we have a circular dependency
+            if (readyTests.Count == 0 && remainingTests.Count > 0)
             {
-                pendingDependentTests.TryRemove(readyTest.TestId, out _);
-                await readyTestsChannel.Writer.WriteAsync(readyTest, cancellationToken);
+                // Yield remaining tests anyway to avoid hanging
+                foreach (var test in remainingTests)
+                {
+                    if (_testFilterService.MatchesTest(filter, test))
+                    {
+                        yield return test;
+                    }
+                }
+                break;
+            }
+
+            // Yield ready tests and remove from remaining
+            foreach (var test in readyTests)
+            {
+                if (_testFilterService.MatchesTest(filter, test))
+                {
+                    yield return test;
+                }
+                yieldedTests.Add(test.TestId);
+                remainingTests.Remove(test);
             }
         }
-
-        // Ensure discovery task completes
-        await discoveryTask;
     }
 
     private bool AreAllDependenciesSatisfied(AbstractExecutableTest test, ConcurrentDictionary<string, bool> completedTests)

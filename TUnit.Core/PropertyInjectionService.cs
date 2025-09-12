@@ -84,14 +84,14 @@ public sealed class PropertyInjectionService
     {
         // Start with an empty visited set for cycle detection
 #if NETSTANDARD2_0
-        var visitedObjects = new HashSet<object>();
+        var visitedObjects = new ConcurrentDictionary<object, byte>();
 #else
-        var visitedObjects = new HashSet<object>(System.Collections.Generic.ReferenceEqualityComparer.Instance);
+        var visitedObjects = new ConcurrentDictionary<object, byte>(System.Collections.Generic.ReferenceEqualityComparer.Instance);
 #endif
         return InjectPropertiesIntoObjectAsyncCore(instance, objectBag, methodMetadata, events, visitedObjects);
     }
     
-    private static async Task InjectPropertiesIntoObjectAsyncCore(object instance, Dictionary<string, object?>? objectBag, MethodMetadata? methodMetadata, TestContextEvents? events, HashSet<object> visitedObjects)
+    private static async Task InjectPropertiesIntoObjectAsyncCore(object instance, Dictionary<string, object?>? objectBag, MethodMetadata? methodMetadata, TestContextEvents? events, ConcurrentDictionary<object, byte> visitedObjects)
     {
         if (instance == null)
         {
@@ -99,7 +99,8 @@ public sealed class PropertyInjectionService
         }
 
         // Prevent cycles - if we're already processing this object, skip it
-        if (!visitedObjects.Add(instance))
+        // TryAdd returns false if the key already exists (thread-safe)
+        if (!visitedObjects.TryAdd(instance, 0))
         {
             return;
         }
@@ -249,7 +250,7 @@ public sealed class PropertyInjectionService
     /// <summary>
     /// Injects properties using a cached source-generated plan.
     /// </summary>
-    private static async Task InjectPropertiesUsingPlanAsync(object instance, PropertyInjectionMetadata[] properties, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, HashSet<object> visitedObjects)
+    private static async Task InjectPropertiesUsingPlanAsync(object instance, PropertyInjectionMetadata[] properties, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, ConcurrentDictionary<object, byte> visitedObjects)
     {
         if (properties.Length == 0)
         {
@@ -268,7 +269,7 @@ public sealed class PropertyInjectionService
     /// Injects properties using a cached reflection plan.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static async Task InjectPropertiesUsingReflectionPlanAsync(object instance, (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, HashSet<object> visitedObjects)
+    private static async Task InjectPropertiesUsingReflectionPlanAsync(object instance, (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, ConcurrentDictionary<object, byte> visitedObjects)
     {
         if (properties.Length == 0)
         {
@@ -288,7 +289,7 @@ public sealed class PropertyInjectionService
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.")]
     private static async Task ProcessPropertyMetadata(object instance, PropertyInjectionMetadata metadata, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata,
-        TestContextEvents events, HashSet<object> visitedObjects, TestContext? testContext = null)
+        TestContextEvents events, ConcurrentDictionary<object, byte> visitedObjects, TestContext? testContext = null)
     {
         var dataSource = metadata.CreateDataSource();
         var propertyMetadata = new PropertyMetadata
@@ -339,7 +340,7 @@ public sealed class PropertyInjectionService
     /// Processes a property data source using reflection mode.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
-    private static async Task ProcessReflectionPropertyDataSource(object instance, PropertyInfo property, IDataSourceAttribute dataSource, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, HashSet<object> visitedObjects, TestContext? testContext = null)
+    private static async Task ProcessReflectionPropertyDataSource(object instance, PropertyInfo property, IDataSourceAttribute dataSource, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, ConcurrentDictionary<object, byte> visitedObjects, TestContext? testContext = null)
     {
         // Use centralized factory for reflection mode
         var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateForPropertyInjection(
@@ -379,7 +380,7 @@ public sealed class PropertyInjectionService
     /// <summary>
     /// Processes a single injected property value: tracks it, initializes it, sets it on the instance.
     /// </summary>
-    private static async Task ProcessInjectedPropertyValue(object instance, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, HashSet<object> visitedObjects)
+    private static async Task ProcessInjectedPropertyValue(object instance, object? propertyValue, Action<object, object?> setProperty, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, ConcurrentDictionary<object, byte> visitedObjects)
     {
         if (propertyValue == null)
         {
@@ -500,8 +501,8 @@ public sealed class PropertyInjectionService
         // This ensures consistent behavior and proper recursive injection
         var objectBag = new Dictionary<string, object?>();
 
-        // Process each property data source
-        foreach (var propertyDataSource in propertyDataSources)
+        // Process all property data sources in parallel for performance
+        var propertyTasks = propertyDataSources.Select(propertyDataSource => Task.Run(async () =>
         {
             try
             {
@@ -518,7 +519,7 @@ public sealed class PropertyInjectionService
                 var propertyInjection = injectionData.FirstOrDefault(p => p.PropertyName == propertyDataSource.PropertyName);
                 if (propertyInjection == null)
                 {
-                    continue;
+                    return; // Skip this property
                 }
 
                 // Create property metadata for the data generator
@@ -593,15 +594,15 @@ public sealed class PropertyInjectionService
                         // Use the modern service for recursive injection and initialization
                         // Create a new visited set for this legacy call
 #if NETSTANDARD2_0
-                        var visitedObjects = new HashSet<object>();
+                        var visitedObjects = new ConcurrentDictionary<object, byte>();
 #else
-                        var visitedObjects = new HashSet<object>(System.Collections.Generic.ReferenceEqualityComparer.Instance);
+                        var visitedObjects = new ConcurrentDictionary<object, byte>(System.Collections.Generic.ReferenceEqualityComparer.Instance);
 #endif
-                        visitedObjects.Add(instance); // Add the current instance to prevent re-processing
+                        visitedObjects.TryAdd(instance, 0); // Add the current instance to prevent re-processing
                         await ProcessInjectedPropertyValue(instance, value, propertyInjection.Setter, objectBag, testInformation, testContext.Events, visitedObjects);
                         // Add to TestClassInjectedPropertyArguments for tracking
                         testContext.TestDetails.TestClassInjectedPropertyArguments[propertyInjection.PropertyName] = value;
-                        break; // Only use first value
+                        return; // Only use first value
                     }
                 }
             }
@@ -610,7 +611,9 @@ public sealed class PropertyInjectionService
                 throw new InvalidOperationException(
                     $"Failed to resolve data source for property '{propertyDataSource.PropertyName}': {ex.Message}", ex);
             }
-        }
+        })).ToArray();
+
+        await Task.WhenAll(propertyTasks).ConfigureAwait(false);
     }
 
     /// <summary>

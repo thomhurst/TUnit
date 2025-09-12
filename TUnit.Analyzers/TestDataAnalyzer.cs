@@ -265,13 +265,32 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (propertySymbol is { IsStatic: false, IsRequired: false })
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rules.PropertyRequiredNotSet, propertySymbol.Locations.FirstOrDefault()));
+            // Skip required keyword enforcement if the property is in a class that inherits from System.Attribute
+            if (IsInAttributeClass(propertySymbol.ContainingType))
+            {
+                // Attribute classes don't need to enforce the required keyword for injected properties
+            }
+            else
+            {
+                context.ReportDiagnostic(Diagnostic.Create(Rules.PropertyRequiredNotSet, propertySymbol.Locations.FirstOrDefault()));
+            }
         }
 
         if (propertySymbol is { IsStatic: true, SetMethod: null })
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MustHavePropertySetter, propertySymbol.Locations.FirstOrDefault()));
         }
+    }
+
+    private static bool IsInAttributeClass(INamedTypeSymbol? typeSymbol)
+    {
+        if (typeSymbol is null)
+        {
+            return false;
+        }
+
+        // Check if the type or any of its base types is System.Attribute
+        return typeSymbol.IsOrInherits("global::System.Attribute");
     }
 
     private ImmutableArray<ITypeSymbol> GetTypes(ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? propertySymbol)
@@ -834,8 +853,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (typedInterface != null)
         {
             // If the type is a tuple, extract its elements
-            if (typedInterface.TypeArguments.Length == 1 && 
-                typedInterface.TypeArguments[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+            if (typedInterface.TypeArguments is
+                [
+                    INamedTypeSymbol { IsTupleType: true } tupleType
+                ])
             {
                 typeArguments = ImmutableArray.CreateRange(tupleType.TupleElements.Select(x => x.Type));
             }

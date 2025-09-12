@@ -24,28 +24,16 @@ internal sealed class TestBuilder : ITestBuilder
         _contextProvider = contextProvider;
     }
 
-    private async Task<object> CreateInstance(TestMetadata metadata, Type[] resolvedClassGenericArgs, object?[] classData, TestBuilderContext? builderContext = null)
+    private async Task<object> CreateInstance(TestMetadata metadata, Type[] resolvedClassGenericArgs, object?[] classData, TestBuilderContext builderContext)
     {
-        // If no builderContext provided and we're in test execution phase, create one from current TestContext
-        if (builderContext == null && TestContext.Current != null)
-        {
-            builderContext = TestBuilderContext.FromTestContext(TestContext.Current, null);
-        }
-        
         // First try to create instance with ClassConstructor attribute
         var attributes = metadata.AttributeFactory();
-
-        // Use the overload that takes individual parameters instead of TestContext
-        var events = builderContext?.Events ?? new TestContextEvents();
-        var objectBag = builderContext?.ObjectBag ?? new Dictionary<string, object?>();
 
         var instance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
             attributes,
             metadata.TestClassType,
-            metadata.TestSessionId,
-            events,
-            objectBag,
-            metadata.MethodMetadata);
+            builderContext,
+            metadata.TestSessionId);
 
         if (instance != null)
         {
@@ -219,7 +207,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     Events = new TestContextEvents(),
                                     ObjectBag = new Dictionary<string, object?>()
                                 };
-                                
+
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
 
@@ -293,7 +281,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 var basicSkipReason = GetBasicSkipReason(metadata);
 
                                 Func<Task<object>> instanceFactory;
-                                if (basicSkipReason != null && basicSkipReason.Length > 0)
+                                if (basicSkipReason is { Length: > 0 })
                                 {
                                     instanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance);
                                 }
@@ -302,8 +290,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     var capturedMetadata = metadata;
                                     var capturedClassGenericArgs = resolvedClassGenericArgs;
                                     var capturedClassData = classData;
-                                    // Pass null for builderContext - CreateInstance will use TestContext.Current during execution
-                                    instanceFactory = () => CreateInstance(capturedMetadata, capturedClassGenericArgs, capturedClassData, null);
+                                    var capturedContext = contextAccessor.Current;
+                                    instanceFactory = () => CreateInstance(capturedMetadata, capturedClassGenericArgs, capturedClassData, capturedContext);
                                 }
 
                                 var testData = new TestData
@@ -329,7 +317,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     test.Context.SkipReason = basicSkipReason;
                                 }
                                 tests.Add(test);
-                                
+
                                 // Context already updated at the beginning of the loop before calling factories
                             }
                         }
@@ -571,7 +559,8 @@ internal sealed class TestBuilder : ITestBuilder
 
         context.TestDetails.ClassInstance = PlaceholderInstance.Instance;
 
-        TrackDataSourceObjects(context, testData.ClassData, testData.MethodData);
+        // Arguments will be tracked by TestArgumentTrackingService during TestRegistered event
+        // This ensures proper reference counting for shared instances
 
         await InvokeDiscoveryEventReceiversAsync(context);
 
@@ -729,12 +718,7 @@ internal sealed class TestBuilder : ITestBuilder
         return context;
     }
 
-    private static void TrackDataSourceObjects(TestContext context, object?[] classArguments, object?[] methodArguments)
-    {
-        // Track all objects at once with a single disposal handler
-        var allObjects = classArguments.Concat(methodArguments);
-        ObjectTracker.TrackObjectsForContext(context.Events, allObjects);
-    }
+
 
     private async Task<AbstractExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
     {
@@ -1212,7 +1196,7 @@ internal sealed class TestBuilder : ITestBuilder
             var basicSkipReason = GetBasicSkipReason(metadata);
             Func<Task<object>> instanceFactory;
 
-            if (basicSkipReason != null && basicSkipReason.Length > 0)
+            if (basicSkipReason is { Length: > 0 })
             {
                 instanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance);
             }

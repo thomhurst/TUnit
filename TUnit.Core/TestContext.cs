@@ -17,15 +17,15 @@ namespace TUnit.Core;
 [DebuggerDisplay("{TestDetails.ClassType.Name}.{GetDisplayName(),nq}")]
 public class TestContext : Context
 {
+    private readonly TestBuilderContext _testBuilderContext;
+
     public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
     {
+        _testBuilderContext = testBuilderContext;
         TestName = testName;
         CancellationToken = cancellationToken;
         ServiceProvider = serviceProvider;
         ClassContext = classContext;
-
-        Events = testBuilderContext.Events;
-        ObjectBag = testBuilderContext.ObjectBag;
     }
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
@@ -104,7 +104,7 @@ public class TestContext : Context
     [
     ];
 
-    public TestContextEvents Events { get; } = new();
+    public TestContextEvents Events => _testBuilderContext.Events;
 
     internal DiscoveredTest? InternalDiscoveredTest { get; set; }
 
@@ -144,6 +144,8 @@ public class TestContext : Context
 
     public IReadOnlyList<Artifact> Artifacts { get; } = new List<Artifact>();
 
+    internal IClassConstructor? ClassConstructor => _testBuilderContext.ClassConstructor;
+
     public string GetDisplayName()
     {
         if(!string.IsNullOrEmpty(CustomDisplayName))
@@ -162,7 +164,7 @@ public class TestContext : Context
         return $"{TestName}({arguments})";
     }
 
-    public Dictionary<string, object?> ObjectBag { get; }
+    public Dictionary<string, object?> ObjectBag => _testBuilderContext.ObjectBag;
 
     public bool ReportResult { get; set; } = true;
 

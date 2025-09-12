@@ -282,17 +282,29 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
         // Flush all thread-local buffers
         FlushAllThreadBuffers();
         
+        // Collect content to write without holding the lock
+        var contentToWrite = new List<string>();
+        
         _lock.EnterWriteLock();
         try
         {
-            // Process any queued content
-            ProcessFlushQueue();
-            _target.Flush();
+            // Dequeue all content while holding the lock
+            while (_flushQueue.TryDequeue(out var content))
+            {
+                contentToWrite.Add(content);
+            }
         }
         finally
         {
             _lock.ExitWriteLock();
         }
+        
+        // Write content and flush outside the lock to avoid deadlock
+        foreach (var content in contentToWrite)
+        {
+            _target.Write(content);
+        }
+        _target.Flush();
     }
 
     public override async Task FlushAsync()
@@ -350,7 +362,28 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
         // Process queue if it's getting large
         if (_flushQueue.Count > 10)
         {
-            ProcessFlushQueue();
+            // Collect content to write without holding the lock
+            var contentToWrite = new List<string>();
+            
+            _lock.EnterWriteLock();
+            try
+            {
+                // Dequeue content while holding the lock
+                while (_flushQueue.TryDequeue(out var queuedContent) && contentToWrite.Count < 20)
+                {
+                    contentToWrite.Add(queuedContent);
+                }
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+            
+            // Write content outside the lock to avoid deadlock
+            foreach (var contentItem in contentToWrite)
+            {
+                _target.Write(contentItem);
+            }
         }
     }
     
@@ -385,14 +418,27 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
         {
             FlushAllThreadBuffers();
             
+            // Collect content to write without holding the lock
+            var contentToWrite = new List<string>();
+            
             _lock.EnterWriteLock();
             try
             {
-                ProcessFlushQueue();
+                // Dequeue all content while holding the lock
+                while (_flushQueue.TryDequeue(out var content))
+                {
+                    contentToWrite.Add(content);
+                }
             }
             finally
             {
                 _lock.ExitWriteLock();
+            }
+            
+            // Write content outside the lock to avoid deadlock
+            foreach (var content in contentToWrite)
+            {
+                _target.Write(content);
             }
         }
         catch
@@ -408,15 +454,28 @@ internal sealed class BufferedTextWriter : TextWriter, IDisposable
             _flushTimer?.Dispose();
             FlushAllThreadBuffers();
             
+            // Collect content to write without holding the lock
+            var contentToWrite = new List<string>();
+            
             _lock.EnterWriteLock();
             try
             {
-                ProcessFlushQueue();
+                // Dequeue all content while holding the lock
+                while (_flushQueue.TryDequeue(out var content))
+                {
+                    contentToWrite.Add(content);
+                }
                 _disposed = true;
             }
             finally
             {
                 _lock.ExitWriteLock();
+            }
+            
+            // Write content outside the lock
+            foreach (var content in contentToWrite)
+            {
+                _target.Write(content);
             }
             
             _threadLocalBuffer?.Dispose();

@@ -7,6 +7,15 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 {
     protected sealed override async ValueTask ExecuteAsync(Func<ValueTask> action)
     {
+        // On browser platforms, threading is not supported, so fall back to direct execution
+#if NET5_0_OR_GREATER
+        if (OperatingSystem.IsBrowser())
+        {
+            await action();
+            return;
+        }
+#endif
+
         var tcs = new TaskCompletionSource<object?>();
 
         var thread = new Thread(() =>
@@ -66,7 +75,8 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 }, CancellationToken.None, TaskCreationOptions.None, taskScheduler).Unwrap();
 
                 // Try fast path first - many tests complete quickly
-                if (task.Wait(10))
+                // Use IsCompleted to avoid synchronous wait
+                if (task.IsCompleted)
                 {
                     HandleTaskCompletion(task, tcs);
                     return;
@@ -301,14 +311,26 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                     }
                 }, null);
 
-                // Wait with a timeout to prevent infinite hangs
-                if (!tcs.Task.Wait(TimeSpan.FromMinutes(30)))
+                // Use a more robust synchronous wait pattern to avoid deadlocks
+                // We use Task.Run to ensure we don't capture the current SynchronizationContext
+                // which is a common cause of deadlocks
+                var waitTask = Task.Run(async () =>
                 {
-                    throw new TimeoutException("Synchronous operation on dedicated thread timed out after 30 minutes");
-                }
+                    // For .NET Standard 2.0 compatibility, use Task.Delay for timeout
+                    var timeoutTask = Task.Delay(TimeSpan.FromMinutes(30));
+                    var completedTask = await Task.WhenAny(tcs.Task, timeoutTask).ConfigureAwait(false);
+                    
+                    if (completedTask == timeoutTask)
+                    {
+                        throw new TimeoutException("Synchronous operation on dedicated thread timed out after 30 minutes");
+                    }
+                    
+                    // Await the actual task to get its result or exception
+                    await tcs.Task.ConfigureAwait(false);
+                });
                 
-                // Re-throw any exception that occurred
-                tcs.Task.GetAwaiter().GetResult();
+                // This wait is safe because it's on a Task.Run thread without SynchronizationContext
+                waitTask.GetAwaiter().GetResult();
             }
         }
 

@@ -208,17 +208,31 @@ public static class TypeExtensions
 
     public static string GloballyQualified(this ISymbol typeSymbol)
     {
-        // Only generate open generic form for types with unresolved type parameters
-        // This ensures we get BaseClass<> for generic definitions but List<int> for constructed types
-        if(typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol && 
-           namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter))
+        // Handle open generic types where type arguments are type parameters
+        // This prevents invalid C# like List<T>, Dictionary<TKey, TValue>, T? where type parameters are undefined
+        if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol)
         {
-            var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix));
-            typeBuilder.Append('<');
-            typeBuilder.Append(new string(',', namedTypeSymbol.TypeArguments.Length - 1));
-            typeBuilder.Append('>');
+            // Check if this is an unbound generic type or has type parameter arguments
+            bool hasTypeParameters = namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
+            bool isUnboundGeneric = namedTypeSymbol.IsUnboundGenericType;
+            
+            if (hasTypeParameters || isUnboundGeneric)
+            {
+                // Special case for System.Nullable<> - Roslyn displays it as "T?" even for open generic
+                if (namedTypeSymbol.SpecialType == SpecialType.System_Nullable_T ||
+                    namedTypeSymbol.ConstructedFrom?.SpecialType == SpecialType.System_Nullable_T)
+                {
+                    return "global::System.Nullable<>";
+                }
+                
+                // General case for other open generic types
+                var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix));
+                typeBuilder.Append('<');
+                typeBuilder.Append(new string(',', namedTypeSymbol.TypeArguments.Length - 1));
+                typeBuilder.Append('>');
 
-            return typeBuilder.ToString();
+                return typeBuilder.ToString();
+            }
         }
 
         return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);

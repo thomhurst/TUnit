@@ -129,16 +129,23 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // Find the concrete implementation of this method in the derived class
             var concreteMethod = FindConcreteMethodImplementation(classInfo.TypeSymbol, method);
-            
+
             // Calculate inheritance depth for this test
             int inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
+
+            var filePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? 
+                          classInfo.ClassSyntax.GetLocation().SourceTree?.FilePath ?? 
+                          classInfo.ClassSyntax.SyntaxTree.FilePath;
+            
+            var lineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 
+                            classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
 
             var testMethodMetadata = new TestMethodMetadata
             {
                 MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
                 TypeSymbol = classInfo.TypeSymbol,
-                FilePath = classInfo.ClassSyntax.GetLocation().SourceTree?.FilePath ?? testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? classInfo.ClassSyntax.SyntaxTree.FilePath,
-                LineNumber = classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+                FilePath = filePath,
+                LineNumber = lineNumber,
                 TestAttribute = testAttribute,
                 Context = null, // No context for inherited tests
                 MethodSyntax = null, // No syntax for inherited methods
@@ -159,11 +166,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             return 0;
         }
-        
+
         // Count how many levels up the inheritance chain the method is declared
         int depth = 0;
         INamedTypeSymbol? currentType = testClass.BaseType;
-        
+
         while (currentType != null)
         {
             depth++;
@@ -173,7 +180,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             currentType = currentType.BaseType;
         }
-        
+
         // This shouldn't happen in normal cases, but return the depth anyway
         return depth;
     }
@@ -361,7 +368,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate AOT-friendly invokers that use the specific types
         GenerateAotFriendlyInvokers(writer, testMethod, className, typeArguments);
-        
+
         // Add file location metadata
         writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
@@ -562,7 +569,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Inheritance depth
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
-        
+
         // File location metadata
         writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
@@ -606,7 +613,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Inheritance depth
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
-        
+
         // File location metadata
         writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
@@ -978,6 +985,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool IsAsyncEnumerable(ITypeSymbol type)
     {
+        // Check if the type itself is an IAsyncEnumerable<T>
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType && 
+            namedType.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>")
+        {
+            return true;
+        }
+
+        // Check if the type implements IAsyncEnumerable<T>
         return type.AllInterfaces.Any(i =>
             i.IsGenericType &&
             i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>");
@@ -1527,7 +1542,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine($"var typedInstance = ({className})instance;");
-        writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+        
+        // Only declare context if it's needed (when hasCancellationToken is true)
+        if (hasCancellationToken)
+        {
+            writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+        }
 
         if (parametersFromArgs.Length == 0)
         {
@@ -1547,10 +1567,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else
         {
             // Count required parameters (those without default values, excluding CancellationToken and params parameters)
-            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional && !p.IsParams);
+            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && p is { IsOptional: false, IsParams: false });
 
             // Generate runtime logic to handle variable argument counts
-            writer.AppendLine("// Invoke with only the arguments that were provided");
             writer.AppendLine("switch (args.Length)");
             writer.AppendLine("{");
             writer.Indent();
@@ -1620,6 +1639,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
+        
+        // Only declare context if it's needed (when hasCancellationToken is true and there are parameters)
+        if (hasCancellationToken && parametersFromArgs.Length > 0)
+        {
+            writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+        }
 
         if (parametersFromArgs.Length == 0)
         {
@@ -1639,10 +1664,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else
         {
             // Count required parameters (those without default values, excluding CancellationToken and params parameters)
-            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional && !p.IsParams);
+            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && p is { IsOptional: false, IsParams: false });
 
             // Generate runtime logic to handle variable argument counts
-            writer.AppendLine("// Invoke with only the arguments that were provided");
             writer.AppendLine("switch (args.Length)");
             writer.AppendLine("{");
             writer.Indent();
@@ -1667,7 +1691,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Add CancellationToken if present
                 if (hasCancellationToken)
                 {
-                    argsToPass.Add("cancellationToken");
+                    argsToPass.Add("context?.CancellationToken ?? System.Threading.CancellationToken.None");
                 }
 
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";
@@ -1890,7 +1914,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Look for ProceedOnFailure property in named arguments
         foreach (var namedArg in attributeData.NamedArguments)
         {
-            if (namedArg.Key == "ProceedOnFailure" && namedArg.Value.Value is bool proceedOnFailure)
+            if (namedArg is { Key: "ProceedOnFailure", Value.Value: bool proceedOnFailure })
             {
                 return proceedOnFailure;
             }
@@ -2379,7 +2403,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // For generic classes with non-generic methods, don't include method Arguments here
             // They will be processed separately with InferClassTypesFromMethodArguments
-            if (!(testMethod.IsGenericType && !testMethod.IsGenericMethod))
+            if (!(testMethod is { IsGenericType: true, IsGenericMethod: false }))
             {
                 allArgumentsAttributes.AddRange(methodArgumentsAttributes);
             }
@@ -2437,7 +2461,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Handle generic classes with non-generic methods that have method-level Arguments
         // These were skipped in the main loop and need special processing
-        if (testMethod.IsGenericType && !testMethod.IsGenericMethod && methodArgumentsAttributes.Count > 0)
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false } && methodArgumentsAttributes.Count > 0)
         {
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
@@ -2700,7 +2724,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Process class-level Arguments attributes for non-generic classes with parameterized constructors
-        if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
+        if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
             var nonGenericClassArguments = testMethod.TypeSymbol.GetAttributes()
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
@@ -2920,7 +2944,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 continue;
 
             // Check if the method parameter type is a class generic type parameter
-            if (methodParam.Type is ITypeParameterSymbol typeParam && typeParam.DeclaringMethod == null)
+            if (methodParam.Type is ITypeParameterSymbol { DeclaringMethod: null } typeParam)
             {
                 // This is a class type parameter
                 var paramName = typeParam.Name;
@@ -2980,12 +3004,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool ContainsClassTypeParameter(ITypeSymbol type, INamedTypeSymbol classSymbol)
     {
-        if (type is ITypeParameterSymbol typeParam && typeParam.DeclaringMethod == null)
+        if (type is ITypeParameterSymbol { DeclaringMethod: null })
         {
             return true;
         }
 
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
             return namedType.TypeArguments.Any(ta => ContainsClassTypeParameter(ta, classSymbol));
         }
@@ -2995,7 +3019,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void MapGenericTypeArguments(ITypeSymbol paramType, ITypeSymbol argType, INamedTypeSymbol classSymbol, Dictionary<string, ITypeSymbol> inferredTypes)
     {
-        if (paramType is ITypeParameterSymbol typeParam && typeParam.DeclaringMethod == null)
+        if (paramType is ITypeParameterSymbol { DeclaringMethod: null } typeParam)
         {
             if (!inferredTypes.ContainsKey(typeParam.Name))
             {
@@ -3257,7 +3281,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         }
 
                         // Multiple type parameters - check for tuple
-                        if (typeArgs.Length == 1 && typeArgs[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+                        if (typeArgs is
+                            [
+                                INamedTypeSymbol { IsTupleType: true } tupleType
+                            ])
                         {
                             if (tupleType.TupleElements.Length == method.TypeParameters.Length)
                             {
@@ -3283,7 +3310,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         }
 
                         // Multiple type parameters - check for tuple
-                        if (typeArgs.Length == 1 && typeArgs[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+                        if (typeArgs is
+                            [
+                                INamedTypeSymbol { IsTupleType: true } tupleType
+                            ])
                         {
                             if (tupleType.TupleElements.Length == classTypeParams.Length)
                             {
@@ -3303,7 +3333,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         var totalGenericParams = method.TypeParameters.Length + method.ContainingType.TypeParameters.Length;
 
                         // Check if the data source provides types for all parameters
-                        if (typeArgs.Length == 1 && typeArgs[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+                        if (typeArgs is
+                            [
+                                INamedTypeSymbol { IsTupleType: true } tupleType
+                            ])
                         {
                             if (tupleType.TupleElements.Length == totalGenericParams)
                             {
@@ -3668,7 +3701,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (hasParameterizedConstructor)
         {
             // For classes with constructor parameters, use the specific constructor arguments from the Arguments attribute
-            if (specificArgumentsAttribute != null && specificArgumentsAttribute.ConstructorArguments.Length > 0 &&
+            if (specificArgumentsAttribute is { ConstructorArguments.Length: > 0 } &&
                 specificArgumentsAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
             {
                 var argumentValues = specificArgumentsAttribute.ConstructorArguments[0].Values;
@@ -3859,7 +3892,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // For combined generic class + generic method scenarios, also include method-level Arguments
             // that provide method parameters (different from the class-level specificArgumentsAttribute)
-            if (testMethod.IsGenericType && testMethod.IsGenericMethod)
+            if (testMethod is { IsGenericType: true, IsGenericMethod: true })
             {
                 var additionalMethodDataSources = methodSymbol.GetAttributes()
                     .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute" && !AreSameAttribute(a, specificArgumentsAttribute))
@@ -4205,8 +4238,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // For classes with constructor parameters, check if we have Arguments attribute
             var isArgumentsAttribute = classDataSourceAttribute?.AttributeClass?.Name == "ArgumentsAttribute";
 
-            if (isArgumentsAttribute && classDataSourceAttribute != null &&
-                classDataSourceAttribute.ConstructorArguments.Length > 0 &&
+            if (isArgumentsAttribute && classDataSourceAttribute is { ConstructorArguments.Length: > 0 } &&
                 classDataSourceAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
             {
                 var argumentValues = classDataSourceAttribute.ConstructorArguments[0].Values;
@@ -4249,7 +4281,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate typed invoker
         GenerateTypedInvokers(writer, testMethod, className);
-        
+
         // Add file location metadata
         writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");

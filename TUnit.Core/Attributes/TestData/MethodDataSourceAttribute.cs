@@ -119,12 +119,20 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // If it's IAsyncEnumerable, handle it specially
         if (IsAsyncEnumerable(methodResult.GetType()))
         {
+            bool hasAnyItems = false;
             await foreach (var item in ConvertToAsyncEnumerable(methodResult))
             {
+                hasAnyItems = true;
                 yield return async () =>
                 {
                     return await Task.FromResult<object?[]?>(item.ToObjectArray());
                 };
+            }
+            
+            // If the async enumerable was empty, yield one empty result like NoDataSource does
+            if (!hasAnyItems)
+            {
+                yield return () => Task.FromResult<object?[]?>([]);
             }
         }
         // If it's Task<IEnumerable>
@@ -135,12 +143,20 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
             if (taskResult is System.Collections.IEnumerable enumerable and not string && !DataSourceHelpers.IsTuple(taskResult))
             {
+                bool hasAnyItems = false;
                 foreach (var item in enumerable)
                 {
+                    hasAnyItems = true;
                     yield return async () =>
                     {
                         return await Task.FromResult<object?[]?>(item.ToObjectArray());
                     };
+                }
+                
+                // If the enumerable was empty, yield one empty result like NoDataSource does
+                if (!hasAnyItems)
+                {
+                    yield return () => Task.FromResult<object?[]?>([]);
                 }
             }
             else
@@ -155,9 +171,17 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // Tuples implement IEnumerable but should be treated as single values
         else if (methodResult is System.Collections.IEnumerable enumerable and not string && !DataSourceHelpers.IsTuple(methodResult))
         {
+            bool hasAnyItems = false;
             foreach (var item in enumerable)
             {
+                hasAnyItems = true;
                 yield return () => Task.FromResult<object?[]?>(item.ToObjectArray());
+            }
+            
+            // If the enumerable was empty, yield one empty result like NoDataSource does
+            if (!hasAnyItems)
+            {
+                yield return () => Task.FromResult<object?[]?>([]);
             }
         }
         else

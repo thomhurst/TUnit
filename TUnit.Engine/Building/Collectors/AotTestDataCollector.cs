@@ -169,12 +169,12 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     private static Func<Type[], object?[], object>? CreateAotDynamicInstanceFactory(Type testClass, object?[]? predefinedClassArgs)
     {
         // Check if we have predefined args to use as defaults
-        var hasPredefinedArgs = predefinedClassArgs != null && predefinedClassArgs.Length > 0;
+        var hasPredefinedArgs = predefinedClassArgs is { Length: > 0 };
 
         return (typeArgs, args) =>
         {
             // Use provided args if available, otherwise fall back to predefined args
-            var effectiveArgs = (args != null && args.Length > 0) ? args : (predefinedClassArgs ?? []);
+            var effectiveArgs = args is { Length: > 0 } ? args : (predefinedClassArgs ?? []);
 
             if (testClass.IsGenericTypeDefinition && typeArgs.Length > 0)
             {

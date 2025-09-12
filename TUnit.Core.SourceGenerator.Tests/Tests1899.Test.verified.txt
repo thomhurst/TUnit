@@ -35,7 +35,7 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             },
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 6,
+            LineNumber = 13,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1899.BaseClass<DummyReferenceTypeClass>),
@@ -71,7 +71,6 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1899.DerivedTest)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Test1();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },

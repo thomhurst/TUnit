@@ -1023,28 +1023,6 @@ namespace
         public RepeatAttribute(int times) { }
         public int Times { get; }
     }
-    public class ResettableLazy<T> : 
-        where T :  class
-    {
-        protected readonly string SessionId;
-        protected <.<T>> _factory;
-        public ResettableLazy(<.<T>> factory, string sessionId, .TestBuilderContext testBuilderContext) { }
-        protected ResettableLazy(. classConstructor, string sessionId, .TestBuilderContext testBuilderContext) { }
-        public .? ClassConstructor { get; protected set; }
-        public .TestBuilderContext TestBuilderContext { get; }
-        public .<T> Value { get; }
-        public .ResettableLazy<T> Clone() { }
-        public . DisposeAsync() { }
-        public virtual . ResetLazy() { }
-        protected static . DisposeAsync(object? obj) { }
-    }
-    public class ResettableLazy<TClassConstructor, T> : .ResettableLazy<T>
-        where TClassConstructor : ., new ()
-        where T :  class
-    {
-        public ResettableLazy(string sessionId, .TestBuilderContext testBuilderContext) { }
-        public override . ResetLazy() { }
-    }
     public sealed class ResolvedDependency
     {
         public ResolvedDependency() { }
@@ -1559,7 +1537,6 @@ namespace .Data
     {
         public ScopedDictionary() { }
         public object? GetOrCreate(TScope scope,  type, <, object?> factory) { }
-        public void RemoveValue(object valueToRemove) { }
     }
 }
 namespace .DataSources
@@ -1607,6 +1584,7 @@ namespace .Enums
         Linux = 1,
         Windows = 2,
         MacOs = 4,
+        Browser = 8,
     }
     public enum Priority
     {
@@ -1775,11 +1753,6 @@ namespace .Executors
 }
 namespace .Extensions
 {
-    public static class ClassConstructorExtensions
-    {
-        public static .<T> Create<T>(this . classConstructor, .ClassConstructorMetadata classConstructorMetadata)
-            where T :  class { }
-    }
     public static class MetadataExtensions
     {
         public static  DeclaringType(this .MethodMetadata method) { }
@@ -1822,15 +1795,15 @@ namespace .Helpers
     {
         public static .ClassConstructorAttribute? GetClassConstructorAttribute([] attributes) { }
         public static bool HasClassConstructorAttribute([] attributes) { }
+        public static .<object?> TryCreateInstanceWithClassConstructor(.<> attributes,  testClassType, .TestBuilderContext testBuilderContext, string testSessionId) { }
         public static .<object?> TryCreateInstanceWithClassConstructor(.<> attributes,  testClassType, string testSessionId, .TestContext testContext) { }
-        public static .<object?> TryCreateInstanceWithClassConstructor(.<> attributes,  testClassType, string testSessionId, .TestContextEvents events, .<string, object?> objectBag, .MethodMetadata methodMetadata) { }
     }
     [.DebuggerDisplay("Count = {CurrentCount}")]
     public class Counter
     {
-        public <int>? OnCountChanged;
         public Counter() { }
         public int CurrentCount { get; }
+        public event <int>? OnCountChanged;
         public int Add(int value) { }
         public int Decrement() { }
         public int Increment() { }
@@ -2407,6 +2380,8 @@ namespace .Tracking
     public static class ObjectTracker
     {
         public static void OnDisposed(object? o,  action) { }
+        public static void OnDisposedAsync(object? o, <.> asyncAction) { }
+        public static void TrackObject(.TestContextEvents events, object? obj) { }
         public static void TrackOwnership(object owner, object owned) { }
     }
 }

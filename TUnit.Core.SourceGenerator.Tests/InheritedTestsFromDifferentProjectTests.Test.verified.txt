@@ -72,7 +72,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Test();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -184,8 +183,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -198,7 +195,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -323,8 +319,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -337,7 +331,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -440,7 +433,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.VerifyInheritedCategoriesAreAvailable();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
@@ -504,7 +496,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTest_TestSourc
             },
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 6,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.BaseTests),
@@ -540,7 +532,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTest_TestSourc
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.BaseTest();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -607,7 +598,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTestWithMultip
             },
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 12,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.BaseTests),
@@ -643,7 +634,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTestWithMultip
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.BaseTestWithMultipleCategories();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -708,7 +698,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
             },
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 9,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -744,7 +734,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Test();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -811,7 +800,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             },
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 14,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -856,8 +845,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -870,7 +857,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -950,7 +936,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             },
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 20,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -995,8 +981,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -1009,7 +993,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -1076,7 +1059,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
             },
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 26,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -1112,7 +1095,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 await typedInstance.VerifyInheritedCategoriesAreAvailable();
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>

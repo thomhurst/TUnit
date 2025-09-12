@@ -634,7 +634,7 @@ public class XUnitMigrationAnalyzerTests
         test.TestState.Sources.Add(globalUsings);
 
         test.ReferenceAssemblies = test.ReferenceAssemblies.AddPackages([
-            new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")
+            new PackageIdentity("xunit.v3.extensibility.core", "3.0.1")
         ]);
     }
 
@@ -646,7 +646,7 @@ public class XUnitMigrationAnalyzerTests
         test.FixedState.Sources.Add(globalUsings);
 
         test.ReferenceAssemblies = test.ReferenceAssemblies.AddPackages([
-            new PackageIdentity("xunit.v3.extensibility.core", "2.0.0")
+            new PackageIdentity("xunit.v3.extensibility.core", "3.0.1")
         ]);
     }
 }

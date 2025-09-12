@@ -8,7 +8,7 @@
 
     <!-- Auto-include Polyfill package for compile-time type generation -->
     <PropertyGroup>
-        <_TUnitPolyfillVersion>8.7.4</_TUnitPolyfillVersion>
+        <_TUnitPolyfillVersion>8.8.1</_TUnitPolyfillVersion>
         <_TUnitNeedsPolyfill Condition="'$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFrameworkIdentifier)' == '.NETFramework'">true</_TUnitNeedsPolyfill>
     </PropertyGroup>
 

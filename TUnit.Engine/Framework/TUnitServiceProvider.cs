@@ -76,7 +76,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
             VerbosityService));
 
-        TestFilterService = Register(new TestFilterService(Logger));
+        // Register the test argument tracking service to handle object disposal for shared instances
+        var testArgumentTrackingService = Register(new TestArgumentTrackingService());
+
+        TestFilterService = Register(new TestFilterService(Logger, testArgumentTrackingService));
 
         MessageBus = Register(new TUnitMessageBus(
             extension,

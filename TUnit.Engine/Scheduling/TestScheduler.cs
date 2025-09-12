@@ -174,10 +174,9 @@ internal sealed class TestScheduler : ITestScheduler
         // 1. NotInParallel tests (global) - must run one at a time
         if (groupedTests.NotInParallel.Length > 0)
         {
-            var globalNotInParallelTask = ExecuteNotInParallelTestsAsync(
+            await ExecuteNotInParallelTestsAsync(
                 groupedTests.NotInParallel,
                 cancellationToken);
-            allTestTasks.Add(globalNotInParallelTask);
         }
 
         // 2. Keyed NotInParallel tests
@@ -314,25 +313,27 @@ internal sealed class TestScheduler : ITestScheduler
         // Execute order groups sequentially
         foreach (var (order, tests) in orderedTests)
         {
-            if (maxParallelism.HasValue)
+            if (maxParallelism is > 0)
             {
-                // Use semaphore to limit parallelism
-                using var semaphore = new SemaphoreSlim(maxParallelism.Value, maxParallelism.Value);
+                // Use worker pool pattern for parallel groups
+                var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
+                var workers = new Task[maxParallelism.Value];
 
-                var tasks = tests.Select(async test =>
+                for (int i = 0; i < maxParallelism.Value; i++)
                 {
-                    await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-                    try
+                    workers[i] = Task.Run(async () =>
                     {
-                        await test.ExecutionTask.ConfigureAwait(false);
-                    }
-                    finally
-                    {
-                        semaphore.Release();
-                    }
-                });
+                        while (testQueue.TryDequeue(out var test))
+                        {
+                            if (cancellationToken.IsCancellationRequested)
+                                break;
 
-                await Task.WhenAll(tasks).ConfigureAwait(false);
+                            await test.ExecutionTask.ConfigureAwait(false);
+                        }
+                    }, cancellationToken);
+                }
+
+                await Task.WhenAll(workers).ConfigureAwait(false);
             }
             else
             {
@@ -347,25 +348,29 @@ internal sealed class TestScheduler : ITestScheduler
         int? maxParallelism,
         CancellationToken cancellationToken)
     {
-        if (maxParallelism.HasValue)
+        if (maxParallelism is > 0)
         {
-            // Use semaphore to limit parallelism
-            using var semaphore = new SemaphoreSlim(maxParallelism.Value, maxParallelism.Value);
+            // Use worker pool pattern to avoid creating too many tasks
+            // Create a fixed number of worker tasks that process tests from a queue
+            var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
+            var workers = new Task[maxParallelism.Value];
 
-            var tasks = tests.Select(async test =>
+            // Create worker tasks
+            for (int i = 0; i < maxParallelism.Value; i++)
             {
-                await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-                try
+                workers[i] = Task.Run(async () =>
                 {
-                    await test.ExecutionTask.ConfigureAwait(false);
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            });
+                    while (testQueue.TryDequeue(out var test))
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                            break;
 
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+                        await test.ExecutionTask.ConfigureAwait(false);
+                    }
+                }, cancellationToken);
+            }
+
+            await Task.WhenAll(workers).ConfigureAwait(false);
         }
         else
         {

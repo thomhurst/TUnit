@@ -35,7 +35,7 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             },
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 6,
+            LineNumber = 5,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
@@ -71,7 +71,6 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1889.DerivedTest)instance;
-                var context = global::TUnit.Core.TestContext.Current;
                 typedInstance.Test1();
                 await global::System.Threading.Tasks.Task.CompletedTask;
             },
@@ -137,7 +136,7 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
             },
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 6,
+            LineNumber = 10,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
@@ -182,8 +181,6 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1889.DerivedTest)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -196,7 +193,6 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -266,7 +262,7 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
             },
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 6,
+            LineNumber = 16,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
@@ -311,8 +307,6 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
             TestInvoker = async (instance, args) =>
             {
                 var typedInstance = (global::TUnit.TestProject.Bugs._1889.DerivedTest)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
@@ -325,7 +319,6 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
-                // Invoke with only the arguments that were provided
                 switch (args.Length)
                 {
                     case 1:
