@@ -40,14 +40,14 @@ public class StringPathIsPathRootedWithStringAssertCondition : BaseAssertConditi
 
 public static partial class PathAssertionExtensions
 {
-    public static InvokableValueAssertionBuilder<string> IsRooted(this IValueSource<string> valueSource)
+    public static InvokableValueAssertionBuilder<string> IsRootedPath(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(
             new StringPathIsPathRootedWithStringAssertCondition(false),
             []);
     }
 
-    public static InvokableValueAssertionBuilder<string> IsNotRooted(this IValueSource<string> valueSource)
+    public static InvokableValueAssertionBuilder<string> IsNotRootedPath(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(
             new StringPathIsPathRootedWithStringAssertCondition(true),

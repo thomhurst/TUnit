@@ -282,6 +282,87 @@ public class StringUriIsHexEncodingWithStringAnd1MoreAssertCondition : BaseAsser
     }
 }
 
+public class UriUriAssertionExtensionsIsHttpsWithUriAssertCondition : BaseAssertCondition<System.Uri>
+{
+    private readonly bool _negated;
+
+    public UriUriAssertionExtensionsIsHttpsWithUriAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(System.Uri? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = TUnit.Assertions.Extensions.UriAssertionExtensions.IsHttps(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsHttps");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsHttps";
+    }
+}
+
+public class UriUriAssertionExtensionsIsHttpWithUriAssertCondition : BaseAssertCondition<System.Uri>
+{
+    private readonly bool _negated;
+
+    public UriUriAssertionExtensionsIsHttpWithUriAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(System.Uri? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = TUnit.Assertions.Extensions.UriAssertionExtensions.IsHttp(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsHttp");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsHttp";
+    }
+}
+
+public class UriUriAssertionExtensionsIsHttpOrHttpsWithUriAssertCondition : BaseAssertCondition<System.Uri>
+{
+    private readonly bool _negated;
+
+    public UriUriAssertionExtensionsIsHttpOrHttpsWithUriAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(System.Uri? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = TUnit.Assertions.Extensions.UriAssertionExtensions.IsHttpOrHttps(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsHttpOrHttps");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsHttpOrHttps";
+    }
+}
+
 public static partial class UriAssertionExtensions
 {
     public static InvokableValueAssertionBuilder<System.Uri> IsAbsoluteUri(this IValueSource<System.Uri> valueSource)
@@ -422,6 +503,48 @@ public static partial class UriAssertionExtensions
         return valueSource.RegisterAssertion(
             new StringUriIsHexEncodingWithStringAnd1MoreAssertCondition(index, true),
             [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<System.Uri> IsHttps(this IValueSource<System.Uri> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new UriUriAssertionExtensionsIsHttpsWithUriAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<System.Uri> IsNotHttps(this IValueSource<System.Uri> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new UriUriAssertionExtensionsIsHttpsWithUriAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<System.Uri> IsHttp(this IValueSource<System.Uri> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new UriUriAssertionExtensionsIsHttpWithUriAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<System.Uri> IsNotHttp(this IValueSource<System.Uri> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new UriUriAssertionExtensionsIsHttpWithUriAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<System.Uri> IsHttpOrHttps(this IValueSource<System.Uri> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new UriUriAssertionExtensionsIsHttpOrHttpsWithUriAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<System.Uri> IsNotHttpOrHttps(this IValueSource<System.Uri> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new UriUriAssertionExtensionsIsHttpOrHttpsWithUriAssertCondition(true),
+            []);
     }
 
 }

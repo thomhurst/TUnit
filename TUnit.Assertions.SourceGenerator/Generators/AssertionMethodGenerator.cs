@@ -156,17 +156,19 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 .OfType<IMethodSymbol>()
                 .Where(m => m.ReturnType.SpecialType == SpecialType.System_Boolean &&
                            (attributeData.TreatAsInstance ?
-                               // If explicitly treating as instance, allow instance methods on any type
-                               !m.IsStatic :
+                               // If treating as instance and containing type is different, look for static methods that take target as first param
+                               (!SymbolEqualityComparer.Default.Equals(attributeData.ContainingType, attributeData.TargetType) ?
+                                   m.IsStatic && m.Parameters.Length > 0 && 
+                                   SymbolEqualityComparer.Default.Equals(m.Parameters[0].Type, attributeData.TargetType) :
+                                   !m.IsStatic) :
                                m.IsStatic ?
                                    // Static method: check first parameter matches target type or is generic Type
                                    m.Parameters.Length > 0 &&
                                    (attributeData.RequiresGenericTypeParameter ?
                                        m.Parameters[0].Type.Name == "Type" && m.Parameters[0].Type.ContainingNamespace.Name == "System" :
                                        SymbolEqualityComparer.Default.Equals(m.Parameters[0].Type, attributeData.TargetType)) :
-                                   // Instance method: method must be on the target type OR TreatAsInstance is true
-                                   SymbolEqualityComparer.Default.Equals(m.ContainingType, attributeData.TargetType) ||
-                                   attributeData.TreatAsInstance))
+                                   // Instance method: method must be on the target type
+                                   SymbolEqualityComparer.Default.Equals(m.ContainingType, attributeData.TargetType)))
                 .OrderBy(m => m.Parameters.Length)
                 .ToArray();
 
@@ -369,12 +371,22 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             var isExtensionMethod = staticMethod.IsExtensionMethod ||
                                     (staticMethod.Parameters.Length > 0 && staticMethod.Parameters[0].IsThis);
 
-            if (isExtensionMethod || attributeData.TreatAsInstance)
+            if (isExtensionMethod)
             {
-                // Extension method or static method treated as instance - call it like an instance method
+                // Extension method - call it like an instance method
                 sourceBuilder.Append($"        var result = actualValue.{methodName}(");
                 var paramList = parameters.Select(p => $"_{p.Name}").ToArray();
                 sourceBuilder.Append(string.Join(", ", paramList));
+                sourceBuilder.AppendLine(");");
+            }
+            else if (attributeData.TreatAsInstance)
+            {
+                // Static method treated as instance - call the static method with actualValue as first parameter
+                sourceBuilder.Append($"        var result = {containingType.ToDisplayString()}.{methodName}(actualValue");
+                foreach (var param in parameters)
+                {
+                    sourceBuilder.Append($", _{param.Name}");
+                }
                 sourceBuilder.AppendLine(");");
             }
             else if (attributeData.RequiresGenericTypeParameter)

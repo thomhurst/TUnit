@@ -29,4 +29,18 @@ namespace TUnit.Assertions.Extensions;
 [CreateAssertion(typeof(char), typeof(Uri), nameof(Uri.IsHexDigit), CustomName = "IsNotHexDigit", NegateLogic = true)]
 [CreateAssertion(typeof(string), typeof(Uri), nameof(Uri.IsHexEncoding))]
 [CreateAssertion(typeof(string), typeof(Uri), nameof(Uri.IsHexEncoding), CustomName = "IsNotHexEncoding", NegateLogic = true)]
-public static partial class UriAssertionExtensions;
+
+[CreateAssertion(typeof(Uri), typeof(UriAssertionExtensions), nameof(IsHttps))]
+[CreateAssertion(typeof(Uri), typeof(UriAssertionExtensions), nameof(IsHttps), CustomName = "IsNotHttps", NegateLogic = true)]
+
+[CreateAssertion(typeof(Uri), typeof(UriAssertionExtensions), nameof(IsHttp))]
+[CreateAssertion(typeof(Uri), typeof(UriAssertionExtensions), nameof(IsHttp), CustomName = "IsNotHttp", NegateLogic = true)]
+
+[CreateAssertion(typeof(Uri), typeof(UriAssertionExtensions), nameof(IsHttpOrHttps))]
+[CreateAssertion(typeof(Uri), typeof(UriAssertionExtensions), nameof(IsHttpOrHttps), CustomName = "IsNotHttpOrHttps", NegateLogic = true)]
+public static partial class UriAssertionExtensions
+{
+    internal static bool IsHttps(Uri uri) => uri.Scheme == Uri.UriSchemeHttps;
+    internal static bool IsHttp(Uri uri) => uri.Scheme == Uri.UriSchemeHttp;
+    internal static bool IsHttpOrHttps(Uri uri) => uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps;
+}
