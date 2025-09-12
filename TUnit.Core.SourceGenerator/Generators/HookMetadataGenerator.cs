@@ -40,71 +40,276 @@ public class HookMetadataGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetHookMethodMetadata(ctx, "AfterEvery"))
             .Where(static m => m is not null);
 
-        var beforeHooksCollected = beforeHooks.Collect();
-        var afterHooksCollected = afterHooks.Collect();
-        var beforeEveryHooksCollected = beforeEveryHooks.Collect();
-        var afterEveryHooksCollected = afterEveryHooks.Collect();
-
-        var allHooks = beforeHooksCollected
-            .Combine(afterHooksCollected)
-            .Combine(beforeEveryHooksCollected)
-            .Combine(afterEveryHooksCollected);
-
-        context.RegisterSourceOutput(allHooks, (sourceProductionContext, data) =>
+        // Generate individual files for each hook instead of collecting them
+        context.RegisterSourceOutput(beforeHooks, (sourceProductionContext, hook) =>
         {
-            var (((beforeHooksList, afterHooksList), beforeEveryHooksList), afterEveryHooksList) = data;
-            var directHooks = beforeHooksList
-                .Concat(afterHooksList)
-                .Concat(beforeEveryHooksList)
-                .Concat(afterEveryHooksList)
-                .Where(h => h != null)
-                .Cast<HookMethodMetadata>()
-                .ToList();
+            if (hook != null)
+            {
+                GenerateIndividualHookFile(sourceProductionContext, hook);
+            }
+        });
 
-            var validHooks = ProcessHooks(directHooks);
-            GenerateHookRegistry(sourceProductionContext, validHooks.ToImmutableArray());
+        context.RegisterSourceOutput(afterHooks, (sourceProductionContext, hook) =>
+        {
+            if (hook != null)
+            {
+                GenerateIndividualHookFile(sourceProductionContext, hook);
+            }
+        });
+
+        context.RegisterSourceOutput(beforeEveryHooks, (sourceProductionContext, hook) =>
+        {
+            if (hook != null)
+            {
+                GenerateIndividualHookFile(sourceProductionContext, hook);
+            }
+        });
+
+        context.RegisterSourceOutput(afterEveryHooks, (sourceProductionContext, hook) =>
+        {
+            if (hook != null)
+            {
+                GenerateIndividualHookFile(sourceProductionContext, hook);
+            }
         });
     }
 
-    private static List<HookMethodMetadata> ProcessHooks(List<HookMethodMetadata> directHooks)
+    private static void GenerateIndividualHookFile(SourceProductionContext context, HookMethodMetadata hook)
     {
-        var validDirectHooks = directHooks.ToList();
+        try
+        {
+            var safeFileName = GetSafeFileName(hook);
+            using var writer = new CodeWriter();
 
-        return validDirectHooks
-            .GroupBy(h => h, new HookEqualityComparer())
-            .Select(g => g.First())
-            .ToList();
+            writer.AppendLine("#nullable enable");
+            writer.AppendLine("#pragma warning disable CS9113 // Parameter is unread.");
+            writer.AppendLine();
+            writer.AppendLine("using System;");
+            writer.AppendLine("using System.Collections.Generic;");
+            writer.AppendLine("using System.Linq;");
+            writer.AppendLine("using System.Reflection;");
+            writer.AppendLine("using System.Runtime.CompilerServices;");
+            writer.AppendLine("using System.Threading;");
+            writer.AppendLine("using System.Threading.Tasks;");
+            writer.AppendLine("using global::TUnit.Core;");
+            writer.AppendLine("using global::TUnit.Core.Hooks;");
+            writer.AppendLine("using global::TUnit.Core.Interfaces.SourceGenerator;");
+            writer.AppendLine("using global::TUnit.Core.Models;");
+            writer.AppendLine("using HookType = global::TUnit.Core.HookType;");
+            writer.AppendLine();
+
+            writer.AppendLine($"namespace TUnit.Generated.Hooks.{safeFileName};");
+            writer.AppendLine();
+
+            using (writer.BeginBlock($"internal static class {safeFileName}Initializer"))
+            {
+                writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+                using (writer.BeginBlock("public static void Initialize()"))
+                {
+                    GenerateHookRegistration(writer, hook);
+                }
+
+                writer.AppendLine();
+                GenerateHookDelegate(writer, hook);
+            }
+
+            context.AddSource($"{safeFileName}.Hook.g.cs", writer.ToString());
+        }
+        catch (Exception ex)
+        {
+            var descriptor = new DiagnosticDescriptor(
+                "THG001",
+                "Hook metadata generation failed",
+                "Failed to generate hook metadata for {0}: {1}",
+                "TUnit",
+                DiagnosticSeverity.Error,
+                isEnabledByDefault: true);
+
+            var hookName = $"{hook.TypeSymbol.Name}.{hook.MethodSymbol.Name}";
+            context.ReportDiagnostic(Diagnostic.Create(descriptor, Location.None, hookName, ex.Message));
+        }
     }
 
-    private class HookEqualityComparer : IEqualityComparer<HookMethodMetadata>
+    private static string GetSafeFileName(HookMethodMetadata hook)
     {
-        public bool Equals(HookMethodMetadata? x, HookMethodMetadata? y)
+        var typeName = hook.TypeSymbol.Name;
+        var methodName = hook.MethodSymbol.Name;
+        
+        // Remove generic type parameters from type name for file safety
+        if (hook.TypeSymbol.IsGenericType)
         {
-            if (x == null || y == null)
+            var genericIndex = typeName.IndexOf('`');
+            if (genericIndex > 0)
             {
-                return x == y;
+                typeName = typeName.Substring(0, genericIndex);
             }
-
-            return SymbolEqualityComparer.Default.Equals(x.TypeSymbol, y.TypeSymbol) &&
-                   SymbolEqualityComparer.Default.Equals(x.MethodSymbol, y.MethodSymbol);
         }
 
-        public int GetHashCode(HookMethodMetadata? obj)
-        {
-            if (obj == null)
-            {
-                return 0;
-            }
+        var safeTypeName = typeName
+            .Replace(".", "_")
+            .Replace("<", "_")
+            .Replace(">", "_")
+            .Replace(",", "_")
+            .Replace(" ", "")
+            .Replace("`", "_")
+            .Replace("+", "_");
 
-            unchecked
+        var safeMethodName = methodName
+            .Replace(".", "_")
+            .Replace("<", "_")
+            .Replace(">", "_")
+            .Replace(",", "_")
+            .Replace(" ", "");
+
+        return $"{safeTypeName}_{safeMethodName}_{hook.HookKind}_{hook.HookType}";
+    }
+
+    private static void GenerateHookRegistration(CodeWriter writer, HookMethodMetadata hook)
+    {
+        var typeDisplay = hook.TypeSymbol.GloballyQualified();
+        var isInstance = hook.HookKind is "Before" or "After" && hook.HookType == "Test";
+
+        if (hook.HookType == "Test")
+        {
+            if (hook.HookKind == "Before")
             {
-                var hash = 17;
-                hash = hash * 31 + SymbolEqualityComparer.Default.GetHashCode(obj.TypeSymbol);
-                hash = hash * 31 + SymbolEqualityComparer.Default.GetHashCode(obj.MethodSymbol);
-                return hash;
+                if (isInstance)
+                {
+                    GenerateInstanceHookRegistration(writer, "BeforeTestHooks", typeDisplay, hook);
+                }
+                else
+                {
+                    GenerateGlobalHookRegistration(writer, "BeforeEveryTestHooks", hook);
+                }
+            }
+            else if (hook.HookKind == "After")
+            {
+                if (isInstance)
+                {
+                    GenerateInstanceHookRegistration(writer, "AfterTestHooks", typeDisplay, hook);
+                }
+                else
+                {
+                    GenerateGlobalHookRegistration(writer, "AfterEveryTestHooks", hook);
+                }
+            }
+            else if (hook.HookKind == "BeforeEvery")
+            {
+                GenerateGlobalHookRegistration(writer, "BeforeEveryTestHooks", hook);
+            }
+            else if (hook.HookKind == "AfterEvery")
+            {
+                GenerateGlobalHookRegistration(writer, "AfterEveryTestHooks", hook);
+            }
+        }
+        else if (hook.HookType == "Class")
+        {
+            if (hook.HookKind == "Before")
+            {
+                GenerateTypeHookRegistration(writer, "BeforeClassHooks", typeDisplay, hook);
+            }
+            else if (hook.HookKind == "After")
+            {
+                GenerateTypeHookRegistration(writer, "AfterClassHooks", typeDisplay, hook);
+            }
+            else if (hook.HookKind == "BeforeEvery")
+            {
+                GenerateGlobalHookRegistration(writer, "BeforeEveryClassHooks", hook);
+            }
+            else if (hook.HookKind == "AfterEvery")
+            {
+                GenerateGlobalHookRegistration(writer, "AfterEveryClassHooks", hook);
+            }
+        }
+        else if (hook.HookType == "Assembly")
+        {
+            var assemblyName = hook.TypeSymbol.ContainingAssembly.Name.Replace(".", "_").Replace("-", "_");
+            writer.AppendLine($"var {assemblyName}_assembly = typeof({typeDisplay}).Assembly;");
+
+            if (hook.HookKind == "Before")
+            {
+                GenerateAssemblyHookRegistration(writer, "BeforeAssemblyHooks", assemblyName, hook);
+            }
+            else if (hook.HookKind == "After")
+            {
+                GenerateAssemblyHookRegistration(writer, "AfterAssemblyHooks", assemblyName, hook);
+            }
+            else if (hook.HookKind == "BeforeEvery")
+            {
+                GenerateGlobalHookRegistration(writer, "BeforeEveryAssemblyHooks", hook);
+            }
+            else if (hook.HookKind == "AfterEvery")
+            {
+                GenerateGlobalHookRegistration(writer, "AfterEveryAssemblyHooks", hook);
+            }
+        }
+        else if (hook.HookType == "TestSession")
+        {
+            if (hook.HookKind is "Before" or "BeforeEvery")
+            {
+                GenerateGlobalHookRegistration(writer, "BeforeTestSessionHooks", hook);
+            }
+            else if (hook.HookKind is "After" or "AfterEvery")
+            {
+                GenerateGlobalHookRegistration(writer, "AfterTestSessionHooks", hook);
+            }
+        }
+        else if (hook.HookType == "TestDiscovery")
+        {
+            if (hook.HookKind is "Before" or "BeforeEvery")
+            {
+                GenerateGlobalHookRegistration(writer, "BeforeTestDiscoveryHooks", hook);
+            }
+            else if (hook.HookKind is "After" or "AfterEvery")
+            {
+                GenerateGlobalHookRegistration(writer, "AfterTestDiscoveryHooks", hook);
             }
         }
     }
+
+    private static void GenerateInstanceHookRegistration(CodeWriter writer, string dictionaryName, string typeDisplay, HookMethodMetadata hook)
+    {
+        var hookType = GetConcreteHookType(dictionaryName, true);
+        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd(typeof({typeDisplay}), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
+        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}[typeof({typeDisplay})].Add(");
+        writer.Indent();
+        GenerateHookObject(writer, hook, true);
+        writer.Unindent();
+        writer.AppendLine(");");
+    }
+
+    private static void GenerateTypeHookRegistration(CodeWriter writer, string dictionaryName, string typeDisplay, HookMethodMetadata hook)
+    {
+        var hookType = GetConcreteHookType(dictionaryName, false);
+        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd(typeof({typeDisplay}), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
+        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}[typeof({typeDisplay})].Add(");
+        writer.Indent();
+        GenerateHookObject(writer, hook, false);
+        writer.Unindent();
+        writer.AppendLine(");");
+    }
+
+    private static void GenerateAssemblyHookRegistration(CodeWriter writer, string dictionaryName, string assemblyVarName, HookMethodMetadata hook)
+    {
+        var assemblyVar = assemblyVarName + "_assembly";
+        var hookType = GetConcreteHookType(dictionaryName, false);
+        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd({assemblyVar}, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
+        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}[{assemblyVar}].Add(");
+        writer.Indent();
+        GenerateHookObject(writer, hook, false);
+        writer.Unindent();
+        writer.AppendLine(");");
+    }
+
+    private static void GenerateGlobalHookRegistration(CodeWriter writer, string listName, HookMethodMetadata hook)
+    {
+        writer.AppendLine($"global::TUnit.Core.Sources.{listName}.Add(");
+        writer.Indent();
+        GenerateHookObject(writer, hook, false);
+        writer.Unindent();
+        writer.AppendLine(");");
+    }
+
 
     private static HookMethodMetadata? GetHookMethodMetadata(GeneratorAttributeSyntaxContext context, string hookKind)
     {
@@ -296,256 +501,10 @@ public class HookMetadataGenerator : IIncrementalGenerator
         };
     }
 
-    private static void GenerateHookRegistry(SourceProductionContext context, ImmutableArray<HookMethodMetadata> hooks)
-    {
-        try
-        {
-            var validHooks = hooks
-                .Where(h => h != null)
-                .ToList();
-
-            if (!validHooks.Any())
-            {
-                return;
-            }
-
-            using var writer = new CodeWriter();
-
-            writer.AppendLine("#nullable enable");
-            writer.AppendLine("#pragma warning disable CS9113 // Parameter is unread.");
-            writer.AppendLine();
-            writer.AppendLine("using System;");
-            writer.AppendLine("using System.Collections.Generic;");
-            writer.AppendLine("using System.Linq;");
-            writer.AppendLine("using System.Reflection;");
-            writer.AppendLine("using System.Runtime.CompilerServices;");
-            writer.AppendLine("using System.Threading;");
-            writer.AppendLine("using System.Threading.Tasks;");
-            writer.AppendLine("using global::TUnit.Core;");
-            writer.AppendLine("using global::TUnit.Core.Hooks;");
-            writer.AppendLine("using global::TUnit.Core.Interfaces.SourceGenerator;");
-            writer.AppendLine("using global::TUnit.Core.Models;");
-            writer.AppendLine("using HookType = global::TUnit.Core.HookType;");
-            writer.AppendLine();
-
-            writer.AppendLine("namespace TUnit.Generated.Hooks;");
-            writer.AppendLine();
-
-            using (writer.BeginBlock("public sealed class GeneratedHookRegistry"))
-            {
-                GenerateStaticConstructor(writer, validHooks);
-
-                GenerateHookDelegates(writer, validHooks);
-            }
-
-            writer.AppendLine();
-
-            using (writer.BeginBlock("internal static class HookModuleInitializer"))
-            {
-                writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
-                using (writer.BeginBlock("public static void Initialize()"))
-                {
-                    writer.AppendLine("_ = new GeneratedHookRegistry();");
-                }
-            }
-
-            context.AddSource("GeneratedHookSource.g.cs", writer.ToString());
-        }
-        catch (Exception ex)
-        {
-            var descriptor = new DiagnosticDescriptor(
-                "THG001",
-                "Hook metadata generation failed",
-                "Failed to generate hook metadata: {0}",
-                "TUnit",
-                DiagnosticSeverity.Error,
-                isEnabledByDefault: true);
-
-            context.ReportDiagnostic(Diagnostic.Create(descriptor, Location.None, ex.ToString()));
-        }
-    }
-
-    private static void GenerateStaticConstructor(CodeWriter writer, List<HookMethodMetadata> hooks)
-    {
-        using (writer.BeginBlock("static GeneratedHookRegistry()"))
-        {
-            writer.AppendLine("try");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("PopulateSourcesDictionaries();");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("catch (Exception ex)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("throw new global::System.InvalidOperationException($\"Failed to initialize hook registry: {ex.Message}\", ex);");
-            writer.Unindent();
-            writer.AppendLine("}");
-        }
-
-        writer.AppendLine();
-
-        using (writer.BeginBlock("private static void PopulateSourcesDictionaries()"))
-        {
-            var hooksByType = hooks.GroupBy(h => h.TypeSymbol, SymbolEqualityComparer.Default);
-
-            foreach (var typeGroup in hooksByType)
-            {
-                var typeSymbol = (INamedTypeSymbol)typeGroup.Key!;
-
-                var typeDisplay = typeSymbol.GloballyQualified();
-
-                var testHooks = typeGroup.Where(h => h.HookType == "Test").ToList();
-                var classHooks = typeGroup.Where(h => h.HookType == "Class").ToList();
-
-                if (testHooks.Any())
-                {
-
-                    var beforeTestHooks = testHooks.Where(h => h.HookKind == "Before").ToList();
-                    if (beforeTestHooks.Any())
-                    {
-                        GenerateHookListPopulation(writer, "BeforeTestHooks", typeDisplay, beforeTestHooks, isInstance: true);
-                    }
-
-                    var afterTestHooks = testHooks.Where(h => h.HookKind == "After").ToList();
-                    if (afterTestHooks.Any())
-                    {
-                        GenerateHookListPopulation(writer, "AfterTestHooks", typeDisplay, afterTestHooks, isInstance: true);
-                    }
-
-                }
-
-                if (classHooks.Any())
-                {
-
-                    var beforeClassHooks = classHooks.Where(h => h.HookKind == "Before").ToList();
-                    if (beforeClassHooks.Any())
-                    {
-                        GenerateHookListPopulation(writer, "BeforeClassHooks", typeDisplay, beforeClassHooks, isInstance: false);
-                    }
-
-                    var afterClassHooks = classHooks.Where(h => h.HookKind == "After").ToList();
-                    if (afterClassHooks.Any())
-                    {
-                        GenerateHookListPopulation(writer, "AfterClassHooks", typeDisplay, afterClassHooks, isInstance: false);
-                    }
-                }
-            }
-
-            // Handle global "Every" hooks for tests
-            var globalBeforeEveryTestHooks = hooks.Where(h => h.HookType == "Test" && h.HookKind == "BeforeEvery").ToList();
-            if (globalBeforeEveryTestHooks.Any())
-            {
-                GenerateGlobalHookListPopulation(writer, "BeforeEveryTestHooks", globalBeforeEveryTestHooks);
-            }
-
-            var globalAfterEveryTestHooks = hooks.Where(h => h.HookType == "Test" && h.HookKind == "AfterEvery").ToList();
-            if (globalAfterEveryTestHooks.Any())
-            {
-                GenerateGlobalHookListPopulation(writer, "AfterEveryTestHooks", globalAfterEveryTestHooks);
-            }
-
-            // Handle global "Every" hooks for classes
-            var globalBeforeEveryClassHooks = hooks.Where(h => h.HookType == "Class" && h.HookKind == "BeforeEvery").ToList();
-            if (globalBeforeEveryClassHooks.Any())
-            {
-                GenerateGlobalHookListPopulation(writer, "BeforeEveryClassHooks", globalBeforeEveryClassHooks);
-            }
-
-            var globalAfterEveryClassHooks = hooks.Where(h => h.HookType == "Class" && h.HookKind == "AfterEvery").ToList();
-            if (globalAfterEveryClassHooks.Any())
-            {
-                GenerateGlobalHookListPopulation(writer, "AfterEveryClassHooks", globalAfterEveryClassHooks);
-            }
-
-            var assemblyHookGroups = hooks.Where(h => h.HookType == "Assembly")
-                .GroupBy(h => h.TypeSymbol.ContainingAssembly, SymbolEqualityComparer.Default);
-
-            foreach (var assemblyGroup in assemblyHookGroups)
-            {
-                var assembly = (IAssemblySymbol)assemblyGroup.Key!;
-                var assemblyName = assembly.Name;
-
-                writer.AppendLine($"var {assemblyName.Replace(".", "_").Replace("-", "_")}_assembly = typeof({assemblyGroup.First().TypeSymbol.GloballyQualified()}).Assembly;");
-
-                var beforeAssemblyHooks = assemblyGroup.Where(h => h.HookKind == "Before").ToList();
-                if (beforeAssemblyHooks.Any())
-                {
-                    GenerateAssemblyHookListPopulation(writer, "BeforeAssemblyHooks", assemblyName, beforeAssemblyHooks);
-                }
-
-                var afterAssemblyHooks = assemblyGroup.Where(h => h.HookKind == "After").ToList();
-                if (afterAssemblyHooks.Any())
-                {
-                    GenerateAssemblyHookListPopulation(writer, "AfterAssemblyHooks", assemblyName, afterAssemblyHooks);
-                }
-            }
-
-            // Handle global "Every" hooks for assemblies
-            var globalBeforeEveryAssemblyHooks = hooks.Where(h => h.HookType == "Assembly" && h.HookKind == "BeforeEvery").ToList();
-            if (globalBeforeEveryAssemblyHooks.Any())
-            {
-                GenerateGlobalHookListPopulation(writer, "BeforeEveryAssemblyHooks", globalBeforeEveryAssemblyHooks);
-            }
-
-            var globalAfterEveryAssemblyHooks = hooks.Where(h => h.HookType == "Assembly" && h.HookKind == "AfterEvery").ToList();
-            if (globalAfterEveryAssemblyHooks.Any())
-            {
-                GenerateGlobalHookListPopulation(writer, "AfterEveryAssemblyHooks", globalAfterEveryAssemblyHooks);
-            }
-
-            var testSessionHooks = hooks.Where(h => h.HookType == "TestSession").ToList();
-            if (testSessionHooks.Any())
-            {
-
-                var beforeTestSessionHooks = testSessionHooks.Where(h => h.HookKind is "Before" or "BeforeEvery").ToList();
-                if (beforeTestSessionHooks.Any())
-                {
-                    GenerateGlobalHookListPopulation(writer, "BeforeTestSessionHooks", beforeTestSessionHooks);
-                }
-
-                var afterTestSessionHooks = testSessionHooks.Where(h => h.HookKind is "After" or "AfterEvery").ToList();
-                if (afterTestSessionHooks.Any())
-                {
-                    GenerateGlobalHookListPopulation(writer, "AfterTestSessionHooks", afterTestSessionHooks);
-                }
-            }
-
-            var testDiscoveryHooks = hooks.Where(h => h.HookType == "TestDiscovery").ToList();
-            if (testDiscoveryHooks.Any())
-            {
-
-                var beforeTestDiscoveryHooks = testDiscoveryHooks.Where(h => h.HookKind is "Before" or "BeforeEvery").ToList();
-                if (beforeTestDiscoveryHooks.Any())
-                {
-                    GenerateGlobalHookListPopulation(writer, "BeforeTestDiscoveryHooks", beforeTestDiscoveryHooks);
-                }
-
-                var afterTestDiscoveryHooks = testDiscoveryHooks.Where(h => h.HookKind is "After" or "AfterEvery").ToList();
-                if (afterTestDiscoveryHooks.Any())
-                {
-                    GenerateGlobalHookListPopulation(writer, "AfterTestDiscoveryHooks", afterTestDiscoveryHooks);
-                }
-            }
-        }
-
-        writer.AppendLine();
-    }
 
 
 
-    private static void GenerateHookDelegates(CodeWriter writer, List<HookMethodMetadata> hooks)
-    {
 
-        var uniqueMethods = hooks
-            .GroupBy(h => h.MethodSymbol, SymbolEqualityComparer.Default)
-            .Select(g => g.First());
-
-        foreach (var hook in uniqueMethods)
-        {
-            GenerateHookDelegate(writer, hook);
-        }
-    }
 
     private static void GenerateHookDelegate(CodeWriter writer, HookMethodMetadata hook)
     {
@@ -745,51 +704,6 @@ public class HookMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static void GenerateHookListPopulation(CodeWriter writer, string dictionaryName, string typeDisplay, List<HookMethodMetadata> hooks, bool isInstance)
-    {
-        var hookType = GetConcreteHookType(dictionaryName, isInstance);
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd(typeof({typeDisplay}), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
-
-        foreach (var hook in hooks.OrderBy(h => h.Order))
-        {
-            writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}[typeof({typeDisplay})].Add(");
-            writer.Indent();
-            GenerateHookObject(writer, hook, isInstance);
-            writer.Unindent();
-            writer.AppendLine(");");
-        }
-        writer.AppendLine();
-    }
-
-    private static void GenerateAssemblyHookListPopulation(CodeWriter writer, string dictionaryName, string assemblyVarName, List<HookMethodMetadata> hooks)
-    {
-        var assemblyVar = assemblyVarName.Replace(".", "_").Replace("-", "_") + "_assembly";
-        var hookType = GetConcreteHookType(dictionaryName, false);
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd({assemblyVar}, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
-
-        foreach (var hook in hooks.OrderBy(h => h.Order))
-        {
-            writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}[{assemblyVar}].Add(");
-            writer.Indent();
-            GenerateHookObject(writer, hook, false);
-            writer.Unindent();
-            writer.AppendLine(");");
-        }
-        writer.AppendLine();
-    }
-
-    private static void GenerateGlobalHookListPopulation(CodeWriter writer, string listName, List<HookMethodMetadata> hooks)
-    {
-        foreach (var hook in hooks.OrderBy(h => h.Order))
-        {
-            writer.AppendLine($"global::TUnit.Core.Sources.{listName}.Add(");
-            writer.Indent();
-            GenerateHookObject(writer, hook, false);
-            writer.Unindent();
-            writer.AppendLine(");");
-        }
-        writer.AppendLine();
-    }
 
     private static void GenerateHookObject(CodeWriter writer, HookMethodMetadata hook, bool isInstance)
     {
