@@ -36,6 +36,11 @@ public class CreateAssertionAttribute : Attribute
     /// Optional custom method name override. If not specified, the method name will be derived from the target method name.
     /// </summary>
     public string? CustomMethodName { get; set; }
+    
+    /// <summary>
+    /// Indicates if this method requires generic type parameter handling (e.g., Enum.IsDefined(Type, object) where Type becomes typeof(T)).
+    /// </summary>
+    public bool RequiresGenericTypeParameter { get; set; }
 }
 
 [Flags]

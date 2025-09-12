@@ -10,6 +10,8 @@
         <ProjectReference Include="..\TUnit.Assertions.Analyzers.CodeFixers\TUnit.Assertions.Analyzers.CodeFixers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 
         <None Include="$(MSBuildProjectDirectory)\..\TUnit.Assertions.Analyzers.CodeFixers\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.Analyzers.CodeFixers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+
+        <ProjectReference Include="..\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>
