@@ -72,6 +72,12 @@ internal sealed class TestCoordinator : ITestCoordinator
             TestContext.Current = test.Context;
             test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
 
+            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(
+                test.Context.TestDetails.ClassInstance,
+                test.Context.ObjectBag,
+                test.Context.TestDetails.MethodMetadata,
+                test.Context.Events);
+
             await _testExecutor.ExecuteAsync(test, cancellationToken).ConfigureAwait(false);
 
             await _stateManager.MarkCompletedAsync(test).ConfigureAwait(false);
