@@ -88,12 +88,20 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     public async Task<CloseTestSessionResult> CloseTestSessionAsync(CloseTestSessionContext context)
     {
+        bool isSuccess = true;
+
         if (_serviceProvidersPerSession.TryRemove(context.SessionUid.Value, out var serviceProvider))
         {
+            // Check if all tests were skipped - if so, mark the session as failed per TUnit requirements
+            if (serviceProvider.SessionResultTracker.ShouldMarkSessionAsFailedDueToSkippedTests())
+            {
+                isSuccess = false;
+            }
+
             await serviceProvider.DisposeAsync().ConfigureAwait(false);
         }
 
-        return new CloseTestSessionResult { IsSuccess = true };
+        return new CloseTestSessionResult { IsSuccess = isSuccess };
     }
 
     private TUnitServiceProvider GetOrCreateServiceProvider(ExecuteRequestContext context)

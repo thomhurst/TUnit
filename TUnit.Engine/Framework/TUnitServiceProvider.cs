@@ -47,6 +47,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitInitializer Initializer { get; }
     public CancellationTokenSource FailFastCancellationSource { get; }
     public ParallelLimitLockProvider ParallelLimitLockProvider { get; }
+    public SessionResultTracker SessionResultTracker { get; }
 
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
@@ -104,7 +105,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         TestExecutor = Register(new TestExecutor(hookExecutor, lifecycleCoordinator, beforeHookTaskCache, ContextProvider, EventReceiverOrchestrator));
 
         var testExecutionGuard = Register(new TestExecutionGuard());
-        var testStateManager = Register(new TestStateManager());
+        SessionResultTracker = Register(new SessionResultTracker());
+        var testStateManager = Register(new TestStateManager(SessionResultTracker));
         var testMessagePublisher = Register(new TestMessagePublisher(MessageBus));
         var testContextRestorer = Register(new TestContextRestorer());
         var testMethodInvoker = Register(new TestMethodInvoker());
