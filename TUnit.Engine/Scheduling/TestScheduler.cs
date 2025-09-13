@@ -123,7 +123,7 @@ internal sealed class TestScheduler : ITestScheduler
                     return task;
                 }).ToArray();
 
-                await Task.WhenAll(parallelTasks).ConfigureAwait(false);
+                await WaitForTasksWithFailFastHandling(parallelTasks, runner, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -146,7 +146,7 @@ internal sealed class TestScheduler : ITestScheduler
                 await ExecuteSequentiallyAsync($"Key-{key}", tests, runner, cancellationToken).ConfigureAwait(false);
             }).ToArray();
 
-            await Task.WhenAll(keyedTasks).ConfigureAwait(false);
+            await WaitForTasksWithFailFastHandling(keyedTasks, runner, cancellationToken).ConfigureAwait(false);
         }
 
         // 4. Execute global NotInParallel tests (completely sequential, after everything else)
@@ -218,7 +218,7 @@ internal sealed class TestScheduler : ITestScheduler
                     return task;
                 }).ToArray();
 
-                await Task.WhenAll(orderTasks).ConfigureAwait(false);
+                await WaitForTasksWithFailFastHandling(orderTasks, runner, cancellationToken).ConfigureAwait(false);
             }
         }
     }
@@ -268,6 +268,41 @@ internal sealed class TestScheduler : ITestScheduler
             }, cancellationToken);
         }
 
-        await Task.WhenAll(workers).ConfigureAwait(false);
+        await WaitForTasksWithFailFastHandling(workers, runner, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Waits for multiple tasks to complete, handling fail-fast cancellation properly.
+    /// When fail-fast is triggered, we only want to bubble up the first real failure,
+    /// not the cancellation exceptions from other tests that were cancelled as a result.
+    /// </summary>
+    private async Task WaitForTasksWithFailFastHandling(Task[] tasks, TestRunner runner, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Wait for all tasks to complete, even if some fail
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            // Check if this is a fail-fast scenario
+            if (cancellationToken.IsCancellationRequested)
+            {
+                // Get the first failure that triggered fail-fast
+                var firstFailure = runner.GetFirstFailFastException();
+                
+                // If we have a stored first failure, throw that instead of the aggregated exceptions
+                if (firstFailure != null)
+                {
+                    throw firstFailure;
+                }
+                
+                // If no stored failure, this was a user-initiated cancellation
+                // Let the original exception bubble up
+            }
+            
+            // Re-throw the original exception (either cancellation or non-fail-fast failure)
+            throw;
+        }
     }
 }

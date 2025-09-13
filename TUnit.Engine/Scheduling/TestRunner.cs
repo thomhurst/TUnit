@@ -52,6 +52,7 @@ public sealed class TestRunner : IDataProducer
     }
 
     private readonly GetOnlyDictionary<string, Task> _executingTests = new();
+    private Exception? _firstFailFastException;
 
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
@@ -87,6 +88,11 @@ public sealed class TestRunner : IDataProducer
             await _messageBus.PublishAsync(this, updateMessage).ConfigureAwait(false);
             if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
             {
+                // Capture the first failure exception before triggering cancellation
+                if (test.Result.Exception != null)
+                {
+                    Interlocked.CompareExchange(ref _firstFailFastException, test.Result.Exception, null);
+                }
                 await _logger.LogErrorAsync($"Test {test.TestId} failed. Triggering fail-fast cancellation.").ConfigureAwait(false);
                 _failFastCancellationSource.Cancel();
             }
@@ -100,6 +106,8 @@ public sealed class TestRunner : IDataProducer
 
             if (_isFailFastEnabled)
             {
+                // Capture the first failure exception before triggering cancellation
+                Interlocked.CompareExchange(ref _firstFailFastException, ex, null);
                 await _logger.LogErrorAsync("Unhandled exception occurred. Triggering fail-fast cancellation.").ConfigureAwait(false);
                 _failFastCancellationSource.Cancel();
             }
@@ -109,4 +117,9 @@ public sealed class TestRunner : IDataProducer
             test.EndTime = DateTimeOffset.UtcNow;
         }
     }
+
+    /// <summary>
+    /// Gets the first exception that triggered fail-fast cancellation.
+    /// </summary>
+    public Exception? GetFirstFailFastException() => _firstFailFastException;
 }
