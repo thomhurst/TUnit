@@ -64,14 +64,6 @@ internal sealed class TestCoordinator : ITestCoordinator
     {
         try
         {
-            if (test.Context.TestDetails.ClassInstance is SkippedTestInstance ||
-                !string.IsNullOrEmpty(test.Context.SkipReason))
-            {
-                await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped").ConfigureAwait(false);
-                await _messagePublisher.PublishSkippedAsync(test, test.Context.SkipReason ?? "Unknown");
-                return;
-            }
-
             await _stateManager.MarkRunningAsync(test).ConfigureAwait(false);
             await _messagePublisher.PublishStartedAsync(test).ConfigureAwait(false);
 
@@ -79,6 +71,15 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             TestContext.Current = test.Context;
             test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
+
+            // Check if this test should be skipped (after creating instance)
+            if (test.Context.TestDetails.ClassInstance is SkippedTestInstance ||
+                !string.IsNullOrEmpty(test.Context.SkipReason))
+            {
+                await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped").ConfigureAwait(false);
+                await _messagePublisher.PublishSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped").ConfigureAwait(false);
+                return;
+            }
 
             await PropertyInjectionService.InjectPropertiesIntoObjectAsync(
                 test.Context.TestDetails.ClassInstance,

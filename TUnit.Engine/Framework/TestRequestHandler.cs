@@ -81,45 +81,5 @@ internal sealed class TestRequestHandler : IRequestHandler
             request.Filter,
             context.MessageBus,
             context.CancellationToken);
-        
-        // Check if we have only skipped tests
-        // When all tests are skipped, the run should be marked as failed per TUnit requirements
-        var hasAnyPassedTest = false;
-        var hasAnySkippedTest = false;
-        var hasAnyFailedTest = false;
-        
-        foreach (var test in allTests)
-        {
-            if (test.Result?.State == TestState.Passed)
-            {
-                hasAnyPassedTest = true;
-            }
-            else if (test.Result?.State == TestState.Skipped)
-            {
-                hasAnySkippedTest = true;
-            }
-            else if (test.Result?.State == TestState.Failed)
-            {
-                hasAnyFailedTest = true;
-            }
-        }
-        
-        // If we have no passed tests and no failed tests, but we have skipped tests,
-        // send a failed test node to force the overall outcome to be "Failed"
-        if (!hasAnyPassedTest && !hasAnyFailedTest && hasAnySkippedTest)
-        {
-            // Create a synthetic failed test to mark the run as failed
-            await context.MessageBus.PublishAsync(
-                dataProducer: serviceProvider.MessageBus,
-                data: new TestNodeUpdateMessage(
-                    sessionUid: context.Request.Session.SessionUid,
-                    testNode: new TestNode
-                    {
-                        DisplayName = "Test run incomplete",
-                        Uid = new TestNodeUid($"skipped-tests-marker-{Guid.NewGuid()}"),
-                        Properties = new PropertyBag(new FailedTestNodeStateProperty(
-                            new Exception("All tests were skipped - marking run as failed")))
-                    }));
-        }
     }
 }
