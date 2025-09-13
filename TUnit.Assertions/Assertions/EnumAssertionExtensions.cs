@@ -8,8 +8,8 @@ using TUnit.Assertions.Attributes;
 namespace TUnit.Assertions.Extensions;
 
 // Enum.HasFlag is an instance method that returns boolean
-[CreateAssertion(typeof(Enum), nameof(Enum.HasFlag))]
-[CreateAssertion(typeof(Enum), nameof(Enum.HasFlag), CustomName = "DoesNotHaveFlag", NegateLogic = true)]
+[CreateAssertion<Enum>( nameof(Enum.HasFlag))]
+[CreateAssertion<Enum>( nameof(Enum.HasFlag), CustomName = "DoesNotHaveFlag", NegateLogic = true)]
 public static partial class EnumAssertionExtensions
 {
     // Manual extension methods for IsDefined since it requires generic constraints

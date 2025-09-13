@@ -7,6 +7,6 @@ namespace TUnit.Assertions.Extensions;
 // DirectoryInfo-specific assertions are in DirectoryInfoAssertionExtensions.cs
 
 // FileSystemInfo common assertions (base class for both FileInfo and DirectoryInfo)
-[CreateAssertion(typeof(FileSystemInfo), nameof(FileSystemInfo.Exists))]
-[CreateAssertion(typeof(FileSystemInfo), nameof(FileSystemInfo.Exists), CustomName = "DoesNotExist", NegateLogic = true)]
+[CreateAssertion<FileSystemInfo>( nameof(FileSystemInfo.Exists))]
+[CreateAssertion<FileSystemInfo>( nameof(FileSystemInfo.Exists), CustomName = "DoesNotExist", NegateLogic = true)]
 public static partial class FileSystemAssertionExtensions;

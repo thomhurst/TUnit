@@ -4,14 +4,14 @@ using TUnit.Assertions.Attributes;
 namespace TUnit.Assertions.Extensions;
 
 // StringBuilder specific assertions
-[CreateAssertion(typeof(StringBuilder), typeof(StringBuilderAssertionExtensions), nameof(IsEmpty))]
-[CreateAssertion(typeof(StringBuilder), typeof(StringBuilderAssertionExtensions), nameof(IsEmpty), CustomName = "IsNotEmpty", NegateLogic = true)]
+[CreateAssertion<StringBuilder>( typeof(StringBuilderAssertionExtensions), nameof(IsEmpty))]
+[CreateAssertion<StringBuilder>( typeof(StringBuilderAssertionExtensions), nameof(IsEmpty), CustomName = "IsNotEmpty", NegateLogic = true)]
 
-[CreateAssertion(typeof(StringBuilder), typeof(StringBuilderAssertionExtensions), nameof(IsAtCapacity))]
-[CreateAssertion(typeof(StringBuilder), typeof(StringBuilderAssertionExtensions), nameof(IsAtCapacity), CustomName = "IsNotAtCapacity", NegateLogic = true)]
+[CreateAssertion<StringBuilder>( typeof(StringBuilderAssertionExtensions), nameof(IsAtCapacity))]
+[CreateAssertion<StringBuilder>( typeof(StringBuilderAssertionExtensions), nameof(IsAtCapacity), CustomName = "IsNotAtCapacity", NegateLogic = true)]
 
-[CreateAssertion(typeof(StringBuilder), typeof(StringBuilderAssertionExtensions), nameof(HasExcessCapacity))]
-[CreateAssertion(typeof(StringBuilder), typeof(StringBuilderAssertionExtensions), nameof(HasExcessCapacity), CustomName = "HasNoExcessCapacity", NegateLogic = true)]
+[CreateAssertion<StringBuilder>( typeof(StringBuilderAssertionExtensions), nameof(HasExcessCapacity))]
+[CreateAssertion<StringBuilder>( typeof(StringBuilderAssertionExtensions), nameof(HasExcessCapacity), CustomName = "HasNoExcessCapacity", NegateLogic = true)]
 public static partial class StringBuilderAssertionExtensions
 {
     internal static bool IsEmpty(StringBuilder sb) => sb.Length == 0;

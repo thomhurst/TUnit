@@ -4,8 +4,8 @@ using TUnit.Assertions.Attributes;
 namespace TUnit.Assertions.Extensions;
 
 // Version comparison helpers
-[CreateAssertion(typeof(Version), typeof(VersionAssertionExtensions), nameof(IsMajorVersion))]
-[CreateAssertion(typeof(Version), typeof(VersionAssertionExtensions), nameof(IsMajorVersion), CustomName = "IsNotMajorVersion", NegateLogic = true)]
+[CreateAssertion<Version>( typeof(VersionAssertionExtensions), nameof(IsMajorVersion))]
+[CreateAssertion<Version>( typeof(VersionAssertionExtensions), nameof(IsMajorVersion), CustomName = "IsNotMajorVersion", NegateLogic = true)]
 public static partial class VersionAssertionExtensions
 {
     internal static bool IsMajorVersion(Version version) =>

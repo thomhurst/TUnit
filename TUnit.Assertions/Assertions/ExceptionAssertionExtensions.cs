@@ -4,20 +4,20 @@ using TUnit.Assertions.Attributes;
 namespace TUnit.Assertions.Extensions;
 
 // Exception-specific assertions
-[CreateAssertion(typeof(Exception), typeof(ExceptionAssertionExtensions), nameof(HasInnerException))]
-[CreateAssertion(typeof(Exception), typeof(ExceptionAssertionExtensions), nameof(HasInnerException), CustomName = "HasNoInnerException", NegateLogic = true)]
+[CreateAssertion<Exception>( typeof(ExceptionAssertionExtensions), nameof(HasInnerException))]
+[CreateAssertion<Exception>( typeof(ExceptionAssertionExtensions), nameof(HasInnerException), CustomName = "HasNoInnerException", NegateLogic = true)]
 
-[CreateAssertion(typeof(Exception), typeof(ExceptionAssertionExtensions), nameof(HasStackTrace))]
-[CreateAssertion(typeof(Exception), typeof(ExceptionAssertionExtensions), nameof(HasStackTrace), CustomName = "HasNoStackTrace", NegateLogic = true)]
+[CreateAssertion<Exception>( typeof(ExceptionAssertionExtensions), nameof(HasStackTrace))]
+[CreateAssertion<Exception>( typeof(ExceptionAssertionExtensions), nameof(HasStackTrace), CustomName = "HasNoStackTrace", NegateLogic = true)]
 
-[CreateAssertion(typeof(Exception), typeof(ExceptionAssertionExtensions), nameof(HasData))]
-[CreateAssertion(typeof(Exception), typeof(ExceptionAssertionExtensions), nameof(HasData), CustomName = "HasNoData", NegateLogic = true)]
+[CreateAssertion<Exception>( typeof(ExceptionAssertionExtensions), nameof(HasData))]
+[CreateAssertion<Exception>( typeof(ExceptionAssertionExtensions), nameof(HasData), CustomName = "HasNoData", NegateLogic = true)]
 
-[CreateAssertion(typeof(Exception), typeof(ExceptionAssertionExtensions), nameof(HasHelpLink))]
-[CreateAssertion(typeof(Exception), typeof(ExceptionAssertionExtensions), nameof(HasHelpLink), CustomName = "HasNoHelpLink", NegateLogic = true)]
+[CreateAssertion<Exception>( typeof(ExceptionAssertionExtensions), nameof(HasHelpLink))]
+[CreateAssertion<Exception>( typeof(ExceptionAssertionExtensions), nameof(HasHelpLink), CustomName = "HasNoHelpLink", NegateLogic = true)]
 
-[CreateAssertion(typeof(AggregateException), typeof(ExceptionAssertionExtensions), nameof(HasMultipleInnerExceptions))]
-[CreateAssertion(typeof(AggregateException), typeof(ExceptionAssertionExtensions), nameof(HasMultipleInnerExceptions), CustomName = "HasSingleInnerException", NegateLogic = true)]
+[CreateAssertion<AggregateException>( typeof(ExceptionAssertionExtensions), nameof(HasMultipleInnerExceptions))]
+[CreateAssertion<AggregateException>( typeof(ExceptionAssertionExtensions), nameof(HasMultipleInnerExceptions), CustomName = "HasSingleInnerException", NegateLogic = true)]
 public static partial class ExceptionAssertionExtensions
 {
     internal static bool HasInnerException(Exception exception) => exception.InnerException != null;

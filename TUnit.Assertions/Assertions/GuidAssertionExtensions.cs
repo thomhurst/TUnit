@@ -7,11 +7,11 @@ namespace TUnit.Assertions.Extensions;
 // Note: Guid.TryParse has different signatures in different frameworks
 // We'll skip this for now as it requires special handling
 
-[CreateAssertion(typeof(Guid), typeof(GuidAssertionExtensions), nameof(IsEmpty))]
-[CreateAssertion(typeof(Guid), typeof(GuidAssertionExtensions), nameof(IsEmpty), CustomName = "IsNotEmpty", NegateLogic = true)]
+[CreateAssertion<Guid>( typeof(GuidAssertionExtensions), nameof(IsEmpty))]
+[CreateAssertion<Guid>( typeof(GuidAssertionExtensions), nameof(IsEmpty), CustomName = "IsNotEmpty", NegateLogic = true)]
 
-[CreateAssertion(typeof(Guid?), typeof(GuidAssertionExtensions), nameof(IsNullOrEmpty))]
-[CreateAssertion(typeof(Guid?), typeof(GuidAssertionExtensions), nameof(IsNullOrEmpty), CustomName = "IsNotNullOrEmpty", NegateLogic = true)]
+[CreateAssertion<Guid?>( typeof(GuidAssertionExtensions), nameof(IsNullOrEmpty))]
+[CreateAssertion<Guid?>( typeof(GuidAssertionExtensions), nameof(IsNullOrEmpty), CustomName = "IsNotNullOrEmpty", NegateLogic = true)]
 public static partial class GuidAssertionExtensions
 {
     // Helper methods for Guid assertions

@@ -4,30 +4,30 @@ using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Extensions;
 
-[CreateAssertion(typeof(IPAddress), nameof(IPAddress.IsIPv4MappedToIPv6))]
-[CreateAssertion(typeof(IPAddress), nameof(IPAddress.IsIPv4MappedToIPv6), CustomName = "IsNotIPv4MappedToIPv6", NegateLogic = true)]
+[CreateAssertion<IPAddress>( nameof(IPAddress.IsIPv4MappedToIPv6))]
+[CreateAssertion<IPAddress>( nameof(IPAddress.IsIPv4MappedToIPv6), CustomName = "IsNotIPv4MappedToIPv6", NegateLogic = true)]
 
-[CreateAssertion(typeof(IPAddress), nameof(IPAddress.IsIPv6LinkLocal))]
-[CreateAssertion(typeof(IPAddress), nameof(IPAddress.IsIPv6LinkLocal), CustomName = "IsNotIPv6LinkLocal", NegateLogic = true)]
+[CreateAssertion<IPAddress>( nameof(IPAddress.IsIPv6LinkLocal))]
+[CreateAssertion<IPAddress>( nameof(IPAddress.IsIPv6LinkLocal), CustomName = "IsNotIPv6LinkLocal", NegateLogic = true)]
 
-[CreateAssertion(typeof(IPAddress), nameof(IPAddress.IsIPv6Multicast))]
-[CreateAssertion(typeof(IPAddress), nameof(IPAddress.IsIPv6Multicast), CustomName = "IsNotIPv6Multicast", NegateLogic = true)]
+[CreateAssertion<IPAddress>( nameof(IPAddress.IsIPv6Multicast))]
+[CreateAssertion<IPAddress>( nameof(IPAddress.IsIPv6Multicast), CustomName = "IsNotIPv6Multicast", NegateLogic = true)]
 
-[CreateAssertion(typeof(IPAddress), nameof(IPAddress.IsIPv6SiteLocal))]
-[CreateAssertion(typeof(IPAddress), nameof(IPAddress.IsIPv6SiteLocal), CustomName = "IsNotIPv6SiteLocal", NegateLogic = true)]
+[CreateAssertion<IPAddress>( nameof(IPAddress.IsIPv6SiteLocal))]
+[CreateAssertion<IPAddress>( nameof(IPAddress.IsIPv6SiteLocal), CustomName = "IsNotIPv6SiteLocal", NegateLogic = true)]
 
 // Custom helper methods
-[CreateAssertion(typeof(IPAddress), typeof(IPAddressAssertionExtensions), nameof(IsIPv4))]
-[CreateAssertion(typeof(IPAddress), typeof(IPAddressAssertionExtensions), nameof(IsIPv4), CustomName = "IsNotIPv4", NegateLogic = true)]
+[CreateAssertion<IPAddress>( typeof(IPAddressAssertionExtensions), nameof(IsIPv4))]
+[CreateAssertion<IPAddress>( typeof(IPAddressAssertionExtensions), nameof(IsIPv4), CustomName = "IsNotIPv4", NegateLogic = true)]
 
-[CreateAssertion(typeof(IPAddress), typeof(IPAddressAssertionExtensions), nameof(IsIPv6))]
-[CreateAssertion(typeof(IPAddress), typeof(IPAddressAssertionExtensions), nameof(IsIPv6), CustomName = "IsNotIPv6", NegateLogic = true)]
+[CreateAssertion<IPAddress>( typeof(IPAddressAssertionExtensions), nameof(IsIPv6))]
+[CreateAssertion<IPAddress>( typeof(IPAddressAssertionExtensions), nameof(IsIPv6), CustomName = "IsNotIPv6", NegateLogic = true)]
 
-[CreateAssertion(typeof(IPAddress), typeof(IPAddressAssertionExtensions), nameof(IsLoopback))]
-[CreateAssertion(typeof(IPAddress), typeof(IPAddressAssertionExtensions), nameof(IsLoopback), CustomName = "IsNotLoopback", NegateLogic = true)]
+[CreateAssertion<IPAddress>( typeof(IPAddressAssertionExtensions), nameof(IsLoopback))]
+[CreateAssertion<IPAddress>( typeof(IPAddressAssertionExtensions), nameof(IsLoopback), CustomName = "IsNotLoopback", NegateLogic = true)]
 
-[CreateAssertion(typeof(IPAddress), typeof(IPAddressAssertionExtensions), nameof(IsPrivate))]
-[CreateAssertion(typeof(IPAddress), typeof(IPAddressAssertionExtensions), nameof(IsPrivate), CustomName = "IsPublic", NegateLogic = true)]
+[CreateAssertion<IPAddress>( typeof(IPAddressAssertionExtensions), nameof(IsPrivate))]
+[CreateAssertion<IPAddress>( typeof(IPAddressAssertionExtensions), nameof(IsPrivate), CustomName = "IsPublic", NegateLogic = true)]
 public static partial class IPAddressAssertionExtensions
 {
     internal static bool IsIPv4(IPAddress address) => address.AddressFamily == AddressFamily.InterNetwork;

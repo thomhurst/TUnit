@@ -3,30 +3,30 @@ using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Extensions;
 
-[CreateAssertion(typeof(FileInfo), nameof(FileInfo.Exists))]
-[CreateAssertion(typeof(FileInfo), nameof(FileInfo.Exists), CustomName = "DoesNotExist", NegateLogic = true)]
+[CreateAssertion<FileInfo>( nameof(FileInfo.Exists))]
+[CreateAssertion<FileInfo>( nameof(FileInfo.Exists), CustomName = "DoesNotExist", NegateLogic = true)]
 
-[CreateAssertion(typeof(FileInfo), nameof(FileInfo.IsReadOnly))]
-[CreateAssertion(typeof(FileInfo), nameof(FileInfo.IsReadOnly), CustomName = "IsNotReadOnly", NegateLogic = true)]
+[CreateAssertion<FileInfo>( nameof(FileInfo.IsReadOnly))]
+[CreateAssertion<FileInfo>( nameof(FileInfo.IsReadOnly), CustomName = "IsNotReadOnly", NegateLogic = true)]
 
 // Custom helper methods
-[CreateAssertion(typeof(FileInfo), typeof(FileInfoAssertionExtensions), nameof(IsEmpty))]
-[CreateAssertion(typeof(FileInfo), typeof(FileInfoAssertionExtensions), nameof(IsEmpty), CustomName = "IsNotEmpty", NegateLogic = true)]
+[CreateAssertion<FileInfo>( typeof(FileInfoAssertionExtensions), nameof(IsEmpty))]
+[CreateAssertion<FileInfo>( typeof(FileInfoAssertionExtensions), nameof(IsEmpty), CustomName = "IsNotEmpty", NegateLogic = true)]
 
-[CreateAssertion(typeof(FileInfo), typeof(FileInfoAssertionExtensions), nameof(IsHidden))]
-[CreateAssertion(typeof(FileInfo), typeof(FileInfoAssertionExtensions), nameof(IsHidden), CustomName = "IsNotHidden", NegateLogic = true)]
+[CreateAssertion<FileInfo>( typeof(FileInfoAssertionExtensions), nameof(IsHidden))]
+[CreateAssertion<FileInfo>( typeof(FileInfoAssertionExtensions), nameof(IsHidden), CustomName = "IsNotHidden", NegateLogic = true)]
 
-[CreateAssertion(typeof(FileInfo), typeof(FileInfoAssertionExtensions), nameof(IsSystem))]
-[CreateAssertion(typeof(FileInfo), typeof(FileInfoAssertionExtensions), nameof(IsSystem), CustomName = "IsNotSystem", NegateLogic = true)]
+[CreateAssertion<FileInfo>( typeof(FileInfoAssertionExtensions), nameof(IsSystem))]
+[CreateAssertion<FileInfo>( typeof(FileInfoAssertionExtensions), nameof(IsSystem), CustomName = "IsNotSystem", NegateLogic = true)]
 
-[CreateAssertion(typeof(FileInfo), typeof(FileInfoAssertionExtensions), nameof(IsExecutable))]
-[CreateAssertion(typeof(FileInfo), typeof(FileInfoAssertionExtensions), nameof(IsExecutable), CustomName = "IsNotExecutable", NegateLogic = true)]
+[CreateAssertion<FileInfo>( typeof(FileInfoAssertionExtensions), nameof(IsExecutable))]
+[CreateAssertion<FileInfo>( typeof(FileInfoAssertionExtensions), nameof(IsExecutable), CustomName = "IsNotExecutable", NegateLogic = true)]
 
-[CreateAssertion(typeof(FileInfo), typeof(FileInfoAssertionExtensions), nameof(IsCompressed))]
-[CreateAssertion(typeof(FileInfo), typeof(FileInfoAssertionExtensions), nameof(IsCompressed), CustomName = "IsNotCompressed", NegateLogic = true)]
+[CreateAssertion<FileInfo>( typeof(FileInfoAssertionExtensions), nameof(IsCompressed))]
+[CreateAssertion<FileInfo>( typeof(FileInfoAssertionExtensions), nameof(IsCompressed), CustomName = "IsNotCompressed", NegateLogic = true)]
 
-[CreateAssertion(typeof(FileInfo), typeof(FileInfoAssertionExtensions), nameof(IsEncrypted))]
-[CreateAssertion(typeof(FileInfo), typeof(FileInfoAssertionExtensions), nameof(IsEncrypted), CustomName = "IsNotEncrypted", NegateLogic = true)]
+[CreateAssertion<FileInfo>( typeof(FileInfoAssertionExtensions), nameof(IsEncrypted))]
+[CreateAssertion<FileInfo>( typeof(FileInfoAssertionExtensions), nameof(IsEncrypted), CustomName = "IsNotEncrypted", NegateLogic = true)]
 public static partial class FileInfoAssertionExtensions
 {
     internal static bool IsEmpty(FileInfo file) => 

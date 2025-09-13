@@ -3,28 +3,28 @@ using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Extensions;
 
-[CreateAssertion(typeof(Assembly), nameof(Assembly.IsDynamic))]
-[CreateAssertion(typeof(Assembly), nameof(Assembly.IsDynamic), CustomName = "IsNotDynamic", NegateLogic = true)]
+[CreateAssertion<Assembly>( nameof(Assembly.IsDynamic))]
+[CreateAssertion<Assembly>( nameof(Assembly.IsDynamic), CustomName = "IsNotDynamic", NegateLogic = true)]
 
-[CreateAssertion(typeof(Assembly), nameof(Assembly.IsFullyTrusted))]
-[CreateAssertion(typeof(Assembly), nameof(Assembly.IsFullyTrusted), CustomName = "IsNotFullyTrusted", NegateLogic = true)]
+[CreateAssertion<Assembly>( nameof(Assembly.IsFullyTrusted))]
+[CreateAssertion<Assembly>( nameof(Assembly.IsFullyTrusted), CustomName = "IsNotFullyTrusted", NegateLogic = true)]
 
 #if !NET
-[CreateAssertion(typeof(Assembly), nameof(Assembly.GlobalAssemblyCache))]
-[CreateAssertion(typeof(Assembly), nameof(Assembly.GlobalAssemblyCache), CustomName = "IsNotInGAC", NegateLogic = true)]
+[CreateAssertion<Assembly>( nameof(Assembly.GlobalAssemblyCache))]
+[CreateAssertion<Assembly>( nameof(Assembly.GlobalAssemblyCache), CustomName = "IsNotInGAC", NegateLogic = true)]
 #endif
 
 #if NET5_0_OR_GREATER
-[CreateAssertion(typeof(Assembly), nameof(Assembly.IsCollectible))]
-[CreateAssertion(typeof(Assembly), nameof(Assembly.IsCollectible), CustomName = "IsNotCollectible", NegateLogic = true)]
+[CreateAssertion<Assembly>( nameof(Assembly.IsCollectible))]
+[CreateAssertion<Assembly>( nameof(Assembly.IsCollectible), CustomName = "IsNotCollectible", NegateLogic = true)]
 #endif
 
 // Custom helper methods
-[CreateAssertion(typeof(Assembly), typeof(AssemblyAssertionExtensions), nameof(IsDebugBuild))]
-[CreateAssertion(typeof(Assembly), typeof(AssemblyAssertionExtensions), nameof(IsDebugBuild), CustomName = "IsReleaseBuild", NegateLogic = true)]
+[CreateAssertion<Assembly>( typeof(AssemblyAssertionExtensions), nameof(IsDebugBuild))]
+[CreateAssertion<Assembly>( typeof(AssemblyAssertionExtensions), nameof(IsDebugBuild), CustomName = "IsReleaseBuild", NegateLogic = true)]
 
-[CreateAssertion(typeof(Assembly), typeof(AssemblyAssertionExtensions), nameof(IsSigned))]
-[CreateAssertion(typeof(Assembly), typeof(AssemblyAssertionExtensions), nameof(IsSigned), CustomName = "IsNotSigned", NegateLogic = true)]
+[CreateAssertion<Assembly>( typeof(AssemblyAssertionExtensions), nameof(IsSigned))]
+[CreateAssertion<Assembly>( typeof(AssemblyAssertionExtensions), nameof(IsSigned), CustomName = "IsNotSigned", NegateLogic = true)]
 public static partial class AssemblyAssertionExtensions
 {
     internal static bool IsDebugBuild(Assembly assembly)

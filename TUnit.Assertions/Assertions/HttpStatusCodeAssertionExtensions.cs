@@ -4,23 +4,23 @@ using TUnit.Assertions.Attributes;
 namespace TUnit.Assertions.Extensions;
 
 // HTTP Status Code assertions
-[CreateAssertion(typeof(HttpStatusCode), typeof(HttpStatusCodeAssertionExtensions), nameof(IsSuccess))]
-[CreateAssertion(typeof(HttpStatusCode), typeof(HttpStatusCodeAssertionExtensions), nameof(IsSuccess), CustomName = "IsNotSuccess", NegateLogic = true)]
+[CreateAssertion<HttpStatusCode>( typeof(HttpStatusCodeAssertionExtensions), nameof(IsSuccess))]
+[CreateAssertion<HttpStatusCode>( typeof(HttpStatusCodeAssertionExtensions), nameof(IsSuccess), CustomName = "IsNotSuccess", NegateLogic = true)]
 
-[CreateAssertion(typeof(HttpStatusCode), typeof(HttpStatusCodeAssertionExtensions), nameof(IsRedirection))]
-[CreateAssertion(typeof(HttpStatusCode), typeof(HttpStatusCodeAssertionExtensions), nameof(IsRedirection), CustomName = "IsNotRedirection", NegateLogic = true)]
+[CreateAssertion<HttpStatusCode>( typeof(HttpStatusCodeAssertionExtensions), nameof(IsRedirection))]
+[CreateAssertion<HttpStatusCode>( typeof(HttpStatusCodeAssertionExtensions), nameof(IsRedirection), CustomName = "IsNotRedirection", NegateLogic = true)]
 
-[CreateAssertion(typeof(HttpStatusCode), typeof(HttpStatusCodeAssertionExtensions), nameof(IsClientError))]
-[CreateAssertion(typeof(HttpStatusCode), typeof(HttpStatusCodeAssertionExtensions), nameof(IsClientError), CustomName = "IsNotClientError", NegateLogic = true)]
+[CreateAssertion<HttpStatusCode>( typeof(HttpStatusCodeAssertionExtensions), nameof(IsClientError))]
+[CreateAssertion<HttpStatusCode>( typeof(HttpStatusCodeAssertionExtensions), nameof(IsClientError), CustomName = "IsNotClientError", NegateLogic = true)]
 
-[CreateAssertion(typeof(HttpStatusCode), typeof(HttpStatusCodeAssertionExtensions), nameof(IsServerError))]
-[CreateAssertion(typeof(HttpStatusCode), typeof(HttpStatusCodeAssertionExtensions), nameof(IsServerError), CustomName = "IsNotServerError", NegateLogic = true)]
+[CreateAssertion<HttpStatusCode>( typeof(HttpStatusCodeAssertionExtensions), nameof(IsServerError))]
+[CreateAssertion<HttpStatusCode>( typeof(HttpStatusCodeAssertionExtensions), nameof(IsServerError), CustomName = "IsNotServerError", NegateLogic = true)]
 
-[CreateAssertion(typeof(HttpStatusCode), typeof(HttpStatusCodeAssertionExtensions), nameof(IsInformational))]
-[CreateAssertion(typeof(HttpStatusCode), typeof(HttpStatusCodeAssertionExtensions), nameof(IsInformational), CustomName = "IsNotInformational", NegateLogic = true)]
+[CreateAssertion<HttpStatusCode>( typeof(HttpStatusCodeAssertionExtensions), nameof(IsInformational))]
+[CreateAssertion<HttpStatusCode>( typeof(HttpStatusCodeAssertionExtensions), nameof(IsInformational), CustomName = "IsNotInformational", NegateLogic = true)]
 
-[CreateAssertion(typeof(HttpStatusCode), typeof(HttpStatusCodeAssertionExtensions), nameof(IsError))]
-[CreateAssertion(typeof(HttpStatusCode), typeof(HttpStatusCodeAssertionExtensions), nameof(IsError), CustomName = "IsNotError", NegateLogic = true)]
+[CreateAssertion<HttpStatusCode>( typeof(HttpStatusCodeAssertionExtensions), nameof(IsError))]
+[CreateAssertion<HttpStatusCode>( typeof(HttpStatusCodeAssertionExtensions), nameof(IsError), CustomName = "IsNotError", NegateLogic = true)]
 public static partial class HttpStatusCodeAssertionExtensions
 {
     internal static bool IsSuccess(HttpStatusCode statusCode) => 

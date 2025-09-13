@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,14 +12,34 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var classAttributeData = context.SyntaxProvider
+        // Handle non-generic CreateAssertionAttribute
+        var nonGenericAttributeData = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Assertions.Attributes.CreateAssertionAttribute",
                 predicate: (node, _) => true,
                 transform: (ctx, _) => GetCreateAssertionAttributeData(ctx))
             .Where(x => x != null);
 
-        context.RegisterSourceOutput(classAttributeData.Collect(), GenerateAssertionsForClass);
+        // Handle generic CreateAssertionAttribute<T>
+        var genericAttributeData = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: (node, _) => node is ClassDeclarationSyntax,
+                transform: (ctx, _) => GetGenericCreateAssertionAttributeData(ctx))
+            .Where(x => x != null)
+            .SelectMany((x, _) => x!.ToImmutableArray());
+
+        // Combine both sources
+        var allAttributeData = nonGenericAttributeData.Collect()
+            .Combine(genericAttributeData.Collect())
+            .Select((data, _) => 
+            {
+                var result = new List<AttributeWithClassData>();
+                result.AddRange(data.Left.Where(x => x != null).SelectMany(x => x!));
+                result.AddRange(data.Right);
+                return result.AsEnumerable();
+            });
+
+        context.RegisterSourceOutput(allAttributeData, GenerateAssertionsForClass);
     }
 
     private static IEnumerable<AttributeWithClassData>? GetCreateAssertionAttributeData(GeneratorAttributeSyntaxContext context)
@@ -102,9 +124,116 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         return attributeDataList.Count > 0 ? attributeDataList : null;
     }
 
-    private static void GenerateAssertionsForClass(SourceProductionContext context, ImmutableArray<IEnumerable<AttributeWithClassData>?> classAttributeData)
+    private static IEnumerable<AttributeWithClassData>? GetGenericCreateAssertionAttributeData(GeneratorSyntaxContext context)
     {
-        var allData = classAttributeData.SelectMany(x => x ?? []).ToArray();
+        if (context.Node is not ClassDeclarationSyntax classDeclaration)
+        {
+            return null;
+        }
+
+        var semanticModel = context.SemanticModel;
+        var classSymbol = semanticModel.GetDeclaredSymbol(classDeclaration) as INamedTypeSymbol;
+        
+        if (classSymbol == null)
+        {
+            return null;
+        }
+
+        var attributeDataList = new List<AttributeWithClassData>();
+
+        foreach (var attributeData in classSymbol.GetAttributes())
+        {
+            var attributeClass = attributeData.AttributeClass;
+            if (attributeClass == null || !attributeClass.IsGenericType)
+            {
+                continue;
+            }
+
+            // Check if it's CreateAssertionAttribute<T>
+            var unboundType = attributeClass.ConstructedFrom;
+            if (unboundType.Name != "CreateAssertionAttribute" || 
+                unboundType.TypeArguments.Length != 1 ||
+                unboundType.ContainingNamespace?.ToDisplayString() != "TUnit.Assertions.Attributes")
+            {
+                continue;
+            }
+
+            // Extract the target type from the generic type argument
+            var targetType = attributeClass.TypeArguments[0] as INamedTypeSymbol;
+            if (targetType == null)
+            {
+                continue;
+            }
+
+            INamedTypeSymbol? containingType = null;
+            string? methodName = null;
+
+            // Handle constructor arguments
+            if (attributeData.ConstructorArguments.Length == 1)
+            {
+                // CreateAssertionAttribute<T>(string methodName)
+                methodName = attributeData.ConstructorArguments[0].Value?.ToString();
+                containingType = targetType;
+            }
+            else if (attributeData.ConstructorArguments.Length == 2)
+            {
+                // CreateAssertionAttribute<T>(Type containingType, string methodName)
+                containingType = attributeData.ConstructorArguments[0].Value as INamedTypeSymbol;
+                methodName = attributeData.ConstructorArguments[1].Value?.ToString();
+            }
+
+            if (targetType != null && containingType != null && !string.IsNullOrEmpty(methodName))
+            {
+                // Skip error symbols
+                if (targetType.TypeKind == TypeKind.Error || containingType.TypeKind == TypeKind.Error)
+                {
+                    continue;
+                }
+
+                string? customName = null;
+                bool negateLogic = false;
+                bool requiresGenericTypeParameter = false;
+                bool treatAsInstance = false;
+
+                foreach (var namedArgument in attributeData.NamedArguments)
+                {
+                    switch (namedArgument.Key)
+                    {
+                        case "CustomName":
+                            customName = namedArgument.Value.Value?.ToString();
+                            break;
+                        case "NegateLogic":
+                            negateLogic = namedArgument.Value.Value is true;
+                            break;
+                        case "RequiresGenericTypeParameter":
+                            requiresGenericTypeParameter = namedArgument.Value.Value is true;
+                            break;
+                        case "TreatAsInstance":
+                            treatAsInstance = namedArgument.Value.Value is true;
+                            break;
+                    }
+                }
+
+                var createAssertionAttributeData = new CreateAssertionAttributeData(
+                    targetType,
+                    containingType,
+                    methodName,
+                    customName,
+                    negateLogic,
+                    requiresGenericTypeParameter,
+                    treatAsInstance
+                );
+
+                attributeDataList.Add(new AttributeWithClassData(classSymbol, createAssertionAttributeData));
+            }
+        }
+
+        return attributeDataList.Count > 0 ? attributeDataList : null;
+    }
+
+    private static void GenerateAssertionsForClass(SourceProductionContext context, IEnumerable<AttributeWithClassData> classAttributeData)
+    {
+        var allData = classAttributeData.ToArray();
         if (!allData.Any())
         {
             return;
