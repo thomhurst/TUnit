@@ -53,17 +53,19 @@ internal class TestExecutor : IDisposable
             // Get or create and cache Before hooks - these run only once
             // Note: Using the consolidated hook methods that include both hooks and event receivers
             await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(
-                () => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(executableTest.Context, cancellationToken)).ConfigureAwait(false);
+                () => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(cancellationToken)).ConfigureAwait(false);
 
             executableTest.Context.ClassContext.AssemblyContext.TestSessionContext.RestoreExecutionContext();
 
             await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(testAssembly,
-                assembly => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(executableTest.Context, cancellationToken)).ConfigureAwait(false);
+                assembly => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, cancellationToken)).ConfigureAwait(false);
 
             executableTest.Context.ClassContext.AssemblyContext.RestoreExecutionContext();
 
+#pragma warning disable IL2067 // Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The implicit 'this' argument of method does not have matching annotations.
             await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass,
-                cls => _hookExecutor.ExecuteBeforeClassHooksAsync(executableTest.Context, cancellationToken)).ConfigureAwait(false);
+                cls => _hookExecutor.ExecuteBeforeClassHooksAsync(cls, cancellationToken)).ConfigureAwait(false);
+#pragma warning restore IL2067
 
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
