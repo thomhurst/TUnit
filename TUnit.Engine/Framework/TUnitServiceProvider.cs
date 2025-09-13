@@ -101,7 +101,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var lifecycleCoordinator = Register(new TestLifecycleCoordinator());
         var beforeHookTaskCache = Register(new BeforeHookTaskCache());
 
-        TestExecutor = Register(new TestExecutor(hookExecutor, lifecycleCoordinator, beforeHookTaskCache, ContextProvider));
+        TestExecutor = Register(new TestExecutor(hookExecutor, lifecycleCoordinator, beforeHookTaskCache, ContextProvider, EventReceiverOrchestrator));
 
         var testExecutionGuard = Register(new TestExecutionGuard());
         var testStateManager = Register(new TestStateManager());

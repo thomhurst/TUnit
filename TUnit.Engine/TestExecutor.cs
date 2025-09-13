@@ -18,16 +18,31 @@ internal class TestExecutor : IDisposable
     private readonly TestLifecycleCoordinator _lifecycleCoordinator;
     private readonly BeforeHookTaskCache _beforeHookTaskCache;
     private readonly IContextProvider _contextProvider;
+    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
+    
+    // Cached delegates to prevent lambda capture issues
+    private readonly Func<Task> _executeBeforeTestSessionHooks;
+    private readonly Func<Assembly, Task> _executeBeforeAssemblyHooks;
+    private readonly Func<Type, Task> _executeBeforeClassHooks;
     public TestExecutor(
         HookExecutor hookExecutor,
         TestLifecycleCoordinator lifecycleCoordinator,
         BeforeHookTaskCache beforeHookTaskCache,
-        IContextProvider contextProvider)
+        IContextProvider contextProvider,
+        EventReceiverOrchestrator eventReceiverOrchestrator)
     {
         _hookExecutor = hookExecutor;
         _lifecycleCoordinator = lifecycleCoordinator;
         _beforeHookTaskCache = beforeHookTaskCache;
         _contextProvider = contextProvider;
+        _eventReceiverOrchestrator = eventReceiverOrchestrator;
+        
+        // Initialize cached delegates once to avoid lambda capture issues
+        _executeBeforeTestSessionHooks = () => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken.None);
+        _executeBeforeAssemblyHooks = assembly => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, CancellationToken.None);
+#pragma warning disable IL2067
+        _executeBeforeClassHooks = cls => _hookExecutor.ExecuteBeforeClassHooksAsync(cls, CancellationToken.None);
+#pragma warning restore IL2067
     }
 
 
@@ -51,20 +66,36 @@ internal class TestExecutor : IDisposable
         try
         {
             // Get or create and cache Before hooks - these run only once
-            // Note: Using the consolidated hook methods that include both hooks and event receivers
-            await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(
-                () => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(cancellationToken)).ConfigureAwait(false);
+            // We use cached delegates to prevent lambda capture issues
+            // Event receivers will be handled separately with their own internal coordination
+            await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(_executeBeforeTestSessionHooks).ConfigureAwait(false);
+            
+            // Event receivers have their own internal coordination to run once
+            await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(
+                executableTest.Context,
+                executableTest.Context.ClassContext.AssemblyContext.TestSessionContext,
+                cancellationToken).ConfigureAwait(false);
 
             executableTest.Context.ClassContext.AssemblyContext.TestSessionContext.RestoreExecutionContext();
 
-            await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(testAssembly,
-                assembly => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, cancellationToken)).ConfigureAwait(false);
+            await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(testAssembly, _executeBeforeAssemblyHooks).ConfigureAwait(false);
+            
+            // Event receivers for first test in assembly
+            await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(
+                executableTest.Context,
+                executableTest.Context.ClassContext.AssemblyContext,
+                cancellationToken).ConfigureAwait(false);
 
             executableTest.Context.ClassContext.AssemblyContext.RestoreExecutionContext();
 
 #pragma warning disable IL2067 // Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The implicit 'this' argument of method does not have matching annotations.
-            await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass,
-                cls => _hookExecutor.ExecuteBeforeClassHooksAsync(cls, cancellationToken)).ConfigureAwait(false);
+            await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _executeBeforeClassHooks).ConfigureAwait(false);
+            
+            // Event receivers for first test in class
+            await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(
+                executableTest.Context,
+                executableTest.Context.ClassContext,
+                cancellationToken).ConfigureAwait(false);
 #pragma warning restore IL2067
 
             executableTest.Context.ClassContext.RestoreExecutionContext();
