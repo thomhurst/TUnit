@@ -64,6 +64,14 @@ internal sealed class TestCoordinator : ITestCoordinator
     {
         try
         {
+            if (test.Context.TestDetails.ClassInstance is SkippedTestInstance ||
+                !string.IsNullOrEmpty(test.Context.SkipReason))
+            {
+                await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped").ConfigureAwait(false);
+                await _messagePublisher.PublishSkippedAsync(test, test.Context.SkipReason ?? "Unknown");
+                return;
+            }
+
             await _stateManager.MarkRunningAsync(test).ConfigureAwait(false);
             await _messagePublisher.PublishStartedAsync(test).ConfigureAwait(false);
 

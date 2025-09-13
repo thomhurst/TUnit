@@ -82,48 +82,43 @@ internal sealed class TestRequestHandler : IRequestHandler
             context.MessageBus,
             context.CancellationToken);
         
-        // Check if we have only skipped tests (no passed tests) after execution
-        // The TRX reporter needs this to mark the run as "Failed" instead of "Completed"
-        var skippedCount = 0;
-        var passedCount = 0;
-        var failedCount = 0;
-        var notExecutedCount = 0;
+        // Check if we have only skipped tests
+        // When all tests are skipped, the run should be marked as failed per TUnit requirements
+        var hasAnyPassedTest = false;
+        var hasAnySkippedTest = false;
+        var hasAnyFailedTest = false;
         
         foreach (var test in allTests)
         {
-            switch (test.State)
+            if (test.Result?.State == TestState.Passed)
             {
-                case TestState.Skipped:
-                    skippedCount++;
-                    break;
-                case TestState.Passed:
-                    passedCount++;
-                    break;
-                case TestState.Failed:
-                    failedCount++;
-                    break;
-                case TestState.NotStarted:
-                    // Tests that weren't executed at all (e.g., due to skip attributes)
-                    notExecutedCount++;
-                    break;
+                hasAnyPassedTest = true;
+            }
+            else if (test.Result?.State == TestState.Skipped)
+            {
+                hasAnySkippedTest = true;
+            }
+            else if (test.Result?.State == TestState.Failed)
+            {
+                hasAnyFailedTest = true;
             }
         }
         
-        // When ALL tests were skipped or not executed (no tests actually ran successfully),
-        // the run should be considered failed
-        if (passedCount == 0 && failedCount == 0 && (skippedCount > 0 || notExecutedCount > 0))
+        // If we have no passed tests and no failed tests, but we have skipped tests,
+        // send a failed test node to force the overall outcome to be "Failed"
+        if (!hasAnyPassedTest && !hasAnyFailedTest && hasAnySkippedTest)
         {
-            // Send an error message to signal this to the TRX reporter
+            // Create a synthetic failed test to mark the run as failed
             await context.MessageBus.PublishAsync(
                 dataProducer: serviceProvider.MessageBus,
                 data: new TestNodeUpdateMessage(
                     sessionUid: context.Request.Session.SessionUid,
                     testNode: new TestNode
                     {
-                        DisplayName = "Test run incomplete - all tests were skipped",
-                        Uid = new TestNodeUid($"skipped-tests-error-{Guid.NewGuid()}"),
-                        Properties = new PropertyBag(new ErrorTestNodeStateProperty(
-                            new Exception("Test run should be marked as failed when all tests are skipped")))
+                        DisplayName = "Test run incomplete",
+                        Uid = new TestNodeUid($"skipped-tests-marker-{Guid.NewGuid()}"),
+                        Properties = new PropertyBag(new FailedTestNodeStateProperty(
+                            new Exception("All tests were skipped - marking run as failed")))
                     }));
         }
     }
