@@ -260,6 +260,7 @@ namespace .Scheduling
         public string Uid { get; }
         public string Version { get; }
         public . ExecuteTestAsync(.AbstractExecutableTest test, .CancellationToken cancellationToken) { }
+        public ? GetFirstFailFastException() { }
         public .<bool> IsEnabledAsync() { }
     }
 }
