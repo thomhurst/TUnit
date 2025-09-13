@@ -109,9 +109,9 @@ internal sealed class TestRequestHandler : IRequestHandler
             }
         }
         
-        // When we have tests that were not executed (skipped or not started) and no passed tests,
+        // When ALL tests were skipped or not executed (no tests actually ran successfully),
         // the run should be considered failed
-        if ((skippedCount > 0 || notExecutedCount > 0) && passedCount == 0 && failedCount == 0)
+        if (passedCount == 0 && failedCount == 0 && (skippedCount > 0 || notExecutedCount > 0))
         {
             // Send an error message to signal this to the TRX reporter
             await context.MessageBus.PublishAsync(
