@@ -6,7 +6,7 @@ namespace TUnit.Core.SourceGenerator.Models;
 /// Encapsulates all the context needed for test metadata generation, avoiding long parameter lists
 /// and making it easier to pass state between components.
 /// </summary>
-public class TestMetadataGenerationContext
+public class TestMetadataGenerationContext : IEquatable<TestMetadataGenerationContext>
 {
     public required TestMethodMetadata TestInfo { get; init; }
     public required string ClassName { get; init; }
@@ -16,7 +16,6 @@ public class TestMetadataGenerationContext
     public required bool HasParameterlessConstructor { get; init; }
     public required string SafeClassName { get; init; }
     public required string SafeMethodName { get; init; }
-    public required string Guid { get; init; }
     public required bool CanUseStaticDefinition { get; init; }
 
     /// <summary>
@@ -57,7 +56,6 @@ public class TestMetadataGenerationContext
             HasParameterlessConstructor = hasParameterlessConstructor,
             SafeClassName = safeClassName,
             SafeMethodName = safeMethodName,
-            Guid = System.Guid.NewGuid().ToString("N"),
             CanUseStaticDefinition = DetermineIfStaticTestDefinition(testInfo)
         };
     }
@@ -227,5 +225,44 @@ public class TestMetadataGenerationContext
         }
 
         return false;
+    }
+
+    public bool Equals(TestMetadataGenerationContext? other)
+    {
+        if (ReferenceEquals(null, other))
+            return false;
+        if (ReferenceEquals(this, other))
+            return true;
+
+        return TestInfo.Equals(other.TestInfo) &&
+               ClassName == other.ClassName &&
+               MethodName == other.MethodName &&
+               RequiredProperties.SequenceEqual(other.RequiredProperties, SymbolEqualityComparer.Default) &&
+               SymbolEqualityComparer.Default.Equals(ConstructorWithParameters, other.ConstructorWithParameters) &&
+               HasParameterlessConstructor == other.HasParameterlessConstructor &&
+               SafeClassName == other.SafeClassName &&
+               SafeMethodName == other.SafeMethodName &&
+               CanUseStaticDefinition == other.CanUseStaticDefinition;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as TestMetadataGenerationContext);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = TestInfo.GetHashCode();
+            hashCode = (hashCode * 397) ^ ClassName.GetHashCode();
+            hashCode = (hashCode * 397) ^ MethodName.GetHashCode();
+            hashCode = (hashCode * 397) ^ (ConstructorWithParameters != null ? SymbolEqualityComparer.Default.GetHashCode(ConstructorWithParameters) : 0);
+            hashCode = (hashCode * 397) ^ HasParameterlessConstructor.GetHashCode();
+            hashCode = (hashCode * 397) ^ SafeClassName.GetHashCode();
+            hashCode = (hashCode * 397) ^ SafeMethodName.GetHashCode();
+            hashCode = (hashCode * 397) ^ CanUseStaticDefinition.GetHashCode();
+            return hashCode;
+        }
     }
 }

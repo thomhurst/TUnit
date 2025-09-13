@@ -12,6 +12,6 @@ public interface ITestScheduler
     /// </summary>
     Task ScheduleAndExecuteAsync(
         IEnumerable<AbstractExecutableTest> tests,
-        ITestExecutor executor,
+        TestRunner testRunner,
         CancellationToken cancellationToken);
 }

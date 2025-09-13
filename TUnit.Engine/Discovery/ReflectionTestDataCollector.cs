@@ -15,7 +15,7 @@ namespace TUnit.Engine.Discovery;
 [RequiresUnreferencedCode("Reflection-based test discovery requires unreferenced code")]
 [RequiresDynamicCode("Expression compilation requires dynamic code generation")]
 [SuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The source field does not have matching annotations.")]
-public sealed class ReflectionTestDataCollector : ITestDataCollector
+internal sealed class ReflectionTestDataCollector : ITestDataCollector
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
     private static readonly ConcurrentBag<TestMetadata> _discoveredTests = new();

@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using EnumerableAsyncProcessor.Extensions;
 using TUnit.Core;
 using TUnit.Core.Services;

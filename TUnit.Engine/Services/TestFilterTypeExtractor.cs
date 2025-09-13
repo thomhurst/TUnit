@@ -1,5 +1,5 @@
-using Microsoft.Testing.Platform.Requests;
 using System.Text.RegularExpressions;
+using Microsoft.Testing.Platform.Requests;
 
 namespace TUnit.Engine.Services;
 

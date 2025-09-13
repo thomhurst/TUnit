@@ -16,8 +16,10 @@ public record DynamicTestSourceDataModel
             return true;
         }
 
-        return FilePath == other.FilePath
-            && LineNumber == other.LineNumber;
+        return FilePath == other.FilePath &&
+               LineNumber == other.LineNumber &&
+               SymbolEqualityComparer.Default.Equals(Class, other.Class) &&
+               SymbolEqualityComparer.Default.Equals(Method, other.Method);
     }
 
     public override int GetHashCode()
@@ -27,6 +29,8 @@ public record DynamicTestSourceDataModel
             var hash = 17;
             hash = hash * 31 + FilePath.GetHashCode();
             hash = hash * 31 + LineNumber.GetHashCode();
+            hash = hash * 31 + SymbolEqualityComparer.Default.GetHashCode(Class);
+            hash = hash * 31 + SymbolEqualityComparer.Default.GetHashCode(Method);
             return hash;
         }
     }

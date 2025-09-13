@@ -6,7 +6,7 @@ namespace TUnit.Core.SourceGenerator.Models;
 /// Context used when building individual test definitions.
 /// This is a subset of TestGenerationContext focused on what's needed for a single test.
 /// </summary>
-public class TestDefinitionContext
+public class TestDefinitionContext : IEquatable<TestDefinitionContext>
 {
     public required TestMetadataGenerationContext GenerationContext { get; init; }
     public required AttributeData? ClassDataAttribute { get; init; }
@@ -117,5 +117,58 @@ public class TestDefinitionContext
         }
 
         return false;
+    }
+
+    public bool Equals(TestDefinitionContext? other)
+    {
+        if (ReferenceEquals(null, other))
+            return false;
+        if (ReferenceEquals(this, other))
+            return true;
+
+        return GenerationContext.Equals(other.GenerationContext) &&
+               AttributeDataEquals(ClassDataAttribute, other.ClassDataAttribute) &&
+               AttributeDataEquals(MethodDataAttribute, other.MethodDataAttribute) &&
+               TestIndex == other.TestIndex;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as TestDefinitionContext);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = GenerationContext.GetHashCode();
+            hashCode = (hashCode * 397) ^ AttributeDataGetHashCode(ClassDataAttribute);
+            hashCode = (hashCode * 397) ^ AttributeDataGetHashCode(MethodDataAttribute);
+            hashCode = (hashCode * 397) ^ TestIndex;
+            return hashCode;
+        }
+    }
+
+    private static bool AttributeDataEquals(AttributeData? x, AttributeData? y)
+    {
+        if (ReferenceEquals(x, y)) return true;
+        if (x is null || y is null) return false;
+        
+        return SymbolEqualityComparer.Default.Equals(x.AttributeClass, y.AttributeClass) &&
+               x.ConstructorArguments.Length == y.ConstructorArguments.Length &&
+               x.ConstructorArguments.Zip(y.ConstructorArguments, (a, b) => TypedConstantEquals(a, b)).All(eq => eq);
+    }
+
+    private static bool TypedConstantEquals(TypedConstant x, TypedConstant y)
+    {
+        if (x.Kind != y.Kind) return false;
+        if (!SymbolEqualityComparer.Default.Equals(x.Type, y.Type)) return false;
+        return Equals(x.Value, y.Value);
+    }
+
+    private static int AttributeDataGetHashCode(AttributeData? attr)
+    {
+        if (attr is null) return 0;
+        return SymbolEqualityComparer.Default.GetHashCode(attr.AttributeClass);
     }
 }
