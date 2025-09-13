@@ -9,6 +9,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="TUnit.Engine" />
     <InternalsVisibleTo Include="TUnit.UnitTests" />
+    <InternalsVisibleTo Include="TUnit.Engine.Tests" />
   </ItemGroup>
 
   <ItemGroup>
