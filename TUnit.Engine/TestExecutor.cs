@@ -37,6 +37,14 @@ internal class TestExecutor : IDisposable
     /// </summary>
     public async Task ExecuteAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {
+        // Skip test execution if the test is already marked as skipped
+        if (!string.IsNullOrEmpty(executableTest.Context.SkipReason)
+            || executableTest.Context.TestDetails.ClassInstance is SkippedTestInstance)
+        {
+            // Test is skipped, don't execute it
+            return;
+        }
+
         var testClass = executableTest.Metadata.TestClassType;
         var testAssembly = testClass.Assembly;
 
