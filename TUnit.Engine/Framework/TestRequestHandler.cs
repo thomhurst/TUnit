@@ -1,5 +1,7 @@
-﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
+using TUnit.Core;
 
 namespace TUnit.Engine.Framework;
 
@@ -79,5 +81,50 @@ internal sealed class TestRequestHandler : IRequestHandler
             request.Filter,
             context.MessageBus,
             context.CancellationToken);
+        
+        // Check if we have only skipped tests (no passed tests) after execution
+        // The TRX reporter needs this to mark the run as "Failed" instead of "Completed"
+        var skippedCount = 0;
+        var passedCount = 0;
+        var failedCount = 0;
+        var notExecutedCount = 0;
+        
+        foreach (var test in allTests)
+        {
+            switch (test.State)
+            {
+                case TestState.Skipped:
+                    skippedCount++;
+                    break;
+                case TestState.Passed:
+                    passedCount++;
+                    break;
+                case TestState.Failed:
+                    failedCount++;
+                    break;
+                case TestState.NotStarted:
+                    // Tests that weren't executed at all (e.g., due to skip attributes)
+                    notExecutedCount++;
+                    break;
+            }
+        }
+        
+        // When we have tests that were not executed (skipped or not started) and no passed tests,
+        // the run should be considered failed
+        if ((skippedCount > 0 || notExecutedCount > 0) && passedCount == 0 && failedCount == 0)
+        {
+            // Send an error message to signal this to the TRX reporter
+            await context.MessageBus.PublishAsync(
+                dataProducer: serviceProvider.MessageBus,
+                data: new TestNodeUpdateMessage(
+                    sessionUid: context.Request.Session.SessionUid,
+                    testNode: new TestNode
+                    {
+                        DisplayName = "Test run incomplete - all tests were skipped",
+                        Uid = new TestNodeUid($"skipped-tests-error-{Guid.NewGuid()}"),
+                        Properties = new PropertyBag(new ErrorTestNodeStateProperty(
+                            new Exception("Test run should be marked as failed when all tests are skipped")))
+                    }));
+        }
     }
 }
