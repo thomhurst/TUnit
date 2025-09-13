@@ -33,7 +33,7 @@ internal sealed class Tests_MyTest_TestSource_GUID : global::TUnit.Core.Interfac
                 new global::TUnit.Core.ArgumentsAttribute(32767),
                 new global::TUnit.Core.ArgumentsAttribute('\uffff'),
                 new global::TUnit.Core.ArgumentsAttribute(2147483647),
-                new global::TUnit.Core.ArgumentsAttribute(9223372036854775807L),
+                new global::TUnit.Core.ArgumentsAttribute(9223372036854775807),
             },
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {

@@ -265,7 +265,7 @@ internal sealed class ConstantArgumentsTests_Double_TestSource_GUID : global::TU
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(1.23d),
+                new global::TUnit.Core.ArgumentsAttribute(1.23),
             },
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -386,7 +386,7 @@ internal sealed class ConstantArgumentsTests_Float_TestSource_GUID : global::TUn
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(1.23f),
+                new global::TUnit.Core.ArgumentsAttribute(1.23),
             },
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -507,7 +507,7 @@ internal sealed class ConstantArgumentsTests_Long_TestSource_GUID : global::TUni
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(123L),
+                new global::TUnit.Core.ArgumentsAttribute(123),
             },
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -628,7 +628,7 @@ internal sealed class ConstantArgumentsTests_UInt_TestSource_GUID : global::TUni
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(123U),
+                new global::TUnit.Core.ArgumentsAttribute(123),
             },
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -749,7 +749,7 @@ internal sealed class ConstantArgumentsTests_ULong_TestSource_GUID : global::TUn
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(123UL),
+                new global::TUnit.Core.ArgumentsAttribute(123),
             },
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {

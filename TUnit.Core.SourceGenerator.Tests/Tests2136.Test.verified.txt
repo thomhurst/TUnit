@@ -313,7 +313,7 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                     ],
                     DataSources = new global::TUnit.Core.IDataSourceAttribute[]
                     {
-                        new global::TUnit.Core.ArgumentsAttribute(1.1d, "1.1"),
+                        new global::TUnit.Core.ArgumentsAttribute(1.1, "1.1"),
                     },
                     ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
                     {
