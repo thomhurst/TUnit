@@ -41,7 +41,7 @@ public static class DataSourceProcessor
         {
             // Direct allocation - ArrayPool doesn't help here since we need to keep the array
             var array = new object?[data.Length];
-            for (int i = 0; i < data.Length; i++)
+            for (var i = 0; i < data.Length; i++)
             {
                 array[i] = data[i];
             }
@@ -308,7 +308,7 @@ public static class DataSourceProcessor
                 var fields = GetTupleFields(tupleType);
                 // Optimize: Pre-allocate array instead of LINQ Select().ToArray()
                 var values = new object?[fields.Length];
-                for (int i = 0; i < fields.Length; i++)
+                for (var i = 0; i < fields.Length; i++)
                 {
                     values[i] = fields[i].GetValue(item);
                 }
@@ -329,7 +329,7 @@ public static class DataSourceProcessor
         var fields = GetTupleFields(resultType);
         // Optimize: Pre-allocate array instead of LINQ Select().ToArray()
         var values = new object?[fields.Length];
-        for (int i = 0; i < fields.Length; i++)
+        for (var i = 0; i < fields.Length; i++)
         {
             values[i] = fields[i].GetValue(result);
         }

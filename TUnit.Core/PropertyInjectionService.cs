@@ -115,7 +115,7 @@ public sealed class PropertyInjectionService
 
         try
         {
-            bool alreadyProcessed = _injectionTasks.TryGetValue(instance, out var existingTask);
+            var alreadyProcessed = _injectionTasks.TryGetValue(instance, out var existingTask);
             
             if (alreadyProcessed && existingTask != null)
             {

@@ -134,7 +134,7 @@ public static class ObjectTracker
         }
         
         var ownedSet = _ownedObjects.GetOrAdd(owner, _ => new HashSet<object>());
-        bool shouldRegisterCallback = false;
+        var shouldRegisterCallback = false;
         
         lock (ownedSet)
         {

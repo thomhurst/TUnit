@@ -1,0 +1,61 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class EnumHasFlagWithEnumAssertCondition : BaseAssertCondition<System.Enum>
+{
+    private readonly System.Enum _flag;
+    private readonly bool _negated;
+
+    public EnumHasFlagWithEnumAssertCondition(System.Enum flag, bool negated = false)
+    {
+        _flag = flag;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(System.Enum? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.HasFlag(_flag);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy HasFlag({_flag})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy HasFlag({_flag})";
+    }
+}
+
+public static partial class EnumAssertionExtensions
+{
+    public static InvokableValueAssertionBuilder<System.Enum> HasFlag(this IValueSource<System.Enum> valueSource, System.Enum flag, [CallerArgumentExpression(nameof(flag))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new EnumHasFlagWithEnumAssertCondition(flag, false),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<System.Enum> DoesNotHaveFlag(this IValueSource<System.Enum> valueSource, System.Enum flag, [CallerArgumentExpression(nameof(flag))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new EnumHasFlagWithEnumAssertCondition(flag, true),
+            [doNotPopulateThisValue1]);
+    }
+
+}
+
+]

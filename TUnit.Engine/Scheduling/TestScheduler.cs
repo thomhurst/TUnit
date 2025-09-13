@@ -206,5 +206,4 @@ internal sealed class TestScheduler : ITestScheduler
             await task.ConfigureAwait(false);
         }
     }
-
 }

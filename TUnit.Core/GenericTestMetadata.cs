@@ -178,7 +178,9 @@ public sealed class GenericTestMetadata : TestMetadata
     private static Type[]? InferTypesFromArguments(object?[]? arguments, TestMetadata metadata)
     {
         if (arguments == null || arguments.Length == 0)
+        {
             return null;
+        }
 
         // For methods with generic parameters, infer types from the argument values
         var inferredTypes = new List<Type>();
@@ -186,7 +188,9 @@ public sealed class GenericTestMetadata : TestMetadata
         // Get the method's generic parameters
         var methodInfo = metadata.TestClassType.GetMethod(metadata.TestMethodName);
         if (methodInfo == null || !methodInfo.IsGenericMethodDefinition)
+        {
             return null;
+        }
 
         var genericParams = methodInfo.GetGenericArguments();
         var methodParams = methodInfo.GetParameters();
@@ -197,7 +201,7 @@ public sealed class GenericTestMetadata : TestMetadata
             Type? inferredType = null;
 
             // Find which method parameter uses this generic parameter
-            for (int i = 0; i < methodParams.Length && i < arguments.Length; i++)
+            for (var i = 0; i < methodParams.Length && i < arguments.Length; i++)
             {
                 var paramType = methodParams[i].ParameterType;
 
@@ -257,7 +261,7 @@ public sealed class GenericTestMetadata : TestMetadata
         if (paramType.IsGenericType && paramType.Name.StartsWith("Func`"))
         {
             var paramTypeArgs = paramType.GetGenericArguments();
-            Type? actualFuncType = argumentType;
+            var actualFuncType = argumentType;
 
             // If the argument is not directly a Func, check if it implements one
             if (!argumentType.IsGenericType || !argumentType.Name.StartsWith("Func`"))
@@ -269,7 +273,7 @@ public sealed class GenericTestMetadata : TestMetadata
             var actualTypeArgs = actualFuncType.GetGenericArguments();
 
             // Find which position contains our generic parameter
-            for (int i = 0; i < paramTypeArgs.Length && i < actualTypeArgs.Length; i++)
+            for (var i = 0; i < paramTypeArgs.Length && i < actualTypeArgs.Length; i++)
             {
                 if (paramTypeArgs[i].IsGenericParameter && paramTypeArgs[i].Name == genericParam.Name)
                 {
@@ -289,7 +293,7 @@ public sealed class GenericTestMetadata : TestMetadata
                 var paramTypeArgs = paramType.GetGenericArguments();
                 var actualTypeArgs = argumentType.GetGenericArguments();
 
-                for (int i = 0; i < paramTypeArgs.Length && i < actualTypeArgs.Length; i++)
+                for (var i = 0; i < paramTypeArgs.Length && i < actualTypeArgs.Length; i++)
                 {
                     if (paramTypeArgs[i].IsGenericParameter && paramTypeArgs[i].Name == genericParam.Name)
                     {
@@ -301,7 +305,9 @@ public sealed class GenericTestMetadata : TestMetadata
                     {
                         var result = InferTypeFromGenericParameter(paramTypeArgs[i], actualTypeArgs[i], genericParam);
                         if (result != null)
+                        {
                             return result;
+                        }
                     }
                 }
             }

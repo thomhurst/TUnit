@@ -26,7 +26,7 @@ public static class TestInformationGenerator
                 var secondLine = lines[1];
                 var baseIndentSpaces = secondLine.Length - secondLine.TrimStart().Length;
                 
-                for (int i = 1; i < lines.Length; i++)
+                for (var i = 1; i < lines.Length; i++)
                 {
                     if (!string.IsNullOrWhiteSpace(lines[i]) || i < lines.Length - 1)
                     {
@@ -38,7 +38,7 @@ public static class TestInformationGenerator
                         var extraIndentLevels = relativeIndent / 4;
                         
                         var trimmedLine = line.TrimStart();
-                        for (int j = 0; j < extraIndentLevels; j++)
+                        for (var j = 0; j < extraIndentLevels; j++)
                         {
                             writer.Append("    ");
                         }

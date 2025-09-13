@@ -185,9 +185,13 @@ public class NotInParallelOrderExecutionTests
     private static string GetGroupKey(string testName)
     {
         if (testName.StartsWith("OrderedTest_"))
+        {
             return "OrderGroup1";
+        }
         if (testName.StartsWith("OrderedGroup2_"))
+        {
             return "OrderGroup2";
+        }
         return "Unknown";
     }
 
@@ -209,7 +213,9 @@ public class NotInParallelOrderExecutionTests
         public bool OverlapsWith(OrderedExecutionRecord other)
         {
             if (EndTime == null || other.EndTime == null)
+            {
                 return false;
+            }
 
             return StartTime < other.EndTime.Value && other.StartTime < EndTime.Value;
         }

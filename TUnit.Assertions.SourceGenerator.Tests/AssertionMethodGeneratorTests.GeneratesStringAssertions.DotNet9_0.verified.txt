@@ -1,0 +1,522 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class StringStartsWithWithStringAssertCondition : BaseAssertCondition<string>
+{
+    private readonly string _value;
+    private readonly bool _negated;
+
+    public StringStartsWithWithStringAssertCondition(string value, bool negated = false)
+    {
+        _value = value;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.StartsWith(_value);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy StartsWith({_value})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy StartsWith({_value})";
+    }
+}
+
+public class StringStartsWithWithCharAssertCondition : BaseAssertCondition<string>
+{
+    private readonly char _value;
+    private readonly bool _negated;
+
+    public StringStartsWithWithCharAssertCondition(char value, bool negated = false)
+    {
+        _value = value;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.StartsWith(_value);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy StartsWith({_value})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy StartsWith({_value})";
+    }
+}
+
+public class StringStartsWithWithStringAnd1MoreAssertCondition : BaseAssertCondition<string>
+{
+    private readonly string _value;
+    private readonly System.StringComparison _comparisonType;
+    private readonly bool _negated;
+
+    public StringStartsWithWithStringAnd1MoreAssertCondition(string value, System.StringComparison comparisonType, bool negated = false)
+    {
+        _value = value;
+        _comparisonType = comparisonType;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.StartsWith(_value, _comparisonType);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy StartsWith({_value}, {_comparisonType})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy StartsWith({_value}, {_comparisonType})";
+    }
+}
+
+public class StringStartsWithWithStringAnd2MoreAssertCondition : BaseAssertCondition<string>
+{
+    private readonly string _value;
+    private readonly bool _ignoreCase;
+    private readonly System.Globalization.CultureInfo? _culture;
+    private readonly bool _negated;
+
+    public StringStartsWithWithStringAnd2MoreAssertCondition(string value, bool ignoreCase, System.Globalization.CultureInfo? culture, bool negated = false)
+    {
+        _value = value;
+        _ignoreCase = ignoreCase;
+        _culture = culture;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.StartsWith(_value, _ignoreCase, _culture);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy StartsWith({_value}, {_ignoreCase}, {_culture})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy StartsWith({_value}, {_ignoreCase}, {_culture})";
+    }
+}
+
+public class StringEndsWithWithStringAssertCondition : BaseAssertCondition<string>
+{
+    private readonly string _value;
+    private readonly bool _negated;
+
+    public StringEndsWithWithStringAssertCondition(string value, bool negated = false)
+    {
+        _value = value;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.EndsWith(_value);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy EndsWith({_value})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy EndsWith({_value})";
+    }
+}
+
+public class StringEndsWithWithCharAssertCondition : BaseAssertCondition<string>
+{
+    private readonly char _value;
+    private readonly bool _negated;
+
+    public StringEndsWithWithCharAssertCondition(char value, bool negated = false)
+    {
+        _value = value;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.EndsWith(_value);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy EndsWith({_value})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy EndsWith({_value})";
+    }
+}
+
+public class StringEndsWithWithStringAnd1MoreAssertCondition : BaseAssertCondition<string>
+{
+    private readonly string _value;
+    private readonly System.StringComparison _comparisonType;
+    private readonly bool _negated;
+
+    public StringEndsWithWithStringAnd1MoreAssertCondition(string value, System.StringComparison comparisonType, bool negated = false)
+    {
+        _value = value;
+        _comparisonType = comparisonType;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.EndsWith(_value, _comparisonType);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy EndsWith({_value}, {_comparisonType})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy EndsWith({_value}, {_comparisonType})";
+    }
+}
+
+public class StringEndsWithWithStringAnd2MoreAssertCondition : BaseAssertCondition<string>
+{
+    private readonly string _value;
+    private readonly bool _ignoreCase;
+    private readonly System.Globalization.CultureInfo? _culture;
+    private readonly bool _negated;
+
+    public StringEndsWithWithStringAnd2MoreAssertCondition(string value, bool ignoreCase, System.Globalization.CultureInfo? culture, bool negated = false)
+    {
+        _value = value;
+        _ignoreCase = ignoreCase;
+        _culture = culture;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.EndsWith(_value, _ignoreCase, _culture);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy EndsWith({_value}, {_ignoreCase}, {_culture})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy EndsWith({_value}, {_ignoreCase}, {_culture})";
+    }
+}
+
+public class StringContainsWithStringAssertCondition : BaseAssertCondition<string>
+{
+    private readonly string _value;
+    private readonly bool _negated;
+
+    public StringContainsWithStringAssertCondition(string value, bool negated = false)
+    {
+        _value = value;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.Contains(_value);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy Contains({_value})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy Contains({_value})";
+    }
+}
+
+public class StringContainsWithCharAssertCondition : BaseAssertCondition<string>
+{
+    private readonly char _value;
+    private readonly bool _negated;
+
+    public StringContainsWithCharAssertCondition(char value, bool negated = false)
+    {
+        _value = value;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.Contains(_value);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy Contains({_value})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy Contains({_value})";
+    }
+}
+
+public class StringContainsWithStringAnd1MoreAssertCondition : BaseAssertCondition<string>
+{
+    private readonly string _value;
+    private readonly System.StringComparison _comparisonType;
+    private readonly bool _negated;
+
+    public StringContainsWithStringAnd1MoreAssertCondition(string value, System.StringComparison comparisonType, bool negated = false)
+    {
+        _value = value;
+        _comparisonType = comparisonType;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.Contains(_value, _comparisonType);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy Contains({_value}, {_comparisonType})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy Contains({_value}, {_comparisonType})";
+    }
+}
+
+public class StringContainsWithCharAnd1MoreAssertCondition : BaseAssertCondition<string>
+{
+    private readonly char _value;
+    private readonly System.StringComparison _comparisonType;
+    private readonly bool _negated;
+
+    public StringContainsWithCharAnd1MoreAssertCondition(char value, System.StringComparison comparisonType, bool negated = false)
+    {
+        _value = value;
+        _comparisonType = comparisonType;
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(string? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        if (actualValue is null)
+        {
+            return AssertionResult.Fail("Actual value is null");
+        }
+
+        var result = actualValue.Contains(_value, _comparisonType);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy Contains({_value}, {_comparisonType})");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy Contains({_value}, {_comparisonType})";
+    }
+}
+
+public static partial class StringAssertionExtensions
+{
+    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWithStringAssertCondition(value, false),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, char value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWithCharAssertCondition(value, false),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string value, System.StringComparison comparisonType, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(comparisonType))] string? doNotPopulateThisValue2 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWithStringAnd1MoreAssertCondition(value, comparisonType, false),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> StartsWith(this IValueSource<string> valueSource, string value, bool ignoreCase, System.Globalization.CultureInfo? culture, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(ignoreCase))] string? doNotPopulateThisValue2 = null, [CallerArgumentExpression(nameof(culture))] string? doNotPopulateThisValue3 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWithStringAnd2MoreAssertCondition(value, ignoreCase, culture, false),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2, doNotPopulateThisValue3]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringEndsWithWithStringAssertCondition(value, false),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, char value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringEndsWithWithCharAssertCondition(value, false),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string value, System.StringComparison comparisonType, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(comparisonType))] string? doNotPopulateThisValue2 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringEndsWithWithStringAnd1MoreAssertCondition(value, comparisonType, false),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> EndsWith(this IValueSource<string> valueSource, string value, bool ignoreCase, System.Globalization.CultureInfo? culture, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(ignoreCase))] string? doNotPopulateThisValue2 = null, [CallerArgumentExpression(nameof(culture))] string? doNotPopulateThisValue3 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringEndsWithWithStringAnd2MoreAssertCondition(value, ignoreCase, culture, false),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2, doNotPopulateThisValue3]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotStartWith(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWithStringAssertCondition(value, true),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotStartWith(this IValueSource<string> valueSource, char value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWithCharAssertCondition(value, true),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotStartWith(this IValueSource<string> valueSource, string value, System.StringComparison comparisonType, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(comparisonType))] string? doNotPopulateThisValue2 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWithStringAnd1MoreAssertCondition(value, comparisonType, true),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotStartWith(this IValueSource<string> valueSource, string value, bool ignoreCase, System.Globalization.CultureInfo? culture, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(ignoreCase))] string? doNotPopulateThisValue2 = null, [CallerArgumentExpression(nameof(culture))] string? doNotPopulateThisValue3 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringStartsWithWithStringAnd2MoreAssertCondition(value, ignoreCase, culture, true),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2, doNotPopulateThisValue3]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotEndWith(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringEndsWithWithStringAssertCondition(value, true),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotEndWith(this IValueSource<string> valueSource, char value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringEndsWithWithCharAssertCondition(value, true),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotEndWith(this IValueSource<string> valueSource, string value, System.StringComparison comparisonType, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(comparisonType))] string? doNotPopulateThisValue2 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringEndsWithWithStringAnd1MoreAssertCondition(value, comparisonType, true),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotEndWith(this IValueSource<string> valueSource, string value, bool ignoreCase, System.Globalization.CultureInfo? culture, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(ignoreCase))] string? doNotPopulateThisValue2 = null, [CallerArgumentExpression(nameof(culture))] string? doNotPopulateThisValue3 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringEndsWithWithStringAnd2MoreAssertCondition(value, ignoreCase, culture, true),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2, doNotPopulateThisValue3]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotContain(this IValueSource<string> valueSource, string value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringContainsWithStringAssertCondition(value, true),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotContain(this IValueSource<string> valueSource, char value, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringContainsWithCharAssertCondition(value, true),
+            [doNotPopulateThisValue1]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotContain(this IValueSource<string> valueSource, string value, System.StringComparison comparisonType, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(comparisonType))] string? doNotPopulateThisValue2 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringContainsWithStringAnd1MoreAssertCondition(value, comparisonType, true),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+    }
+
+    public static InvokableValueAssertionBuilder<string> DoesNotContain(this IValueSource<string> valueSource, char value, System.StringComparison comparisonType, [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(comparisonType))] string? doNotPopulateThisValue2 = null)
+    {
+        return valueSource.RegisterAssertion(
+            new StringContainsWithCharAnd1MoreAssertCondition(value, comparisonType, true),
+            [doNotPopulateThisValue1, doNotPopulateThisValue2]);
+    }
+
+}
+
+]

@@ -1,5 +1,7 @@
 using TUnit.TestProject.Attributes;
 
+using TUnit.Assertions.Extensions;
+
 namespace TUnit.TestProject;
 
 [EngineTest(ExpectedResult.Pass)]

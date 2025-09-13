@@ -236,7 +236,7 @@ internal sealed class TestRegistry : ITestRegistry
                 };
 
                 // Create instance and test invoker for the dynamic test
-                Func<TestContext, Task<object>> createInstance = (TestContext testContext) =>
+                var createInstance = (TestContext testContext) =>
                 {
                     var instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
 

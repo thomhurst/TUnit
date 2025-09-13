@@ -41,9 +41,9 @@ public partial class Tests
             ]
         });
 
-        await Verify(publicApi)
-            .AddScrubber(Scrub)
-            .AddScrubber(sb => new StringBuilder(sb.ToString().Replace("\\r\\n", "\\n")))
+        await VerifyTUnit.Verify(publicApi)
+            .AddScrubber(sb => Scrub(sb))
+            .AddScrubber(sb => new StringBuilder(sb.ToString().Replace("\r\n", "\n")))
             .ScrubLinesWithReplace(x => x.Replace("\r\n", "\n"))
             .ScrubLinesWithReplace(line =>
             {
@@ -74,12 +74,16 @@ public partial class Tests
             .Replace("\\r\\n", "\\n")
             .Replace("\\r", "\\n");
 
-        return new StringBuilder(newText);
+        text.Clear();
+        text.Append(newText);
+        return text;
     }
 
     private string Scrub(string text)
     {
-        return Scrub(new StringBuilder(text)).ToString();
+        var sb = new StringBuilder(text);
+        Scrub(sb);
+        return sb.ToString();
     }
 
 

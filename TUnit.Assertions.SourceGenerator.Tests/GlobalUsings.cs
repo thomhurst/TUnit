@@ -1,0 +1,12 @@
+global using System;
+global using System.Collections.Generic;
+global using System.IO;
+global using System.Linq;
+global using System.Threading;
+global using System.Threading.Tasks;
+global using TUnit.Assertions.Extensions;
+global using Assert = TUnit.Assertions.Assert;
+global using TestAttribute = TUnit.Core.TestAttribute;
+global using VerifyTUnit;
+global using VerifyTests;
+global using static VerifyTUnit.Verifier;

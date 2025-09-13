@@ -32,8 +32,10 @@ public static class AttributeDataExtensions
     public static ITypeSymbol? GetTypedDataSourceType(this AttributeData? attributeData)
     {
         if (attributeData?.AttributeClass == null)
+        {
             return null;
-            
+        }
+
         var typedInterface = attributeData.AttributeClass.AllInterfaces
             .FirstOrDefault(x => x.IsGenericType && 
                 x.ConstructedFrom.GloballyQualified() == WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "`1");

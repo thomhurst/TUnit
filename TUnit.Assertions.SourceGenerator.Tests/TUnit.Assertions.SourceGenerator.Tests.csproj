@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\TestProject.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj" />
+    <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.SourceGenerators.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+    <PackageReference Include="NuGet.Protocol" />
+    <PackageReference Include="Sourcy.DotNet">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Sourcy.Git">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Verify" />
+    <PackageReference Include="Verify.TUnit" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\TUnit.Assertions\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Import Project="..\TestProject.targets" />
+</Project>

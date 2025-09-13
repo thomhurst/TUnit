@@ -455,7 +455,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         if (parameters.Length > 0)
         {
             writer.AppendLine("// Extract and convert parameters");
-            for (int i = 0; i < parameters.Length; i++)
+            for (var i = 0; i < parameters.Length; i++)
             {
                 var param = parameters[i];
                 var paramType = param.Type.GloballyQualified();

@@ -20,7 +20,9 @@ internal readonly struct TestPriority : IComparable<TestPriority>
     {
         var priorityComparison = ((int)other.Priority).CompareTo((int)Priority);
         if (priorityComparison != 0)
+        {
             return priorityComparison;
+        }
 
         return Order.CompareTo(other.Order);
     }
