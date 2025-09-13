@@ -98,7 +98,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
     {
         // Check both the legacy --detailed-stacktrace flag and the new verbosity system
         if (commandLineOptions.IsOptionSet(DetailedStacktraceCommandProvider.DetailedStackTrace) || 
-            (verbosityService?.ShowDetailedStackTrace == true))
+            verbosityService?.ShowDetailedStackTrace == true)
         {
             return exception;
         }

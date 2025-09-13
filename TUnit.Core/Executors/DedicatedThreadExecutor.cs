@@ -90,7 +90,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 
                 while (!task.IsCompleted)
                 {
-                    bool hadWork = dedicatedContext.ProcessPendingWork();
+                    var hadWork = dedicatedContext.ProcessPendingWork();
                     hadWork |= taskScheduler.ProcessPendingTasks();
 
                     if (!hadWork)
@@ -238,7 +238,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 throw new InvalidOperationException("ProcessPendingTasks can only be called from the dedicated thread.");
             }
 
-            bool hadWork = false;
+            var hadWork = false;
             while (true)
             {
                 Task? task;
@@ -342,7 +342,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 return false;
             }
 
-            bool hadWork = false;
+            var hadWork = false;
             while (true)
             {
                 (SendOrPostCallback callback, object? state) workItem;

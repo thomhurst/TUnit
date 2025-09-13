@@ -14,16 +14,16 @@ public static class AsyncTestDataSources
     public static async IAsyncEnumerable<Func<AsyncTestData>> GetAsyncTestData(
         [EnumeratorCancellation] CancellationToken ct = default)
     {
-        for (int i = 1; i <= 3; i++)
+        for (var i = 1; i <= 3; i++)
         {
             ct.ThrowIfCancellationRequested();
-            
+
             // Simulate async data loading (database, API, etc.)
             await Task.Delay(10, ct);
-            
+
             yield return () => new AsyncTestData(
-                Id: i, 
-                Name: $"Item_{i}", 
+                Id: i,
+                Name: $"Item_{i}",
                 CreatedAt: DateTime.UtcNow.AddDays(-i)
             );
         }

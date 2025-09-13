@@ -121,8 +121,10 @@ public class NotInParallelExecutionTests
         public bool OverlapsWith(TestExecutionRecord other)
         {
             if (EndTime == null || other.EndTime == null)
+            {
                 return false;
-                
+            }
+
             return StartTime < other.EndTime.Value && other.StartTime < EndTime.Value;
         }
     }

@@ -756,7 +756,9 @@ internal sealed class TestBuilder : ITestBuilder
         }
 
         if (expectedTypes == null || expectedTypes.Length == 0)
+        {
             return true; // No specific types expected, allow all data
+        }
 
         // For generic methods, we need to check if the data types match the expected types
         // The key is to determine what type of data this data source produces
@@ -776,7 +778,9 @@ internal sealed class TestBuilder : ITestBuilder
         }
 
         if (actualDataType == null || sampleData == null)
+        {
             return true; // Can't determine type, allow it
+        }
 
         // For AggregateBy test, the first generic type parameter is TSource
         if (expectedTypes.Length > 0)
@@ -854,14 +858,18 @@ internal sealed class TestBuilder : ITestBuilder
     private static Type? GetExpectedTypeForParameter(ParameterMetadata param, Type[] genericTypeArgs)
     {
         if (param.TypeReference == null)
+        {
             return null;
+        }
 
         // If it's a direct generic parameter (e.g., T)
         if (param.TypeReference.IsGenericParameter)
         {
             var position = param.TypeReference.GenericParameterPosition;
             if (position < genericTypeArgs.Length)
+            {
                 return genericTypeArgs[position];
+            }
         }
 
         // For constructed generic types, we'll just return the element type for now
@@ -890,7 +898,9 @@ internal sealed class TestBuilder : ITestBuilder
     {
         // Direct match
         if (actualType == expectedType)
+        {
             return true;
+        }
 
         // For the data source filtering, we're mainly concerned with checking if the
         // data types match the expected generic type parameters.

@@ -63,13 +63,11 @@ internal sealed class TestDependencyResolver
 
     private bool ResolveDependenciesForTest(AbstractExecutableTest test)
     {
-        if (_testsBeingResolved.Contains(test))
+        if (!_testsBeingResolved.Add(test))
         {
             return false;
         }
-        
-        _testsBeingResolved.Add(test);
-        
+
         try
         {
             var resolvedDependencies = new List<ResolvedDependency>();
@@ -204,7 +202,7 @@ internal sealed class TestDependencyResolver
             }
             
             var maxRetries = 3;
-            for (int retry = 0; retry < maxRetries && _testsWithPendingDependencies.Count > 0; retry++)
+            for (var retry = 0; retry < maxRetries && _testsWithPendingDependencies.Count > 0; retry++)
             {
                 ResolvePendingDependencies();
             }

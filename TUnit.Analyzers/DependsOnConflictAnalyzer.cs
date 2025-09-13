@@ -42,7 +42,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         var method = (IMethodSymbol) context.Symbol;
 
-        AttributeData[] dependsOnAttributes = GetDependsOnAttributes(method).Concat(GetDependsOnAttributes(method.ReceiverType ?? method.ContainingType)).ToArray();
+        var dependsOnAttributes = GetDependsOnAttributes(method).Concat(GetDependsOnAttributes(method.ReceiverType ?? method.ContainingType)).ToArray();
 
         var dependencies = GetDependencies(context, new Chain(method), method, dependsOnAttributes);
 

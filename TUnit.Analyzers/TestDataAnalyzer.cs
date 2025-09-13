@@ -295,7 +295,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private ImmutableArray<ITypeSymbol> GetTypes(ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? propertySymbol)
     {
-        IEnumerable<ITypeSymbol?> types = parameters.Select(x => x.Type).Concat(new[] { propertySymbol?.Type }).Where(t => t != null);
+        var types = parameters.Select(x => x.Type).Concat(new[] { propertySymbol?.Type }).Where(t => t != null);
 
         return types.OfType<ITypeSymbol>().ToImmutableArray().WithoutCancellationTokenParameter();
     }

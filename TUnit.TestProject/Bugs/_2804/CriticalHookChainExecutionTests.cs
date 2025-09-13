@@ -173,10 +173,10 @@ public class CriticalAssemblyHooks
             // Executed hook types verified
             // Failed hooks verified
             
-            bool afterTestExecuted = executedHookTypes.Contains("AfterEveryTest");
-            bool afterClassExecuted = executedHookTypes.Contains("AfterClass");
-            bool afterEveryClassExecuted = executedHookTypes.Contains("AfterEveryClass");
-            bool afterAssemblyExecuted = AssemblyHookExecutions.Contains("AfterEveryAssembly");
+            var afterTestExecuted = executedHookTypes.Contains("AfterEveryTest");
+            var afterClassExecuted = executedHookTypes.Contains("AfterClass");
+            var afterEveryClassExecuted = executedHookTypes.Contains("AfterEveryClass");
+            var afterAssemblyExecuted = AssemblyHookExecutions.Contains("AfterEveryAssembly");
             
             // AfterEveryTest execution verified
             // AfterClass execution verified
@@ -366,7 +366,7 @@ public class ExtremeFailureCascadeTests
                 // Trace item recorded
             }
             
-            bool allLevelsExecuted = ExecutionTrace.Contains("Test_Executed") &&
+            var allLevelsExecuted = ExecutionTrace.Contains("Test_Executed") &&
                                      ExecutionTrace.Contains("AfterTest_Failed") &&
                                      ExecutionTrace.Contains("AfterEveryTest_Failed") &&
                                      ExecutionTrace.Contains("AfterClass_Failed") &&

@@ -26,7 +26,7 @@ public static class TupleArgumentHelper
         var argumentExpressions = new List<string>();
         
         // Data sources already provide unwrapped arguments, so we just access by index
-        for (int i = 0; i < parameterTypes.Count; i++)
+        for (var i = 0; i < parameterTypes.Count; i++)
         {
             var parameterType = parameterTypes[i];
             var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argumentsArrayName}[{i}])";
@@ -46,7 +46,7 @@ public static class TupleArgumentHelper
     {
         var allArguments = new List<string>();
         
-        for (int i = 0; i < parameters.Count; i++)
+        for (var i = 0; i < parameters.Count; i++)
         {
             var parameter = parameters[i];
             var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameter.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
@@ -93,7 +93,7 @@ public static class TupleArgumentHelper
             if (argCountExpression != null)
             {
                 // Dynamic count - use Math.Min
-                for (int i = 0; i < parameters.Count; i++)
+                for (var i = 0; i < parameters.Count; i++)
                 {
                     var param = parameters[i];
                     var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
@@ -102,7 +102,7 @@ public static class TupleArgumentHelper
             }
             else
             {
-                for (int i = 0; i < parameters.Count && i < argCount; i++)
+                for (var i = 0; i < parameters.Count && i < argCount; i++)
                 {
                     var param = parameters[i];
                     var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
@@ -119,7 +119,7 @@ public static class TupleArgumentHelper
             if (argCountExpression != null)
             {
                 // Dynamic count
-                for (int i = 0; i < regularParamCount; i++)
+                for (var i = 0; i < regularParamCount; i++)
                 {
                     var param = parameters[i];
                     var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
@@ -128,7 +128,7 @@ public static class TupleArgumentHelper
             }
             else
             {
-                for (int i = 0; i < regularParamCount && i < argCount; i++)
+                for (var i = 0; i < regularParamCount && i < argCount; i++)
                 {
                     var param = parameters[i];
                     var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
@@ -172,7 +172,7 @@ public static class TupleArgumentHelper
                     {
                         // Multiple arguments for params - create array
                         var arrayElements = new List<string>();
-                        for (int i = regularParamCount; i < argCount; i++)
+                        for (var i = regularParamCount; i < argCount; i++)
                         {
                             arrayElements.Add($"TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[{i}])");
                         }

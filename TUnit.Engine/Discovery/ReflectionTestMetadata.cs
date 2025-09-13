@@ -69,7 +69,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
                 throw new InvalidOperationException($"No instance factory for {_testClass.Name}");
             }
 
-            Type[] typeArgs = context.ResolvedClassGenericArguments;
+            var typeArgs = context.ResolvedClassGenericArguments;
 
             var instance = InstanceFactory(typeArgs, context.ClassArguments ??
             [
