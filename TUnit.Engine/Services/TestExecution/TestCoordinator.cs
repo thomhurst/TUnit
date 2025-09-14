@@ -1,8 +1,6 @@
-using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Logging;
-using TUnit.Engine.Extensions;
+
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 
@@ -18,44 +16,29 @@ internal sealed class TestCoordinator : ITestCoordinator
     private readonly TestStateManager _stateManager;
     private readonly TestMessagePublisher _messagePublisher;
     private readonly TestContextRestorer _contextRestorer;
-    private readonly TestMethodInvoker _methodInvoker;
     private readonly TestExecutor _testExecutor;
     private readonly TUnitFrameworkLogger _logger;
-    private readonly SessionUid _sessionUid;
 
     public TestCoordinator(
         TestExecutionGuard executionGuard,
         TestStateManager stateManager,
         TestMessagePublisher messagePublisher,
         TestContextRestorer contextRestorer,
-        TestMethodInvoker methodInvoker,
         TestExecutor testExecutor,
-        TUnitFrameworkLogger logger,
-        SessionUid sessionUid)
+        TUnitFrameworkLogger logger)
     {
         _executionGuard = executionGuard;
         _stateManager = stateManager;
         _messagePublisher = messagePublisher;
         _contextRestorer = contextRestorer;
-        _methodInvoker = methodInvoker;
         _testExecutor = testExecutor;
         _logger = logger;
-        _sessionUid = sessionUid;
-    }
-
-    public void SetSessionId(SessionUid sessionUid)
-    {
     }
 
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        var wasExecuted = await _executionGuard.TryStartExecutionAsync(test.TestId,
+        await _executionGuard.TryStartExecutionAsync(test.TestId,
             () => ExecuteTestInternalAsync(test, cancellationToken)).ConfigureAwait(false);
-
-        if (!wasExecuted)
-        {
-            await _logger.LogDebugAsync($"Test {test.TestId} was already executed by another thread").ConfigureAwait(false);
-        }
     }
 
     private async Task ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
@@ -96,5 +79,4 @@ internal sealed class TestCoordinator : ITestCoordinator
             await _messagePublisher.PublishFailedAsync(test, ex).ConfigureAwait(false);
         }
     }
-
 }

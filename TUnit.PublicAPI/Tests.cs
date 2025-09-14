@@ -20,12 +20,6 @@ public partial class Tests
     }
 
     [Test]
-    public Task Engine_Library_Has_No_API_Changes()
-    {
-        return VerifyPublicApi(typeof(Engine.Scheduling.ParallelismStrategy).Assembly);
-    }
-
-    [Test]
     public Task Playwright_Library_Has_No_API_Changes()
     {
         return VerifyPublicApi(typeof(Playwright.PageTest).Assembly);

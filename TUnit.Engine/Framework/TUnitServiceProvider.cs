@@ -150,10 +150,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 testStateManager,
                 testMessagePublisher,
                 testContextRestorer,
-                testMethodInvoker,
                 TestExecutor,
-                Logger,
-                context.Request.Session.SessionUid));
+                Logger));
 
         // Create the HookOrchestratingTestExecutorAdapter
         // Note: We'll need to update this to handle dynamic dependencies properly
