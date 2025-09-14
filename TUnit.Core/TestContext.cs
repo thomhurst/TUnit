@@ -194,7 +194,7 @@ public class TestContext : Context
         CancellationToken = LinkedCancellationTokens.Token;
     }
 
-    public DateTimeOffset TestStart { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? TestStart { get; set; }
 
     public void AddArtifact(Artifact artifact)
     {
@@ -213,9 +213,9 @@ public class TestContext : Context
             State = state,
             OverrideReason = reason,
             IsOverridden = true,
-            Start = TestStart,
+            Start = TestStart ?? DateTimeOffset.UtcNow,
             End = DateTimeOffset.UtcNow,
-            Duration = DateTimeOffset.UtcNow - TestStart,
+            Duration = DateTimeOffset.UtcNow - (TestStart ?? DateTimeOffset.UtcNow),
             Exception = null,
             ComputerName = Environment.MachineName,
             TestContext = this

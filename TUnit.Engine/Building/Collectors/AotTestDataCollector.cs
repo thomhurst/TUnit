@@ -326,7 +326,12 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
 
                 return new ExecutableTest(createInstance,
-                    async (instance, args, context, ct) => await invokeTest(instance, args))
+                    async (instance, args, context, ct) => 
+                    {
+                        // Set TestContext.Current so the test method can access it
+                        TestContext.Current = context;
+                        await invokeTest(instance, args);
+                    })
                 {
                     TestId = modifiedContext.TestId,
                     Metadata = metadata,

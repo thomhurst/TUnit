@@ -12,6 +12,7 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
     public required AttributeData? ClassDataAttribute { get; init; }
     public required AttributeData? MethodDataAttribute { get; init; }
     public required int TestIndex { get; init; }
+    public required int RepeatIndex { get; init; }
 
     /// <summary>
     /// Creates contexts for all test definitions based on data attributes
@@ -29,18 +30,29 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
             .Where(attr => IsCompileTimeDataSourceAttribute(attr))
             .ToList();
 
+        // Extract repeat count
+        var repeatCount = ExtractRepeatCount(testInfo.MethodSymbol);
+        if (repeatCount == 0)
+        {
+            repeatCount = 1; // Default to 1 if no repeat attribute
+        }
+
         var testIndex = 0;
 
-        // If no attributes, create one test with empty data providers
+        // If no attributes, create tests based on repeat count
         if (!classDataAttrs.Any() && !methodDataAttrs.Any())
         {
-            yield return new TestDefinitionContext
+            for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
             {
-                GenerationContext = generationContext,
-                ClassDataAttribute = null,
-                MethodDataAttribute = null,
-                TestIndex = testIndex
-            };
+                yield return new TestDefinitionContext
+                {
+                    GenerationContext = generationContext,
+                    ClassDataAttribute = null,
+                    MethodDataAttribute = null,
+                    TestIndex = testIndex++,
+                    RepeatIndex = repeatIndex
+                };
+            }
             yield break;
         }
 
@@ -49,13 +61,17 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
         {
             foreach (var classAttr in classDataAttrs)
             {
-                yield return new TestDefinitionContext
+                for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
                 {
-                    GenerationContext = generationContext,
-                    ClassDataAttribute = classAttr,
-                    MethodDataAttribute = null,
-                    TestIndex = testIndex++
-                };
+                    yield return new TestDefinitionContext
+                    {
+                        GenerationContext = generationContext,
+                        ClassDataAttribute = classAttr,
+                        MethodDataAttribute = null,
+                        TestIndex = testIndex++,
+                        RepeatIndex = repeatIndex
+                    };
+                }
             }
         }
         // If we have method data but no class data
@@ -63,13 +79,17 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
         {
             foreach (var methodAttr in methodDataAttrs)
             {
-                yield return new TestDefinitionContext
+                for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
                 {
-                    GenerationContext = generationContext,
-                    ClassDataAttribute = null,
-                    MethodDataAttribute = methodAttr,
-                    TestIndex = testIndex++
-                };
+                    yield return new TestDefinitionContext
+                    {
+                        GenerationContext = generationContext,
+                        ClassDataAttribute = null,
+                        MethodDataAttribute = methodAttr,
+                        TestIndex = testIndex++,
+                        RepeatIndex = repeatIndex
+                    };
+                }
             }
         }
         // If we have both class and method data - create cartesian product
@@ -79,16 +99,36 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
             {
                 foreach (var methodAttr in methodDataAttrs)
                 {
-                    yield return new TestDefinitionContext
+                    for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
                     {
-                        GenerationContext = generationContext,
-                        ClassDataAttribute = classAttr,
-                        MethodDataAttribute = methodAttr,
-                        TestIndex = testIndex++
-                    };
+                        yield return new TestDefinitionContext
+                        {
+                            GenerationContext = generationContext,
+                            ClassDataAttribute = classAttr,
+                            MethodDataAttribute = methodAttr,
+                            TestIndex = testIndex++,
+                            RepeatIndex = repeatIndex
+                        };
+                    }
                 }
             }
         }
+    }
+
+    private static int ExtractRepeatCount(IMethodSymbol methodSymbol)
+    {
+        var repeatAttribute = methodSymbol.GetAttributes()
+            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute");
+
+        if (repeatAttribute is { ConstructorArguments.Length: > 0 })
+        {
+            if (repeatAttribute.ConstructorArguments[0].Value is int count)
+            {
+                return count;
+            }
+        }
+
+        return 0;
     }
 
     private static bool IsCompileTimeDataSourceAttribute(AttributeData attr)
@@ -129,7 +169,8 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
         return GenerationContext.Equals(other.GenerationContext) &&
                AttributeDataEquals(ClassDataAttribute, other.ClassDataAttribute) &&
                AttributeDataEquals(MethodDataAttribute, other.MethodDataAttribute) &&
-               TestIndex == other.TestIndex;
+               TestIndex == other.TestIndex &&
+               RepeatIndex == other.RepeatIndex;
     }
 
     public override bool Equals(object? obj)
@@ -145,6 +186,7 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
             hashCode = (hashCode * 397) ^ AttributeDataGetHashCode(ClassDataAttribute);
             hashCode = (hashCode * 397) ^ AttributeDataGetHashCode(MethodDataAttribute);
             hashCode = (hashCode * 397) ^ TestIndex;
+            hashCode = (hashCode * 397) ^ RepeatIndex;
             return hashCode;
         }
     }

@@ -26,7 +26,7 @@ public class NotInParallelExecutionTests
         
         ExecutionRecords.Add(new TestExecutionRecord(
             TestContext.Current!.TestDetails.TestName,
-            TestContext.Current.TestStart.DateTime,
+            TestContext.Current.TestStart!.Value.DateTime,
             null,
             CurrentlyRunning
         ));

@@ -53,6 +53,11 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             _contextRestorer.RestoreContext(test);
 
+            // Clear Result and timing from any previous execution (important for repeated tests)
+            test.Context.Result = null;
+            test.Context.TestStart = null;
+            test.Context.TestEnd = null;
+
             TestContext.Current = test.Context;
             test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
 

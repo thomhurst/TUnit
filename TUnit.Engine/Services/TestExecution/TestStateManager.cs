@@ -66,12 +66,19 @@ internal sealed class TestStateManager
     public Task MarkSkippedAsync(AbstractExecutableTest test, string reason)
     {
         test.State = TestState.Skipped;
+        
+        // Ensure StartTime is set if it wasn't already
+        if (!test.StartTime.HasValue)
+        {
+            test.StartTime = DateTimeOffset.UtcNow;
+        }
+        
         test.EndTime = DateTimeOffset.UtcNow;
         test.Result = new TestResult
         {
             State = TestState.Skipped,
             Exception = new SkipTestException(reason),
-            Start = test.StartTime ?? DateTimeOffset.UtcNow,
+            Start = test.StartTime.Value,
             End = test.EndTime,
             Duration = test.EndTime - test.StartTime.GetValueOrDefault(),
             ComputerName = Environment.MachineName

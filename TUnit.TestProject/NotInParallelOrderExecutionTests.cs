@@ -32,7 +32,7 @@ public class NotInParallelOrderExecutionTests
         OrderedExecutionRecords.Add(new OrderedExecutionRecord(
             testName,
             groupKey,
-            TestContext.Current.TestStart.DateTime,
+            TestContext.Current.TestStart!.Value.DateTime,
             null
         ));
     }
