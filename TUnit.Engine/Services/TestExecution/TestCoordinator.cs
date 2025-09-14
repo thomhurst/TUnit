@@ -69,7 +69,9 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             test.Context.RestoreExecutionContext();
 
-            await _testExecutor.ExecuteAsync(test, cancellationToken).ConfigureAwait(false);
+            await RetryHelper.ExecuteWithRetry(test.Context, async () =>
+                await _testExecutor.ExecuteAsync(test, cancellationToken).ConfigureAwait(false)
+            );
 
             await _stateManager.MarkCompletedAsync(test).ConfigureAwait(false);
             await _messagePublisher.PublishCompletedAsync(test).ConfigureAwait(false);
