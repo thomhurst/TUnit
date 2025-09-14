@@ -83,9 +83,8 @@ public sealed class TestRunner : IDataProducer
 
             await _tunitMessageBus.InProgress(test.Context).ConfigureAwait(false);
 
-            var updateMessage = await _testCoordinator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+            await _testCoordinator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
 
-            await _messageBus.PublishAsync(this, updateMessage).ConfigureAwait(false);
             if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
             {
                 // Capture the first failure exception before triggering cancellation

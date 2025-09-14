@@ -47,7 +47,7 @@ internal sealed class TestCoordinator : ITestCoordinator
     {
     }
 
-    public async Task<TestNodeUpdateMessage> ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var wasExecuted = await _executionGuard.TryStartExecutionAsync(test.TestId,
             () => ExecuteTestInternalAsync(test, cancellationToken)).ConfigureAwait(false);
@@ -56,8 +56,6 @@ internal sealed class TestCoordinator : ITestCoordinator
         {
             await _logger.LogDebugAsync($"Test {test.TestId} was already executed by another thread").ConfigureAwait(false);
         }
-
-        return CreateUpdateMessage(test);
     }
 
     private async Task ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
@@ -99,41 +97,4 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
     }
 
-    private TestNodeUpdateMessage CreateUpdateMessage(AbstractExecutableTest test)
-    {
-        var testNode = test.Context.ToTestNode()
-            .WithProperty(GetTestNodeState(test));
-
-        var standardOutput = test.Context.GetStandardOutput();
-        var errorOutput = test.Context.GetErrorOutput();
-
-        if (!string.IsNullOrEmpty(standardOutput))
-        {
-#pragma warning disable TPEXP
-            testNode = testNode.WithProperty(new StandardOutputProperty(standardOutput));
-#pragma warning restore TPEXP
-        }
-
-        if (!string.IsNullOrEmpty(errorOutput))
-        {
-#pragma warning disable TPEXP
-            testNode = testNode.WithProperty(new StandardErrorProperty(errorOutput));
-#pragma warning restore TPEXP
-        }
-
-        return new TestNodeUpdateMessage(
-            sessionUid: _sessionUid,
-            testNode: testNode);
-    }
-
-    private IProperty GetTestNodeState(AbstractExecutableTest test)
-    {
-        return test.Result?.State switch
-        {
-            TestState.Passed => new PassedTestNodeStateProperty(),
-            TestState.Failed => new FailedTestNodeStateProperty(test.Result.Exception ?? new Exception("Unknown error")),
-            TestState.Skipped => new SkippedTestNodeStateProperty(test.Result.Exception?.Message ?? "Test was skipped"),
-            _ => new InProgressTestNodeStateProperty()
-        };
-    }
 }

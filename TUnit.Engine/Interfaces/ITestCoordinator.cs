@@ -8,5 +8,5 @@ namespace TUnit.Engine.Interfaces;
 /// </summary>
 public interface ITestCoordinator
 {
-    Task<TestNodeUpdateMessage> ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken);
+    Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken);
 }
