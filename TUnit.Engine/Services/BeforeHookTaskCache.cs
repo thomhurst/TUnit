@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using TUnit.Core.Data;
 
 namespace TUnit.Engine.Services;
 
@@ -8,11 +9,11 @@ namespace TUnit.Engine.Services;
 /// Responsible for caching Before hook tasks to ensure they run only once.
 /// Follows Single Responsibility Principle - only handles task caching.
 /// </summary>
-internal sealed class BeforeHookTaskCache : IDisposable
+internal sealed class BeforeHookTaskCache
 {
     // Cached Before hook tasks to ensure they run only once
-    private readonly ConcurrentDictionary<Type, Task> _beforeClassTasks = new();
-    private readonly ConcurrentDictionary<Assembly, Task> _beforeAssemblyTasks = new();
+    private readonly GetOnlyDictionary<Type, Task> _beforeClassTasks = new();
+    private readonly GetOnlyDictionary<Assembly, Task> _beforeAssemblyTasks = new();
     private Task? _beforeTestSessionTask;
 
     public Task GetOrCreateBeforeTestSessionTask(Func<Task> taskFactory)
@@ -30,12 +31,5 @@ internal sealed class BeforeHookTaskCache : IDisposable
         Type testClass, Func<Type, Task> taskFactory)
     {
         return _beforeClassTasks.GetOrAdd(testClass, taskFactory);
-    }
-
-    public void Dispose()
-    {
-        _beforeClassTasks.Clear();
-        _beforeAssemblyTasks.Clear();
-        _beforeTestSessionTask = null;
     }
 }

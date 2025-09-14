@@ -12,18 +12,13 @@ namespace TUnit.Engine;
 /// Simple orchestrator that composes focused services to manage test execution flow.
 /// Follows Single Responsibility Principle and SOLID principles.
 /// </summary>
-internal class TestExecutor : IDisposable
+internal class TestExecutor
 {
     private readonly HookExecutor _hookExecutor;
     private readonly TestLifecycleCoordinator _lifecycleCoordinator;
     private readonly BeforeHookTaskCache _beforeHookTaskCache;
     private readonly IContextProvider _contextProvider;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
-
-    // Cached delegates to prevent lambda capture issues
-    private readonly Func<Task> _executeBeforeTestSessionHooks;
-    private readonly Func<Assembly, Task> _executeBeforeAssemblyHooks;
-    private readonly Func<Type, Task> _executeBeforeClassHooks;
 
     public TestExecutor(
         HookExecutor hookExecutor,
@@ -37,13 +32,6 @@ internal class TestExecutor : IDisposable
         _beforeHookTaskCache = beforeHookTaskCache;
         _contextProvider = contextProvider;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
-
-        // Initialize cached delegates once to avoid lambda capture issues
-        _executeBeforeTestSessionHooks = () => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken.None);
-        _executeBeforeAssemblyHooks = assembly => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, CancellationToken.None);
-#pragma warning disable IL2067
-        _executeBeforeClassHooks = cls => _hookExecutor.ExecuteBeforeClassHooksAsync(cls, CancellationToken.None);
-#pragma warning restore IL2067
     }
 
 
@@ -62,7 +50,7 @@ internal class TestExecutor : IDisposable
             // Get or create and cache Before hooks - these run only once
             // We use cached delegates to prevent lambda capture issues
             // Event receivers will be handled separately with their own internal coordination
-            await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(_executeBeforeTestSessionHooks).ConfigureAwait(false);
+            await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(() => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken.None)).ConfigureAwait(false);
 
             // Event receivers have their own internal coordination to run once
             await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(
@@ -72,7 +60,7 @@ internal class TestExecutor : IDisposable
 
             executableTest.Context.ClassContext.AssemblyContext.TestSessionContext.RestoreExecutionContext();
 
-            await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(testAssembly, _executeBeforeAssemblyHooks).ConfigureAwait(false);
+            await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(testAssembly, assembly => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, CancellationToken.None)).ConfigureAwait(false);
 
             // Event receivers for first test in assembly
             await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(
@@ -82,7 +70,7 @@ internal class TestExecutor : IDisposable
 
             executableTest.Context.ClassContext.AssemblyContext.RestoreExecutionContext();
 
-            await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _executeBeforeClassHooks).ConfigureAwait(false);
+            await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _ => _hookExecutor.ExecuteBeforeClassHooksAsync(testClass, CancellationToken.None)).ConfigureAwait(false);
 
             // Event receivers for first test in class
             await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(
@@ -197,11 +185,5 @@ internal class TestExecutor : IDisposable
     public IContextProvider GetContextProvider()
     {
         return _contextProvider;
-    }
-
-    public void Dispose()
-    {
-        _lifecycleCoordinator.Dispose();
-        _beforeHookTaskCache.Dispose();
     }
 }

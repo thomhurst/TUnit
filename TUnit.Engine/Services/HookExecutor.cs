@@ -43,7 +43,7 @@ internal sealed class HookExecutor
             {
                 // Wrap hook exceptions in specific exception types
                 // This allows the test runner to handle hook failures appropriately
-                throw new BeforeTestSessionException($"BeforeTestSession hook failed", ex);
+                throw new BeforeTestSessionException("BeforeTestSession hook failed", ex);
             }
         }
     }
@@ -77,7 +77,7 @@ internal sealed class HookExecutor
             catch (Exception ex)
             {
                 // Wrap hook exceptions in specific exception types
-                throw new AfterTestSessionException($"AfterTestSession hook failed", ex);
+                throw new AfterTestSessionException("AfterTestSession hook failed", ex);
             }
         }
     }
@@ -95,7 +95,7 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new BeforeAssemblyException($"BeforeAssembly hook failed", ex);
+                throw new BeforeAssemblyException("BeforeAssembly hook failed", ex);
             }
         }
     }
@@ -131,7 +131,7 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new AfterAssemblyException($"AfterAssembly hook failed", ex);
+                throw new AfterAssemblyException("AfterAssembly hook failed", ex);
             }
         }
     }
@@ -151,7 +151,7 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new BeforeClassException($"BeforeClass hook failed", ex);
+                throw new BeforeClassException("BeforeClass hook failed", ex);
             }
         }
     }
@@ -189,7 +189,7 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new AfterClassException($"AfterClass hook failed", ex);
+                throw new AfterClassException("AfterClass hook failed", ex);
             }
         }
     }
@@ -209,7 +209,7 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new BeforeTestException($"BeforeTest hook failed", ex);
+                throw new BeforeTestException("BeforeTest hook failed", ex);
             }
         }
 
@@ -224,7 +224,7 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new BeforeTestException($"BeforeEveryTest hook failed", ex);
+                throw new BeforeTestException("BeforeEveryTest hook failed", ex);
             }
         }
     }
@@ -244,7 +244,7 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new AfterTestException($"AfterTest hook failed", ex);
+                throw new AfterTestException("AfterTest hook failed", ex);
             }
         }
 
@@ -259,7 +259,7 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new AfterTestException($"AfterEveryTest hook failed", ex);
+                throw new AfterTestException("AfterEveryTest hook failed", ex);
             }
         }
     }
@@ -276,7 +276,7 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new BeforeTestDiscoveryException($"BeforeTestDiscovery hook failed", ex);
+                throw new BeforeTestDiscoveryException("BeforeTestDiscovery hook failed", ex);
             }
         }
     }
@@ -293,7 +293,7 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new AfterTestDiscoveryException($"AfterTestDiscovery hook failed", ex);
+                throw new AfterTestDiscoveryException("AfterTestDiscovery hook failed", ex);
             }
         }
     }
