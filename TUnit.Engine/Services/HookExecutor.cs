@@ -198,22 +198,7 @@ internal sealed class HookExecutor
     {
         var testClassType = test.Metadata.TestClassType;
 
-        // Execute Before(Test) hooks specific to this test
-        var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType).ConfigureAwait(false);
-        foreach (var hook in beforeTestHooks)
-        {
-            try
-            {
-                test.Context.RestoreExecutionContext();
-                await hook(test.Context, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw new BeforeTestException("BeforeTest hook failed", ex);
-            }
-        }
-
-        // Execute BeforeEvery(Test) hooks (global test hooks)
+        // Execute BeforeEvery(Test) hooks first (global test hooks run before specific hooks)
         var beforeEveryTestHooks = await _hookCollectionService.CollectBeforeEveryTestHooksAsync(testClassType).ConfigureAwait(false);
         foreach (var hook in beforeEveryTestHooks)
         {
@@ -227,13 +212,28 @@ internal sealed class HookExecutor
                 throw new BeforeTestException("BeforeEveryTest hook failed", ex);
             }
         }
+
+        // Execute Before(Test) hooks after BeforeEvery hooks
+        var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType).ConfigureAwait(false);
+        foreach (var hook in beforeTestHooks)
+        {
+            try
+            {
+                test.Context.RestoreExecutionContext();
+                await hook(test.Context, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new BeforeTestException("BeforeTest hook failed", ex);
+            }
+        }
     }
 
     public async Task ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassType = test.Metadata.TestClassType;
 
-        // Execute After(Test) hooks specific to this test
+        // Execute After(Test) hooks first (specific hooks run before global hooks for cleanup)
         var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType).ConfigureAwait(false);
         foreach (var hook in afterTestHooks)
         {
@@ -248,7 +248,7 @@ internal sealed class HookExecutor
             }
         }
 
-        // Execute AfterEvery(Test) hooks (global test hooks)
+        // Execute AfterEvery(Test) hooks after After hooks (global test hooks run last for cleanup)
         var afterEveryTestHooks = await _hookCollectionService.CollectAfterEveryTestHooksAsync(testClassType).ConfigureAwait(false);
         foreach (var hook in afterEveryTestHooks)
         {
