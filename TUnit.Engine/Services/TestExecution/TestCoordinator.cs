@@ -68,6 +68,8 @@ internal sealed class TestCoordinator : ITestCoordinator
                 test.Context.TestDetails.MethodMetadata,
                 test.Context.Events);
 
+            await ObjectInitializer.InitializeAsync(test.Context.TestDetails.ClassInstance, cancellationToken).ConfigureAwait(false);
+
             await _testExecutor.ExecuteAsync(test, cancellationToken).ConfigureAwait(false);
 
             await _stateManager.MarkCompletedAsync(test).ConfigureAwait(false);
