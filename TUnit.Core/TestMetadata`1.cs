@@ -101,8 +101,6 @@ public class TestMetadata<
                     // Convert InvokeTypedTest to the expected signature
                     Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
                     {
-                        // Set TestContext.Current so the test method can access it
-                        TestContext.Current = testContext;
                         await typedMetadata.InvokeTypedTest!((T)instance, args, cancellationToken);
                     };
 

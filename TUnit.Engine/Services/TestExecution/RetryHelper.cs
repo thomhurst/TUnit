@@ -17,13 +17,17 @@ internal static class RetryHelper
             }
             catch (Exception ex)
             {
-                if (attempt >= maxRetries + 1)
+                if (attempt >= maxRetries)
                 {
                     throw;
                 }
 
                 if (await ShouldRetry(testContext, ex, attempt))
                 {
+                    // Clear the previous result before retrying
+                    testContext.Result = null;
+                    testContext.TestStart = null;
+                    testContext.TestEnd = null;
                     continue;
                 }
 
@@ -34,8 +38,17 @@ internal static class RetryHelper
 
     private static async Task<bool> ShouldRetry(TestContext testContext, Exception ex, int attempt)
     {
-        return attempt < testContext.TestDetails.RetryLimit
-            && testContext.RetryFunc != null
-            && await testContext.RetryFunc(testContext, ex, attempt + 1).ConfigureAwait(false);
+        if (attempt >= testContext.TestDetails.RetryLimit)
+        {
+            return false;
+        }
+        
+        if (testContext.RetryFunc == null)
+        {
+            // Default behavior: retry on any exception if within retry limit
+            return true;
+        }
+        
+        return await testContext.RetryFunc(testContext, ex, attempt + 1).ConfigureAwait(false);
     }
 }

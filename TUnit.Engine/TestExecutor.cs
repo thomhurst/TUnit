@@ -125,6 +125,9 @@ internal class TestExecutor
             return;
         }
 
+        // Set the test start time when we actually begin executing the test
+        executableTest.Context.TestStart = DateTimeOffset.UtcNow;
+
         if (executableTest.Context.InternalDiscoveredTest?.TestExecutor is { } testExecutor)
         {
             await testExecutor.ExecuteTest(executableTest.Context,
