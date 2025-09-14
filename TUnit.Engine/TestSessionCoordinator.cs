@@ -1,12 +1,9 @@
-using Microsoft.Testing.Platform.CommandLine;
-using Microsoft.Testing.Platform.Logging;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Services;
 using TUnit.Engine.Framework;
-using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Scheduling;
 using TUnit.Engine.Services;
@@ -16,39 +13,27 @@ namespace TUnit.Engine;
 
 internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyncDisposable
 {
-    private readonly ITestCoordinator _testCoordinator;
-    private readonly ICommandLineOptions _commandLineOptions;
+    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestScheduler _testScheduler;
-    private readonly ILoggerFactory _loggerFactory;
     private readonly TUnitServiceProvider _serviceProvider;
-    private readonly Scheduling.TestRunner _testRunner;
     private readonly IContextProvider _contextProvider;
     private readonly ITUnitMessageBus _messageBus;
 
-    public TestSessionCoordinator(
-        ITestCoordinator testCoordinator,
-        ICommandLineOptions commandLineOptions,
+    public TestSessionCoordinator(EventReceiverOrchestrator eventReceiverOrchestrator,
         TUnitFrameworkLogger logger,
-        ILoggerFactory? loggerFactory,
         ITestScheduler testScheduler,
         TUnitServiceProvider serviceProvider,
-        Scheduling.TestRunner testRunner,
         IContextProvider contextProvider,
         ITUnitMessageBus messageBus)
     {
-        _testCoordinator = testCoordinator;
-        _commandLineOptions = commandLineOptions;
+        _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _logger = logger;
-        _loggerFactory = loggerFactory ?? new NullLoggerFactory();
         _serviceProvider = serviceProvider;
-        _testRunner = testRunner;
         _contextProvider = contextProvider;
         _messageBus = messageBus;
         _testScheduler = testScheduler;
     }
-
-    public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
     public async Task ExecuteTests(
         IEnumerable<AbstractExecutableTest> tests,
@@ -81,15 +66,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
 
     private void InitializeEventReceivers(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
-        if (_serviceProvider.GetService(typeof(EventReceiverOrchestrator)) is not EventReceiverOrchestrator eventReceiverOrchestrator)
-        {
-            return;
-        }
-
         var testContexts = testList.Select(t => t.Context);
-        eventReceiverOrchestrator.InitializeTestCounts(testContexts);
-
-        // Test registered event receivers are now invoked during discovery phase
+        _eventReceiverOrchestrator.InitializeTestCounts(testContexts);
     }
 
     private async Task PrepareTestOrchestrator(TestExecutor testExecutor, List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
@@ -133,29 +111,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             _serviceProvider.FailFastCancellationSource.Token);
 
         // Schedule and execute tests (batch approach to preserve ExecutionContext)
-        await _testScheduler.ScheduleAndExecuteAsync(testList, _testRunner, linkedCts.Token);
-    }
-
-    private async Task FailAllTestsDueToSessionSetupFailure(List<AbstractExecutableTest> testList, BeforeTestSessionException sessionException)
-    {
-        // Mark all tests as failed due to session setup failure
-        var now = DateTimeOffset.UtcNow;
-        foreach (var test in testList)
-        {
-            test.State = TestState.Failed;
-            test.Result = new TestResult
-            {
-                State = TestState.Failed,
-                Exception = sessionException,
-                Start = now,
-                End = now,
-                Duration = TimeSpan.Zero,
-                ComputerName = Environment.MachineName
-            };
-
-            // Publish test failure to message bus
-            await _messageBus.Failed(test.Context, sessionException, now);
-        }
+        await _testScheduler.ScheduleAndExecuteAsync(testList, linkedCts.Token);
     }
 
     private bool _disposed;

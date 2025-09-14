@@ -62,4 +62,19 @@ public abstract class AbstractExecutableTest
     public TimeSpan? Duration => StartTime.HasValue && EndTime.HasValue
         ? EndTime.Value - StartTime.Value
         : null;
+
+    public void SetResult(TestState state, Exception? exception = null)
+    {
+        State = state;
+        Context.Result ??= new TestResult
+        {
+            State = state,
+            Exception = exception,
+            ComputerName = Environment.MachineName,
+            Duration = Duration,
+            End = EndTime ??= DateTimeOffset.UtcNow,
+            Start = StartTime ??= DateTimeOffset.UtcNow,
+            Output = Context.GetOutput() + Environment.NewLine + Environment.NewLine + Context.GetErrorOutput()
+        };
+    }
 }

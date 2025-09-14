@@ -165,9 +165,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testRunner = Register(
             new TestRunner(
                 testCoordinator,
-                messageBus,
                 MessageBus,
-                sessionUid,
                 isFailFastEnabled,
                 FailFastCancellationSource,
                 Logger,
@@ -184,16 +182,13 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             CommandLineOptions,
             ParallelLimitLockProvider,
             testStateManager,
+            testRunner,
             circularDependencyDetector));
 
-        TestSessionCoordinator = Register(new TestSessionCoordinator(
-            testCoordinator,
-            CommandLineOptions,
+        TestSessionCoordinator = Register(new TestSessionCoordinator(EventReceiverOrchestrator,
             Logger,
-            loggerFactory,
             testScheduler,
             serviceProvider: this,
-            testRunner,
             ContextProvider,
             MessageBus));
 

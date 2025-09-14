@@ -35,7 +35,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     {
         var eligibleObjects = context.GetEligibleEventObjects().ToArray();
 
-
         // Register all event receivers for fast lookup
         _registry.RegisterReceivers(eligibleObjects);
 
@@ -233,7 +232,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
 
         // Use GetOrAdd to ensure exactly one task is created per session and all tests await it
-        var task = _firstTestInSessionTasks.GetOrAdd("session", 
+        var task = _firstTestInSessionTasks.GetOrAdd("session",
             _ => InvokeFirstTestInSessionEventReceiversCoreAsync(context, sessionContext, cancellationToken));
         await task;
     }
@@ -271,7 +270,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
         // Use GetOrAdd to ensure exactly one task is created per assembly and all tests await it
-        var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName, 
+        var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName,
             _ => InvokeFirstTestInAssemblyEventReceiversCoreAsync(context, assemblyContext, cancellationToken));
         await task;
     }
@@ -309,7 +308,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         var classType = classContext.ClassType;
         // Use GetOrAdd to ensure exactly one task is created per class and all tests await it
-        var task = _firstTestInClassTasks.GetOrAdd(classType, 
+        var task = _firstTestInClassTasks.GetOrAdd(classType,
             _ => InvokeFirstTestInClassEventReceiversCoreAsync(context, classContext, cancellationToken));
         await task;
     }
@@ -370,7 +369,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
                 await _logger.LogErrorAsync($"Error in last test in session event receiver: {ex.Message}");
             }
         }
-        
+
         // Dispose the global static property context after all tests complete
         if (TestSessionContext.GlobalStaticPropertyContext.Events.OnDispose != null)
         {

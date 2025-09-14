@@ -1,6 +1,4 @@
 using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Messages;
-using Microsoft.Testing.Platform.TestHost;
 using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Engine.Interfaces;
@@ -13,38 +11,25 @@ namespace TUnit.Engine.Scheduling;
 /// Executes individual tests for the scheduler
 /// Integrates with SingleTestExecutor and handles message bus communication and fail-fast logic
 /// </summary>
-public sealed class TestRunner : IDataProducer
+public sealed class TestRunner
 {
     private readonly ITestCoordinator _testCoordinator;
-    private readonly IMessageBus _messageBus;
     private readonly ITUnitMessageBus _tunitMessageBus;
-    private readonly SessionUid _sessionUid;
     private readonly bool _isFailFastEnabled;
     private readonly CancellationTokenSource _failFastCancellationSource;
     private readonly TUnitFrameworkLogger _logger;
     private readonly TestStateManager _testStateManager;
 
-    public string Uid => "TUnit.TestExecutor";
-    public string Version => "1.0.0";
-    public string DisplayName => "TUnit Test Executor";
-    public string Description => "Executes individual tests with message bus integration and fail-fast support";
-    public Type[] DataTypesProduced => [typeof(TestNodeUpdateMessage)];
-    public Task<bool> IsEnabledAsync() => Task.FromResult(true);
-
     internal TestRunner(
         ITestCoordinator testCoordinator,
-        IMessageBus messageBus,
         ITUnitMessageBus tunitMessageBus,
-        SessionUid sessionUid,
         bool isFailFastEnabled,
         CancellationTokenSource failFastCancellationSource,
         TUnitFrameworkLogger logger,
         TestStateManager testStateManager)
     {
         _testCoordinator = testCoordinator;
-        _messageBus = messageBus;
         _tunitMessageBus = tunitMessageBus;
-        _sessionUid = sessionUid;
         _isFailFastEnabled = isFailFastEnabled;
         _failFastCancellationSource = failFastCancellationSource;
         _logger = logger;

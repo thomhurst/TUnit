@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Helpers;
@@ -60,7 +61,8 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.AssemblyContext.TestSessionContext.RestoreExecutionContext();
 
-            await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(testAssembly, assembly => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, CancellationToken.None)).ConfigureAwait(false);
+            await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(testAssembly, assembly => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, CancellationToken.None))
+                .ConfigureAwait(false);
 
             // Event receivers for first test in assembly
             await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(
@@ -70,7 +72,8 @@ internal class TestExecutor
 
             executableTest.Context.ClassContext.AssemblyContext.RestoreExecutionContext();
 
-            await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _ => _hookExecutor.ExecuteBeforeClassHooksAsync(testClass, CancellationToken.None)).ConfigureAwait(false);
+            await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _ => _hookExecutor.ExecuteBeforeClassHooksAsync(testClass, CancellationToken.None))
+                .ConfigureAwait(false);
 
             // Event receivers for first test in class
             await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(
@@ -96,12 +99,20 @@ internal class TestExecutor
                 cancellationToken,
                 timeoutMessage).ConfigureAwait(false);
 
-            await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+            executableTest.SetResult(TestState.Passed);
+        }
+        catch (SkipTestException)
+        {
+            executableTest.SetResult(TestState.Skipped);
+        }
+        catch (Exception ex)
+        {
+            executableTest.SetResult(TestState.Failed, ex);
         }
         finally
         {
             // Always decrement counters and run After hooks if we're the last test
-            await ExecuteAfterHooksBasedOnLifecycle(testClass, testAssembly, cancellationToken).ConfigureAwait(false);
+            await ExecuteAfterHooksBasedOnLifecycle(executableTest, testClass, testAssembly, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -125,10 +136,13 @@ internal class TestExecutor
         }
     }
 
-    private async Task ExecuteAfterHooksBasedOnLifecycle(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
+    private async Task ExecuteAfterHooksBasedOnLifecycle(AbstractExecutableTest executableTest,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties
+            | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, Assembly testAssembly, CancellationToken cancellationToken)
     {
+        await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+
         var flags = _lifecycleCoordinator.DecrementAndCheckAfterHooks(testClass, testAssembly);
 
         if (flags.ShouldExecuteAfterClass)

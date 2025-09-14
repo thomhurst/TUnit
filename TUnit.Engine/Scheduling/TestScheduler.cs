@@ -18,6 +18,7 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly ICommandLineOptions _commandLineOptions;
     private readonly ParallelLimitLockProvider _parallelLimitLockProvider;
     private readonly TestStateManager _testStateManager;
+    private readonly TestRunner _testRunner;
     private readonly CircularDependencyDetector _circularDependencyDetector;
 
     public TestScheduler(
@@ -27,6 +28,7 @@ internal sealed class TestScheduler : ITestScheduler
         ICommandLineOptions commandLineOptions,
         ParallelLimitLockProvider parallelLimitLockProvider,
         TestStateManager testStateManager,
+        TestRunner testRunner,
         CircularDependencyDetector circularDependencyDetector)
     {
         _logger = logger;
@@ -35,21 +37,17 @@ internal sealed class TestScheduler : ITestScheduler
         _commandLineOptions = commandLineOptions;
         _parallelLimitLockProvider = parallelLimitLockProvider;
         _testStateManager = testStateManager;
+        _testRunner = testRunner;
         _circularDependencyDetector = circularDependencyDetector;
     }
 
     public async Task ScheduleAndExecuteAsync(
         IEnumerable<AbstractExecutableTest> tests,
-        TestRunner runner,
         CancellationToken cancellationToken)
     {
         if (tests == null)
         {
             throw new ArgumentNullException(nameof(tests));
-        }
-        if (runner == null)
-        {
-            throw new ArgumentNullException(nameof(runner));
         }
 
         var testList = tests as IList<AbstractExecutableTest> ?? tests.ToList();
@@ -70,7 +68,7 @@ internal sealed class TestScheduler : ITestScheduler
             await _messageBus.Failed(test.Context, exception, DateTimeOffset.UtcNow).ConfigureAwait(false);
         }
 
-        var executableTests = testList.Where(t => !circularDependencies.Any(cd => cd.Test == t)).ToList();
+        var executableTests = testList.Where(t => circularDependencies.All(cd => cd.Test != t)).ToList();
         if (executableTests.Count == 0)
         {
             await _logger.LogDebugAsync("No executable tests found after removing circular dependencies").ConfigureAwait(false);
@@ -81,12 +79,11 @@ internal sealed class TestScheduler : ITestScheduler
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
 
         // Execute tests according to their grouping
-        await ExecuteGroupedTestsAsync(groupedTests, runner, cancellationToken).ConfigureAwait(false);
+        await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task ExecuteGroupedTestsAsync(
         GroupedTests groupedTests,
-        TestRunner runner,
         CancellationToken cancellationToken)
     {
         // Check if maximum parallel tests limit is specified
@@ -102,28 +99,28 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
         // Execute all test groups with proper isolation to prevent race conditions between class-level hooks
-        
+
         // 1. Execute parallel tests (no constraints, can run freely in parallel)
         if (groupedTests.Parallel.Length > 0)
         {
             await _logger.LogDebugAsync($"Starting {groupedTests.Parallel.Length} parallel tests").ConfigureAwait(false);
-            
+
             if (maxParallelism is > 0)
             {
                 // Use worker pool pattern to respect maximum parallel tests limit
-                await ExecuteParallelTestsWithLimitAsync(groupedTests.Parallel, maxParallelism.Value, runner, cancellationToken).ConfigureAwait(false);
+                await ExecuteParallelTestsWithLimitAsync(groupedTests.Parallel, maxParallelism.Value, cancellationToken).ConfigureAwait(false);
             }
             else
             {
                 // No limit - start all tests at once
                 var parallelTasks = groupedTests.Parallel.Select(test =>
                 {
-                    var task = ExecuteTestWithParallelLimitAsync(test, runner, cancellationToken);
+                    var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
                     test.ExecutionTask = task;
                     return task;
                 }).ToArray();
 
-                await WaitForTasksWithFailFastHandling(parallelTasks, runner, cancellationToken).ConfigureAwait(false);
+                await WaitForTasksWithFailFastHandling(parallelTasks, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -132,8 +129,8 @@ internal sealed class TestScheduler : ITestScheduler
         foreach (var (groupName, orderedTests) in groupedTests.ParallelGroups)
         {
             await _logger.LogDebugAsync($"Starting parallel group '{groupName}' with {orderedTests.Length} orders").ConfigureAwait(false);
-            
-            await ExecuteParallelGroupAsync(groupName, orderedTests, runner, maxParallelism, cancellationToken).ConfigureAwait(false);
+
+            await ExecuteParallelGroupAsync(groupName, orderedTests, maxParallelism, cancellationToken).ConfigureAwait(false);
         }
 
         // 3. Execute keyed NotInParallel tests (each key runs sequentially, but keys can run in parallel with each other)
@@ -143,23 +140,23 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 var (key, tests) = keyGroup;
                 await _logger.LogDebugAsync($"Starting keyed NotInParallel group '{key}' with {tests.Length} tests").ConfigureAwait(false);
-                await ExecuteSequentiallyAsync($"Key-{key}", tests, runner, cancellationToken).ConfigureAwait(false);
+                await ExecuteSequentiallyAsync($"Key-{key}", tests, cancellationToken).ConfigureAwait(false);
             }).ToArray();
 
-            await WaitForTasksWithFailFastHandling(keyedTasks, runner, cancellationToken).ConfigureAwait(false);
+            await WaitForTasksWithFailFastHandling(keyedTasks, cancellationToken).ConfigureAwait(false);
         }
 
         // 4. Execute global NotInParallel tests (completely sequential, after everything else)
         if (groupedTests.NotInParallel.Length > 0)
         {
             await _logger.LogDebugAsync($"Starting {groupedTests.NotInParallel.Length} global NotInParallel tests").ConfigureAwait(false);
-            
+
             // Execute each test individually in sequence to ensure no concurrency
             foreach (var test in groupedTests.NotInParallel)
             {
                 await _logger.LogDebugAsync($"Executing global NotInParallel test: {test.TestId}").ConfigureAwait(false);
-                
-                var task = ExecuteTestWithParallelLimitAsync(test, runner, cancellationToken);
+
+                var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
                 test.ExecutionTask = task;
                 await task.ConfigureAwait(false);
             }
@@ -168,7 +165,6 @@ internal sealed class TestScheduler : ITestScheduler
 
     private async Task ExecuteTestWithParallelLimitAsync(
         AbstractExecutableTest test,
-        TestRunner runner,
         CancellationToken cancellationToken)
     {
         // Check if test has parallel limit constraint
@@ -178,7 +174,7 @@ internal sealed class TestScheduler : ITestScheduler
             await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                await runner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+                await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -187,14 +183,13 @@ internal sealed class TestScheduler : ITestScheduler
         }
         else
         {
-            await runner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+            await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
         }
     }
 
     private async Task ExecuteParallelGroupAsync(
         string groupName,
         (int Order, AbstractExecutableTest[] Tests)[] orderedTests,
-        TestRunner runner,
         int? maxParallelism,
         CancellationToken cancellationToken)
     {
@@ -202,23 +197,23 @@ internal sealed class TestScheduler : ITestScheduler
         foreach (var (order, tests) in orderedTests)
         {
             await _logger.LogDebugAsync($"Executing parallel group '{groupName}' order {order} with {tests.Length} tests").ConfigureAwait(false);
-            
+
             if (maxParallelism is > 0)
             {
                 // Use worker pool pattern to respect maximum parallel tests limit
-                await ExecuteParallelTestsWithLimitAsync(tests, maxParallelism.Value, runner, cancellationToken).ConfigureAwait(false);
+                await ExecuteParallelTestsWithLimitAsync(tests, maxParallelism.Value, cancellationToken).ConfigureAwait(false);
             }
             else
             {
                 // No limit - start all tests at once
                 var orderTasks = tests.Select(test =>
                 {
-                    var task = ExecuteTestWithParallelLimitAsync(test, runner, cancellationToken);
+                    var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
                     test.ExecutionTask = task;
                     return task;
                 }).ToArray();
 
-                await WaitForTasksWithFailFastHandling(orderTasks, runner, cancellationToken).ConfigureAwait(false);
+                await WaitForTasksWithFailFastHandling(orderTasks, cancellationToken).ConfigureAwait(false);
             }
         }
     }
@@ -226,14 +221,13 @@ internal sealed class TestScheduler : ITestScheduler
     private async Task ExecuteSequentiallyAsync(
         string groupName,
         AbstractExecutableTest[] tests,
-        TestRunner runner,
         CancellationToken cancellationToken)
     {
         foreach (var test in tests)
         {
             await _logger.LogDebugAsync($"Executing sequential test in group '{groupName}': {test.TestId}").ConfigureAwait(false);
-            
-            var task = ExecuteTestWithParallelLimitAsync(test, runner, cancellationToken);
+
+            var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
             test.ExecutionTask = task;
             await task.ConfigureAwait(false);
         }
@@ -242,7 +236,6 @@ internal sealed class TestScheduler : ITestScheduler
     private async Task ExecuteParallelTestsWithLimitAsync(
         AbstractExecutableTest[] tests,
         int maxParallelism,
-        TestRunner runner,
         CancellationToken cancellationToken)
     {
         // Use worker pool pattern to avoid creating too many concurrent test executions
@@ -261,14 +254,14 @@ internal sealed class TestScheduler : ITestScheduler
                         break;
                     }
 
-                    var task = ExecuteTestWithParallelLimitAsync(test, runner, cancellationToken);
+                    var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
                     test.ExecutionTask = task;
                     await task.ConfigureAwait(false);
                 }
             }, cancellationToken);
         }
 
-        await WaitForTasksWithFailFastHandling(workers, runner, cancellationToken).ConfigureAwait(false);
+        await WaitForTasksWithFailFastHandling(workers, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -276,7 +269,7 @@ internal sealed class TestScheduler : ITestScheduler
     /// When fail-fast is triggered, we only want to bubble up the first real failure,
     /// not the cancellation exceptions from other tests that were cancelled as a result.
     /// </summary>
-    private async Task WaitForTasksWithFailFastHandling(Task[] tasks, TestRunner runner, CancellationToken cancellationToken)
+    private async Task WaitForTasksWithFailFastHandling(Task[] tasks, CancellationToken cancellationToken)
     {
         try
         {
@@ -289,18 +282,18 @@ internal sealed class TestScheduler : ITestScheduler
             if (cancellationToken.IsCancellationRequested)
             {
                 // Get the first failure that triggered fail-fast
-                var firstFailure = runner.GetFirstFailFastException();
-                
+                var firstFailure = _testRunner.GetFirstFailFastException();
+
                 // If we have a stored first failure, throw that instead of the aggregated exceptions
                 if (firstFailure != null)
                 {
                     throw firstFailure;
                 }
-                
+
                 // If no stored failure, this was a user-initiated cancellation
                 // Let the original exception bubble up
             }
-            
+
             // Re-throw the original exception (either cancellation or non-fail-fast failure)
             throw;
         }
