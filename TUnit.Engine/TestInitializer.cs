@@ -1,10 +1,18 @@
 ﻿using TUnit.Core;
 using TUnit.Engine.Extensions;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
 
 internal class TestInitializer
 {
+    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
+
+    public TestInitializer(EventReceiverOrchestrator eventReceiverOrchestrator)
+    {
+        _eventReceiverOrchestrator = eventReceiverOrchestrator;
+    }
+
     public async Task InitializeTest(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         await PropertyInjectionService.InjectPropertiesIntoObjectAsync(
@@ -13,9 +21,7 @@ internal class TestInitializer
             test.Context.TestDetails.MethodMetadata,
             test.Context.Events);
 
-        foreach (var obj in test.Context.GetEligibleEventObjects())
-        {
-            await ObjectInitializer.InitializeAsync(obj, cancellationToken).ConfigureAwait(false);
-        }
+        // Initialize and register all eligible objects including event receivers
+        await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken).ConfigureAwait(false);
     }
 }
