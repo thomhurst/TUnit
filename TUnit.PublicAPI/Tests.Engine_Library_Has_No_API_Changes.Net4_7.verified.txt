@@ -137,7 +137,7 @@ namespace .Interfaces
     }
     public interface ITestCoordinator
     {
-        .<..> ExecuteTestAsync(.AbstractExecutableTest test, .CancellationToken cancellationToken);
+        . ExecuteTestAsync(.AbstractExecutableTest test, .CancellationToken cancellationToken);
     }
     public interface ITestExecutor
     {

@@ -3,6 +3,16 @@
 [assembly: .(".NETCoreApp,Version=v8.0", FrameworkDisplayName=".NET 8.0")]
 namespace 
 {
+    public abstract class AbstractDynamicTest
+    {
+        protected AbstractDynamicTest() { }
+        public abstract .<.DiscoveryResult> GetTests();
+    }
+    public abstract class AbstractDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T> : .AbstractDynamicTest
+        where T :  class
+    {
+        protected AbstractDynamicTest() { }
+    }
     [.DebuggerDisplay("{.Name}.{}")]
     public abstract class AbstractExecutableTest
     {
@@ -537,7 +547,6 @@ namespace
     {
         public DiscoveredTestContext(string testName, .TestContext testContext) { }
         public .<<object?, string?>> ArgumentDisplayFormatters { get; }
-        public bool RunOnTestDiscovery { get; }
         public .TestContext TestContext { get; }
         public .TestDetails TestDetails { get; }
         public string TestName { get; }
@@ -551,7 +560,6 @@ namespace
         public void SetPriority(. priority) { }
         public void SetRetryLimit(int retryLimit) { }
         public void SetRetryLimit(int retryCount, <.TestContext, , int, .<bool>> shouldRetry) { }
-        public void SetRunOnDiscovery(bool runOnDiscovery) { }
     }
     public class DiscoveredTest<T> : .DiscoveredTest
         where T :  class
@@ -600,11 +608,6 @@ namespace
         public .? TestMethod { get; set; }
         public object?[]? TestMethodArguments { get; set; }
     }
-    public abstract class DynamicTest
-    {
-        protected DynamicTest() { }
-        public abstract .<.DiscoveryResult> GetTests();
-    }
     [.("TUnitWIP0001")]
     public class DynamicTestBuilderAttribute : .BaseTestAttribute
     {
@@ -615,17 +618,17 @@ namespace
         public DynamicTestBuilderContext(string filePath, int lineNumber) { }
         public string FilePath { get; }
         public int LineNumber { get; }
-        public .<.DynamicTest> Tests { get; }
-        public void AddTest(.DynamicTest test) { }
+        public .<.AbstractDynamicTest> Tests { get; }
+        public void AddTest(.AbstractDynamicTest test) { }
     }
     public static class DynamicTestHelper
     {
         public static T Argument<T>() { }
     }
-    public class DynamicTestInstance<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T> : .DynamicTest<T>, .IDynamicTestCreatorLocation
+    public class DynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T> : .AbstractDynamicTest<T>, .IDynamicTestCreatorLocation
         where T :  class
     {
-        public DynamicTestInstance() { }
+        public DynamicTest() { }
         public .<> Attributes { get; set; }
         public string? CreatorFilePath { get; set; }
         public int? CreatorLineNumber { get; set; }
@@ -633,11 +636,6 @@ namespace
         public .<<T>>? TestMethod { get; set; }
         public object?[]? TestMethodArguments { get; set; }
         public override .<.DiscoveryResult> GetTests() { }
-    }
-    public abstract class DynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T> : .DynamicTest
-        where T :  class
-    {
-        protected DynamicTest() { }
     }
     public class EngineCancellationToken : 
     {
@@ -699,7 +697,7 @@ namespace
         public ExplicitAttribute([.] string callerFile = "", [.] string callerMemberName = "") { }
         public string For { get; }
     }
-    public class FailedDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]  T> : .DynamicTest
+    public class FailedDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]  T> : .AbstractDynamicTest
         where T :  class
     {
         public FailedDynamicTest() { }
@@ -829,7 +827,7 @@ namespace
     public interface IDynamicTestMetadata { }
     public interface IDynamicTestSource
     {
-        .<.DynamicTest> CollectDynamicTests(string sessionId);
+        .<.AbstractDynamicTest> CollectDynamicTests(string sessionId);
     }
     public interface IRequiresImmediateInitialization { }
     public interface IScopedAttribute { }
@@ -1111,12 +1109,6 @@ namespace
     {
         public RunOnAttribute(. OperatingSystem) { }
         public override .<bool> ShouldSkip(.TestRegisteredContext context) { }
-    }
-    public class RunOnDiscoveryAttribute : .TUnitAttribute, ., .
-    {
-        public RunOnDiscoveryAttribute() { }
-        public int Order { get; }
-        public . OnTestDiscovered(.DiscoveredTestContext context) { }
     }
     [.("windows")]
     public class STAThreadExecutor : .DedicatedThreadExecutor
@@ -1868,7 +1860,7 @@ namespace .Extensions
     }
     public static class TestContextExtensions
     {
-        public static . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T>(this .TestContext context, .DynamicTestInstance<T> dynamicTest)
+        public static . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T>(this .TestContext context, .DynamicTest<T> dynamicTest)
             where T :  class { }
         public static string GetClassTypeName(this .TestContext context) { }
         public static T? GetService<T>(this .TestContext context)
@@ -2291,7 +2283,7 @@ namespace .Interfaces
     }
     public interface ITestRegistry
     {
-        . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T>(.TestContext context, .DynamicTestInstance<T> dynamicTest)
+        . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T>(.TestContext context, .DynamicTest<T> dynamicTest)
             where T :  class;
     }
     public interface ITestRetryEventReceiver : .
