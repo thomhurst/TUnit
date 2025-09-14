@@ -17,6 +17,7 @@ internal sealed class TestCoordinator : ITestCoordinator
     private readonly TestMessagePublisher _messagePublisher;
     private readonly TestContextRestorer _contextRestorer;
     private readonly TestExecutor _testExecutor;
+    private readonly TestInitializer _testInitializer;
     private readonly TUnitFrameworkLogger _logger;
 
     public TestCoordinator(
@@ -25,6 +26,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         TestMessagePublisher messagePublisher,
         TestContextRestorer contextRestorer,
         TestExecutor testExecutor,
+        TestInitializer testInitializer,
         TUnitFrameworkLogger logger)
     {
         _executionGuard = executionGuard;
@@ -32,6 +34,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         _messagePublisher = messagePublisher;
         _contextRestorer = contextRestorer;
         _testExecutor = testExecutor;
+        _testInitializer = testInitializer;
         _logger = logger;
     }
 
@@ -62,13 +65,9 @@ internal sealed class TestCoordinator : ITestCoordinator
                 return;
             }
 
-            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(
-                test.Context.TestDetails.ClassInstance,
-                test.Context.ObjectBag,
-                test.Context.TestDetails.MethodMetadata,
-                test.Context.Events);
+            await _testInitializer.InitializeTest(test, cancellationToken).ConfigureAwait(false);
 
-            await ObjectInitializer.InitializeAsync(test.Context.TestDetails.ClassInstance, cancellationToken).ConfigureAwait(false);
+            test.Context.RestoreExecutionContext();
 
             await _testExecutor.ExecuteAsync(test, cancellationToken).ConfigureAwait(false);
 
