@@ -51,7 +51,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            IEnumerable<DynamicTest> dynamicTests;
+            IEnumerable<AbstractDynamicTest> dynamicTests;
             TestMetadata? failedMetadata = null;
 
             try
@@ -83,10 +83,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     }
 
     private async IAsyncEnumerable<TestMetadata> ConvertDynamicTestToMetadataStreaming(
-        DynamicTest dynamicTest,
+        AbstractDynamicTest abstractDynamicTest,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        foreach (var discoveryResult in dynamicTest.GetTests())
+        foreach (var discoveryResult in abstractDynamicTest.GetTests())
         {
             cancellationToken.ThrowIfCancellationRequested();
 

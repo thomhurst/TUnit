@@ -1698,11 +1698,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return dynamicTests;
     }
 
-    private async Task<List<TestMetadata>> ConvertDynamicTestToMetadata(DynamicTest dynamicTest)
+    private async Task<List<TestMetadata>> ConvertDynamicTestToMetadata(AbstractDynamicTest abstractDynamicTest)
     {
         var testMetadataList = new List<TestMetadata>();
 
-        foreach (var discoveryResult in dynamicTest.GetTests())
+        foreach (var discoveryResult in abstractDynamicTest.GetTests())
         {
             if (discoveryResult is DynamicDiscoveryResult { TestMethod: not null } dynamicResult)
             {

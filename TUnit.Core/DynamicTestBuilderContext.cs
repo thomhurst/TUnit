@@ -5,7 +5,7 @@ namespace TUnit.Core;
 /// </summary>
 public class DynamicTestBuilderContext
 {
-    private readonly List<DynamicTest> _tests =
+    private readonly List<AbstractDynamicTest> _tests =
     [
     ];
 
@@ -18,9 +18,9 @@ public class DynamicTestBuilderContext
     public string FilePath { get; }
     public int LineNumber { get; }
 
-    public IReadOnlyList<DynamicTest> Tests => _tests.AsReadOnly();
+    public IReadOnlyList<AbstractDynamicTest> Tests => _tests.AsReadOnly();
 
-    public void AddTest(DynamicTest test)
+    public void AddTest(AbstractDynamicTest test)
     {
         // Set creator location if the test implements IDynamicTestCreatorLocation
         if (test is IDynamicTestCreatorLocation testWithLocation)
