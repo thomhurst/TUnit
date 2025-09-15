@@ -33,6 +33,7 @@ namespace
         public required string TestId { get; init; }
         public abstract .<object> CreateInstanceAsync();
         public abstract . InvokeTestAsync(object instance, .CancellationToken cancellationToken);
+        public void SetResult(.TestState state, ? exception = null) { }
     }
     [(.Method)]
     public sealed class AfterAttribute : .HookAttribute
@@ -1179,7 +1180,7 @@ namespace
         public .TestDetails TestDetails { get; set; }
         public ? TestEnd { get; set; }
         public string TestName { get; }
-        public  TestStart { get; set; }
+        public ? TestStart { get; set; }
         public .<.Timing> Timings { get; }
         public static . Configuration { get; }
         public new static .TestContext? Current { get; }
@@ -1514,22 +1515,22 @@ namespace .Converters
 }
 namespace .Data
 {
-    public class GetOnlyDictionary<TKey, TValue>
+    public class ScopedDictionary<TScope>
+        where TScope :  notnull
+    {
+        public ScopedDictionary() { }
+        public object? GetOrCreate(TScope scope,  type, <, object?> factory) { }
+    }
+    public class ThreadSafeDictionary<TKey, TValue>
         where TKey :  notnull
     {
-        public GetOnlyDictionary() { }
+        public ThreadSafeDictionary() { }
         public TValue this[TKey key] { get; }
         public .<TKey> Keys { get; }
         public .<TValue> Values { get; }
         public TValue GetOrAdd(TKey key, <TKey, TValue> func) { }
         public TValue? Remove(TKey key) { }
         public bool TryGetValue(TKey key, [.(true)] out TValue? value) { }
-    }
-    public class ScopedDictionary<TScope>
-        where TScope :  notnull
-    {
-        public ScopedDictionary() { }
-        public object? GetOrCreate(TScope scope,  type, <, object?> factory) { }
     }
 }
 namespace .DataSources
