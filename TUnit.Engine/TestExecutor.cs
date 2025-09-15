@@ -104,10 +104,12 @@ internal class TestExecutor
         catch (SkipTestException)
         {
             executableTest.SetResult(TestState.Skipped);
+            throw;
         }
         catch (Exception ex)
         {
             executableTest.SetResult(TestState.Failed, ex);
+            throw;
         }
         finally
         {
@@ -170,14 +172,6 @@ internal class TestExecutor
     public async Task ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
         await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Register tests for lifecycle coordination. Should be called after filtering.
-    /// </summary>
-    public void RegisterTests(IEnumerable<AbstractExecutableTest> tests)
-    {
-        _lifecycleCoordinator.RegisterTests(tests);
     }
 
     /// <summary>

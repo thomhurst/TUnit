@@ -36,7 +36,7 @@ public sealed class TestRunner
         _testStateManager = testStateManager;
     }
 
-    private readonly GetOnlyDictionary<string, Task> _executingTests = new();
+    private readonly ThreadSafeDictionary<string, Task> _executingTests = new();
     private Exception? _firstFailFastException;
 
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
@@ -66,8 +66,7 @@ public sealed class TestRunner
             test.State = TestState.Running;
             test.StartTime = DateTimeOffset.UtcNow;
 
-            await _tunitMessageBus.InProgress(test.Context).ConfigureAwait(false);
-
+            // TestCoordinator handles sending InProgress message
             await _testCoordinator.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
 
             if (_isFailFastEnabled && test.Result?.State == TestState.Failed)
@@ -83,9 +82,8 @@ public sealed class TestRunner
         }
         catch (Exception ex)
         {
-            await _testStateManager.MarkFailedAsync(test, ex).ConfigureAwait(false);
-
-            await _tunitMessageBus.Failed(test.Context, ex, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+            // TestCoordinator already handles marking as failed and sending Failed message
+            // We only need to handle fail-fast logic here
             await _logger.LogErrorAsync($"Unhandled exception in test {test.TestId}: {ex}").ConfigureAwait(false);
 
             if (_isFailFastEnabled)

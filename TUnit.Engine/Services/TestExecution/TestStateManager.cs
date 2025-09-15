@@ -9,12 +9,6 @@ namespace TUnit.Engine.Services.TestExecution;
 /// </summary>
 internal sealed class TestStateManager
 {
-    private readonly SessionResultTracker _sessionResultTracker;
-
-    public TestStateManager(SessionResultTracker sessionResultTracker)
-    {
-        _sessionResultTracker = sessionResultTracker;
-    }
     public Task MarkRunningAsync(AbstractExecutableTest test)
     {
         test.State = TestState.Running;
@@ -36,10 +30,7 @@ internal sealed class TestStateManager
 
         test.State = test.Result.State;
         test.EndTime = DateTimeOffset.UtcNow;
-        
-        // Record the result in session tracker
-        _sessionResultTracker.RecordTestResult(test.State);
-        
+
         return Task.CompletedTask;
     }
 
@@ -57,22 +48,19 @@ internal sealed class TestStateManager
             ComputerName = Environment.MachineName
         };
 
-        // Record the result in session tracker
-        _sessionResultTracker.RecordTestResult(test.State);
-
         return Task.CompletedTask;
     }
 
     public Task MarkSkippedAsync(AbstractExecutableTest test, string reason)
     {
         test.State = TestState.Skipped;
-        
+
         // Ensure StartTime is set if it wasn't already
         if (!test.StartTime.HasValue)
         {
             test.StartTime = DateTimeOffset.UtcNow;
         }
-        
+
         test.EndTime = DateTimeOffset.UtcNow;
         test.Result = new TestResult
         {
@@ -83,10 +71,7 @@ internal sealed class TestStateManager
             Duration = test.EndTime - test.StartTime.GetValueOrDefault(),
             ComputerName = Environment.MachineName
         };
-        
-        // Record the result in session tracker
-        _sessionResultTracker.RecordTestResult(test.State);
-        
+
         return Task.CompletedTask;
     }
 
@@ -103,17 +88,16 @@ internal sealed class TestStateManager
             Duration = TimeSpan.Zero,
             ComputerName = Environment.MachineName
         };
-        
-        // Record the result in session tracker
-        _sessionResultTracker.RecordTestResult(test.State);
-        
+
         return Task.CompletedTask;
     }
 
     public Task MarkDependencyResolutionFailedAsync(AbstractExecutableTest test, Exception exception)
     {
         test.State = TestState.Failed;
+
         var now = DateTimeOffset.UtcNow;
+
         test.Result = new TestResult
         {
             State = TestState.Failed,
@@ -123,10 +107,7 @@ internal sealed class TestStateManager
             Duration = TimeSpan.Zero,
             ComputerName = Environment.MachineName
         };
-        
-        // Record the result in session tracker
-        _sessionResultTracker.RecordTestResult(test.State);
-        
+
         return Task.CompletedTask;
     }
 }

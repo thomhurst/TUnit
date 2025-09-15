@@ -21,9 +21,9 @@ internal sealed class PropertyInjectionPlan
 
 public sealed class PropertyInjectionService
 {
-    private static readonly GetOnlyDictionary<object, Task> _injectionTasks = new();
-    private static readonly GetOnlyDictionary<Type, PropertyInjectionPlan> _injectionPlans = new();
-    private static readonly GetOnlyDictionary<Type, bool> _shouldInjectCache = new();
+    private static readonly ThreadSafeDictionary<object, Task> _injectionTasks = new();
+    private static readonly ThreadSafeDictionary<Type, PropertyInjectionPlan> _injectionPlans = new();
+    private static readonly ThreadSafeDictionary<Type, bool> _shouldInjectCache = new();
 
     /// <summary>
     /// Injects properties with data sources into argument objects just before test execution.

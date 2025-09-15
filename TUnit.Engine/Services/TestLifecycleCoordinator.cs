@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
+using TUnit.Core.Data;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Services;
@@ -10,36 +11,34 @@ namespace TUnit.Engine.Services;
 /// Responsible for counter-based test lifecycle management.
 /// Follows Single Responsibility Principle - only manages test counts and lifecycle coordination.
 /// </summary>
-internal sealed class TestLifecycleCoordinator : IDisposable
+internal sealed class TestLifecycleCoordinator
 {
     // Counter-based tracking for hook lifecycle
-    private readonly ConcurrentDictionary<Type, Counter> _classTestCounts = new();
-    private readonly ConcurrentDictionary<Assembly, Counter> _assemblyTestCounts = new();
+    private readonly ThreadSafeDictionary<Type, Counter> _classTestCounts = new();
+    private readonly ThreadSafeDictionary<Assembly, Counter> _assemblyTestCounts = new();
     private readonly Counter _sessionTestCount = new();
-    
+
     // Track if After hooks have been executed to prevent double-execution
-    private readonly ConcurrentDictionary<Type, bool> _afterClassExecuted = new();
-    private readonly ConcurrentDictionary<Assembly, bool> _afterAssemblyExecuted = new();
-    private volatile bool _afterTestSessionExecuted = false;
+    private readonly ThreadSafeDictionary<Type, bool> _afterClassExecuted = new();
+    private readonly ThreadSafeDictionary<Assembly, bool> _afterAssemblyExecuted = new();
+    private volatile bool _afterTestSessionExecuted;
 
     /// <summary>
     /// Initialize counters for all tests before execution begins.
     /// This must be called once with all tests before any test execution.
     /// </summary>
-    public void RegisterTests(IEnumerable<AbstractExecutableTest> tests)
+    public void RegisterTests(List<AbstractExecutableTest> testList)
     {
-        var testList = tests.ToList();
-        
         // Initialize session counter
         _sessionTestCount.Add(testList.Count);
-        
+
         // Initialize assembly counters
         foreach (var assemblyGroup in testList.GroupBy(t => t.Metadata.TestClassType.Assembly))
         {
             var counter = _assemblyTestCounts.GetOrAdd(assemblyGroup.Key, _ => new Counter());
             counter.Add(assemblyGroup.Count());
         }
-        
+
         // Initialize class counters
         foreach (var classGroup in testList.GroupBy(t => t.Metadata.TestClassType))
         {
@@ -62,22 +61,22 @@ internal sealed class TestLifecycleCoordinator : IDisposable
         if (_classTestCounts.TryGetValue(testClass, out var classCounter))
         {
             var remainingClassTests = classCounter.Decrement();
-            if (remainingClassTests == 0 && _afterClassExecuted.TryAdd(testClass, true))
+            if (remainingClassTests == 0 && _afterClassExecuted.GetOrAdd(testClass, _ => true))
             {
                 flags.ShouldExecuteAfterClass = true;
             }
         }
-        
+
         // Decrement assembly counter and check if we should run After(Assembly)
         if (_assemblyTestCounts.TryGetValue(testAssembly, out var assemblyCounter))
         {
             var remainingAssemblyTests = assemblyCounter.Decrement();
-            if (remainingAssemblyTests == 0 && _afterAssemblyExecuted.TryAdd(testAssembly, true))
+            if (remainingAssemblyTests == 0 && _afterAssemblyExecuted.GetOrAdd(testAssembly, _ => true))
             {
                 flags.ShouldExecuteAfterAssembly = true;
             }
         }
-        
+
         // Decrement session counter and check if we should run After(TestSession)
         var remainingSessionTests = _sessionTestCount.Decrement();
         if (remainingSessionTests == 0 && !_afterTestSessionExecuted)
@@ -87,14 +86,6 @@ internal sealed class TestLifecycleCoordinator : IDisposable
         }
 
         return flags;
-    }
-
-    public void Dispose()
-    {
-        _classTestCounts.Clear();
-        _assemblyTestCounts.Clear();
-        _afterClassExecuted.Clear();
-        _afterAssemblyExecuted.Clear();
     }
 }
 

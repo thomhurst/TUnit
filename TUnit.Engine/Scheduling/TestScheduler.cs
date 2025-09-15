@@ -42,15 +42,14 @@ internal sealed class TestScheduler : ITestScheduler
     }
 
     public async Task ScheduleAndExecuteAsync(
-        IEnumerable<AbstractExecutableTest> tests,
+        List<AbstractExecutableTest> testList,
         CancellationToken cancellationToken)
     {
-        if (tests == null)
+        if (testList == null)
         {
-            throw new ArgumentNullException(nameof(tests));
+            throw new ArgumentNullException(nameof(testList));
         }
 
-        var testList = tests as IList<AbstractExecutableTest> ?? tests.ToList();
         if (testList.Count == 0)
         {
             await _logger.LogDebugAsync("No executable tests found").ConfigureAwait(false);

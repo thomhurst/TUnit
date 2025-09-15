@@ -92,12 +92,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
         if (_serviceProvidersPerSession.TryRemove(context.SessionUid.Value, out var serviceProvider))
         {
-            // Check if all tests were skipped - if so, mark the session as failed per TUnit requirements
-            if (serviceProvider.SessionResultTracker.ShouldMarkSessionAsFailedDueToSkippedTests())
-            {
-                isSuccess = false;
-            }
-
             await serviceProvider.DisposeAsync().ConfigureAwait(false);
         }
 

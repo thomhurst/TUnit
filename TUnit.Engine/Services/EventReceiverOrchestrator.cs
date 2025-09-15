@@ -17,9 +17,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     private readonly TUnitFrameworkLogger _logger;
 
     // Track which assemblies/classes/sessions have had their "first" event invoked
-    private GetOnlyDictionary<string, Task> _firstTestInAssemblyTasks = new();
-    private GetOnlyDictionary<Type, Task> _firstTestInClassTasks = new();
-    private GetOnlyDictionary<string, Task> _firstTestInSessionTasks = new();
+    private ThreadSafeDictionary<string, Task> _firstTestInAssemblyTasks = new();
+    private ThreadSafeDictionary<Type, Task> _firstTestInClassTasks = new();
+    private ThreadSafeDictionary<string, Task> _firstTestInSessionTasks = new();
 
     // Track remaining test counts for "last" events
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
@@ -472,9 +472,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         _sessionTestCount = contexts.Count;
 
         // Clear first-event tracking to ensure clean state for each test execution
-        _firstTestInAssemblyTasks = new GetOnlyDictionary<string, Task>();
-        _firstTestInClassTasks = new GetOnlyDictionary<Type, Task>();
-        _firstTestInSessionTasks = new GetOnlyDictionary<string, Task>();
+        _firstTestInAssemblyTasks = new ThreadSafeDictionary<string, Task>();
+        _firstTestInClassTasks = new ThreadSafeDictionary<Type, Task>();
+        _firstTestInSessionTasks = new ThreadSafeDictionary<string, Task>();
 
         foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.AssemblyContext.Assembly.GetName().FullName))
         {

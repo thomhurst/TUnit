@@ -12,8 +12,8 @@ namespace TUnit.Engine.Services;
 internal sealed class BeforeHookTaskCache
 {
     // Cached Before hook tasks to ensure they run only once
-    private readonly GetOnlyDictionary<Type, Task> _beforeClassTasks = new();
-    private readonly GetOnlyDictionary<Assembly, Task> _beforeAssemblyTasks = new();
+    private readonly ThreadSafeDictionary<Type, Task> _beforeClassTasks = new();
+    private readonly ThreadSafeDictionary<Assembly, Task> _beforeAssemblyTasks = new();
     private Task? _beforeTestSessionTask;
 
     public Task GetOrCreateBeforeTestSessionTask(Func<Task> taskFactory)

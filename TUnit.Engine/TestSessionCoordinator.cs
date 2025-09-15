@@ -18,6 +18,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     private readonly ITestScheduler _testScheduler;
     private readonly TUnitServiceProvider _serviceProvider;
     private readonly IContextProvider _contextProvider;
+    private readonly TestLifecycleCoordinator _lifecycleCoordinator;
     private readonly ITUnitMessageBus _messageBus;
 
     public TestSessionCoordinator(EventReceiverOrchestrator eventReceiverOrchestrator,
@@ -25,12 +26,14 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         ITestScheduler testScheduler,
         TUnitServiceProvider serviceProvider,
         IContextProvider contextProvider,
+        TestLifecycleCoordinator lifecycleCoordinator,
         ITUnitMessageBus messageBus)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _logger = logger;
         _serviceProvider = serviceProvider;
         _contextProvider = contextProvider;
+        _lifecycleCoordinator = lifecycleCoordinator;
         _messageBus = messageBus;
         _testScheduler = testScheduler;
     }
@@ -43,17 +46,12 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     {
         var testList = tests.ToList();
 
-        var testOrchestrator = _serviceProvider.TestExecutor;
         InitializeEventReceivers(testList, cancellationToken);
 
         try
         {
-            await PrepareTestOrchestrator(testOrchestrator, testList, cancellationToken);
+            await PrepareTestOrchestrator(testList, cancellationToken);
             await ExecuteTestsCore(testList, cancellationToken);
-        }
-        catch (BeforeTestSessionException)
-        {
-            // Session setup failed - tests have already been marked as failed
         }
         finally
         {
@@ -70,10 +68,10 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _eventReceiverOrchestrator.InitializeTestCounts(testContexts);
     }
 
-    private async Task PrepareTestOrchestrator(TestExecutor testExecutor, List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
+    private async Task PrepareTestOrchestrator(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
         // Register all tests upfront so orchestrator knows total counts per class/assembly for lifecycle management
-        testExecutor.RegisterTests(testList);
+        _lifecycleCoordinator.RegisterTests(testList);
 
         await InitializeStaticPropertiesAsync(cancellationToken);
     }

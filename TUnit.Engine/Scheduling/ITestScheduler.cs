@@ -11,6 +11,6 @@ public interface ITestScheduler
     /// Schedules and executes tests with optimal parallelization
     /// </summary>
     Task ScheduleAndExecuteAsync(
-        IEnumerable<AbstractExecutableTest> tests,
+        List<AbstractExecutableTest> tests,
         CancellationToken cancellationToken);
 }
