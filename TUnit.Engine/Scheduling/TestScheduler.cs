@@ -150,15 +150,7 @@ internal sealed class TestScheduler : ITestScheduler
         {
             await _logger.LogDebugAsync($"Starting {groupedTests.NotInParallel.Length} global NotInParallel tests").ConfigureAwait(false);
 
-            // Execute each test individually in sequence to ensure no concurrency
-            foreach (var test in groupedTests.NotInParallel)
-            {
-                await _logger.LogDebugAsync($"Executing global NotInParallel test: {test.TestId}").ConfigureAwait(false);
-
-                var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
-                test.ExecutionTask = task;
-                await task.ConfigureAwait(false);
-            }
+            await ExecuteSequentiallyAsync("Global", groupedTests.NotInParallel, cancellationToken).ConfigureAwait(false);
         }
     }
 
