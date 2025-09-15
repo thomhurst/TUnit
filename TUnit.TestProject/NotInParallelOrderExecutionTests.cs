@@ -29,10 +29,13 @@ public class NotInParallelOrderExecutionTests
             orderList.Add(testName);
         }
 
+        // Use TestStart if available, otherwise use DateTime.Now
+        var startTime = TestContext.Current.TestStart?.DateTime ?? DateTime.Now;
+        
         OrderedExecutionRecords.Add(new OrderedExecutionRecord(
             testName,
             groupKey,
-            TestContext.Current.TestStart!.Value.DateTime,
+            startTime,
             null
         ));
     }
@@ -55,7 +58,8 @@ public class NotInParallelOrderExecutionTests
 
         if (record != null)
         {
-            record.EndTime = TestContext.Current.Result!.End!.Value.DateTime;
+            // Use Result.End if available, otherwise use DateTime.Now
+            record.EndTime = TestContext.Current.Result?.End?.DateTime ?? DateTime.Now;
         }
 
         await AssertOrderedExecutionWithinGroup(groupKey);

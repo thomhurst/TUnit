@@ -5,7 +5,7 @@ namespace TUnit.Engine.Scheduling;
 /// <summary>
 /// Represents the priority of a test for ordering purposes
 /// </summary>
-internal readonly struct TestPriority : IComparable<TestPriority>
+internal readonly record struct TestPriority : IComparable<TestPriority>
 {
     public Priority Priority { get; }
     public int Order { get; }
