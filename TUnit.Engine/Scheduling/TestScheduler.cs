@@ -20,6 +20,7 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly TestStateManager _testStateManager;
     private readonly TestRunner _testRunner;
     private readonly CircularDependencyDetector _circularDependencyDetector;
+    private readonly IConstraintKeyScheduler _constraintKeyScheduler;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
@@ -29,7 +30,8 @@ internal sealed class TestScheduler : ITestScheduler
         ParallelLimitLockProvider parallelLimitLockProvider,
         TestStateManager testStateManager,
         TestRunner testRunner,
-        CircularDependencyDetector circularDependencyDetector)
+        CircularDependencyDetector circularDependencyDetector,
+        IConstraintKeyScheduler constraintKeyScheduler)
     {
         _logger = logger;
         _groupingService = groupingService;
@@ -39,6 +41,7 @@ internal sealed class TestScheduler : ITestScheduler
         _testStateManager = testStateManager;
         _testRunner = testRunner;
         _circularDependencyDetector = circularDependencyDetector;
+        _constraintKeyScheduler = constraintKeyScheduler;
     }
 
     public async Task ScheduleAndExecuteAsync(
@@ -132,17 +135,11 @@ internal sealed class TestScheduler : ITestScheduler
             await ExecuteParallelGroupAsync(groupName, orderedTests, maxParallelism, cancellationToken).ConfigureAwait(false);
         }
 
-        // 3. Execute keyed NotInParallel tests (each key runs sequentially, but keys can run in parallel with each other)
+        // 3. Execute keyed NotInParallel tests using ConstraintKeyScheduler for proper coordination
         if (groupedTests.KeyedNotInParallel.Length > 0)
         {
-            var keyedTasks = groupedTests.KeyedNotInParallel.Select(async keyGroup =>
-            {
-                var (key, tests) = keyGroup;
-                await _logger.LogDebugAsync($"Starting keyed NotInParallel group '{key}' with {tests.Length} tests").ConfigureAwait(false);
-                await ExecuteSequentiallyAsync($"Key-{key}", tests, cancellationToken).ConfigureAwait(false);
-            }).ToArray();
-
-            await WaitForTasksWithFailFastHandling(keyedTasks, cancellationToken).ConfigureAwait(false);
+            await _logger.LogDebugAsync($"Starting {groupedTests.KeyedNotInParallel.Length} keyed NotInParallel tests").ConfigureAwait(false);
+            await _constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(groupedTests.KeyedNotInParallel, cancellationToken).ConfigureAwait(false);
         }
 
         // 4. Execute global NotInParallel tests (completely sequential, after everything else)

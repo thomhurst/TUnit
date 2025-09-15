@@ -11,9 +11,9 @@ internal record GroupedTests
     // Tests are already sorted, no need to store priority
     public required AbstractExecutableTest[] NotInParallel { get; init; }
     
-    // Array of key-value pairs since we only iterate, never lookup by key
-    // Tests within each key are pre-sorted by priority
-    public required (string Key, AbstractExecutableTest[] Tests)[] KeyedNotInParallel { get; init; }
+    // Array of tests with their constraint keys - no duplication
+    // Tests are pre-sorted by priority
+    public required (AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, int Priority)[] KeyedNotInParallel { get; init; }
     
     // Array of groups with nested arrays for maximum iteration performance
     // Tests are grouped by order, ready for parallel execution
