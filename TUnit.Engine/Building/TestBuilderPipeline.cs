@@ -117,6 +117,7 @@ internal sealed class TestBuilderPipeline
             };
 
             var testId = TestIdentifierService.GenerateTestId(metadata, testData);
+            
             var displayName = repeatCount > 0
                 ? $"{metadata.TestName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
                 : metadata.TestName;

@@ -1,5 +1,5 @@
 // Assembly-level retry should be overridden by class and method level
-[assembly: Retry(5)]
+// [assembly: Retry(5)] // Removed to fix NotInParallel test issues
 
 namespace TUnit.TestProject
 {

@@ -40,15 +40,15 @@ internal sealed class TestCoordinator : ITestCoordinator
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         await _executionGuard.TryStartExecutionAsync(test.TestId,
-            () => ExecuteTestInternalAsync(test, cancellationToken)).ConfigureAwait(false);
+            () => ExecuteTestInternalAsync(test, cancellationToken));
     }
 
     private async Task ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         try
         {
-            await _stateManager.MarkRunningAsync(test).ConfigureAwait(false);
-            await _messageBus.InProgress(test.Context).ConfigureAwait(false);
+            await _stateManager.MarkRunningAsync(test);
+            await _messageBus.InProgress(test.Context);
 
             _contextRestorer.RestoreContext(test);
 
@@ -64,24 +64,24 @@ internal sealed class TestCoordinator : ITestCoordinator
             if (test.Context.TestDetails.ClassInstance is SkippedTestInstance ||
                 !string.IsNullOrEmpty(test.Context.SkipReason))
             {
-                await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped").ConfigureAwait(false);
+                await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped");
                 return;
             }
 
-            await _testInitializer.InitializeTest(test, cancellationToken).ConfigureAwait(false);
+            await _testInitializer.InitializeTest(test, cancellationToken);
 
             test.Context.RestoreExecutionContext();
 
             await RetryHelper.ExecuteWithRetry(test.Context, async () =>
-                await _testExecutor.ExecuteAsync(test, cancellationToken).ConfigureAwait(false)
+                await _testExecutor.ExecuteAsync(test, cancellationToken)
             );
 
-            await _stateManager.MarkCompletedAsync(test).ConfigureAwait(false);
+            await _stateManager.MarkCompletedAsync(test);
 
         }
         catch (Exception ex)
         {
-            await _stateManager.MarkFailedAsync(test, ex).ConfigureAwait(false);
+            await _stateManager.MarkFailedAsync(test, ex);
         }
         finally
         {
@@ -92,20 +92,20 @@ internal sealed class TestCoordinator : ITestCoordinator
                 case TestState.Queued:
                 case TestState.Running:
                     // This shouldn't happen
-                    await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+                    await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault());
                     break;
                 case TestState.Passed:
-                    await _messageBus.Passed(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+                    await _messageBus.Passed(test.Context, test.StartTime.GetValueOrDefault());
                     break;
                 case TestState.Timeout:
                 case TestState.Failed:
-                    await _messageBus.Failed(test.Context, test.Context.Result?.Exception!, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+                    await _messageBus.Failed(test.Context, test.Context.Result?.Exception!, test.StartTime.GetValueOrDefault());
                     break;
                 case TestState.Skipped:
-                    await _messageBus.Skipped(test.Context, test.Context.SkipReason ?? "Skipped").ConfigureAwait(false);
+                    await _messageBus.Skipped(test.Context, test.Context.SkipReason ?? "Skipped");
                     break;
                 case TestState.Cancelled:
-                    await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
+                    await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault());
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

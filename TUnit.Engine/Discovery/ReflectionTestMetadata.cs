@@ -89,9 +89,6 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
         Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
         {
-            // Set TestContext.Current so the test method can access it
-            TestContext.Current = testContext;
-            
             if (TestInvoker == null)
             {
                 throw new InvalidOperationException($"No test invoker for {_testMethod.Name}");
