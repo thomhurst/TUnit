@@ -17,10 +17,9 @@ internal sealed class TestGroupingService : ITestGroupingService
     public ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<AbstractExecutableTest> tests)
     {
         // Group tests by class first to ensure class-level NotInParallel constraints maintain class grouping
-        var testsByClass = tests.GroupBy(x => x.Context.TestDetails.ClassType)
-            .OrderBy(g => g.Max(t => t.Context.ExecutionPriority))
-            .ThenBy(g => g.Min(t => (t.Context.ParallelConstraint as NotInParallelConstraint)?.Order ?? int.MaxValue))
-            .ToList();
+        // Order by ExecutionPriority descending (Critical=5 runs first, Low=0 runs last)
+        var testsByClass = tests
+            .GroupBy(x => x.Context.TestDetails.ClassType);
 
         var notInParallelList = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
         var keyedNotInParallelList = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TestPriority Priority)>();
@@ -30,9 +29,9 @@ internal sealed class TestGroupingService : ITestGroupingService
         // Process each class group sequentially to maintain class ordering for NotInParallel tests
         foreach (var classGroup in testsByClass)
         {
-            var classTests = classGroup.OrderBy(t => (t.Context.ParallelConstraint as NotInParallelConstraint)?.Order ?? int.MaxValue).ToList();
-
-            foreach (var test in classTests)
+            foreach (var test in classGroup
+                         .OrderByDescending(t => t.Context.ExecutionPriority)
+                         .ThenBy(t => (t.Context.ParallelConstraint as NotInParallelConstraint)?.Order ?? int.MaxValue))
             {
                 var constraint = test.Context.ParallelConstraint;
 
@@ -53,19 +52,14 @@ internal sealed class TestGroupingService : ITestGroupingService
             }
         }
 
-        // Group NotInParallel tests by class first, then sort within each class by priority
+        // Tests are already in the correct order from processing above (by class, then by priority/order)
+        // No need to re-sort - just extract the tests
         var sortedNotInParallel = notInParallelList
-            .GroupBy(t => t.Test.Context.TestDetails.ClassType)
-            .OrderBy(g => g.Min(t => t.Priority))
-            .SelectMany(g => g.OrderBy(t => t.Priority))
             .Select(t => t.Test)
             .ToArray();
 
-        // Group keyed tests by class first, then sort within each class by priority
+        // Keyed tests are also already in correct order
         var keyedArrays = keyedNotInParallelList
-            .GroupBy(t => t.Test.Context.TestDetails.ClassType)
-            .OrderBy(g => g.Min(t => t.Priority))
-            .SelectMany(g => g.OrderBy(t => t.Priority))
             .Select(t => (t.Test, t.ConstraintKeys, t.Priority.GetHashCode()))
             .ToArray();
 
@@ -98,7 +92,6 @@ internal sealed class TestGroupingService : ITestGroupingService
         var order = constraint.Order;
         var priority = test.Context.ExecutionPriority;
         var testPriority = new TestPriority(priority, order);
-
 
         if (constraint.NotInParallelConstraintKeys.Count == 0)
         {
