@@ -1,5 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <PropertyGroup>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\strongname.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
+
     <Import Project="..\TestProject.props" />
 
     <PropertyGroup>
@@ -19,6 +24,12 @@
 
     <ItemGroup>
         <ProjectReference Include="..\TUnit\TUnit.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\strongname.snk">
+            <Link>strongname.snk</Link>
+        </None>
     </ItemGroup>
 
     <Import Project="..\TestProject.targets" />
