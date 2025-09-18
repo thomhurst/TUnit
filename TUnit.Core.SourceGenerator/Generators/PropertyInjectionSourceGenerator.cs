@@ -18,9 +18,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             .Where(x => x != null)
             .Select((x, _) => x!);
 
-        var collectedClasses = classesWithPropertyInjection.Collect();
-
-        context.RegisterSourceOutput(collectedClasses, GeneratePropertyInjectionSources);
+        // Generate individual files for each class instead of collecting them all
+        context.RegisterSourceOutput(classesWithPropertyInjection, GenerateIndividualPropertyInjectionSource);
     }
 
     private static bool IsClassWithDataSourceProperties(SyntaxNode node)
@@ -132,41 +131,56 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         return true;
     }
 
-    private static void GeneratePropertyInjectionSources(SourceProductionContext context, ImmutableArray<ClassWithDataSourceProperties> classes)
+    private static void GenerateIndividualPropertyInjectionSource(SourceProductionContext context, ClassWithDataSourceProperties classInfo)
     {
-        if (classes.IsEmpty)
+        if (classInfo.Properties.Length == 0)
         {
             return;
         }
 
+        var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
+        var safeName = GetSafeClassName(classInfo.ClassSymbol);
+        var fileName = $"{safeName}_PropertyInjection.g.cs";
+
         var sourceBuilder = new StringBuilder();
-
         WriteFileHeader(sourceBuilder);
+        
+        // Generate individual module initializer for this class
+        GenerateIndividualModuleInitializer(sourceBuilder, classInfo, sourceClassName);
+        
+        // Generate property source for this class
+        GeneratePropertySource(sourceBuilder, classInfo, sourceClassName);
 
-        // Deduplicate classes by symbol to prevent duplicate source generation
-        var uniqueClasses = classes
-            .GroupBy(c => c.ClassSymbol, SymbolEqualityComparer.Default)
-            .Select(g => g.First())
-            .Where(x => x.Properties.Length > 0)
-            .ToImmutableArray();
+        context.AddSource(fileName, sourceBuilder.ToString());
+    }
 
-        // Generate all property sources first with stable names
-        var classNameMapping = new Dictionary<INamedTypeSymbol, string>(SymbolEqualityComparer.Default);
-        foreach (var classInfo in uniqueClasses)
-        {
-            var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
-            classNameMapping[classInfo.ClassSymbol] = sourceClassName;
-        }
+    private static string GetSafeClassName(INamedTypeSymbol classSymbol)
+    {
+        var fullyQualified = classSymbol.GloballyQualified();
+        return fullyQualified
+            .Replace("global::", "")
+            .Replace(".", "_")
+            .Replace("<", "_")
+            .Replace(">", "_")
+            .Replace(",", "_")
+            .Replace(" ", "")
+            .Replace("`", "_")
+            .Replace("+", "_");
+    }
 
-        GenerateModuleInitializer(sourceBuilder, uniqueClasses, classNameMapping);
-
-        foreach (var classInfo in uniqueClasses)
-        {
-            GeneratePropertySource(sourceBuilder, classInfo, classNameMapping[classInfo.ClassSymbol]);
-        }
-
-
-        context.AddSource("PropertyInjectionSources.g.cs", sourceBuilder.ToString());
+    private static void GenerateIndividualModuleInitializer(StringBuilder sb, ClassWithDataSourceProperties classInfo, string sourceClassName)
+    {
+        var safeName = GetSafeClassName(classInfo.ClassSymbol);
+        
+        sb.AppendLine($"internal static class {safeName}_PropertyInjectionInitializer");
+        sb.AppendLine("{");
+        sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
+        sb.AppendLine("    public static void Initialize()");
+        sb.AppendLine("    {");
+        sb.AppendLine($"        global::TUnit.Core.PropertySourceRegistry.Register(typeof({classInfo.ClassSymbol.GloballyQualified()}), new {sourceClassName}());");
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+        sb.AppendLine();
     }
 
     private static void WriteFileHeader(StringBuilder sb)
@@ -182,27 +196,6 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine();
     }
 
-    private static void GenerateModuleInitializer(StringBuilder sb, ImmutableArray<ClassWithDataSourceProperties> classes, Dictionary<INamedTypeSymbol, string> classNameMapping)
-    {
-        sb.AppendLine("internal static class PropertyInjectionInitializer");
-        sb.AppendLine("{");
-        sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
-        sb.AppendLine("    public static void InitializePropertyInjectionSources()");
-        sb.AppendLine("    {");
-
-        foreach (var classInfo in classes)
-        {
-            var sourceClassName = classNameMapping[classInfo.ClassSymbol];
-            var classTypeName = classInfo.ClassSymbol.GloballyQualified();
-            sb.AppendLine($"        PropertySourceRegistry.Register(typeof({classTypeName}), new {sourceClassName}());");
-        }
-
-        sb.AppendLine("    }");
-        sb.AppendLine();
-
-        sb.AppendLine("}");
-        sb.AppendLine();
-    }
 
     private static void GeneratePropertySource(StringBuilder sb, ClassWithDataSourceProperties classInfo, string sourceClassName)
     {

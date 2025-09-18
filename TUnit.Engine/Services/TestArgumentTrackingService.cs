@@ -1,4 +1,3 @@
-using System.Linq;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Tracking;
@@ -17,11 +16,37 @@ internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
     /// Called when a test is registered. This is the correct time to track constructor and method arguments
     /// for shared instances, as per the ObjectTracker reference counting approach.
     /// </summary>
-    public ValueTask OnTestRegistered(TestRegisteredContext context)
+    public async ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         var testContext = context.TestContext;
         var classArguments = testContext.TestDetails.TestClassArguments;
         var methodArguments = testContext.TestDetails.TestMethodArguments;
+        
+        // Inject properties into ClassDataSource instances before tracking
+        foreach (var classDataItem in classArguments)
+        {
+            if (classDataItem != null)
+            {
+                await PropertyInjectionService.InjectPropertiesIntoObjectAsync(
+                    classDataItem,
+                    testContext.ObjectBag,
+                    testContext.TestDetails.MethodMetadata,
+                    testContext.Events);
+            }
+        }
+        
+        // Also inject properties into MethodDataSource instances
+        foreach (var methodDataItem in methodArguments)
+        {
+            if (methodDataItem != null)
+            {
+                await PropertyInjectionService.InjectPropertiesIntoObjectAsync(
+                    methodDataItem,
+                    testContext.ObjectBag,
+                    testContext.TestDetails.MethodMetadata,
+                    testContext.Events);
+            }
+        }
         
         // Track all constructor and method arguments
         var allArguments = classArguments.Concat(methodArguments);
@@ -35,7 +60,5 @@ internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
                 ObjectTracker.TrackObject(testContext.Events, obj);
             }
         }
-        
-        return default(ValueTask);
     }
 }

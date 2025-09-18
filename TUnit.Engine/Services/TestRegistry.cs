@@ -1,4 +1,3 @@
-using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
@@ -6,6 +5,7 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
+using TUnit.Engine.Interfaces;
 
 namespace TUnit.Engine.Services;
 
@@ -16,18 +16,18 @@ internal sealed class TestRegistry : ITestRegistry
 {
     private readonly ConcurrentQueue<PendingDynamicTest> _pendingTests = new();
     private readonly TestBuilderPipeline? _testBuilderPipeline;
-    private readonly Scheduling.TestExecutor _testExecutor;
+    private readonly ITestCoordinator _testCoordinator;
     private readonly CancellationToken _sessionCancellationToken;
     private readonly string? _sessionId;
 
 
     public TestRegistry(TestBuilderPipeline testBuilderPipeline,
-        Scheduling.TestExecutor testExecutor,
+        ITestCoordinator testCoordinator,
         string sessionId,
         CancellationToken sessionCancellationToken)
     {
         _testBuilderPipeline = testBuilderPipeline;
-        _testExecutor = testExecutor;
+        _testCoordinator = testCoordinator;
         _sessionId = sessionId;
         _sessionCancellationToken = sessionCancellationToken;
     }
@@ -38,7 +38,7 @@ internal sealed class TestRegistry : ITestRegistry
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.NonPublicMethods
         | DynamicallyAccessedMemberTypes.PublicFields
-        | DynamicallyAccessedMemberTypes.NonPublicFields)] T>(TestContext context, DynamicTestInstance<T> dynamicTest) where T : class
+        | DynamicallyAccessedMemberTypes.NonPublicFields)] T>(TestContext context, DynamicTest<T> dynamicTest) where T : class
     {
         // Create a dynamic test discovery result
         var discoveryResult = new DynamicDiscoveryResult
@@ -96,7 +96,7 @@ internal sealed class TestRegistry : ITestRegistry
         foreach (var test in builtTests)
         {
             // The SingleTestExecutor will handle all execution-related message publishing
-            await _testExecutor.ExecuteTestAsync(test, _sessionCancellationToken);
+            await _testCoordinator.ExecuteTestAsync(test, _sessionCancellationToken);
         }
     }
 
@@ -253,7 +253,10 @@ internal sealed class TestRegistry : ITestRegistry
                 var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
 
                 return new ExecutableTest(createInstance,
-                    async (instance, args, context, ct) => await invokeTest(instance, args))
+                    async (instance, args, context, ct) =>
+                    {
+                        await invokeTest(instance, args);
+                    })
                 {
                     TestId = modifiedContext.TestId,
                     Metadata = metadata,

@@ -28,11 +28,5 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\TUnit.Assertions\bin\$(Configuration)\netstandard2.0\TUnit.Assertions.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
   <Import Project="..\TestProject.targets" />
 </Project>

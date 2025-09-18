@@ -35,40 +35,40 @@ public class DynamicDiscoveryResult : DiscoveryResult
         | DynamicallyAccessedMemberTypes.PublicFields
         | DynamicallyAccessedMemberTypes.NonPublicFields)]
     public Type? TestClassType { get; set; }
-    
+
     /// <summary>
     /// The file path where the dynamic test was created
     /// </summary>
     public string? CreatorFilePath { get; set; }
-    
+
     /// <summary>
     /// The line number where the dynamic test was created
     /// </summary>
     public int? CreatorLineNumber { get; set; }
 }
 
-public abstract class DynamicTest
+public abstract class AbstractDynamicTest
 {
     public abstract IEnumerable<DiscoveryResult> GetTests();
 }
 
-public abstract class DynamicTest<[DynamicallyAccessedMembers(
+public abstract class AbstractDynamicTest<[DynamicallyAccessedMembers(
     DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.NonPublicConstructors
     | DynamicallyAccessedMemberTypes.PublicProperties
     | DynamicallyAccessedMemberTypes.PublicMethods
     | DynamicallyAccessedMemberTypes.NonPublicMethods
     | DynamicallyAccessedMemberTypes.PublicFields
-    | DynamicallyAccessedMemberTypes.NonPublicFields)] T> : DynamicTest where T : class;
+    | DynamicallyAccessedMemberTypes.NonPublicFields)] T> : AbstractDynamicTest where T : class;
 
-public class DynamicTestInstance<[DynamicallyAccessedMembers(
+public class DynamicTest<[DynamicallyAccessedMembers(
     DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.NonPublicConstructors
     | DynamicallyAccessedMemberTypes.PublicProperties
     | DynamicallyAccessedMemberTypes.PublicMethods
     | DynamicallyAccessedMemberTypes.NonPublicMethods
     | DynamicallyAccessedMemberTypes.PublicFields
-    | DynamicallyAccessedMemberTypes.NonPublicFields)]T> : DynamicTest<T>, IDynamicTestCreatorLocation where T : class
+    | DynamicallyAccessedMemberTypes.NonPublicFields)]T> : AbstractDynamicTest<T>, IDynamicTestCreatorLocation where T : class
 {
     public Expression<Action<T>>? TestMethod { get; set; }
     public object?[]? TestClassArguments { get; set; }
@@ -76,12 +76,12 @@ public class DynamicTestInstance<[DynamicallyAccessedMembers(
     public List<Attribute> Attributes { get; set; } =
     [
     ];
-    
+
     /// <summary>
     /// The file path where this dynamic test was created
     /// </summary>
     public string? CreatorFilePath { get; set; }
-    
+
     /// <summary>
     /// The line number where this dynamic test was created
     /// </summary>
@@ -111,7 +111,7 @@ public static class DynamicTestHelper
 
 public interface IDynamicTestSource
 {
-    IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId);
+    IReadOnlyList<AbstractDynamicTest> CollectDynamicTests(string sessionId);
 }
 
 public class FailedDynamicTest<[DynamicallyAccessedMembers(
@@ -119,7 +119,7 @@ public class FailedDynamicTest<[DynamicallyAccessedMembers(
     | DynamicallyAccessedMemberTypes.NonPublicConstructors
     | DynamicallyAccessedMemberTypes.PublicProperties
     | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.NonPublicMethods)] T> : DynamicTest where T : class
+    | DynamicallyAccessedMemberTypes.NonPublicMethods)] T> : AbstractDynamicTest where T : class
 {
     public string TestId { get; set; } = string.Empty;
     public string MethodName { get; set; } = string.Empty;

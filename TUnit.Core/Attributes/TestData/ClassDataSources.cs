@@ -12,7 +12,7 @@ internal class ClassDataSources
     {
     }
 
-    public static readonly GetOnlyDictionary<string, ClassDataSources> SourcesPerSession = new();
+    public static readonly ThreadSafeDictionary<string, ClassDataSources> SourcesPerSession = new();
 
     public static ClassDataSources Get(string sessionId)
     {

@@ -2,8 +2,8 @@ using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
-using TUnit.Core.Tracking;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
@@ -101,12 +101,22 @@ internal sealed class TestBuilder : ITestBuilder
             }
 
             // Create a single context accessor that we'll reuse, updating its Current property for each test
-            var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
+            var testBuilderContext = new TestBuilderContext
             {
                 TestMetadata = metadata.MethodMetadata,
                 Events = new TestContextEvents(),
                 ObjectBag = new Dictionary<string, object?>()
-            });
+            };
+            
+            // Check for ClassConstructor attribute and set it early if present
+            var classAttributes = metadata.AttributeFactory();
+            var classConstructorAttribute = classAttributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
+            if (classConstructorAttribute != null)
+            {
+                testBuilderContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
+            }
+            
+            var contextAccessor = new TestBuilderContextAccessor(testBuilderContext);
 
             var classDataAttributeIndex = 0;
             foreach (var classDataSource in GetDataSources(metadata.ClassDataSources))
@@ -309,7 +319,17 @@ internal sealed class TestBuilder : ITestBuilder
                                     ResolvedMethodGenericArguments = resolvedMethodGenericArgs
                                 };
 
-                                var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
+                                // Create a unique TestBuilderContext for this specific test
+                                var testSpecificContext = new TestBuilderContext
+                                {
+                                    TestMetadata = metadata.MethodMetadata,
+                                    Events = new TestContextEvents(),
+                                    ObjectBag = new Dictionary<string, object?>(),
+                                    ClassConstructor = testBuilderContext.ClassConstructor, // Copy the ClassConstructor from the template
+                                    DataSourceAttribute = contextAccessor.Current.DataSourceAttribute // Copy any data source attribute
+                                };
+                                
+                                var test = await BuildTestAsync(metadata, testData, testSpecificContext);
 
                                 // If we have a basic skip reason, set it immediately
                                 if (!string.IsNullOrEmpty(basicSkipReason))
@@ -995,12 +1015,28 @@ internal sealed class TestBuilder : ITestBuilder
         var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
         var repeatCount = repeatAttr?.Times ?? 0;
 
-        var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
+        // Create base context with ClassConstructor if present
+        var baseContext = new TestBuilderContext
         {
             TestMetadata = metadata.MethodMetadata,
             Events = new TestContextEvents(),
             ObjectBag = new Dictionary<string, object?>()
-        });
+        };
+        
+        // Check for ClassConstructor attribute and set it early if present
+        // Look for any attribute that inherits from ClassConstructorAttribute
+        // This handles both ClassConstructorAttribute and ClassConstructorAttribute<T>
+        var classConstructorAttribute = attributes
+            .Where(a => a is ClassConstructorAttribute)
+            .Cast<ClassConstructorAttribute>()
+            .FirstOrDefault();
+            
+        if (classConstructorAttribute != null)
+        {
+            baseContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
+        }
+        
+        var contextAccessor = new TestBuilderContextAccessor(baseContext);
 
         // Check for circular dependency
         if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
@@ -1143,6 +1179,7 @@ internal sealed class TestBuilder : ITestBuilder
         try
         {
             var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+            
             var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
 
             // Check data compatibility for generic methods
@@ -1235,18 +1272,17 @@ internal sealed class TestBuilder : ITestBuilder
                 ResolvedMethodGenericArguments = resolvedMethodGenericArgs
             };
 
-            // Update context BEFORE building the test (for subsequent iterations)
-            if (repeatIndex > 0)
+            // Create a unique TestBuilderContext for this specific test
+            var testSpecificContext = new TestBuilderContext
             {
-                contextAccessor.Current = new TestBuilderContext
-                {
-                    TestMetadata = metadata.MethodMetadata,
-                    Events = new TestContextEvents(),
-                    ObjectBag = new Dictionary<string, object?>()
-                };
-            }
+                TestMetadata = metadata.MethodMetadata,
+                Events = new TestContextEvents(),
+                ObjectBag = new Dictionary<string, object?>(),
+                ClassConstructor = contextAccessor.Current.ClassConstructor, // Preserve ClassConstructor if it was set
+                DataSourceAttribute = contextAccessor.Current.DataSourceAttribute // Preserve data source attribute
+            };
 
-            var test = await BuildTestAsync(metadata, testData, contextAccessor.Current);
+            var test = await BuildTestAsync(metadata, testData, testSpecificContext);
 
             if (!string.IsNullOrEmpty(basicSkipReason))
             {

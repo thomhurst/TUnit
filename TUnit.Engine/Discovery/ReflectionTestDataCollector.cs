@@ -15,7 +15,7 @@ namespace TUnit.Engine.Discovery;
 [RequiresUnreferencedCode("Reflection-based test discovery requires unreferenced code")]
 [RequiresDynamicCode("Expression compilation requires dynamic code generation")]
 [SuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The source field does not have matching annotations.")]
-public sealed class ReflectionTestDataCollector : ITestDataCollector
+internal sealed class ReflectionTestDataCollector : ITestDataCollector
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
     private static readonly ConcurrentBag<TestMetadata> _discoveredTests = new();
@@ -1698,11 +1698,11 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
         return dynamicTests;
     }
 
-    private async Task<List<TestMetadata>> ConvertDynamicTestToMetadata(DynamicTest dynamicTest)
+    private async Task<List<TestMetadata>> ConvertDynamicTestToMetadata(AbstractDynamicTest abstractDynamicTest)
     {
         var testMetadataList = new List<TestMetadata>();
 
-        foreach (var discoveryResult in dynamicTest.GetTests())
+        foreach (var discoveryResult in abstractDynamicTest.GetTests())
         {
             if (discoveryResult is DynamicDiscoveryResult { TestMethod: not null } dynamicResult)
             {
@@ -2034,7 +2034,10 @@ public sealed class ReflectionTestDataCollector : ITestDataCollector
                 var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
 
                 return new ExecutableTest(createInstance,
-                    async (instance, args, context, ct) => await invokeTest(instance, args).ConfigureAwait(false))
+                    async (instance, args, context, ct) =>
+                    {
+                        await invokeTest(instance, args).ConfigureAwait(false);
+                    })
                 {
                     TestId = modifiedContext.TestId,
                     Metadata = metadata,

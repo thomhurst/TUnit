@@ -12,16 +12,16 @@ public abstract class AsyncDataSourceGeneratorAttribute<[DynamicallyAccessedMemb
     {
         // Inject properties into the data source attribute itself if we have context
         // This is needed for custom data sources that have their own data source properties
-        if (dataGeneratorMetadata is { TestBuilderContext: not null, TestInformation: not null })
+        if (dataGeneratorMetadata is { TestInformation: not null })
         {
-            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, 
-                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, 
-                dataGeneratorMetadata.TestInformation, 
+            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this,
+                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
+                dataGeneratorMetadata.TestInformation,
                 dataGeneratorMetadata.TestBuilderContext.Current.Events);
         }
-        
+
         await ObjectInitializer.InitializeAsync(this);
-        
+
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
@@ -41,16 +41,16 @@ public abstract class AsyncDataSourceGeneratorAttribute<
     public override async IAsyncEnumerable<Func<Task<(T1, T2)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Inject properties into the data source attribute itself if we have context
-        if (dataGeneratorMetadata is { TestBuilderContext: not null, TestInformation: not null })
+        if (dataGeneratorMetadata is { TestInformation: not null })
         {
-            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, 
-                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, 
-                dataGeneratorMetadata.TestInformation, 
+            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this,
+                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
+                dataGeneratorMetadata.TestInformation,
                 dataGeneratorMetadata.TestBuilderContext.Current.Events);
         }
-        
+
         await ObjectInitializer.InitializeAsync(this);
-        
+
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
@@ -72,16 +72,16 @@ public abstract class AsyncDataSourceGeneratorAttribute<
     public override async IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Inject properties into the data source attribute itself if we have context
-        if (dataGeneratorMetadata is { TestBuilderContext: not null, TestInformation: not null })
+        if (dataGeneratorMetadata is { TestInformation: not null })
         {
-            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, 
-                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, 
-                dataGeneratorMetadata.TestInformation, 
+            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this,
+                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
+                dataGeneratorMetadata.TestInformation,
                 dataGeneratorMetadata.TestBuilderContext.Current.Events);
         }
-        
+
         await ObjectInitializer.InitializeAsync(this);
-        
+
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
@@ -105,16 +105,16 @@ public abstract class AsyncDataSourceGeneratorAttribute<
     public override async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Inject properties into the data source attribute itself if we have context
-        if (dataGeneratorMetadata is { TestBuilderContext: not null, TestInformation: not null })
+        if (dataGeneratorMetadata is { TestInformation: not null })
         {
-            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, 
-                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, 
-                dataGeneratorMetadata.TestInformation, 
+            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this,
+                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
+                dataGeneratorMetadata.TestInformation,
                 dataGeneratorMetadata.TestBuilderContext.Current.Events);
         }
-        
+
         await ObjectInitializer.InitializeAsync(this);
-        
+
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
@@ -140,16 +140,16 @@ public abstract class AsyncDataSourceGeneratorAttribute<
     public override async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4, T5)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Inject properties into the data source attribute itself if we have context
-        if (dataGeneratorMetadata is { TestBuilderContext: not null, TestInformation: not null })
+        if (dataGeneratorMetadata is { TestInformation: not null })
         {
-            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, 
-                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, 
-                dataGeneratorMetadata.TestInformation, 
+            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this,
+                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
+                dataGeneratorMetadata.TestInformation,
                 dataGeneratorMetadata.TestBuilderContext.Current.Events);
         }
-        
+
         await ObjectInitializer.InitializeAsync(this);
-        
+
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;

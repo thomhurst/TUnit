@@ -88,12 +88,14 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
     public async Task<CloseTestSessionResult> CloseTestSessionAsync(CloseTestSessionContext context)
     {
+        bool isSuccess = true;
+
         if (_serviceProvidersPerSession.TryRemove(context.SessionUid.Value, out var serviceProvider))
         {
             await serviceProvider.DisposeAsync().ConfigureAwait(false);
         }
 
-        return new CloseTestSessionResult { IsSuccess = true };
+        return new CloseTestSessionResult { IsSuccess = isSuccess };
     }
 
     private TUnitServiceProvider GetOrCreateServiceProvider(ExecuteRequestContext context)

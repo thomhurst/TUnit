@@ -3,7 +3,7 @@ using TUnit.Engine.Json;
 
 namespace TUnit.Engine.Extensions;
 
-public static class JsonExtensions
+internal static class JsonExtensions
 {
     public static TestSessionJson ToJsonModel(this TestSessionContext context)
     {

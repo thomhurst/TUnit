@@ -68,7 +68,7 @@ public class DynamicTestsGenerator : IIncrementalGenerator
                 }
 
                 sourceBuilder.EnsureNewLine();
-                using (sourceBuilder.BeginBlock("public global::System.Collections.Generic.IReadOnlyList<DynamicTest> CollectDynamicTests(string sessionId)"))
+                using (sourceBuilder.BeginBlock("public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Core.AbstractDynamicTest> CollectDynamicTests(string sessionId)"))
                 {
                     using (sourceBuilder.BeginBlock("try"))
                     {

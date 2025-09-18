@@ -7,7 +7,7 @@ namespace TUnit.Core.Data;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public class GetOnlyDictionary<TKey, 
+public class ThreadSafeDictionary<TKey, 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] TValue> 
     where TKey : notnull
 {
