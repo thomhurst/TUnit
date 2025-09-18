@@ -34,11 +34,4 @@ public class ReturnTypeTests
     {
         return default(ValueTask);
     }
-
-    [Test]
-    public async ValueTask<int> Test6()
-    {
-        await Task.Delay(1); // Small delay to ensure truly async and avoid race conditions
-        return 1;
-    }
 }

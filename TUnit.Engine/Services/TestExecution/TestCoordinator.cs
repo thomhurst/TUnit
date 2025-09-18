@@ -60,10 +60,13 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             TestContext.Current = test.Context;
             
-            // Copy resolved dependencies to TestContext
-            foreach (var dependency in test.Dependencies)
+            // Copy resolved dependencies to TestContext (including transitive dependencies)
+            var allDependencies = new HashSet<TestDetails>();
+            CollectAllDependencies(test, allDependencies, new HashSet<AbstractExecutableTest>());
+            
+            foreach (var dependency in allDependencies)
             {
-                test.Context.Dependencies.Add(dependency.Test.Context.TestDetails);
+                test.Context.Dependencies.Add(dependency);
             }
             
             test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
@@ -134,6 +137,25 @@ internal sealed class TestCoordinator : ITestCoordinator
                 {
                     await _logger.LogErrorAsync($"Error during test disposal: {ex.Message}");
                 }
+            }
+        }
+    }
+
+    private void CollectAllDependencies(AbstractExecutableTest test, HashSet<TestDetails> collected, HashSet<AbstractExecutableTest> visited)
+    {
+        // Prevent infinite recursion in case of circular dependencies
+        if (!visited.Add(test))
+        {
+            return;
+        }
+
+        foreach (var dependency in test.Dependencies)
+        {
+            // Add the direct dependency
+            if (collected.Add(dependency.Test.Context.TestDetails))
+            {
+                // Recursively collect transitive dependencies
+                CollectAllDependencies(dependency.Test, collected, visited);
             }
         }
     }

@@ -47,20 +47,20 @@ internal sealed class TestGroupingService : ITestGroupingService
             }
         }
 
-        // Sort NotInParallel tests by priority (descending) then by order
-        // Priority takes precedence over class grouping to ensure Critical priority tests run first
+        // Sort NotInParallel tests by class first to maintain class grouping,
+        // then by priority within each class
         var sortedNotInParallel = notInParallelList
-            .OrderByDescending(t => t.Priority.Priority)
+            .OrderBy(t => t.Test.Context.ClassContext?.ClassType?.FullName ?? string.Empty)
+            .ThenByDescending(t => t.Priority.Priority)
             .ThenBy(t => t.Priority.Order)
-            .ThenBy(t => t.Test.Context.ClassContext?.ClassType?.FullName ?? string.Empty)
             .Select(t => t.Test)
             .ToArray();
 
-        // Sort keyed tests similarly - priority takes precedence
+        // Sort keyed tests similarly - class grouping first, then priority
         var keyedArrays = keyedNotInParallelList
-            .OrderByDescending(t => t.Priority.Priority)
+            .OrderBy(t => t.Test.Context.ClassContext?.ClassType?.FullName ?? string.Empty)
+            .ThenByDescending(t => t.Priority.Priority)
             .ThenBy(t => t.Priority.Order)
-            .ThenBy(t => t.Test.Context.ClassContext?.ClassType?.FullName ?? string.Empty)
             .Select(t => (t.Test, t.ConstraintKeys, t.Priority.GetHashCode()))
             .ToArray();
 
