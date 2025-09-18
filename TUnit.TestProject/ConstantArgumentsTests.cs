@@ -9,6 +9,7 @@ public class ConstantArgumentsTests
     public const int DummyInt = 123;
     public const double DummyDouble = 1.23;
     public const float DummyFloat = 1.23f;
+    public const decimal DummyDecimal = 123.456789012345678901234567890m;
     public const long DummyLong = 123;
     public const uint DummyUInt = 123;
     public const ulong DummyULong = 123;
@@ -60,5 +61,13 @@ public class ConstantArgumentsTests
     public async Task ULong(ulong dummy)
     {
         await Assert.That(dummy).IsEqualTo(DummyULong);
+    }
+
+    [Test]
+    [Arguments(123.456789012345678901234567890)] // Test with full precision
+    public async Task Decimal(decimal dummy)
+    {
+        // Testing if source generator can preserve the full literal text
+        await Assert.That(dummy).IsEqualTo(123.456789012345678901234567890m);
     }
 }

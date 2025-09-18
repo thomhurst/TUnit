@@ -167,7 +167,8 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                     // Double is default for floating-point literals
                     return value.ToString()!;
                 case SpecialType.System_Decimal:
-                    return $"{value}m";
+                    // For decimal values, use G29 format to preserve maximum precision
+                    return value is decimal decVal ? decVal.ToString("G29") + "m" : $"{value}m";
             }
         }
 
@@ -223,6 +224,9 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 return SymbolDisplay.FormatLiteral(c, quote: true);
             case bool b:
                 return b ? "true" : "false";
+            case decimal d:
+                // Use G29 format to preserve maximum decimal precision
+                return d.ToString("G29") + "m";
             case float.NaN:
                 return "float.NaN";
             case float f when float.IsPositiveInfinity(f):
