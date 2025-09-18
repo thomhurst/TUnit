@@ -194,7 +194,7 @@ public class TestMetadataGenerationContext : IEquatable<TestMetadataGenerationCo
         if (attrName == "MethodDataSourceAttribute")
         {
             var args = attr.ConstructorArguments;
-            if (args.Length == 1)
+            if (args.Length == 1 && !args.Any(arg => arg.Kind == TypedConstantKind.Error))
             {
                 // Single argument - method name on the same class
                 var methodName = args[0].Value?.ToString();

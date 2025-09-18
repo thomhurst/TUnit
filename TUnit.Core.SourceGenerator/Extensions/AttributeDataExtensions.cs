@@ -4,6 +4,38 @@ namespace TUnit.Core.SourceGenerator.Extensions;
 
 public static class AttributeDataExtensions
 {
+    /// <summary>
+    /// Safely gets a constructor argument value, returning null if the argument is in an error state.
+    /// </summary>
+    public static T? SafeGetConstructorArgument<T>(this AttributeData attributeData, int index)
+    {
+        if (index < 0 || index >= attributeData.ConstructorArguments.Length)
+        {
+            return default;
+        }
+
+        var argument = attributeData.ConstructorArguments[index];
+        if (argument.Kind == TypedConstantKind.Error)
+        {
+            return default;
+        }
+
+        if (argument.Value is T value)
+        {
+            return value;
+        }
+
+        return default;
+    }
+
+    /// <summary>
+    /// Checks if any constructor arguments are in an error state.
+    /// </summary>
+    public static bool HasErrorArguments(this AttributeData attributeData)
+    {
+        return attributeData.ConstructorArguments.Any(arg => arg.Kind == TypedConstantKind.Error);
+    }
+
     public static string? GetFullyQualifiedAttributeTypeName(this AttributeData? attributeData)
     {
         return attributeData?.AttributeClass?.GloballyQualifiedNonGeneric();

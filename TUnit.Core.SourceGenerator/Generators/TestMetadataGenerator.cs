@@ -699,19 +699,25 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         string? methodName = null;
         ITypeSymbol? targetType = null;
 
-        if (attr.ConstructorArguments is
-            [
-                { Value: ITypeSymbol } _, _, ..
-            ])
+        // Check if any constructor arguments are in error state or if there are no arguments
+        if (attr.ConstructorArguments.IsEmpty || attr.HasErrorArguments())
+        {
+            // Handle invalid attribute arguments gracefully
+            writer.AppendLine("// Error: Invalid argument in MethodDataSourceAttribute");
+            return;
+        }
+
+        if (attr.ConstructorArguments.Length >= 2 &&
+            attr.SafeGetConstructorArgument<ITypeSymbol>(0) is not null)
         {
             // MethodDataSource(Type, string) overload
-            targetType = (ITypeSymbol?)attr.ConstructorArguments[0].Value;
-            methodName = attr.ConstructorArguments[1].Value?.ToString();
+            targetType = attr.SafeGetConstructorArgument<ITypeSymbol>(0);
+            methodName = attr.SafeGetConstructorArgument<string>(1);
         }
         else if (attr.ConstructorArguments.Length >= 1)
         {
             // MethodDataSource(string) overload
-            methodName = attr.ConstructorArguments[0].Value?.ToString();
+            methodName = attr.SafeGetConstructorArgument<string>(0);
             targetType = typeSymbol;
         }
 
@@ -3230,6 +3236,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Check if any constructor arguments are in error state
+        if (argAttr.ConstructorArguments.Any(arg => arg.Kind == TypedConstantKind.Error))
+        {
+            return null;
+        }
+
         var inferredTypes = new Dictionary<string, ITypeSymbol>();
         var typeParameters = method.TypeParameters;
 
@@ -3455,8 +3467,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Check if any constructor arguments are in error state
+        if (mdsAttr.HasErrorArguments())
+        {
+            return null;
+        }
+
         // Get the method name from the attribute
-        if (mdsAttr.ConstructorArguments[0].Value is not string methodName)
+        var methodName = mdsAttr.SafeGetConstructorArgument<string>(0);
+        if (methodName == null)
         {
             return null;
         }
@@ -3534,8 +3553,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Check if any constructor arguments are in error state
+        if (mdsAttr.HasErrorArguments())
+        {
+            return null;
+        }
+
         // Get the method name from the attribute
-        if (mdsAttr.ConstructorArguments[0].Value is not string methodName)
+        var methodName = mdsAttr.SafeGetConstructorArgument<string>(0);
+        if (methodName == null)
         {
             return null;
         }

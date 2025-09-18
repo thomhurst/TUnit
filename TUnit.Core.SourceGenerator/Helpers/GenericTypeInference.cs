@@ -233,7 +233,9 @@ internal static class GenericTypeInference
 
         foreach (var attr in methodDataSourceAttributes)
         {
-            if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is string methodName)
+            if (attr.ConstructorArguments.Length > 0 && 
+                !attr.ConstructorArguments.Any(arg => arg.Kind == TypedConstantKind.Error) &&
+                attr.ConstructorArguments[0].Value is string methodName)
             {
                 // Find the data source method
                 var dataSourceMethod = testMethod.ContainingType.GetMembers(methodName)
