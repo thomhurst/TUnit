@@ -21,6 +21,11 @@ public class HookRegisteredContext
         set => _timeout = value;
     }
     
+    /// <summary>
+    /// Gets or sets the skip reason for this hook
+    /// </summary>
+    public string? SkipReason { get; set; }
+    
     public HookRegisteredContext(HookMethod hookMethod)
     {
         HookMethod = hookMethod;
