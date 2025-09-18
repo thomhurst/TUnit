@@ -473,10 +473,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         var contexts = allTestContexts.ToList();
         _sessionTestCount = contexts.Count;
 
-        // Clear first-event tracking to ensure clean state for each test execution
-        _firstTestInAssemblyTasks = new GetOnlyDictionary<string, Task>();
-        _firstTestInClassTasks = new GetOnlyDictionary<Type, Task>();
-        _firstTestInSessionTasks = new GetOnlyDictionary<string, Task>();
+        // Initialize first-event tracking dictionaries only if not already initialized
+        // First events should only fire once per assembly/class/session for the entire test run
+        _firstTestInAssemblyTasks ??= new GetOnlyDictionary<string, Task>();
+        _firstTestInClassTasks ??= new GetOnlyDictionary<Type, Task>();
+        _firstTestInSessionTasks ??= new GetOnlyDictionary<string, Task>();
 
         foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.AssemblyContext.Assembly.GetName().FullName))
         {
