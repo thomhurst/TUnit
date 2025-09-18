@@ -1,5 +1,6 @@
 using System.Linq;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
@@ -88,6 +89,10 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             await _stateManager.MarkCompletedAsync(test);
 
+        }
+        catch (SkipTestException ex)
+        {
+            await _stateManager.MarkSkippedAsync(test, ex.Message);
         }
         catch (Exception ex)
         {
