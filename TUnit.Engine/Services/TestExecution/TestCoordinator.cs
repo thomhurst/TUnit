@@ -60,7 +60,6 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             TestContext.Current = test.Context;
             
-            // Copy resolved dependencies to TestContext (including transitive dependencies)
             var allDependencies = new HashSet<TestDetails>();
             CollectAllDependencies(test, allDependencies, new HashSet<AbstractExecutableTest>());
             
@@ -143,7 +142,6 @@ internal sealed class TestCoordinator : ITestCoordinator
 
     private void CollectAllDependencies(AbstractExecutableTest test, HashSet<TestDetails> collected, HashSet<AbstractExecutableTest> visited)
     {
-        // Prevent infinite recursion in case of circular dependencies
         if (!visited.Add(test))
         {
             return;
@@ -151,10 +149,8 @@ internal sealed class TestCoordinator : ITestCoordinator
 
         foreach (var dependency in test.Dependencies)
         {
-            // Add the direct dependency
             if (collected.Add(dependency.Test.Context.TestDetails))
             {
-                // Recursively collect transitive dependencies
                 CollectAllDependencies(dependency.Test, collected, visited);
             }
         }

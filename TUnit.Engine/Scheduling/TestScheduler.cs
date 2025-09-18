@@ -63,14 +63,24 @@ internal sealed class TestScheduler : ITestScheduler
 
         var circularDependencies = _circularDependencyDetector.DetectCircularDependencies(testList);
 
+        var testsInCircularDependencies = new HashSet<AbstractExecutableTest>();
+        
         foreach (var (test, dependencyChain) in circularDependencies)
         {
             var exception = new CircularDependencyException($"Circular dependency detected: {string.Join(" -> ", dependencyChain.Select(d => d.TestId))}");
-            await _testStateManager.MarkCircularDependencyFailedAsync(test, exception).ConfigureAwait(false);
-            await _messageBus.Failed(test.Context, exception, DateTimeOffset.UtcNow).ConfigureAwait(false);
+            
+            // Mark all tests in the dependency chain as failed
+            foreach (var chainTest in dependencyChain)
+            {
+                if (testsInCircularDependencies.Add(chainTest))
+                {
+                    await _testStateManager.MarkCircularDependencyFailedAsync(chainTest, exception).ConfigureAwait(false);
+                    await _messageBus.Failed(chainTest.Context, exception, DateTimeOffset.UtcNow).ConfigureAwait(false);
+                }
+            }
         }
 
-        var executableTests = testList.Where(t => circularDependencies.All(cd => cd.Test != t)).ToList();
+        var executableTests = testList.Where(t => !testsInCircularDependencies.Contains(t)).ToList();
         if (executableTests.Count == 0)
         {
             await _logger.LogDebugAsync("No executable tests found after removing circular dependencies").ConfigureAwait(false);
