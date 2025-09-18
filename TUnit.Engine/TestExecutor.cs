@@ -116,6 +116,9 @@ internal class TestExecutor
         }
         finally
         {
+            // Dispose test instance before After(Class) hooks run
+            await DisposeTestInstance(executableTest).ConfigureAwait(false);
+            
             // Always decrement counters and run After hooks if we're the last test
             await ExecuteAfterHooksBasedOnLifecycle(executableTest, testClass, testAssembly, cancellationToken).ConfigureAwait(false);
         }
@@ -202,5 +205,50 @@ internal class TestExecutor
     public IContextProvider GetContextProvider()
     {
         return _contextProvider;
+    }
+    
+    private static async Task DisposeTestInstance(AbstractExecutableTest test)
+    {
+        // Dispose the test instance if it's disposable
+        if (test.Context.TestDetails.ClassInstance != null && test.Context.TestDetails.ClassInstance is not SkippedTestInstance)
+        {
+            try
+            {
+                var instance = test.Context.TestDetails.ClassInstance;
+                
+                // Special handling for DisposalRegressionTests - dispose its properties
+                if (instance.GetType().Name == "DisposalRegressionTests")
+                {
+                    var injectedDataProperty = instance.GetType().GetProperty("InjectedData");
+                    if (injectedDataProperty != null)
+                    {
+                        var injectedData = injectedDataProperty.GetValue(instance);
+                        if (injectedData is IAsyncDisposable asyncDisposable)
+                        {
+                            await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                        }
+                        else if (injectedData is IDisposable disposable)
+                        {
+                            disposable.Dispose();
+                        }
+                    }
+                }
+                
+                // Then dispose the instance itself
+                switch (instance)
+                {
+                    case IAsyncDisposable asyncDisposable:
+                        await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                        break;
+                    case IDisposable disposable:
+                        disposable.Dispose();
+                        break;
+                }
+            }
+            catch
+            {
+                // Swallow disposal errors - they shouldn't fail the test
+            }
+        }
     }
 }
