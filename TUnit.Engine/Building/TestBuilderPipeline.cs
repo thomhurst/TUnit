@@ -1,5 +1,6 @@
 using EnumerableAsyncProcessor.Extensions;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Services;
@@ -24,6 +25,33 @@ internal sealed class TestBuilderPipeline
         _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
         _contextProvider = contextBuilder;
         _eventReceiverOrchestrator = eventReceiverOrchestrator ?? throw new ArgumentNullException(nameof(eventReceiverOrchestrator));
+    }
+    
+    private TestBuilderContext CreateTestBuilderContext(TestMetadata metadata)
+    {
+        var testBuilderContext = new TestBuilderContext
+        {
+            TestMetadata = metadata.MethodMetadata,
+            Events = new TestContextEvents(),
+            ObjectBag = new Dictionary<string, object?>()
+        };
+        
+        // Check for ClassConstructor attribute and set it early if present
+        var attributes = metadata.AttributeFactory();
+        
+        // Look for any attribute that inherits from ClassConstructorAttribute
+        // This handles both ClassConstructorAttribute and ClassConstructorAttribute<T>
+        var classConstructorAttribute = attributes
+            .Where(a => a is ClassConstructorAttribute)
+            .Cast<ClassConstructorAttribute>()
+            .FirstOrDefault();
+            
+        if (classConstructorAttribute != null)
+        {
+            testBuilderContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
+        }
+        
+        return testBuilderContext;
     }
 
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsAsync(string testSessionId, HashSet<Type>? filterTypes)
@@ -122,6 +150,9 @@ internal sealed class TestBuilderPipeline
                 ? $"{metadata.TestName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
                 : metadata.TestName;
 
+            // Get attributes first
+            var attributes = metadata.AttributeFactory();
+            
             // Create TestDetails for dynamic tests
             var testDetails = new TestDetails
             {
@@ -141,15 +172,12 @@ internal sealed class TestBuilderPipeline
                 // Don't set RetryLimit here - let discovery event receivers set it
             };
 
+            var testBuilderContext = CreateTestBuilderContext(metadata);
+            
             var context = _contextProvider.CreateTestContext(
                 metadata.TestName,
                 metadata.TestClassType,
-                new TestBuilderContext
-                {
-                    TestMetadata = metadata.MethodMetadata,
-                    Events = new TestContextEvents(),
-                    ObjectBag = new Dictionary<string, object?>()
-                },
+                testBuilderContext,
                 CancellationToken.None);
 
             // Set the TestDetails on the context
@@ -264,12 +292,7 @@ internal sealed class TestBuilderPipeline
                     var context = _contextProvider.CreateTestContext(
                         resolvedMetadata.TestName,
                         resolvedMetadata.TestClassType,
-                        new TestBuilderContext 
-                        { 
-                            TestMetadata = resolvedMetadata.MethodMetadata,
-                            Events = new TestContextEvents(),
-                            ObjectBag = new Dictionary<string, object?>()
-                        },
+                        CreateTestBuilderContext(resolvedMetadata),
                         CancellationToken.None);
 
                     // Set the TestDetails on the context
@@ -342,12 +365,7 @@ internal sealed class TestBuilderPipeline
         var context = _contextProvider.CreateTestContext(
             metadata.TestName,
             metadata.TestClassType,
-            new TestBuilderContext
-            {
-                TestMetadata = metadata.MethodMetadata,
-                Events = new TestContextEvents(),
-                ObjectBag = new Dictionary<string, object?>()
-            },
+            CreateTestBuilderContext(metadata),
             CancellationToken.None);
 
         context.TestDetails = testDetails;
@@ -399,12 +417,7 @@ internal sealed class TestBuilderPipeline
         var context = _contextProvider.CreateTestContext(
             metadata.TestName,
             metadata.TestClassType,
-            new TestBuilderContext
-            {
-                TestMetadata = metadata.MethodMetadata,
-                Events = new TestContextEvents(),
-                ObjectBag = new Dictionary<string, object?>()
-            },
+            CreateTestBuilderContext(metadata),
             CancellationToken.None);
 
         context.TestDetails = testDetails;

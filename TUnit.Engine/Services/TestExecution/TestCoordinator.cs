@@ -58,6 +58,13 @@ internal sealed class TestCoordinator : ITestCoordinator
             test.Context.TestEnd = null;
 
             TestContext.Current = test.Context;
+            
+            // Copy resolved dependencies to TestContext
+            foreach (var dependency in test.Dependencies)
+            {
+                test.Context.Dependencies.Add(dependency.Test.Context.TestDetails);
+            }
+            
             test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
 
             // Check if this test should be skipped (after creating instance)

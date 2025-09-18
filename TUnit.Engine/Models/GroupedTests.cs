@@ -17,5 +17,5 @@ internal record GroupedTests
     
     // Array of groups with nested arrays for maximum iteration performance
     // Tests are grouped by order, ready for parallel execution
-    public required (string Group, (int Order, AbstractExecutableTest[] Tests)[] OrderedTests)[] ParallelGroups { get; init; }
+    public required Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>> ParallelGroups { get; init; }
 }

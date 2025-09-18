@@ -128,8 +128,14 @@ internal sealed class TestScheduler : ITestScheduler
 
         // 2. Execute parallel groups SEQUENTIALLY to prevent race conditions between class-level hooks
         // Each group completes entirely (including After(Class)) before the next group starts (including Before(Class))
-        foreach (var (groupName, orderedTests) in groupedTests.ParallelGroups)
+        foreach (var group in groupedTests.ParallelGroups)
         {
+            var groupName = group.Key;
+            var orderedTests = group.Value
+                .OrderBy(t => t.Key)
+                .SelectMany(x => x.Value)
+                .ToArray();
+
             await _logger.LogDebugAsync($"Starting parallel group '{groupName}' with {orderedTests.Length} orders").ConfigureAwait(false);
 
             await ExecuteParallelGroupAsync(groupName, orderedTests, maxParallelism, cancellationToken).ConfigureAwait(false);
@@ -177,32 +183,28 @@ internal sealed class TestScheduler : ITestScheduler
 
     private async Task ExecuteParallelGroupAsync(
         string groupName,
-        (int Order, AbstractExecutableTest[] Tests)[] orderedTests,
+        AbstractExecutableTest[] orderedTests,
         int? maxParallelism,
         CancellationToken cancellationToken)
     {
-        // Execute each order sequentially, but tests within each order can run in parallel
-        foreach (var (order, tests) in orderedTests)
+        await _logger.LogDebugAsync($"Executing parallel group '{groupName}' with {orderedTests.Length} tests").ConfigureAwait(false);
+
+        if (maxParallelism is > 0)
         {
-            await _logger.LogDebugAsync($"Executing parallel group '{groupName}' order {order} with {tests.Length} tests").ConfigureAwait(false);
-
-            if (maxParallelism is > 0)
+            // Use worker pool pattern to respect maximum parallel tests limit
+            await ExecuteParallelTestsWithLimitAsync(orderedTests, maxParallelism.Value, cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            // No limit - start all tests at once
+            var orderTasks = orderedTests.Select(test =>
             {
-                // Use worker pool pattern to respect maximum parallel tests limit
-                await ExecuteParallelTestsWithLimitAsync(tests, maxParallelism.Value, cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                // No limit - start all tests at once
-                var orderTasks = tests.Select(test =>
-                {
-                    var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
-                    test.ExecutionTask = task;
-                    return task;
-                }).ToArray();
+                var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
+                test.ExecutionTask = task;
+                return task;
+            }).ToArray();
 
-                await WaitForTasksWithFailFastHandling(orderTasks, cancellationToken).ConfigureAwait(false);
-            }
+            await WaitForTasksWithFailFastHandling(orderTasks, cancellationToken).ConfigureAwait(false);
         }
     }
 

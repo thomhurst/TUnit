@@ -21,6 +21,7 @@ internal class TestInitializer
             test.Context.TestDetails.MethodMetadata,
             test.Context.Events);
 
+
         // Initialize and register all eligible objects including event receivers
         await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken).ConfigureAwait(false);
     }

@@ -84,6 +84,9 @@ internal class TestExecutor
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
             await _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+            
+            // Invoke test start event receivers
+            await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
 
             executableTest.Context.RestoreExecutionContext();
 
@@ -147,6 +150,9 @@ internal class TestExecutor
         Type testClass, Assembly testAssembly, CancellationToken cancellationToken)
     {
         await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+        
+        // Invoke test end event receivers
+        await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
 
         var flags = _lifecycleCoordinator.DecrementAndCheckAfterHooks(testClass, testAssembly);
 
