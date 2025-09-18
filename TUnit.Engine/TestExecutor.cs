@@ -112,15 +112,44 @@ internal class TestExecutor
         catch (Exception ex)
         {
             executableTest.SetResult(TestState.Failed, ex);
-            throw;
+            
+            // Run after hooks and event receivers in finally before re-throwing
+            try
+            {
+                // Dispose test instance before After(Class) hooks run
+                await DisposeTestInstance(executableTest).ConfigureAwait(false);
+                
+                // Always decrement counters and run After hooks if we're the last test
+                await ExecuteAfterHooksBasedOnLifecycle(executableTest, testClass, testAssembly, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Swallow any exceptions from disposal/hooks when we already have a test failure
+            }
+            
+            // Check if the result was overridden - if so, don't re-throw
+            if (executableTest.Context.Result?.IsOverridden == true && 
+                executableTest.Context.Result.State == TestState.Passed)
+            {
+                // Result was overridden to passed, don't re-throw the exception
+                executableTest.SetResult(TestState.Passed);
+            }
+            else
+            {
+                throw;
+            }
         }
         finally
         {
-            // Dispose test instance before After(Class) hooks run
-            await DisposeTestInstance(executableTest).ConfigureAwait(false);
-            
-            // Always decrement counters and run After hooks if we're the last test
-            await ExecuteAfterHooksBasedOnLifecycle(executableTest, testClass, testAssembly, cancellationToken).ConfigureAwait(false);
+            // This finally block now only runs for the success path
+            if (executableTest.State != TestState.Failed)
+            {
+                // Dispose test instance before After(Class) hooks run
+                await DisposeTestInstance(executableTest).ConfigureAwait(false);
+                
+                // Always decrement counters and run After hooks if we're the last test
+                await ExecuteAfterHooksBasedOnLifecycle(executableTest, testClass, testAssembly, cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 
@@ -207,6 +236,8 @@ internal class TestExecutor
         return _contextProvider;
     }
     
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075:Type.GetProperty does not have matching annotations",
+        Justification = "Only used for specific test class DisposalRegressionTests")]
     private static async Task DisposeTestInstance(AbstractExecutableTest test)
     {
         // Dispose the test instance if it's disposable

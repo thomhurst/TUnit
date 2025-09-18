@@ -36,17 +36,26 @@ internal sealed class TestStateManager
 
     public Task MarkFailedAsync(AbstractExecutableTest test, Exception exception)
     {
-        test.State = TestState.Failed;
-        test.EndTime = DateTimeOffset.UtcNow;
-        test.Result = new TestResult
+        // Check if result has been overridden - if so, respect the override
+        if (test.Context.Result?.IsOverridden == true)
         {
-            State = TestState.Failed,
-            Exception = exception,
-            Start = test.StartTime,
-            End = test.EndTime,
-            Duration = test.EndTime - test.StartTime.GetValueOrDefault(),
-            ComputerName = Environment.MachineName
-        };
+            test.State = test.Context.Result.State;
+            test.EndTime = test.Context.Result.End ?? DateTimeOffset.UtcNow;
+        }
+        else
+        {
+            test.State = TestState.Failed;
+            test.EndTime = DateTimeOffset.UtcNow;
+            test.Result = new TestResult
+            {
+                State = TestState.Failed,
+                Exception = exception,
+                Start = test.StartTime,
+                End = test.EndTime,
+                Duration = test.EndTime - test.StartTime.GetValueOrDefault(),
+                ComputerName = Environment.MachineName
+            };
+        }
 
         return Task.CompletedTask;
     }
