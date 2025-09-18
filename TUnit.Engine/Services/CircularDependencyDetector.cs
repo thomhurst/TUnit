@@ -56,7 +56,8 @@ internal sealed class CircularDependencyDetector
         {
             if (state == VisitState.Visiting)
             {
-                // Found a cycle - the current path contains the cycle
+                // Found a cycle - add the current test to complete the cycle
+                currentPath.Add(test);
                 return true;
             }
             if (state == VisitState.Visited)

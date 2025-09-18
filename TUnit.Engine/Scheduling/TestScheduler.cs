@@ -67,7 +67,16 @@ internal sealed class TestScheduler : ITestScheduler
         
         foreach (var (test, dependencyChain) in circularDependencies)
         {
-            var exception = new CircularDependencyException($"Circular dependency detected: {string.Join(" -> ", dependencyChain.Select(d => d.TestId))}");
+            // Format the error message to match the expected format
+            var simpleNames = dependencyChain.Select(t => 
+            {
+                var className = t.Metadata.TestClassType.Name;
+                var testName = t.Metadata.TestMethodName;
+                return $"{className}.{testName}";
+            }).ToList();
+            
+            var errorMessage = $"DependsOn Conflict: {string.Join(" > ", simpleNames)}";
+            var exception = new CircularDependencyException(errorMessage);
             
             // Mark all tests in the dependency chain as failed
             foreach (var chainTest in dependencyChain)
