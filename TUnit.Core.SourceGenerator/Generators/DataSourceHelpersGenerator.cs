@@ -33,6 +33,12 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Skip error symbols
+        if (typeSymbol.TypeKind == TypeKind.Error)
+        {
+            return null;
+        }
+
         var propertiesWithDataSource = typeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
             .Where(p => p.DeclaredAccessibility == Accessibility.Public && 

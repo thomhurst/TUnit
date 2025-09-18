@@ -326,6 +326,12 @@ public class HookMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Skip error symbols
+        if (typeSymbol.TypeKind == TypeKind.Error)
+        {
+            return null;
+        }
+
         if (methodSymbol.DeclaredAccessibility != Accessibility.Public)
         {
             return null;

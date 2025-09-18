@@ -28,6 +28,12 @@ public class DynamicTestsGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Skip error symbols  
+        if (methodSymbol.ContainingType?.TypeKind == TypeKind.Error)
+        {
+            return null;
+        }
+
         if (methodSymbol.IsAbstract)
         {
             return null;
