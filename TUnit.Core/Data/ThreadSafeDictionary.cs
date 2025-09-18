@@ -11,29 +11,43 @@ public class ThreadSafeDictionary<TKey,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] TValue> 
     where TKey : notnull
 {
-    // Using Lazy<TValue> ensures factory functions are only executed once per key,
-    // solving the race condition issue with ConcurrentDictionary.GetOrAdd
-    private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _innerDictionary = new();
+    private readonly ConcurrentDictionary<TKey, TValue> _values = new();
+    private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _lazyFactories = new();
 
-    public ICollection<TKey> Keys => _innerDictionary.Keys;
+    public ICollection<TKey> Keys => _values.Keys;
 
-    public ICollection<TValue> Values => _innerDictionary.Values.Select(lazy => lazy.Value).ToList();
+    public ICollection<TValue> Values => _values.Values;
 
     public TValue GetOrAdd(TKey key, Func<TKey, TValue> func)
     {
-        // The Lazy wrapper ensures the factory function is only executed once,
-        // even if multiple threads race to add the same key
-        // We use ExecutionAndPublication mode for thread safety
-        var lazy = _innerDictionary.GetOrAdd(key, 
+        if (_values.TryGetValue(key, out var existingValue))
+        {
+            return existingValue;
+        }
+
+        var lazy = _lazyFactories.GetOrAdd(key, 
             k => new Lazy<TValue>(() => func(k), LazyThreadSafetyMode.ExecutionAndPublication));
-        return lazy.Value;
+        
+        var value = lazy.Value;
+        
+        _values.TryAdd(key, value);
+        _lazyFactories.TryRemove(key, out _);
+        
+        return value;
     }
 
     public bool TryGetValue(TKey key, [NotNullWhen(true)] out TValue? value)
     {
-        if (_innerDictionary.TryGetValue(key, out var lazy))
+        if (_values.TryGetValue(key, out value!))
+        {
+            return true;
+        }
+        
+        if (_lazyFactories.TryGetValue(key, out var lazy))
         {
             value = lazy.Value!;
+            _values.TryAdd(key, value);
+            _lazyFactories.TryRemove(key, out _);
             return true;
         }
         
@@ -43,15 +57,34 @@ public class ThreadSafeDictionary<TKey,
 
     public TValue? Remove(TKey key)
     {
-        if (_innerDictionary.TryRemove(key, out var lazy))
+        _lazyFactories.TryRemove(key, out _);
+        
+        if (_values.TryRemove(key, out var value))
         {
-            return lazy.Value;
+            return value;
         }
 
         return default(TValue?);
     }
 
-    public TValue this[TKey key] => _innerDictionary.TryGetValue(key, out var lazy) 
-        ? lazy.Value 
-        : throw new KeyNotFoundException($"Key '{key}' not found in dictionary");
+    public TValue this[TKey key]
+    {
+        get
+        {
+            if (_values.TryGetValue(key, out var value))
+            {
+                return value;
+            }
+            
+            if (_lazyFactories.TryGetValue(key, out var lazy))
+            {
+                var lazyValue = lazy.Value;
+                _values.TryAdd(key, lazyValue);
+                _lazyFactories.TryRemove(key, out _);
+                return lazyValue;
+            }
+            
+            throw new KeyNotFoundException($"Key '{key}' not found in dictionary");
+        }
+    }
 }

@@ -247,30 +247,34 @@ internal sealed class TestScheduler : ITestScheduler
         int maxParallelism,
         CancellationToken cancellationToken)
     {
-        // Use worker pool pattern to avoid creating too many concurrent test executions
-        var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
-        var workers = new Task[maxParallelism];
+        using var semaphore = new SemaphoreSlim(maxParallelism, maxParallelism);
+        var tasks = new Task[tests.Length];
 
-        // Create worker tasks that will process tests from the queue
-        for (var i = 0; i < maxParallelism; i++)
+        for (var i = 0; i < tests.Length; i++)
         {
-            workers[i] = Task.Run(async () =>
-            {
-                while (testQueue.TryDequeue(out var test))
-                {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
-                    test.ExecutionTask = task;
-                    await task.ConfigureAwait(false);
-                }
-            }, cancellationToken);
+            var test = tests[i];
+            
+            tasks[i] = ExecuteTestWithSemaphoreAsync(test, semaphore, cancellationToken);
+            test.ExecutionTask = tasks[i];
         }
 
-        await WaitForTasksWithFailFastHandling(workers, cancellationToken).ConfigureAwait(false);
+        await WaitForTasksWithFailFastHandling(tasks, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task ExecuteTestWithSemaphoreAsync(
+        AbstractExecutableTest test,
+        SemaphoreSlim semaphore,
+        CancellationToken cancellationToken)
+    {
+        await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await ExecuteTestWithParallelLimitAsync(test, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            semaphore.Release();
+        }
     }
 
     /// <summary>

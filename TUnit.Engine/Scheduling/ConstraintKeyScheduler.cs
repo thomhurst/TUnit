@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Threading.Channels;
 using TUnit.Core;
 using TUnit.Core.Logging;
 using TUnit.Engine.Logging;
@@ -34,146 +35,122 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         // Sort tests by priority
         var sortedTests = tests.OrderBy(t => t.Priority).ToArray();
 
-        // Track which constraint keys are currently in use
-        var lockedKeys = new HashSet<string>();
-        var lockObject = new object();
-        
-        // Queue for tests waiting for their constraint keys to become available
-        var waitingTests = new ConcurrentQueue<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
-        
-        // Active test tasks
-        var activeTasks = new List<Task>();
+        var constraintKeyUsage = new ConcurrentDictionary<string, int>();
+        var readyTestsChannel = Channel.CreateUnbounded<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys)>();
+        var pendingTests = new ConcurrentDictionary<AbstractExecutableTest, (IReadOnlyList<string> ConstraintKeys, int Priority)>();
+        var activeTasks = new ConcurrentBag<Task>();
 
-        // Process each test
-        foreach (var (test, constraintKeys, _) in sortedTests)
+        var executorTask = Task.Run(async () => await ExecuteTestsFromChannelAsync(readyTestsChannel.Reader, constraintKeyUsage, pendingTests, activeTasks, cancellationToken).ConfigureAwait(false), cancellationToken);
+        foreach (var (test, constraintKeys, priority) in sortedTests)
         {
-            var startSignal = new TaskCompletionSource<bool>();
-            
-            bool canStart;
-            lock (lockObject)
+            if (TryAcquireConstraints(constraintKeys, constraintKeyUsage))
             {
-                // Check if all constraint keys are available
-                canStart = !constraintKeys.Any(key => lockedKeys.Contains(key));
-                
-                if (canStart)
-                {
-                    // Lock all the constraint keys for this test
-                    foreach (var key in constraintKeys)
-                    {
-                        lockedKeys.Add(key);
-                    }
-                }
-            }
-
-            if (canStart)
-            {
-                // Start the test immediately
                 await _logger.LogDebugAsync($"Starting test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
-                startSignal.SetResult(true);
-                
-                var testTask = ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTests, cancellationToken);
-                test.ExecutionTask = testTask;
-                activeTasks.Add(testTask);
+                await readyTestsChannel.Writer.WriteAsync((test, constraintKeys), cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                // Queue the test to wait for its keys
                 await _logger.LogDebugAsync($"Queueing test {test.TestId} waiting for constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
-                waitingTests.Enqueue((test, constraintKeys, startSignal));
-                
-                var testTask = WaitAndExecuteTestAsync(test, constraintKeys, startSignal, lockedKeys, lockObject, waitingTests, cancellationToken);
+                pendingTests.TryAdd(test, (constraintKeys, priority));
+            }
+        }
+
+        readyTestsChannel.Writer.TryComplete();
+        
+        await executorTask.ConfigureAwait(false);
+        await Task.WhenAll(activeTasks).ConfigureAwait(false);
+    }
+
+    private bool TryAcquireConstraints(IReadOnlyList<string> constraintKeys, ConcurrentDictionary<string, int> constraintKeyUsage)
+    {
+        var acquiredKeys = new List<string>();
+        
+        foreach (var key in constraintKeys)
+        {
+            if (constraintKeyUsage.AddOrUpdate(key, 1, (k, currentValue) => currentValue == 0 ? 1 : currentValue) == 1)
+            {
+                acquiredKeys.Add(key);
+            }
+            else
+            {
+                foreach (var acquiredKey in acquiredKeys)
+                {
+                    constraintKeyUsage.AddOrUpdate(acquiredKey, 0, (k, v) => 0);
+                }
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private void ReleaseConstraints(IReadOnlyList<string> constraintKeys, ConcurrentDictionary<string, int> constraintKeyUsage)
+    {
+        foreach (var key in constraintKeys)
+        {
+            constraintKeyUsage.AddOrUpdate(key, 0, (k, v) => 0);
+        }
+    }
+
+    private async Task ExecuteTestsFromChannelAsync(
+        ChannelReader<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys)> reader,
+        ConcurrentDictionary<string, int> constraintKeyUsage,
+        ConcurrentDictionary<AbstractExecutableTest, (IReadOnlyList<string> ConstraintKeys, int Priority)> pendingTests,
+        ConcurrentBag<Task> activeTasks,
+        CancellationToken cancellationToken)
+    {
+        var readerTask = ProcessTestsAsync();
+        await readerTask.ConfigureAwait(false);
+        await Task.WhenAll(activeTasks).ConfigureAwait(false);
+        
+        async Task ProcessTestsAsync()
+        {
+            await foreach (var (test, constraintKeys) in reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
+            {
+                // Start test execution without Task.Run for better performance
+                var testTask = ExecuteAndReleaseTestAsync(test, constraintKeys);
                 test.ExecutionTask = testTask;
                 activeTasks.Add(testTask);
             }
         }
-
-        // Wait for all tests to complete
-        await Task.WhenAll(activeTasks).ConfigureAwait(false);
-    }
-
-    private async Task WaitAndExecuteTestAsync(
-        AbstractExecutableTest test,
-        IReadOnlyList<string> constraintKeys,
-        TaskCompletionSource<bool> startSignal,
-        HashSet<string> lockedKeys,
-        object lockObject,
-        ConcurrentQueue<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)> waitingTests,
-        CancellationToken cancellationToken)
-    {
-        // Wait for signal to start
-        await startSignal.Task.ConfigureAwait(false);
         
-        await _logger.LogDebugAsync($"Starting previously queued test {test.TestId} with constraint keys: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
-        
-        await ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTests, cancellationToken).ConfigureAwait(false);
-    }
-
-    private async Task ExecuteTestAndReleaseKeysAsync(
-        AbstractExecutableTest test,
-        IReadOnlyList<string> constraintKeys,
-        HashSet<string> lockedKeys,
-        object lockObject,
-        ConcurrentQueue<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)> waitingTests,
-        CancellationToken cancellationToken)
-    {
-        try
+        async Task ExecuteAndReleaseTestAsync(AbstractExecutableTest test, IReadOnlyList<string> constraintKeys)
         {
-            // Execute the test with parallel limit support
-            await ExecuteTestWithParallelLimitAsync(test, cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            // Release the constraint keys and check if any waiting tests can now run
-            var testsToStart = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
-            
-            lock (lockObject)
+            try
             {
-                // Release all constraint keys for this test
-                foreach (var key in constraintKeys)
-                {
-                    lockedKeys.Remove(key);
-                }
-                
-                // Check waiting tests to see if any can now run
-                var tempQueue = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
-                
-                while (waitingTests.TryDequeue(out var waitingTest))
-                {
-                    // Check if all constraint keys are available for this waiting test
-                    var canStart = !waitingTest.ConstraintKeys.Any(key => lockedKeys.Contains(key));
-                    
-                    if (canStart)
-                    {
-                        // Lock the keys for this test
-                        foreach (var key in waitingTest.ConstraintKeys)
-                        {
-                            lockedKeys.Add(key);
-                        }
-                        
-                        // Mark test to start after we exit the lock
-                        testsToStart.Add(waitingTest);
-                    }
-                    else
-                    {
-                        // Still can't run, keep it in the queue
-                        tempQueue.Add(waitingTest);
-                    }
-                }
-                
-                // Re-add tests that still can't run
-                foreach (var waitingTestItem in tempQueue)
-                {
-                    waitingTests.Enqueue(waitingTestItem);
-                }
+                await ExecuteTestWithParallelLimitAsync(test, cancellationToken).ConfigureAwait(false);
             }
-            
-            // Log and signal tests to start outside the lock
-            await _logger.LogDebugAsync($"Released constraint keys for test {test.TestId}: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
-            
-            foreach (var testToStart in testsToStart)
+            finally
             {
-                await _logger.LogDebugAsync($"Unblocking waiting test {testToStart.Test.TestId} with constraint keys: {string.Join(", ", testToStart.ConstraintKeys)}").ConfigureAwait(false);
-                testToStart.StartSignal.SetResult(true);
+                // Release constraints
+                ReleaseConstraints(constraintKeys, constraintKeyUsage);
+                await _logger.LogDebugAsync($"Released constraint keys for test {test.TestId}: {string.Join(", ", constraintKeys)}").ConfigureAwait(false);
+                
+                // Check if any pending tests can now run
+                var readyTests = new List<(AbstractExecutableTest, IReadOnlyList<string>)>();
+                
+                // Get a snapshot of pending tests sorted by priority
+                var sortedPending = pendingTests.OrderBy(p => p.Value.Priority).ToList();
+                
+                foreach (var kvp in sortedPending)
+                {
+                    if (TryAcquireConstraints(kvp.Value.ConstraintKeys, constraintKeyUsage))
+                    {
+                        readyTests.Add((kvp.Key, kvp.Value.ConstraintKeys));
+                        pendingTests.TryRemove(kvp.Key, out _);
+                    }
+                }
+                
+                // Start ready tests directly
+                foreach (var (readyTest, keys) in readyTests)
+                {
+                    await _logger.LogDebugAsync($"Unblocking waiting test {readyTest.TestId} with constraint keys: {string.Join(", ", keys)}").ConfigureAwait(false);
+                    
+                    // Start the test immediately
+                    var readyTestTask = ExecuteAndReleaseTestAsync(readyTest, keys);
+                    readyTest.ExecutionTask = readyTestTask;
+                    activeTasks.Add(readyTestTask);
+                }
             }
         }
     }

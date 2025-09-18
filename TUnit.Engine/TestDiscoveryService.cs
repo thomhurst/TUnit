@@ -56,51 +56,56 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
 
-        // Extract types from filter for optimized discovery
         var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
-
-        // Stage 1: Stream independent tests immediately while buffering dependent tests
-        var independentTests = new List<AbstractExecutableTest>();
-        var dependentTests = new List<AbstractExecutableTest>();
-        var allTests = new List<AbstractExecutableTest>();
+        var estimatedTestCount = 1000;
+        var allTests = ObjectPools.RentTestList(estimatedTestCount);
+        var dependentTestIndices = ObjectPools.RentIntList();
 
         await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false))
         {
+            var index = allTests.Count;
             allTests.Add(test);
+            
+            _dependencyResolver.RegisterTest(test);
 
-            // Check if this test has dependencies based on metadata
             if (test.Metadata.Dependencies.Length > 0)
             {
-                // Buffer tests with dependencies for later resolution
-                dependentTests.Add(test);
-            }
-            else
-            {
-                // Independent test - can be used immediately
-                independentTests.Add(test);
+                dependentTestIndices.Add(index);
             }
         }
 
-        // Now resolve dependencies for dependent tests
-        foreach (var test in dependentTests)
+        foreach (var index in dependentTestIndices)
         {
-            _dependencyResolver.TryResolveDependencies(test);
+            _dependencyResolver.TryResolveDependencies(allTests[index]);
         }
 
-        // Combine independent and dependent tests
-        var tests = new List<AbstractExecutableTest>(independentTests.Count + dependentTests.Count);
-        tests.AddRange(independentTests);
-        tests.AddRange(dependentTests);
+        var tests = allTests;
 
         // For discovery requests (IDE test explorers), return all tests including explicit ones
         // For execution requests, apply filtering to exclude explicit tests unless explicitly targeted
-        var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, tests) : tests;
-
-        // If we applied filtering, find all dependencies of filtered tests and add them
-        if (isForExecution)
+        List<AbstractExecutableTest> filteredTests;
+        
+        if (!isForExecution)
         {
-            var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
-            var queue = new Queue<AbstractExecutableTest>(filteredTests);
+            filteredTests = tests;
+        }
+        else
+        {
+            var filtered = _testFilterService.FilterTests(filter, tests);
+            
+#if NETSTANDARD2_0
+            var testsToInclude = new HashSet<AbstractExecutableTest>();
+            var queue = new Queue<AbstractExecutableTest>();
+#else
+            var testsToInclude = new HashSet<AbstractExecutableTest>(filtered.Count * 2);
+            var queue = new Queue<AbstractExecutableTest>(filtered.Count);
+#endif
+            
+            foreach (var test in filtered)
+            {
+                testsToInclude.Add(test);
+                queue.Enqueue(test);
+            }
 
             while (queue.Count > 0)
             {
@@ -115,10 +120,16 @@ internal sealed class TestDiscoveryService : IDataProducer
                 }
             }
 
-            filteredTests = testsToInclude.ToList();
+            filteredTests = new List<AbstractExecutableTest>(testsToInclude.Count);
+            filteredTests.AddRange(testsToInclude);
         }
 
-        contextProvider.TestDiscoveryContext.AddTests(allTests.Select(t => t.Context));
+        var contexts = new TestContext[allTests.Count];
+        for (var i = 0; i < allTests.Count; i++)
+        {
+            contexts[i] = allTests[i].Context;
+        }
+        contextProvider.TestDiscoveryContext.AddTests(contexts);
 
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
@@ -127,7 +138,12 @@ internal sealed class TestDiscoveryService : IDataProducer
         // Register the filtered tests to invoke ITestRegisteredEventReceiver
         await _testFilterService.RegisterTestsAsync(filteredTests).ConfigureAwait(false);
 
-        // Capture the final execution context after discovery
+        ObjectPools.ReturnIntList(dependentTestIndices);
+        if (allTests != filteredTests && allTests != tests)
+        {
+            ObjectPools.ReturnTestList(allTests);
+        }
+        
         var finalContext = ExecutionContext.Capture();
         return new TestDiscoveryResult(filteredTests, finalContext);
     }
@@ -173,69 +189,90 @@ internal sealed class TestDiscoveryService : IDataProducer
         // Extract types from filter for optimized discovery
         var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
 
-        // Collect all tests first (like source generation mode does)
-        var allTests = new List<AbstractExecutableTest>();
+        // Use pooled list for collection
+        var estimatedCount = 1000;
+        var allTests = ObjectPools.RentTestList(estimatedCount);
         await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false))
         {
             allTests.Add(test);
         }
 
         // Resolve dependencies for all tests
-        foreach (var test in allTests)
+        for (var i = 0; i < allTests.Count; i++)
         {
-            _dependencyResolver.TryResolveDependencies(test);
+            _dependencyResolver.TryResolveDependencies(allTests[i]);
         }
 
-        // Separate into independent and dependent tests
-        var independentTests = new List<AbstractExecutableTest>();
-        var dependentTests = new List<AbstractExecutableTest>();
+        // Use pooled lists for indices
+        var independentIndices = ObjectPools.RentIntList(allTests.Count);
+        var dependentIndices = ObjectPools.RentIntList(allTests.Count);
 
-        foreach (var test in allTests)
+        for (var i = 0; i < allTests.Count; i++)
         {
-            if (test.Dependencies.Length == 0)
+            if (allTests[i].Dependencies.Length == 0)
             {
-                independentTests.Add(test);
+                independentIndices.Add(i);
             }
             else
             {
-                dependentTests.Add(test);
+                dependentIndices.Add(i);
             }
         }
 
-        // Yield independent tests first
-        foreach (var test in independentTests)
+        // Yield independent tests first using indices
+        foreach (var index in independentIndices)
         {
+            var test = allTests[index];
             if (_testFilterService.MatchesTest(filter, test))
             {
                 yield return test;
             }
         }
 
-        // Process dependent tests in dependency order
-        var yieldedTests = new HashSet<string>(independentTests.Select(t => t.TestId));
-        var remainingTests = new List<AbstractExecutableTest>(dependentTests);
-
-        while (remainingTests.Count > 0)
+        // Use pooled collections
+        var yieldedTests = ObjectPools.RentStringHashSet(independentIndices.Count);
+        foreach (var index in independentIndices)
         {
-            var readyTests = new List<AbstractExecutableTest>();
+            yieldedTests.Add(allTests[index].TestId);
+        }
+        
+        var remainingIndices = ObjectPools.RentIntList(dependentIndices.Count);
+        remainingIndices.AddRange(dependentIndices);
 
-            foreach (var test in remainingTests)
+        while (remainingIndices.Count > 0)
+        {
+            var readyIndices = ObjectPools.RentIntList();
+
+            for (var i = remainingIndices.Count - 1; i >= 0; i--) // Iterate backwards for safe removal
             {
+                var testIndex = remainingIndices[i];
+                var test = allTests[testIndex];
+                
                 // Check if all dependencies have been yielded
-                var allDependenciesYielded = test.Dependencies.All(dep => yieldedTests.Contains(dep.Test.TestId));
+                var allDependenciesYielded = true;
+                foreach (var dep in test.Dependencies)
+                {
+                    if (!yieldedTests.Contains(dep.Test.TestId))
+                    {
+                        allDependenciesYielded = false;
+                        break;
+                    }
+                }
 
                 if (allDependenciesYielded)
                 {
-                    readyTests.Add(test);
+                    readyIndices.Add(testIndex);
+                    remainingIndices.RemoveAt(i);
                 }
             }
 
             // If no tests are ready, we have a circular dependency
-            if (readyTests.Count == 0 && remainingTests.Count > 0)
+            if (readyIndices.Count == 0 && remainingIndices.Count > 0)
             {
                 // Yield remaining tests anyway to avoid hanging
-                foreach (var test in remainingTests)
+                foreach (var index in remainingIndices)
                 {
+                    var test = allTests[index];
                     if (_testFilterService.MatchesTest(filter, test))
                     {
                         yield return test;
@@ -244,17 +281,26 @@ internal sealed class TestDiscoveryService : IDataProducer
                 break;
             }
 
-            // Yield ready tests and remove from remaining
-            foreach (var test in readyTests)
+            // Yield ready tests
+            foreach (var index in readyIndices)
             {
+                var test = allTests[index];
                 if (_testFilterService.MatchesTest(filter, test))
                 {
                     yield return test;
                 }
                 yieldedTests.Add(test.TestId);
-                remainingTests.Remove(test);
             }
+            
+            ObjectPools.ReturnIntList(readyIndices);
         }
+        
+        // Clean up pooled objects
+        ObjectPools.ReturnIntList(independentIndices);
+        ObjectPools.ReturnIntList(dependentIndices);
+        ObjectPools.ReturnIntList(remainingIndices);
+        ObjectPools.ReturnStringHashSet(yieldedTests);
+        ObjectPools.ReturnTestList(allTests);
     }
 
     private bool AreAllDependenciesSatisfied(AbstractExecutableTest test, ConcurrentDictionary<string, bool> completedTests)
