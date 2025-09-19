@@ -61,7 +61,7 @@ public sealed class TestDependency : IEquatable<TestDependency>
             if (ClassType.IsGenericTypeDefinition)
             {
                 // Early exit if test class type has no generic inheritance at all
-                if (!testClassType.IsGenericType && testClassType.BaseType == null)
+                if (testClassType is { IsGenericType: false, BaseType: null })
                 {
                     return false;
                 }

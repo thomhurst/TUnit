@@ -38,7 +38,7 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
     protected override async Task<CommandResult[]?> ExecuteAsync(IPipelineContext context, CancellationToken cancellationToken)
     {
         var nupkgs = context.Git().RootDirectory
-            .GetFiles(x => x.Extension is ".nupkg");
+            .GetFiles(x => x.NameWithoutExtension.Contains("TUnit") && x.Extension is ".nupkg");
 
         return await nupkgs.SelectAsync(file =>
                 context.DotNet().Nuget.Push(new DotNetNugetPushOptions(file)

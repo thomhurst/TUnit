@@ -29,10 +29,13 @@ public class NotInParallelOrderExecutionTests
             orderList.Add(testName);
         }
 
+        // Use TestStart if available, otherwise use DateTime.Now
+        var startTime = TestContext.Current.TestStart?.DateTime ?? DateTime.Now;
+        
         OrderedExecutionRecords.Add(new OrderedExecutionRecord(
             testName,
             groupKey,
-            TestContext.Current.TestStart.DateTime,
+            startTime,
             null
         ));
     }
@@ -55,7 +58,8 @@ public class NotInParallelOrderExecutionTests
 
         if (record != null)
         {
-            record.EndTime = TestContext.Current.Result!.End!.Value.DateTime;
+            // Use Result.End if available, otherwise use DateTime.Now
+            record.EndTime = TestContext.Current.Result?.End?.DateTime ?? DateTime.Now;
         }
 
         await AssertOrderedExecutionWithinGroup(groupKey);
@@ -185,9 +189,13 @@ public class NotInParallelOrderExecutionTests
     private static string GetGroupKey(string testName)
     {
         if (testName.StartsWith("OrderedTest_"))
+        {
             return "OrderGroup1";
+        }
         if (testName.StartsWith("OrderedGroup2_"))
+        {
             return "OrderGroup2";
+        }
         return "Unknown";
     }
 
@@ -209,7 +217,9 @@ public class NotInParallelOrderExecutionTests
         public bool OverlapsWith(OrderedExecutionRecord other)
         {
             if (EndTime == null || other.EndTime == null)
+            {
                 return false;
+            }
 
             return StartTime < other.EndTime.Value && other.StartTime < EndTime.Value;
         }

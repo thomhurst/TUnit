@@ -33,7 +33,7 @@ public class GlobalContext : Context
         set;
     }
 
-    internal override void RestoreContextAsyncLocal()
+    internal override void SetAsyncLocalContext()
     {
         Current = this;
     }

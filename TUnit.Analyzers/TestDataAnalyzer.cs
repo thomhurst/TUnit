@@ -295,7 +295,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private ImmutableArray<ITypeSymbol> GetTypes(ImmutableArray<IParameterSymbol> parameters, IPropertySymbol? propertySymbol)
     {
-        IEnumerable<ITypeSymbol?> types = parameters.Select(x => x.Type).Concat(new[] { propertySymbol?.Type }).Where(t => t != null);
+        var types = parameters.Select(x => x.Type).Concat(new[] { propertySymbol?.Type }).Where(t => t != null);
 
         return types.OfType<ITypeSymbol>().ToImmutableArray().WithoutCancellationTokenParameter();
     }
@@ -853,8 +853,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         if (typedInterface != null)
         {
             // If the type is a tuple, extract its elements
-            if (typedInterface.TypeArguments.Length == 1 && 
-                typedInterface.TypeArguments[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+            if (typedInterface.TypeArguments is
+                [
+                    INamedTypeSymbol { IsTupleType: true } tupleType
+                ])
             {
                 typeArguments = ImmutableArray.CreateRange(tupleType.TupleElements.Select(x => x.Type));
             }

@@ -210,11 +210,11 @@ public static class TypeExtensions
     {
         // Handle open generic types where type arguments are type parameters
         // This prevents invalid C# like List<T>, Dictionary<TKey, TValue>, T? where type parameters are undefined
-        if (typeSymbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsGenericType)
+        if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol)
         {
             // Check if this is an unbound generic type or has type parameter arguments
-            bool hasTypeParameters = namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
-            bool isUnboundGeneric = namedTypeSymbol.IsUnboundGenericType;
+            var hasTypeParameters = namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
+            var isUnboundGeneric = namedTypeSymbol.IsUnboundGenericType;
             
             if (hasTypeParameters || isUnboundGeneric)
             {

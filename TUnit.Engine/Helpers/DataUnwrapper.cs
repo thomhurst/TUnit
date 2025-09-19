@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Helpers;
 
-public class DataUnwrapper
+internal class DataUnwrapper
 {
     public static object?[] Unwrap(object?[] values)
     {

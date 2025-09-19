@@ -29,7 +29,7 @@ public class DynamicTestAwaitExpressionSuppressor : DiagnosticSuppressor
                 continue;
             }
 
-            if (namedTypeSymbol.Name == "DynamicTest" || namedTypeSymbol.Name == "DynamicTestInstance")
+            if (namedTypeSymbol.Name == "DynamicTest" || namedTypeSymbol.Name == "DynamicTest")
             {
                 Suppress(context, diagnostic);
             }

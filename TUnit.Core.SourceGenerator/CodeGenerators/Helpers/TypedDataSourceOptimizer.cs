@@ -11,12 +11,16 @@ internal static class TypedDataSourceOptimizer
     public static bool CanOptimizeTypedDataSource(AttributeData dataSourceAttribute, IMethodSymbol testMethod)
     {
         if (!dataSourceAttribute.IsTypedDataSourceAttribute())
+        {
             return false;
-            
+        }
+
         var dataSourceType = dataSourceAttribute.GetTypedDataSourceType();
         if (dataSourceType == null)
+        {
             return false;
-            
+        }
+
         // For single parameter tests, check if types match directly
         if (testMethod.Parameters.Length == 1)
         {
@@ -24,14 +28,15 @@ internal static class TypedDataSourceOptimizer
         }
         
         // For multiple parameters, check if data source provides a matching tuple
-        if (dataSourceType is INamedTypeSymbol namedType && 
-            namedType.IsTupleType && 
+        if (dataSourceType is INamedTypeSymbol { IsTupleType: true } namedType && 
             namedType.TupleElements.Length == testMethod.Parameters.Length)
         {
-            for (int i = 0; i < testMethod.Parameters.Length; i++)
+            for (var i = 0; i < testMethod.Parameters.Length; i++)
             {
                 if (!SymbolEqualityComparer.Default.Equals(namedType.TupleElements[i].Type, testMethod.Parameters[i].Type))
+                {
                     return false;
+                }
             }
             return true;
         }
@@ -71,14 +76,17 @@ internal static class TypedDataSourceOptimizer
             writer.AppendLine("var value = await dataFunc();");
             writer.AppendLine($"var args = new object?[] {{ value }};");
         }
-        else if (dataSourceType is INamedTypeSymbol namedType && namedType.IsTupleType)
+        else if (dataSourceType is INamedTypeSymbol { IsTupleType: true } namedType)
         {
             // Tuple - decompose without boxing
             writer.AppendLine("var tuple = await dataFunc();");
             writer.Append("var args = new object?[] { ");
-            for (int i = 0; i < namedType.TupleElements.Length; i++)
+            for (var i = 0; i < namedType.TupleElements.Length; i++)
             {
-                if (i > 0) writer.Append(", ");
+                if (i > 0)
+                {
+                    writer.Append(", ");
+                }
                 writer.Append($"tuple.Item{i + 1}");
             }
             writer.AppendLine(" };");

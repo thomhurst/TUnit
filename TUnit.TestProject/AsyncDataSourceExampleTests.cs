@@ -1,3 +1,5 @@
+using TUnit.Assertions.Extensions;
+
 namespace TUnit.TestProject;
 
 public class AsyncApiDataSource : AsyncDataSourceGeneratorAttribute<string>

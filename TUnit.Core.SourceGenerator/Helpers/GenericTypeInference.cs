@@ -56,7 +56,9 @@ internal static class GenericTypeInference
         foreach (var attribute in attributes)
         {
             if (attribute.AttributeClass == null)
+            {
                 continue;
+            }
 
             // Check if this is a typed data source (inherits from AsyncDataSourceGeneratorAttribute<T> or DataSourceGeneratorAttribute<T>)
             var baseType = GetTypedDataSourceBase(attribute.AttributeClass);
@@ -108,17 +110,21 @@ internal static class GenericTypeInference
             .ToList();
 
         if (argumentsAttributes.Count == 0)
+        {
             return null;
+        }
 
         // Get the first Arguments attribute to infer types
         var firstArgs = argumentsAttributes[0];
         if (firstArgs.ConstructorArguments.Length == 0)
+        {
             return null;
+        }
 
         var inferredTypes = new List<ITypeSymbol>();
 
         // Match type parameters with method parameters
-        for (int i = 0; i < method.TypeParameters.Length && i < method.Parameters.Length; i++)
+        for (var i = 0; i < method.TypeParameters.Length && i < method.Parameters.Length; i++)
         {
             var parameter = method.Parameters[i];
             
@@ -171,7 +177,7 @@ internal static class GenericTypeInference
                             
                             // Find the index of this type parameter
                             var typeParamIndex = -1;
-                            for (int i = 0; i < method.TypeParameters.Length; i++)
+                            for (var i = 0; i < method.TypeParameters.Length; i++)
                             {
                                 if (method.TypeParameters[i].Name == typeParam.Name)
                                 {
@@ -206,7 +212,9 @@ internal static class GenericTypeInference
     private static ITypeSymbol? InferTypeFromValue(TypedConstant value)
     {
         if (value.IsNull)
+        {
             return null;
+        }
 
         // The type of the constant value tells us what T should be
         return value.Type;
@@ -219,7 +227,9 @@ internal static class GenericTypeInference
             .ToList();
 
         if (!methodDataSourceAttributes.Any())
+        {
             return null;
+        }
 
         foreach (var attr in methodDataSourceAttributes)
         {
@@ -243,7 +253,9 @@ internal static class GenericTypeInference
                             // Extract types from tuple elements
                             var inferredTypes = InferTypesFromTupleElements(testMethod, tupleNamedType);
                             if (inferredTypes != null)
+                            {
                                 return inferredTypes;
+                            }
                         }
                     }
                 }
@@ -259,7 +271,7 @@ internal static class GenericTypeInference
         var tupleElements = tupleType.TupleElements;
 
         // Map tuple elements to method parameters
-        for (int i = 0; i < testMethod.Parameters.Length && i < tupleElements.Length; i++)
+        for (var i = 0; i < testMethod.Parameters.Length && i < tupleElements.Length; i++)
         {
             var parameter = testMethod.Parameters[i];
             var tupleElement = tupleElements[i];
@@ -268,7 +280,7 @@ internal static class GenericTypeInference
             {
                 // Find the index of this type parameter
                 var typeParamIndex = -1;
-                for (int j = 0; j < testMethod.TypeParameters.Length; j++)
+                for (var j = 0; j < testMethod.TypeParameters.Length; j++)
                 {
                     if (testMethod.TypeParameters[j].Name == typeParam.Name)
                     {
@@ -301,13 +313,13 @@ internal static class GenericTypeInference
                 if (tupleElementType is INamedTypeSymbol { Name: "Func" } funcType)
                 {
                     // Match type arguments between parameter type and tuple element type
-                    for (int j = 0; j < funcType.TypeArguments.Length && j < paramNamedType.TypeArguments.Length; j++)
+                    for (var j = 0; j < funcType.TypeArguments.Length && j < paramNamedType.TypeArguments.Length; j++)
                     {
                         var paramTypeArg = paramNamedType.TypeArguments[j];
                         if (paramTypeArg is ITypeParameterSymbol funcTypeParam)
                         {
                             var typeParamIndex = -1;
-                            for (int k = 0; k < testMethod.TypeParameters.Length; k++)
+                            for (var k = 0; k < testMethod.TypeParameters.Length; k++)
                             {
                                 if (testMethod.TypeParameters[k].Name == funcTypeParam.Name)
                                 {
@@ -385,11 +397,13 @@ internal static class GenericTypeInference
     private static ImmutableArray<ITypeSymbol>? InferTypesFromSingleArguments(IMethodSymbol method, AttributeData args)
     {
         if (!method.IsGenericMethod || args.ConstructorArguments.Length == 0)
+        {
             return null;
+        }
 
         var inferredTypes = new List<ITypeSymbol>();
 
-        for (int i = 0; i < method.TypeParameters.Length && i < method.Parameters.Length; i++)
+        for (var i = 0; i < method.TypeParameters.Length && i < method.Parameters.Length; i++)
         {
             var parameter = method.Parameters[i];
             
@@ -416,12 +430,16 @@ internal static class GenericTypeInference
     private static bool TypeArraysEqual(ImmutableArray<ITypeSymbol> a, ImmutableArray<ITypeSymbol> b)
     {
         if (a.Length != b.Length)
+        {
             return false;
+        }
 
-        for (int i = 0; i < a.Length; i++)
+        for (var i = 0; i < a.Length; i++)
         {
             if (!SymbolEqualityComparer.Default.Equals(a[i], b[i]))
+            {
                 return false;
+            }
         }
 
         return true;

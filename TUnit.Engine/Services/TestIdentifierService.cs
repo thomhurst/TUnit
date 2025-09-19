@@ -153,7 +153,7 @@ internal static class TestIdentifierService
         }
 
         // Use StringBuilder for efficient parameter list construction
-        var sb = new StringBuilder(typeName.Length + (parameterTypes.Length * 20)); // Estimate capacity
+        var sb = new StringBuilder(typeName.Length + parameterTypes.Length * 20); // Estimate capacity
         sb.Append(typeName).Append('(');
 
         for (var i = 0; i < parameterTypes.Length; i++)

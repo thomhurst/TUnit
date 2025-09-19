@@ -1,10 +1,10 @@
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using EnumerableAsyncProcessor.Extensions;
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Building.Interfaces;
 
 namespace TUnit.Engine.Building.Collectors;
@@ -52,7 +52,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            IEnumerable<DynamicTest> dynamicTests;
+            IEnumerable<AbstractDynamicTest> dynamicTests;
             TestMetadata? failedMetadata = null;
 
             try
@@ -84,10 +84,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     }
 
     private async IAsyncEnumerable<TestMetadata> ConvertDynamicTestToMetadataStreaming(
-        DynamicTest dynamicTest,
+        AbstractDynamicTest abstractDynamicTest,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        foreach (var discoveryResult in dynamicTest.GetTests())
+        foreach (var discoveryResult in abstractDynamicTest.GetTests())
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -169,12 +169,12 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     private static Func<Type[], object?[], object>? CreateAotDynamicInstanceFactory(Type testClass, object?[]? predefinedClassArgs)
     {
         // Check if we have predefined args to use as defaults
-        var hasPredefinedArgs = predefinedClassArgs != null && predefinedClassArgs.Length > 0;
+        var hasPredefinedArgs = predefinedClassArgs is { Length: > 0 };
 
         return (typeArgs, args) =>
         {
             // Use provided args if available, otherwise fall back to predefined args
-            var effectiveArgs = (args != null && args.Length > 0) ? args : (predefinedClassArgs ?? []);
+            var effectiveArgs = args is { Length: > 0 } ? args : predefinedClassArgs ?? [];
 
             if (testClass.IsGenericTypeDefinition && typeArgs.Length > 0)
             {
@@ -310,9 +310,26 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 };
 
                 // Create instance and test invoker for the dynamic test
-                Func<TestContext, Task<object>> createInstance = (TestContext testContext) =>
+                var createInstance = async (TestContext testContext) =>
                 {
-                    var instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
+                    object instance;
+                    
+                    // Check if there's a ClassConstructor to use
+                    if (testContext.ClassConstructor != null)
+                    {
+                        var testBuilderContext = TestBuilderContext.FromTestContext(testContext, null);
+                        var classConstructorMetadata = new ClassConstructorMetadata
+                        {
+                            TestSessionId = "", // Dynamic tests don't have session IDs
+                            TestBuilderContext = testBuilderContext
+                        };
+                        
+                        instance = await testContext.ClassConstructor.Create(metadata.TestClassType, classConstructorMetadata);
+                    }
+                    else
+                    {
+                        instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
+                    }
 
                     // Handle property injections
                     foreach (var propertyInjection in metadata.PropertyInjections)
@@ -321,13 +338,16 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                         propertyInjection.Setter(instance, value);
                     }
 
-                    return Task.FromResult(instance);
+                    return instance;
                 };
 
                 var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
 
                 return new ExecutableTest(createInstance,
-                    async (instance, args, context, ct) => await invokeTest(instance, args))
+                    async (instance, args, context, ct) =>
+                    {
+                        await invokeTest(instance, args);
+                    })
                 {
                     TestId = modifiedContext.TestId,
                     Metadata = metadata,

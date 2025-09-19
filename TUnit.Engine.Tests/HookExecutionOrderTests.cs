@@ -27,7 +27,7 @@ public class HookExecutionOrderTests
     public void VerifyExecutionOrder()
     {
         _executionOrder.Add("Test");
-        
+
         // Verify that BeforeEvery runs before Before
         _executionOrder.Count.ShouldBe(3);
         _executionOrder[0].ShouldBe("BeforeEvery");

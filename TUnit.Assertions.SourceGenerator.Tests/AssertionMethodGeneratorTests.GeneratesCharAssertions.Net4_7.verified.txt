@@ -1,0 +1,522 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.Extensions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class CharIsDigitWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsDigitWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsDigit(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsDigit");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsDigit";
+    }
+}
+
+public class CharIsLetterWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsLetterWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsLetter(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsLetter");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsLetter";
+    }
+}
+
+public class CharIsLetterOrDigitWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsLetterOrDigitWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsLetterOrDigit(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsLetterOrDigit");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsLetterOrDigit";
+    }
+}
+
+public class CharIsLowerWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsLowerWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsLower(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsLower");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsLower";
+    }
+}
+
+public class CharIsUpperWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsUpperWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsUpper(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsUpper");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsUpper";
+    }
+}
+
+public class CharIsNumberWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsNumberWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsNumber(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsNumber");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsNumber";
+    }
+}
+
+public class CharIsPunctuationWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsPunctuationWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsPunctuation(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsPunctuation");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsPunctuation";
+    }
+}
+
+public class CharIsSeparatorWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsSeparatorWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsSeparator(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsSeparator");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsSeparator";
+    }
+}
+
+public class CharIsSymbolWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsSymbolWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsSymbol(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsSymbol");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsSymbol";
+    }
+}
+
+public class CharIsWhiteSpaceWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsWhiteSpaceWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsWhiteSpace(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsWhiteSpace");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsWhiteSpace";
+    }
+}
+
+public class CharIsControlWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsControlWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsControl(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsControl");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsControl";
+    }
+}
+
+public class CharIsHighSurrogateWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsHighSurrogateWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsHighSurrogate(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsHighSurrogate");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsHighSurrogate";
+    }
+}
+
+public class CharIsLowSurrogateWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsLowSurrogateWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsLowSurrogate(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsLowSurrogate");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsLowSurrogate";
+    }
+}
+
+public class CharIsSurrogateWithCharAssertCondition : BaseAssertCondition<char>
+{
+    private readonly bool _negated;
+
+    public CharIsSurrogateWithCharAssertCondition(bool negated = false)
+    {
+        _negated = negated;
+    }
+
+    protected override ValueTask<AssertionResult> GetResult(char actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    {
+        var result = char.IsSurrogate(actualValue);
+        var condition = _negated ? result : !result;
+        return AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsSurrogate");
+    }
+
+    protected internal override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")}to satisfy IsSurrogate";
+    }
+}
+
+public static partial class CharAssertionExtensions
+{
+    public static InvokableValueAssertionBuilder<char> IsDigit(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsDigitWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotDigit(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsDigitWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsLetter(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsLetterWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotLetter(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsLetterWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsLetterOrDigit(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsLetterOrDigitWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotLetterOrDigit(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsLetterOrDigitWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsLower(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsLowerWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotLower(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsLowerWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsUpper(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsUpperWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotUpper(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsUpperWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNumber(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsNumberWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotNumber(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsNumberWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsPunctuation(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsPunctuationWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotPunctuation(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsPunctuationWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsSeparator(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsSeparatorWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotSeparator(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsSeparatorWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsSymbol(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsSymbolWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotSymbol(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsSymbolWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsWhiteSpace(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsWhiteSpaceWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotWhiteSpace(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsWhiteSpaceWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsControl(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsControlWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotControl(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsControlWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsHighSurrogate(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsHighSurrogateWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotHighSurrogate(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsHighSurrogateWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsLowSurrogate(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsLowSurrogateWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotLowSurrogate(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsLowSurrogateWithCharAssertCondition(true),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsSurrogate(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsSurrogateWithCharAssertCondition(false),
+            []);
+    }
+
+    public static InvokableValueAssertionBuilder<char> IsNotSurrogate(this IValueSource<char> valueSource)
+    {
+        return valueSource.RegisterAssertion(
+            new CharIsSurrogateWithCharAssertCondition(true),
+            []);
+    }
+
+}
+
+]

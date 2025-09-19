@@ -14,6 +14,7 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Verify" />
+      <PackageReference Include="Verify.TUnit" />
     </ItemGroup>
 
     <ItemGroup>

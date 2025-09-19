@@ -9,7 +9,7 @@ internal class TestableContext : Context
 {
     public TestableContext() : base(null) { }
 
-    internal override void RestoreContextAsyncLocal() { }
+    internal override void SetAsyncLocalContext() { }
 }
 
 public class ContextThreadSafetyTests
@@ -70,7 +70,9 @@ public class ContextThreadSafetyTests
         for (var i = 0; i < 20; i++)
         {
             if (finalOutput.Contains($"Task {i},"))
+            {
                 foundTasks++;
+            }
         }
         await Assert.That(foundTasks).IsGreaterThan(5); // At least 5 tasks should have written something
     }

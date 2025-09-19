@@ -131,14 +131,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var concreteMethod = FindConcreteMethodImplementation(classInfo.TypeSymbol, method);
 
             // Calculate inheritance depth for this test
-            int inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
+            var inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
+
+            var filePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? 
+                          classInfo.ClassSyntax.GetLocation().SourceTree?.FilePath ?? 
+                          classInfo.ClassSyntax.SyntaxTree.FilePath;
+            
+            var lineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 
+                            classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
 
             var testMethodMetadata = new TestMethodMetadata
             {
                 MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
                 TypeSymbol = classInfo.TypeSymbol,
-                FilePath = classInfo.ClassSyntax.GetLocation().SourceTree?.FilePath ?? testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? classInfo.ClassSyntax.SyntaxTree.FilePath,
-                LineNumber = classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+                FilePath = filePath,
+                LineNumber = lineNumber,
                 TestAttribute = testAttribute,
                 Context = null, // No context for inherited tests
                 MethodSyntax = null, // No syntax for inherited methods
@@ -161,8 +168,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Count how many levels up the inheritance chain the method is declared
-        int depth = 0;
-        INamedTypeSymbol? currentType = testClass.BaseType;
+        var depth = 0;
+        var currentType = testClass.BaseType;
 
         while (currentType != null)
         {
@@ -418,7 +425,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Direct method invocation with known types
         var parameterCasts = new List<string>();
-        for (int i = 0; i < testMethod.MethodSymbol.Parameters.Length; i++)
+        for (var i = 0; i < testMethod.MethodSymbol.Parameters.Length; i++)
         {
             var param = testMethod.MethodSymbol.Parameters[i];
             if (param.Type.Name == "CancellationToken")
@@ -447,7 +454,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // Find the index of this type parameter
             var index = -1;
-            for (int j = 0; j < typeParameters.Length; j++)
+            for (var j = 0; j < typeParameters.Length; j++)
             {
                 if (typeParameters[j].Name == typeParam.Name)
                 {
@@ -979,7 +986,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static bool IsAsyncEnumerable(ITypeSymbol type)
     {
         // Check if the type itself is an IAsyncEnumerable<T>
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType && 
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType && 
             namedType.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>")
         {
             return true;
@@ -1063,7 +1070,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     ? arrayType.ElementType.GloballyQualified()
                     : "object";
                 writer.Append($"new {elementType}[] {{ ");
-                for (int i = 0; i < constant.Values.Length; i++)
+                for (var i = 0; i < constant.Values.Length; i++)
                 {
                     WriteTypedConstant(writer, constant.Values[i]);
                     if (i < constant.Values.Length - 1)
@@ -1560,7 +1567,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else
         {
             // Count required parameters (those without default values, excluding CancellationToken and params parameters)
-            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional && !p.IsParams);
+            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && p is { IsOptional: false, IsParams: false });
 
             // Generate runtime logic to handle variable argument counts
             writer.AppendLine("switch (args.Length)");
@@ -1657,7 +1664,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else
         {
             // Count required parameters (those without default values, excluding CancellationToken and params parameters)
-            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && !p.IsOptional && !p.IsParams);
+            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && p is { IsOptional: false, IsParams: false });
 
             // Generate runtime logic to handle variable argument counts
             writer.AppendLine("switch (args.Length)");
@@ -1907,7 +1914,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Look for ProceedOnFailure property in named arguments
         foreach (var namedArg in attributeData.NamedArguments)
         {
-            if (namedArg.Key == "ProceedOnFailure" && namedArg.Value.Value is bool proceedOnFailure)
+            if (namedArg is { Key: "ProceedOnFailure", Value.Value: bool proceedOnFailure })
             {
                 return proceedOnFailure;
             }
@@ -2021,7 +2028,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return false;
         }
 
-        for (int i = 0; i < params1.Length; i++)
+        for (var i = 0; i < params1.Length; i++)
         {
             // For generic types, we need to consider that T in base class becomes concrete type in derived class
             if (!TypesMatchForInheritance(params1[i].Type, params2[i].Type))
@@ -2352,12 +2359,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             foreach (var classAttr in classArgumentsAttributes)
             {
                 var classTypes = InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, classAttr, compilation);
-                if (classTypes == null || classTypes.Length == 0) continue;
+                if (classTypes == null || classTypes.Length == 0)
+                {
+                    continue;
+                }
 
                 foreach (var methodAttr in methodArgumentsAttributes)
                 {
                     var methodTypes = InferTypesFromArgumentsAttribute(testMethod.MethodSymbol, methodAttr, compilation);
-                    if (methodTypes == null || methodTypes.Length == 0) continue;
+                    if (methodTypes == null || methodTypes.Length == 0)
+                    {
+                        continue;
+                    }
 
                     // Combine class and method types
                     var combinedTypes = new ITypeSymbol[classTypes.Length + methodTypes.Length];
@@ -2367,20 +2380,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var typeKey = string.Join(",", combinedTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
                     // Skip if we've already processed this type combination
-                    if (processedTypeCombinations.Contains(typeKey))
+                    if (!processedTypeCombinations.Add(typeKey))
+                    {
                         continue;
-
-                    processedTypeCombinations.Add(typeKey);
+                    }
 
                     // Validate constraints for both class and method separately
-                    bool constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes) &&
+                    var constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes) &&
                                           ValidateTypeConstraints(testMethod.MethodSymbol, methodTypes);
 
                     // TODO: Fix ValidateTypeConstraints method - temporarily skip validation
                     constraintsValid = true;
 
                     if (!constraintsValid)
+                    {
                         continue;
+                    }
 
                     // Generate a concrete instantiation for this type combination
                     writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
@@ -2396,7 +2411,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // For generic classes with non-generic methods, don't include method Arguments here
             // They will be processed separately with InferClassTypesFromMethodArguments
-            if (!(testMethod.IsGenericType && !testMethod.IsGenericMethod))
+            if (!(testMethod is { IsGenericType: true, IsGenericMethod: false }))
             {
                 allArgumentsAttributes.AddRange(methodArgumentsAttributes);
             }
@@ -2423,13 +2438,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
                     // Skip if we've already processed this type combination
-                    if (processedTypeCombinations.Contains(typeKey))
+                    if (!processedTypeCombinations.Add(typeKey))
+                    {
                         continue;
-
-                    processedTypeCombinations.Add(typeKey);
+                    }
 
                     // Validate constraints
-                    bool constraintsValid = true;
+                    var constraintsValid = true;
                     if (testMethod is { IsGenericType: true, IsGenericMethod: false })
                     {
                         // For generic class only, validate class constraints
@@ -2442,7 +2457,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
 
                     if (!constraintsValid)
+                    {
                         continue;
+                    }
 
                     // Generate a concrete instantiation for this type combination
                     writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
@@ -2454,7 +2471,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Handle generic classes with non-generic methods that have method-level Arguments
         // These were skipped in the main loop and need special processing
-        if (testMethod.IsGenericType && !testMethod.IsGenericMethod && methodArgumentsAttributes.Count > 0)
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false } && methodArgumentsAttributes.Count > 0)
         {
             foreach (var methodArgAttr in methodArgumentsAttributes)
             {
@@ -2464,19 +2481,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
                     // Skip if we've already processed this type combination
-                    if (processedTypeCombinations.Contains(typeKey))
+                    if (!processedTypeCombinations.Add(typeKey))
+                    {
                         continue;
-
-                    processedTypeCombinations.Add(typeKey);
+                    }
 
                     // Validate class type constraints
-                    bool constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes);
+                    var constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes);
 
                     // TODO: Fix ValidateClassTypeConstraints method - temporarily skip validation
                     constraintsValid = true;
 
                     if (!constraintsValid)
+                    {
                         continue;
+                    }
 
                     // Generate a concrete instantiation for this type combination
                     writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
@@ -2499,13 +2518,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
                 // Skip if we've already processed this type combination
-                if (processedTypeCombinations.Contains(typeKey))
+                if (!processedTypeCombinations.Add(typeKey))
+                {
                     continue;
-
-                processedTypeCombinations.Add(typeKey);
+                }
 
                 // Validate constraints
-                bool constraintsValid = true;
+                var constraintsValid = true;
                 if (testMethod is { IsGenericType: true, IsGenericMethod: false })
                 {
                     // For generic class only, validate class constraints
@@ -2518,7 +2537,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
 
                 if (!constraintsValid)
+                {
                     continue;
+                }
 
                 // Generate a concrete instantiation for this type combination
                 writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
@@ -2536,10 +2557,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
                 // Skip if we've already processed this type combination
-                if (!processedTypeCombinations.Contains(typeKey))
+                if (processedTypeCombinations.Add(typeKey))
                 {
-                    processedTypeCombinations.Add(typeKey);
-
                     // Validate constraints
                     if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
                     {
@@ -2568,10 +2587,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
                     // Skip if we've already processed this type combination
-                    if (!processedTypeCombinations.Contains(typeKey))
+                    if (processedTypeCombinations.Add(typeKey))
                     {
-                        processedTypeCombinations.Add(typeKey);
-
                         // Validate constraints for the generic class
                         if (ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes))
                         {
@@ -2594,10 +2611,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var typeKey = string.Join(",", typedDataSourceInferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
                 // Skip if we've already processed this type combination
-                if (!processedTypeCombinations.Contains(typeKey))
+                if (processedTypeCombinations.Add(typeKey))
                 {
-                    processedTypeCombinations.Add(typeKey);
-
                     // Validate constraints for the generic class
                     if (ValidateClassTypeConstraints(testMethod.TypeSymbol, typedDataSourceInferredTypes))
                     {
@@ -2626,10 +2641,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
                     // Skip if we've already processed this type combination
-                    if (!processedTypeCombinations.Contains(typeKey))
+                    if (processedTypeCombinations.Add(typeKey))
                     {
-                        processedTypeCombinations.Add(typeKey);
-
                         // Validate constraints
                         if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
                         {
@@ -2675,10 +2688,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                                 var typeKey = string.Join(",", combinedTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
                                 // Skip if we've already processed this type combination
-                                if (!processedTypeCombinations.Contains(typeKey))
+                                if (processedTypeCombinations.Add(typeKey))
                                 {
-                                    processedTypeCombinations.Add(typeKey);
-
                                     // Validate constraints for both class and method type parameters
                                     if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classInferredTypes) &&
                                         ValidateTypeConstraints(testMethod.MethodSymbol, methodInferredTypes))
@@ -2698,10 +2709,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         var typeKey = string.Join(",", classInferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
                         // Skip if we've already processed this type combination
-                        if (!processedTypeCombinations.Contains(typeKey))
+                        if (processedTypeCombinations.Add(typeKey))
                         {
-                            processedTypeCombinations.Add(typeKey);
-
                             // Validate constraints for the generic class type parameters
                             if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classInferredTypes))
                             {
@@ -2717,7 +2726,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Process class-level Arguments attributes for non-generic classes with parameterized constructors
-        if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
+        if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
             var nonGenericClassArguments = testMethod.TypeSymbol.GetAttributes()
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
@@ -2825,10 +2834,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
 
                     // Skip if we've already processed this type combination
-                    if (!processedTypeCombinations.Contains(typeKey))
+                    if (processedTypeCombinations.Add(typeKey))
                     {
-                        processedTypeCombinations.Add(typeKey);
-
                         // Validate constraints
                         if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
                         {
@@ -2858,9 +2865,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var typeParams = classSymbol.TypeParameters;
 
         if (typeParams.Length != typeArguments.Length)
+        {
             return false;
+        }
 
-        for (int i = 0; i < typeParams.Length; i++)
+        for (var i = 0; i < typeParams.Length; i++)
         {
             var typeParam = typeParams[i];
             var typeArg = typeArguments[i];
@@ -2869,14 +2878,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (typeParam.HasValueTypeConstraint)
             {
                 if (!typeArg.IsValueType || typeArg.IsReferenceType)
+                {
                     return false;
+                }
             }
 
             // Check class constraint
             if (typeParam.HasReferenceTypeConstraint)
             {
                 if (!typeArg.IsReferenceType)
+                {
                     return false;
+                }
             }
 
             // Check specific type constraints
@@ -2886,13 +2899,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 if (constraintType.TypeKind == TypeKind.Interface)
                 {
                     if (!typeArg.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, constraintType)))
+                    {
                         return false;
+                    }
                 }
                 // For base class constraints, check if the type derives from the class
                 else if (constraintType.TypeKind == TypeKind.Class)
                 {
                     var baseType = typeArg.BaseType;
-                    bool found = false;
+                    var found = false;
                     while (baseType != null)
                     {
                         if (SymbolEqualityComparer.Default.Equals(baseType, constraintType))
@@ -2903,7 +2918,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         baseType = baseType.BaseType;
                     }
                     if (!found && !SymbolEqualityComparer.Default.Equals(typeArg, constraintType))
+                    {
                         return false;
+                    }
                 }
             }
         }
@@ -2914,30 +2931,36 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static ITypeSymbol[]? InferClassTypesFromMethodArguments(INamedTypeSymbol classSymbol, IMethodSymbol methodSymbol, AttributeData argAttr, Compilation compilation)
     {
         if (argAttr.ConstructorArguments.Length == 0)
+        {
             return null;
+        }
 
         var inferredTypes = new Dictionary<string, ITypeSymbol>();
         var classTypeParameters = classSymbol.TypeParameters;
 
         // Arguments attribute takes params object?[] so the first constructor argument is an array
         if (argAttr.ConstructorArguments.Length != 1 || argAttr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
+        {
             return null;
+        }
 
         var argumentValues = argAttr.ConstructorArguments[0].Values;
         var methodParams = methodSymbol.Parameters;
 
         // For each value in the params array
-        for (int argIndex = 0; argIndex < argumentValues.Length && argIndex < methodParams.Length; argIndex++)
+        for (var argIndex = 0; argIndex < argumentValues.Length && argIndex < methodParams.Length; argIndex++)
         {
             var methodParam = methodParams[argIndex];
             var argValue = argumentValues[argIndex];
 
             // Skip if this is a CancellationToken parameter
             if (methodParam.Type.Name == "CancellationToken")
+            {
                 continue;
+            }
 
             // Check if the method parameter type is a class generic type parameter
-            if (methodParam.Type is ITypeParameterSymbol typeParam && typeParam.DeclaringMethod == null)
+            if (methodParam.Type is ITypeParameterSymbol { DeclaringMethod: null } typeParam)
             {
                 // This is a class type parameter
                 var paramName = typeParam.Name;
@@ -2974,11 +2997,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Check if we've inferred all required type parameters
         if (inferredTypes.Count == 0)
+        {
             return null;
+        }
 
         // Build the result array in the correct order
         var result = new ITypeSymbol[classTypeParameters.Length];
-        for (int i = 0; i < classTypeParameters.Length; i++)
+        for (var i = 0; i < classTypeParameters.Length; i++)
         {
             var paramName = classTypeParameters[i].Name;
             if (inferredTypes.TryGetValue(paramName, out var inferredType))
@@ -2997,12 +3022,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool ContainsClassTypeParameter(ITypeSymbol type, INamedTypeSymbol classSymbol)
     {
-        if (type is ITypeParameterSymbol typeParam && typeParam.DeclaringMethod == null)
+        if (type is ITypeParameterSymbol { DeclaringMethod: null })
         {
             return true;
         }
 
-        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
             return namedType.TypeArguments.Any(ta => ContainsClassTypeParameter(ta, classSymbol));
         }
@@ -3012,7 +3037,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void MapGenericTypeArguments(ITypeSymbol paramType, ITypeSymbol argType, INamedTypeSymbol classSymbol, Dictionary<string, ITypeSymbol> inferredTypes)
     {
-        if (paramType is ITypeParameterSymbol typeParam && typeParam.DeclaringMethod == null)
+        if (paramType is ITypeParameterSymbol { DeclaringMethod: null } typeParam)
         {
             if (!inferredTypes.ContainsKey(typeParam.Name))
             {
@@ -3024,7 +3049,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                  paramNamedType.OriginalDefinition.Equals(argNamedType.OriginalDefinition, SymbolEqualityComparer.Default))
         {
             // Map type arguments recursively
-            for (int i = 0; i < paramNamedType.TypeArguments.Length && i < argNamedType.TypeArguments.Length; i++)
+            for (var i = 0; i < paramNamedType.TypeArguments.Length && i < argNamedType.TypeArguments.Length; i++)
             {
                 MapGenericTypeArguments(paramNamedType.TypeArguments[i], argNamedType.TypeArguments[i], classSymbol, inferredTypes);
             }
@@ -3034,40 +3059,66 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static ITypeSymbol? InferTypeFromValue(object value, Compilation compilation)
     {
         if (value is int)
+        {
             return compilation?.GetSpecialType(SpecialType.System_Int32);
+        }
         else if (value is string)
+        {
             return compilation?.GetSpecialType(SpecialType.System_String);
+        }
         else if (value is bool)
+        {
             return compilation?.GetSpecialType(SpecialType.System_Boolean);
+        }
         else if (value is double)
+        {
             return compilation?.GetSpecialType(SpecialType.System_Double);
+        }
         else if (value is float)
+        {
             return compilation?.GetSpecialType(SpecialType.System_Single);
+        }
         else if (value is long)
+        {
             return compilation?.GetSpecialType(SpecialType.System_Int64);
+        }
         else if (value is byte)
+        {
             return compilation?.GetSpecialType(SpecialType.System_Byte);
+        }
         else if (value is char)
+        {
             return compilation?.GetSpecialType(SpecialType.System_Char);
+        }
         else if (value is decimal)
+        {
             return compilation?.GetSpecialType(SpecialType.System_Decimal);
+        }
         else if (value is ITypeSymbol typeSymbol)
+        {
             return compilation?.GetTypeByMetadataName("System.Type");
+        }
         else
+        {
             return null;
+        }
     }
 
     private static ITypeSymbol[]? InferTypesFromClassArgumentsAttribute(INamedTypeSymbol classSymbol, AttributeData argAttr, Compilation compilation)
     {
         if (argAttr.ConstructorArguments.Length == 0)
+        {
             return null;
+        }
 
         var inferredTypes = new Dictionary<string, ITypeSymbol>();
         var typeParameters = classSymbol.TypeParameters;
 
         // Arguments attribute takes params object?[] so the first constructor argument is an array
         if (argAttr.ConstructorArguments.Length != 1 || argAttr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
+        {
             return null;
+        }
 
         var argumentValues = argAttr.ConstructorArguments[0].Values;
 
@@ -3079,12 +3130,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ?? classSymbol.Constructors.FirstOrDefault();
 
         if (primaryConstructor == null)
+        {
             return null;
+        }
 
         var constructorParams = primaryConstructor.Parameters;
 
         // For each value in the params array
-        for (int argIndex = 0; argIndex < argumentValues.Length && argIndex < constructorParams.Length; argIndex++)
+        for (var argIndex = 0; argIndex < argumentValues.Length && argIndex < constructorParams.Length; argIndex++)
         {
             var constructorParam = constructorParams[argIndex];
             var argValue = argumentValues[argIndex];
@@ -3105,23 +3158,41 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var value = argValue.Value;
 
                     if (value is int)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Int32);
+                    }
                     else if (value is string)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_String);
+                    }
                     else if (value is bool)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Boolean);
+                    }
                     else if (value is double)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Double);
+                    }
                     else if (value is float)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Single);
+                    }
                     else if (value is long)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Int64);
+                    }
                     else if (value is char)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Char);
+                    }
                     else if (value is byte)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Byte);
+                    }
                     else if (value is decimal)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Decimal);
+                    }
                 }
 
                 if (argType != null)
@@ -3135,7 +3206,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (inferredTypes.Count == typeParameters.Length)
         {
             var result = new ITypeSymbol[typeParameters.Length];
-            for (int i = 0; i < typeParameters.Length; i++)
+            for (var i = 0; i < typeParameters.Length; i++)
             {
                 if (inferredTypes.TryGetValue(typeParameters[i].Name, out var type))
                 {
@@ -3155,27 +3226,33 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static ITypeSymbol[]? InferTypesFromArgumentsAttribute(IMethodSymbol method, AttributeData argAttr, Compilation compilation)
     {
         if (argAttr.ConstructorArguments.Length == 0)
+        {
             return null;
+        }
 
         var inferredTypes = new Dictionary<string, ITypeSymbol>();
         var typeParameters = method.TypeParameters;
 
         // Arguments attribute takes params object?[] so the first constructor argument is an array
         if (argAttr.ConstructorArguments.Length != 1 || argAttr.ConstructorArguments[0].Kind != TypedConstantKind.Array)
+        {
             return null;
+        }
 
         var argumentValues = argAttr.ConstructorArguments[0].Values;
         var methodParams = method.Parameters;
 
         // For each value in the params array
-        for (int argIndex = 0; argIndex < argumentValues.Length && argIndex < methodParams.Length; argIndex++)
+        for (var argIndex = 0; argIndex < argumentValues.Length && argIndex < methodParams.Length; argIndex++)
         {
             var methodParam = methodParams[argIndex];
             var argValue = argumentValues[argIndex];
 
             // Skip if this is a CancellationToken parameter
             if (methodParam.Type.Name == "CancellationToken")
+            {
                 continue;
+            }
 
             // Check if the method parameter type is a generic type parameter
             if (methodParam.Type is ITypeParameterSymbol typeParam)
@@ -3194,23 +3271,41 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var value = argValue.Value;
 
                     if (value is int)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Int32);
+                    }
                     else if (value is string)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_String);
+                    }
                     else if (value is bool)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Boolean);
+                    }
                     else if (value is double)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Double);
+                    }
                     else if (value is float)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Single);
+                    }
                     else if (value is long)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Int64);
+                    }
                     else if (value is char)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Char);
+                    }
                     else if (value is byte)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Byte);
+                    }
                     else if (value is decimal)
+                    {
                         argType = compilation?.GetSpecialType(SpecialType.System_Decimal);
+                    }
                 }
 
                 if (argType != null)
@@ -3224,7 +3319,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (inferredTypes.Count == typeParameters.Length)
         {
             var result = new ITypeSymbol[typeParameters.Length];
-            for (int i = 0; i < typeParameters.Length; i++)
+            for (var i = 0; i < typeParameters.Length; i++)
             {
                 if (inferredTypes.TryGetValue(typeParameters[i].Name, out var type))
                 {
@@ -3245,7 +3340,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var attrClass = dataSourceAttr.AttributeClass;
         if (attrClass == null)
+        {
             return null;
+        }
 
         // Check if it's a typed data source by examining its base types
         var baseType = attrClass.BaseType;
@@ -3274,7 +3371,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         }
 
                         // Multiple type parameters - check for tuple
-                        if (typeArgs.Length == 1 && typeArgs[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+                        if (typeArgs is
+                            [
+                                INamedTypeSymbol { IsTupleType: true } tupleType
+                            ])
                         {
                             if (tupleType.TupleElements.Length == method.TypeParameters.Length)
                             {
@@ -3300,7 +3400,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         }
 
                         // Multiple type parameters - check for tuple
-                        if (typeArgs.Length == 1 && typeArgs[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+                        if (typeArgs is
+                            [
+                                INamedTypeSymbol { IsTupleType: true } tupleType
+                            ])
                         {
                             if (tupleType.TupleElements.Length == classTypeParams.Length)
                             {
@@ -3320,7 +3423,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         var totalGenericParams = method.TypeParameters.Length + method.ContainingType.TypeParameters.Length;
 
                         // Check if the data source provides types for all parameters
-                        if (typeArgs.Length == 1 && typeArgs[0] is INamedTypeSymbol { IsTupleType: true } tupleType)
+                        if (typeArgs is
+                            [
+                                INamedTypeSymbol { IsTupleType: true } tupleType
+                            ])
                         {
                             if (tupleType.TupleElements.Length == totalGenericParams)
                             {
@@ -3345,11 +3451,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static ITypeSymbol[]? InferTypesFromMethodDataSource(Compilation compilation, TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
         if (mdsAttr.ConstructorArguments.Length == 0)
+        {
             return null;
+        }
 
         // Get the method name from the attribute
         if (mdsAttr.ConstructorArguments[0].Value is not string methodName)
+        {
             return null;
+        }
 
         // Find the method in the test class
         var testClass = testMethod.TypeSymbol;
@@ -3358,24 +3468,34 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .FirstOrDefault(m => m.IsStatic && m.Parameters.Length == 0);
 
         if (dataMethod == null)
+        {
             return null;
+        }
 
         // Check if the method returns IEnumerable<Func<T>> where T is a tuple
         var returnType = dataMethod.ReturnType;
         if (returnType is not INamedTypeSymbol namedReturnType)
+        {
             return null;
+        }
 
         // Navigate through IEnumerable<Func<...>>
         if (!namedReturnType.IsGenericType || namedReturnType.Name != "IEnumerable")
+        {
             return null;
+        }
 
         var funcType = namedReturnType.TypeArguments[0] as INamedTypeSymbol;
         if (funcType == null || funcType.Name != "Func" || funcType.TypeArguments.Length != 1)
+        {
             return null;
+        }
 
         var tupleType = funcType.TypeArguments[0] as INamedTypeSymbol;
         if (tupleType == null || !tupleType.IsTupleType)
+        {
             return null;
+        }
 
         // Extract the types from the tuple elements that correspond to the generic parameters
         var testMethodParams = testMethod.MethodSymbol.Parameters;
@@ -3384,7 +3504,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Map tuple elements to method parameters to infer types
         var tupleElements = tupleType.TupleElements;
-        for (int i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
+        for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
         {
             var paramType = testMethodParams[i].Type;
             var tupleElementType = tupleElements[i].Type;
@@ -3395,10 +3515,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Build the result array in the correct order
         var inferredTypes = new ITypeSymbol[genericParams.Length];
-        for (int i = 0; i < genericParams.Length; i++)
+        for (var i = 0; i < genericParams.Length; i++)
         {
             if (!genericParamMap.TryGetValue(genericParams[i].Name, out var inferredType))
+            {
                 return null;
+            }
             inferredTypes[i] = inferredType;
         }
 
@@ -3408,11 +3530,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static ITypeSymbol[]? InferClassTypesFromMethodDataSource(Compilation compilation, TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
         if (mdsAttr.ConstructorArguments.Length == 0)
+        {
             return null;
+        }
 
         // Get the method name from the attribute
         if (mdsAttr.ConstructorArguments[0].Value is not string methodName)
+        {
             return null;
+        }
 
         // Find the method in the test class
         var testClass = testMethod.TypeSymbol;
@@ -3421,16 +3547,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .FirstOrDefault(m => m.IsStatic && m.Parameters.Length == 0);
 
         if (dataMethod == null)
+        {
             return null;
+        }
 
         // Check if the method returns IEnumerable<Func<T>> where T is a tuple or a single type
         var returnType = dataMethod.ReturnType;
         if (returnType is not INamedTypeSymbol namedReturnType)
+        {
             return null;
+        }
 
         // Navigate through IEnumerable<Func<...>> or IEnumerable<...>
         if (!namedReturnType.IsGenericType || namedReturnType.Name != "IEnumerable")
+        {
             return null;
+        }
 
         var innerType = namedReturnType.TypeArguments[0];
         INamedTypeSymbol? dataType = null;
@@ -3447,7 +3579,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         if (dataType == null)
+        {
             return null;
+        }
 
         // Get class type parameters
         var classTypeParams = testMethod.TypeSymbol.TypeParameters;
@@ -3459,7 +3593,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var tupleElements = dataType.TupleElements;
             var testMethodParams = testMethod.MethodSymbol.Parameters;
 
-            for (int i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
+            for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
             {
                 var paramType = testMethodParams[i].Type;
                 var tupleElementType = tupleElements[i].Type;
@@ -3477,10 +3611,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Build the result array in the correct order
         var inferredTypes = new ITypeSymbol[classTypeParams.Length];
-        for (int i = 0; i < classTypeParams.Length; i++)
+        for (var i = 0; i < classTypeParams.Length; i++)
         {
             if (!genericParamMap.TryGetValue(classTypeParams[i].Name, out var inferredType))
+            {
                 return null;
+            }
             inferredTypes[i] = inferredType;
         }
 
@@ -3502,7 +3638,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             namedParamType.OriginalDefinition.Equals(namedActualType.OriginalDefinition, SymbolEqualityComparer.Default))
         {
             // Recursively process type arguments
-            for (int i = 0; i < namedParamType.TypeArguments.Length && i < namedActualType.TypeArguments.Length; i++)
+            for (var i = 0; i < namedParamType.TypeArguments.Length && i < namedActualType.TypeArguments.Length; i++)
             {
                 ProcessTypeForGenerics(namedParamType.TypeArguments[i], namedActualType.TypeArguments[i], genericParams, genericParamMap);
             }
@@ -3513,11 +3649,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         // Validate constraints for a generic class
         if (!classType.IsGenericType)
+        {
             return true;
+        }
 
         var typeParams = classType.TypeParameters;
         if (typeParams.Length != typeArguments.Length)
+        {
             return false;
+        }
 
         return ValidateTypeParameterConstraints(typeParams, typeArguments);
     }
@@ -3537,7 +3677,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         allTypeParams.AddRange(method.TypeParameters);
 
         if (allTypeParams.Count != typeArguments.Length)
+        {
             return false;
+        }
 
         return ValidateTypeParameterConstraints(allTypeParams, typeArguments);
     }
@@ -3546,7 +3688,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var typeParamsList = typeParams.ToList();
 
-        for (int i = 0; i < typeParamsList.Count; i++)
+        for (var i = 0; i < typeParamsList.Count; i++)
         {
             var typeParam = typeParamsList[i];
             var typeArg = typeArguments[i];
@@ -3555,14 +3697,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (typeParam.HasValueTypeConstraint)
             {
                 if (!typeArg.IsValueType || typeArg.IsReferenceType)
+                {
                     return false;
+                }
             }
 
             // Check class constraint
             if (typeParam.HasReferenceTypeConstraint)
             {
                 if (!typeArg.IsReferenceType)
+                {
                     return false;
+                }
             }
 
             // Check interface constraints
@@ -3572,13 +3718,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     // Check if the type argument implements the interface
                     if (!typeArg.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, constraintType)))
+                    {
                         return false;
+                    }
                 }
                 else if (constraintType.TypeKind == TypeKind.Class)
                 {
                     // Check if the type argument derives from the base class
                     var baseType = typeArg.BaseType;
-                    bool found = false;
+                    var found = false;
                     while (baseType != null)
                     {
                         if (SymbolEqualityComparer.Default.Equals(baseType, constraintType))
@@ -3589,7 +3737,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         baseType = baseType.BaseType;
                     }
                     if (!found)
+                    {
                         return false;
+                    }
                 }
             }
         }
@@ -3685,22 +3835,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (hasParameterizedConstructor)
         {
             // For classes with constructor parameters, use the specific constructor arguments from the Arguments attribute
-            if (specificArgumentsAttribute != null && specificArgumentsAttribute.ConstructorArguments.Length > 0 &&
+            if (specificArgumentsAttribute is { ConstructorArguments.Length: > 0 } &&
                 specificArgumentsAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
             {
                 var argumentValues = specificArgumentsAttribute.ConstructorArguments[0].Values;
                 var constructorArgs = string.Join(", ", argumentValues.Select(arg =>
                 {
                     if (arg.Value is string str)
+                    {
                         return $"\"{str}\"";
+                    }
                     else if (arg.Value is char chr)
+                    {
                         return $"'{chr}'";
+                    }
                     else if (arg.Value is bool b)
+                    {
                         return b.ToString().ToLower();
+                    }
                     else if (arg.Value is null)
+                    {
                         return "null";
+                    }
                     else
+                    {
                         return arg.Value.ToString();
+                    }
                 }));
 
                 writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), new object[] {{ {constructorArgs} }})!;");
@@ -3733,7 +3893,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Prepare method arguments with proper casting
         var parameterCasts = new List<string>();
-        for (int i = 0; i < testMethod.MethodSymbol.Parameters.Length; i++)
+        for (var i = 0; i < testMethod.MethodSymbol.Parameters.Length; i++)
         {
             var param = testMethod.MethodSymbol.Parameters[i];
             if (param.Type.Name == "CancellationToken")
@@ -3777,7 +3937,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Check if it's a class type parameter
             if (typeParam.ContainingSymbol is INamedTypeSymbol && testMethod.IsGenericType)
             {
-                for (int i = 0; i < testMethod.TypeSymbol.TypeParameters.Length; i++)
+                for (var i = 0; i < testMethod.TypeSymbol.TypeParameters.Length; i++)
                 {
                     if (testMethod.TypeSymbol.TypeParameters[i].Name == typeParam.Name)
                     {
@@ -3790,7 +3950,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
 
             // Check if it's a method type parameter
-            for (int i = 0; i < testMethod.MethodSymbol.TypeParameters.Length; i++)
+            for (var i = 0; i < testMethod.MethodSymbol.TypeParameters.Length; i++)
             {
                 if (testMethod.MethodSymbol.TypeParameters[i].Name == typeParam.Name)
                 {
@@ -3876,7 +4036,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             // For combined generic class + generic method scenarios, also include method-level Arguments
             // that provide method parameters (different from the class-level specificArgumentsAttribute)
-            if (testMethod.IsGenericType && testMethod.IsGenericMethod)
+            if (testMethod is { IsGenericType: true, IsGenericMethod: true })
             {
                 var additionalMethodDataSources = methodSymbol.GetAttributes()
                     .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute" && !AreSameAttribute(a, specificArgumentsAttribute))
@@ -3947,15 +4107,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         // Compare attributes by their constructor arguments and attribute class
         if (a1.AttributeClass?.Name != a2.AttributeClass?.Name)
+        {
             return false;
+        }
 
         if (a1.ConstructorArguments.Length != a2.ConstructorArguments.Length)
+        {
             return false;
+        }
 
-        for (int i = 0; i < a1.ConstructorArguments.Length; i++)
+        for (var i = 0; i < a1.ConstructorArguments.Length; i++)
         {
             if (!a1.ConstructorArguments[i].Equals(a2.ConstructorArguments[i]))
+            {
                 return false;
+            }
         }
 
         return true;
@@ -3998,14 +4164,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Return null if we didn't infer all type parameters
         if (inferredTypes.Count != typeParameters.Length)
+        {
             return null;
+        }
 
         // Build the result array in the correct order
         var result = new ITypeSymbol[typeParameters.Length];
-        for (int i = 0; i < typeParameters.Length; i++)
+        for (var i = 0; i < typeParameters.Length; i++)
         {
             if (!inferredTypes.TryGetValue(typeParameters[i].Name, out var inferredType))
+            {
                 return null;
+            }
             result[i] = inferredType;
         }
 
@@ -4065,14 +4235,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Return null if we didn't infer all class type parameters
         if (inferredTypes.Count != classTypeParameters.Length)
+        {
             return null;
+        }
 
         // Build the result array in the correct order
         var result = new ITypeSymbol[classTypeParameters.Length];
-        for (int i = 0; i < classTypeParameters.Length; i++)
+        for (var i = 0; i < classTypeParameters.Length; i++)
         {
             if (!inferredTypes.TryGetValue(classTypeParameters[i].Name, out var inferredType))
+            {
                 return null;
+            }
             result[i] = inferredType;
         }
 
@@ -4222,23 +4396,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // For classes with constructor parameters, check if we have Arguments attribute
             var isArgumentsAttribute = classDataSourceAttribute?.AttributeClass?.Name == "ArgumentsAttribute";
 
-            if (isArgumentsAttribute && classDataSourceAttribute != null &&
-                classDataSourceAttribute.ConstructorArguments.Length > 0 &&
+            if (isArgumentsAttribute && classDataSourceAttribute is { ConstructorArguments.Length: > 0 } &&
                 classDataSourceAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
             {
                 var argumentValues = classDataSourceAttribute.ConstructorArguments[0].Values;
                 var constructorArgs = string.Join(", ", argumentValues.Select(arg =>
                 {
                     if (arg.Value is string str)
+                    {
                         return $"\"{str}\"";
+                    }
                     else if (arg.Value is char chr)
+                    {
                         return $"'{chr}'";
+                    }
                     else if (arg.Value is bool b)
+                    {
                         return b.ToString().ToLower();
+                    }
                     else if (arg.Value == null)
+                    {
                         return "null";
+                    }
                     else
+                    {
                         return arg.Value.ToString();
+                    }
                 }));
 
                 writer.AppendLine($"return new {className}({constructorArgs});");

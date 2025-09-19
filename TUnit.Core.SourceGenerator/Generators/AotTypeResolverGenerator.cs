@@ -498,8 +498,8 @@ public sealed class AotTypeResolverGenerator : IIncrementalGenerator
         var conditions = new List<string>();
         
         // Only generate combinations for concrete types, not generic type parameters
-        bool hasGenericParameters = false;
-        for (int i = 0; i < combination.TypeArguments.Length; i++)
+        var hasGenericParameters = false;
+        for (var i = 0; i < combination.TypeArguments.Length; i++)
         {
             var typeArg = combination.TypeArguments[i];
             

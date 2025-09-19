@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Models;
 
 namespace TUnit.Core;
 
@@ -30,6 +31,11 @@ public abstract class AbstractExecutableTest
 
     public ResolvedDependency[] Dependencies { get; set; } = [];
 
+    /// <summary>
+    /// Execution context information for this test, used to coordinate class hooks properly
+    /// </summary>
+    public TestExecutionContext? ExecutionContext { get; set; }
+
     public TestState State { get; set; } = TestState.NotStarted;
 
     public TestResult? Result
@@ -44,63 +50,31 @@ public abstract class AbstractExecutableTest
         set => Context.TestStart = value ?? DateTimeOffset.UtcNow;
     }
 
-    private readonly object _executionLock = new();
-
-    internal Func<AbstractExecutableTest, CancellationToken, Task>? ExecutorDelegate { get; set; }
-
-    internal CancellationToken ExecutionCancellationToken { get; set; }
-
     /// <summary>
-    /// Gets the task representing this test's execution.
-    /// The task is started lazily on first access in a thread-safe manner.
+    /// Gets the task representing this test's execution, set directly by the scheduler.
     /// </summary>
-    [field: AllowNull, MaybeNull]
-    public Task ExecutionTask
-    {
-        get
-        {
-            lock (_executionLock)
-            {
-                if (field == null)
-                {
-                    if (ExecutorDelegate == null)
-                    {
-                        field = Task.FromException(new InvalidOperationException(
-                            $"Test {TestId} execution was accessed before executor was set"));
-                    }
-                    else
-                    {
-                        field = Task.Run(async () =>
-                        {
-                            try
-                            {
-                                await ExecutorDelegate(this, ExecutionCancellationToken).ConfigureAwait(false);
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine($"Test {TestId} execution failed: {ex}");
-                            }
-                        });
-                    }
-                }
-                return field;
-            }
-        }
-    }
+    public Task? ExecutionTask { get; internal set; }
 
-    /// <summary>
-    /// Allows the scheduler to trigger execution if not already started
-    /// </summary>
-    internal void EnsureStarted()
-    {
-        _ = ExecutionTask;
-    }
-
-    public Task CompletionTask => ExecutionTask;
+    public Task CompletionTask => ExecutionTask ?? Task.CompletedTask;
 
     public DateTimeOffset? EndTime { get => Context.TestEnd; set => Context.TestEnd = value; }
 
     public TimeSpan? Duration => StartTime.HasValue && EndTime.HasValue
         ? EndTime.Value - StartTime.Value
         : null;
+
+    public void SetResult(TestState state, Exception? exception = null)
+    {
+        State = state;
+        Context.Result ??= new TestResult
+        {
+            State = state,
+            Exception = exception,
+            ComputerName = Environment.MachineName,
+            Duration = Duration,
+            End = EndTime ??= DateTimeOffset.UtcNow,
+            Start = StartTime ??= DateTimeOffset.UtcNow,
+            Output = Context.GetOutput() + Environment.NewLine + Environment.NewLine + Context.GetErrorOutput()
+        };
+    }
 }

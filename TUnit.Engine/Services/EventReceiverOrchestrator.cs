@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Data;
@@ -18,9 +17,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     private readonly TUnitFrameworkLogger _logger;
 
     // Track which assemblies/classes/sessions have had their "first" event invoked
-    private GetOnlyDictionary<string, Task> _firstTestInAssemblyTasks = new();
-    private GetOnlyDictionary<Type, Task> _firstTestInClassTasks = new();
-    private GetOnlyDictionary<string, Task> _firstTestInSessionTasks = new();
+    private ThreadSafeDictionary<string, Task> _firstTestInAssemblyTasks = new();
+    private ThreadSafeDictionary<Type, Task> _firstTestInClassTasks = new();
+    private ThreadSafeDictionary<string, Task> _firstTestInSessionTasks = new();
 
     // Track remaining test counts for "last" events
     private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
@@ -35,7 +34,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     public async ValueTask InitializeAllEligibleObjectsAsync(TestContext context, CancellationToken cancellationToken)
     {
         var eligibleObjects = context.GetEligibleEventObjects().ToArray();
-
 
         // Register all event receivers for fast lookup
         _registry.RegisterReceivers(eligibleObjects);
@@ -214,7 +212,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
 
         // Apply the timeout from the context back to the hook method
-        if (hookContext.Timeout.HasValue && hookContext.HookMethod != null)
+        if (hookContext is { Timeout: not null })
         {
             hookContext.HookMethod.Timeout = hookContext.Timeout;
         }
@@ -234,7 +232,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
 
         // Use GetOrAdd to ensure exactly one task is created per session and all tests await it
-        var task = _firstTestInSessionTasks.GetOrAdd("session", 
+        var task = _firstTestInSessionTasks.GetOrAdd("session",
             _ => InvokeFirstTestInSessionEventReceiversCoreAsync(context, sessionContext, cancellationToken));
         await task;
     }
@@ -272,7 +270,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
         // Use GetOrAdd to ensure exactly one task is created per assembly and all tests await it
-        var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName, 
+        var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName,
             _ => InvokeFirstTestInAssemblyEventReceiversCoreAsync(context, assemblyContext, cancellationToken));
         await task;
     }
@@ -310,7 +308,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         var classType = classContext.ClassType;
         // Use GetOrAdd to ensure exactly one task is created per class and all tests await it
-        var task = _firstTestInClassTasks.GetOrAdd(classType, 
+        var task = _firstTestInClassTasks.GetOrAdd(classType,
             _ => InvokeFirstTestInClassEventReceiversCoreAsync(context, classContext, cancellationToken));
         await task;
     }
@@ -371,7 +369,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
                 await _logger.LogErrorAsync($"Error in last test in session event receiver: {ex.Message}");
             }
         }
-        
+
         // Dispose the global static property context after all tests complete
         if (TestSessionContext.GlobalStaticPropertyContext.Events.OnDispose != null)
         {
@@ -474,9 +472,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         _sessionTestCount = contexts.Count;
 
         // Clear first-event tracking to ensure clean state for each test execution
-        _firstTestInAssemblyTasks = new GetOnlyDictionary<string, Task>();
-        _firstTestInClassTasks = new GetOnlyDictionary<Type, Task>();
-        _firstTestInSessionTasks = new GetOnlyDictionary<string, Task>();
+        _firstTestInAssemblyTasks = new ThreadSafeDictionary<string, Task>();
+        _firstTestInClassTasks = new ThreadSafeDictionary<Type, Task>();
+        _firstTestInSessionTasks = new ThreadSafeDictionary<string, Task>();
 
         foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.AssemblyContext.Assembly.GetName().FullName))
         {

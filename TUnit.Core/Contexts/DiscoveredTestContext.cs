@@ -12,7 +12,6 @@ public class DiscoveredTestContext
     public TestContext TestContext { get; }
 
     public TestDetails TestDetails => TestContext.TestDetails;
-    public bool RunOnTestDiscovery { get; private set; }
 
     public DiscoveredTestContext(string testName, TestContext testContext)
     {
@@ -69,11 +68,6 @@ public class DiscoveredTestContext
     public void AddArgumentDisplayFormatter(ArgumentDisplayFormatter formatter)
     {
         TestContext.ArgumentDisplayFormatters.Add(obj => formatter.CanHandle(obj) ? formatter.FormatValue(obj) : null);
-    }
-
-    public void SetRunOnDiscovery(bool runOnDiscovery)
-    {
-        RunOnTestDiscovery = runOnDiscovery;
     }
 
     public void SetPriority(Priority priority)
