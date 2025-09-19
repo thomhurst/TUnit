@@ -149,8 +149,9 @@ public class AttributeWriter
 
         sourceCodeWriter.Append($"new {attributeName}({formattedConstructorArgs})");
 
-        if (formattedProperties.Length == 0
-            && !HasNestedDataGeneratorProperties(attributeData))
+        // Only add object initializer if we have regular properties to set
+        // Don't include data source properties - they'll be handled by property injection
+        if (formattedProperties.Length == 0)
         {
             return sourceCodeWriter.ToString();
         }
@@ -162,61 +163,11 @@ public class AttributeWriter
             sourceCodeWriter.Append($"{property},");
         }
 
-        WriteDataSourceGeneratorProperties(sourceCodeWriter, compilation, attributeData);
-
         sourceCodeWriter.Append("}");
 
         return sourceCodeWriter.ToString();
     }
 
-    private static bool HasNestedDataGeneratorProperties(AttributeData attributeData)
-    {
-        if (attributeData.AttributeClass is not { } attributeClass)
-        {
-            return false;
-        }
-
-        if (attributeClass.GetMembersIncludingBase().OfType<IPropertySymbol>().Any(x => x.GetAttributes().Any(a => a.IsDataSourceAttribute())))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    private static void WriteDataSourceGeneratorProperties(ICodeWriter sourceCodeWriter, Compilation compilation, AttributeData attributeData)
-    {
-        foreach (var propertySymbol in attributeData.AttributeClass?.GetMembers().OfType<IPropertySymbol>() ?? [])
-        {
-            if (propertySymbol.DeclaredAccessibility != Accessibility.Public)
-            {
-                continue;
-            }
-
-            if (propertySymbol.GetAttributes().FirstOrDefault(x => x.IsDataSourceAttribute()) is not { } dataSourceAttribute)
-            {
-                continue;
-            }
-
-            sourceCodeWriter.Append($"{propertySymbol.Name} = ");
-
-            var propertyType = propertySymbol.Type.GloballyQualified();
-            var isNullable = propertySymbol.Type.NullableAnnotation == NullableAnnotation.Annotated;
-
-            if (propertySymbol.Type.IsReferenceType && !isNullable)
-            {
-                sourceCodeWriter.Append("null!,");
-            }
-            else if (propertySymbol.Type.IsValueType && !isNullable)
-            {
-                sourceCodeWriter.Append($"default({propertyType}),");
-            }
-            else
-            {
-                sourceCodeWriter.Append("null,");
-            }
-        }
-    }
 
     private static string FormatConstructorArgument(Compilation compilation, AttributeArgumentSyntax attributeArgumentSyntax)
     {
@@ -253,11 +204,10 @@ public class AttributeWriter
 
         sourceCodeWriter.Append($"new {attributeName}({formattedConstructorArgs})");
 
-        // Check if we need to add properties (named arguments or data generator properties)
+        // Check if we need to add properties (named arguments only, not data source properties)
         var hasNamedArgs = !string.IsNullOrEmpty(formattedNamedArgs);
-        var hasDataGeneratorProperties = HasNestedDataGeneratorProperties(attributeData);
 
-        if (!hasNamedArgs && !hasDataGeneratorProperties)
+        if (!hasNamedArgs)
         {
             return;
         }
@@ -268,55 +218,11 @@ public class AttributeWriter
         if (hasNamedArgs)
         {
             sourceCodeWriter.Append($"{formattedNamedArgs}");
-            if (hasDataGeneratorProperties)
-            {
-                sourceCodeWriter.Append(",");
-            }
-        }
-
-        if (hasDataGeneratorProperties)
-        {
-            // For attributes without syntax, we still need to handle data generator properties
-            // but we can't rely on syntax analysis, so we'll use a simpler approach
-            WriteDataSourceGeneratorPropertiesWithoutSyntax(sourceCodeWriter, attributeData);
         }
 
         sourceCodeWriter.Append("}");
     }
 
-    private static void WriteDataSourceGeneratorPropertiesWithoutSyntax(ICodeWriter sourceCodeWriter, AttributeData attributeData)
-    {
-        foreach (var propertySymbol in attributeData.AttributeClass?.GetMembers().OfType<IPropertySymbol>() ?? [])
-        {
-            if (propertySymbol.DeclaredAccessibility != Accessibility.Public)
-            {
-                continue;
-            }
-
-            if (propertySymbol.GetAttributes().FirstOrDefault(x => x.IsDataSourceAttribute()) is not { } dataSourceAttribute)
-            {
-                continue;
-            }
-
-            sourceCodeWriter.Append($"{propertySymbol.Name} = ");
-
-            var propertyType = propertySymbol.Type.GloballyQualified();
-            var isNullable = propertySymbol.Type.NullableAnnotation == NullableAnnotation.Annotated;
-
-            if (propertySymbol.Type.IsReferenceType && !isNullable)
-            {
-                sourceCodeWriter.Append("null!,");
-            }
-            else if (propertySymbol.Type.IsValueType && !isNullable)
-            {
-                sourceCodeWriter.Append($"default({propertyType}),");
-            }
-            else
-            {
-                sourceCodeWriter.Append("null,");
-            }
-        }
-    }
 
     private static bool ShouldSkipFrameworkSpecificAttribute(Compilation compilation, AttributeData attributeData)
     {

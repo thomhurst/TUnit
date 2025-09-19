@@ -144,7 +144,7 @@ internal sealed class TestRegistry : ITestRegistry
             GenericMethodInfo = null,
             GenericMethodTypeArguments = null,
             AttributeFactory = () => GetAttributesOptimized(result.Attributes),
-            PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(result.TestClassType)
+            PropertyInjections = PropertySourceRegistry.DiscoverInjectableProperties(result.TestClassType)
         });
     }
 
