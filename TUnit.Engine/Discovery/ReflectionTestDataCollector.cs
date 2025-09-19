@@ -303,7 +303,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
             catch (ReflectionTypeLoadException reflectionTypeLoadException)
             {
-                return reflectionTypeLoadException.Types;
+                return reflectionTypeLoadException.Types.Where(x => x != null).ToArray()!;
             }
             catch (Exception)
             {
