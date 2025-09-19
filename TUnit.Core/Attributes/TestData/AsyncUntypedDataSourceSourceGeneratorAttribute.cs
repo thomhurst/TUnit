@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Initialization;
 
 namespace TUnit.Core;
 
@@ -11,12 +12,18 @@ public abstract class AsyncUntypedDataSourceGeneratorAttribute : Attribute, IAsy
 
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
+        // Use centralized TestObjectInitializer for all initialization
         if (dataGeneratorMetadata is { TestInformation: not null })
         {
-            await PropertyInjectionService.InjectPropertiesIntoObjectAsync(this, dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag, dataGeneratorMetadata.TestInformation, dataGeneratorMetadata.TestBuilderContext.Current.Events);
+            await TestObjectInitializer.InitializeAsync(this,
+                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
+                dataGeneratorMetadata.TestInformation,
+                dataGeneratorMetadata.TestBuilderContext.Current.Events);
         }
-
-        await ObjectInitializer.InitializeAsync(this);
+        else
+        {
+            await TestObjectInitializer.InitializeAsync(this, TestContext.Current);
+        }
 
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {

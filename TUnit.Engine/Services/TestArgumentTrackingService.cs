@@ -1,4 +1,5 @@
 using TUnit.Core;
+using TUnit.Core.Initialization;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Tracking;
 
@@ -22,33 +23,23 @@ internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
         var classArguments = testContext.TestDetails.TestClassArguments;
         var methodArguments = testContext.TestDetails.TestMethodArguments;
         
-        // Inject properties into ClassDataSource instances before tracking
-        foreach (var classDataItem in classArguments)
-        {
-            if (classDataItem != null)
-            {
-                await PropertyInjectionService.InjectPropertiesIntoObjectAsync(
-                    classDataItem,
-                    testContext.ObjectBag,
-                    testContext.TestDetails.MethodMetadata,
-                    testContext.Events);
-            }
-        }
+        // Use centralized TestObjectInitializer for all initialization
+        // Initialize class arguments
+        await TestObjectInitializer.InitializeArgumentsAsync(
+            classArguments,
+            testContext.ObjectBag,
+            testContext.TestDetails.MethodMetadata,
+            testContext.Events);
         
-        // Also inject properties into MethodDataSource instances
-        foreach (var methodDataItem in methodArguments)
-        {
-            if (methodDataItem != null)
-            {
-                await PropertyInjectionService.InjectPropertiesIntoObjectAsync(
-                    methodDataItem,
-                    testContext.ObjectBag,
-                    testContext.TestDetails.MethodMetadata,
-                    testContext.Events);
-            }
-        }
+        // Initialize method arguments
+        await TestObjectInitializer.InitializeArgumentsAsync(
+            methodArguments,
+            testContext.ObjectBag,
+            testContext.TestDetails.MethodMetadata,
+            testContext.Events);
         
         // Track all constructor and method arguments
+        // Note: TestObjectInitializer already handles tracking, but we ensure it here for clarity
         var allArguments = classArguments.Concat(methodArguments);
         
         foreach (var obj in allArguments)

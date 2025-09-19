@@ -891,7 +891,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(testMethod),
                 GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
                 AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(testClass, testMethod),
-                PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(testClass),
+                PropertyInjections = PropertySourceRegistry.DiscoverInjectableProperties(testClass),
                 InheritanceDepth = inheritanceDepth
             });
         }
@@ -1839,7 +1839,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(methodInfo),
             GenericMethodTypeArguments = methodInfo.IsGenericMethodDefinition ? null : methodInfo.GetGenericArguments(),
             AttributeFactory = () => result.Attributes.ToArray(),
-            PropertyInjections = PropertyInjectionService.DiscoverInjectableProperties(result.TestClassType)
+            PropertyInjections = PropertySourceRegistry.DiscoverInjectableProperties(result.TestClassType)
         };
 
         return Task.FromResult<TestMetadata>(metadata);
