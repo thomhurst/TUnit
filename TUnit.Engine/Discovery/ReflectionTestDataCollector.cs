@@ -25,10 +25,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
-        // Disable assembly loading event handler to prevent recursive issues
-        // This was causing problems when assemblies were loaded during scanning
-
-        // Optimize: Pre-filter and allocate array instead of LINQ ToList()
         var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
         var assembliesList = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
@@ -41,8 +37,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var assemblies = assembliesList;
 
 
-        // Use throttled parallel processing to prevent thread pool exhaustion
-        // Limit to 2x processor count to avoid overwhelming the thread pool
         var maxConcurrency = Math.Min(assemblies.Count, Environment.ProcessorCount * 2);
         var semaphore = new SemaphoreSlim(maxConcurrency, maxConcurrency);
         var tasks = new Task<List<TestMetadata>>[assemblies.Count];
@@ -57,7 +51,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 await semaphore.WaitAsync().ConfigureAwait(false);
                 try
                 {
-                    // Use lock-free ConcurrentDictionary for assembly tracking
                     if (!_scannedAssemblies.TryAdd(assembly, true))
                     {
                         return
@@ -67,9 +60,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     try
                     {
-                        // Now we can properly await the async method
-                        var testsInAssembly = await DiscoverTestsInAssembly(assembly).ConfigureAwait(false);
-                        return testsInAssembly;
+                        return await DiscoverTestsInAssembly(assembly).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
@@ -308,41 +299,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             try
             {
-                // In single file mode, GetExportedTypes might miss some types
-                // Use GetTypes() instead which gets all types including nested ones
                 return asm.GetTypes();
             }
-            catch (ReflectionTypeLoadException rtle)
+            catch (ReflectionTypeLoadException reflectionTypeLoadException)
             {
-                // Some types might fail to load, but we can still use the ones that loaded successfully
-                // Optimize: Manual filtering with ArrayPool for better memory efficiency
-                var loadedTypes = rtle.Types;
-                if (loadedTypes == null)
-                {
-                    return [];
-                }
-
-                // Use ArrayPool for temporary storage to reduce allocations
-                var tempArray = ArrayPool<Type>.Shared.Rent(loadedTypes.Length);
-                try
-                {
-                    var validCount = 0;
-                    foreach (var type in loadedTypes)
-                    {
-                        if (type != null)
-                        {
-                            tempArray[validCount++] = type;
-                        }
-                    }
-
-                    var result = new Type[validCount];
-                    Array.Copy(tempArray, result, validCount);
-                    return result;
-                }
-                finally
-                {
-                    ArrayPool<Type>.Shared.Return(tempArray);
-                }
+                return reflectionTypeLoadException.Types.Where(x => x != null).ToArray()!;
             }
             catch (Exception)
             {
@@ -359,13 +320,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         foreach (var type in filteredTypes)
         {
-            // Skip abstract types - they can't be instantiated
             if (type.IsAbstract)
             {
                 continue;
             }
 
-            // Handle generic type definitions specially
             if (type.IsGenericTypeDefinition)
             {
                 var genericTests = await DiscoverGenericTests(type).ConfigureAwait(false);
@@ -396,8 +355,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 else
                 {
-                    // Only get declared methods
-                    // Optimize: Manual filtering instead of LINQ Where().ToArray()
                     var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
                     var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
                     foreach (var method in declaredMethods)
@@ -423,7 +380,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 catch (Exception ex)
                 {
-                    // Create a failed test metadata for this specific test
                     var failedTest = CreateFailedTestMetadata(type, method, ex);
                     discoveredTests.Add(failedTest);
                 }
@@ -863,10 +819,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static Task<TestMetadata> BuildTestMetadata(Type testClass, MethodInfo testMethod, object?[]? classData = null)
     {
-        // Create a base ReflectionTestMetadata instance
         var testName = GenerateTestName(testClass, testMethod);
 
-        // Calculate inheritance depth
         var inheritanceDepth = CalculateInheritanceDepth(testClass, testMethod);
 
         try
@@ -1061,25 +1015,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return parameters;
     }
 
-
-
-
-
     private static string? ExtractFilePath(MethodInfo method)
     {
-        method.GetCustomAttribute<TestAttribute>();
-        // Reflection doesn't have access to file path from CallerFilePath
-        return null;
+        return method.GetCustomAttribute<TestAttribute>()?.File;
     }
 
     private static int? ExtractLineNumber(MethodInfo method)
     {
-        method.GetCustomAttribute<TestAttribute>();
-        // Reflection doesn't have access to line number from CallerLineNumber
-        return null;
+        return method.GetCustomAttribute<TestAttribute>()?.Line;
     }
-
-
 
     private static TestMetadata CreateFailedTestMetadataForAssembly(Assembly assembly, Exception ex)
     {
