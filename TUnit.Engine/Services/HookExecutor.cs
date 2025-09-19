@@ -48,22 +48,6 @@ internal sealed class HookExecutor
         }
     }
 
-    /// <summary>
-    /// Execute before test session hooks AND first test in session event receivers for a specific test context.
-    /// This consolidates both lifecycle mechanisms into a single call.
-    /// </summary>
-    public async Task ExecuteBeforeTestSessionHooksAsync(TestContext testContext, CancellationToken cancellationToken)
-    {
-        // Execute regular before session hooks
-        await ExecuteBeforeTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
-
-        // Also execute first test in session event receivers (these run only once via internal task coordination)
-        await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(
-            testContext,
-            testContext.ClassContext.AssemblyContext.TestSessionContext,
-            cancellationToken).ConfigureAwait(false);
-    }
-
     public async Task ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync().ConfigureAwait(false);
@@ -98,24 +82,6 @@ internal sealed class HookExecutor
                 throw new BeforeAssemblyException("BeforeAssembly hook failed", ex);
             }
         }
-    }
-
-    /// <summary>
-    /// Execute before assembly hooks AND first test in assembly event receivers for a specific test context.
-    /// This consolidates both lifecycle mechanisms into a single call.
-    /// </summary>
-    public async Task ExecuteBeforeAssemblyHooksAsync(TestContext testContext, CancellationToken cancellationToken)
-    {
-        var assembly = testContext.TestDetails.ClassType.Assembly;
-
-        // Execute regular before assembly hooks
-        await ExecuteBeforeAssemblyHooksAsync(assembly, cancellationToken).ConfigureAwait(false);
-
-        // Also execute first test in assembly event receivers
-        await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(
-            testContext,
-            testContext.ClassContext.AssemblyContext,
-            cancellationToken).ConfigureAwait(false);
     }
 
     public async Task ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
@@ -154,24 +120,6 @@ internal sealed class HookExecutor
                 throw new BeforeClassException("BeforeClass hook failed", ex);
             }
         }
-    }
-
-    /// <summary>
-    /// Execute before class hooks AND first test in class event receivers for a specific test context.
-    /// This consolidates both lifecycle mechanisms into a single call.
-    /// </summary>
-    public async Task ExecuteBeforeClassHooksAsync(TestContext testContext, CancellationToken cancellationToken)
-    {
-        var testClass = testContext.TestDetails.ClassType;
-
-        // Execute regular before class hooks
-        await ExecuteBeforeClassHooksAsync(testClass, cancellationToken).ConfigureAwait(false);
-
-        // Also execute first test in class event receivers
-        await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(
-            testContext,
-            testContext.ClassContext,
-            cancellationToken).ConfigureAwait(false);
     }
 
     public async Task ExecuteAfterClassHooksAsync(

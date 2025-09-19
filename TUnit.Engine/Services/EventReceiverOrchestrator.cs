@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Data;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Events;
 using TUnit.Engine.Extensions;
@@ -22,8 +23,8 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     private ThreadSafeDictionary<string, Task> _firstTestInSessionTasks = new();
 
     // Track remaining test counts for "last" events
-    private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
-    private readonly ConcurrentDictionary<Type, int> _classTestCounts = new();
+    private readonly ThreadSafeDictionary<string, Counter> _assemblyTestCounts = new();
+    private readonly ThreadSafeDictionary<Type, Counter> _classTestCounts = new();
     private int _sessionTestCount;
 
     public EventReceiverOrchestrator(TUnitFrameworkLogger logger)
@@ -40,14 +41,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var obj in eligibleObjects)
         {
-            try
-            {
-                await ObjectInitializer.InitializeAsync(obj, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error initializing object of type {obj.GetType().Name}: {ex.Message}");
-            }
+            await ObjectInitializer.InitializeAsync(obj, cancellationToken);
         }
     }
 
@@ -85,14 +79,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             // Sequential for small counts
             foreach (var receiver in filteredReceivers)
             {
-                try
-                {
-                    await receiver.OnTestStart(context);
-                }
-                catch (Exception ex)
-                {
-                    await _logger.LogErrorAsync($"Error in test start event receiver: {ex.Message}");
-                }
+                await receiver.OnTestStart(context);
             }
         }
     }
@@ -154,14 +141,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var receiver in filteredReceivers)
         {
-            try
-            {
-                await receiver.OnTestSkipped(context);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in test skipped event receiver: {ex.Message}");
-            }
+            await receiver.OnTestSkipped(context);
         }
     }
 
@@ -177,14 +157,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
         {
-            try
-            {
-                await receiver.OnTestDiscovered(discoveredContext);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in test discovery event receiver: {ex.Message}");
-            }
+            await receiver.OnTestDiscovered(discoveredContext);
         }
     }
 
@@ -201,14 +174,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
         {
-            try
-            {
-                await receiver.OnHookRegistered(hookContext);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in hook registration event receiver: {ex.Message}");
-            }
+            await receiver.OnHookRegistered(hookContext);
         }
 
         // Apply the timeout from the context back to the hook method
@@ -246,14 +212,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var receiver in receivers)
         {
-            try
-            {
-                await receiver.OnFirstTestInTestSession(sessionContext, context);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in first test in session event receiver: {ex.Message}");
-            }
+            await receiver.OnFirstTestInTestSession(sessionContext, context);
         }
     }
 
@@ -270,9 +229,8 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
         // Use GetOrAdd to ensure exactly one task is created per assembly and all tests await it
-        var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName,
+        await _firstTestInAssemblyTasks.GetOrAdd(assemblyName,
             _ => InvokeFirstTestInAssemblyEventReceiversCoreAsync(context, assemblyContext, cancellationToken));
-        await task;
     }
 
     private async Task InvokeFirstTestInAssemblyEventReceiversCoreAsync(
@@ -284,14 +242,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var receiver in receivers)
         {
-            try
-            {
-                await receiver.OnFirstTestInAssembly(assemblyContext, context);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in first test in assembly event receiver: {ex.Message}");
-            }
+            await receiver.OnFirstTestInAssembly(assemblyContext, context);
         }
     }
 
@@ -322,14 +273,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var receiver in receivers)
         {
-            try
-            {
-                await receiver.OnFirstTestInClass(classContext, context);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in first test in class event receiver: {ex.Message}");
-            }
+            await receiver.OnFirstTestInClass(classContext, context);
         }
     }
 
@@ -399,7 +343,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
-        if (_assemblyTestCounts.AddOrUpdate(assemblyName, 0, (_, count) => count - 1) == 0)
+
+        var assemblyCount = _assemblyTestCounts.GetOrAdd(assemblyName, _ => new Counter()).Decrement();
+
+        if (assemblyCount == 0)
         {
             await InvokeLastTestInAssemblyEventReceiversCore(context, assemblyContext, cancellationToken);
         }
@@ -437,7 +384,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
 
         var classType = classContext.ClassType;
-        if (_classTestCounts.AddOrUpdate(classType, 0, (_, count) => count - 1) == 0)
+
+        var classCount = _classTestCounts.GetOrAdd(classType, _ => new Counter()).Decrement();
+
+        if (classCount == 0)
         {
             await InvokeLastTestInClassEventReceiversCore(context, classContext, cancellationToken);
         }
@@ -476,19 +426,23 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         _firstTestInClassTasks = new ThreadSafeDictionary<Type, Task>();
         _firstTestInSessionTasks = new ThreadSafeDictionary<string, Task>();
 
-        foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.AssemblyContext.Assembly.GetName().FullName))
+        foreach (var group in contexts.GroupBy(c => c.ClassContext.AssemblyContext.Assembly.GetName().FullName))
         {
-            if (group.Key != null)
+            var counter = _assemblyTestCounts.GetOrAdd(group.Key, _ => new Counter());
+
+            for (var i = 0; i < group.Count(); i++)
             {
-                _assemblyTestCounts[group.Key] = group.Count();
+                counter.Increment();
             }
         }
 
-        foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.ClassType))
+        foreach (var group in contexts.GroupBy(c => c.ClassContext.ClassType))
         {
-            if (group.Key != null)
+            var counter = _classTestCounts.GetOrAdd(group.Key, _ => new Counter());
+
+            for (var i = 0; i < group.Count(); i++)
             {
-                _classTestCounts[group.Key] = group.Count();
+                counter.Increment();
             }
         }
     }
@@ -517,18 +471,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         Func<T, ValueTask> invoker,
         CancellationToken cancellationToken) where T : IEventReceiver
     {
-        try
-        {
-            await invoker(receiver);
-        }
-        catch (Exception ex)
-        {
-            await _logger.LogErrorAsync($"Event receiver {receiver.GetType().Name} threw exception: {ex.Message}");
-        }
+        await invoker(receiver);
     }
 
     public void Dispose()
     {
-        _registry?.Dispose();
+        _registry.Dispose();
     }
 }

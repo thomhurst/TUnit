@@ -7,8 +7,8 @@ namespace TUnit.Core.Data;
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
-public class ThreadSafeDictionary<TKey, 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] TValue> 
+public class ThreadSafeDictionary<TKey,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] TValue>
     where TKey : notnull
 {
     // Using Lazy<TValue> ensures factory functions are only executed once per key,
@@ -24,8 +24,9 @@ public class ThreadSafeDictionary<TKey,
         // The Lazy wrapper ensures the factory function is only executed once,
         // even if multiple threads race to add the same key
         // We use ExecutionAndPublication mode for thread safety
-        var lazy = _innerDictionary.GetOrAdd(key, 
+        var lazy = _innerDictionary.GetOrAdd(key,
             k => new Lazy<TValue>(() => func(k), LazyThreadSafetyMode.ExecutionAndPublication));
+
         return lazy.Value;
     }
 
@@ -36,7 +37,7 @@ public class ThreadSafeDictionary<TKey,
             value = lazy.Value!;
             return true;
         }
-        
+
         value = default!;
         return false;
     }
@@ -51,7 +52,7 @@ public class ThreadSafeDictionary<TKey,
         return default(TValue?);
     }
 
-    public TValue this[TKey key] => _innerDictionary.TryGetValue(key, out var lazy) 
-        ? lazy.Value 
+    public TValue this[TKey key] => _innerDictionary.TryGetValue(key, out var lazy)
+        ? lazy.Value
         : throw new KeyNotFoundException($"Key '{key}' not found in dictionary");
 }
