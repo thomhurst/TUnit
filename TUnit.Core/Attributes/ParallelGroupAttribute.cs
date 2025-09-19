@@ -80,7 +80,7 @@ public class ParallelGroupAttribute(string group) : TUnitAttribute, ITestDiscove
     /// <inheritdoc />
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        context.SetParallelConstraint(new ParallelGroupConstraint(Group, Order));
+        context.AddParallelConstraint(new ParallelGroupConstraint(Group, Order));
         return default(ValueTask);
     }
 }

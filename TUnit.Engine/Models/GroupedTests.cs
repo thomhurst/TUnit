@@ -18,4 +18,25 @@ internal record GroupedTests
     // Array of groups with nested arrays for maximum iteration performance
     // Tests are grouped by order, ready for parallel execution
     public required Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>> ParallelGroups { get; init; }
+    
+    // New: For tests that have both ParallelGroup and keyed NotInParallel constraints
+    // Key is the parallel group name, value contains tests partitioned by constraints
+    public required Dictionary<string, GroupedConstrainedTests> ConstrainedParallelGroups { get; init; }
+}
+
+/// <summary>
+/// Represents tests within a parallel group that have additional constraints
+/// </summary>
+internal record GroupedConstrainedTests
+{
+    /// <summary>
+    /// Tests that only have ParallelGroup constraint (can run in parallel within the group)
+    /// </summary>
+    public required AbstractExecutableTest[] UnconstrainedTests { get; init; }
+    
+    /// <summary>
+    /// Tests that have both ParallelGroup and NotInParallel constraints
+    /// These must respect their constraint keys even within the parallel group
+    /// </summary>
+    public required (AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, int Priority)[] KeyedTests { get; init; }
 }

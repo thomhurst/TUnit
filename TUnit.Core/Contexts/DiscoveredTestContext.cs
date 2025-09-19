@@ -60,6 +60,20 @@ public class DiscoveredTestContext
         TestContext.TestDetails.RetryLimit = retryCount;
     }
 
+    /// <summary>
+    /// Adds a parallel constraint to the test context.
+    /// Multiple constraints can be combined (e.g., ParallelGroup + NotInParallel).
+    /// </summary>
+    public void AddParallelConstraint(IParallelConstraint constraint)
+    {
+        TestContext.AddParallelConstraint(constraint);
+    }
+    
+    /// <summary>
+    /// Sets the parallel constraint, replacing any existing constraints.
+    /// Maintained for backward compatibility.
+    /// </summary>
+    [Obsolete("Use AddParallelConstraint to support multiple constraints. This method replaces all existing constraints.")]
     public void SetParallelConstraint(IParallelConstraint constraint)
     {
         TestContext.ParallelConstraint = constraint;
