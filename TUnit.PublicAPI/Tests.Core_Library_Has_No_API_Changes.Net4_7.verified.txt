@@ -121,7 +121,7 @@ namespace
         protected AsyncDataSourceGeneratorAttribute() { }
         protected abstract .<<.<T>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T>.<GetTypedDataRowsAsync>d__1))]
-        public override .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public override sealed .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
     public abstract class AsyncDataSourceGeneratorAttribute<T1, T2> : .TypedDataSourceAttribute<<T1, T2>>
@@ -129,7 +129,7 @@ namespace
         protected AsyncDataSourceGeneratorAttribute() { }
         protected abstract .<<.<<T1, T2>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2>.<GetTypedDataRowsAsync>d__1))]
-        public override .<<.<<T1, T2>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public override sealed .<<.<<T1, T2>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
     public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3> : .TypedDataSourceAttribute<<T1, T2, T3>>
@@ -137,7 +137,7 @@ namespace
         protected AsyncDataSourceGeneratorAttribute() { }
         protected abstract .<<.<<T1, T2, T3>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3>.<GetTypedDataRowsAsync>d__1))]
-        public override .<<.<<T1, T2, T3>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public override sealed .<<.<<T1, T2, T3>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
     public abstract class AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4> : .TypedDataSourceAttribute<<T1, T2, T3, T4>>
@@ -982,16 +982,6 @@ namespace
         public PropertyInjectionException(string propertyName,  propertyType,  innerException) { }
         public string PropertyName { get; }
         public  PropertyType { get; }
-    }
-    public sealed class PropertyInjectionService
-    {
-        public PropertyInjectionService() { }
-        public static .PropertyInjectionData CreatePropertyInjection(.PropertyInfo property) { }
-        public static <object, object?> CreatePropertySetter(.PropertyInfo property) { }
-        public static .PropertyInjectionData[] DiscoverInjectableProperties( type) { }
-        public static . InjectPropertiesAsync(.TestContext testContext, object instance, .PropertyDataSource[] propertyDataSources, .PropertyInjectionData[] injectionData, .MethodMetadata testInformation, string testSessionId) { }
-        public static . InjectPropertiesIntoArgumentsAsync(object?[] arguments, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
-        public static . InjectPropertiesIntoObjectAsync(object instance, .<string, object?>? objectBag, .MethodMetadata? methodMetadata, .TestContextEvents? events) { }
     }
     [.DebuggerDisplay("{Type} {Name})")]
     public class PropertyMetadata : .MemberMetadata, <.PropertyMetadata>
@@ -2021,6 +2011,14 @@ namespace .Hooks
         protected StaticHookMethod() { }
         public <T, .CancellationToken, .>? Body { get; init; }
         public abstract . ExecuteAsync(T context, .CancellationToken cancellationToken);
+    }
+}
+namespace .Initialization
+{
+    public class TestObjectInitializationException : 
+    {
+        public TestObjectInitializationException(string message) { }
+        public TestObjectInitializationException(string message,  innerException) { }
     }
 }
 namespace .Interfaces

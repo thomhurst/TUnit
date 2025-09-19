@@ -11,13 +11,20 @@ namespace TUnit.Core.Initialization;
 /// Centralized service for initializing test-related objects.
 /// Provides a single entry point for the complete object initialization lifecycle.
 /// </summary>
-public static class TestObjectInitializer
+internal sealed class TestObjectInitializer
 {
+    private readonly PropertyInjectionService _propertyInjectionService;
+
+    public TestObjectInitializer(PropertyInjectionService propertyInjectionService)
+    {
+        _propertyInjectionService = propertyInjectionService ?? throw new ArgumentNullException(nameof(propertyInjectionService));
+    }
+
     /// <summary>
     /// Initializes a single object with the complete lifecycle:
     /// Create → Inject Properties → Initialize → Track → Ready
     /// </summary>
-    public static async Task<T> InitializeAsync<T>(
+    public async Task<T> InitializeAsync<T>(
         T instance,
         TestContext? testContext = null) where T : notnull
     {
@@ -34,7 +41,7 @@ public static class TestObjectInitializer
     /// <summary>
     /// Initializes a single object with explicit context parameters.
     /// </summary>
-    public static async Task InitializeAsync(
+    public async Task InitializeAsync(
         object instance,
         Dictionary<string, object?>? objectBag = null,
         MethodMetadata? methodMetadata = null,
@@ -59,7 +66,7 @@ public static class TestObjectInitializer
     /// <summary>
     /// Initializes multiple objects (e.g., test arguments) in parallel.
     /// </summary>
-    public static async Task InitializeArgumentsAsync(
+    public async Task InitializeArgumentsAsync(
         object?[] arguments,
         Dictionary<string, object?> objectBag,
         MethodMetadata methodMetadata,
@@ -94,7 +101,7 @@ public static class TestObjectInitializer
     /// <summary>
     /// Initializes test class instance with full lifecycle.
     /// </summary>
-    public static async Task InitializeTestClassAsync(
+    public async Task InitializeTestClassAsync(
         object testClassInstance,
         TestContext testContext)
     {
@@ -115,14 +122,14 @@ public static class TestObjectInitializer
     /// <summary>
     /// Core initialization logic - the single place where all initialization happens.
     /// </summary>
-    private static async Task InitializeObjectAsync(object instance, InitializationContext context)
+    private async Task InitializeObjectAsync(object instance, InitializationContext context)
     {
         try
         {
             // Step 1: Property Injection
             if (RequiresPropertyInjection(instance))
             {
-                await PropertyInjectionService.InjectPropertiesIntoObjectAsync(
+                await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
                     instance,
                     context.ObjectBag,
                     context.MethodMetadata,
@@ -151,7 +158,7 @@ public static class TestObjectInitializer
     /// <summary>
     /// Determines if an object requires property injection.
     /// </summary>
-    private static bool RequiresPropertyInjection(object instance)
+    private bool RequiresPropertyInjection(object instance)
     {
         // Use the existing cache from PropertyInjectionCache
         return PropertyInjection.PropertyInjectionCache.HasInjectableProperties(instance.GetType());
@@ -160,7 +167,7 @@ public static class TestObjectInitializer
     /// <summary>
     /// Tracks an object for disposal and ownership.
     /// </summary>
-    private static void TrackObject(object instance, InitializationContext context)
+    private void TrackObject(object instance, InitializationContext context)
     {
         // Only track if we have events context
         if (context.Events != null)
@@ -172,7 +179,7 @@ public static class TestObjectInitializer
     /// <summary>
     /// Hook for post-initialization processing.
     /// </summary>
-    private static Task OnObjectInitializedAsync(object instance, InitializationContext context)
+    private Task OnObjectInitializedAsync(object instance, InitializationContext context)
     {
         // Extension point for future features (e.g., validation, logging)
         return Task.CompletedTask;
@@ -181,7 +188,7 @@ public static class TestObjectInitializer
     /// <summary>
     /// Prepares initialization context from test context.
     /// </summary>
-    private static InitializationContext PrepareContext(TestContext? testContext)
+    private InitializationContext PrepareContext(TestContext? testContext)
     {
         return new InitializationContext
         {
@@ -197,10 +204,10 @@ public static class TestObjectInitializer
     /// </summary>
     private class InitializationContext
     {
-        public required Dictionary<string, object?> ObjectBag { get; init; }
-        public MethodMetadata? MethodMetadata { get; init; }
-        public required TestContextEvents Events { get; init; }
-        public TestContext? TestContext { get; init; }
+        public Dictionary<string, object?> ObjectBag { get; set; } = null!;
+        public MethodMetadata? MethodMetadata { get; set; }
+        public TestContextEvents Events { get; set; } = null!;
+        public TestContext? TestContext { get; set; }
     }
 }
 
@@ -213,7 +220,7 @@ public class TestObjectInitializationException : Exception
     {
     }
 
-    public TestObjectInitializationException(string message, Exception innerException) 
+    public TestObjectInitializationException(string message, Exception innerException)
         : base(message, innerException)
     {
     }

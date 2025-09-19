@@ -2,6 +2,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+using TUnit.Core.DataSources;
+using TUnit.Core.Initialization;
+using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core.PropertyInjection.Initialization;
@@ -16,9 +19,9 @@ internal static class PropertyDataResolver
     /// Resolves data from a property's data source.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Property types handled dynamically")]
-    public static async Task<object?> ResolvePropertyDataAsync(PropertyInitializationContext context)
+    public static async Task<object?> ResolvePropertyDataAsync(PropertyInitializationContext context, DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
     {
-        var dataSource = GetDataSource(context);
+        var dataSource = await GetInitializedDataSourceAsync(context, dataSourceInitializer);
         if (dataSource == null)
         {
             return null;
@@ -36,8 +39,26 @@ internal static class PropertyDataResolver
             // Resolve any Func<T> wrappers
             value = await ResolveDelegateValue(value);
             
+            // Initialize the resolved value if needed
             if (value != null)
             {
+                // If the resolved value is itself a data source, ensure it's initialized
+                if (value is IDataSourceAttribute dataSourceValue)
+                {
+                    value = await dataSourceInitializer.EnsureInitializedAsync(
+                        dataSourceValue,
+                        context.ObjectBag,
+                        context.MethodMetadata,
+                        context.Events);
+                }
+                // Otherwise, initialize if it has injectable properties or implements IAsyncInitializer
+                else if (PropertyInjectionCache.HasInjectableProperties(value.GetType()) || 
+                         value is IAsyncInitializer)
+                {
+                    // Use TestObjectInitializer for complete initialization
+                    value = await testObjectInitializer.InitializeAsync(value, context.TestContext);
+                }
+                
                 return value;
             }
         }
@@ -46,21 +67,35 @@ internal static class PropertyDataResolver
     }
 
     /// <summary>
-    /// Gets the data source from the context.
+    /// Gets an initialized data source from the context.
+    /// Ensures the data source is fully initialized (including property injection) before returning it.
     /// </summary>
-    private static IDataSourceAttribute? GetDataSource(PropertyInitializationContext context)
+    private static async Task<IDataSourceAttribute?> GetInitializedDataSourceAsync(PropertyInitializationContext context, DataSourceInitializer dataSourceInitializer)
     {
+        IDataSourceAttribute? dataSource = null;
+        
         if (context.DataSource != null)
         {
-            return context.DataSource;
+            dataSource = context.DataSource;
         }
-
-        if (context.SourceGeneratedMetadata != null)
+        else if (context.SourceGeneratedMetadata != null)
         {
-            return context.SourceGeneratedMetadata.CreateDataSource();
+            // Create a new data source instance
+            dataSource = context.SourceGeneratedMetadata.CreateDataSource();
         }
 
-        return null;
+        if (dataSource == null)
+        {
+            return null;
+        }
+
+        // Ensure the data source is fully initialized before use
+        // This handles property injection and IAsyncInitializer
+        return await dataSourceInitializer.EnsureInitializedAsync(
+            dataSource,
+            context.ObjectBag,
+            context.MethodMetadata,
+            context.Events);
     }
 
     /// <summary>

@@ -1,4 +1,6 @@
 using System.Threading.Tasks;
+using TUnit.Core.DataSources;
+using TUnit.Core.Initialization;
 
 namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
 
@@ -8,6 +10,21 @@ namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
 /// </summary>
 internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
 {
+    private readonly DataSourceInitializer _dataSourceInitializer;
+    private readonly TestObjectInitializer _testObjectInitializer;
+
+    public NestedPropertyStrategy(DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
+    {
+        _dataSourceInitializer = dataSourceInitializer ?? throw new System.ArgumentNullException(nameof(dataSourceInitializer));
+        _testObjectInitializer = testObjectInitializer ?? throw new System.ArgumentNullException(nameof(testObjectInitializer));
+    }
+
+    public NestedPropertyStrategy()
+    {
+        // Default constructor for backward compatibility if needed
+        _dataSourceInitializer = null!;
+        _testObjectInitializer = null!;
+    }
     /// <summary>
     /// Determines if this strategy can handle nested properties.
     /// </summary>
@@ -73,7 +90,7 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
         var tasks = plan.SourceGeneratedProperties.Select(async metadata =>
         {
             var nestedContext = CreateNestedContext(parentContext, instance, metadata);
-            var strategy = new SourceGeneratedPropertyStrategy();
+            var strategy = new SourceGeneratedPropertyStrategy(_dataSourceInitializer, _testObjectInitializer);
             
             if (strategy.CanHandle(nestedContext))
             {
@@ -95,7 +112,7 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
         var tasks = plan.ReflectionProperties.Select(async pair =>
         {
             var nestedContext = CreateNestedContext(parentContext, instance, pair.Property, pair.DataSource);
-            var strategy = new ReflectionPropertyStrategy();
+            var strategy = new ReflectionPropertyStrategy(_dataSourceInitializer, _testObjectInitializer);
             
             if (strategy.CanHandle(nestedContext))
             {

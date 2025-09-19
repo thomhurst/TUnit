@@ -11,6 +11,13 @@ namespace TUnit.Engine.Services;
 /// </summary>
 internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
 {
+    private readonly TestObjectInitializer _testObjectInitializer;
+
+    public TestArgumentTrackingService(TestObjectInitializer testObjectInitializer)
+    {
+        _testObjectInitializer = testObjectInitializer;
+    }
+
     public int Order => int.MinValue; // Run first to ensure tracking happens before other event receivers
 
     /// <summary>
@@ -25,14 +32,14 @@ internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
         
         // Use centralized TestObjectInitializer for all initialization
         // Initialize class arguments
-        await TestObjectInitializer.InitializeArgumentsAsync(
+        await _testObjectInitializer.InitializeArgumentsAsync(
             classArguments,
             testContext.ObjectBag,
             testContext.TestDetails.MethodMetadata,
             testContext.Events);
         
         // Initialize method arguments
-        await TestObjectInitializer.InitializeArgumentsAsync(
+        await _testObjectInitializer.InitializeArgumentsAsync(
             methodArguments,
             testContext.ObjectBag,
             testContext.TestDetails.MethodMetadata,

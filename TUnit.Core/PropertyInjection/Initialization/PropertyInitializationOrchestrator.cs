@@ -5,6 +5,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using TUnit.Core.DataSources;
+using TUnit.Core.Initialization;
 using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core.PropertyInjection.Initialization;
@@ -15,11 +17,28 @@ namespace TUnit.Core.PropertyInjection.Initialization;
 /// </summary>
 internal sealed class PropertyInitializationOrchestrator
 {
-    private readonly PropertyInitializationPipeline _pipeline;
+    private PropertyInitializationPipeline _pipeline;
+    internal DataSourceInitializer DataSourceInitializer { get; }
+    internal TestObjectInitializer TestObjectInitializer { get; private set; }
 
-    public PropertyInitializationOrchestrator()
+    public PropertyInitializationOrchestrator(DataSourceInitializer dataSourceInitializer, TestObjectInitializer? testObjectInitializer)
     {
-        _pipeline = PropertyInitializationPipeline.CreateDefault();
+        DataSourceInitializer = dataSourceInitializer ?? throw new ArgumentNullException(nameof(dataSourceInitializer));
+        TestObjectInitializer = testObjectInitializer!; // Will be set via Initialize()
+        if (testObjectInitializer != null)
+        {
+            _pipeline = PropertyInitializationPipeline.CreateDefault(dataSourceInitializer, testObjectInitializer);
+        }
+        else
+        {
+            _pipeline = null!; // Will be set via Initialize()
+        }
+    }
+    
+    public void Initialize(TestObjectInitializer testObjectInitializer)
+    {
+        TestObjectInitializer = testObjectInitializer ?? throw new ArgumentNullException(nameof(testObjectInitializer));
+        _pipeline = PropertyInitializationPipeline.CreateDefault(DataSourceInitializer, testObjectInitializer);
     }
 
     /// <summary>
@@ -86,6 +105,7 @@ internal sealed class PropertyInitializationOrchestrator
         }
 
         // Initialize properties based on the mode
+        // Properties will be fully initialized (including nested initialization) by the strategies
         if (SourceRegistrar.IsEnabled)
         {
             await InitializePropertiesAsync(
@@ -97,7 +117,8 @@ internal sealed class PropertyInitializationOrchestrator
                 instance, plan.ReflectionProperties, objectBag, methodMetadata, events, visitedObjects);
         }
 
-        // Initialize the object itself after properties are set
+        // Initialize the object itself after all its properties are fully initialized
+        // This ensures properties are available when IAsyncInitializer.InitializeAsync() is called
         await ObjectInitializer.InitializeAsync(instance);
     }
 
@@ -162,5 +183,4 @@ internal sealed class PropertyInitializationOrchestrator
     /// <summary>
     /// Gets the singleton instance of the orchestrator.
     /// </summary>
-    public static PropertyInitializationOrchestrator Instance { get; } = new();
 }

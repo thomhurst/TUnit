@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TUnit.Core.DataSources;
+using TUnit.Core.Initialization;
 using TUnit.Core.PropertyInjection.Initialization.Strategies;
 
 namespace TUnit.Core.PropertyInjection.Initialization;
@@ -14,14 +16,16 @@ internal sealed class PropertyInitializationPipeline
     private readonly List<IPropertyInitializationStrategy> _strategies;
     private readonly List<Func<PropertyInitializationContext, Task>> _beforeSteps;
     private readonly List<Func<PropertyInitializationContext, Task>> _afterSteps;
+    private readonly DataSourceInitializer _dataSourceInitializer;
 
-    public PropertyInitializationPipeline()
+    public PropertyInitializationPipeline(DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
     {
+        _dataSourceInitializer = dataSourceInitializer ?? throw new ArgumentNullException(nameof(dataSourceInitializer));
         _strategies = new List<IPropertyInitializationStrategy>
         {
-            new SourceGeneratedPropertyStrategy(),
-            new ReflectionPropertyStrategy(),
-            new NestedPropertyStrategy()
+            new SourceGeneratedPropertyStrategy(dataSourceInitializer, testObjectInitializer),
+            new ReflectionPropertyStrategy(dataSourceInitializer, testObjectInitializer),
+            new NestedPropertyStrategy(dataSourceInitializer, testObjectInitializer)
         };
 
         _beforeSteps = new List<Func<PropertyInitializationContext, Task>>();
@@ -113,9 +117,9 @@ internal sealed class PropertyInitializationPipeline
     /// <summary>
     /// Creates a default pipeline with standard steps.
     /// </summary>
-    public static PropertyInitializationPipeline CreateDefault()
+    public static PropertyInitializationPipeline CreateDefault(DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
     {
-        return new PropertyInitializationPipeline()
+        return new PropertyInitializationPipeline(dataSourceInitializer, testObjectInitializer)
             .AddBeforeStep(ValidateContext)
             .AddAfterStep(FinalizeInitialization);
     }

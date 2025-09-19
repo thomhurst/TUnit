@@ -1,6 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using TUnit.Core.Extensions;
-using TUnit.Core.Initialization;
 
 namespace TUnit.Core;
 
@@ -11,21 +9,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<[DynamicallyAccessedMemb
 
     public sealed override async IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Use centralized TestObjectInitializer for all initialization
-        // This handles both property injection and object initialization
-        if (dataGeneratorMetadata is { TestInformation: not null })
-        {
-            await TestObjectInitializer.InitializeAsync(this,
-                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
-                dataGeneratorMetadata.TestInformation,
-                dataGeneratorMetadata.TestBuilderContext.Current.Events);
-        }
-        else
-        {
-            // Fallback if no context available
-            await TestObjectInitializer.InitializeAsync(this, TestContext.Current);
-        }
-
+        // Data source initialization is now handled externally by DataSourceInitializer
+        // This follows SRP - the attribute is only responsible for generating data, not initialization
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
@@ -44,19 +29,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<
 
     public sealed override async IAsyncEnumerable<Func<Task<(T1, T2)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Inject properties into the data source attribute itself if we have context
-        if (dataGeneratorMetadata is { TestInformation: not null })
-        {
-            await TestObjectInitializer.InitializeAsync(this,
-                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
-                dataGeneratorMetadata.TestInformation,
-                dataGeneratorMetadata.TestBuilderContext.Current.Events);
-        }
-        else
-        {
-            await TestObjectInitializer.InitializeAsync(this, TestContext.Current);
-        }
-
+        // Data source initialization is now handled externally by DataSourceInitializer
+        // This follows SRP - the attribute is only responsible for generating data, not initialization
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
@@ -77,19 +51,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<
 
     public sealed override async IAsyncEnumerable<Func<Task<(T1, T2, T3)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Inject properties into the data source attribute itself if we have context
-        if (dataGeneratorMetadata is { TestInformation: not null })
-        {
-            await TestObjectInitializer.InitializeAsync(this,
-                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
-                dataGeneratorMetadata.TestInformation,
-                dataGeneratorMetadata.TestBuilderContext.Current.Events);
-        }
-        else
-        {
-            await TestObjectInitializer.InitializeAsync(this, TestContext.Current);
-        }
-
+        // Data source initialization is now handled externally by DataSourceInitializer
+        // This follows SRP - the attribute is only responsible for generating data, not initialization
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
@@ -112,19 +75,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<
 
     public override async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Inject properties into the data source attribute itself if we have context
-        if (dataGeneratorMetadata is { TestInformation: not null })
-        {
-            await TestObjectInitializer.InitializeAsync(this,
-                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
-                dataGeneratorMetadata.TestInformation,
-                dataGeneratorMetadata.TestBuilderContext.Current.Events);
-        }
-        else
-        {
-            await TestObjectInitializer.InitializeAsync(this, TestContext.Current);
-        }
-
+        // Data source initialization is now handled externally by DataSourceInitializer
+        // This follows SRP - the attribute is only responsible for generating data, not initialization
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;
@@ -149,19 +101,8 @@ public abstract class AsyncDataSourceGeneratorAttribute<
 
     public override async IAsyncEnumerable<Func<Task<(T1, T2, T3, T4, T5)>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        // Inject properties into the data source attribute itself if we have context
-        if (dataGeneratorMetadata is { TestInformation: not null })
-        {
-            await TestObjectInitializer.InitializeAsync(this,
-                dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
-                dataGeneratorMetadata.TestInformation,
-                dataGeneratorMetadata.TestBuilderContext.Current.Events);
-        }
-        else
-        {
-            await TestObjectInitializer.InitializeAsync(this, TestContext.Current);
-        }
-
+        // Data source initialization is now handled externally by DataSourceInitializer
+        // This follows SRP - the attribute is only responsible for generating data, not initialization
         await foreach (var generateDataSource in GenerateDataSourcesAsync(dataGeneratorMetadata))
         {
             yield return generateDataSource;

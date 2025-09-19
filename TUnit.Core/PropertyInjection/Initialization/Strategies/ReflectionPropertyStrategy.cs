@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using TUnit.Core.DataSources;
+using TUnit.Core.Initialization;
 
 namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
 
@@ -9,6 +11,14 @@ namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
 /// </summary>
 internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrategy
 {
+    private readonly DataSourceInitializer _dataSourceInitializer;
+    private readonly TestObjectInitializer _testObjectInitializer;
+
+    public ReflectionPropertyStrategy(DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
+    {
+        _dataSourceInitializer = dataSourceInitializer ?? throw new System.ArgumentNullException(nameof(dataSourceInitializer));
+        _testObjectInitializer = testObjectInitializer ?? throw new System.ArgumentNullException(nameof(testObjectInitializer));
+    }
     /// <summary>
     /// Determines if this strategy can handle reflection-based properties.
     /// </summary>
@@ -29,7 +39,7 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
         }
 
         // Step 1: Resolve data from the data source
-        var resolvedValue = await PropertyDataResolver.ResolvePropertyDataAsync(context);
+        var resolvedValue = await PropertyDataResolver.ResolvePropertyDataAsync(context, _dataSourceInitializer, _testObjectInitializer);
         if (resolvedValue == null)
         {
             return;
@@ -40,36 +50,12 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
         // Step 2: Track the property value
         PropertyTrackingService.TrackPropertyValue(context, resolvedValue);
 
-        // Step 3: Handle nested property initialization
-        if (PropertyInjectionCache.HasInjectableProperties(resolvedValue.GetType()))
-        {
-            // Mark for recursive processing
-            await InitializeNestedProperties(context, resolvedValue);
-        }
-        else
-        {
-            // Just initialize the object
-            await ObjectInitializer.InitializeAsync(resolvedValue);
-        }
-
-        // Step 4: Set the property value
+        // Step 3: Set the property value
+        // The value has already been initialized by PropertyDataResolver if needed
         context.PropertySetter(context.Instance, resolvedValue);
 
-        // Step 5: Add to test context tracking
+        // Step 4: Add to test context tracking
         PropertyTrackingService.AddToTestContext(context, resolvedValue);
     }
 
-    /// <summary>
-    /// Handles initialization of nested properties.
-    /// </summary>
-    private async Task InitializeNestedProperties(PropertyInitializationContext context, object propertyValue)
-    {
-        // This will be handled by the PropertyInjectionService recursively
-        // We just need to ensure it's initialized
-        await PropertyInjectionService.InjectPropertiesIntoObjectAsync(
-            propertyValue,
-            context.ObjectBag,
-            context.MethodMetadata,
-            context.Events);
-    }
 }

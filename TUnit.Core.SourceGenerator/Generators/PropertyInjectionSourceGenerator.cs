@@ -262,6 +262,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var propertyType = propInfo.Property.Type.ToDisplayString();
         var propertyTypeForTypeof = GetNonNullableTypeString(propInfo.Property.Type);
         var attributeTypeName = propInfo.DataSourceAttribute.AttributeClass!.ToDisplayString();
+        var attributeClass = propInfo.DataSourceAttribute.AttributeClass!;
 
         sb.AppendLine("        yield return new PropertyInjectionMetadata");
         sb.AppendLine("        {");
@@ -272,7 +273,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         // Generate CreateDataSource delegate
         sb.AppendLine("            CreateDataSource = () =>");
         sb.AppendLine("            {");
-        GenerateDataSourceCreation(sb, propInfo.DataSourceAttribute, attributeTypeName);
+        GenerateDataSourceCreation(sb, propInfo.DataSourceAttribute, attributeTypeName, attributeClass);
         sb.AppendLine("            },");
 
         // Generate SetProperty delegate
@@ -286,9 +287,13 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine();
     }
 
-    private static void GenerateDataSourceCreation(StringBuilder sb, AttributeData attributeData, string attributeTypeName)
+    private static void GenerateDataSourceCreation(StringBuilder sb, AttributeData attributeData, string attributeTypeName, INamedTypeSymbol attributeClass)
     {
         var constructorArgs = string.Join(", ", attributeData.ConstructorArguments.Select(FormatTypedConstant));
+
+        // Check if this is a custom data source that might have its own properties needing injection
+        // We identify custom data sources as those that inherit from DataSourceGeneratorAttribute or AsyncDataSourceGeneratorAttribute
+        var isCustomDataSource = IsCustomDataSource(attributeClass);
 
         sb.AppendLine($"                var dataSource = new {attributeTypeName}({constructorArgs});");
 
@@ -298,7 +303,15 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             sb.AppendLine($"                dataSource.{namedArg.Key} = {value};");
         }
 
+        // For custom data sources, we don't initialize them here - that will be handled by DataSourceInitializer
+        // which is called by PropertyDataResolver.GetInitializedDataSourceAsync
         sb.AppendLine("                return dataSource;");
+    }
+    
+    private static bool IsCustomDataSource(INamedTypeSymbol attributeClass)
+    {
+        // Check if this class implements IDataSourceAttribute
+        return attributeClass.AllInterfaces.Any(i => i.Name == "IDataSourceAttribute");
     }
 
     private static void GeneratePropertySetting(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, string propertyType, string instanceVariableName, string classTypeName)

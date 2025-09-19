@@ -2,6 +2,8 @@ using TUnit.Core;
 using TUnit.Core.Tracking;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Data;
+using TUnit.Core.DataSources;
+using TUnit.Core.Initialization;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Core.Enums;
 using TUnit.Core.Services;
@@ -19,30 +21,25 @@ namespace TUnit.Core;
 /// </summary>
 internal sealed class PropertyInjectionService
 {
-    private static readonly PropertyInjectionService _instance = new();
     private readonly PropertyInitializationOrchestrator _orchestrator;
 
-    public PropertyInjectionService()
+    public PropertyInjectionService(DataSourceInitializer dataSourceInitializer)
     {
-        _orchestrator = PropertyInitializationOrchestrator.Instance;
+        // We'll set TestObjectInitializer later to break the circular dependency
+        _orchestrator = new PropertyInitializationOrchestrator(dataSourceInitializer, null!);
     }
-
-    /// <summary>
-    /// Gets the singleton instance of the PropertyInjectionService.
-    /// </summary>
-    public static PropertyInjectionService Instance => _instance;
+    
+    public void Initialize(TestObjectInitializer testObjectInitializer)
+    {
+        _orchestrator.Initialize(testObjectInitializer);
+    }
 
     /// <summary>
     /// Injects properties with data sources into argument objects just before test execution.
     /// This ensures properties are only initialized when the test is about to run.
     /// Arguments are processed in parallel for better performance.
     /// </summary>
-    public static Task InjectPropertiesIntoArgumentsAsync(object?[] arguments, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
-    {
-        return _instance.InjectPropertiesIntoArgumentsAsyncCore(arguments, objectBag, methodMetadata, events);
-    }
-
-    private async Task InjectPropertiesIntoArgumentsAsyncCore(object?[] arguments, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
+    public async Task InjectPropertiesIntoArgumentsAsync(object?[] arguments, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
     {
         if (arguments.Length == 0)
         {
@@ -73,12 +70,7 @@ internal sealed class PropertyInjectionService
     /// Uses source generation mode when available, falls back to reflection mode.
     /// After injection, handles tracking, initialization, and recursive injection.
     /// </summary>
-    public static Task InjectPropertiesIntoObjectAsync(object instance, Dictionary<string, object?>? objectBag, MethodMetadata? methodMetadata, TestContextEvents? events)
-    {
-        return _instance.InjectPropertiesIntoObjectAsyncInstance(instance, objectBag, methodMetadata, events);
-    }
-
-    private Task InjectPropertiesIntoObjectAsyncInstance(object instance, Dictionary<string, object?>? objectBag, MethodMetadata? methodMetadata, TestContextEvents? events)
+    public Task InjectPropertiesIntoObjectAsync(object instance, Dictionary<string, object?>? objectBag, MethodMetadata? methodMetadata, TestContextEvents? events)
     {
         // Start with an empty visited set for cycle detection
 #if NETSTANDARD2_0
