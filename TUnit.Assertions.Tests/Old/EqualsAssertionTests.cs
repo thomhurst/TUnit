@@ -48,4 +48,17 @@ public class EqualsAssertionTests
         short zero = 1;
         await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That<long>(zero).IsEqualTo(0));
     }
+
+    [Test]
+    public async Task IEquatable()
+    {
+        var value = new TestItem(0);
+
+        await TUnitAssert.That(value).IsEquatableTo(0);
+    }
+
+    public record TestItem(int Value) : IEquatable<int>
+    {
+        public bool Equals(int other) => Value == other;
+    }
 }
