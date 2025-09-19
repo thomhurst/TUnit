@@ -19,31 +19,42 @@ internal sealed class TestGroupingService : ITestGroupingService
         var orderedTests = tests
             .OrderByDescending(t => t.Context.ExecutionPriority)
             .ThenBy(x => x.Context.ClassContext?.ClassType?.FullName ?? string.Empty)
-            .ThenBy(t => (t.Context.ParallelConstraint as NotInParallelConstraint)?.Order ?? int.MaxValue);
+            .ThenBy(t => t.Context.ParallelConstraints.OfType<NotInParallelConstraint>().FirstOrDefault()?.Order ?? int.MaxValue);
 
         var notInParallelList = new List<(AbstractExecutableTest Test, TestPriority Priority)>();
         var keyedNotInParallelList = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TestPriority Priority)>();
         var parallelTests = new List<AbstractExecutableTest>();
         var parallelGroups = new Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>>();
+        var constrainedParallelGroups = new Dictionary<string, (List<AbstractExecutableTest> Unconstrained, List<(AbstractExecutableTest, IReadOnlyList<string>, TestPriority)> Keyed)>();
 
         // Process each class group sequentially to maintain class ordering for NotInParallel tests
         foreach (var test in orderedTests)
         {
-            var constraint = test.Context.ParallelConstraint;
-
-            switch (constraint)
+            var constraints = test.Context.ParallelConstraints;
+            
+            // Handle tests with multiple constraints
+            var parallelGroup = constraints.OfType<ParallelGroupConstraint>().FirstOrDefault();
+            var notInParallel = constraints.OfType<NotInParallelConstraint>().FirstOrDefault();
+            
+            if (parallelGroup != null && notInParallel != null)
             {
-                case NotInParallelConstraint notInParallel:
-                    ProcessNotInParallelConstraint(test, notInParallel, notInParallelList, keyedNotInParallelList);
-                    break;
-
-                case ParallelGroupConstraint parallelGroup:
-                    ProcessParallelGroupConstraint(test, parallelGroup, parallelGroups);
-                    break;
-
-                default:
-                    parallelTests.Add(test);
-                    break;
+                // Test has both ParallelGroup and NotInParallel constraints
+                ProcessCombinedConstraints(test, parallelGroup, notInParallel, constrainedParallelGroups);
+            }
+            else if (parallelGroup != null)
+            {
+                // Only ParallelGroup constraint
+                ProcessParallelGroupConstraint(test, parallelGroup, parallelGroups);
+            }
+            else if (notInParallel != null)
+            {
+                // Only NotInParallel constraint
+                ProcessNotInParallelConstraint(test, notInParallel, notInParallelList, keyedNotInParallelList);
+            }
+            else
+            {
+                // No constraints - can run in parallel
+                parallelTests.Add(test);
             }
         }
 
@@ -64,12 +75,35 @@ internal sealed class TestGroupingService : ITestGroupingService
             .Select(t => (t.Test, t.ConstraintKeys, t.Priority.GetHashCode()))
             .ToArray();
 
+        // Convert constrained parallel groups to the final format
+        var finalConstrainedGroups = new Dictionary<string, GroupedConstrainedTests>();
+        foreach (var kvp in constrainedParallelGroups)
+        {
+            var groupName = kvp.Key;
+            var unconstrained = kvp.Value.Unconstrained;
+            var keyed = kvp.Value.Keyed;
+            
+            var sortedKeyed = keyed
+                .OrderBy(t => t.Item1.Context.ClassContext?.ClassType?.FullName ?? string.Empty)
+                .ThenByDescending(t => t.Item3.Priority)
+                .ThenBy(t => t.Item3.Order)
+                .Select(t => (t.Item1, t.Item2, t.Item3.GetHashCode()))
+                .ToArray();
+                
+            finalConstrainedGroups[groupName] = new GroupedConstrainedTests
+            {
+                UnconstrainedTests = unconstrained.ToArray(),
+                KeyedTests = sortedKeyed
+            };
+        }
+        
         var result = new GroupedTests
         {
             Parallel = parallelTests.ToArray(),
             NotInParallel = sortedNotInParallel,
             KeyedNotInParallel = keyedArrays,
-            ParallelGroups = parallelGroups
+            ParallelGroups = parallelGroups,
+            ConstrainedParallelGroups = finalConstrainedGroups
         };
 
         return new ValueTask<GroupedTests>(result);
@@ -114,5 +148,33 @@ internal sealed class TestGroupingService : ITestGroupingService
         }
 
         tests.Add(test);
+    }
+    
+    private static void ProcessCombinedConstraints(
+        AbstractExecutableTest test,
+        ParallelGroupConstraint parallelGroup,
+        NotInParallelConstraint notInParallel,
+        Dictionary<string, (List<AbstractExecutableTest> Unconstrained, List<(AbstractExecutableTest, IReadOnlyList<string>, TestPriority)> Keyed)> constrainedGroups)
+    {
+        if (!constrainedGroups.TryGetValue(parallelGroup.Group, out var group))
+        {
+            group = (new List<AbstractExecutableTest>(), new List<(AbstractExecutableTest, IReadOnlyList<string>, TestPriority)>());
+            constrainedGroups[parallelGroup.Group] = group;
+        }
+        
+        // Add to keyed tests within the parallel group
+        var order = notInParallel.Order;
+        var priority = test.Context.ExecutionPriority;
+        var testPriority = new TestPriority(priority, order);
+        
+        if (notInParallel.NotInParallelConstraintKeys.Count > 0)
+        {
+            group.Keyed.Add((test, notInParallel.NotInParallelConstraintKeys, testPriority));
+        }
+        else
+        {
+            // NotInParallel without keys means sequential within the group
+            group.Keyed.Add((test, new List<string> { "__global__" }, testPriority));
+        }
     }
 }

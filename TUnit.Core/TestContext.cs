@@ -93,7 +93,45 @@ public class TestContext : Context
 
     public Func<TestContext, Exception, int, Task<bool>>? RetryFunc { get; set; }
 
-    public IParallelConstraint? ParallelConstraint { get; set; }
+    // New: Support multiple parallel constraints
+    private readonly List<IParallelConstraint> _parallelConstraints = [];
+    
+    /// <summary>
+    /// Gets the collection of parallel constraints applied to this test.
+    /// Multiple constraints can be combined (e.g., ParallelGroup + NotInParallel).
+    /// </summary>
+    public IReadOnlyList<IParallelConstraint> ParallelConstraints => _parallelConstraints;
+    
+    /// <summary>
+    /// Gets or sets the primary parallel constraint for backward compatibility.
+    /// When setting, this replaces all existing constraints.
+    /// When getting, returns the first constraint or null if none exist.
+    /// </summary>
+    [Obsolete("Use ParallelConstraints collection instead. This property is maintained for backward compatibility.")]
+    public IParallelConstraint? ParallelConstraint 
+    { 
+        get => _parallelConstraints.FirstOrDefault();
+        set
+        {
+            _parallelConstraints.Clear();
+            if (value != null)
+            {
+                _parallelConstraints.Add(value);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Adds a parallel constraint to this test context.
+    /// Multiple constraints can be combined to create complex parallelization rules.
+    /// </summary>
+    public void AddParallelConstraint(IParallelConstraint constraint)
+    {
+        if (constraint != null)
+        {
+            _parallelConstraints.Add(constraint);
+        }
+    }
 
     public Priority ExecutionPriority { get; set; } = Priority.Normal;
 

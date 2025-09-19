@@ -553,10 +553,13 @@ namespace
         public string TestName { get; }
         public void AddArgumentDisplayFormatter(.ArgumentDisplayFormatter formatter) { }
         public void AddCategory(string category) { }
+        public void AddParallelConstraint(. constraint) { }
         public void AddProperty(string key, string value) { }
         public string GetDisplayName() { }
         public void SetDisplayName(string displayName) { }
         public void SetDisplayNameFormatter( formatterType) { }
+        [("Use AddParallelConstraint to support multiple constraints. This method replaces a" +
+            "ll existing constraints.")]
         public void SetParallelConstraint(. constraint) { }
         public void SetPriority(. priority) { }
         public void SetRetryLimit(int retryLimit) { }
@@ -1246,7 +1249,10 @@ namespace
         public .CancellationTokenSource? LinkedCancellationTokens { get; set; }
         public object Lock { get; }
         public .<string, object?> ObjectBag { get; }
+        [("Use ParallelConstraints collection instead. This property is maintained for backw" +
+            "ard compatibility.")]
         public .? ParallelConstraint { get; set; }
+        public .<.> ParallelConstraints { get; }
         public .? ParallelLimiter { get; }
         public .TestPhase Phase { get; set; }
         public bool ReportResult { get; set; }
@@ -1266,6 +1272,7 @@ namespace
         public static string WorkingDirectory { get; set; }
         public void AddArtifact(.Artifact artifact) { }
         public void AddLinkedCancellationToken(.CancellationToken cancellationToken) { }
+        public void AddParallelConstraint(. constraint) { }
         public string GetDisplayName() { }
         public new string GetErrorOutput() { }
         public string GetOutput() { }
