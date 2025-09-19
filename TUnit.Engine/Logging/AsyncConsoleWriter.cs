@@ -60,14 +60,20 @@ internal sealed class AsyncConsoleWriter : TextWriter
 
     public override void Write(char value)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         Write(value.ToString());
     }
 
     public override void Write(string? value)
     {
-        if (_disposed || string.IsNullOrEmpty(value)) return;
-        
+        if (_disposed || string.IsNullOrEmpty(value))
+        {
+            return;
+        }
+
         // Non-blocking write to channel
         if (!_writeChannel.Writer.TryWrite(WriteCommand.Write(value!)))
         {
@@ -85,26 +91,38 @@ internal sealed class AsyncConsoleWriter : TextWriter
 
     public override void Write(char[]? buffer)
     {
-        if (_disposed || buffer == null) return;
+        if (_disposed || buffer == null)
+        {
+            return;
+        }
         Write(new string(buffer));
     }
 
     public override void Write(char[] buffer, int index, int count)
     {
-        if (_disposed || buffer == null || count <= 0) return;
+        if (_disposed || buffer == null || count <= 0)
+        {
+            return;
+        }
         Write(new string(buffer, index, count));
     }
 
     public override void WriteLine()
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         WriteLine(string.Empty);
     }
 
     public override void WriteLine(string? value)
     {
-        if (_disposed) return;
-        
+        if (_disposed)
+        {
+            return;
+        }
+
         // Non-blocking write to channel
         if (!_writeChannel.Writer.TryWrite(WriteCommand.WriteLine(value ?? string.Empty)))
         {
@@ -122,8 +140,11 @@ internal sealed class AsyncConsoleWriter : TextWriter
 
     public override void Flush()
     {
-        if (_disposed) return;
-        
+        if (_disposed)
+        {
+            return;
+        }
+
         // Queue a flush command
         if (!_writeChannel.Writer.TryWrite(WriteCommand.FlushCommand))
         {
@@ -141,8 +162,11 @@ internal sealed class AsyncConsoleWriter : TextWriter
 
     public override async Task FlushAsync()
     {
-        if (_disposed) return;
-        
+        if (_disposed)
+        {
+            return;
+        }
+
         // Queue a flush and wait a bit for it to process
         _writeChannel.Writer.TryWrite(WriteCommand.FlushCommand);
         await Task.Delay(10); // Small delay to allow flush to process
@@ -204,8 +228,11 @@ internal sealed class AsyncConsoleWriter : TextWriter
 
     private void FlushBuffer(StringBuilder buffer)
     {
-        if (buffer.Length == 0) return;
-        
+        if (buffer.Length == 0)
+        {
+            return;
+        }
+
         try
         {
             _target.Write(buffer.ToString());
@@ -223,7 +250,10 @@ internal sealed class AsyncConsoleWriter : TextWriter
 
     protected override void Dispose(bool disposing)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         _disposed = true;
 
         if (disposing)
@@ -255,56 +285,83 @@ internal sealed class AsyncConsoleWriter : TextWriter
     // Formatted write methods to match BufferedTextWriter interface
     public void WriteFormatted(string format, object? arg0)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         Write(string.Format(format, arg0));
     }
 
     public void WriteFormatted(string format, object? arg0, object? arg1)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         Write(string.Format(format, arg0, arg1));
     }
 
     public void WriteFormatted(string format, object? arg0, object? arg1, object? arg2)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         Write(string.Format(format, arg0, arg1, arg2));
     }
 
     public void WriteFormatted(string format, params object?[] args)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         Write(string.Format(format, args));
     }
 
     public void WriteLineFormatted(string format, object? arg0)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         WriteLine(string.Format(format, arg0));
     }
 
     public void WriteLineFormatted(string format, object? arg0, object? arg1)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         WriteLine(string.Format(format, arg0, arg1));
     }
 
     public void WriteLineFormatted(string format, object? arg0, object? arg1, object? arg2)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         WriteLine(string.Format(format, arg0, arg1, arg2));
     }
 
     public void WriteLineFormatted(string format, params object?[] args)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         WriteLine(string.Format(format, args));
     }
 
 #if NET
     public override async ValueTask DisposeAsync()
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
         _disposed = true;
 
         // Signal shutdown

@@ -112,7 +112,9 @@ public class AotConverterGenerator : IIncrementalGenerator
         foreach (var conversion in conversions)
         {
             if (conversion == null)
+            {
                 continue;
+            }
 
             var converterClassName = $"AotConverter_{converterIndex++}";
             var sourceTypeName = conversion.SourceType.GloballyQualified();

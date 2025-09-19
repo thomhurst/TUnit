@@ -24,9 +24,12 @@ public class NotInParallelExecutionTests
             }
         }
         
+        // Use TestStart if available, otherwise use DateTime.Now
+        var startTime = TestContext.Current.TestStart?.DateTime ?? DateTime.Now;
+        
         ExecutionRecords.Add(new TestExecutionRecord(
             TestContext.Current!.TestDetails.TestName,
-            TestContext.Current.TestStart.DateTime,
+            startTime,
             null,
             CurrentlyRunning
         ));
@@ -46,7 +49,8 @@ public class NotInParallelExecutionTests
         
         if (record != null)
         {
-            record.EndTime = TestContext.Current.Result!.End!.Value.DateTime;
+            // Use Result.End if available, otherwise use DateTime.Now
+            record.EndTime = TestContext.Current.Result?.End?.DateTime ?? DateTime.Now;
         }
 
         await AssertNoParallelExecution();
@@ -121,8 +125,10 @@ public class NotInParallelExecutionTests
         public bool OverlapsWith(TestExecutionRecord other)
         {
             if (EndTime == null || other.EndTime == null)
+            {
                 return false;
-                
+            }
+
             return StartTime < other.EndTime.Value && other.StartTime < EndTime.Value;
         }
     }

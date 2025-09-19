@@ -35,7 +35,7 @@ public class TestDiscoveryContext : Context
 
     public IReadOnlyList<TestContext> AllTests { get; private set; } = [];
 
-    internal override void RestoreContextAsyncLocal()
+    internal override void SetAsyncLocalContext()
     {
         Current = this;
     }

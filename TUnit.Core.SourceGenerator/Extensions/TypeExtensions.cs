@@ -213,8 +213,8 @@ public static class TypeExtensions
         if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol)
         {
             // Check if this is an unbound generic type or has type parameter arguments
-            bool hasTypeParameters = namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
-            bool isUnboundGeneric = namedTypeSymbol.IsUnboundGenericType;
+            var hasTypeParameters = namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
+            var isUnboundGeneric = namedTypeSymbol.IsUnboundGenericType;
             
             if (hasTypeParameters || isUnboundGeneric)
             {

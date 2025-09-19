@@ -1,5 +1,7 @@
-﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
+using TUnit.Core;
 
 namespace TUnit.Engine.Framework;
 
@@ -74,7 +76,7 @@ internal sealed class TestRequestHandler : IRequestHandler
         }
 
         // Execute tests
-        await serviceProvider.TestExecutor.ExecuteTests(
+        await serviceProvider.TestSessionCoordinator.ExecuteTests(
             allTests,
             request.Filter,
             context.MessageBus,

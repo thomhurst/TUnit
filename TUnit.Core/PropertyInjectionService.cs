@@ -21,9 +21,9 @@ internal sealed class PropertyInjectionPlan
 
 public sealed class PropertyInjectionService
 {
-    private static readonly GetOnlyDictionary<object, Task> _injectionTasks = new();
-    private static readonly GetOnlyDictionary<Type, PropertyInjectionPlan> _injectionPlans = new();
-    private static readonly GetOnlyDictionary<Type, bool> _shouldInjectCache = new();
+    private static readonly ThreadSafeDictionary<object, Task> _injectionTasks = new();
+    private static readonly ThreadSafeDictionary<Type, PropertyInjectionPlan> _injectionPlans = new();
+    private static readonly ThreadSafeDictionary<Type, bool> _shouldInjectCache = new();
 
     /// <summary>
     /// Injects properties with data sources into argument objects just before test execution.
@@ -115,7 +115,7 @@ public sealed class PropertyInjectionService
 
         try
         {
-            bool alreadyProcessed = _injectionTasks.TryGetValue(instance, out var existingTask);
+            var alreadyProcessed = _injectionTasks.TryGetValue(instance, out var existingTask);
             
             if (alreadyProcessed && existingTask != null)
             {
@@ -318,7 +318,45 @@ public sealed class PropertyInjectionService
         await foreach (var factory in dataRows)
         {
             var args = await factory();
-            var value = args?.FirstOrDefault();
+            object? value;
+            
+            // Handle tuple properties - if the property expects a tuple and we have multiple args, create the tuple
+            if (args != null && TupleFactory.IsTupleType(metadata.PropertyType))
+            {
+                if (args.Length > 1)
+                {
+                    // Multiple arguments - create tuple from them
+                    value = TupleFactory.CreateTuple(metadata.PropertyType, args);
+                }
+                else if (args.Length == 1 && args[0] != null && TupleFactory.IsTupleType(args[0]!.GetType()))
+                {
+                    // Single tuple argument - check if it needs type conversion
+                    var tupleValue = args[0]!;
+                    var tupleType = tupleValue.GetType();
+                    
+                    if (tupleType != metadata.PropertyType)
+                    {
+                        // Tuple types don't match - unwrap and recreate with correct types
+                        var elements = DataSourceHelpers.UnwrapTupleAot(tupleValue);
+                        value = TupleFactory.CreateTuple(metadata.PropertyType, elements);
+                    }
+                    else
+                    {
+                        // Types match - use directly
+                        value = tupleValue;
+                    }
+                }
+                else
+                {
+                    // Single non-tuple argument for tuple property - shouldn't happen but handle gracefully
+                    value = args.FirstOrDefault();
+                }
+            }
+            else
+            {
+                // Non-tuple property - use first argument as before
+                value = args?.FirstOrDefault();
+            }
 
             // Resolve any Func<T> wrappers
             value = await ResolveTestDataValueAsync(metadata.PropertyType, value);
@@ -358,7 +396,45 @@ public sealed class PropertyInjectionService
         await foreach (var factory in dataRows)
         {
             var args = await factory();
-            var value = args?.FirstOrDefault();
+            object? value;
+            
+            // Handle tuple properties - if the property expects a tuple and we have multiple args, create the tuple
+            if (args != null && TupleFactory.IsTupleType(property.PropertyType))
+            {
+                if (args.Length > 1)
+                {
+                    // Multiple arguments - create tuple from them
+                    value = TupleFactory.CreateTuple(property.PropertyType, args);
+                }
+                else if (args.Length == 1 && args[0] != null && TupleFactory.IsTupleType(args[0]!.GetType()))
+                {
+                    // Single tuple argument - check if it needs type conversion
+                    var tupleValue = args[0]!;
+                    var tupleType = tupleValue.GetType();
+                    
+                    if (tupleType != property.PropertyType)
+                    {
+                        // Tuple types don't match - unwrap and recreate with correct types
+                        var elements = DataSourceHelpers.UnwrapTupleAot(tupleValue);
+                        value = TupleFactory.CreateTuple(property.PropertyType, elements);
+                    }
+                    else
+                    {
+                        // Types match - use directly
+                        value = tupleValue;
+                    }
+                }
+                else
+                {
+                    // Single non-tuple argument for tuple property - shouldn't happen but handle gracefully
+                    value = args.FirstOrDefault();
+                }
+            }
+            else
+            {
+                // Non-tuple property - use first argument as before
+                value = args?.FirstOrDefault();
+            }
 
             // Resolve any Func<T> wrappers
             value = await ResolveTestDataValueAsync(property.PropertyType, value);

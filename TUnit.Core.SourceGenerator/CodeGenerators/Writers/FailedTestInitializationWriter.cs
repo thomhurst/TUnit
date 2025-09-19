@@ -12,11 +12,11 @@ public static class FailedTestInitializationWriter
 
         sourceBuilder.Append("return");
         sourceBuilder.Append("[");
-        sourceBuilder.Append($"new FailedDynamicTest<{testSourceDataModel.Class.GloballyQualified()}>");
+        sourceBuilder.Append($"new global::TUnit.Core.FailedDynamicTest<{testSourceDataModel.Class.GloballyQualified()}>");
         sourceBuilder.Append("{");
         sourceBuilder.Append($"TestId = \"{testId}\",");
         sourceBuilder.Append($"MethodName = $\"{testSourceDataModel.Method.Name}\",");
-        sourceBuilder.Append($"Exception = new TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.Class.Name}.{testSourceDataModel.Method.Name} failed to initialize\", exception),");
+        sourceBuilder.Append($"Exception = new global::TUnit.Core.Exceptions.TestFailedInitializationException(\"{testSourceDataModel.Class.Name}.{testSourceDataModel.Method.Name} failed to initialize\", exception),");
         sourceBuilder.Append($"TestFilePath = @\"{testSourceDataModel.FilePath}\",");
         sourceBuilder.Append($"TestLineNumber = {testSourceDataModel.LineNumber},");
         sourceBuilder.Append("}");

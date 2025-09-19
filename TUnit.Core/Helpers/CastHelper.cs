@@ -121,7 +121,7 @@ public static class CastHelper
                 try
                 {
                     var targetArray = Array.CreateInstance(targetElementType, sourceArray.Length);
-                    for (int i = 0; i < sourceArray.Length; i++)
+                    for (var i = 0; i < sourceArray.Length; i++)
                     {
                         var sourceElement = sourceArray.GetValue(i);
                         var convertedElement = sourceElement is IConvertible 
@@ -304,7 +304,7 @@ public static class CastHelper
                 try
                 {
                     var targetArray = Array.CreateInstance(targetElementType, sourceArray.Length);
-                    for (int i = 0; i < sourceArray.Length; i++)
+                    for (var i = 0; i < sourceArray.Length; i++)
                     {
                         var sourceElement = sourceArray.GetValue(i);
                         var convertedElement = sourceElement is IConvertible 

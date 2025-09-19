@@ -119,7 +119,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // If it's IAsyncEnumerable, handle it specially
         if (IsAsyncEnumerable(methodResult.GetType()))
         {
-            bool hasAnyItems = false;
+            var hasAnyItems = false;
             await foreach (var item in ConvertToAsyncEnumerable(methodResult))
             {
                 hasAnyItems = true;
@@ -143,7 +143,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
             if (taskResult is System.Collections.IEnumerable enumerable and not string && !DataSourceHelpers.IsTuple(taskResult))
             {
-                bool hasAnyItems = false;
+                var hasAnyItems = false;
                 foreach (var item in enumerable)
                 {
                     hasAnyItems = true;
@@ -171,7 +171,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // Tuples implement IEnumerable but should be treated as single values
         else if (methodResult is System.Collections.IEnumerable enumerable and not string && !DataSourceHelpers.IsTuple(methodResult))
         {
-            bool hasAnyItems = false;
+            var hasAnyItems = false;
             foreach (var item in enumerable)
             {
                 hasAnyItems = true;

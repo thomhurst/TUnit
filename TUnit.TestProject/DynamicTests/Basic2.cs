@@ -13,7 +13,7 @@ public class Basic2
         var machine = new StateMachine();
 
         context.AddTest(
-            new DynamicTestInstance<Basic2>
+            new DynamicTest<Basic2>
             {
                 TestMethod = @class => @class.AssertNotStarted(DynamicTestHelper.Argument<string>()),
                 TestMethodArguments = [machine.CurrentState],
@@ -24,7 +24,7 @@ public class Basic2
         machine.Advance();
 
         context.AddTest( // 👈 Problem: if first test fails, this one doesn't run?
-            new DynamicTestInstance<Basic2>
+            new DynamicTest<Basic2>
             {
                 TestMethod = @class => @class.AssertQueuedAfterAdvance(DynamicTestHelper.Argument<string>()), // 👈 Problem: this needs to expect a Task
                 TestMethodArguments = [machine.CurrentState],
