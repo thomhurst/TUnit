@@ -357,7 +357,7 @@ public class CatastrophicFailureRecoveryTests
             // Cleanup Hook 3 - still cleaning remaining resources after catastrophic failure
             
             // Clean remaining resources
-            for (int i = 1; i < ResourcesToClean.Count; i++)
+            for (var i = 1; i < ResourcesToClean.Count; i++)
             {
                 if (ResourcesToClean[i] != null)
                 {

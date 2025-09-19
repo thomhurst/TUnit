@@ -76,7 +76,16 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
             return ConsoleColor.DarkRed;
         }
 
+        // Console.ForegroundColor is not supported on browser platforms
+#if NET5_0_OR_GREATER
+        if (!OperatingSystem.IsBrowser())
+        {
+            return Console.ForegroundColor;
+        }
+        return ConsoleColor.Gray; // Default color for browser platforms
+#else
         return Console.ForegroundColor;
+#endif
     }
 
     public bool IsEnabled(LogLevel logLevel)

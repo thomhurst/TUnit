@@ -35,7 +35,7 @@ namespace TUnit.Core;
 /// }
 ///
 /// // Skip on all supported platforms (essentially always skips the test)
-/// [Test, ExcludeOn(OS.Windows | OS.Linux | OS.MacOs)]
+/// [Test, ExcludeOn(OS.Windows | OS.Linux | OS.MacOs | OS.Browser)]
 /// public void NeverRunTest()
 /// {
 ///     // This test will not run on any supported platform
@@ -52,13 +52,14 @@ public sealed class ExcludeOnAttribute(OS OperatingSystem) : SkipAttribute($"Thi
     {
         // Check if the current platform matches any of the excluded operating systems
         var shouldSkip =
-            (OperatingSystem.HasFlag(OS.Windows) && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            OperatingSystem.HasFlag(OS.Windows) && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
 #if NET
             // Only validate Linux and macOS on .NET 5+ where these OS flags are available
             || (OperatingSystem.HasFlag(OS.Linux) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             || (OperatingSystem.HasFlag(OS.MacOs) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            || (OperatingSystem.HasFlag(OS.Browser) && System.OperatingSystem.IsBrowser())
 #endif
-            || true;
+            ;
 
         // Return true if the test should be skipped (if we're on an excluded OS)
         return Task.FromResult(shouldSkip);

@@ -5,7 +5,7 @@ namespace TUnit.Core;
 
 public class ParallelLimitLockProvider
 {
-    private readonly GetOnlyDictionary<Type, SemaphoreSlim> _locks = new();
+    private readonly ThreadSafeDictionary<Type, SemaphoreSlim> _locks = new();
 
     internal SemaphoreSlim GetLock(IParallelLimit parallelLimit)
     {

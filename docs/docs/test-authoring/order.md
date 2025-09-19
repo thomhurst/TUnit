@@ -2,7 +2,7 @@
 
 :::warning
 
-It is recommended to use [DependsOn(...)] as it provides more flexibility and doesnt sacrifice parallelisation.
+It is recommended to use [DependsOn(...)] as it provides more flexibility and doesn't sacrifice parallelisation.
 
 :::
 

@@ -49,12 +49,12 @@ public abstract class Context : IContext, IDisposable
         {
             ExecutionContext.Restore(ExecutionContext);
         }
-        
-        RestoreContextAsyncLocal();
+
+        SetAsyncLocalContext();
 #endif
     }
 
-    internal abstract void RestoreContextAsyncLocal();
+    internal abstract void SetAsyncLocalContext();
 
     public void AddAsyncLocalValues()
     {

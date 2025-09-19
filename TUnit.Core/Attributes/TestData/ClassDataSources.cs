@@ -12,23 +12,11 @@ internal class ClassDataSources
     {
     }
 
-    public static readonly GetOnlyDictionary<string, ClassDataSources> SourcesPerSession = new();
+    public static readonly ThreadSafeDictionary<string, ClassDataSources> SourcesPerSession = new();
 
     public static ClassDataSources Get(string sessionId)
     {
-        var isNew = false;
-        var result = SourcesPerSession.GetOrAdd(sessionId, _ =>
-        {
-            isNew = true;
-            return new ClassDataSources();
-        });
-
-        if (isNew)
-        {
-            Console.WriteLine($"[ClassDataSources] Created new ClassDataSources for session {sessionId}");
-        }
-
-        return result;
+        return SourcesPerSession.GetOrAdd(sessionId, _ => new ClassDataSources());
     }
 
     public (T, SharedType, string) GetItemForIndexAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()

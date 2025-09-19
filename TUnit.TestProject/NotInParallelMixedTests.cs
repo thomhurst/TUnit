@@ -25,7 +25,9 @@ public class NotInParallelMixedTests
         {
             GlobalCurrentlyRunning++;
             if (GlobalCurrentlyRunning > GlobalMaxConcurrent)
+            {
                 GlobalMaxConcurrent = GlobalCurrentlyRunning;
+            }
         }
 
         if (groupKey != null)
@@ -63,7 +65,9 @@ public class NotInParallelMixedTests
         {
             var execution = executions.FirstOrDefault(e => e.TestName == testName && e.EndTime == null);
             if (execution != null)
+            {
                 execution.EndTime = endTime;
+            }
         }
 
         await ValidateExecutionRules(testName, groupKey);
@@ -303,10 +307,22 @@ public class NotInParallelMixedTests
 
     private static string? GetGroupKeyForTest(string testName)
     {
-        if (testName.StartsWith("NoKey_")) return "NoKey";
-        if (testName.StartsWith("GroupA_")) return "GroupA";
-        if (testName.StartsWith("GroupB_")) return "GroupB";
-        if (testName.StartsWith("GroupC_")) return "GroupC";
+        if (testName.StartsWith("NoKey_"))
+        {
+            return "NoKey";
+        }
+        if (testName.StartsWith("GroupA_"))
+        {
+            return "GroupA";
+        }
+        if (testName.StartsWith("GroupB_"))
+        {
+            return "GroupB";
+        }
+        if (testName.StartsWith("GroupC_"))
+        {
+            return "GroupC";
+        }
         if (testName.StartsWith("MultiGroup_"))
         {
             // For multi-group tests, we track them separately
@@ -318,7 +334,10 @@ public class NotInParallelMixedTests
                 _ => null
             };
         }
-        if (testName.StartsWith("Parallel_")) return null; // No constraint
+        if (testName.StartsWith("Parallel_"))
+        {
+            return null; // No constraint
+        }
         return null;
     }
 
@@ -338,7 +357,9 @@ public class NotInParallelMixedTests
         public bool OverlapsWith(ExecutionInfo other)
         {
             if (EndTime == null || other.EndTime == null)
+            {
                 return false;
+            }
 
             // Tests with NotInParallel constraints should run sequentially.
             // Due to timing precision and test framework overhead, we need tolerance.
@@ -353,8 +374,10 @@ public class NotInParallelMixedTests
             
             // If either test ran completely before the other (sequential), they don't overlap
             if (test1RanFirst || test2RanFirst)
+            {
                 return false;
-                
+            }
+
             // Otherwise they overlapped (ran in parallel)
             return true;
         }

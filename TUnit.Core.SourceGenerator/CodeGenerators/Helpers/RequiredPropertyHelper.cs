@@ -48,12 +48,15 @@ public static class RequiredPropertyHelper
     {
         return property.GetAttributes().Any(attr =>
         {
-            var attrName = attr.AttributeClass?.Name ?? "";
-            return attrName.EndsWith("DataSourceAttribute") || 
-                   attrName == "ClassDataSource" ||
-                   attrName == "MethodDataSource" ||
-                   attrName == "ArgumentsAttribute" ||
-                   attrName == "DataSourceForAttribute";
+            var attrClass = attr.AttributeClass;
+
+            if (attrClass == null)
+            {
+                return false;
+            }
+
+            // Check if the attribute implements IDataSourceAttribute
+            return attrClass.AllInterfaces.Any(i => i.GloballyQualified() == WellKnownFullyQualifiedClassNames.IDataSourceAttribute.WithGlobalPrefix);
         });
     }
 

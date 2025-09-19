@@ -8,26 +8,6 @@ namespace .
         .<.<.TestMetadata>> CollectTestsAsync(string testSessionId);
     }
 }
-namespace .Building
-{
-    public static class TestDataCollectorFactory
-    {
-        [.("AOT", "IL3050:Using member \'..Reflectio" +
-            "nTestDataCollector()\' which has \'RequiresDynamicCodeAttribute\' can break functio" +
-            "nality when AOT compiling", Justification="Reflection mode is explicitly chosen and cannot support AOT")]
-        [.("Trimming", "IL2026:Using member \'..Reflectio" +
-            "nTestDataCollector()\' which has \'RequiresUnreferencedCodeAttribute\' can break fu" +
-            "nctionality when trimming application code", Justification="Reflection mode is explicitly chosen and cannot support trimming")]
-        public static ..ITestDataCollector Create(.? mode = default, .Assembly[]? assembliesToScan = null) { }
-        [.("AOT", "IL3050:Using member \'..Reflectio" +
-            "nTestDataCollector()\' which has \'RequiresDynamicCodeAttribute\' can break functio" +
-            "nality when AOT compiling", Justification="Reflection mode is a fallback and cannot support AOT")]
-        [.("Trimming", "IL2026:Using member \'..Reflectio" +
-            "nTestDataCollector()\' which has \'RequiresUnreferencedCodeAttribute\' can break fu" +
-            "nctionality when trimming application code", Justification="Reflection mode is a fallback and cannot support trimming")]
-        public static .<..ITestDataCollector> CreateAutoDetectAsync(string testSessionId, .Assembly[]? assembliesToScan = null) { }
-    }
-}
 namespace .Capabilities
 {
     [.("TPEXP")]
@@ -48,68 +28,6 @@ namespace .Configuration
         public static bool EnableDiagnostics { get; set; }
         public static void ConfigureFromEnvironment() { }
         public static . CreateCircuitBreaker() { }
-    }
-}
-namespace .Diagnostics
-{
-    public class TUnitAssertionFailedException : 
-    {
-        public TUnitAssertionFailedException(string message) { }
-        public TUnitAssertionFailedException(string message,  innerException) { }
-    }
-}
-namespace .Discovery
-{
-    [.("Expression compilation requires dynamic code generation")]
-    [.("Reflection-based test discovery requires unreferenced code")]
-    public sealed class ReflectionTestDataCollector : ..ITestDataCollector
-    {
-        public ReflectionTestDataCollector() { }
-        public .<.<.TestMetadata>> CollectTestsAsync(string testSessionId) { }
-    }
-}
-namespace ...Examples
-{
-    public class GenericTests<T>
-    {
-        public GenericTests() { }
-        [.Test("PATH_SCRUBBED", 120)]
-        public void GenericTest() { }
-    }
-    public class SimpleTests
-    {
-        public SimpleTests() { }
-        [.Category("Integration")]
-        [.Test("PATH_SCRUBBED", 66)]
-        [.Timeout(5000)]
-        public . AsyncTestWithAttributes() { }
-        [.Arguments(new object[] {
-                1,
-                2,
-                3})]
-        [.Arguments(new object[] {
-                4,
-                5,
-                6})]
-        [.Test("PATH_SCRUBBED", 75)]
-        public void ParameterizedTest(int a, int b, int c) { }
-        [.Test("PATH_SCRUBBED", 60)]
-        public void SimpleTest() { }
-        [.Skip("Example of skipped test")]
-        [.Test("PATH_SCRUBBED", 83)]
-        public void SkippedTest() { }
-    }
-    public class TestsWithHooks
-    {
-        public TestsWithHooks() { }
-        [.After(., "PATH_SCRUBBED", 111)]
-        public void AfterEachTest() { }
-        [.Before(., "PATH_SCRUBBED", 99)]
-        public void BeforeEachTest() { }
-        [.Test("PATH_SCRUBBED", 105)]
-        public void TestWithHooks() { }
-        [.Before(., "PATH_SCRUBBED", 93)]
-        public static void BeforeClass() { }
     }
 }
 namespace .Enums
@@ -141,29 +59,24 @@ namespace .Exceptions
 }
 namespace .Extensions
 {
-    public static class JsonExtensions
-    {
-        public static . ToJsonModel(this  exception) { }
-        public static . ToJsonModel(this .AssemblyHookContext context) { }
-        public static . ToJsonModel(this .ClassHookContext context) { }
-        public static . ToJsonModel(this .TestContext context) { }
-        public static . ToJsonModel(this .TestResult result) { }
-        public static . ToJsonModel(this .TestSessionContext context) { }
-    }
     public static class TestApplicationBuilderExtensions
     {
         public static void AddTUnit(this ..ITestApplicationBuilder testApplicationBuilder) { }
     }
 }
+namespace .Framework
+{
+    public interface IFilterReceiver
+    {
+        string? Filter { set; }
+    }
+    public static class TestingPlatformBuilderHook
+    {
+        public static void AddExtensions(..ITestApplicationBuilder testApplicationBuilder, string[] _) { }
+    }
+}
 namespace 
 {
-    public class FileArtifact
-    {
-        public FileArtifact() { }
-        public string? Description { get; init; }
-        public required string DisplayName { get; init; }
-        public required string File { get; init; }
-    }
     public interface ITestMetadataScanner
     {
         .<.<.TestMetadata>> ScanAssembly(.Assembly assembly);
@@ -182,30 +95,6 @@ namespace
         public string Value { get; }
     }
 }
-namespace .Framework
-{
-    public interface IFilterReceiver
-    {
-        string? Filter { set; }
-    }
-    public static class TestingPlatformBuilderHook
-    {
-        public static void AddExtensions(..ITestApplicationBuilder testApplicationBuilder, string[] _) { }
-    }
-}
-namespace .Helpers
-{
-    public class DataUnwrapper
-    {
-        public DataUnwrapper() { }
-        public static object?[] Unwrap(object?[] values) { }
-    }
-    public static class DotNetAssemblyHelper
-    {
-        public static bool IsDotNetCoreLibrary(byte[]? publicKeyToken) { }
-        public static bool IsInDotNetCoreLibrary( type) { }
-    }
-}
 namespace .Interfaces
 {
     public interface IDataSourceResolver
@@ -216,36 +105,34 @@ namespace .Interfaces
     }
     public interface IExecutableTestFactory
     {
-        .ExecutableTest CreateExecutableTest(string testId, string displayName, object[] arguments, object[] classArguments, .<string, object?> propertyValues, <.TestContext, .CancellationToken, .>[] beforeTestHooks, <.TestContext, .CancellationToken, .>[] afterTestHooks, .TestContext context, .TestMetadata metadata);
+        .AbstractExecutableTest CreateExecutableTest(string testId, string displayName, object[] arguments, object[] classArguments, .<string, object?> propertyValues, <.TestContext, .CancellationToken, .>[] beforeTestHooks, <.TestContext, .CancellationToken, .>[] afterTestHooks, .TestContext context, .TestMetadata metadata);
     }
     public interface IHookCollectionService
     {
         .<.<<.AssemblyHookContext, .CancellationToken, .>>> CollectAfterAssemblyHooksAsync(.Assembly assembly);
         .<.<<.ClassHookContext, .CancellationToken, .>>> CollectAfterClassHooksAsync( testClassType);
+        .<.<<.AssemblyHookContext, .CancellationToken, .>>> CollectAfterEveryAssemblyHooksAsync();
+        .<.<<.ClassHookContext, .CancellationToken, .>>> CollectAfterEveryClassHooksAsync();
         .<.<<.TestContext, .CancellationToken, .>>> CollectAfterEveryTestHooksAsync( testClassType);
         .<.<<.TestDiscoveryContext, .CancellationToken, .>>> CollectAfterTestDiscoveryHooksAsync();
         .<.<<.TestContext, .CancellationToken, .>>> CollectAfterTestHooksAsync( testClassType);
         .<.<<.TestSessionContext, .CancellationToken, .>>> CollectAfterTestSessionHooksAsync();
         .<.<<.AssemblyHookContext, .CancellationToken, .>>> CollectBeforeAssemblyHooksAsync(.Assembly assembly);
         .<.<<.ClassHookContext, .CancellationToken, .>>> CollectBeforeClassHooksAsync( testClassType);
+        .<.<<.AssemblyHookContext, .CancellationToken, .>>> CollectBeforeEveryAssemblyHooksAsync();
+        .<.<<.ClassHookContext, .CancellationToken, .>>> CollectBeforeEveryClassHooksAsync();
         .<.<<.TestContext, .CancellationToken, .>>> CollectBeforeEveryTestHooksAsync( testClassType);
         .<.<<.BeforeTestDiscoveryContext, .CancellationToken, .>>> CollectBeforeTestDiscoveryHooksAsync();
         .<.<<.TestContext, .CancellationToken, .>>> CollectBeforeTestHooksAsync( testClassType);
         .<.<<.TestSessionContext, .CancellationToken, .>>> CollectBeforeTestSessionHooksAsync();
     }
-    public interface ISingleTestExecutor
+    public interface ITestCoordinator
     {
-        .<..> ExecuteTestAsync(.ExecutableTest test, ..IMessageBus messageBus, .CancellationToken cancellationToken);
-        void SetSessionId(..SessionUid sessionUid);
+        . ExecuteTestAsync(.AbstractExecutableTest test, .CancellationToken cancellationToken);
     }
     public interface ITestExecutor
     {
-        . ExecuteTests(.<.ExecutableTest> tests, ..ITestExecutionFilter? filter, ..IMessageBus messageBus, .CancellationToken cancellationToken);
-    }
-    public interface ITestInvoker
-    {
-        . InvokeTestAsync(object instance, <object, object?[], .> testInvoker, object?[] arguments);
-        . InvokeTestAsync(string testMethodKey, object instance, object?[] arguments);
+        . ExecuteTests(.<.AbstractExecutableTest> tests, ..ITestExecutionFilter? filter, ..IMessageBus messageBus, .CancellationToken cancellationToken);
     }
 }
 namespace .Json
@@ -339,7 +226,7 @@ namespace .Logging
 }
 namespace .Reporters
 {
-    public class GitHubReporter : ..IExtension, .., .., .., .
+    public class GitHubReporter : ..IExtension, .., .., .., .., .
     {
         public GitHubReporter(..IExtension extension) { }
         public [] DataTypesConsumed { get; }
@@ -356,43 +243,25 @@ namespace .Reporters
 }
 namespace .Scheduling
 {
-    public interface ITestExecutor
-    {
-        . ExecuteTestAsync(.ExecutableTest test, .CancellationToken cancellationToken);
-    }
     public interface ITestScheduler
     {
-        . ScheduleAndExecuteAsync(.<.ExecutableTest> tests, . executor, .CancellationToken cancellationToken);
+        . ScheduleAndExecuteAsync(.<.AbstractExecutableTest> tests, . testRunner, .CancellationToken cancellationToken);
     }
     public enum ParallelismStrategy
     {
         Fixed = 0,
         Adaptive = 1,
     }
-    public sealed class SchedulerConfiguration
+    public sealed class TestRunner : ..IExtension, ..
     {
-        public SchedulerConfiguration() { }
-        public int MaxParallelism { get; set; }
-        public int MinParallelism { get; set; }
-        public  StallTimeout { get; set; }
-        public . Strategy { get; set; }
-        public  TestTimeout { get; set; }
-        public static . Default { get; }
-    }
-    public sealed class TestExecutionState
-    {
-        public TestExecutionState(.ExecutableTest test) { }
-        public .? Constraint { get; init; }
-        public string? ConstraintKey { get; init; }
-        public .<string> Dependents { get; }
-        public  EnqueueTime { get; set; }
-        public int Order { get; init; }
-        public . Priority { get; init; }
-        public int RemainingDependencies { get; set; }
-        public .TestState State { get; set; }
-        public .ExecutableTest Test { get; }
-        public .CancellationTokenSource? TimeoutCts { get; set; }
-        public int DecrementRemainingDependencies() { }
+        public [] DataTypesProduced { get; }
+        public string Description { get; }
+        public string DisplayName { get; }
+        public string Uid { get; }
+        public string Version { get; }
+        public . ExecuteTestAsync(.AbstractExecutableTest test, .CancellationToken cancellationToken) { }
+        public ? GetFirstFailFastException() { }
+        public .<bool> IsEnabledAsync() { }
     }
 }
 namespace .Services
@@ -414,27 +283,6 @@ namespace .Services
         public long MemoryGrowthBytes { get; init; }
         public double MemoryUsagePercentage { get; init; }
         public double TimeUsagePercentage { get; init; }
-    }
-    public class FilterParser
-    {
-        public FilterParser() { }
-        public string? GetTestFilter(.. context) { }
-        public static string? StringifyFilter(..ITestExecutionFilter filter) { }
-    }
-    public class LogLevelProvider
-    {
-        public LogLevelProvider(..ICommandLineOptions commandLineOptions) { }
-        public . LogLevel { get; }
-    }
-    public static class ParallelismDetector
-    {
-        public static int DetectOptimalParallelism() { }
-    }
-    public class TestInvoker : .
-    {
-        public TestInvoker() { }
-        public . InvokeTestAsync(object instance, <object, object?[], .> testInvoker, object?[] arguments) { }
-        public . InvokeTestAsync(string testMethodKey, object instance, object?[] arguments) { }
     }
     public sealed class VerbosityService
     {

@@ -27,7 +27,15 @@ public class EngineCancellationToken : IDisposable
         CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         Token = CancellationTokenSource.Token;
 
-        Console.CancelKeyPress += OnCancelKeyPress;
+        // Console.CancelKeyPress is not supported on browser platforms
+#if NET5_0_OR_GREATER
+        if (!OperatingSystem.IsBrowser())
+        {
+#endif
+            Console.CancelKeyPress += OnCancelKeyPress;
+#if NET5_0_OR_GREATER
+        }
+#endif
     }
     
     private void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
@@ -68,7 +76,15 @@ public class EngineCancellationToken : IDisposable
     /// </summary>
     public void Dispose()
     {
-        Console.CancelKeyPress -= OnCancelKeyPress;
+        // Console.CancelKeyPress is not supported on browser platforms
+#if NET5_0_OR_GREATER
+        if (!OperatingSystem.IsBrowser())
+        {
+#endif
+            Console.CancelKeyPress -= OnCancelKeyPress;
+#if NET5_0_OR_GREATER
+        }
+#endif
         _forcefulExitCts?.Cancel();
         _forcefulExitCts?.Dispose();
         CancellationTokenSource.Dispose();

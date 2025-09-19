@@ -239,8 +239,7 @@ public class AttributeWriter
 
         // Skip if any constructor arguments contain compiler-generated types
         if (attributeData.ConstructorArguments.Any(arg => 
-            arg.Kind == TypedConstantKind.Type && 
-            arg.Value is ITypeSymbol typeSymbol && 
+            arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol } && 
             typeSymbol.IsCompilerGeneratedType()))
         {
             return;

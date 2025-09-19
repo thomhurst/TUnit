@@ -55,7 +55,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
             return false;
         }
 
-        for (int i = 0; i < exclusion.Length; i++)
+        for (var i = 0; i < exclusion.Length; i++)
         {
             var exclusionValue = exclusion[i];
             var rowValue = rowArray[i];

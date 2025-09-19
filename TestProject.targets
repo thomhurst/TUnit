@@ -7,7 +7,6 @@
     <ItemGroup>
         <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Engine\TUnit.Engine.csproj" />
         <ProjectReference Include="$(MSBuildThisFileDirectory)TUnit.Assertions\TUnit.Assertions.csproj" />
-        <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
 
         <ProjectReference
             Include="$(MSBuildThisFileDirectory)TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj"

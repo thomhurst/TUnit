@@ -17,15 +17,15 @@ namespace TUnit.Core;
 [DebuggerDisplay("{TestDetails.ClassType.Name}.{GetDisplayName(),nq}")]
 public class TestContext : Context
 {
+    private readonly TestBuilderContext _testBuilderContext;
+
     public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
     {
+        _testBuilderContext = testBuilderContext;
         TestName = testName;
         CancellationToken = cancellationToken;
         ServiceProvider = serviceProvider;
         ClassContext = classContext;
-
-        Events = testBuilderContext.Events;
-        ObjectBag = testBuilderContext.ObjectBag;
     }
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
@@ -39,7 +39,11 @@ public class TestContext : Context
     public static new TestContext? Current
     {
         get => TestContexts.Value;
-        internal set => TestContexts.Value = value;
+        internal set
+        {
+            TestContexts.Value = value;
+            ClassHookContext.Current = value?.ClassContext;
+        }
     }
 
     public static IReadOnlyDictionary<string, List<string>> Parameters => InternalParametersDictionary;
@@ -94,7 +98,7 @@ public class TestContext : Context
     public Priority ExecutionPriority { get; set; } = Priority.Normal;
 
     /// <summary>
-    /// Will be null until initialized by HookOrchestrator
+    /// Will be null until initialized by TestOrchestrator
     /// </summary>
     public ClassHookContext ClassContext { get; }
 
@@ -104,7 +108,7 @@ public class TestContext : Context
     [
     ];
 
-    public TestContextEvents Events { get; } = new();
+    public TestContextEvents Events => _testBuilderContext.Events;
 
     internal DiscoveredTest? InternalDiscoveredTest { get; set; }
 
@@ -132,7 +136,7 @@ public class TestContext : Context
         return ServiceProvider.GetService(typeof(T)) as T;
     }
 
-    internal override void RestoreContextAsyncLocal()
+    internal override void SetAsyncLocalContext()
     {
         TestContexts.Value = this;
     }
@@ -144,6 +148,8 @@ public class TestContext : Context
     public ConcurrentBag<Timing> Timings { get; } = new();
 
     public IReadOnlyList<Artifact> Artifacts { get; } = new List<Artifact>();
+
+    internal IClassConstructor? ClassConstructor => _testBuilderContext.ClassConstructor;
 
     public string GetDisplayName()
     {
@@ -163,7 +169,7 @@ public class TestContext : Context
         return $"{TestName}({arguments})";
     }
 
-    public Dictionary<string, object?> ObjectBag { get; }
+    public Dictionary<string, object?> ObjectBag => _testBuilderContext.ObjectBag;
 
     public bool ReportResult { get; set; } = true;
 
@@ -188,7 +194,7 @@ public class TestContext : Context
         CancellationToken = LinkedCancellationTokens.Token;
     }
 
-    public DateTimeOffset TestStart { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? TestStart { get; set; }
 
     public void AddArtifact(Artifact artifact)
     {
@@ -207,9 +213,9 @@ public class TestContext : Context
             State = state,
             OverrideReason = reason,
             IsOverridden = true,
-            Start = TestStart,
+            Start = TestStart ?? DateTimeOffset.UtcNow,
             End = DateTimeOffset.UtcNow,
-            Duration = DateTimeOffset.UtcNow - TestStart,
+            Duration = DateTimeOffset.UtcNow - (TestStart ?? DateTimeOffset.UtcNow),
             Exception = null,
             ComputerName = Environment.MachineName,
             TestContext = this

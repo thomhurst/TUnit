@@ -34,7 +34,7 @@ This won't:
 ```
 
 TUnit is able to take in asynchronous delegates. To be able to assert on these, we need to execute the code. We want to avoid sync-over-async, as this can cause problems and block the thread pool, slowing down your test suite.
-And with how fast .NET has become, the overhead of `Task`s and `async` methods shouldn't be noticable.
+And with how fast .NET has become, the overhead of `Task`s and `async` methods shouldn't be noticeable.
 
 ## Complex Assertion Examples
 

@@ -32,8 +32,10 @@ internal static class DataSourceAttributeHelper
     public static ITypeSymbol? GetTypedDataSourceType(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null)
+        {
             return null;
-            
+        }
+
         var typedInterface = attributeClass.AllInterfaces
             .FirstOrDefault(i => i.IsGenericType && 
                 i.ConstructedFrom.GloballyQualified() == "global::TUnit.Core.ITypedDataSourceAttribute`1");

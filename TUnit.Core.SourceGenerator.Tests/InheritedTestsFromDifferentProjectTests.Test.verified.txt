@@ -496,7 +496,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTest_TestSourc
             },
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 6,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.BaseTests),
@@ -598,7 +598,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTestWithMultip
             },
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 12,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.BaseTests),
@@ -698,7 +698,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
             },
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 9,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -800,7 +800,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             },
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 14,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -936,7 +936,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             },
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 20,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -1059,7 +1059,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
             },
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 26,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),

@@ -22,7 +22,7 @@
 /// [RunOn(OS.Windows | OS.Linux)]
 /// 
 /// // Specify a test should run on all supported platforms
-/// [RunOn(OS.Windows | OS.Linux | OS.MacOs)]
+/// [RunOn(OS.Windows | OS.Linux | OS.MacOs | OS.Browser)]
 /// </code>
 /// </example>
 /// <seealso cref="RunOnAttribute"/>
@@ -51,5 +51,13 @@ public enum OS
     /// <remarks>
     /// Tests with this flag will be executed on macOS platforms when used with <see cref="RunOnAttribute"/>.
     /// </remarks>
-    MacOs = 4
+    MacOs = 4,
+
+    /// <summary>
+    /// Represents the Browser platform (WebAssembly).
+    /// </summary>
+    /// <remarks>
+    /// Tests with this flag will be executed on Browser platforms when used with <see cref="RunOnAttribute"/>.
+    /// </remarks>
+    Browser = 8
 }

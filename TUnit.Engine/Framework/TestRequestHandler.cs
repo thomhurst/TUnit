@@ -1,5 +1,7 @@
-﻿using Microsoft.Testing.Platform.Extensions.TestFramework;
+﻿using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
+using TUnit.Core;
 
 namespace TUnit.Engine.Framework;
 
@@ -30,7 +32,9 @@ internal sealed class TestRequestHandler : IRequestHandler
         ExecuteRequestContext context,
         ITestExecutionFilter? testExecutionFilter)
     {
-        var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, testExecutionFilter, context.CancellationToken);
+        // For discovery, we want to show ALL tests including explicit ones
+        // Pass isForExecution: false to discover all tests - filtering is only for execution
+        var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, testExecutionFilter, context.CancellationToken, isForExecution: false);
 
 #if NET
         if (discoveryResult.ExecutionContext != null)
@@ -52,7 +56,8 @@ internal sealed class TestRequestHandler : IRequestHandler
         RunTestExecutionRequest request,
         ExecuteRequestContext context, ITestExecutionFilter? testExecutionFilter)
     {
-        var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, testExecutionFilter, context.CancellationToken);
+        // For execution, apply filtering to exclude explicit tests unless explicitly targeted
+        var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, testExecutionFilter, context.CancellationToken, isForExecution: true);
 
 #if NET
         if (discoveryResult.ExecutionContext != null)
@@ -71,7 +76,7 @@ internal sealed class TestRequestHandler : IRequestHandler
         }
 
         // Execute tests
-        await serviceProvider.TestExecutor.ExecuteTests(
+        await serviceProvider.TestSessionCoordinator.ExecuteTests(
             allTests,
             request.Filter,
             context.MessageBus,

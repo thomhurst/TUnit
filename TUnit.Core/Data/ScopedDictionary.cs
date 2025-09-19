@@ -5,11 +5,11 @@ namespace TUnit.Core.Data;
 public class ScopedDictionary<TScope>
     where TScope : notnull
 {
-    private readonly GetOnlyDictionary<TScope, GetOnlyDictionary<Type, object?>> _scopedContainers = new();
+    private readonly ThreadSafeDictionary<TScope, ThreadSafeDictionary<Type, object?>> _scopedContainers = new();
 
     public object? GetOrCreate(TScope scope, Type type, Func<Type, object?> factory)
     {
-        var innerDictionary = _scopedContainers.GetOrAdd(scope, _ => new GetOnlyDictionary<Type, object?>());
+        var innerDictionary = _scopedContainers.GetOrAdd(scope, _ => new ThreadSafeDictionary<Type, object?>());
 
         var obj = innerDictionary.GetOrAdd(type, factory);
 
@@ -21,14 +21,4 @@ public class ScopedDictionary<TScope>
         return obj;
     }
 
-    /// <summary>
-    /// Removes a specific value from all scopes and types where it might be stored.
-    /// This is used to clear disposed objects from the cache.
-    /// </summary>
-    public void RemoveValue(object valueToRemove)
-    {
-        // Since GetOnlyDictionary doesn't support removal, we'll need to track this differently
-        // For now, log that this needs to be implemented
-        Console.WriteLine($"[ScopedDictionary] WARNING: RemoveValue called for {valueToRemove.GetType().Name}@{valueToRemove.GetHashCode():X8} but GetOnlyDictionary doesn't support removal");
-    }
 }

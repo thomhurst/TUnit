@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using TUnit.Core;
 
 namespace TUnit.Engine.Services;
@@ -63,13 +62,11 @@ internal sealed class TestDependencyResolver
 
     private bool ResolveDependenciesForTest(AbstractExecutableTest test)
     {
-        if (_testsBeingResolved.Contains(test))
+        if (!_testsBeingResolved.Add(test))
         {
             return false;
         }
-        
-        _testsBeingResolved.Add(test);
-        
+
         try
         {
             var resolvedDependencies = new List<ResolvedDependency>();
@@ -204,7 +201,7 @@ internal sealed class TestDependencyResolver
             }
             
             var maxRetries = 3;
-            for (int retry = 0; retry < maxRetries && _testsWithPendingDependencies.Count > 0; retry++)
+            for (var retry = 0; retry < maxRetries && _testsWithPendingDependencies.Count > 0; retry++)
             {
                 ResolvePendingDependencies();
             }
@@ -213,17 +210,7 @@ internal sealed class TestDependencyResolver
             {
                 foreach (var test in _testsWithPendingDependencies)
                 {
-                    test.State = TestState.Failed;
-                    test.Result = new TestResult
-                    {
-                        State = TestState.Failed,
-                        Start = DateTimeOffset.UtcNow,
-                        End = DateTimeOffset.UtcNow,
-                        Duration = TimeSpan.Zero,
-                        Exception = new InvalidOperationException(
-                            $"Could not resolve all dependencies for test {test.Metadata.TestClassType.Name}.{test.Metadata.TestMethodName}"),
-                        ComputerName = Environment.MachineName
-                    };
+                    CreateDependencyResolutionFailedResult(test);
                 }
             }
         }
@@ -259,5 +246,21 @@ internal sealed class TestDependencyResolver
         
         CollectDependencies(testDetails);
         return result;
+    }
+
+    private static void CreateDependencyResolutionFailedResult(AbstractExecutableTest test)
+    {
+        test.State = TestState.Failed;
+        var now = DateTimeOffset.UtcNow;
+        test.Result = new TestResult
+        {
+            State = TestState.Failed,
+            Start = now,
+            End = now,
+            Duration = TimeSpan.Zero,
+            Exception = new InvalidOperationException(
+                $"Could not resolve all dependencies for test {test.Metadata.TestClassType.Name}.{test.Metadata.TestMethodName}"),
+            ComputerName = Environment.MachineName
+        };
     }
 }

@@ -7,6 +7,15 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 {
     protected sealed override async ValueTask ExecuteAsync(Func<ValueTask> action)
     {
+        // On browser platforms, threading is not supported, so fall back to direct execution
+#if NET5_0_OR_GREATER
+        if (OperatingSystem.IsBrowser())
+        {
+            await action();
+            return;
+        }
+#endif
+
         var tcs = new TaskCompletionSource<object?>();
 
         var thread = new Thread(() =>
@@ -81,7 +90,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 
                 while (!task.IsCompleted)
                 {
-                    bool hadWork = dedicatedContext.ProcessPendingWork();
+                    var hadWork = dedicatedContext.ProcessPendingWork();
                     hadWork |= taskScheduler.ProcessPendingTasks();
 
                     if (!hadWork)
@@ -229,7 +238,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 throw new InvalidOperationException("ProcessPendingTasks can only be called from the dedicated thread.");
             }
 
-            bool hadWork = false;
+            var hadWork = false;
             while (true)
             {
                 Task? task;
@@ -333,7 +342,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 return false;
             }
 
-            bool hadWork = false;
+            var hadWork = false;
             while (true)
             {
                 (SendOrPostCallback callback, object? state) workItem;

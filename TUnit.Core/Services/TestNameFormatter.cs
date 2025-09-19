@@ -51,6 +51,10 @@ public class TestNameFormatter : ITestNameFormatter
             string str => $"\"{str}\"",
             char ch => $"'{ch}'",
             bool b => b.ToString().ToLowerInvariant(),
+            // Use InvariantCulture for numeric types to avoid culture-specific formatting issues
+            double d => d.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            float f => f.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            decimal dec => dec.ToString(System.Globalization.CultureInfo.InvariantCulture),
             IEnumerable enumerable when value.GetType() != typeof(string) => FormatEnumerable(enumerable),
             _ => value.ToString() ?? "null"
         };

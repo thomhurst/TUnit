@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Threading.Channels;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
@@ -26,7 +25,7 @@ internal sealed class TestDiscoveryResult
 /// Unified test discovery service using the pipeline architecture with streaming support
 internal sealed class TestDiscoveryService : IDataProducer
 {
-    private readonly HookOrchestrator _hookOrchestrator;
+    private readonly TestExecutor _testExecutor;
     private readonly TestBuilderPipeline _testBuilderPipeline;
     private readonly TestFilterService _testFilterService;
     private readonly ConcurrentBag<AbstractExecutableTest> _cachedTests =
@@ -42,22 +41,20 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
-    public TestDiscoveryService(HookOrchestrator hookOrchestrator, TestBuilderPipeline testBuilderPipeline, TestFilterService testFilterService)
+    public TestDiscoveryService(TestExecutor testExecutor, TestBuilderPipeline testBuilderPipeline, TestFilterService testFilterService)
     {
-        _hookOrchestrator = hookOrchestrator;
+        _testExecutor = testExecutor;
         _testBuilderPipeline = testBuilderPipeline ?? throw new ArgumentNullException(nameof(testBuilderPipeline));
         _testFilterService = testFilterService;
     }
 
-    public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken)
+    public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken, bool isForExecution)
     {
-        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
-#if NET
-        if (discoveryContext != null)
-        {
-            ExecutionContext.Restore(discoveryContext);
-        }
-#endif
+        await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
+
+        var contextProvider = _testExecutor.GetContextProvider();
+
+        contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
 
         // Extract types from filter for optimized discovery
         var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
@@ -95,33 +92,37 @@ internal sealed class TestDiscoveryService : IDataProducer
         tests.AddRange(independentTests);
         tests.AddRange(dependentTests);
 
-        // Apply filter first to get the tests we want to run
-        var filteredTests = _testFilterService.FilterTests(filter, tests);
+        // For discovery requests (IDE test explorers), return all tests including explicit ones
+        // For execution requests, apply filtering to exclude explicit tests unless explicitly targeted
+        var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, tests) : tests;
 
-        // Now find all dependencies of filtered tests and add them
-        var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
-        var queue = new Queue<AbstractExecutableTest>(filteredTests);
-
-        while (queue.Count > 0)
+        // If we applied filtering, find all dependencies of filtered tests and add them
+        if (isForExecution)
         {
-            var test = queue.Dequeue();
-            foreach (var resolvedDep in test.Dependencies)
+            var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
+            var queue = new Queue<AbstractExecutableTest>(filteredTests);
+
+            while (queue.Count > 0)
             {
-                var dependency = resolvedDep.Test;
-                if (testsToInclude.Add(dependency))
+                var test = queue.Dequeue();
+                foreach (var resolvedDep in test.Dependencies)
                 {
-                    queue.Enqueue(dependency);
+                    var dependency = resolvedDep.Test;
+                    if (testsToInclude.Add(dependency))
+                    {
+                        queue.Enqueue(dependency);
+                    }
                 }
             }
+
+            filteredTests = testsToInclude.ToList();
         }
 
-        filteredTests = testsToInclude.ToList();
-
-        // Populate the TestDiscoveryContext with all discovered tests before running AfterTestDiscovery hooks
-        var contextProvider = _hookOrchestrator.GetContextProvider();
         contextProvider.TestDiscoveryContext.AddTests(allTests.Select(t => t.Context));
 
-        await _hookOrchestrator.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
+        await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
+
+        contextProvider.TestDiscoveryContext.RestoreExecutionContext();
 
         // Register the filtered tests to invoke ITestRegisteredEventReceiver
         await _testFilterService.RegisterTestsAsync(filteredTests).ConfigureAwait(false);
@@ -167,13 +168,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         ITestExecutionFilter? filter,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var discoveryContext = await _hookOrchestrator.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
-#if NET
-        if (discoveryContext != null)
-        {
-            ExecutionContext.Restore(discoveryContext);
-        }
-#endif
+        await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
         // Extract types from filter for optimized discovery
         var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
@@ -194,7 +189,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         // Separate into independent and dependent tests
         var independentTests = new List<AbstractExecutableTest>();
         var dependentTests = new List<AbstractExecutableTest>();
-        
+
         foreach (var test in allTests)
         {
             if (test.Dependencies.Length == 0)
@@ -219,16 +214,16 @@ internal sealed class TestDiscoveryService : IDataProducer
         // Process dependent tests in dependency order
         var yieldedTests = new HashSet<string>(independentTests.Select(t => t.TestId));
         var remainingTests = new List<AbstractExecutableTest>(dependentTests);
-        
+
         while (remainingTests.Count > 0)
         {
             var readyTests = new List<AbstractExecutableTest>();
-            
+
             foreach (var test in remainingTests)
             {
                 // Check if all dependencies have been yielded
                 var allDependenciesYielded = test.Dependencies.All(dep => yieldedTests.Contains(dep.Test.TestId));
-                
+
                 if (allDependenciesYielded)
                 {
                     readyTests.Add(test);

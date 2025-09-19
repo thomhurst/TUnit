@@ -18,11 +18,11 @@ internal static class MetadataGenerationHelper
         var lines = multiLineString.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
         
         // Find the base indentation level from the content (skip first line as it's usually inline)
-        int baseIndent = 0;
+        var baseIndent = 0;
         if (lines.Length > 1)
         {
             // Find first non-empty line after the first to determine base indentation
-            for (int i = 1; i < lines.Length; i++)
+            for (var i = 1; i < lines.Length; i++)
             {
                 if (!string.IsNullOrWhiteSpace(lines[i]))
                 {
@@ -32,7 +32,7 @@ internal static class MetadataGenerationHelper
             }
         }
         
-        for (int i = 0; i < lines.Length; i++)
+        for (var i = 0; i < lines.Length; i++)
         {
             if (i > 0)
             {
@@ -47,7 +47,7 @@ internal static class MetadataGenerationHelper
                 var relativeIndent = Math.Max(0, currentIndent - baseIndent);
                 
                 // Add relative indentation
-                for (int j = 0; j < relativeIndent; j++)
+                for (var j = 0; j < relativeIndent; j++)
                 {
                     writer.Append(" ");
                 }
@@ -460,7 +460,7 @@ internal static class MetadataGenerationHelper
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
 
-        for (int i = 0; i < method.Parameters.Length; i++)
+        for (var i = 0; i < method.Parameters.Length; i++)
         {
             var param = method.Parameters[i];
             WriteParameterMetadata(writer, param, method);
@@ -505,7 +505,7 @@ internal static class MetadataGenerationHelper
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
 
-        for (int i = 0; i < constructor.Parameters.Length; i++)
+        for (var i = 0; i < constructor.Parameters.Length; i++)
         {
             var param = constructor.Parameters[i];
             WriteParameterMetadata(writer, param, constructor);
@@ -537,7 +537,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine("{");
         writer.Indent();
 
-        for (int i = 0; i < constructor.Parameters.Length; i++)
+        for (var i = 0; i < constructor.Parameters.Length; i++)
         {
             var param = constructor.Parameters[i];
             WriteParameterMetadata(writer, param, constructor);
@@ -577,7 +577,7 @@ internal static class MetadataGenerationHelper
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
 
-        for (int i = 0; i < properties.Count; i++)
+        for (var i = 0; i < properties.Count; i++)
         {
             var prop = properties[i];
             WritePropertyMetadata(writer, prop, typeSymbol);
@@ -614,7 +614,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine("{");
         writer.Indent();
 
-        for (int i = 0; i < properties.Count; i++)
+        for (var i = 0; i < properties.Count; i++)
         {
             var prop = properties[i];
             WritePropertyMetadata(writer, prop, typeSymbol);

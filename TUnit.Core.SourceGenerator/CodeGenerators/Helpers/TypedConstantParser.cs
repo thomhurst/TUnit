@@ -101,7 +101,19 @@ public static class TypedConstantParser
                 return "double.NegativeInfinity";
             case null:
                 return "null";
+            // Use InvariantCulture for numeric types to ensure consistent formatting
+            case double d:
+                return d.ToString(System.Globalization.CultureInfo.InvariantCulture) + "d";
+            case float f:
+                return f.ToString(System.Globalization.CultureInfo.InvariantCulture) + "f";
+            case decimal dec:
+                return dec.ToString(System.Globalization.CultureInfo.InvariantCulture) + "m";
             default:
+                // For other numeric types, use InvariantCulture
+                if (value is IFormattable formattable)
+                {
+                    return formattable.ToString(null, System.Globalization.CultureInfo.InvariantCulture);
+                }
                 return value.ToString() ?? "null";
         }
     }

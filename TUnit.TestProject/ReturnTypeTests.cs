@@ -34,10 +34,4 @@ public class ReturnTypeTests
     {
         return default(ValueTask);
     }
-
-    [Test]
-    public ValueTask<int> Test6()
-    {
-        return new ValueTask<int>(1);
-    }
 }

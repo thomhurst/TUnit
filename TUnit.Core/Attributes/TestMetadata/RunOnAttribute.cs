@@ -35,7 +35,7 @@ namespace TUnit.Core;
 /// }
 ///
 /// // Run on all supported platforms
-/// [Test, RunOn(OS.Windows | OS.Linux | OS.MacOs)]
+/// [Test, RunOn(OS.Windows | OS.Linux | OS.MacOs | OS.Browser)]
 /// public void AllPlatformsTest()
 /// {
 ///     // This test will run on all supported platforms
@@ -61,6 +61,12 @@ public sealed class RunOnAttribute(OS OperatingSystem) : SkipAttribute($"Test is
         }
 
         if (OperatingSystem.HasFlag(OS.MacOs) && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return Task.FromResult(false);
+        }
+
+        // Check for Browser platform (WebAssembly)
+        if (OperatingSystem.HasFlag(OS.Browser) && System.OperatingSystem.IsBrowser())
         {
             return Task.FromResult(false);
         }
