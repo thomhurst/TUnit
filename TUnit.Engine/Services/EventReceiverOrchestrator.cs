@@ -26,6 +26,12 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     private readonly ThreadSafeDictionary<string, Counter> _assemblyTestCounts = new();
     private readonly ThreadSafeDictionary<Type, Counter> _classTestCounts = new();
     private int _sessionTestCount;
+    
+    // Track which objects have already been initialized to avoid duplicates
+    private readonly HashSet<object> _initializedObjects = new();
+    
+    // Track registered First event receiver types to avoid duplicate registrations
+    private readonly HashSet<Type> _registeredFirstEventReceiverTypes = new();
 
     public EventReceiverOrchestrator(TUnitFrameworkLogger logger)
     {
@@ -36,12 +42,52 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     {
         var eligibleObjects = context.GetEligibleEventObjects().ToArray();
 
-        // Register all event receivers for fast lookup
-        _registry.RegisterReceivers(eligibleObjects);
-
+        // Only initialize and register objects that haven't been processed yet
+        var newObjects = new List<object>();
+        var objectsToRegister = new List<object>();
+        
         foreach (var obj in eligibleObjects)
         {
-            await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+            if (_initializedObjects.Add(obj)) // Add returns false if already present
+            {
+                newObjects.Add(obj);
+                
+                // For First event receivers, only register one instance per type
+                var objType = obj.GetType();
+                bool isFirstEventReceiver = obj is IFirstTestInTestSessionEventReceiver ||
+                                           obj is IFirstTestInAssemblyEventReceiver ||
+                                           obj is IFirstTestInClassEventReceiver;
+                
+                if (isFirstEventReceiver)
+                {
+                    if (_registeredFirstEventReceiverTypes.Add(objType))
+                    {
+                        // First instance of this type, register it
+                        objectsToRegister.Add(obj);
+                    }
+                    // else: Skip registration, we already have an instance of this type
+                }
+                else
+                {
+                    // Not a First event receiver, register normally
+                    objectsToRegister.Add(obj);
+                }
+            }
+        }
+
+        if (objectsToRegister.Count > 0)
+        {
+            // Register only the objects that should be registered
+            _registry.RegisterReceivers(objectsToRegister);
+        }
+        
+        if (newObjects.Count > 0)
+        {
+            // Initialize all new objects (even if not registered)
+            foreach (var obj in newObjects)
+            {
+                await ObjectInitializer.InitializeAsync(obj, cancellationToken);
+            }
         }
     }
 
@@ -229,8 +275,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
         // Use GetOrAdd to ensure exactly one task is created per assembly and all tests await it
-        await _firstTestInAssemblyTasks.GetOrAdd(assemblyName,
+        var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName,
             _ => InvokeFirstTestInAssemblyEventReceiversCoreAsync(context, assemblyContext, cancellationToken));
+        await task;
     }
 
     private async Task InvokeFirstTestInAssemblyEventReceiversCoreAsync(
