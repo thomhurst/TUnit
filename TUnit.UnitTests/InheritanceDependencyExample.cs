@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 namespace TUnit.UnitTests;
 
 /// <summary>
@@ -7,7 +9,7 @@ namespace TUnit.UnitTests;
 public abstract class DatabaseTestBase
 {
     // Static dictionary to simulate a "database" that persists across test instances
-    protected static readonly Dictionary<string, object> Database = new();
+    protected static readonly ConcurrentDictionary<string, object> Database = new();
 
     [Before(Class)]
     public static async Task CleanDatabase()
@@ -33,7 +35,7 @@ public abstract class DatabaseTestBase
         // This depends on InitializeDatabase
         await Assert.That(Database.ContainsKey("initialized")).IsTrue();
         await Assert.That(Database["connectionString"]).IsNotNull();
-        
+
         // Simulate schema creation
         Database["schemaCreated"] = true;
         await Task.Delay(1);
@@ -50,7 +52,7 @@ public class UserRepositoryTests : DatabaseTestBase
         // This test depends on the schema being created
         await Assert.That(Database.ContainsKey("schemaCreated")).IsTrue();
         await Assert.That(Database["connectionString"]).IsNotNull();
-        
+
         // Simulate user creation
         Database["userCreated"] = true;
         await Task.Delay(1);
@@ -67,7 +69,7 @@ public class ProductRepositoryTests : DatabaseTestBase
         // Only depends on database initialization, not schema
         await Assert.That(Database.ContainsKey("initialized")).IsTrue();
         await Assert.That(Database["connectionString"]).IsNotNull();
-        
+
         // Simulate product creation
         Database["productCreated"] = true;
         await Task.Delay(1);
@@ -81,7 +83,7 @@ public class ProductRepositoryTests : DatabaseTestBase
 public abstract class RepositoryTestBase<T> where T : class, new()
 {
     // Static dictionary to store entities by type
-    protected static readonly Dictionary<Type, object> Entities = new();
+    protected static readonly ConcurrentDictionary<Type, object> Entities = new();
 
     [Before(Class)]
     public static async Task CleanEntities()
@@ -110,7 +112,7 @@ public class CustomerRepositoryTests : RepositoryTestBase<Customer>
         await Assert.That(Entities.ContainsKey(typeof(Customer))).IsTrue();
         var entity = (Customer)Entities[typeof(Customer)];
         await Assert.That(entity).IsNotNull();
-        
+
         entity.Name = "Test Customer";
         await Assert.That(entity.Name).IsEqualTo("Test Customer");
     }
