@@ -27,6 +27,7 @@ internal static class EnvironmentVariableCache
         "TUNIT_ADAPTIVE_MAX_PARALLELISM", 
         "TUNIT_ADAPTIVE_METRICS",
         "TUNIT_DISABLE_GITHUB_REPORTER",
+        "TUNIT_GITHUB_REPORTER_STYLE",
         
         // CI environment detection variables
         "CI",

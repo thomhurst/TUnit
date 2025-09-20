@@ -98,6 +98,7 @@ const sidebars: SidebarsConfig = {
         'execution/test-filters',
         'execution/executors',
         'execution/engine-modes',
+        'execution/ci-cd-reporting',
       ],
     },
     {

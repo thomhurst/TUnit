@@ -11,10 +11,17 @@ using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Reporters;
 
+public enum GitHubReporterStyle
+{
+    Collapsible,
+    Full
+}
+
 public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostApplicationLifetime, IFilterReceiver
 {
     private const long MaxFileSizeInBytes = 1 * 1024 * 1024; // 1MB
     private string _outputSummaryFilePath = null!;
+    private GitHubReporterStyle _reporterStyle = GitHubReporterStyle.Collapsible;
 
     public async Task<bool> IsEnabledAsync()
     {
@@ -36,6 +43,18 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         }
 
         _outputSummaryFilePath = fileName;
+
+        // Determine reporter style from environment variable or default to collapsible
+        var styleEnv = EnvironmentVariableCache.Get("TUNIT_GITHUB_REPORTER_STYLE");
+        if (!string.IsNullOrEmpty(styleEnv))
+        {
+            _reporterStyle = styleEnv!.ToLowerInvariant() switch
+            {
+                "full" => GitHubReporterStyle.Full,
+                "collapsible" => GitHubReporterStyle.Collapsible,
+                _ => GitHubReporterStyle.Collapsible
+            };
+        }
 
         return await extension.IsEnabledAsync();
     }
@@ -83,17 +102,22 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         var passedCount = last.Count(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is PassedTestNodeStateProperty));
+
         var failed = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable()
                 .Any(p => p is FailedTestNodeStateProperty)).ToArray();
+
         var cancelled = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is CancelledTestNodeStateProperty)).ToArray();
+
         var timeout = last
             .Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is TimeoutTestNodeStateProperty))
             .ToArray();
+
         var skipped = last
             .Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is SkippedTestNodeStateProperty))
             .ToArray();
+
         var inProgress = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
@@ -136,12 +160,14 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             return WriteFile(stringBuilder.ToString());
         }
 
-        stringBuilder.AppendLine();
-        stringBuilder.AppendLine();
-        stringBuilder.AppendLine("### Details");
-        stringBuilder.AppendLine();
-        stringBuilder.AppendLine("| Test | Status | Details | Duration |");
-        stringBuilder.AppendLine("| --- | --- | --- | --- |");
+        // Build the details table
+        var detailsBuilder = new StringBuilder();
+        detailsBuilder.AppendLine();
+        detailsBuilder.AppendLine();
+        detailsBuilder.AppendLine("### Details");
+        detailsBuilder.AppendLine();
+        detailsBuilder.AppendLine("| Test | Status | Details | Duration |");
+        detailsBuilder.AppendLine("| --- | --- | --- | --- |");
 
         foreach (var testNodeUpdateMessage in last.Values)
         {
@@ -167,7 +193,24 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
             var duration = timingProperty?.GlobalTiming.Duration;
 
-            stringBuilder.AppendLine($"| {name} | {status} | {details} | {duration} |");
+            detailsBuilder.AppendLine($"| {name} | {status} | {details} | {duration} |");
+        }
+
+        // Wrap in collapsible section if using collapsible style
+        if (_reporterStyle == GitHubReporterStyle.Collapsible)
+        {
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("<details>");
+            stringBuilder.AppendLine("<summary>📊 Test Details (click to expand)</summary>");
+            stringBuilder.Append(detailsBuilder.ToString());
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("</details>");
+        }
+        else
+        {
+            // Full style - append details directly
+            stringBuilder.Append(detailsBuilder.ToString());
         }
 
         return WriteFile(stringBuilder.ToString());
@@ -246,4 +289,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     }
 
     public string? Filter { get; set; }
+
+    internal void SetReporterStyle(GitHubReporterStyle style)
+    {
+        _reporterStyle = style;
+    }
 }

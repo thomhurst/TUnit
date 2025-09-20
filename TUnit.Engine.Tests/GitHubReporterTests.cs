@@ -4,6 +4,7 @@ using TUnit.Engine.Reporters;
 
 namespace TUnit.Engine.Tests;
 
+[NotInParallel]
 public class GitHubReporterTests
 {
     private sealed class MockExtension : IExtension
@@ -14,7 +15,18 @@ public class GitHubReporterTests
         public string Description => "Mock Extension";
         public Task<bool> IsEnabledAsync() => Task.FromResult(true);
     }
-    
+
+    [After(Test)]
+    public void CleanupAfterTest()
+    {
+        // Reset all environment variables
+        Environment.SetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER", null);
+        Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", null);
+        Environment.SetEnvironmentVariable("TUNIT_GITHUB_REPORTER_STYLE", null);
+        Environment.SetEnvironmentVariable("GITHUB_ACTIONS", null);
+        Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", null);
+    }
+
     [Test]
     public async Task IsEnabledAsync_Should_Return_False_When_TUNIT_DISABLE_GITHUB_REPORTER_Is_Set()
     {
@@ -22,27 +34,17 @@ public class GitHubReporterTests
         Environment.SetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER", "true");
         Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
         Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", CreateTempFile());
-        
+
         var extension = new MockExtension();
         var reporter = new GitHubReporter(extension);
-        
-        try
-        {
-            // Act
-            var result = await reporter.IsEnabledAsync();
-            
-            // Assert
-            result.ShouldBeFalse();
-        }
-        finally
-        {
-            // Cleanup
-            Environment.SetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER", null);
-            Environment.SetEnvironmentVariable("GITHUB_ACTIONS", null);
-            Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", null);
-        }
+
+        // Act
+        var result = await reporter.IsEnabledAsync();
+
+        // Assert
+        result.ShouldBeFalse();
     }
-    
+
     [Test]
     public async Task IsEnabledAsync_Should_Return_False_When_DISABLE_GITHUB_REPORTER_Is_Set()
     {
@@ -50,27 +52,17 @@ public class GitHubReporterTests
         Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", "true");
         Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
         Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", CreateTempFile());
-        
+
         var extension = new MockExtension();
         var reporter = new GitHubReporter(extension);
-        
-        try
-        {
-            // Act
-            var result = await reporter.IsEnabledAsync();
-            
-            // Assert
-            result.ShouldBeFalse();
-        }
-        finally
-        {
-            // Cleanup
-            Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", null);
-            Environment.SetEnvironmentVariable("GITHUB_ACTIONS", null);
-            Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", null);
-        }
+
+        // Act
+        var result = await reporter.IsEnabledAsync();
+
+        // Assert
+        result.ShouldBeFalse();
     }
-    
+
     [Test]
     public async Task IsEnabledAsync_Should_Return_False_When_Both_Environment_Variables_Are_Set()
     {
@@ -79,28 +71,17 @@ public class GitHubReporterTests
         Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", "true");
         Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
         Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", CreateTempFile());
-        
+
         var extension = new MockExtension();
         var reporter = new GitHubReporter(extension);
-        
-        try
-        {
-            // Act
-            var result = await reporter.IsEnabledAsync();
-            
-            // Assert
-            result.ShouldBeFalse();
-        }
-        finally
-        {
-            // Cleanup
-            Environment.SetEnvironmentVariable("TUNIT_DISABLE_GITHUB_REPORTER", null);
-            Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", null);
-            Environment.SetEnvironmentVariable("GITHUB_ACTIONS", null);
-            Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", null);
-        }
+
+        // Act
+        var result = await reporter.IsEnabledAsync();
+
+        // Assert
+        result.ShouldBeFalse();
     }
-    
+
     [Test]
     public async Task IsEnabledAsync_Should_Return_False_When_GITHUB_ACTIONS_Is_Not_Set()
     {
@@ -109,29 +90,19 @@ public class GitHubReporterTests
         Environment.SetEnvironmentVariable("DISABLE_GITHUB_REPORTER", null);
         Environment.SetEnvironmentVariable("GITHUB_ACTIONS", null);
         Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", CreateTempFile());
-        
+
         var extension = new MockExtension();
         var reporter = new GitHubReporter(extension);
-        
-        try
-        {
-            // Act
-            var result = await reporter.IsEnabledAsync();
-            
-            // Assert
-            result.ShouldBeFalse();
-        }
-        finally
-        {
-            // Cleanup
-            Environment.SetEnvironmentVariable("GITHUB_STEP_SUMMARY", null);
-        }
+
+        // Act
+        var result = await reporter.IsEnabledAsync();
+
+        // Assert
+        result.ShouldBeFalse();
     }
-    
-    private static string CreateTempFile()
+
+    private string CreateTempFile()
     {
-        var tempFile = Path.GetTempFileName();
-        File.WriteAllText(tempFile, "test");
-        return tempFile;
+        return Path.GetTempFileName();
     }
 }
