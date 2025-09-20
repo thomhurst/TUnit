@@ -80,6 +80,7 @@ namespace
         public CompareOptions() { }
         public . EquivalencyKind { get; set; }
         public string[] MembersToIgnore { get; init; }
+        public [] TypesToIgnore { get; init; }
     }
     public class ComparisonFailure : <.ComparisonFailure>
     {
@@ -831,6 +832,8 @@ namespace .
     public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : .<TActual>
     {
         public ..EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMember(string propertyName, [.("propertyName")] string doNotPopulateThis = "") { }
+        public ..EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType( type, [.("type")] string doNotPopulateThis = "") { }
+        public ..EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType<TType>() { }
         public ..EquivalentToAssertionBuilderWrapper<TActual, TExpected> WithPartialEquivalency() { }
     }
     public class GenericEqualToAssertionBuilderWrapper<TActual> : .<TActual> { }
@@ -844,6 +847,8 @@ namespace .
     public class NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> : .<TActual>
     {
         public ..NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMember(string propertyName, [.("propertyName")] string doNotPopulateThis = "") { }
+        public ..NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType( type, [.("type")] string doNotPopulateThis = "") { }
+        public ..NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType<TType>() { }
         public ..NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> WithPartialEquivalency() { }
     }
     public class NotNullAssertionBuilderWrapper<TActual> : .<TActual>
@@ -1030,6 +1035,7 @@ namespace ..Conditions
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TActual? actualValue, TExpected? expectedValue) { }
         public void IgnoringMember(string fieldName) { }
+        public void IgnoringType( type) { }
     }
     public class NotAssignableFromExpectedValueAssertCondition<TActual> : .<TActual>
     {
@@ -1062,6 +1068,7 @@ namespace ..Conditions
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TActual? actualValue, TExpected? expectedValue) { }
         public void IgnoringMember(string fieldName) { }
+        public void IgnoringType( type) { }
     }
     public class NotSameReferenceExpectedValueAssertCondition<TActual, TExpected> : .<TActual, TExpected>
     {

@@ -14,6 +14,7 @@ TActual,
 TExpected>(TExpected expected, string? expectedExpression) : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
     private readonly List<string> _ignoredMembers = [];
+    private readonly List<Type> _ignoredTypes = [];
 
     public EquivalencyKind EquivalencyKind { get; set; } = EquivalencyKind.Full;
 
@@ -62,6 +63,7 @@ TExpected>(TExpected expected, string? expectedExpression) : ExpectedValueAssert
         var failures = Compare.CheckEquivalent(actualValue, ExpectedValue, new CompareOptions
         {
             MembersToIgnore = [.. _ignoredMembers],
+            TypesToIgnore = [.. _ignoredTypes],
             EquivalencyKind = EquivalencyKind
         }, null).ToList();
 
@@ -94,5 +96,10 @@ TExpected>(TExpected expected, string? expectedExpression) : ExpectedValueAssert
     public void IgnoringMember(string fieldName)
     {
         _ignoredMembers.Add(fieldName);
+    }
+
+    public void IgnoringType(Type type)
+    {
+        _ignoredTypes.Add(type);
     }
 }
