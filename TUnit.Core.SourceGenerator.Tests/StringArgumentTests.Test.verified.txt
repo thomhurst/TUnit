@@ -43,15 +43,9 @@ internal sealed class StringArgumentTests_Normal_TestSource_GUID : global::TUnit
                 new global::TUnit.Core.ArgumentsAttribute("\\\\t"),
                 new global::TUnit.Core.ArgumentsAttribute("Hello\nWorld"),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 8,
@@ -86,7 +80,6 @@ internal sealed class StringArgumentTests_Normal_TestSource_GUID : global::TUnit
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -180,15 +173,9 @@ internal sealed class StringArgumentTests_Nullable_TestSource_GUID : global::TUn
                 new global::TUnit.Core.ArgumentsAttribute("\\\\t"),
                 new global::TUnit.Core.ArgumentsAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 27,
@@ -223,7 +210,6 @@ internal sealed class StringArgumentTests_Nullable_TestSource_GUID : global::TUn
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;

@@ -24,18 +24,10 @@ internal sealed class STAThreadTests_With_STA_TestSource_GUID : global::TUnit.Co
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 14,
@@ -61,7 +53,6 @@ internal sealed class STAThreadTests_With_STA_TestSource_GUID : global::TUnit.Co
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -123,18 +114,10 @@ internal sealed class STAThreadTests_Without_STA_TestSource_GUID : global::TUnit
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 20,
@@ -160,7 +143,6 @@ internal sealed class STAThreadTests_Without_STA_TestSource_GUID : global::TUnit
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -223,18 +205,10 @@ internal sealed class STAThreadTests_STA_WithSimpleAwait_TestSource_GUID : globa
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 26,
@@ -260,7 +234,6 @@ internal sealed class STAThreadTests_STA_WithSimpleAwait_TestSource_GUID : globa
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -323,18 +296,10 @@ internal sealed class STAThreadTests_STA_WithTaskYield_TestSource_GUID : global:
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 36,
@@ -360,7 +325,6 @@ internal sealed class STAThreadTests_STA_WithTaskYield_TestSource_GUID : global:
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -423,18 +387,10 @@ internal sealed class STAThreadTests_STA_WithConfigureAwaitTrue_TestSource_GUID 
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 45,
@@ -460,7 +416,6 @@ internal sealed class STAThreadTests_STA_WithConfigureAwaitTrue_TestSource_GUID 
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -523,18 +478,10 @@ internal sealed class STAThreadTests_STA_WithNestedAsyncCalls_TestSource_GUID : 
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 54,
@@ -560,7 +507,6 @@ internal sealed class STAThreadTests_STA_WithNestedAsyncCalls_TestSource_GUID : 
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -623,18 +569,10 @@ internal sealed class STAThreadTests_STA_WithTaskFromResult_TestSource_GUID : gl
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 64,
@@ -660,7 +598,6 @@ internal sealed class STAThreadTests_STA_WithTaskFromResult_TestSource_GUID : gl
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -723,18 +660,10 @@ internal sealed class STAThreadTests_STA_WithCompletedTask_TestSource_GUID : glo
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 74,
@@ -760,7 +689,6 @@ internal sealed class STAThreadTests_STA_WithCompletedTask_TestSource_GUID : glo
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -823,18 +751,10 @@ internal sealed class STAThreadTests_STA_WithTaskRun_TestSource_GUID : global::T
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 83,
@@ -860,7 +780,6 @@ internal sealed class STAThreadTests_STA_WithTaskRun_TestSource_GUID : global::T
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -923,18 +842,10 @@ internal sealed class STAThreadTests_STA_WithMultipleAwaits_TestSource_GUID : gl
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 98,
@@ -960,7 +871,6 @@ internal sealed class STAThreadTests_STA_WithMultipleAwaits_TestSource_GUID : gl
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -1023,18 +933,10 @@ internal sealed class STAThreadTests_STA_WithAsyncEnumerable_TestSource_GUID : g
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 116,
@@ -1060,7 +962,6 @@ internal sealed class STAThreadTests_STA_WithAsyncEnumerable_TestSource_GUID : g
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -1123,18 +1024,10 @@ internal sealed class STAThreadTests_STA_WithTaskWhenAll_TestSource_GUID : globa
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 130,
@@ -1160,7 +1053,6 @@ internal sealed class STAThreadTests_STA_WithTaskWhenAll_TestSource_GUID : globa
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -1223,18 +1115,10 @@ internal sealed class STAThreadTests_STA_WithExceptionHandling_TestSource_GUID :
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 147,
@@ -1260,7 +1144,6 @@ internal sealed class STAThreadTests_STA_WithExceptionHandling_TestSource_GUID :
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;

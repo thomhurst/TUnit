@@ -25,15 +25,9 @@ internal sealed class MatrixTests_MatrixTest_One_TestSource_GUID : global::TUnit
             {
                 new global::TUnit.Core.MatrixDataSourceAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 9,
@@ -82,7 +76,6 @@ internal sealed class MatrixTests_MatrixTest_One_TestSource_GUID : global::TUnit
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -160,15 +153,9 @@ internal sealed class MatrixTests_MatrixTest_Two_TestSource_GUID : global::TUnit
             {
                 new global::TUnit.Core.MatrixDataSourceAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 19,
@@ -224,7 +211,6 @@ internal sealed class MatrixTests_MatrixTest_Two_TestSource_GUID : global::TUnit
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -302,15 +288,9 @@ internal sealed class MatrixTests_MatrixTest_Enum_TestSource_GUID : global::TUni
             {
                 new global::TUnit.Core.MatrixDataSourceAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 30,
@@ -359,7 +339,6 @@ internal sealed class MatrixTests_MatrixTest_Enum_TestSource_GUID : global::TUni
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -437,15 +416,9 @@ internal sealed class MatrixTests_AutoGenerateBools_TestSource_GUID : global::TU
             {
                 new global::TUnit.Core.MatrixDataSourceAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 40,
@@ -487,7 +460,6 @@ internal sealed class MatrixTests_AutoGenerateBools_TestSource_GUID : global::TU
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -565,15 +537,9 @@ internal sealed class MatrixTests_AutoGenerateBools2_TestSource_GUID : global::T
             {
                 new global::TUnit.Core.MatrixDataSourceAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 49,
@@ -615,7 +581,6 @@ internal sealed class MatrixTests_AutoGenerateBools2_TestSource_GUID : global::T
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -693,15 +658,9 @@ internal sealed class MatrixTests_ImplicitConversion_TestSource_GUID : global::T
             {
                 new global::TUnit.Core.MatrixDataSourceAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 58,
@@ -743,7 +702,6 @@ internal sealed class MatrixTests_ImplicitConversion_TestSource_GUID : global::T
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -821,15 +779,9 @@ internal sealed class MatrixTests_ExcludingAutoGeneratedMatrixValues_TestSource_
             {
                 new global::TUnit.Core.MatrixDataSourceAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 67,
@@ -871,7 +823,6 @@ internal sealed class MatrixTests_ExcludingAutoGeneratedMatrixValues_TestSource_
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -949,15 +900,9 @@ internal sealed class MatrixTests_Method1_TestSource_GUID : global::TUnit.Core.I
             {
                 new global::TUnit.Core.MatrixDataSourceAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 116,
@@ -992,7 +937,6 @@ internal sealed class MatrixTests_Method1_TestSource_GUID : global::TUnit.Core.I
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -1070,15 +1014,9 @@ internal sealed class MatrixTests_Method2_TestSource_GUID : global::TUnit.Core.I
             {
                 new global::TUnit.Core.MatrixDataSourceAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 124,
@@ -1113,7 +1051,6 @@ internal sealed class MatrixTests_Method2_TestSource_GUID : global::TUnit.Core.I
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -1191,15 +1128,9 @@ internal sealed class MatrixTests_Method3_TestSource_GUID : global::TUnit.Core.I
             {
                 new global::TUnit.Core.MatrixDataSourceAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 132,
@@ -1234,7 +1165,6 @@ internal sealed class MatrixTests_Method3_TestSource_GUID : global::TUnit.Core.I
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -1312,15 +1242,9 @@ internal sealed class MatrixTests_Method4_TestSource_GUID : global::TUnit.Core.I
             {
                 new global::TUnit.Core.MatrixDataSourceAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 140,
@@ -1355,7 +1279,6 @@ internal sealed class MatrixTests_Method4_TestSource_GUID : global::TUnit.Core.I
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -1436,15 +1359,9 @@ internal sealed class MatrixTests_Exclusion_TestSource_GUID : global::TUnit.Core
             {
                 new global::TUnit.Core.MatrixDataSourceAttribute(),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 148,
@@ -1486,7 +1403,6 @@ internal sealed class MatrixTests_Exclusion_TestSource_GUID : global::TUnit.Core
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;

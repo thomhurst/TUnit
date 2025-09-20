@@ -32,12 +32,8 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method_TestSource_G
                 new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
                 new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
             },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 12,
@@ -95,7 +91,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method_TestSource_G
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -185,12 +180,8 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method2_TestSource_
                 new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
                 new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
             },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 18,
@@ -262,7 +253,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method2_TestSource_
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -352,12 +342,8 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method3_TestSource_
                 new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
                 new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
             },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 24,
@@ -429,7 +415,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method3_TestSource_
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;

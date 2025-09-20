@@ -48,7 +48,6 @@ internal static class DisposableFieldTests_Setup_Before_Test_GUIDInitializer
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -124,7 +123,6 @@ internal static class DisposableFieldTests_Blah_After_Test_GUIDInitializer
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;

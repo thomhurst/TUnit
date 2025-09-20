@@ -48,7 +48,6 @@ internal static class AssemblyBase1_AfterAll1_After_Assembly_GUIDInitializer
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -125,7 +124,6 @@ internal static class AssemblyBase1_AfterEach1_After_Test_GUIDInitializer
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -201,7 +199,6 @@ internal static class AssemblyBase2_AfterAll2_After_Assembly_GUIDInitializer
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -278,7 +275,6 @@ internal static class AssemblyBase2_AfterEach2_After_Test_GUIDInitializer
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -354,7 +350,6 @@ internal static class AssemblyBase3_AfterAll3_After_Assembly_GUIDInitializer
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -431,7 +426,6 @@ internal static class AssemblyBase3_AfterEach3_After_Test_GUIDInitializer
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -507,7 +501,6 @@ internal static class AssemblyCleanupTests_AfterAllCleanUp_After_Assembly_GUIDIn
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -593,7 +586,6 @@ internal static class AssemblyCleanupTests_AfterAllCleanUpWithContext_After_Asse
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -670,7 +662,6 @@ internal static class AssemblyCleanupTests_AfterAllCleanUp2_After_Assembly_GUIDI
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -763,7 +754,6 @@ internal static class AssemblyCleanupTests_AfterAllCleanUpWithContextAndToken_Af
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -840,7 +830,6 @@ internal static class AssemblyCleanupTests_Cleanup_After_Test_GUIDInitializer
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -925,7 +914,6 @@ internal static class AssemblyCleanupTests_Cleanup_After_Test_GUIDInitializer
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -1010,7 +998,6 @@ internal static class AssemblyCleanupTests_CleanupWithContext_After_Test_GUIDIni
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
@@ -1102,7 +1089,6 @@ internal static class AssemblyCleanupTests_CleanupWithContext_After_Test_GUIDIni
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
                         };
-                        // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                         foreach (var prop in classMetadata.Properties)
                         {
                             prop.ClassMetadata = classMetadata;
