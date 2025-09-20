@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
@@ -55,7 +56,7 @@ internal static class CodeGenerationHelpers
     /// <summary>
     /// Generates direct instantiation code for attributes.
     /// </summary>
-    public static string GenerateAttributeInstantiation(AttributeData attr, IMethodSymbol? targetMethod = null)
+    public static string GenerateAttributeInstantiation(AttributeData attr, ImmutableArray<IParameterSymbol> targetParameters = default)
     {
         var typeName = attr.AttributeClass!.GloballyQualified();
         using var writer = new CodeWriter("", includeHeader: false);
@@ -75,9 +76,9 @@ internal static class CodeGenerationHelpers
 
             // Determine if this is an Arguments attribute and get parameter types
             ITypeSymbol[]? parameterTypes = null;
-            if (attr.AttributeClass?.Name == "ArgumentsAttribute" && targetMethod != null)
+            if (attr.AttributeClass?.Name == "ArgumentsAttribute" && !targetParameters.IsDefault)
             {
-                parameterTypes = targetMethod.Parameters.Select(p => p.Type).ToArray();
+                parameterTypes = targetParameters.Select(p => p.Type).ToArray();
             }
 
             var syntaxIndex = 0;
