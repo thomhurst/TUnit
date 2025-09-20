@@ -21,6 +21,28 @@ public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : Invokable
         return this;
     }
 
+    public EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType<TType>()
+    {
+        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+
+        assertion.IgnoringType(typeof(TType));
+
+        AppendCallerMethod([$"<{typeof(TType).Name}>"]);
+
+        return this;
+    }
+
+    public EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType(Type type, [CallerArgumentExpression(nameof(type))] string doNotPopulateThis = "")
+    {
+        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+
+        assertion.IgnoringType(type);
+
+        AppendCallerMethod([doNotPopulateThis]);
+
+        return this;
+    }
+
     public EquivalentToAssertionBuilderWrapper<TActual, TExpected> WithPartialEquivalency()
     {
         var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
