@@ -73,6 +73,22 @@ public class AotConverterGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Skip conversion operators where the containing type is not publicly accessible
+        // The generated code won't be able to reference private/internal types
+        if (containingType.DeclaredAccessibility != Accessibility.Public)
+        {
+            return null;
+        }
+        
+        // Also skip if the target type of the conversion is not publicly accessible
+        // (unless it's a built-in type)
+        if (targetType is INamedTypeSymbol namedTargetType && 
+            namedTargetType.SpecialType == SpecialType.None &&
+            namedTargetType.DeclaredAccessibility != Accessibility.Public)
+        {
+            return null;
+        }
+
         return new ConversionInfo
         {
             ContainingType = containingType,
