@@ -1847,6 +1847,7 @@ namespace .Helpers
         public static .<object?> ResolveDataSourceForPropertyAsync( containingType, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static .<object?> ResolveDataSourcePropertyAsync(object instance, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static object?[] ToObjectArray(this object? item) { }
+        public static object?[] ToObjectArrayWithTypes(this object? item, []? expectedTypes) { }
         [return: .(new string[] {
                 "success",
                 "createdInstance"})]
