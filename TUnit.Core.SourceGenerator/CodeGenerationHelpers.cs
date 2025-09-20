@@ -61,6 +61,14 @@ internal static class CodeGenerationHelpers
         writer.SetIndentLevel(1);
         writer.Append($"new {typeName}(");
 
+        // Check if any constructor arguments are in error state
+        if (attr.ConstructorArguments.Any(arg => arg.Kind == TypedConstantKind.Error))
+        {
+            // Handle invalid attribute arguments gracefully by using default constructor
+            writer.Append(")");
+            return writer.ToString();
+        }
+
         if (attr.ConstructorArguments.Length > 0)
         {
             var argStrings = new List<string>();
