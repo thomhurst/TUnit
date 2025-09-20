@@ -25,7 +25,16 @@ public static class ArgumentFormatter
 
     public static string FormatArguments(IEnumerable<object?> arguments)
     {
-        return string.Join(", ", arguments.Select(arg => FormatDefault(arg)));
+        var list = arguments as IList<object?> ?? arguments.ToList();
+        if (list.Count == 0)
+            return string.Empty;
+            
+        var formatted = new string[list.Count];
+        for (int i = 0; i < list.Count; i++)
+        {
+            formatted[i] = FormatDefault(list[i]);
+        }
+        return string.Join(", ", formatted);
     }
 
     private static string FormatDefault(object? o)
@@ -70,15 +79,19 @@ public static class ArgumentFormatter
     private static string FormatTuple(object tuple)
     {
         var elements = TupleHelper.UnwrapTuple(tuple);
-        var formattedElements = elements.Select(e => FormatDefault(e));
-        return $"({string.Join(", ", formattedElements)})";
+        var formatted = new string[elements.Length];
+        for (int i = 0; i < elements.Length; i++)
+        {
+            formatted[i] = FormatDefault(elements[i]);
+        }
+        return $"({string.Join(", ", formatted)})";
     }
 
     private static string FormatEnumerable(IEnumerable enumerable)
     {
-        var elements = new List<string>();
+        const int maxElements = 10;
+        var elements = new List<string>(maxElements + 1);
         var count = 0;
-        const int maxElements = 10; // Limit to prevent huge displays
 
         foreach (var element in enumerable)
         {

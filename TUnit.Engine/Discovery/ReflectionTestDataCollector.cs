@@ -22,10 +22,60 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static readonly Lock _resultsLock = new(); // Only for final results aggregation
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
     private static readonly ConcurrentDictionary<Type, MethodInfo[]> _typeMethodsCache = new();
+    
+    private static Assembly[]? _cachedAssemblies;
+    private static readonly Lock _assemblyCacheLock = new();
+    
+    private static Assembly[] GetCachedAssemblies()
+    {
+        lock (_assemblyCacheLock)
+        {
+            return _cachedAssemblies ??= AppDomain.CurrentDomain.GetAssemblies();
+        }
+    }
+    
+    public static void ClearCaches()
+    {
+        _scannedAssemblies.Clear();
+        while (_discoveredTests.TryTake(out _)) { }
+        _assemblyTypesCache.Clear();
+        _typeMethodsCache.Clear();
+        lock (_assemblyCacheLock)
+        {
+            _cachedAssemblies = null;
+        }
+    }
+
+    private async Task<List<TestMetadata>> ProcessAssemblyAsync(Assembly assembly, SemaphoreSlim semaphore)
+    {
+        await semaphore.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            if (!_scannedAssemblies.TryAdd(assembly, true))
+            {
+                return [];
+            }
+
+            try
+            {
+                return await DiscoverTestsInAssembly(assembly).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Create a failed test metadata for the assembly that couldn't be scanned
+                var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
+                return [failedTest];
+            }
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+    }
 
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
-        var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var allAssemblies = GetCachedAssemblies();
         var assembliesList = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
         {
@@ -46,44 +96,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             var assembly = assemblies[i];
             var index = i;
 
-            tasks[index] = Task.Run(async () =>
-            {
-                await semaphore.WaitAsync().ConfigureAwait(false);
-                try
-                {
-                    if (!_scannedAssemblies.TryAdd(assembly, true))
-                    {
-                        return
-                        [
-                        ];
-                    }
-
-                    try
-                    {
-                        return await DiscoverTestsInAssembly(assembly).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Create a failed test metadata for the assembly that couldn't be scanned
-                        var failedTest = CreateFailedTestMetadataForAssembly(assembly, ex);
-                        return
-                        [
-                            failedTest
-                        ];
-                    }
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            });
+            tasks[index] = ProcessAssemblyAsync(assembly, semaphore);
         }
 
         // Wait for all tasks to complete
         var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-        // Reassemble results in original order
-        var newTests = new List<TestMetadata>();
+        var totalCount = results.Sum(r => r.Count);
+        var newTests = new List<TestMetadata>(totalCount);
         foreach (var tests in results)
         {
             newTests.AddRange(tests);
@@ -111,7 +131,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // Get assemblies to scan
-        var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var allAssemblies = GetCachedAssemblies();
         var assemblies = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
         {
@@ -154,7 +174,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         return _typeMethodsCache.GetOrAdd(type, static t =>
         {
-            var methods = new List<MethodInfo>();
+            var methods = new List<MethodInfo>(20);
             var currentType = t;
 
             while (currentType != null && currentType != typeof(object))
@@ -276,8 +296,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // Don't return false here, continue with other checks
         }
 
-        if (!assembly.GetReferencedAssemblies().Any(a =>
-                a.Name != null && (a.Name.StartsWith("TUnit") || a.Name == "TUnit")))
+        var referencedAssemblies = assembly.GetReferencedAssemblies();
+        var hasTUnitReference = false;
+        foreach (var reference in referencedAssemblies)
+        {
+            if (reference.Name != null && (reference.Name.StartsWith("TUnit") || reference.Name == "TUnit"))
+            {
+                hasTUnitReference = true;
+                break;
+            }
+        }
+        
+        if (!hasTUnitReference)
         {
             return false;
         }
@@ -293,7 +323,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         Justification = "Reflection mode requires dynamic access")]
     private static async Task<List<TestMetadata>> DiscoverTestsInAssembly(Assembly assembly)
     {
-        var discoveredTests = new List<TestMetadata>();
+        var discoveredTests = new List<TestMetadata>(100);
 
         var types = _assemblyTypesCache.GetOrAdd(assembly, asm =>
         {
@@ -541,7 +571,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         Justification = "Reflection mode requires dynamic access")]
     private static async Task<List<TestMetadata>> DiscoverGenericTests(Type genericTypeDefinition)
     {
-        var discoveredTests = new List<TestMetadata>();
+        var discoveredTests = new List<TestMetadata>(100);
 
         // Extract class-level data sources that will determine the generic type arguments
         var classDataSources = ReflectionAttributeExtractor.ExtractDataSources(genericTypeDefinition);
@@ -765,7 +795,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static async Task<List<object?[]>> GetDataFromSourceAsync(IDataSourceAttribute dataSource, MethodMetadata methodMetadata)
     {
-        var data = new List<object?[]>();
+        var data = new List<object?[]>(16);
 
         try
         {
@@ -1469,7 +1499,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private async Task<List<TestMetadata>> DiscoverDynamicTests(string testSessionId)
     {
-        var dynamicTests = new List<TestMetadata>();
+        var dynamicTests = new List<TestMetadata>(50);
 
         // First check if there are any registered dynamic test sources from source generation
         if (Sources.DynamicTestSources.Count > 0)
@@ -1494,9 +1524,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
 
-        // Also discover dynamic test builder methods via reflection
-        // Optimize: Pre-filter and allocate array instead of LINQ ToList()
-        var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var allAssemblies = GetCachedAssemblies();
         var assembliesList = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
         {
@@ -1521,11 +1549,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
             });
 
-            foreach (var type in types.Where(t => t.IsClass && !IsCompilerGenerated(t)))
+            foreach (var type in types)
             {
-                // Optimize: Manual filtering instead of LINQ Where().ToArray()
+                if (!type.IsClass || IsCompilerGenerated(type))
+                    continue;
                 var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-                var methodsList = new List<MethodInfo>(declaredMethods.Length);
+                var methodsList = new List<MethodInfo>(4);
                 foreach (var method in declaredMethods)
                 {
 #pragma warning disable TUnitWIP0001
@@ -1561,9 +1590,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(ShouldScanAssembly)
-            .ToList();
+        var allAssemblies = GetCachedAssemblies();
+        var assemblies = new List<Assembly>(allAssemblies.Length);
+        foreach (var assembly in allAssemblies)
+        {
+            if (ShouldScanAssembly(assembly))
+            {
+                assemblies.Add(assembly);
+            }
+        }
 
         foreach (var assembly in assemblies)
         {
@@ -1581,11 +1616,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
             });
 
-            foreach (var type in types.Where(t => t.IsClass && !IsCompilerGenerated(t)))
+            foreach (var type in types)
             {
-                // Optimize: Manual filtering instead of LINQ Where().ToArray()
+                if (!type.IsClass || IsCompilerGenerated(type))
+                    continue;
                 var declaredMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-                var methodsList = new List<MethodInfo>(declaredMethods.Length);
+                var methodsList = new List<MethodInfo>(4);
                 foreach (var method in declaredMethods)
                 {
 #pragma warning disable TUnitWIP0001
@@ -1613,7 +1649,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private async Task<List<TestMetadata>> ExecuteDynamicTestBuilder(Type testClass, MethodInfo builderMethod, string testSessionId)
     {
-        var dynamicTests = new List<TestMetadata>();
+        var dynamicTests = new List<TestMetadata>(50);
 
         // Extract file path and line number from the DynamicTestBuilderAttribute if possible
         var filePath = ExtractFilePath(builderMethod) ?? "Unknown";

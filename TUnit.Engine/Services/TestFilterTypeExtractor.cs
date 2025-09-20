@@ -10,6 +10,55 @@ internal static class TestFilterTypeExtractor
 {
     private static readonly Regex PathFilterRegex = new(@"^/([^/]+)/([^/]+)/([^/]+)(?:/|$)", RegexOptions.Compiled);
     
+    private static readonly Lazy<Dictionary<string, List<System.Reflection.Assembly>>> AssemblyCache = 
+        new(() => BuildAssemblyCache());
+    
+    private static readonly Lazy<Dictionary<string, Type>> TypeCache = 
+        new(() => BuildTypeCache());
+    
+    private static Dictionary<string, List<System.Reflection.Assembly>> BuildAssemblyCache()
+    {
+        var cache = new Dictionary<string, List<System.Reflection.Assembly>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            var name = assembly.GetName().Name;
+            if (name != null)
+            {
+                if (!cache.TryGetValue(name, out var list))
+                {
+                    list = new List<System.Reflection.Assembly>();
+                    cache[name] = list;
+                }
+                list.Add(assembly);
+            }
+        }
+        return cache;
+    }
+    
+    private static Dictionary<string, Type> BuildTypeCache()
+    {
+        var cache = new Dictionary<string, Type>(StringComparer.Ordinal);
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            try
+            {
+#pragma warning disable IL2026
+                foreach (var type in assembly.GetExportedTypes())
+#pragma warning restore IL2026
+                {
+                    if (type.FullName != null)
+                    {
+                        cache[type.FullName] = type;
+                    }
+                }
+            }
+            catch
+            {
+            }
+        }
+        return cache;
+    }
+    
     public static HashSet<Type>? ExtractTypesFromFilter(ITestExecutionFilter? filter)
     {
         if (filter == null)
@@ -57,17 +106,24 @@ internal static class TestFilterTypeExtractor
                 
                 var fullTypeName = $"{namespaceName}.{className}";
                 
-                // Try to find the type in loaded assemblies
-                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                if (TypeCache.Value.TryGetValue(fullTypeName, out var cachedType))
                 {
-                    if (assembly.GetName().Name == assemblyName || assemblyName == "*")
+                    types.Add(cachedType);
+                }
+                else if (assemblyName != "*")
+                {
+                    if (AssemblyCache.Value.TryGetValue(assemblyName, out var assemblies))
                     {
-#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access
-                        var type = assembly.GetType(fullTypeName, throwOnError: false);
-#pragma warning restore IL2026
-                        if (type != null)
+                        foreach (var assembly in assemblies)
                         {
-                            types.Add(type);
+#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access
+                            var type = assembly.GetType(fullTypeName, throwOnError: false);
+#pragma warning restore IL2026
+                            if (type != null)
+                            {
+                                types.Add(type);
+                                break;
+                            }
                         }
                     }
                 }

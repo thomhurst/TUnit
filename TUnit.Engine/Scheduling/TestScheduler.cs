@@ -308,6 +308,23 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
+    private async Task ProcessTestQueueAsync(
+        System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest> testQueue,
+        CancellationToken cancellationToken)
+    {
+        while (testQueue.TryDequeue(out var test))
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+
+            var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
+            test.ExecutionTask = task;
+            await task.ConfigureAwait(false);
+        }
+    }
+
     private async Task ExecuteParallelTestsWithLimitAsync(
         AbstractExecutableTest[] tests,
         int maxParallelism,
@@ -317,23 +334,9 @@ internal sealed class TestScheduler : ITestScheduler
         var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
         var workers = new Task[maxParallelism];
 
-        // Create worker tasks that will process tests from the queue
         for (var i = 0; i < maxParallelism; i++)
         {
-            workers[i] = Task.Run(async () =>
-            {
-                while (testQueue.TryDequeue(out var test))
-                {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
-                    test.ExecutionTask = task;
-                    await task.ConfigureAwait(false);
-                }
-            }, cancellationToken);
+            workers[i] = ProcessTestQueueAsync(testQueue, cancellationToken);
         }
 
         await WaitForTasksWithFailFastHandling(workers, cancellationToken).ConfigureAwait(false);
