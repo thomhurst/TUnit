@@ -105,7 +105,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         var failed = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable()
-                .Any(p => p is FailedTestNodeStateProperty)).ToArray();
+                .Any(p => p is FailedTestNodeStateProperty or ErrorTestNodeStateProperty)).ToArray();
 
         var cancelled = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is CancelledTestNodeStateProperty)).ToArray();
@@ -174,16 +174,13 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             var name = testNodeUpdateMessage.TestNode.DisplayName;
 
             var passedProperty = testNodeUpdateMessage.TestNode.Properties.OfType<PassedTestNodeStateProperty>().FirstOrDefault();
+
             if (passedProperty != null)
             {
                 continue;
             }
 
-            var stateProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().FirstOrDefault(p =>
-                p is FailedTestNodeStateProperty ||
-                p is SkippedTestNodeStateProperty ||
-                p is TimeoutTestNodeStateProperty ||
-                p is CancelledTestNodeStateProperty);
+            var stateProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().FirstOrDefault(p => p is TestNodeStateProperty);
 
             var status = GetStatus(stateProperty);
 
@@ -241,6 +238,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     private string GetDetails(IProperty? stateProperty, PropertyBag properties)
     {
         if (stateProperty is FailedTestNodeStateProperty
+            or ErrorTestNodeStateProperty
             or TimeoutTestNodeStateProperty
             or CancelledTestNodeStateProperty)
         {
@@ -268,6 +266,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         {
             FailedTestNodeStateProperty failedTestNodeStateProperty =>
                 failedTestNodeStateProperty.Exception?.ToString() ?? "Test failed",
+            ErrorTestNodeStateProperty errorTestNodeStateProperty =>
+                errorTestNodeStateProperty.Exception?.ToString() ?? "Test failed",
             TimeoutTestNodeStateProperty timeoutTestNodeStateProperty => timeoutTestNodeStateProperty.Explanation,
             CancelledTestNodeStateProperty => "Test was cancelled",
             _ => null
@@ -279,6 +279,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         return stateProperty switch
         {
             CancelledTestNodeStateProperty => "Cancelled",
+            ErrorTestNodeStateProperty => "Failed",
             FailedTestNodeStateProperty => "Failed",
             InProgressTestNodeStateProperty => "In Progress (never finished)",
             PassedTestNodeStateProperty => "Passed",
