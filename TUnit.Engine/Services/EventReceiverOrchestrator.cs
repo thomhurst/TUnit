@@ -26,12 +26,12 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     private readonly ThreadSafeDictionary<string, Counter> _assemblyTestCounts = new();
     private readonly ThreadSafeDictionary<Type, Counter> _classTestCounts = new();
     private int _sessionTestCount;
-    
+
     // Track which objects have already been initialized to avoid duplicates
-    private readonly HashSet<object> _initializedObjects = new();
-    
+    private readonly ConcurrentHashSet<object> _initializedObjects = new();
+
     // Track registered First event receiver types to avoid duplicate registrations
-    private readonly HashSet<Type> _registeredFirstEventReceiverTypes = new();
+    private readonly ConcurrentHashSet<Type> _registeredFirstEventReceiverTypes = new();
 
     public EventReceiverOrchestrator(TUnitFrameworkLogger logger)
     {
@@ -45,19 +45,19 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         // Only initialize and register objects that haven't been processed yet
         var newObjects = new List<object>();
         var objectsToRegister = new List<object>();
-        
+
         foreach (var obj in eligibleObjects)
         {
             if (_initializedObjects.Add(obj)) // Add returns false if already present
             {
                 newObjects.Add(obj);
-                
+
                 // For First event receivers, only register one instance per type
                 var objType = obj.GetType();
                 bool isFirstEventReceiver = obj is IFirstTestInTestSessionEventReceiver ||
                                            obj is IFirstTestInAssemblyEventReceiver ||
                                            obj is IFirstTestInClassEventReceiver;
-                
+
                 if (isFirstEventReceiver)
                 {
                     if (_registeredFirstEventReceiverTypes.Add(objType))
@@ -80,7 +80,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             // Register only the objects that should be registered
             _registry.RegisterReceivers(objectsToRegister);
         }
-        
+
         if (newObjects.Count > 0)
         {
             // Initialize all new objects (even if not registered)

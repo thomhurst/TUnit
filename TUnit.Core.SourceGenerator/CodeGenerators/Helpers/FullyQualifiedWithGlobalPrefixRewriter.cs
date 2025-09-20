@@ -176,19 +176,57 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
 #if ROSLYN4_7_OR_GREATER
     public override SyntaxNode? VisitCollectionExpression(CollectionExpressionSyntax node)
     {
-        // For collection expressions, visit each element and ensure proper type conversion
-        var rewrittenElements = node.Elements.Select(element =>
+        // Convert collection expressions to array initializers for property assignments
+        // Collection expressions like [1, 2, 3] need to be converted to new object[] { 1, 2, 3 }
+        // when used in property initializers to avoid compilation errors
+        
+        // Get the type info from the semantic model if available
+        var typeInfo = semanticModel.GetTypeInfo(node);
+        var elementType = "object";
+        
+        if (typeInfo.ConvertedType is IArrayTypeSymbol arrayTypeSymbol)
+        {
+            elementType = arrayTypeSymbol.ElementType.GloballyQualified();
+        }
+        else if (typeInfo.Type is IArrayTypeSymbol arrayTypeSymbol2)
+        {
+            elementType = arrayTypeSymbol2.ElementType.GloballyQualified();
+        }
+        
+        // Visit and rewrite each element
+        var rewrittenElements = new List<ExpressionSyntax>();
+        foreach (var element in node.Elements)
         {
             if (element is ExpressionElementSyntax expressionElement)
             {
                 var rewrittenExpression = Visit(expressionElement.Expression);
-                return SyntaxFactory.ExpressionElement((ExpressionSyntax)rewrittenExpression);
+                rewrittenElements.Add((ExpressionSyntax)rewrittenExpression);
             }
-            return element;
-        }).ToList();
-
-        return SyntaxFactory.CollectionExpression(
+        }
+        
+        // Create an array creation expression instead of a collection expression
+        // This ensures compatibility with property initializers
+        var arrayTypeSyntax = SyntaxFactory.ArrayType(
+            SyntaxFactory.ParseTypeName(elementType),
+            SyntaxFactory.SingletonList(
+                SyntaxFactory.ArrayRankSpecifier(
+                    SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
+                        SyntaxFactory.OmittedArraySizeExpression()
+                    )
+                )
+            )
+        );
+        
+        var initializer = SyntaxFactory.InitializerExpression(
+            SyntaxKind.ArrayInitializerExpression,
             SyntaxFactory.SeparatedList(rewrittenElements)
+        );
+        
+        // Create the array creation expression with proper spacing
+        return SyntaxFactory.ArrayCreationExpression(
+            SyntaxFactory.Token(SyntaxKind.NewKeyword).WithTrailingTrivia(SyntaxFactory.Whitespace(" ")),
+            arrayTypeSyntax,
+            initializer
         );
     }
 #endif

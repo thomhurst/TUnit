@@ -20,7 +20,7 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test1_TestSource_GUID :
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
-{Shared = [global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None],}
+{Shared = new global::TUnit.Core.SharedType[]{global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None},}
             ],
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -154,7 +154,7 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test2_TestSource_GUID :
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
-{Shared = [global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None],}
+{Shared = new global::TUnit.Core.SharedType[]{global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None},}
             ],
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
