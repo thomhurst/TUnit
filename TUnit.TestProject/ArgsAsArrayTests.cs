@@ -51,4 +51,24 @@ public class ArgsAsArrayTests
             Console.WriteLine(argument);
         }
     }
+
+    [Test]
+    // This should work - single type params  
+    [Arguments("Foo", typeof(Foo))]
+    [Arguments("Bar", typeof(Bar))]
+    // this works - multiple types
+    [Arguments("FooBar", typeof(Foo), typeof(Bar))]
+    public void ParamsTypesSingle(string reference, params Type[] typeName)
+    {
+        var result = string.Join("", typeName.Select(type => type.Name));
+        Console.WriteLine($"Expected: {reference}, Got: {result}");
+        // Simple assertion for verification - we expect the type name to match
+        if (reference != result)
+        {
+            throw new Exception($"Expected {reference} but got {result}");
+        }
+    }
+
+    public record Foo();
+    public record Bar();
 }
