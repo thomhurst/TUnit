@@ -49,12 +49,12 @@ public class Issue2504CollectionExpressionTest
         yield return [baseNumber + 5, baseText + "_modified"];
     }
     
-    public static IEnumerable<int[]> GetDataWithArrayParam(int[] values)
+    public static IEnumerable<int> GetDataWithArrayParam(int[] values)
     {
         // Return each value from the array as test data
         foreach (var value in values)
         {
-            yield return [value];
+            yield return value;
         }
     }
 
