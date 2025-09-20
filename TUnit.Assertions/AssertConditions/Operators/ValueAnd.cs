@@ -12,7 +12,7 @@ public class ValueAnd<TActual>(AssertionBuilder assertionBuilder) : IValueSource
     }
 
     Stack<BaseAssertCondition> ISource.Assertions => ((ISource) assertionBuilder).Assertions;
-    ValueTask<AssertionData> ISource.AssertionDataTask => ((ISource) assertionBuilder).AssertionDataTask;
+    LazyAssertionData ISource.LazyAssertionData => ((ISource) assertionBuilder).LazyAssertionData;
     StringBuilder ISource.ExpressionBuilder => ((ISource) assertionBuilder).ExpressionBuilder;
     string? ISource.ActualExpression => ((ISource) assertionBuilder).ActualExpression;
 

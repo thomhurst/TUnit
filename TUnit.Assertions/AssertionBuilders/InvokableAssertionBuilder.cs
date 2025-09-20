@@ -9,7 +9,7 @@ public class InvokableAssertionBuilder<TActual> :
 {
     protected readonly ISource Source;
 
-    internal InvokableAssertionBuilder(ISource source) : base(source.AssertionDataTask, source.ActualExpression!,
+    internal InvokableAssertionBuilder(ISource source) : base(source.LazyAssertionData, source.ActualExpression!,
         source.ExpressionBuilder, source.Assertions)
     {
         Source = source;
