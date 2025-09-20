@@ -1443,34 +1443,114 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 var parameters = methodToInvoke.GetParameters();
                 var castedArgs = new object?[parameters.Length];
 
-                for (var i = 0; i < parameters.Length && i < args.Length; i++)
+                // Check if the last parameter is a params array
+                var lastParam = parameters.Length > 0 ? parameters[^1] : null;
+                var isParamsArray = lastParam != null && lastParam.IsDefined(typeof(ParamArrayAttribute), false);
+                
+                if (isParamsArray && lastParam != null)
                 {
-                    var paramType = parameters[i].ParameterType;
-                    var arg = args[i];
+                    // Handle params array parameter
+                    var paramsElementType = lastParam.ParameterType.GetElementType();
+                    var regularParamsCount = parameters.Length - 1;
+                    
+                    // Process regular parameters first
+                    for (var i = 0; i < regularParamsCount && i < args.Length; i++)
+                    {
+                        var paramType = parameters[i].ParameterType;
+                        var arg = args[i];
 
-                    if (arg == null)
-                    {
-                        castedArgs[i] = null;
-                        continue;
-                    }
+                        if (arg == null)
+                        {
+                            castedArgs[i] = null;
+                            continue;
+                        }
 
-                    var argType = arg.GetType();
+                        var argType = arg.GetType();
 
-                    // If the argument is already assignable to the parameter type, use it directly
-                    // This handles delegates and other non-convertible types
-                    if (paramType.IsAssignableFrom(argType))
-                    {
-                        castedArgs[i] = arg;
+                        // If the argument is already assignable to the parameter type, use it directly
+                        // This handles delegates and other non-convertible types
+                        if (paramType.IsAssignableFrom(argType))
+                        {
+                            castedArgs[i] = arg;
+                        }
+                        // Special handling for covariant interfaces like IEnumerable<T>
+                        else if (IsCovariantCompatible(paramType, argType))
+                        {
+                            castedArgs[i] = arg;
+                        }
+                        else
+                        {
+                            // Otherwise use CastHelper for conversions
+                            castedArgs[i] = CastHelper.Cast(paramType, arg);
+                        }
                     }
-                    // Special handling for covariant interfaces like IEnumerable<T>
-                    else if (IsCovariantCompatible(paramType, argType))
+                    
+                    // Collect remaining arguments into params array
+                    var paramsStartIndex = regularParamsCount;
+                    var paramsCount = Math.Max(0, args.Length - paramsStartIndex);
+                    
+                    if (paramsElementType != null)
                     {
-                        castedArgs[i] = arg;
+                        var paramsArray = Array.CreateInstance(paramsElementType, paramsCount);
+                        for (var i = 0; i < paramsCount; i++)
+                        {
+                            var arg = args[paramsStartIndex + i];
+                            if (arg != null)
+                            {
+                                var argType = arg.GetType();
+                                if (paramsElementType.IsAssignableFrom(argType))
+                                {
+                                    paramsArray.SetValue(arg, i);
+                                }
+                                else if (IsCovariantCompatible(paramsElementType, argType))
+                                {
+                                    paramsArray.SetValue(arg, i);
+                                }
+                                else
+                                {
+                                    paramsArray.SetValue(CastHelper.Cast(paramsElementType, arg), i);
+                                }
+                            }
+                            else
+                            {
+                                paramsArray.SetValue(null, i);
+                            }
+                        }
+                        castedArgs[regularParamsCount] = paramsArray;
                     }
-                    else
+                }
+                else
+                {
+                    // Normal parameter handling when no params array
+                    for (var i = 0; i < parameters.Length && i < args.Length; i++)
                     {
-                        // Otherwise use CastHelper for conversions
-                        castedArgs[i] = CastHelper.Cast(paramType, arg);
+                        var paramType = parameters[i].ParameterType;
+                        var arg = args[i];
+
+                        if (arg == null)
+                        {
+                            castedArgs[i] = null;
+                            continue;
+                        }
+
+                        var argType = arg.GetType();
+
+                        // If the argument is already assignable to the parameter type, use it directly
+                        // This handles delegates and other non-convertible types
+                        if (paramType.IsAssignableFrom(argType))
+                        {
+                            castedArgs[i] = arg;
+                        }
+                        // Special handling for covariant interfaces like IEnumerable<T>
+                        else if (IsCovariantCompatible(paramType, argType))
+                        {
+                            castedArgs[i] = arg;
+                        }
+                        else
+                        {
+                            // Otherwise use CastHelper for conversions
+                            castedArgs[i] = CastHelper.Cast(paramType, arg);
+                        }
                     }
                 }
 

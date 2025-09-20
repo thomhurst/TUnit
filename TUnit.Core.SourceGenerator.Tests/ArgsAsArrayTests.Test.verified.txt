@@ -79,7 +79,7 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
                         typedInstance.Params(new string[0]);
                         break;
                     case 1:
-                        typedInstance.Params(TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0]));
+                        typedInstance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) });
                         break;
                     case 2:
                         typedInstance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]) });
@@ -109,7 +109,7 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
                         instance.Params(new string[0]);
                         break;
                     case 1:
-                        instance.Params(TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0]));
+                        instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) });
                         break;
                     case 2:
                         instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]) });
