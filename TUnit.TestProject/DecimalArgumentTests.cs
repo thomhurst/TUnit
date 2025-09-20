@@ -69,4 +69,13 @@ public class DecimalArgumentTests
         await Assert.That(b).IsEqualTo(2.2m);
         await Assert.That(c).IsEqualTo(3.3m);
     }
+
+    [Test]
+    [Arguments(0.5)]
+    [Arguments(0.75)]
+    [Arguments(1)]
+    public void Test(decimal test)
+    {
+        return;
+    }
 }
