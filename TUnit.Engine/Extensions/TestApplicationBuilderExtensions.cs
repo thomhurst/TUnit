@@ -6,6 +6,7 @@ using TUnit.Engine.Capabilities;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Framework;
 using TUnit.Engine.Reporters;
+using Microsoft.Testing.Platform.CommandLine;
 
 #pragma warning disable TPEXP
 
@@ -18,6 +19,7 @@ public static class TestApplicationBuilderExtensions
         TUnitExtension extension = new();
 
         var githubReporter = new GitHubReporter(extension);
+        var githubReporterCommandProvider = new GitHubReporterCommandProvider(extension);
 
         testApplicationBuilder.RegisterTestFramework(
             serviceProvider => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
@@ -43,7 +45,20 @@ public static class TestApplicationBuilderExtensions
         // Keep detailed stacktrace option for backward compatibility 
         testApplicationBuilder.CommandLine.AddProvider(() => new DetailedStacktraceCommandProvider(extension));
 
-        testApplicationBuilder.TestHost.AddDataConsumer(_ => githubReporter);
+        // GitHub reporter configuration
+        testApplicationBuilder.CommandLine.AddProvider(() => githubReporterCommandProvider);
+
+        testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
+        {
+            // Apply command-line configuration if provided
+            var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();
+            if (commandLineOptions.TryGetOptionArgumentList(GitHubReporterCommandProvider.GitHubReporterStyleOption, out var styleArgs))
+            {
+                var style = GitHubReporterCommandProvider.ParseReporterStyle(styleArgs);
+                githubReporter.SetReporterStyle(style);
+            }
+            return githubReporter;
+        });
         testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => githubReporter);
     }
 

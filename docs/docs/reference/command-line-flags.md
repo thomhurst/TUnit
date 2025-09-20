@@ -103,4 +103,10 @@ Please note that for the coverage and trx report, you need to install [additiona
 
     --treenode-filter
         Use a tree filter to filter down the tests to execute
+
+    --github-reporter-style
+        Style for GitHub Actions test reporter output.
+        Valid values are 'collapsible' (default) or 'full'.
+        'collapsible' wraps detailed test results in expandable HTML blocks.
+        'full' displays all test details directly.
 </pre>

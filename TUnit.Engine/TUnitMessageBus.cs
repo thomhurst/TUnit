@@ -97,7 +97,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
     private Exception SimplifyStacktrace(Exception exception)
     {
         // Check both the legacy --detailed-stacktrace flag and the new verbosity system
-        if (commandLineOptions.IsOptionSet(DetailedStacktraceCommandProvider.DetailedStackTrace) || 
+        if (commandLineOptions.IsOptionSet(DetailedStacktraceCommandProvider.DetailedStackTrace) ||
             verbosityService?.ShowDetailedStackTrace == true)
         {
             return exception;
@@ -175,7 +175,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
     private static IProperty GetFailureStateProperty(TestContext testContext, Exception e, TimeSpan duration)
     {
-        if (testContext.TestDetails?.Timeout != null
+        if (testContext.TestDetails.Timeout != null
             && e is TaskCanceledException or OperationCanceledException or TimeoutException
             && duration >= testContext.TestDetails.Timeout.Value)
         {
