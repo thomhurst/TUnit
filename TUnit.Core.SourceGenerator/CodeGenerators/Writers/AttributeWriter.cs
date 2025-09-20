@@ -196,7 +196,7 @@ public class AttributeWriter
             return;
         }
 
-        var constructorArgs = attributeData.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue);
+        var constructorArgs = attributeData.ConstructorArguments.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg));
         var formattedConstructorArgs = string.Join(", ", constructorArgs);
 
         var namedArgs = attributeData.NamedArguments.Select(arg => $"{arg.Key} = {TypedConstantParser.GetRawTypedConstantValue(arg.Value)}");

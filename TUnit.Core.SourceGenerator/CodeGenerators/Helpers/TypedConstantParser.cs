@@ -66,10 +66,10 @@ public static class TypedConstantParser
         return typedConstant.Type!.GloballyQualified();
     }
 
-    public static string GetRawTypedConstantValue(TypedConstant typedConstant)
+    public static string GetRawTypedConstantValue(TypedConstant typedConstant, ITypeSymbol? targetType = null)
     {
         // Use the formatter for consistent handling
-        return _formatter.FormatForCode(typedConstant);
+        return _formatter.FormatForCode(typedConstant, targetType);
     }
 
     private static string FormatPrimitive(TypedConstant typedConstant)
