@@ -17,7 +17,7 @@ internal static class TestDataCollectorFactory
 
         if (isSourceGenerationEnabled)
         {
-            return new AotTestDataCollector(filterTypes: null);
+            return new AotTestDataCollector();
         }
         else
         {
@@ -31,7 +31,7 @@ internal static class TestDataCollectorFactory
     public static async Task<ITestDataCollector> CreateAutoDetectAsync(string testSessionId, Assembly[]? assembliesToScan = null)
     {
         // Try AOT mode first (check if any tests were registered)
-        var aotCollector = new AotTestDataCollector(filterTypes: null);
+        var aotCollector = new AotTestDataCollector();
         var aotTests = await aotCollector.CollectTestsAsync(testSessionId);
 
         if (aotTests.Any())

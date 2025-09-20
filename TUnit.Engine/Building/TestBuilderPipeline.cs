@@ -10,18 +10,18 @@ namespace TUnit.Engine.Building;
 
 internal sealed class TestBuilderPipeline
 {
-    private readonly Func<HashSet<Type>?, ITestDataCollector> _dataCollectorFactory;
+    private readonly ITestDataCollector _dataCollector;
     private readonly ITestBuilder _testBuilder;
     private readonly IContextProvider _contextProvider;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
 
     public TestBuilderPipeline(
-        Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory,
+        ITestDataCollector dataCollector,
         ITestBuilder testBuilder,
         IContextProvider contextBuilder,
         EventReceiverOrchestrator eventReceiverOrchestrator)
     {
-        _dataCollectorFactory = dataCollectorFactory ?? throw new ArgumentNullException(nameof(dataCollectorFactory));
+        _dataCollector = dataCollector ?? throw new ArgumentNullException(nameof(dataCollector));
         _testBuilder = testBuilder ?? throw new ArgumentNullException(nameof(testBuilder));
         _contextProvider = contextBuilder;
         _eventReceiverOrchestrator = eventReceiverOrchestrator ?? throw new ArgumentNullException(nameof(eventReceiverOrchestrator));
@@ -54,10 +54,9 @@ internal sealed class TestBuilderPipeline
         return testBuilderContext;
     }
 
-    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsAsync(string testSessionId, HashSet<Type>? filterTypes)
+    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsAsync(string testSessionId)
     {
-        var dataCollector = _dataCollectorFactory(filterTypes);
-        var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
+        var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
 
         return await BuildTestsFromMetadataAsync(collectedMetadata).ConfigureAwait(false);
     }
@@ -67,14 +66,11 @@ internal sealed class TestBuilderPipeline
     /// </summary>
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsStreamingAsync(
         string testSessionId,
-        HashSet<Type>? filterTypes,
         CancellationToken cancellationToken = default)
     {
-        var dataCollector = _dataCollectorFactory(filterTypes);
-
         // Get metadata streaming if supported
         // Fall back to non-streaming collection
-        var collectedMetadata = await dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
+        var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
 
         return await collectedMetadata
             .SelectManyAsync(BuildTestsFromSingleMetadataAsync, cancellationToken: cancellationToken)

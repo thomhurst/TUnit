@@ -18,6 +18,7 @@ namespace TUnit.Core;
 public class TestContext : Context
 {
     private readonly TestBuilderContext _testBuilderContext;
+    private string? _cachedDisplayName;
 
     public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
     {
@@ -196,15 +197,28 @@ public class TestContext : Context
             return CustomDisplayName!;
         }
 
+        if (_cachedDisplayName != null)
+        {
+            return _cachedDisplayName;
+        }
+
+        if (TestDetails.TestMethodArguments.Length == 0)
+        {
+            _cachedDisplayName = TestName;
+            return TestName;
+        }
+
         var arguments = string.Join(", ", TestDetails.TestMethodArguments
             .Select(arg => ArgumentFormatter.Format(arg, ArgumentDisplayFormatters)));
 
         if (string.IsNullOrEmpty(arguments))
         {
+            _cachedDisplayName = TestName;
             return TestName;
         }
 
-        return $"{TestName}({arguments})";
+        _cachedDisplayName = $"{TestName}({arguments})";
+        return _cachedDisplayName;
     }
 
     public Dictionary<string, object?> ObjectBag => _testBuilderContext.ObjectBag;
