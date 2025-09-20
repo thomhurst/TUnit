@@ -634,19 +634,6 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (isTuples)
             {
-                // Check if any test method parameters are tuple types when data source returns tuples
-                // This causes a runtime mismatch: data source provides separate arguments, but method expects tuple parameter
-                var tupleParameters = testParameterTypes.Where(p => p is INamedTypeSymbol { IsTupleType: true }).ToArray();
-                if (tupleParameters.Any())
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        Rules.WrongArgumentTypeTestData,
-                        attribute.GetLocation(),
-                        string.Join(", ", unwrappedTypes),
-                        string.Join(", ", testParameterTypes))
-                    );
-                    return;
-                }
 
                 if (unwrappedTypes.Length != testParameterTypes.Length)
                 {
@@ -777,11 +764,51 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             type = genericType.TypeArguments[0];
         }
 
-        // Check for tuple types first before doing conversion checks
+        // Check for tuple types - but handle them intelligently based on test parameters
         if (type is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
+            // Special case: If there's a single parameter that expects the same tuple type,
+            // don't unwrap the tuple at all
+            if (testParameterTypes.Length == 1 && 
+                testParameterTypes[0] is INamedTypeSymbol paramTupleType && 
+                paramTupleType.IsTupleType &&
+                SymbolEqualityComparer.Default.Equals(tupleType, testParameterTypes[0]))
+            {
+                // Return the tuple as-is for single parameter expecting the same tuple
+                return ImmutableArray.Create(type);
+            }
+            
             isTuples = true;
-            return ImmutableArray.CreateRange(tupleType.TupleElements.Select(x => x.Type));
+            
+            // Create a list to build the unwrapped types
+            var unwrappedTypes = new List<ITypeSymbol>();
+            var tupleElements = tupleType.TupleElements;
+            var paramIndex = 0;
+            
+            // Iterate through tuple elements and test parameters together
+            for (var i = 0; i < tupleElements.Length && paramIndex < testParameterTypes.Length; i++)
+            {
+                var tupleElementType = tupleElements[i].Type;
+                var testParamType = testParameterTypes[paramIndex];
+                
+                // If the test parameter expects a tuple and the tuple element is a tuple,
+                // keep it as-is instead of unwrapping further
+                if (testParamType is INamedTypeSymbol { IsTupleType: true } && 
+                    tupleElementType is INamedTypeSymbol { IsTupleType: true })
+                {
+                    unwrappedTypes.Add(tupleElementType);
+                    paramIndex++;
+                }
+                // If the tuple element is not a tuple, or the test param doesn't expect a tuple,
+                // add it normally
+                else
+                {
+                    unwrappedTypes.Add(tupleElementType);
+                    paramIndex++;
+                }
+            }
+            
+            return ImmutableArray.CreateRange(unwrappedTypes);
         }
 
         if (testParameterTypes.Length == 1

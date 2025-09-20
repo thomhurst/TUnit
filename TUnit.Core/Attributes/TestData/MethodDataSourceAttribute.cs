@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Enums;
@@ -125,7 +126,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 hasAnyItems = true;
                 yield return async () =>
                 {
-                    return await Task.FromResult<object?[]?>(item.ToObjectArray());
+                    var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+                    return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
                 };
             }
             
@@ -149,7 +151,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                     hasAnyItems = true;
                     yield return async () =>
                     {
-                        return await Task.FromResult<object?[]?>(item.ToObjectArray());
+                        var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+                        return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
                     };
                 }
                 
@@ -163,7 +166,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             {
                 yield return async () =>
                 {
-                    return await Task.FromResult<object?[]?>(taskResult.ToObjectArray());
+                    var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+                    return await Task.FromResult<object?[]?>(taskResult.ToObjectArrayWithTypes(paramTypes));
                 };
             }
         }
@@ -175,7 +179,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             foreach (var item in enumerable)
             {
                 hasAnyItems = true;
-                yield return () => Task.FromResult<object?[]?>(item.ToObjectArray());
+                var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+                yield return () => Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
             }
             
             // If the enumerable was empty, yield one empty result like NoDataSource does
@@ -186,9 +191,10 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
         else
         {
+            var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
             yield return async () =>
             {
-                return await Task.FromResult<object?[]?>(methodResult.ToObjectArray());
+                return await Task.FromResult<object?[]?>(methodResult.ToObjectArrayWithTypes(paramTypes));
             };
         }
     }
@@ -204,8 +210,26 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     private static async IAsyncEnumerable<object?> ConvertToAsyncEnumerable(object asyncEnumerable, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var type = asyncEnumerable.GetType();
-        var enumeratorMethod = type.GetMethod("GetAsyncEnumerator");
-        var enumerator = enumeratorMethod!.Invoke(asyncEnumerable, [cancellationToken]);
+        
+        // Find the IAsyncEnumerable<T> interface
+        var asyncEnumerableInterface = type.GetInterfaces()
+            .FirstOrDefault(i => i.IsGenericType && 
+                           i.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>));
+        
+        if (asyncEnumerableInterface is null)
+        {
+            throw new InvalidOperationException($"Type {type.Name} does not implement IAsyncEnumerable<T>");
+        }
+        
+        // Get the GetAsyncEnumerator method from the interface
+        var enumeratorMethod = asyncEnumerableInterface.GetMethod("GetAsyncEnumerator");
+        
+        if (enumeratorMethod is null)
+        {
+            throw new InvalidOperationException($"Could not find GetAsyncEnumerator method on interface {asyncEnumerableInterface.Name}");
+        }
+        
+        var enumerator = enumeratorMethod.Invoke(asyncEnumerable, [cancellationToken]);
 
         var moveNextMethod = enumerator!.GetType().GetMethod("MoveNextAsync");
         var currentProperty = enumerator.GetType().GetProperty("Current");
