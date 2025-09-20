@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -369,6 +370,136 @@ public static class DataSourceHelpers
         // Don't expand IEnumerable - test methods expect the IEnumerable itself as a parameter
         // Only arrays and tuples are expanded (handled above)
         return [item];
+    }
+    
+    /// <summary>
+    /// Converts an item to an object array, considering the expected parameter types.
+    /// This version handles nested tuples correctly by checking if parameters expect tuples.
+    /// </summary>
+    public static object?[] ToObjectArrayWithTypes(this object? item, Type[]? expectedTypes)
+    {
+        item = InvokeIfFunc(item);
+
+        if (item is null)
+        {
+            return [ null ];
+        }
+
+        // Check if it's specifically object?[] (not other array types like string[])
+        if(item is object?[] array && item.GetType().GetElementType() == typeof(object))
+        {
+            return array;
+        }
+
+        // Don't treat strings as character arrays
+        if (item is string)
+        {
+            return [item];
+        }
+
+        // Check if it's any other kind of array (string[], int[], etc.)
+        if (item is Array)
+        {
+            return [item];
+        }
+
+        // Check tuples before IEnumerable because tuples implement IEnumerable
+        // but need special unwrapping logic
+        if (IsTuple(item))
+        {
+            // If we have expected types, handle nested tuples intelligently
+            if (expectedTypes != null && expectedTypes.Length > 0)
+            {
+                // Special case: If there's a single parameter that expects a tuple type,
+                // and the item is a tuple, don't unwrap
+                if (expectedTypes.Length == 1 && IsTupleType(expectedTypes[0]))
+                {
+                    return [item];
+                }
+                
+                return UnwrapTupleWithTypes(item, expectedTypes);
+            }
+            // Fall back to default unwrapping if no type info
+            return UnwrapTupleAot(item);
+        }
+
+        // Don't expand IEnumerable - test methods expect the IEnumerable itself as a parameter
+        return [item];
+    }
+    
+    /// <summary>
+    /// Unwraps a tuple considering the expected parameter types.
+    /// Preserves nested tuples when parameters expect tuple types.
+    /// </summary>
+    private static object?[] UnwrapTupleWithTypes(object? value, Type[] expectedTypes)
+    {
+        if (value == null)
+        {
+            return [null];
+        }
+
+#if NET5_0_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        // Try to use ITuple interface first for any ValueTuple type
+        if (value is ITuple tuple)
+        {
+            var result = new List<object?>();
+            var typeIndex = 0;
+            
+            for (var i = 0; i < tuple.Length && typeIndex < expectedTypes.Length; i++)
+            {
+                var element = tuple[i];
+                var expectedType = expectedTypes[typeIndex];
+                
+                // Check if the expected type is a tuple type
+                if (IsTupleType(expectedType) && IsTuple(element))
+                {
+                    // Keep nested tuple as-is
+                    result.Add(element);
+                    typeIndex++;
+                }
+                else
+                {
+                    // Add element normally
+                    result.Add(element);
+                    typeIndex++;
+                }
+            }
+            
+            return result.ToArray();
+        }
+#endif
+
+        // Fallback to default unwrapping
+        return UnwrapTupleAot(value);
+    }
+    
+    /// <summary>
+    /// Checks if a Type represents a tuple type.
+    /// </summary>
+    private static bool IsTupleType(Type type)
+    {
+        if (!type.IsGenericType)
+        {
+            return false;
+        }
+
+        var genericType = type.GetGenericTypeDefinition();
+        return genericType == typeof(ValueTuple<>) ||
+            genericType == typeof(ValueTuple<,>) ||
+            genericType == typeof(ValueTuple<,,>) ||
+            genericType == typeof(ValueTuple<,,,>) ||
+            genericType == typeof(ValueTuple<,,,,>) ||
+            genericType == typeof(ValueTuple<,,,,,>) ||
+            genericType == typeof(ValueTuple<,,,,,,>) ||
+            genericType == typeof(ValueTuple<,,,,,,,>) ||
+            genericType == typeof(Tuple<>) ||
+            genericType == typeof(Tuple<,>) ||
+            genericType == typeof(Tuple<,,>) ||
+            genericType == typeof(Tuple<,,,>) ||
+            genericType == typeof(Tuple<,,,,>) ||
+            genericType == typeof(Tuple<,,,,,>) ||
+            genericType == typeof(Tuple<,,,,,,>) ||
+            genericType == typeof(Tuple<,,,,,,,>);
     }
 
     public static bool IsTuple(object? obj)
