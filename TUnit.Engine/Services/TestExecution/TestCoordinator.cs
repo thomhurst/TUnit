@@ -126,22 +126,6 @@ internal sealed class TestCoordinator : ITestCoordinator
                     throw new ArgumentOutOfRangeException();
             }
             
-            // Invoke disposal events after test completion and messaging
-            // This decrements reference counts for tracked objects
-            if (test.Context.Events.OnDispose != null)
-            {
-                try
-                {
-                    foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
-                    {
-                        await invocation.InvokeAsync(test.Context, test.Context);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await _logger.LogErrorAsync($"Error during test disposal: {ex.Message}");
-                }
-            }
         }
     }
 

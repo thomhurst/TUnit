@@ -188,6 +188,21 @@ internal class TestExecutor
 
         var flags = _lifecycleCoordinator.DecrementAndCheckAfterHooks(testClass, testAssembly);
 
+        if (executableTest.Context.Events.OnDispose != null)
+        {
+            try
+            {
+                foreach (var invocation in executableTest.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                {
+                    await invocation.InvokeAsync(executableTest.Context, executableTest.Context);
+                }
+            }
+            catch
+            {
+                // Swallow disposal exceptions
+            }
+        }
+
         if (flags.ShouldExecuteAfterClass)
         {
             await _hookExecutor.ExecuteAfterClassHooksAsync(testClass, cancellationToken).ConfigureAwait(false);
