@@ -232,7 +232,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 };
 
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
-                                var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
+                                var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
                                 // For concrete generic instantiations, check if the data is compatible with the expected types
                                 if (metadata.GenericMethodTypeArguments is { Length: > 0 })
@@ -1243,7 +1243,7 @@ internal sealed class TestBuilder : ITestBuilder
         {
             var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
             
-            var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
+            var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
             // Check data compatibility for generic methods
             if (metadata.GenericMethodTypeArguments is { Length: > 0 })

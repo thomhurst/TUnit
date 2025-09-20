@@ -1633,8 +1633,59 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
         }
-
-        if (parametersFromArgs.Length == 0)
+        
+        // Special case: Single tuple parameter
+        // If we have exactly one parameter that's a tuple type, we need to handle it specially
+        // In source-generated mode, tuples are always unwrapped into their elements
+        if (parametersFromArgs.Length == 1 && parametersFromArgs[0].Type is INamedTypeSymbol { IsTupleType: true } tupleType)
+        {
+            writer.AppendLine("// Special handling for single tuple parameter");
+            writer.AppendLine($"if (args.Length == {tupleType.TupleElements.Length})");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("// Arguments are unwrapped tuple elements, reconstruct the tuple");
+            
+            // Build tuple reconstruction
+            var tupleConstruction = $"({string.Join(", ", tupleType.TupleElements.Select((_, i) => $"({tupleType.TupleElements[i].Type.GloballyQualified()})args[{i}]"))})";
+            
+            var methodCallReconstructed = hasCancellationToken
+                ? $"typedInstance.{methodName}({tupleConstruction}, context?.CancellationToken ?? System.Threading.CancellationToken.None)"
+                : $"typedInstance.{methodName}({tupleConstruction})";
+            if (isAsync)
+            {
+                writer.AppendLine($"await {methodCallReconstructed};");
+            }
+            else
+            {
+                writer.AppendLine($"{methodCallReconstructed};");
+            }
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("// Rare case: tuple is wrapped as a single argument");
+            var methodCallDirect = hasCancellationToken
+                ? $"typedInstance.{methodName}(({tupleType.GloballyQualified()})args[0], context?.CancellationToken ?? System.Threading.CancellationToken.None)"
+                : $"typedInstance.{methodName}(({tupleType.GloballyQualified()})args[0])";
+            if (isAsync)
+            {
+                writer.AppendLine($"await {methodCallDirect};");
+            }
+            else
+            {
+                writer.AppendLine($"{methodCallDirect};");
+            }
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"throw new global::System.ArgumentException($\"Expected {tupleType.TupleElements.Length} unwrapped elements or 1 wrapped tuple, but got {{args.Length}} arguments\");");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else if (parametersFromArgs.Length == 0)
         {
             var methodCall = hasCancellationToken
                 ? $"typedInstance.{methodName}(context?.CancellationToken ?? System.Threading.CancellationToken.None)"
@@ -1730,8 +1781,61 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
         }
-
-        if (parametersFromArgs.Length == 0)
+        
+        // Special case: Single tuple parameter (same as in TestInvoker)
+        // If we have exactly one parameter that's a tuple type, we need to handle it specially
+        // In source-generated mode, tuples are always unwrapped into their elements
+        if (parametersFromArgs.Length == 1 && parametersFromArgs[0].Type is INamedTypeSymbol { IsTupleType: true } singleTupleParam)
+        {
+            writer.AppendLine("// Special handling for single tuple parameter");
+            writer.AppendLine($"if (args.Length == {singleTupleParam.TupleElements.Length})");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("// Arguments are unwrapped tuple elements, reconstruct the tuple");
+            
+            // Build tuple reconstruction with proper casting
+            var tupleElements = singleTupleParam.TupleElements.Select((elem, i) => 
+                $"TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i}])").ToList();
+            var tupleConstruction = $"({string.Join(", ", tupleElements)})";
+            
+            var methodCallReconstructed = hasCancellationToken
+                ? $"instance.{methodName}({tupleConstruction}, cancellationToken)"
+                : $"instance.{methodName}({tupleConstruction})";
+            if (isAsync)
+            {
+                writer.AppendLine($"await {methodCallReconstructed};");
+            }
+            else
+            {
+                writer.AppendLine($"{methodCallReconstructed};");
+            }
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("// Rare case: tuple is wrapped as a single argument");
+            var methodCallDirect = hasCancellationToken
+                ? $"instance.{methodName}(TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]), cancellationToken)"
+                : $"instance.{methodName}(TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]))";
+            if (isAsync)
+            {
+                writer.AppendLine($"await {methodCallDirect};");
+            }
+            else
+            {
+                writer.AppendLine($"{methodCallDirect};");
+            }
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"throw new global::System.ArgumentException($\"Expected {singleTupleParam.TupleElements.Length} unwrapped elements or 1 wrapped tuple, but got {{args.Length}} arguments\");");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else if (parametersFromArgs.Length == 0)
         {
             var typedMethodCall = hasCancellationToken
                 ? $"instance.{methodName}(cancellationToken)"
