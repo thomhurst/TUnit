@@ -10,13 +10,13 @@ public class ConvertedValueSource<TFromType, TToType> : IValueSource<TToType?>
     {
         ActualExpression = source.ActualExpression;
         Assertions = new Stack<BaseAssertCondition>([new ValueConversionAssertionCondition<TFromType, TToType>(source, convertToAssertCondition)]);
-        AssertionDataTask = ConvertAsync(source, convertToAssertCondition);
+        LazyAssertionData = Convert(source, convertToAssertCondition);
         ExpressionBuilder = source.ExpressionBuilder;
     }
 
     public string? ActualExpression { get; }
     public Stack<BaseAssertCondition> Assertions { get; }
-    public ValueTask<AssertionData> AssertionDataTask { get; }
+    public LazyAssertionData LazyAssertionData { get; }
 
     public StringBuilder ExpressionBuilder { get; }
 
@@ -37,12 +37,13 @@ public class ConvertedValueSource<TFromType, TToType> : IValueSource<TToType?>
         return this;
     }
 
-    private static async ValueTask<AssertionData> ConvertAsync(IValueSource<TFromType> valueSource, ConvertToAssertCondition<TFromType, TToType> convertToAssertCondition)
+    private static LazyAssertionData Convert(IValueSource<TFromType> valueSource, ConvertToAssertCondition<TFromType, TToType> convertToAssertCondition)
     {
         var invokableAssertionBuilder = valueSource.RegisterAssertion(convertToAssertCondition, [], null);
 
-        return await invokableAssertionBuilder.ProcessAssertionsAsync(assertionData =>
-            Task.FromResult(assertionData with { Result = convertToAssertCondition.ConvertedValue, End = DateTimeOffset.Now }));
+        throw new NotImplementedException();
+        // return await invokableAssertionBuilder.ProcessAssertionsAsync(assertionData =>
+        //     Task.FromResult(assertionData with { Result = convertToAssertCondition.ConvertedValue, End = DateTimeOffset.Now }));
 
     }
 }

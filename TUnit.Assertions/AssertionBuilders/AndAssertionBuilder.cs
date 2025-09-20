@@ -6,7 +6,7 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public class AndAssertionBuilder : AssertionBuilder, IAndAssertionBuilder
 {
-    internal AndAssertionBuilder(AssertionBuilder assertionBuilder) : base(((ISource) assertionBuilder).AssertionDataTask, (
+    internal AndAssertionBuilder(AssertionBuilder assertionBuilder) : base(((ISource) assertionBuilder).LazyAssertionData, (
         (ISource) assertionBuilder).ActualExpression!, (
         (ISource) assertionBuilder).ExpressionBuilder, ((ISource) assertionBuilder).Assertions)
     {

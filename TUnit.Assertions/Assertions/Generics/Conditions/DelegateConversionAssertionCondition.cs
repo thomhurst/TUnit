@@ -14,6 +14,6 @@ public class DelegateConversionAssertionCondition<TToType>(
         AssertionMetadata assertionMetadata
     )
     {
-        return await assertCondition.GetAssertionResult(await source.AssertionDataTask);
+        return await assertCondition.GetAssertionResult(await source.LazyAssertionData.GetResultAsync());
     }
 }
