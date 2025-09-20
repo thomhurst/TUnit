@@ -8,7 +8,10 @@ public static class CompilationExtensions
     public static bool HasImplicitConversionOrGenericParameter(this Compilation compilation, ITypeSymbol? argumentType,
         ITypeSymbol? parameterType)
     {
-        // Handle exact type matches (including when metadata differs)
+        if (parameterType == null && argumentType != null)
+        {
+            return false;
+        }
         if (argumentType != null && parameterType != null && 
             argumentType.ToDisplayString() == parameterType.ToDisplayString())
         {

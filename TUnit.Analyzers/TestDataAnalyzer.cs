@@ -197,6 +197,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 var typesToValidate = propertySymbol != null 
                     ? ImmutableArray.Create(propertySymbol.Type)
                     : parameters.Select(p => p.Type).ToImmutableArray().WithoutCancellationTokenParameter();
+                
                 CheckMethodDataSource(context, attribute, testClassType, typesToValidate, propertySymbol);
             }
 
@@ -556,6 +557,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 testParameterTypes,
                 out var isFunc,
                 out var isTuples);
+            
 
             if (!isFunc && unwrappedTypes.Any(x => x.SpecialType != SpecialType.System_String && x.IsReferenceType))
             {
@@ -577,6 +579,18 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 // object[] can contain any types - skip compile-time type checking
                 return;
             }
+            
+            if (isTuples && unwrappedTypes.Length != testParameterTypes.Length)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    Rules.WrongArgumentTypeTestData,
+                    attribute.GetLocation(),
+                    string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")),
+                    string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
+                );
+                return;
+            }
+            
             var conversions = unwrappedTypes.ZipAll(testParameterTypes,
                 (argument, parameter) => 
                 {
@@ -597,8 +611,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     Diagnostic.Create(
                         Rules.WrongArgumentTypeTestData,
                         attribute.GetLocation(),
-                        string.Join(", ", unwrappedTypes),
-                        string.Join(", ", testParameterTypes))
+                        string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")),
+                        string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
                 );
                 return;
             }
@@ -640,8 +654,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     context.ReportDiagnostic(Diagnostic.Create(
                         Rules.WrongArgumentTypeTestData,
                         attribute.GetLocation(),
-                        string.Join(", ", unwrappedTypes),
-                        string.Join(", ", testParameterTypes))
+                        string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")),
+                        string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
                     );
                     return;
                 }
@@ -676,8 +690,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 Diagnostic.Create(
                     Rules.WrongArgumentTypeTestData,
                     attribute.GetLocation(),
-                    string.Join(", ", unwrappedTypes),
-                    string.Join(", ", testParameterTypes))
+                    string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")),
+                    string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
             );
         }
     }
@@ -764,51 +778,26 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             type = genericType.TypeArguments[0];
         }
 
-        // Check for tuple types - but handle them intelligently based on test parameters
-        if (type is INamedTypeSymbol { IsTupleType: true } tupleType)
+        if (type is INamedTypeSymbol namedType && namedType.IsTupleType)
         {
-            // Special case: If there's a single parameter that expects the same tuple type,
-            // don't unwrap the tuple at all
+            var tupleType = namedType;
             if (testParameterTypes.Length == 1 && 
                 testParameterTypes[0] is INamedTypeSymbol paramTupleType && 
                 paramTupleType.IsTupleType &&
                 SymbolEqualityComparer.Default.Equals(tupleType, testParameterTypes[0]))
             {
-                // Return the tuple as-is for single parameter expecting the same tuple
                 return ImmutableArray.Create(type);
             }
             
             isTuples = true;
             
-            // Create a list to build the unwrapped types
-            var unwrappedTypes = new List<ITypeSymbol>();
-            var tupleElements = tupleType.TupleElements;
-            var paramIndex = 0;
-            
-            // Iterate through tuple elements and test parameters together
-            for (var i = 0; i < tupleElements.Length && paramIndex < testParameterTypes.Length; i++)
+            if (testParameterTypes.Length == 1 && 
+                testParameterTypes[0] is INamedTypeSymbol { IsTupleType: true })
             {
-                var tupleElementType = tupleElements[i].Type;
-                var testParamType = testParameterTypes[paramIndex];
-                
-                // If the test parameter expects a tuple and the tuple element is a tuple,
-                // keep it as-is instead of unwrapping further
-                if (testParamType is INamedTypeSymbol { IsTupleType: true } && 
-                    tupleElementType is INamedTypeSymbol { IsTupleType: true })
-                {
-                    unwrappedTypes.Add(tupleElementType);
-                    paramIndex++;
-                }
-                // If the tuple element is not a tuple, or the test param doesn't expect a tuple,
-                // add it normally
-                else
-                {
-                    unwrappedTypes.Add(tupleElementType);
-                    paramIndex++;
-                }
+                return ImmutableArray.CreateRange(tupleType.TupleElements.Select(e => e.Type));
             }
             
-            return ImmutableArray.CreateRange(unwrappedTypes);
+            return ImmutableArray.CreateRange(tupleType.TupleElements.Select(e => e.Type));
         }
 
         if (testParameterTypes.Length == 1
