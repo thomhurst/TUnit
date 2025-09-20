@@ -274,7 +274,7 @@ internal sealed class DataDrivenTests_EnumValue_TestSource_GUID : global::TUnit.
             {
                 new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.TestEnum.One),
                 new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.TestEnum.Two),
-                new global::TUnit.Core.ArgumentsAttribute((global::TUnit.TestProject.TestEnum)(-1)),
+                new global::TUnit.Core.ArgumentsAttribute(-1),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),

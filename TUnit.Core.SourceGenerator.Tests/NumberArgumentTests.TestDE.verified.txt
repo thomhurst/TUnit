@@ -139,7 +139,7 @@ internal sealed class NumberArgumentTests_Double_TestSource_GUID : global::TUnit
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(1,1),
+                new global::TUnit.Core.ArgumentsAttribute(1.1d),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -255,7 +255,7 @@ internal sealed class NumberArgumentTests_Float_TestSource_GUID : global::TUnit.
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(1,1f),
+                new global::TUnit.Core.ArgumentsAttribute(1.1f),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -603,7 +603,7 @@ internal sealed class NumberArgumentTests_UInt_TestSource_GUID : global::TUnit.C
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(1u),
+                new global::TUnit.Core.ArgumentsAttribute(1U),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),

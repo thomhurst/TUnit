@@ -251,7 +251,7 @@ internal sealed class ConstantArgumentsTests_Double_TestSource_GUID : global::TU
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(1.23),
+                new global::TUnit.Core.ArgumentsAttribute(1.23d),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -593,7 +593,7 @@ internal sealed class ConstantArgumentsTests_UInt_TestSource_GUID : global::TUni
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(123u),
+                new global::TUnit.Core.ArgumentsAttribute(123U),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
