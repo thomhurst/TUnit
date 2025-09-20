@@ -1160,6 +1160,7 @@ namespace
         public ? DisplayNameFormatter { get; set; }
         public .TestContextEvents Events { get; }
         public . ExecutionPriority { get; set; }
+        public  Id { get; }
         public .CancellationTokenSource? LinkedCancellationTokens { get; set; }
         public object Lock { get; }
         public .<string, object?> ObjectBag { get; }
@@ -1202,6 +1203,7 @@ namespace
         public void SetParallelLimiter(. parallelLimit) { }
         public void WriteError(string message) { }
         public void WriteLine(string message) { }
+        public static .TestContext? GetById( id) { }
     }
     public class TestContextEvents
     {

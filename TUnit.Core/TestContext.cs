@@ -17,6 +17,7 @@ namespace TUnit.Core;
 [DebuggerDisplay("{TestDetails.ClassType.Name}.{GetDisplayName(),nq}")]
 public class TestContext : Context
 {
+    private static readonly Dictionary<Guid, TestContext> _testContextsById = new(1000);
     private readonly TestBuilderContext _testBuilderContext;
     private string? _cachedDisplayName;
 
@@ -27,7 +28,11 @@ public class TestContext : Context
         CancellationToken = cancellationToken;
         ServiceProvider = serviceProvider;
         ClassContext = classContext;
+
+        _testContextsById[_testBuilderContext.Id] = this;
     }
+
+    public Guid Id => _testBuilderContext.Id;
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
 
@@ -46,6 +51,8 @@ public class TestContext : Context
             ClassHookContext.Current = value?.ClassContext;
         }
     }
+
+    public static TestContext? GetById(Guid id) => _testContextsById.GetValueOrDefault(id);
 
     public static IReadOnlyDictionary<string, List<string>> Parameters => InternalParametersDictionary;
 
@@ -96,21 +103,21 @@ public class TestContext : Context
 
     // New: Support multiple parallel constraints
     private readonly List<IParallelConstraint> _parallelConstraints = [];
-    
+
     /// <summary>
     /// Gets the collection of parallel constraints applied to this test.
     /// Multiple constraints can be combined (e.g., ParallelGroup + NotInParallel).
     /// </summary>
     public IReadOnlyList<IParallelConstraint> ParallelConstraints => _parallelConstraints;
-    
+
     /// <summary>
     /// Gets or sets the primary parallel constraint for backward compatibility.
     /// When setting, this replaces all existing constraints.
     /// When getting, returns the first constraint or null if none exist.
     /// </summary>
     [Obsolete("Use ParallelConstraints collection instead. This property is maintained for backward compatibility.")]
-    public IParallelConstraint? ParallelConstraint 
-    { 
+    public IParallelConstraint? ParallelConstraint
+    {
         get => _parallelConstraints.FirstOrDefault();
         set
         {
@@ -121,7 +128,7 @@ public class TestContext : Context
             }
         }
     }
-    
+
     /// <summary>
     /// Adds a parallel constraint to this test context.
     /// Multiple constraints can be combined to create complex parallelization rules.
