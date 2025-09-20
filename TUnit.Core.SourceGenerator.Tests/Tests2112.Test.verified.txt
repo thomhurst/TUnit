@@ -89,7 +89,7 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
                         typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
                         break;
                     case 2:
-                        typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<long[]>(args[1]));
+                        typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) });
                         break;
                     case 3:
                         typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });
@@ -119,7 +119,7 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
                         instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
                         break;
                     case 2:
-                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<long[]>(args[1]));
+                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) });
                         break;
                     case 3:
                         instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });
@@ -250,7 +250,7 @@ internal sealed class Tests_Test2_TestSource_GUID : global::TUnit.Core.Interface
                         typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
                         break;
                     case 2:
-                        typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<long[]>(args[1]));
+                        typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) });
                         break;
                     case 3:
                         typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });
@@ -280,7 +280,7 @@ internal sealed class Tests_Test2_TestSource_GUID : global::TUnit.Core.Interface
                         instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
                         break;
                     case 2:
-                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<long[]>(args[1]));
+                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) });
                         break;
                     case 3:
                         instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });
