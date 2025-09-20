@@ -231,8 +231,39 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         
         var enumerator = enumeratorMethod.Invoke(asyncEnumerable, [cancellationToken]);
 
-        var moveNextMethod = enumerator!.GetType().GetMethod("MoveNextAsync");
-        var currentProperty = enumerator.GetType().GetProperty("Current");
+        // The enumerator might not have MoveNextAsync directly on its type,
+        // we need to look for it on the IAsyncEnumerator<T> interface
+        var enumeratorType = enumerator!.GetType();
+        
+        // Find MoveNextAsync - first try the type directly, then check interfaces
+        var moveNextMethod = enumeratorType.GetMethod("MoveNextAsync");
+        if (moveNextMethod is null)
+        {
+            // Look for it on the IAsyncEnumerator<T> interface
+            var asyncEnumeratorInterface = enumeratorType.GetInterfaces()
+                .FirstOrDefault(i => i.IsGenericType && 
+                                i.GetGenericTypeDefinition() == typeof(IAsyncEnumerator<>));
+            
+            if (asyncEnumeratorInterface != null)
+            {
+                moveNextMethod = asyncEnumeratorInterface.GetMethod("MoveNextAsync");
+            }
+        }
+        
+        // Similarly for Current property
+        var currentProperty = enumeratorType.GetProperty("Current");
+        if (currentProperty is null)
+        {
+            // Look for it on the IAsyncEnumerator<T> interface
+            var asyncEnumeratorInterface = enumeratorType.GetInterfaces()
+                .FirstOrDefault(i => i.IsGenericType && 
+                                i.GetGenericTypeDefinition() == typeof(IAsyncEnumerator<>));
+            
+            if (asyncEnumeratorInterface != null)
+            {
+                currentProperty = asyncEnumeratorInterface.GetProperty("Current");
+            }
+        }
 
         while (true)
         {
