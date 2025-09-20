@@ -33,6 +33,12 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Skip error symbols
+        if (typeSymbol.TypeKind == TypeKind.Error)
+        {
+            return null;
+        }
+
         // Check if this type has any static properties with data source attributes
         var hasStaticPropertiesWithDataSources = GetStaticPropertyDataSources(typeSymbol).Any();
         

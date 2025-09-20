@@ -37,6 +37,12 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Skip error symbols
+        if (typeSymbol.TypeKind == TypeKind.Error)
+        {
+            return null;
+        }
+
         // Skip types that are not publicly accessible to avoid accessibility issues
         // Also check if the type is nested and ensure the containing types are also public
         if (!IsPubliclyAccessible(typeSymbol))

@@ -43,7 +43,8 @@ public static class TypeExtensions
         {
             if (symbol is IErrorTypeSymbol)
             {
-                throw new Exception($"ErrorTypeSymbol for {symbol.Name} - Have you added any missing file sources to the compilation?");
+                // Skip error symbols instead of throwing - they will be filtered out by the generators
+                break;
             }
 
             if (symbol.SpecialType == SpecialType.System_Object)

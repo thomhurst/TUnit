@@ -54,6 +54,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Skip error symbols
+        if (classSymbol.TypeKind == TypeKind.Error)
+        {
+            return null;
+        }
+
         // Skip abstract classes
         if (classSymbol.IsAbstract)
         {
@@ -75,6 +81,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var containingType = methodSymbol?.ContainingType;
 
         if (containingType == null)
+        {
+            return null;
+        }
+
+        // Skip error symbols
+        if (containingType.TypeKind == TypeKind.Error)
         {
             return null;
         }
