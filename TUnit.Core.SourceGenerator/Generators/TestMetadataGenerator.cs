@@ -641,30 +641,44 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             .ToList();
 
         // Generate method data sources
-        writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        foreach (var attr in methodDataSources)
+        if (methodDataSources.Count == 0)
         {
-            GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            writer.AppendLine("DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
         }
+        else
+        {
+            writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
+            writer.AppendLine("{");
+            writer.Indent();
 
-        writer.Unindent();
-        writer.AppendLine("},");
+            foreach (var attr in methodDataSources)
+            {
+                GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            }
+
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
 
         // Generate class data sources
-        writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        foreach (var attr in classDataSources)
+        if (classDataSources.Count == 0)
         {
-            GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            writer.AppendLine("ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
         }
+        else
+        {
+            writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
+            writer.AppendLine("{");
+            writer.Indent();
 
-        writer.Unindent();
-        writer.AppendLine("},");
+            foreach (var attr in classDataSources)
+            {
+                GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            }
+
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
 
         // Generate property data sources
         GeneratePropertyDataSources(writer, compilation, testMethod);
@@ -1089,17 +1103,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GeneratePropertyInjections(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
     {
-        writer.AppendLine("PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
         // Walk inheritance hierarchy to find properties with data source attributes
         var currentType = typeSymbol;
         var processedProperties = new HashSet<string>();
+        var hasPropertyInjections = false;
 
-        while (currentType != null)
+        // First check if we have any property injections
+        var tempType = currentType;
+        while (tempType != null)
         {
-            foreach (var member in currentType.GetMembers())
+            foreach (var member in tempType.GetMembers())
             {
                 if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
                     !processedProperties.Contains(property.Name))
@@ -1109,76 +1122,110 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     if (dataSourceAttr != null)
                     {
+                        hasPropertyInjections = true;
                         processedProperties.Add(property.Name);
-                        var propertyType = property.Type.GloballyQualified();
-
-                        writer.AppendLine("new global::TUnit.Core.PropertyInjectionData");
-                        writer.AppendLine("{");
-                        writer.Indent();
-                        writer.AppendLine($"PropertyName = \"{property.Name}\",");
-                        writer.AppendLine($"PropertyType = typeof({propertyType}),");
-
-                        // Generate appropriate setter based on whether property is init-only
-                        if (property.SetMethod.IsInitOnly)
-                        {
-                            // For init-only properties, use UnsafeAccessor on .NET 8+, throw on older frameworks
-                            writer.AppendLine("#if NET8_0_OR_GREATER");
-                            // Cast to the property's containing type if needed
-                            var containingTypeName = property.ContainingType.GloballyQualified();
-
-                            if (containingTypeName != className)
-                            {
-                                writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({containingTypeName})instance) = ({propertyType})value,");
-                            }
-                            else
-                            {
-                                writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
-                            }
-                            writer.AppendLine("#else");
-                            writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
-                            writer.AppendLine("#endif");
-                        }
-                        else
-                        {
-                            // For regular properties, use normal property assignment
-                            // For regular properties, use direct assignment (tuple conversion happens at runtime)
-                            writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
-                        }
-
-                        // ValueFactory will be provided by the TestDataCombination at runtime
-                        writer.AppendLine("ValueFactory = () => throw new global::System.InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\"),");
-
-                        // Generate nested property injections
-                        GenerateNestedPropertyInjections(writer, property.Type, processedProperties);
-
-                        // Generate nested property value factory
-                        GenerateNestedPropertyValueFactory(writer, property.Type);
-
-                        writer.Unindent();
-                        writer.AppendLine("},");
                     }
                 }
             }
-            currentType = currentType.BaseType;
+            tempType = tempType.BaseType;
         }
 
-        writer.Unindent();
-        writer.AppendLine("},");
+        // Reset for actual generation
+        processedProperties.Clear();
+
+        if (!hasPropertyInjections)
+        {
+            writer.AppendLine("PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),");
+        }
+        else
+        {
+            writer.AppendLine("PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]");
+            writer.AppendLine("{");
+            writer.Indent();
+
+            currentType = typeSymbol;
+            while (currentType != null)
+            {
+                foreach (var member in currentType.GetMembers())
+                {
+                    if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
+                        !processedProperties.Contains(property.Name))
+                    {
+                        var dataSourceAttr = property.GetAttributes()
+                            .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
+
+                        if (dataSourceAttr != null)
+                        {
+                            processedProperties.Add(property.Name);
+                            var propertyType = property.Type.GloballyQualified();
+
+                            writer.AppendLine("new global::TUnit.Core.PropertyInjectionData");
+                            writer.AppendLine("{");
+                            writer.Indent();
+                            writer.AppendLine($"PropertyName = \"{property.Name}\",");
+                            writer.AppendLine($"PropertyType = typeof({propertyType}),");
+
+                            // Generate appropriate setter based on whether property is init-only
+                            if (property.SetMethod.IsInitOnly)
+                            {
+                                // For init-only properties, use UnsafeAccessor on .NET 8+, throw on older frameworks
+                                writer.AppendLine("#if NET8_0_OR_GREATER");
+                                // Cast to the property's containing type if needed
+                                var containingTypeName = property.ContainingType.GloballyQualified();
+
+                                if (containingTypeName != className)
+                                {
+                                    writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({containingTypeName})instance) = ({propertyType})value,");
+                                }
+                                else
+                                {
+                                    writer.AppendLine($"Setter = (instance, value) => Get{property.Name}BackingField(({className})instance) = ({propertyType})value,");
+                                }
+                                writer.AppendLine("#else");
+                                writer.AppendLine("Setter = (instance, value) => throw new global::System.NotSupportedException(\"Setting init-only properties requires .NET 8 or later\"),");
+                                writer.AppendLine("#endif");
+                            }
+                            else
+                            {
+                                // For regular properties, use normal property assignment
+                                // For regular properties, use direct assignment (tuple conversion happens at runtime)
+                                writer.AppendLine($"Setter = (instance, value) => (({className})instance).{property.Name} = ({propertyType})value,");
+                            }
+
+                            // ValueFactory will be provided by the TestDataCombination at runtime
+                            writer.AppendLine("ValueFactory = () => throw new global::System.InvalidOperationException(\"ValueFactory should be provided by TestDataCombination\"),");
+
+                            // Generate nested property injections
+                            GenerateNestedPropertyInjections(writer, property.Type, processedProperties);
+
+                            // Generate nested property value factory
+                            GenerateNestedPropertyValueFactory(writer, property.Type);
+
+                            writer.Unindent();
+                            writer.AppendLine("},");
+                        }
+                    }
+                }
+                currentType = currentType.BaseType;
+            }
+
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
     }
 
     private static void GeneratePropertyDataSources(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
     {
-        writer.AppendLine("PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
         var typeSymbol = testMethod.TypeSymbol;
         var currentType = typeSymbol;
         var processedProperties = new HashSet<string>();
+        var hasPropertyDataSources = false;
 
-        while (currentType != null)
+        // First check if we have any property data sources
+        var tempType = currentType;
+        while (tempType != null)
         {
-            foreach (var member in currentType.GetMembers())
+            foreach (var member in tempType.GetMembers())
             {
                 if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
                     !processedProperties.Contains(property.Name))
@@ -1188,41 +1235,78 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     if (dataSourceAttr != null)
                     {
+                        hasPropertyDataSources = true;
                         processedProperties.Add(property.Name);
-
-                        writer.AppendLine("new global::TUnit.Core.PropertyDataSource");
-                        writer.AppendLine("{");
-                        writer.Indent();
-                        writer.AppendLine($"PropertyName = \"{property.Name}\",");
-                        writer.AppendLine($"PropertyType = typeof({property.Type.GloballyQualified()}),");
-                        writer.Append("DataSource = ");
-                        GenerateDataSourceAttribute(writer, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
-                        writer.Unindent();
-                        writer.AppendLine("},");
                     }
                 }
             }
-            currentType = currentType.BaseType;
+            tempType = tempType.BaseType;
         }
 
-        writer.Unindent();
-        writer.AppendLine("},");
+        // Reset for actual generation
+        processedProperties.Clear();
+
+        if (!hasPropertyDataSources)
+        {
+            writer.AppendLine("PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),");
+        }
+        else
+        {
+            writer.AppendLine("PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]");
+            writer.AppendLine("{");
+            writer.Indent();
+
+            currentType = typeSymbol;
+            while (currentType != null)
+            {
+                foreach (var member in currentType.GetMembers())
+                {
+                    if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
+                        !processedProperties.Contains(property.Name))
+                    {
+                        var dataSourceAttr = property.GetAttributes()
+                            .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
+
+                        if (dataSourceAttr != null)
+                        {
+                            processedProperties.Add(property.Name);
+
+                            writer.AppendLine("new global::TUnit.Core.PropertyDataSource");
+                            writer.AppendLine("{");
+                            writer.Indent();
+                            writer.AppendLine($"PropertyName = \"{property.Name}\",");
+                            writer.AppendLine($"PropertyType = typeof({property.Type.GloballyQualified()}),");
+                            writer.Append("DataSource = ");
+                            GenerateDataSourceAttribute(writer, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
+                            writer.Unindent();
+                            writer.AppendLine("},");
+                        }
+                    }
+                }
+                currentType = currentType.BaseType;
+            }
+
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
     }
 
     private static void GenerateNestedPropertyInjections(CodeWriter writer, ITypeSymbol propertyType, HashSet<string> processedProperties)
     {
-        writer.AppendLine("NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
         // Only generate nested injections for reference types that aren't basic types
         if (ShouldGenerateNestedInjections(propertyType))
         {
+            writer.AppendLine("NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]");
+            writer.AppendLine("{");
+            writer.Indent();
             GeneratePropertyInjectionsForType(writer, propertyType, processedProperties, isNested: true);
+            writer.Unindent();
+            writer.AppendLine("},");
         }
-
-        writer.Unindent();
-        writer.AppendLine("},");
+        else
+        {
+            writer.AppendLine("NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),");
+        }
     }
 
     private static void GenerateNestedPropertyValueFactory(CodeWriter writer, ITypeSymbol propertyType)
@@ -4061,30 +4145,44 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Generate method data sources
-        writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        foreach (var attr in methodDataSources)
+        if (methodDataSources.Count == 0)
         {
-            GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            writer.AppendLine("DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
         }
+        else
+        {
+            writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
+            writer.AppendLine("{");
+            writer.Indent();
 
-        writer.Unindent();
-        writer.AppendLine("},");
+            foreach (var attr in methodDataSources)
+            {
+                GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            }
+
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
 
         // Generate class data sources
-        writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        foreach (var attr in classDataSources)
+        if (classDataSources.Count == 0)
         {
-            GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            writer.AppendLine("ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
         }
+        else
+        {
+            writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
+            writer.AppendLine("{");
+            writer.Indent();
 
-        writer.Unindent();
-        writer.AppendLine("},");
+            foreach (var attr in classDataSources)
+            {
+                GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
+            }
+
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
 
         // Empty property data sources for concrete instantiations
         writer.AppendLine("PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),");
@@ -4334,32 +4432,34 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("],");
 
         // Generate data sources
-        writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Add method data source if present
-        if (methodDataSourceAttribute != null)
+        if (methodDataSourceAttribute == null)
         {
-            GenerateDataSourceAttribute(writer, methodDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+            writer.AppendLine("DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
         }
-
-        writer.Unindent();
-        writer.AppendLine("},");
+        else
+        {
+            writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            GenerateDataSourceAttribute(writer, methodDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
 
         // Generate class data sources
-        writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Add class data source if present
-        if (classDataSourceAttribute != null)
+        if (classDataSourceAttribute == null)
         {
-            GenerateDataSourceAttribute(writer, classDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+            writer.AppendLine("ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
         }
-
-        writer.Unindent();
-        writer.AppendLine("},");
+        else
+        {
+            writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            GenerateDataSourceAttribute(writer, classDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
 
         // Generate property data sources and injections
         GeneratePropertyDataSources(writer, compilation, testMethod);

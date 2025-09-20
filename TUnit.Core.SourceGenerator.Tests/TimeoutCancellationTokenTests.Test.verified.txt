@@ -22,9 +22,7 @@ internal sealed class TimeoutCancellationTokenTests_DefaultTest_TestSource_GUID 
                 new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
                 new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
                 new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
@@ -50,12 +48,8 @@ internal sealed class TimeoutCancellationTokenTests_DefaultTest_TestSource_GUID 
                     }
                 },
             },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 14,
@@ -99,7 +93,6 @@ internal sealed class TimeoutCancellationTokenTests_DefaultTest_TestSource_GUID 
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -166,9 +159,7 @@ internal sealed class TimeoutCancellationTokenTests_BasicTest_TestSource_GUID : 
                 new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
                 new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
                 new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
@@ -194,12 +185,8 @@ internal sealed class TimeoutCancellationTokenTests_BasicTest_TestSource_GUID : 
                     }
                 },
             },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 21,
@@ -243,7 +230,6 @@ internal sealed class TimeoutCancellationTokenTests_BasicTest_TestSource_GUID : 
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -309,9 +295,7 @@ internal sealed class TimeoutCancellationTokenTests_InheritedTimeoutAttribute_Te
                 new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
                 new global::TUnit.Core.CategoryAttribute("Timeout Cancellation Token Tests")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
                 new global::TUnit.Core.MethodDataSourceAttribute("DataSource")
@@ -337,12 +321,8 @@ internal sealed class TimeoutCancellationTokenTests_InheritedTimeoutAttribute_Te
                     }
                 },
             },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 30,
@@ -386,7 +366,6 @@ internal sealed class TimeoutCancellationTokenTests_InheritedTimeoutAttribute_Te
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -482,12 +461,8 @@ internal sealed class TimeoutCancellationTokenTests_DataTest_TestSource_GUID : g
                     }
                 },
             },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 38,
@@ -538,7 +513,6 @@ internal sealed class TimeoutCancellationTokenTests_DataTest_TestSource_GUID : g
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -670,12 +644,8 @@ internal sealed class TimeoutCancellationTokenTests_DataSourceTest_TestSource_GU
                     }
                 },
             },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 48,
@@ -726,7 +696,6 @@ internal sealed class TimeoutCancellationTokenTests_DataSourceTest_TestSource_GU
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -838,12 +807,8 @@ internal sealed class TimeoutCancellationTokenTests_MatrixTest_TestSource_GUID :
                     }
                 },
             },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 58,
@@ -894,7 +859,6 @@ internal sealed class TimeoutCancellationTokenTests_MatrixTest_TestSource_GUID :
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
