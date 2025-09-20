@@ -167,6 +167,33 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                     // Double is default for floating-point literals
                     return value.ToString()!;
                 case SpecialType.System_Decimal:
+                    // Handle string to decimal conversion for values that can't be expressed as literals
+                    if (value is string s)
+                    {
+                        // Generate code that parses the string at runtime
+                        // This allows for maximum precision decimal values
+                        return $"decimal.Parse(\"{s}\", System.Globalization.CultureInfo.InvariantCulture)";
+                    }
+                    // When target is decimal but value is double/float/int, convert and format with m suffix
+                    else if (value is double d)
+                    {
+                        // Use the full precision by formatting with sufficient digits
+                        // The 'G29' format gives us the maximum precision for decimal
+                        var decimalValue = (decimal)d;
+                        return $"{decimalValue.ToString("G29", System.Globalization.CultureInfo.InvariantCulture)}m";
+                    }
+                    else if (value is float f)
+                    {
+                        var decimalValue = (decimal)f;
+                        return $"{decimalValue.ToString("G29", System.Globalization.CultureInfo.InvariantCulture)}m";
+                    }
+                    else if (value is int || value is long || value is short || value is byte ||
+                             value is uint || value is ulong || value is ushort || value is sbyte)
+                    {
+                        // For integer types, convert to decimal
+                        var decimalValue = Convert.ToDecimal(value);
+                        return $"{decimalValue.ToString(System.Globalization.CultureInfo.InvariantCulture)}m";
+                    }
                     return $"{value}m";
             }
         }

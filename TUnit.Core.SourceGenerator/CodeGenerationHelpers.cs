@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -54,17 +55,32 @@ internal static class CodeGenerationHelpers
     /// <summary>
     /// Generates direct instantiation code for attributes.
     /// </summary>
-    public static string GenerateAttributeInstantiation(AttributeData attr)
+    public static string GenerateAttributeInstantiation(AttributeData attr, IMethodSymbol? targetMethod = null)
     {
         var typeName = attr.AttributeClass!.GloballyQualified();
         using var writer = new CodeWriter("", includeHeader: false);
         writer.SetIndentLevel(1);
         writer.Append($"new {typeName}(");
 
+        // Try to get the original syntax for better precision with decimal literals
+        var syntax = attr.ApplicationSyntaxReference?.GetSyntax();
+        var syntaxArguments = syntax?.ChildNodes()
+            .OfType<AttributeArgumentListSyntax>()
+            .FirstOrDefault()
+            ?.Arguments.Where(x => x.NameEquals == null).ToList();
+
         if (attr.ConstructorArguments.Length > 0)
         {
             var argStrings = new List<string>();
 
+            // Determine if this is an Arguments attribute and get parameter types
+            ITypeSymbol[]? parameterTypes = null;
+            if (attr.AttributeClass?.Name == "ArgumentsAttribute" && targetMethod != null)
+            {
+                parameterTypes = targetMethod.Parameters.Select(p => p.Type).ToArray();
+            }
+
+            var syntaxIndex = 0;
             for (var i = 0; i < attr.ConstructorArguments.Length; i++)
             {
                 var arg = attr.ConstructorArguments[i];
@@ -76,18 +92,105 @@ internal static class CodeGenerationHelpers
                     {
                         if (!arg.Values.IsDefault)
                         {
-                            var elements = arg.Values.Select(TypedConstantParser.GetRawTypedConstantValue);
+                            var elementIndex = 0;
+                            var elements = arg.Values.Select(v =>
+                            {
+                                var paramType = parameterTypes != null && elementIndex < parameterTypes.Length 
+                                    ? parameterTypes[elementIndex] 
+                                    : null;
+                                
+                                // For decimal parameters with syntax available, use the original text
+                                if (paramType?.SpecialType == SpecialType.System_Decimal && 
+                                    syntaxArguments != null && syntaxIndex < syntaxArguments.Count)
+                                {
+                                    var originalText = syntaxArguments[syntaxIndex].Expression.ToString();
+                                    syntaxIndex++;
+                                    // Check if it's a string literal (starts and ends with quotes)
+                                    if (originalText.StartsWith("\"") && originalText.EndsWith("\""))
+                                    {
+                                        // For string literals, let the normal processing handle it (will use decimal.Parse)
+                                        syntaxIndex--; // Back up so normal processing can handle it
+                                        elementIndex++;
+                                        return TypedConstantParser.GetRawTypedConstantValue(v, paramType);
+                                    }
+                                    else
+                                    {
+                                        // For numeric literals, remove any suffix and add 'm' for decimal
+                                        originalText = originalText.TrimEnd('d', 'D', 'f', 'F', 'l', 'L', 'u', 'U', 'm', 'M');
+                                        return $"{originalText}m";
+                                    }
+                                }
+                                
+                                syntaxIndex++;
+                                elementIndex++;
+                                return TypedConstantParser.GetRawTypedConstantValue(v, paramType);
+                            }).ToList();
                             argStrings.AddRange(elements);
                         }
                     }
                     else
                     {
-                        argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg));
+                        var paramType = parameterTypes != null && i < parameterTypes.Length ? parameterTypes[i] : null;
+                        
+                        // For decimal parameters with syntax available, use the original text
+                        if (paramType?.SpecialType == SpecialType.System_Decimal && 
+                            syntaxArguments != null && syntaxIndex < syntaxArguments.Count)
+                        {
+                            var originalText = syntaxArguments[syntaxIndex].Expression.ToString();
+                            syntaxIndex++;
+                            // Check if it's a string literal (starts and ends with quotes)
+                            if (originalText.StartsWith("\"") && originalText.EndsWith("\""))
+                            {
+                                // For string literals, let the normal processing handle it (will use decimal.Parse)
+                                syntaxIndex--; // Back up so normal processing can handle it
+                                argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg, paramType));
+                            }
+                            else
+                            {
+                                // For numeric literals, remove any suffix and add 'm' for decimal
+                                originalText = originalText.TrimEnd('d', 'D', 'f', 'F', 'l', 'L', 'u', 'U', 'm', 'M');
+                                argStrings.Add($"{originalText}m");
+                            }
+                        }
+                        else
+                        {
+                            syntaxIndex++;
+                            argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg, paramType));
+                        }
                     }
                 }
                 else
                 {
-                    argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg));
+                    var paramType = parameterTypes != null && i < parameterTypes.Length ? parameterTypes[i] : null;
+                    
+                    // For decimal parameters with syntax available, use the original text
+                    if (paramType?.SpecialType == SpecialType.System_Decimal && 
+                        syntaxArguments != null && syntaxIndex < syntaxArguments.Count)
+                    {
+                        var originalText = syntaxArguments[syntaxIndex].Expression.ToString();
+                        syntaxIndex++;
+                        // Check if it's a string literal (starts and ends with quotes)
+                        if (originalText.StartsWith("\"") && originalText.EndsWith("\""))
+                        {
+                            // For string literals, let the normal processing handle it (will use decimal.Parse)
+                            syntaxIndex--; // Back up so normal processing can handle it
+                            argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg, paramType));
+                        }
+                        else
+                        {
+                            // For numeric literals, remove any suffix and add 'm' for decimal
+                            originalText = originalText.TrimEnd('d', 'D', 'f', 'F', 'l', 'L', 'u', 'U', 'm', 'M');
+                            argStrings.Add($"{originalText}m");
+                        }
+                    }
+                    else
+                    {
+                        if (syntaxArguments != null && syntaxIndex < syntaxArguments.Count)
+                        {
+                            syntaxIndex++;
+                        }
+                        argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg, paramType));
+                    }
                 }
             }
 
@@ -311,7 +414,7 @@ internal static class CodeGenerationHelpers
         using var writer = new CodeWriter("", includeHeader: false);
         writer.Append("new global::TUnit.Core.StaticTestDataSource(new object?[][] { new object?[] { ");
 
-        var args = attr.ConstructorArguments.Select(TypedConstantParser.GetRawTypedConstantValue).ToList();
+        var args = attr.ConstructorArguments.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg)).ToList();
         writer.Append(string.Join(", ", args));
         writer.Append(" } })");
         return writer.ToString().Trim();

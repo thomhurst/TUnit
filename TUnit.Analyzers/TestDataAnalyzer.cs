@@ -934,6 +934,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return true;
         }
 
+        if (methodParameterType?.SpecialType == SpecialType.System_Decimal &&
+            argument.Type?.SpecialType == SpecialType.System_String &&
+            argument.Value is string strValue &&
+            decimal.TryParse(strValue, out _))
+        {
+            // Allow string literals for decimal parameters for values that can't be expressed as C# numeric literals
+            // e.g. [Arguments("79228162514264337593543950335")] for decimal.MaxValue
+            return true;
+        }
+
         return CanConvert(context, argument.Type, methodParameterType);
     }
 

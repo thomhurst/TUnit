@@ -702,7 +702,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // Use the generic attribute instantiation method for all other attributes
             // This properly handles generics on the attribute type
-            var generatedCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
+            // Pass methodSymbol for ArgumentsAttribute to preserve decimal precision
+            var generatedCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr, methodSymbol);
             writer.AppendLine($"{generatedCode},");
         }
     }
