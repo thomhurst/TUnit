@@ -15,17 +15,10 @@ namespace TUnit.Engine.Building.Collectors;
 /// </summary>
 internal sealed class AotTestDataCollector : ITestDataCollector
 {
-    private readonly HashSet<Type>? _filterTypes;
-
-    public AotTestDataCollector(HashSet<Type>? filterTypes)
-    {
-        _filterTypes = filterTypes;
-    }
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
         // Stream from all test sources
         var testSources = Sources.TestSources
-            .Where(kvp => _filterTypes == null || _filterTypes.Contains(kvp.Key))
             .SelectMany(kvp => kvp.Value);
 
         var standardTestMetadatas = await testSources

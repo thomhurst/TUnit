@@ -125,17 +125,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var useSourceGeneration = GetUseSourceGeneration(CommandLineOptions);
 #pragma warning disable IL2026 // Using member which has 'RequiresUnreferencedCodeAttribute'
 #pragma warning disable IL3050 // Using member which has 'RequiresDynamicCodeAttribute'
-        Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory = filterTypes =>
-        {
-            if (useSourceGeneration)
-            {
-                return new AotTestDataCollector(filterTypes);
-            }
-            else
-            {
-                return new ReflectionTestDataCollector();
-            }
-        };
+        ITestDataCollector dataCollector = useSourceGeneration
+            ? new AotTestDataCollector()
+            : new ReflectionTestDataCollector();
 #pragma warning restore IL3050
 #pragma warning restore IL2026
 
@@ -144,7 +136,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         TestBuilderPipeline = Register(
             new TestBuilderPipeline(
-                dataCollectorFactory,
+                dataCollector,
                 testBuilder,
                 ContextProvider,
                 EventReceiverOrchestrator));

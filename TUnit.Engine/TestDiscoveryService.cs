@@ -56,15 +56,12 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
 
-        // Extract types from filter for optimized discovery
-        var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
-
         // Stage 1: Stream independent tests immediately while buffering dependent tests
         var independentTests = new List<AbstractExecutableTest>();
         var dependentTests = new List<AbstractExecutableTest>();
         var allTests = new List<AbstractExecutableTest>();
 
-        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false))
+        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, cancellationToken).ConfigureAwait(false))
         {
             allTests.Add(test);
 
@@ -135,7 +132,6 @@ internal sealed class TestDiscoveryService : IDataProducer
     /// Streams test discovery for parallel discovery and execution
     private async IAsyncEnumerable<AbstractExecutableTest> DiscoverTestsStreamAsync(
         string testSessionId,
-        HashSet<Type>? filterTypes,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -147,7 +143,7 @@ internal sealed class TestDiscoveryService : IDataProducer
             cts.CancelAfter(DiscoveryConfiguration.DiscoveryTimeout);
         }
 
-        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false);
+        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, cancellationToken).ConfigureAwait(false);
 
         foreach (var test in tests)
         {
@@ -170,12 +166,9 @@ internal sealed class TestDiscoveryService : IDataProducer
     {
         await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
-        // Extract types from filter for optimized discovery
-        var filterTypes = TestFilterTypeExtractor.ExtractTypesFromFilter(filter);
-
         // Collect all tests first (like source generation mode does)
         var allTests = new List<AbstractExecutableTest>();
-        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, filterTypes, cancellationToken).ConfigureAwait(false))
+        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, cancellationToken).ConfigureAwait(false))
         {
             allTests.Add(test);
         }

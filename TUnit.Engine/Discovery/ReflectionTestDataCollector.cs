@@ -568,7 +568,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         Justification = "Reflection mode requires dynamic access")]
     [UnconditionalSuppressMessage("Trimming",
         "IL2067:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicParameterlessConstructor' in call to 'System.Activator.CreateInstance(Type)'",
-        Justification = "Reflection mode requires dynamic access")]
+        Justification = "Reflection mode requires dynamic access")]  
     private static async Task<List<TestMetadata>> DiscoverGenericTests(Type genericTypeDefinition)
     {
         var discoveredTests = new List<TestMetadata>(100);
