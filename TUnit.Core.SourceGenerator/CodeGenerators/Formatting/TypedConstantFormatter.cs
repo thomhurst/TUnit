@@ -17,6 +17,16 @@ public class TypedConstantFormatter : ITypedConstantFormatter
         switch (constant.Kind)
         {
             case TypedConstantKind.Primitive:
+                // Check for special floating-point values first using the TypedConstant's type info
+                if (constant.Type?.SpecialType == SpecialType.System_Single || 
+                    constant.Type?.SpecialType == SpecialType.System_Double)
+                {
+                    var specialValue = Helpers.SpecialFloatingPointValuesHelper.TryFormatSpecialFloatingPointValue(constant.Value);
+                    if (specialValue != null)
+                    {
+                        return specialValue;
+                    }
+                }
                 return FormatPrimitiveForCode(constant.Value, targetType);
                 
             case TypedConstantKind.Enum:
@@ -242,6 +252,13 @@ public class TypedConstantFormatter : ITypedConstantFormatter
 
     private static string FormatPrimitive(object? value)
     {
+        // Check for special floating-point values first
+        var specialFloatValue = Helpers.SpecialFloatingPointValuesHelper.TryFormatSpecialFloatingPointValue(value);
+        if (specialFloatValue != null)
+        {
+            return specialFloatValue;
+        }
+
         switch (value)
         {
             case string s:
@@ -250,18 +267,6 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 return SymbolDisplay.FormatLiteral(c, quote: true);
             case bool b:
                 return b ? "true" : "false";
-            case float.NaN:
-                return "float.NaN";
-            case float f when float.IsPositiveInfinity(f):
-                return "float.PositiveInfinity";
-            case float f when float.IsNegativeInfinity(f):
-                return "float.NegativeInfinity";
-            case double.NaN:
-                return "double.NaN";
-            case double d when double.IsPositiveInfinity(d):
-                return "double.PositiveInfinity";
-            case double d when double.IsNegativeInfinity(d):
-                return "double.NegativeInfinity";
             case null:
                 return "null";
             // Use InvariantCulture for numeric types to ensure consistent formatting

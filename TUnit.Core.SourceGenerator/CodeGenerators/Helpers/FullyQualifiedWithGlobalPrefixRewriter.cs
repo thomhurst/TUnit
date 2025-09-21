@@ -17,6 +17,25 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
     {
         var symbol = node.GetSymbolInfo(semanticModel);
 
+        // Special handling for double/float special constants (NaN, PositiveInfinity, NegativeInfinity)
+        if (symbol is IFieldSymbol fieldSymbol && fieldSymbol.IsConst)
+        {
+            var containingType = fieldSymbol.ContainingType;
+            if (containingType?.SpecialType == SpecialType.System_Double || 
+                containingType?.SpecialType == SpecialType.System_Single)
+            {
+                // Get the constant value and use the helper to create the appropriate syntax
+                if (fieldSymbol.HasConstantValue)
+                {
+                    var specialSyntax = SpecialFloatingPointValuesHelper.TryCreateSpecialFloatingPointSyntax(fieldSymbol.ConstantValue);
+                    if (specialSyntax != null)
+                    {
+                        return specialSyntax;
+                    }
+                }
+            }
+        }
+
         if (node.Name is IdentifierNameSyntax identifierName)
         {
             return VisitIdentifierName(identifierName);
@@ -95,6 +114,13 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
 
     private static SyntaxNode Literal(object? constantValue)
     {
+        // Check for special floating-point values first
+        var specialFloatSyntax = SpecialFloatingPointValuesHelper.TryCreateSpecialFloatingPointSyntax(constantValue);
+        if (specialFloatSyntax != null)
+        {
+            return specialFloatSyntax;
+        }
+
         return constantValue switch
         {
             null => SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression),
@@ -103,13 +129,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             bool boolValue => boolValue ? SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression)
                 : SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression),
             int intValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(intValue)),
-            double and Double.NaN => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("double.NaN", double.NaN)),
-            double doubleValue when double.IsPositiveInfinity(doubleValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("double.PositiveInfinity", double.PositiveInfinity)),
-            double doubleValue when double.IsNegativeInfinity(doubleValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("double.NegativeInfinity", double.NegativeInfinity)),
             double doubleValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(doubleValue)),
-            float and Single.NaN => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("float.NaN", float.NaN)),
-            float floatValue when float.IsPositiveInfinity(floatValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("float.PositiveInfinity", float.PositiveInfinity)),
-            float floatValue when float.IsNegativeInfinity(floatValue) => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal("float.NegativeInfinity", float.NegativeInfinity)),
             float floatValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(floatValue)),
             long longValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(longValue)),
             decimal decimalValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(decimalValue)),
