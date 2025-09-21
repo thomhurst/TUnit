@@ -35,12 +35,8 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
             {
                 new global::TUnit.Core.PropertyDataSource
@@ -103,9 +99,7 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -121,9 +115,7 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -139,9 +131,7 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -157,9 +147,7 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -175,9 +163,7 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -193,9 +179,7 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -317,7 +301,6 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                         },
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -401,12 +384,8 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.Core.NotInParallelAttribute("PropertySetterTests")
             ],
-            DataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
+            DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
             {
                 new global::TUnit.Core.PropertyDataSource
@@ -458,9 +437,7 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -476,9 +453,7 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -494,9 +469,7 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -512,9 +485,7 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -530,9 +501,7 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -548,9 +517,7 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -582,7 +549,6 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;

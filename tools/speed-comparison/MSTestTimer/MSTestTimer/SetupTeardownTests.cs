@@ -23,7 +23,7 @@ public class SetupTeardownTests : IDisposable
         _testData.AddRange(new[] { "Apple", "Banana", "Cherry", "Date", "Elderberry" });
         
         _cache.Clear();
-        for (int i = 0; i < 10; i++)
+        for (var i = 0; i < 10; i++)
         {
             _cache[i] = $"Value_{i}";
         }
@@ -132,7 +132,7 @@ public class ClassSetupTeardownTests
         if (n <= 3) return true;
         if (n % 2 == 0 || n % 3 == 0) return false;
         
-        for (int i = 5; i * i <= n; i += 6)
+        for (var i = 5; i * i <= n; i += 6)
         {
             if (n % i == 0 || n % (i + 2) == 0)
                 return false;

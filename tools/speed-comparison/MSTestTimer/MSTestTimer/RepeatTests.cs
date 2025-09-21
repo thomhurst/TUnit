@@ -28,7 +28,7 @@ public class RepeatTests
         var result = PerformCalculation(localCounter);
         
         Assert.IsTrue(result > 0);
-        Assert.AreEqual(0, result % localCounter);
+        Assert.AreEqual(localCounter * (localCounter + 1) / 2, result);
     }
     
     [TestMethod]
@@ -59,7 +59,7 @@ public class RepeatTests
     private int PerformCalculation(int input)
     {
         var result = 0;
-        for (int i = 1; i <= input; i++)
+        for (var i = 1; i <= input; i++)
         {
             result += i;
         }

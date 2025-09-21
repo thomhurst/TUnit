@@ -21,6 +21,28 @@ public class NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> : Invoka
         return this;
     }
 
+    public NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType<TType>()
+    {
+        var assertion = (NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+
+        assertion.IgnoringType(typeof(TType));
+
+        AppendCallerMethod([$"<{typeof(TType).Name}>"]);
+
+        return this;
+    }
+
+    public NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType(Type type, [CallerArgumentExpression(nameof(type))] string doNotPopulateThis = "")
+    {
+        var assertion = (NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+
+        assertion.IgnoringType(type);
+
+        AppendCallerMethod([doNotPopulateThis]);
+
+        return this;
+    }
+
     public NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> WithPartialEquivalency()
     {
         var assertion = (NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();

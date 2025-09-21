@@ -1,4 +1,5 @@
 using TUnit.Core;
+using TUnit.Core.DataSources;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Helpers;
@@ -16,18 +17,28 @@ internal sealed class TestBuilder : ITestBuilder
     private readonly string _sessionId;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private readonly IContextProvider _contextProvider;
+    private readonly PropertyInjectionService _propertyInjectionService;
+    private readonly DataSourceInitializer _dataSourceInitializer;
 
-    public TestBuilder(string sessionId, EventReceiverOrchestrator eventReceiverOrchestrator, IContextProvider contextProvider)
+    public TestBuilder(
+        string sessionId, 
+        EventReceiverOrchestrator eventReceiverOrchestrator, 
+        IContextProvider contextProvider,
+        PropertyInjectionService propertyInjectionService,
+        DataSourceInitializer dataSourceInitializer)
     {
         _sessionId = sessionId;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _contextProvider = contextProvider;
+        _propertyInjectionService = propertyInjectionService;
+        _dataSourceInitializer = dataSourceInitializer;
     }
 
     private async Task<object> CreateInstance(TestMetadata metadata, Type[] resolvedClassGenericArgs, object?[] classData, TestBuilderContext builderContext)
     {
         // First try to create instance with ClassConstructor attribute
-        var attributes = metadata.AttributeFactory();
+        // Use attributes from context if available
+        var attributes = builderContext.InitializedAttributes ?? metadata.AttributeFactory();
 
         var instance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
             attributes,
@@ -87,8 +98,8 @@ internal sealed class TestBuilder : ITestBuilder
             }
 
 
-            // Extract repeat count from attributes
-            var attributes = metadata.AttributeFactory.Invoke();
+            // Create and initialize attributes ONCE
+            var attributes = await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
             var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
             var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
             var repeatCount = repeatAttr?.Times ?? 0;
@@ -105,12 +116,12 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 TestMetadata = metadata.MethodMetadata,
                 Events = new TestContextEvents(),
-                ObjectBag = new Dictionary<string, object?>()
+                ObjectBag = new Dictionary<string, object?>(),
+                InitializedAttributes = attributes  // Store the initialized attributes
             };
             
-            // Check for ClassConstructor attribute and set it early if present
-            var classAttributes = metadata.AttributeFactory();
-            var classConstructorAttribute = classAttributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
+            // Check for ClassConstructor attribute and set it early if present (reuse already created attributes)
+            var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
             if (classConstructorAttribute != null)
             {
                 testBuilderContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
@@ -119,12 +130,13 @@ internal sealed class TestBuilder : ITestBuilder
             var contextAccessor = new TestBuilderContextAccessor(testBuilderContext);
 
             var classDataAttributeIndex = 0;
-            foreach (var classDataSource in GetDataSources(metadata.ClassDataSources))
+            foreach (var classDataSource in await GetDataSourcesAsync(metadata.ClassDataSources))
             {
                 classDataAttributeIndex++;
 
                 var classDataLoopIndex = 0;
-                await foreach (var classDataFactory in classDataSource.GetDataRowsAsync(
+                await foreach (var classDataFactory in GetInitializedDataRowsAsync(
+                                   classDataSource,
                                    DataGeneratorMetadataCreator.CreateDataGeneratorMetadata
                                    (
                                        testMetadata: metadata,
@@ -190,12 +202,13 @@ internal sealed class TestBuilder : ITestBuilder
                     }
 
                     var methodDataAttributeIndex = 0;
-                    foreach (var methodDataSource in GetDataSources(metadata.DataSources))
+                    foreach (var methodDataSource in await GetDataSourcesAsync(metadata.DataSources))
                     {
                         methodDataAttributeIndex++;
 
                         var methodDataLoopIndex = 0;
-                        await foreach (var methodDataFactory in methodDataSource.GetDataRowsAsync(
+                        await foreach (var methodDataFactory in GetInitializedDataRowsAsync(
+                                           methodDataSource,
                                            DataGeneratorMetadataCreator.CreateDataGeneratorMetadata
                                            (
                                                testMetadata: metadata,
@@ -219,7 +232,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 };
 
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
-                                var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
+                                var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
                                 // For concrete generic instantiations, check if the data is compatible with the expected types
                                 if (metadata.GenericMethodTypeArguments is { Length: > 0 })
@@ -288,7 +301,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
                                 }
 
-                                var basicSkipReason = GetBasicSkipReason(metadata);
+                                var basicSkipReason = GetBasicSkipReason(metadata, attributes);
 
                                 Func<Task<object>> instanceFactory;
                                 if (basicSkipReason is { Length: > 0 })
@@ -326,7 +339,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     Events = new TestContextEvents(),
                                     ObjectBag = new Dictionary<string, object?>(),
                                     ClassConstructor = testBuilderContext.ClassConstructor, // Copy the ClassConstructor from the template
-                                    DataSourceAttribute = contextAccessor.Current.DataSourceAttribute // Copy any data source attribute
+                                    DataSourceAttribute = contextAccessor.Current.DataSourceAttribute, // Copy any data source attribute
+                                    InitializedAttributes = attributes // Pass the initialized attributes
                                 };
                                 
                                 var test = await BuildTestAsync(metadata, testData, testSpecificContext);
@@ -561,14 +575,43 @@ internal sealed class TestBuilder : ITestBuilder
         return resolvedTypes;
     }
 
-    private static IDataSourceAttribute[] GetDataSources(IDataSourceAttribute[] dataSources)
+    private async Task<IDataSourceAttribute[]> GetDataSourcesAsync(IDataSourceAttribute[] dataSources)
     {
         if (dataSources.Length == 0)
         {
             return [NoDataSource.Instance];
         }
 
+        // Initialize all data sources to ensure properties are injected
+        foreach (var dataSource in dataSources)
+        {
+            await _dataSourceInitializer.EnsureInitializedAsync(dataSource);
+        }
+
         return dataSources;
+    }
+
+    /// <summary>
+    /// Ensures a data source is initialized before use and returns data rows.
+    /// This centralizes the initialization logic for all data source usage.
+    /// </summary>
+    private async IAsyncEnumerable<Func<Task<object?[]?>>> GetInitializedDataRowsAsync(
+        IDataSourceAttribute dataSource,
+        DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        // Ensure the data source is fully initialized before getting data rows
+        // This includes property injection and IAsyncInitializer.InitializeAsync
+        var initializedDataSource = await _dataSourceInitializer.EnsureInitializedAsync(
+            dataSource,
+            dataGeneratorMetadata.TestBuilderContext?.Current.ObjectBag,
+            dataGeneratorMetadata.TestInformation,
+            dataGeneratorMetadata.TestBuilderContext?.Current.Events);
+
+        // Now get data rows from the initialized data source
+        await foreach (var dataRow in initializedDataSource.GetDataRowsAsync(dataGeneratorMetadata))
+        {
+            yield return dataRow;
+        }
     }
 
     public async Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
@@ -604,9 +647,9 @@ internal sealed class TestBuilder : ITestBuilder
     /// Returns null if no skip attributes, a skip reason if basic skip attributes are found,
     /// or empty string if custom skip attributes requiring runtime evaluation are found.
     /// </summary>
-    private static string? GetBasicSkipReason(TestMetadata metadata)
+    private static string? GetBasicSkipReason(TestMetadata metadata, Attribute[]? cachedAttributes = null)
     {
-        var attributes = metadata.AttributeFactory();
+        var attributes = cachedAttributes ?? metadata.AttributeFactory();
         var skipAttributes = attributes.OfType<SkipAttribute>().ToList();
 
         if (skipAttributes.Count == 0)
@@ -631,9 +674,10 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
 
-    private ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
+    private async ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
-        var attributes = metadata.AttributeFactory.Invoke();
+        // Use attributes from context if available, or create new ones
+        var attributes = testBuilderContext.InitializedAttributes ?? await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
 
         var testDetails = new TestDetails
         {
@@ -663,7 +707,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         context.TestDetails = testDetails;
 
-        return new ValueTask<TestContext>(context);
+        return context;
     }
 
 
@@ -687,7 +731,7 @@ internal sealed class TestBuilder : ITestBuilder
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
 
-        var testDetails = CreateFailedTestDetails(metadata, testId);
+        var testDetails = await CreateFailedTestDetails(metadata, testId);
         var context = CreateFailedTestContext(metadata, testDetails);
 
         await InvokeDiscoveryEventReceiversAsync(context);
@@ -702,7 +746,7 @@ internal sealed class TestBuilder : ITestBuilder
         };
     }
 
-    private static TestDetails CreateFailedTestDetails(TestMetadata metadata, string testId)
+    private async Task<TestDetails> CreateFailedTestDetails(TestMetadata metadata, string testId)
     {
         return new TestDetails
         {
@@ -717,9 +761,25 @@ internal sealed class TestBuilder : ITestBuilder
             TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
-            Attributes = metadata.AttributeFactory.Invoke(),
+            Attributes = await InitializeAttributesAsync(metadata.AttributeFactory.Invoke()),
             Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
         };
+    }
+
+    private async Task<Attribute[]> InitializeAttributesAsync(Attribute[] attributes)
+    {
+        // Initialize any attributes that need property injection or implement IAsyncInitializer
+        // This ensures they're fully initialized before being used
+        foreach (var attribute in attributes)
+        {
+            if (attribute is IDataSourceAttribute dataSource)
+            {
+                // Data source attributes need to be initialized with property injection
+                await _dataSourceInitializer.EnsureInitializedAsync(dataSource);
+            }
+        }
+        
+        return attributes;
     }
 
     private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails)
@@ -1010,7 +1070,7 @@ internal sealed class TestBuilder : ITestBuilder
         }
 
         // Extract repeat count from attributes
-        var attributes = metadata.AttributeFactory.Invoke();
+        var attributes = await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
         var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
         var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
         var repeatCount = repeatAttr?.Times ?? 0;
@@ -1020,7 +1080,8 @@ internal sealed class TestBuilder : ITestBuilder
         {
             TestMetadata = metadata.MethodMetadata,
             Events = new TestContextEvents(),
-            ObjectBag = new Dictionary<string, object?>()
+            ObjectBag = new Dictionary<string, object?>(),
+            InitializedAttributes = attributes  // Store the initialized attributes
         };
         
         // Check for ClassConstructor attribute and set it early if present
@@ -1047,12 +1108,13 @@ internal sealed class TestBuilder : ITestBuilder
 
         // Stream through all data source combinations
         var classDataAttributeIndex = 0;
-        foreach (var classDataSource in GetDataSources(metadata.ClassDataSources))
+        foreach (var classDataSource in await GetDataSourcesAsync(metadata.ClassDataSources))
         {
             classDataAttributeIndex++;
             var classDataLoopIndex = 0;
 
-            await foreach (var classDataFactory in classDataSource.GetDataRowsAsync(
+            await foreach (var classDataFactory in GetInitializedDataRowsAsync(
+                classDataSource,
                 DataGeneratorMetadataCreator.CreateDataGeneratorMetadata(
                     testMetadata: metadata,
                     testSessionId: _sessionId,
@@ -1083,12 +1145,13 @@ internal sealed class TestBuilder : ITestBuilder
 
                 // Stream through method data sources
                 var methodDataAttributeIndex = 0;
-                foreach (var methodDataSource in GetDataSources(metadata.DataSources))
+                foreach (var methodDataSource in await GetDataSourcesAsync(metadata.DataSources))
                 {
                     methodDataAttributeIndex++;
                     var methodDataLoopIndex = 0;
 
-                    await foreach (var methodDataFactory in methodDataSource.GetDataRowsAsync(
+                    await foreach (var methodDataFactory in GetInitializedDataRowsAsync(
+                        methodDataSource,
                         DataGeneratorMetadataCreator.CreateDataGeneratorMetadata(
                             testMetadata: metadata,
                             testSessionId: _sessionId,
@@ -1180,7 +1243,7 @@ internal sealed class TestBuilder : ITestBuilder
         {
             var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
             
-            var methodData = DataUnwrapper.Unwrap(await methodDataFactory() ?? []);
+            var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
             // Check data compatibility for generic methods
             if (metadata.GenericMethodTypeArguments is { Length: > 0 })
@@ -1240,7 +1303,8 @@ internal sealed class TestBuilder : ITestBuilder
             }
 
             // Create instance factory
-            var basicSkipReason = GetBasicSkipReason(metadata);
+            var attributes = contextAccessor.Current.InitializedAttributes ?? Array.Empty<Attribute>();
+            var basicSkipReason = GetBasicSkipReason(metadata, attributes);
             Func<Task<object>> instanceFactory;
 
             if (basicSkipReason is { Length: > 0 })
@@ -1279,7 +1343,8 @@ internal sealed class TestBuilder : ITestBuilder
                 Events = new TestContextEvents(),
                 ObjectBag = new Dictionary<string, object?>(),
                 ClassConstructor = contextAccessor.Current.ClassConstructor, // Preserve ClassConstructor if it was set
-                DataSourceAttribute = contextAccessor.Current.DataSourceAttribute // Preserve data source attribute
+                DataSourceAttribute = contextAccessor.Current.DataSourceAttribute, // Preserve data source attribute
+                InitializedAttributes = attributes // Pass the initialized attributes
             };
 
             var test = await BuildTestAsync(metadata, testData, testSpecificContext);

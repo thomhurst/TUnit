@@ -17,7 +17,9 @@ namespace TUnit.Core;
 [DebuggerDisplay("{TestDetails.ClassType.Name}.{GetDisplayName(),nq}")]
 public class TestContext : Context
 {
+    private static readonly Dictionary<Guid, TestContext> _testContextsById = new(1000);
     private readonly TestBuilderContext _testBuilderContext;
+    private string? _cachedDisplayName;
 
     public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
     {
@@ -26,7 +28,11 @@ public class TestContext : Context
         CancellationToken = cancellationToken;
         ServiceProvider = serviceProvider;
         ClassContext = classContext;
+
+        _testContextsById[_testBuilderContext.Id] = this;
     }
+
+    public Guid Id => _testBuilderContext.Id;
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
 
@@ -45,6 +51,8 @@ public class TestContext : Context
             ClassHookContext.Current = value?.ClassContext;
         }
     }
+
+    public static TestContext? GetById(Guid id) => _testContextsById.GetValueOrDefault(id);
 
     public static IReadOnlyDictionary<string, List<string>> Parameters => InternalParametersDictionary;
 
@@ -93,7 +101,45 @@ public class TestContext : Context
 
     public Func<TestContext, Exception, int, Task<bool>>? RetryFunc { get; set; }
 
-    public IParallelConstraint? ParallelConstraint { get; set; }
+    // New: Support multiple parallel constraints
+    private readonly List<IParallelConstraint> _parallelConstraints = [];
+
+    /// <summary>
+    /// Gets the collection of parallel constraints applied to this test.
+    /// Multiple constraints can be combined (e.g., ParallelGroup + NotInParallel).
+    /// </summary>
+    public IReadOnlyList<IParallelConstraint> ParallelConstraints => _parallelConstraints;
+
+    /// <summary>
+    /// Gets or sets the primary parallel constraint for backward compatibility.
+    /// When setting, this replaces all existing constraints.
+    /// When getting, returns the first constraint or null if none exist.
+    /// </summary>
+    [Obsolete("Use ParallelConstraints collection instead. This property is maintained for backward compatibility.")]
+    public IParallelConstraint? ParallelConstraint
+    {
+        get => _parallelConstraints.FirstOrDefault();
+        set
+        {
+            _parallelConstraints.Clear();
+            if (value != null)
+            {
+                _parallelConstraints.Add(value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Adds a parallel constraint to this test context.
+    /// Multiple constraints can be combined to create complex parallelization rules.
+    /// </summary>
+    public void AddParallelConstraint(IParallelConstraint constraint)
+    {
+        if (constraint != null)
+        {
+            _parallelConstraints.Add(constraint);
+        }
+    }
 
     public Priority ExecutionPriority { get; set; } = Priority.Normal;
 
@@ -157,15 +203,28 @@ public class TestContext : Context
             return CustomDisplayName!;
         }
 
+        if (_cachedDisplayName != null)
+        {
+            return _cachedDisplayName;
+        }
+
+        if (TestDetails.TestMethodArguments.Length == 0)
+        {
+            _cachedDisplayName = TestName;
+            return TestName;
+        }
+
         var arguments = string.Join(", ", TestDetails.TestMethodArguments
             .Select(arg => ArgumentFormatter.Format(arg, ArgumentDisplayFormatters)));
 
         if (string.IsNullOrEmpty(arguments))
         {
+            _cachedDisplayName = TestName;
             return TestName;
         }
 
-        return $"{TestName}({arguments})";
+        _cachedDisplayName = $"{TestName}({arguments})";
+        return _cachedDisplayName;
     }
 
     public Dictionary<string, object?> ObjectBag => _testBuilderContext.ObjectBag;

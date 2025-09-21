@@ -16,7 +16,7 @@ internal static class MetadataGenerationHelper
     private static void WriteIndentedString(ICodeWriter writer, string multiLineString, bool firstLineIsInline = true)
     {
         var lines = multiLineString.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-        
+
         // Find the base indentation level from the content (skip first line as it's usually inline)
         var baseIndent = 0;
         if (lines.Length > 1)
@@ -31,32 +31,32 @@ internal static class MetadataGenerationHelper
                 }
             }
         }
-        
+
         for (var i = 0; i < lines.Length; i++)
         {
             if (i > 0)
             {
                 writer.AppendLine();
             }
-            
+
             var line = lines[i];
             if (!string.IsNullOrWhiteSpace(line))
             {
                 // Calculate how much indentation this line has beyond the base
                 var currentIndent = line.Length - line.TrimStart().Length;
                 var relativeIndent = Math.Max(0, currentIndent - baseIndent);
-                
+
                 // Add relative indentation
                 for (var j = 0; j < relativeIndent; j++)
                 {
                     writer.Append(" ");
                 }
-                
+
                 writer.Append(line.TrimStart());
             }
         }
     }
-    
+
     /// <summary>
     /// Writes code for creating a MethodMetadata instance
     /// </summary>
@@ -64,7 +64,7 @@ internal static class MetadataGenerationHelper
     {
         writer.AppendLine("new global::TUnit.Core.MethodMetadata");
         writer.AppendLine("{");
-        
+
         // Manually increment indent level without calling EnsureNewLine
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
@@ -89,7 +89,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine();
         writer.Append("}");
     }
-    
+
     /// <summary>
     /// Generates code for creating a MethodMetadata instance (for backward compat)
     /// </summary>
@@ -128,7 +128,7 @@ internal static class MetadataGenerationHelper
         var qualifiedName = $"{typeSymbol.ContainingAssembly.Name}:{typeSymbol.GloballyQualified()}";
         writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", () => ");
         writer.AppendLine("{");
-        
+
         // Manually increment indent level without calling EnsureNewLine
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
@@ -136,7 +136,7 @@ internal static class MetadataGenerationHelper
         // Create the ClassMetadata instance
         writer.AppendLine("var classMetadata = new global::TUnit.Core.ClassMetadata");
         writer.AppendLine("{");
-        
+
         // Increment for the object initializer content
         writer.SetIndentLevel(currentIndent + 2);
 
@@ -145,11 +145,11 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"Name = \"{typeSymbol.Name}\",");
         writer.AppendLine($"Namespace = \"{typeSymbol.ContainingNamespace?.ToDisplayString() ?? ""}\",");
         writer.AppendLine($"Assembly = {GenerateAssemblyMetadataGetOrAdd(typeSymbol.ContainingAssembly)},");
-        
+
         // For abstract classes, skip constructor processing since they cannot be instantiated directly
         // For concrete classes, only consider public constructors
-        var constructor = typeSymbol.IsAbstract 
-            ? null 
+        var constructor = typeSymbol.IsAbstract
+            ? null
             : typeSymbol.InstanceConstructors.FirstOrDefault(c => c.DeclaredAccessibility == Accessibility.Public);
         var constructorParams = constructor?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         if (constructor != null && constructorParams.Length > 0)
@@ -162,7 +162,7 @@ internal static class MetadataGenerationHelper
         {
             writer.AppendLine("Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),");
         }
-        
+
         writer.Append("Properties = ");
         WritePropertyMetadataArray(writer, typeSymbol);
         writer.AppendLine(",");
@@ -172,27 +172,26 @@ internal static class MetadataGenerationHelper
         writer.SetIndentLevel(currentIndent + 1);
         writer.AppendLine();
         writer.AppendLine("};");
-        
+
         // Set ClassMetadata reference on each property
-        writer.AppendLine("// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency");
         writer.AppendLine("foreach (var prop in classMetadata.Properties)");
         writer.AppendLine("{");
-        
+
         writer.SetIndentLevel(currentIndent + 2);
         writer.AppendLine("prop.ClassMetadata = classMetadata;");
         writer.Append("prop.ContainingTypeMetadata = classMetadata;");
-        
+
         writer.SetIndentLevel(currentIndent + 1);
         writer.AppendLine();
         writer.AppendLine("}");
         writer.Append("return classMetadata;");
-        
+
         // Back to original level
         writer.SetIndentLevel(currentIndent);
         writer.AppendLine();
         writer.Append("})");
     }
-    
+
     /// <summary>
     /// Generates code for creating a ClassMetadata instance with GetOrAdd pattern
     /// </summary>
@@ -216,8 +215,8 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"Assembly = {GenerateAssemblyMetadataGetOrAdd(typeSymbol.ContainingAssembly)},");
         // For abstract classes, skip constructor processing since they cannot be instantiated directly
         // For concrete classes, only consider public constructors
-        var constructor = typeSymbol.IsAbstract 
-            ? null 
+        var constructor = typeSymbol.IsAbstract
+            ? null
             : typeSymbol.InstanceConstructors.FirstOrDefault(c => c.DeclaredAccessibility == Accessibility.Public);
         var constructorParams = constructor?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
         if (constructor != null && constructorParams.Length > 0)
@@ -236,7 +235,6 @@ internal static class MetadataGenerationHelper
         writer.AppendLine();
 
         // Set ClassMetadata reference on each property
-        writer.AppendLine("// Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency");
         writer.AppendLine("foreach (var prop in classMetadata.Properties)");
         writer.AppendLine("{");
         writer.Indent();
@@ -273,15 +271,15 @@ internal static class MetadataGenerationHelper
 
         writer.AppendLine($"new global::TUnit.Core.ParameterMetadata<{safeType}>");
         writer.AppendLine("{");
-        
+
         // Manually increment indent level without calling EnsureNewLine
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
-        
+
         writer.AppendLine($"Name = \"{parameter.Name}\",");
         writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(parameter.Type)},");
         writer.Append($"ReflectionInfo = {reflectionInfo}");
-        
+
         // Manually restore indent level
         writer.SetIndentLevel(currentIndent);
         writer.AppendLine();
@@ -299,16 +297,16 @@ internal static class MetadataGenerationHelper
 
         writer.AppendLine($"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))");
         writer.AppendLine("{");
-        
+
         // Manually increment indent level without calling EnsureNewLine
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
-        
+
         writer.AppendLine($"Name = \"{parameter.Name}\",");
         writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(parameter.Type)},");
         writer.AppendLine($"IsNullable = {parameter.Type.IsNullable().ToString().ToLowerInvariant()},");
         writer.Append($"ReflectionInfo = {reflectionInfo}");
-        
+
         // Manually restore indent level
         writer.SetIndentLevel(currentIndent);
         writer.AppendLine();
@@ -400,11 +398,11 @@ internal static class MetadataGenerationHelper
 
         writer.AppendLine("new global::TUnit.Core.PropertyMetadata");
         writer.AppendLine("{");
-        
+
         // Manually increment indent level without calling EnsureNewLine
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
-        
+
         writer.AppendLine($"ReflectionInfo = typeof({safeTypeNameForReflection}).GetProperty(\"{property.Name}\"),");
         writer.AppendLine($"Type = typeof({safePropertyTypeName}),");
         writer.AppendLine($"Name = \"{property.Name}\",");
@@ -413,7 +411,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine($"Getter = {GetPropertyAccessor(containingType, property)},");
         writer.AppendLine("ClassMetadata = null!,");
         writer.Append("ContainingTypeMetadata = null!");
-        
+
         // Manually restore indent level
         writer.SetIndentLevel(currentIndent);
         writer.AppendLine();
@@ -455,7 +453,7 @@ internal static class MetadataGenerationHelper
 
         writer.AppendLine("new global::TUnit.Core.ParameterMetadata[]");
         writer.AppendLine("{");
-        
+
         // Manually increment indent level without calling EnsureNewLine
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
@@ -464,7 +462,7 @@ internal static class MetadataGenerationHelper
         {
             var param = method.Parameters[i];
             WriteParameterMetadata(writer, param, method);
-            
+
             if (i < method.Parameters.Length - 1)
             {
                 writer.AppendLine(",");
@@ -476,7 +474,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine();
         writer.Append("}");
     }
-    
+
     /// <summary>
     /// Generates an array of ParameterMetadata objects for method parameters with proper reflection info (for backward compat)
     /// </summary>
@@ -500,7 +498,7 @@ internal static class MetadataGenerationHelper
 
         writer.AppendLine("new global::TUnit.Core.ParameterMetadata[]");
         writer.AppendLine("{");
-        
+
         // Manually increment indent level without calling EnsureNewLine
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
@@ -509,7 +507,7 @@ internal static class MetadataGenerationHelper
         {
             var param = constructor.Parameters[i];
             WriteParameterMetadata(writer, param, constructor);
-            
+
             if (i < constructor.Parameters.Length - 1)
             {
                 writer.AppendLine(",");
@@ -521,7 +519,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine();
         writer.Append("}");
     }
-    
+
     /// <summary>
     /// Generates an array of ParameterMetadata objects for constructor parameters with proper reflection info
     /// </summary>
@@ -541,7 +539,7 @@ internal static class MetadataGenerationHelper
         {
             var param = constructor.Parameters[i];
             WriteParameterMetadata(writer, param, constructor);
-            
+
             if (i < constructor.Parameters.Length - 1)
             {
                 writer.AppendLine(",");
@@ -572,7 +570,7 @@ internal static class MetadataGenerationHelper
 
         writer.AppendLine("new global::TUnit.Core.PropertyMetadata[]");
         writer.AppendLine("{");
-        
+
         // Manually increment indent level without calling EnsureNewLine
         var currentIndent = writer.IndentLevel;
         writer.SetIndentLevel(currentIndent + 1);
@@ -581,7 +579,7 @@ internal static class MetadataGenerationHelper
         {
             var prop = properties[i];
             WritePropertyMetadata(writer, prop, typeSymbol);
-            
+
             if (i < properties.Count - 1)
             {
                 writer.AppendLine(",");
@@ -593,7 +591,7 @@ internal static class MetadataGenerationHelper
         writer.AppendLine();
         writer.Append("}");
     }
-    
+
     /// <summary>
     /// Generates an array of PropertyMetadata objects
     /// </summary>
@@ -618,7 +616,7 @@ internal static class MetadataGenerationHelper
         {
             var prop = properties[i];
             WritePropertyMetadata(writer, prop, typeSymbol);
-            
+
             if (i < properties.Count - 1)
             {
                 writer.AppendLine(",");

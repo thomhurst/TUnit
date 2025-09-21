@@ -11,10 +11,17 @@ using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Reporters;
 
+public enum GitHubReporterStyle
+{
+    Collapsible,
+    Full
+}
+
 public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostApplicationLifetime, IFilterReceiver
 {
     private const long MaxFileSizeInBytes = 1 * 1024 * 1024; // 1MB
     private string _outputSummaryFilePath = null!;
+    private GitHubReporterStyle _reporterStyle = GitHubReporterStyle.Collapsible;
 
     public async Task<bool> IsEnabledAsync()
     {
@@ -36,6 +43,18 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         }
 
         _outputSummaryFilePath = fileName;
+
+        // Determine reporter style from environment variable or default to collapsible
+        var styleEnv = EnvironmentVariableCache.Get("TUNIT_GITHUB_REPORTER_STYLE");
+        if (!string.IsNullOrEmpty(styleEnv))
+        {
+            _reporterStyle = styleEnv!.ToLowerInvariant() switch
+            {
+                "full" => GitHubReporterStyle.Full,
+                "collapsible" => GitHubReporterStyle.Collapsible,
+                _ => GitHubReporterStyle.Collapsible
+            };
+        }
 
         return await extension.IsEnabledAsync();
     }
@@ -83,17 +102,22 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         var passedCount = last.Count(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is PassedTestNodeStateProperty));
+
         var failed = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable()
-                .Any(p => p is FailedTestNodeStateProperty)).ToArray();
+                .Any(p => p is FailedTestNodeStateProperty or ErrorTestNodeStateProperty)).ToArray();
+
         var cancelled = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is CancelledTestNodeStateProperty)).ToArray();
+
         var timeout = last
             .Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is TimeoutTestNodeStateProperty))
             .ToArray();
+
         var skipped = last
             .Where(x => x.Value.TestNode.Properties.AsEnumerable().Any(p => p is SkippedTestNodeStateProperty))
             .ToArray();
+
         var inProgress = last.Where(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is InProgressTestNodeStateProperty)).ToArray();
 
@@ -136,28 +160,27 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             return WriteFile(stringBuilder.ToString());
         }
 
-        stringBuilder.AppendLine();
-        stringBuilder.AppendLine();
-        stringBuilder.AppendLine("### Details");
-        stringBuilder.AppendLine();
-        stringBuilder.AppendLine("| Test | Status | Details | Duration |");
-        stringBuilder.AppendLine("| --- | --- | --- | --- |");
+        // Build the details table
+        var detailsBuilder = new StringBuilder();
+        detailsBuilder.AppendLine();
+        detailsBuilder.AppendLine();
+        detailsBuilder.AppendLine("### Details");
+        detailsBuilder.AppendLine();
+        detailsBuilder.AppendLine("| Test | Status | Details | Duration |");
+        detailsBuilder.AppendLine("| --- | --- | --- | --- |");
 
         foreach (var testNodeUpdateMessage in last.Values)
         {
             var name = testNodeUpdateMessage.TestNode.DisplayName;
 
             var passedProperty = testNodeUpdateMessage.TestNode.Properties.OfType<PassedTestNodeStateProperty>().FirstOrDefault();
+
             if (passedProperty != null)
             {
                 continue;
             }
 
-            var stateProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().FirstOrDefault(p =>
-                p is FailedTestNodeStateProperty ||
-                p is SkippedTestNodeStateProperty ||
-                p is TimeoutTestNodeStateProperty ||
-                p is CancelledTestNodeStateProperty);
+            var stateProperty = testNodeUpdateMessage.TestNode.Properties.AsEnumerable().FirstOrDefault(p => p is TestNodeStateProperty);
 
             var status = GetStatus(stateProperty);
 
@@ -167,13 +190,30 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
             var duration = timingProperty?.GlobalTiming.Duration;
 
-            stringBuilder.AppendLine($"| {name} | {status} | {details} | {duration} |");
+            detailsBuilder.AppendLine($"| {name} | {status} | {details} | {duration} |");
+        }
+
+        // Wrap in collapsible section if using collapsible style
+        if (_reporterStyle == GitHubReporterStyle.Collapsible)
+        {
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("<details>");
+            stringBuilder.AppendLine("<summary>📊 Test Details (click to expand)</summary>");
+            stringBuilder.Append(detailsBuilder.ToString());
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("</details>");
+        }
+        else
+        {
+            // Full style - append details directly
+            stringBuilder.Append(detailsBuilder.ToString());
         }
 
         return WriteFile(stringBuilder.ToString());
     }
 
-    private Task WriteFile(string contents)
+    private async Task WriteFile(string contents)
     {
         var fileInfo = new FileInfo(_outputSummaryFilePath);
         var currentFileSize = fileInfo.Exists ? fileInfo.Length : 0;
@@ -183,21 +223,50 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         if (newSize > MaxFileSizeInBytes)
         {
             Console.WriteLine("Appending to the GitHub Step Summary would exceed the 1MB file size limit.");
-            return Task.CompletedTask;
+            return;
         }
 
+        const int maxAttempts = 5;
+        var random = new Random();
+        
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
 #if NET
-        return File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
+                await File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
 #else
-        File.AppendAllText(_outputSummaryFilePath, contents, Encoding.UTF8);
-
-        return Task.CompletedTask;
+                File.AppendAllText(_outputSummaryFilePath, contents, Encoding.UTF8);
 #endif
+                return;
+            }
+            catch (IOException ex) when (attempt < maxAttempts && IsFileLocked(ex))
+            {
+                var baseDelay = 50 * Math.Pow(2, attempt - 1);
+                var jitter = random.Next(0, 50);
+                var delay = (int)(baseDelay + jitter);
+                
+                Console.WriteLine($"GitHub Summary file is locked, retrying in {delay}ms (attempt {attempt}/{maxAttempts})");
+                await Task.Delay(delay);
+            }
+        }
+    }
+
+    private static bool IsFileLocked(IOException exception)
+    {
+        // Check if the exception is due to the file being locked/in use
+        // HResult 0x80070020 is ERROR_SHARING_VIOLATION on Windows
+        // HResult 0x80070021 is ERROR_LOCK_VIOLATION on Windows
+        var errorCode = exception.HResult & 0xFFFF;
+        return errorCode == 0x20 || errorCode == 0x21 || 
+               exception.Message.Contains("being used by another process") ||
+               exception.Message.Contains("access denied", StringComparison.OrdinalIgnoreCase);
     }
 
     private string GetDetails(IProperty? stateProperty, PropertyBag properties)
     {
         if (stateProperty is FailedTestNodeStateProperty
+            or ErrorTestNodeStateProperty
             or TimeoutTestNodeStateProperty
             or CancelledTestNodeStateProperty)
         {
@@ -225,6 +294,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         {
             FailedTestNodeStateProperty failedTestNodeStateProperty =>
                 failedTestNodeStateProperty.Exception?.ToString() ?? "Test failed",
+            ErrorTestNodeStateProperty errorTestNodeStateProperty =>
+                errorTestNodeStateProperty.Exception?.ToString() ?? "Test failed",
             TimeoutTestNodeStateProperty timeoutTestNodeStateProperty => timeoutTestNodeStateProperty.Explanation,
             CancelledTestNodeStateProperty => "Test was cancelled",
             _ => null
@@ -236,6 +307,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         return stateProperty switch
         {
             CancelledTestNodeStateProperty => "Cancelled",
+            ErrorTestNodeStateProperty => "Failed",
             FailedTestNodeStateProperty => "Failed",
             InProgressTestNodeStateProperty => "In Progress (never finished)",
             PassedTestNodeStateProperty => "Passed",
@@ -246,4 +318,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     }
 
     public string? Filter { get; set; }
+
+    internal void SetReporterStyle(GitHubReporterStyle style)
+    {
+        _reporterStyle = style;
+    }
 }

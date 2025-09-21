@@ -125,7 +125,7 @@ namespace
         protected AsyncDataSourceGeneratorAttribute() { }
         protected abstract .<<.<T>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T>.<GetTypedDataRowsAsync>d__1))]
-        public override .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public override sealed .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
     public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2> : .TypedDataSourceAttribute<<T1, T2>>
@@ -133,7 +133,7 @@ namespace
         protected AsyncDataSourceGeneratorAttribute() { }
         protected abstract .<<.<<T1, T2>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2>.<GetTypedDataRowsAsync>d__1))]
-        public override .<<.<<T1, T2>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public override sealed .<<.<<T1, T2>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
     public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3> : .TypedDataSourceAttribute<<T1, T2, T3>>
@@ -141,7 +141,7 @@ namespace
         protected AsyncDataSourceGeneratorAttribute() { }
         protected abstract .<<.<<T1, T2, T3>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
         [.(typeof(.AsyncDataSourceGeneratorAttribute<T1, T2, T3>.<GetTypedDataRowsAsync>d__1))]
-        public override .<<.<<T1, T2, T3>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public override sealed .<<.<<T1, T2, T3>>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
     public abstract class AsyncDataSourceGeneratorAttribute<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T1, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods)]  T4> : .TypedDataSourceAttribute<<T1, T2, T3, T4>>
@@ -553,10 +553,13 @@ namespace
         public string TestName { get; }
         public void AddArgumentDisplayFormatter(.ArgumentDisplayFormatter formatter) { }
         public void AddCategory(string category) { }
+        public void AddParallelConstraint(. constraint) { }
         public void AddProperty(string key, string value) { }
         public string GetDisplayName() { }
         public void SetDisplayName(string displayName) { }
         public void SetDisplayNameFormatter( formatterType) { }
+        [("Use AddParallelConstraint to support multiple constraints. This method replaces a" +
+            "ll existing constraints.")]
         public void SetParallelConstraint(. constraint) { }
         public void SetPriority(. priority) { }
         public void SetRetryLimit(int retryLimit) { }
@@ -1046,18 +1049,6 @@ namespace
         public string PropertyName { get; }
         public  PropertyType { get; }
     }
-    public sealed class PropertyInjectionService
-    {
-        public PropertyInjectionService() { }
-        public static .PropertyInjectionData CreatePropertyInjection(.PropertyInfo property) { }
-        public static <object, object?> CreatePropertySetter(.PropertyInfo property) { }
-        [.("Trimming", "IL2070", Justification="Legacy compatibility method")]
-        public static .PropertyInjectionData[] DiscoverInjectableProperties([.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  type) { }
-        [.("Trimming", "IL2072", Justification="Legacy compatibility method")]
-        public static . InjectPropertiesAsync(.TestContext testContext, object instance, .PropertyDataSource[] propertyDataSources, .PropertyInjectionData[] injectionData, .MethodMetadata testInformation, string testSessionId) { }
-        public static . InjectPropertiesIntoArgumentsAsync(object?[] arguments, .<string, object?> objectBag, .MethodMetadata methodMetadata, .TestContextEvents events) { }
-        public static . InjectPropertiesIntoObjectAsync(object instance, .<string, object?>? objectBag, .MethodMetadata? methodMetadata, .TestContextEvents? events) { }
-    }
     [.DebuggerDisplay("{Type} {Name})")]
     public class PropertyMetadata : .MemberMetadata, <.PropertyMetadata>
     {
@@ -1243,10 +1234,14 @@ namespace
         public ? DisplayNameFormatter { get; set; }
         public .TestContextEvents Events { get; }
         public . ExecutionPriority { get; set; }
+        public  Id { get; }
         public .CancellationTokenSource? LinkedCancellationTokens { get; set; }
         public object Lock { get; }
         public .<string, object?> ObjectBag { get; }
+        [("Use ParallelConstraints collection instead. This property is maintained for backw" +
+            "ard compatibility.")]
         public .? ParallelConstraint { get; set; }
+        public .<.> ParallelConstraints { get; }
         public .? ParallelLimiter { get; }
         public .TestPhase Phase { get; set; }
         public bool ReportResult { get; set; }
@@ -1266,6 +1261,7 @@ namespace
         public static string WorkingDirectory { get; set; }
         public void AddArtifact(.Artifact artifact) { }
         public void AddLinkedCancellationToken(.CancellationToken cancellationToken) { }
+        public void AddParallelConstraint(. constraint) { }
         public string GetDisplayName() { }
         public new string GetErrorOutput() { }
         public string GetOutput() { }
@@ -1282,6 +1278,7 @@ namespace
         public void SetParallelLimiter(. parallelLimit) { }
         public void WriteError(string message) { }
         public void WriteLine(string message) { }
+        public static .TestContext? GetById( id) { }
     }
     public class TestContextEvents
     {
@@ -1950,6 +1947,7 @@ namespace .Helpers
         public static .<object?> ResolveDataSourceForPropertyAsync([.(..None | ..PublicParameterlessConstructor | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  containingType, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static .<object?> ResolveDataSourcePropertyAsync(object instance, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static object?[] ToObjectArray(this object? item) { }
+        public static object?[] ToObjectArrayWithTypes(this object? item, []? expectedTypes) { }
         [return: .(new string[] {
                 "success",
                 "createdInstance"})]
@@ -2133,6 +2131,14 @@ namespace .Hooks
         protected StaticHookMethod() { }
         public <T, .CancellationToken, .>? Body { get; init; }
         public abstract . ExecuteAsync(T context, .CancellationToken cancellationToken);
+    }
+}
+namespace .Initialization
+{
+    public class TestObjectInitializationException : 
+    {
+        public TestObjectInitializationException(string message) { }
+        public TestObjectInitializationException(string message,  innerException) { }
     }
 }
 namespace .Interfaces

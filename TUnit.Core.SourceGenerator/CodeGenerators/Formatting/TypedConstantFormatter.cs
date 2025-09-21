@@ -17,6 +17,16 @@ public class TypedConstantFormatter : ITypedConstantFormatter
         switch (constant.Kind)
         {
             case TypedConstantKind.Primitive:
+                // Check for special floating-point values first using the TypedConstant's type info
+                if (constant.Type?.SpecialType == SpecialType.System_Single || 
+                    constant.Type?.SpecialType == SpecialType.System_Double)
+                {
+                    var specialValue = Helpers.SpecialFloatingPointValuesHelper.TryFormatSpecialFloatingPointValue(constant.Value);
+                    if (specialValue != null)
+                    {
+                        return specialValue;
+                    }
+                }
                 return FormatPrimitiveForCode(constant.Value, targetType);
                 
             case TypedConstantKind.Enum:
@@ -167,6 +177,33 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                     // Double is default for floating-point literals
                     return value.ToString()!;
                 case SpecialType.System_Decimal:
+                    // Handle string to decimal conversion for values that can't be expressed as literals
+                    if (value is string s)
+                    {
+                        // Generate code that parses the string at runtime
+                        // This allows for maximum precision decimal values
+                        return $"decimal.Parse(\"{s}\", System.Globalization.CultureInfo.InvariantCulture)";
+                    }
+                    // When target is decimal but value is double/float/int, convert and format with m suffix
+                    else if (value is double d)
+                    {
+                        // Use the full precision by formatting with sufficient digits
+                        // The 'G29' format gives us the maximum precision for decimal
+                        var decimalValue = (decimal)d;
+                        return $"{decimalValue.ToString("G29", System.Globalization.CultureInfo.InvariantCulture)}m";
+                    }
+                    else if (value is float f)
+                    {
+                        var decimalValue = (decimal)f;
+                        return $"{decimalValue.ToString("G29", System.Globalization.CultureInfo.InvariantCulture)}m";
+                    }
+                    else if (value is int || value is long || value is short || value is byte ||
+                             value is uint || value is ulong || value is ushort || value is sbyte)
+                    {
+                        // For integer types, convert to decimal
+                        var decimalValue = Convert.ToDecimal(value);
+                        return $"{decimalValue.ToString(System.Globalization.CultureInfo.InvariantCulture)}m";
+                    }
                     return $"{value}m";
             }
         }
@@ -215,6 +252,13 @@ public class TypedConstantFormatter : ITypedConstantFormatter
 
     private static string FormatPrimitive(object? value)
     {
+        // Check for special floating-point values first
+        var specialFloatValue = Helpers.SpecialFloatingPointValuesHelper.TryFormatSpecialFloatingPointValue(value);
+        if (specialFloatValue != null)
+        {
+            return specialFloatValue;
+        }
+
         switch (value)
         {
             case string s:
@@ -223,18 +267,6 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 return SymbolDisplay.FormatLiteral(c, quote: true);
             case bool b:
                 return b ? "true" : "false";
-            case float.NaN:
-                return "float.NaN";
-            case float f when float.IsPositiveInfinity(f):
-                return "float.PositiveInfinity";
-            case float f when float.IsNegativeInfinity(f):
-                return "float.NegativeInfinity";
-            case double.NaN:
-                return "double.NaN";
-            case double d when double.IsPositiveInfinity(d):
-                return "double.PositiveInfinity";
-            case double d when double.IsNegativeInfinity(d):
-                return "double.NegativeInfinity";
             case null:
                 return "null";
             // Use InvariantCulture for numeric types to ensure consistent formatting

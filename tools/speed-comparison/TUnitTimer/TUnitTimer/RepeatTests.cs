@@ -14,7 +14,7 @@ public class RepeatTests
         var result = PerformCalculation(localCounter);
 
         await Assert.That(result).IsGreaterThan(0);
-        await Assert.That(result % localCounter).IsEqualTo(0);
+        await Assert.That(result).IsEqualTo(localCounter * (localCounter + 1) / 2);
     }
 
     [Test]
@@ -45,7 +45,7 @@ public class RepeatTests
     private int PerformCalculation(int input)
     {
         var result = 0;
-        for (int i = 1; i <= input; i++)
+        for (var i = 1; i <= input; i++)
         {
             result += i;
         }

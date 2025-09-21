@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Data;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Events;
 using TUnit.Engine.Extensions;
@@ -22,9 +23,15 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     private ThreadSafeDictionary<string, Task> _firstTestInSessionTasks = new();
 
     // Track remaining test counts for "last" events
-    private readonly ConcurrentDictionary<string, int> _assemblyTestCounts = new();
-    private readonly ConcurrentDictionary<Type, int> _classTestCounts = new();
+    private readonly ThreadSafeDictionary<string, Counter> _assemblyTestCounts = new();
+    private readonly ThreadSafeDictionary<Type, Counter> _classTestCounts = new();
     private int _sessionTestCount;
+
+    // Track which objects have already been initialized to avoid duplicates
+    private readonly ConcurrentHashSet<object> _initializedObjects = new();
+
+    // Track registered First event receiver types to avoid duplicate registrations
+    private readonly ConcurrentHashSet<Type> _registeredFirstEventReceiverTypes = new();
 
     public EventReceiverOrchestrator(TUnitFrameworkLogger logger)
     {
@@ -35,18 +42,51 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     {
         var eligibleObjects = context.GetEligibleEventObjects().ToArray();
 
-        // Register all event receivers for fast lookup
-        _registry.RegisterReceivers(eligibleObjects);
+        // Only initialize and register objects that haven't been processed yet
+        var newObjects = new List<object>();
+        var objectsToRegister = new List<object>();
 
         foreach (var obj in eligibleObjects)
         {
-            try
+            if (_initializedObjects.Add(obj)) // Add returns false if already present
+            {
+                newObjects.Add(obj);
+
+                // For First event receivers, only register one instance per type
+                var objType = obj.GetType();
+                bool isFirstEventReceiver = obj is IFirstTestInTestSessionEventReceiver ||
+                                           obj is IFirstTestInAssemblyEventReceiver ||
+                                           obj is IFirstTestInClassEventReceiver;
+
+                if (isFirstEventReceiver)
+                {
+                    if (_registeredFirstEventReceiverTypes.Add(objType))
+                    {
+                        // First instance of this type, register it
+                        objectsToRegister.Add(obj);
+                    }
+                    // else: Skip registration, we already have an instance of this type
+                }
+                else
+                {
+                    // Not a First event receiver, register normally
+                    objectsToRegister.Add(obj);
+                }
+            }
+        }
+
+        if (objectsToRegister.Count > 0)
+        {
+            // Register only the objects that should be registered
+            _registry.RegisterReceivers(objectsToRegister);
+        }
+
+        if (newObjects.Count > 0)
+        {
+            // Initialize all new objects (even if not registered)
+            foreach (var obj in newObjects)
             {
                 await ObjectInitializer.InitializeAsync(obj, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error initializing object of type {obj.GetType().Name}: {ex.Message}");
             }
         }
     }
@@ -85,14 +125,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             // Sequential for small counts
             foreach (var receiver in filteredReceivers)
             {
-                try
-                {
-                    await receiver.OnTestStart(context);
-                }
-                catch (Exception ex)
-                {
-                    await _logger.LogErrorAsync($"Error in test start event receiver: {ex.Message}");
-                }
+                await receiver.OnTestStart(context);
             }
         }
     }
@@ -154,14 +187,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var receiver in filteredReceivers)
         {
-            try
-            {
-                await receiver.OnTestSkipped(context);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in test skipped event receiver: {ex.Message}");
-            }
+            await receiver.OnTestSkipped(context);
         }
     }
 
@@ -177,14 +203,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
         {
-            try
-            {
-                await receiver.OnTestDiscovered(discoveredContext);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in test discovery event receiver: {ex.Message}");
-            }
+            await receiver.OnTestDiscovered(discoveredContext);
         }
     }
 
@@ -201,14 +220,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
         {
-            try
-            {
-                await receiver.OnHookRegistered(hookContext);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in hook registration event receiver: {ex.Message}");
-            }
+            await receiver.OnHookRegistered(hookContext);
         }
 
         // Apply the timeout from the context back to the hook method
@@ -246,14 +258,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var receiver in receivers)
         {
-            try
-            {
-                await receiver.OnFirstTestInTestSession(sessionContext, context);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in first test in session event receiver: {ex.Message}");
-            }
+            await receiver.OnFirstTestInTestSession(sessionContext, context);
         }
     }
 
@@ -284,14 +289,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var receiver in receivers)
         {
-            try
-            {
-                await receiver.OnFirstTestInAssembly(assemblyContext, context);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in first test in assembly event receiver: {ex.Message}");
-            }
+            await receiver.OnFirstTestInAssembly(assemblyContext, context);
         }
     }
 
@@ -322,14 +320,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var receiver in receivers)
         {
-            try
-            {
-                await receiver.OnFirstTestInClass(classContext, context);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error in first test in class event receiver: {ex.Message}");
-            }
+            await receiver.OnFirstTestInClass(classContext, context);
         }
     }
 
@@ -399,7 +390,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
-        if (_assemblyTestCounts.AddOrUpdate(assemblyName, 0, (_, count) => count - 1) == 0)
+
+        var assemblyCount = _assemblyTestCounts.GetOrAdd(assemblyName, _ => new Counter()).Decrement();
+
+        if (assemblyCount == 0)
         {
             await InvokeLastTestInAssemblyEventReceiversCore(context, assemblyContext, cancellationToken);
         }
@@ -437,7 +431,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
 
         var classType = classContext.ClassType;
-        if (_classTestCounts.AddOrUpdate(classType, 0, (_, count) => count - 1) == 0)
+
+        var classCount = _classTestCounts.GetOrAdd(classType, _ => new Counter()).Decrement();
+
+        if (classCount == 0)
         {
             await InvokeLastTestInClassEventReceiversCore(context, classContext, cancellationToken);
         }
@@ -476,19 +473,23 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         _firstTestInClassTasks = new ThreadSafeDictionary<Type, Task>();
         _firstTestInSessionTasks = new ThreadSafeDictionary<string, Task>();
 
-        foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.AssemblyContext.Assembly.GetName().FullName))
+        foreach (var group in contexts.GroupBy(c => c.ClassContext.AssemblyContext.Assembly.GetName().FullName))
         {
-            if (group.Key != null)
+            var counter = _assemblyTestCounts.GetOrAdd(group.Key, _ => new Counter());
+
+            for (var i = 0; i < group.Count(); i++)
             {
-                _assemblyTestCounts[group.Key] = group.Count();
+                counter.Increment();
             }
         }
 
-        foreach (var group in contexts.Where(c => c.ClassContext != null).GroupBy(c => c.ClassContext!.ClassType))
+        foreach (var group in contexts.GroupBy(c => c.ClassContext.ClassType))
         {
-            if (group.Key != null)
+            var counter = _classTestCounts.GetOrAdd(group.Key, _ => new Counter());
+
+            for (var i = 0; i < group.Count(); i++)
             {
-                _classTestCounts[group.Key] = group.Count();
+                counter.Increment();
             }
         }
     }
@@ -517,18 +518,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         Func<T, ValueTask> invoker,
         CancellationToken cancellationToken) where T : IEventReceiver
     {
-        try
-        {
-            await invoker(receiver);
-        }
-        catch (Exception ex)
-        {
-            await _logger.LogErrorAsync($"Event receiver {receiver.GetType().Name} threw exception: {ex.Message}");
-        }
+        await invoker(receiver);
     }
 
     public void Dispose()
     {
-        _registry?.Dispose();
+        _registry.Dispose();
     }
 }

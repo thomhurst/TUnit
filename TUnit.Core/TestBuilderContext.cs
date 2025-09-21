@@ -30,6 +30,11 @@ public record TestBuilderContext
     public required MethodMetadata TestMetadata { get; init; }
 
     internal IClassConstructor? ClassConstructor { get; set; }
+    
+    /// <summary>
+    /// Cached and initialized attributes for the test
+    /// </summary>
+    internal Attribute[]? InitializedAttributes { get; set; }
 
     public void RegisterForInitialization(object? obj)
     {

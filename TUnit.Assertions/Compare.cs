@@ -172,6 +172,17 @@ public static class Compare
             var actualFieldInfo = actual.GetType().GetField(fieldName, BindingFlags);
             var expectedFieldInfo = expected.GetType().GetField(fieldName, BindingFlags);
 
+            // Check if field type should be ignored
+            if (actualFieldInfo != null && ShouldIgnoreType(actualFieldInfo.FieldType, options.TypesToIgnore))
+            {
+                continue;
+            }
+
+            if (expectedFieldInfo != null && ShouldIgnoreType(expectedFieldInfo.FieldType, options.TypesToIgnore))
+            {
+                continue;
+            }
+
             if (options.EquivalencyKind == EquivalencyKind.Partial && expectedFieldInfo is null)
             {
                 continue;
@@ -220,6 +231,17 @@ public static class Compare
 
             var actualPropertyInfo = actual.GetType().GetProperty(propertyName, BindingFlags);
             var expectedPropertyInfo = expected.GetType().GetProperty(propertyName, BindingFlags);
+
+            // Check if property type should be ignored
+            if (actualPropertyInfo != null && ShouldIgnoreType(actualPropertyInfo.PropertyType, options.TypesToIgnore))
+            {
+                continue;
+            }
+
+            if (expectedPropertyInfo != null && ShouldIgnoreType(expectedPropertyInfo.PropertyType, options.TypesToIgnore))
+            {
+                continue;
+            }
 
             if (options.EquivalencyKind == EquivalencyKind.Partial && expectedPropertyInfo is null)
             {
@@ -271,5 +293,23 @@ public static class Compare
         }
 
         return $"{type}[{index}]";
+    }
+
+    private static bool ShouldIgnoreType(Type type, Type[] typesToIgnore)
+    {
+        if (typesToIgnore.Length == 0)
+        {
+            return false;
+        }
+
+        // Get the underlying type if it's nullable
+        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+
+        // Check if the type or its underlying type (for nullable) should be ignored
+        return typesToIgnore.Any(ignoredType => 
+            type == ignoredType || 
+            underlyingType == ignoredType ||
+            type.IsAssignableFrom(ignoredType) ||
+            underlyingType.IsAssignableFrom(ignoredType));
     }
 }

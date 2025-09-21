@@ -24,15 +24,9 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
             {
                 new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3"),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 5,
@@ -67,7 +61,6 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -86,7 +79,7 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
                         typedInstance.Params(new string[0]);
                         break;
                     case 1:
-                        typedInstance.Params(TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0]));
+                        typedInstance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) });
                         break;
                     case 2:
                         typedInstance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]) });
@@ -116,7 +109,7 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
                         instance.Params(new string[0]);
                         break;
                     case 1:
-                        instance.Params(TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0]));
+                        instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) });
                         break;
                     case 2:
                         instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]) });
@@ -182,15 +175,9 @@ internal sealed class ArgsAsArrayTests_NonParams_TestSource_GUID : global::TUnit
             {
                 new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3"),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 15,
@@ -225,7 +212,6 @@ internal sealed class ArgsAsArrayTests_NonParams_TestSource_GUID : global::TUnit
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -304,15 +290,9 @@ internal sealed class ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID : global
             {
                 new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3"),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 25,
@@ -347,7 +327,6 @@ internal sealed class ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID : global
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -462,15 +441,9 @@ internal sealed class ArgsAsArrayTests_Enumerable_TestSource_GUID : global::TUni
             {
                 new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3"),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 35,
@@ -505,7 +478,6 @@ internal sealed class ArgsAsArrayTests_Enumerable_TestSource_GUID : global::TUni
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -584,15 +556,9 @@ internal sealed class ArgsAsArrayTests_Following_Non_Params_TestSource_GUID : gl
             {
                 new global::TUnit.Core.ArgumentsAttribute(1, "arg1", "arg2", "arg3"),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
-            PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
-            {
-            },
-            PropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
+            PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
+            PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
             LineNumber = 45,
@@ -634,7 +600,6 @@ internal sealed class ArgsAsArrayTests_Following_Non_Params_TestSource_GUID : gl
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;

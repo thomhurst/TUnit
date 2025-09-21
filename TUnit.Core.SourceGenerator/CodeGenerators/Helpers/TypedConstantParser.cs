@@ -66,10 +66,10 @@ public static class TypedConstantParser
         return typedConstant.Type!.GloballyQualified();
     }
 
-    public static string GetRawTypedConstantValue(TypedConstant typedConstant)
+    public static string GetRawTypedConstantValue(TypedConstant typedConstant, ITypeSymbol? targetType = null)
     {
         // Use the formatter for consistent handling
-        return _formatter.FormatForCode(typedConstant);
+        return _formatter.FormatForCode(typedConstant, targetType);
     }
 
     private static string FormatPrimitive(TypedConstant typedConstant)
@@ -79,6 +79,13 @@ public static class TypedConstantParser
 
     public static string FormatPrimitive(object? value)
     {
+        // Check for special floating-point values first
+        var specialFloatValue = SpecialFloatingPointValuesHelper.TryFormatSpecialFloatingPointValue(value);
+        if (specialFloatValue != null)
+        {
+            return specialFloatValue;
+        }
+
         switch (value)
         {
             case string s:
@@ -87,18 +94,6 @@ public static class TypedConstantParser
                 return SymbolDisplay.FormatLiteral(c, quote: true);
             case bool b:
                 return b ? "true" : "false";
-            case float.NaN:
-                return "float.NaN";
-            case float f when float.IsPositiveInfinity(f):
-                return "float.PositiveInfinity";
-            case float f when float.IsNegativeInfinity(f):
-                return "float.NegativeInfinity";
-            case double.NaN:
-                return "double.NaN";
-            case double d when double.IsPositiveInfinity(d):
-                return "double.PositiveInfinity";
-            case double d when double.IsNegativeInfinity(d):
-                return "double.NegativeInfinity";
             case null:
                 return "null";
             // Use InvariantCulture for numeric types to ensure consistent formatting

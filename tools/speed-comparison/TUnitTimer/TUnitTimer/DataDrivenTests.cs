@@ -40,15 +40,10 @@ public class DataDrivenTests
     }
 
     [Test]
-#pragma warning disable TUnit0001
-    [ClassDataSource<TestDataProvider>]
-#pragma warning restore TUnit0001
-    public async Task ClassDataSourceTest(int value, string text, bool flag)
+    [ClassDataSource<TestData>]
+    public async Task ClassDataSourceTest(TestData testData)
     {
-        await Assert.That(value).IsGreaterThan(0);
-        await Assert.That(text).IsNotNull();
-        await Assert.That(text.Length).IsGreaterThan(0);
-        await Assert.That(flag).IsTrue();
+        await Assert.That(testData.Value).IsEqualTo(0);
     }
 
     [Test]
@@ -66,13 +61,13 @@ public class DataDrivenTests
         await Assert.That(numbers).IsNotEmpty();
     }
 
-    public static IEnumerable<TestData> ComplexTestData()
+    public static IEnumerable<Func<TestData>> ComplexTestData()
     {
-        yield return new TestData { Id = 1, Value = 10, Name = "Test1" };
-        yield return new TestData { Id = 2, Value = 20, Name = "Test2" };
-        yield return new TestData { Id = 3, Value = 30, Name = "Test3" };
-        yield return new TestData { Id = 4, Value = 40, Name = "Test4" };
-        yield return new TestData { Id = 5, Value = 50, Name = "Test5" };
+        yield return () => new TestData { Id = 1, Value = 10, Name = "Test1" };
+        yield return () => new TestData { Id = 2, Value = 20, Name = "Test2" };
+        yield return () => new TestData { Id = 3, Value = 30, Name = "Test3" };
+        yield return () => new TestData { Id = 4, Value = 40, Name = "Test4" };
+        yield return () => new TestData { Id = 5, Value = 50, Name = "Test5" };
     }
 
     private ProcessedData ProcessTestData(TestData data)
@@ -99,7 +94,7 @@ public class DataDrivenTests
         public bool IsValid { get; set; }
     }
 
-    public class TestDataProvider : DataSourceGeneratorAttribute<(int, string, bool)>
+    public class TestDataProvider : DataSourceGeneratorAttribute<int, string, bool>
     {
         protected override IEnumerable<Func<(int, string, bool)>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {

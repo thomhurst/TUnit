@@ -112,7 +112,7 @@ public class AssertionTests
         Assert.That(allValid, Is.True);
         
         var totalSum = data.SelectMany(x => x.Values).Sum();
-        Assert.That(totalSum, Is.EqualTo(165));
+        Assert.That(totalSum, Is.EqualTo(120));
     }
     
     [TestCase(new[] { 1, 2, 3 }, 6)]

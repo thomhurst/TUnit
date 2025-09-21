@@ -159,6 +159,17 @@ internal sealed class TestScheduler : ITestScheduler
 
             await ExecuteParallelGroupAsync(groupName, orderedTests, maxParallelism, cancellationToken).ConfigureAwait(false);
         }
+        
+        // 2b. Execute constrained parallel groups (groups with both ParallelGroup and NotInParallel)
+        foreach (var kvp in groupedTests.ConstrainedParallelGroups)
+        {
+            var groupName = kvp.Key;
+            var constrainedTests = kvp.Value;
+            
+            await _logger.LogDebugAsync($"Starting constrained parallel group '{groupName}' with {constrainedTests.UnconstrainedTests.Length} unconstrained and {constrainedTests.KeyedTests.Length} keyed tests").ConfigureAwait(false);
+            
+            await ExecuteConstrainedParallelGroupAsync(groupName, constrainedTests, maxParallelism, cancellationToken).ConfigureAwait(false);
+        }
 
         // 3. Execute keyed NotInParallel tests using ConstraintKeyScheduler for proper coordination
         if (groupedTests.KeyedNotInParallel.Length > 0)
@@ -226,6 +237,61 @@ internal sealed class TestScheduler : ITestScheduler
             await WaitForTasksWithFailFastHandling(orderTasks, cancellationToken).ConfigureAwait(false);
         }
     }
+    
+    private async Task ExecuteConstrainedParallelGroupAsync(
+        string groupName,
+        GroupedConstrainedTests constrainedTests,
+        int? maxParallelism,
+        CancellationToken cancellationToken)
+    {
+        await _logger.LogDebugAsync($"Executing constrained parallel group '{groupName}'").ConfigureAwait(false);
+        
+        // Start unconstrained tests (can run in parallel)
+        var unconstrainedTasks = new List<Task>();
+        if (constrainedTests.UnconstrainedTests.Length > 0)
+        {
+            if (maxParallelism is > 0)
+            {
+                // Respect maximum parallel tests limit for unconstrained tests
+                var unconstrainedTask = ExecuteParallelTestsWithLimitAsync(
+                    constrainedTests.UnconstrainedTests, 
+                    maxParallelism.Value, 
+                    cancellationToken);
+                unconstrainedTasks.Add(unconstrainedTask);
+            }
+            else
+            {
+                // No limit - start all unconstrained tests at once
+                foreach (var test in constrainedTests.UnconstrainedTests)
+                {
+                    var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
+                    test.ExecutionTask = task;
+                    unconstrainedTasks.Add(task);
+                }
+            }
+        }
+        
+        // Execute keyed tests using the constraint key scheduler
+        Task? keyedTask = null;
+        if (constrainedTests.KeyedTests.Length > 0)
+        {
+            keyedTask = _constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(
+                constrainedTests.KeyedTests,
+                cancellationToken).AsTask();
+        }
+        
+        // Wait for both unconstrained and keyed tests to complete
+        var allTasks = unconstrainedTasks.ToList();
+        if (keyedTask != null)
+        {
+            allTasks.Add(keyedTask);
+        }
+        
+        if (allTasks.Count > 0)
+        {
+            await WaitForTasksWithFailFastHandling(allTasks.ToArray(), cancellationToken).ConfigureAwait(false);
+        }
+    }
 
     private async Task ExecuteSequentiallyAsync(
         string groupName,
@@ -242,6 +308,23 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
+    private async Task ProcessTestQueueAsync(
+        System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest> testQueue,
+        CancellationToken cancellationToken)
+    {
+        while (testQueue.TryDequeue(out var test))
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+
+            var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
+            test.ExecutionTask = task;
+            await task.ConfigureAwait(false);
+        }
+    }
+
     private async Task ExecuteParallelTestsWithLimitAsync(
         AbstractExecutableTest[] tests,
         int maxParallelism,
@@ -251,23 +334,9 @@ internal sealed class TestScheduler : ITestScheduler
         var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
         var workers = new Task[maxParallelism];
 
-        // Create worker tasks that will process tests from the queue
         for (var i = 0; i < maxParallelism; i++)
         {
-            workers[i] = Task.Run(async () =>
-            {
-                while (testQueue.TryDequeue(out var test))
-                {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
-                    test.ExecutionTask = task;
-                    await task.ConfigureAwait(false);
-                }
-            }, cancellationToken);
+            workers[i] = ProcessTestQueueAsync(testQueue, cancellationToken);
         }
 
         await WaitForTasksWithFailFastHandling(workers, cancellationToken).ConfigureAwait(false);

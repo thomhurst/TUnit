@@ -23,6 +23,12 @@ public class TimeoutCancellationTokenAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
+        if (!methodSymbol.IsTestMethod(context.Compilation) && 
+            !methodSymbol.IsHookMethod(context.Compilation, out _, out _, out _))
+        {
+            return;
+        }
+
         var attributes = methodSymbol.GetAttributes()
             .Concat(methodSymbol.ContainingType.GetAttributes());
 

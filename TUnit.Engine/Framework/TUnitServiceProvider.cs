@@ -8,6 +8,8 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
+using TUnit.Core.DataSources;
+using TUnit.Core.Initialization;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Collectors;
@@ -48,6 +50,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public TUnitInitializer Initializer { get; }
     public CancellationTokenSource FailFastCancellationSource { get; }
     public ParallelLimitLockProvider ParallelLimitLockProvider { get; }
+    public PropertyInjectionService PropertyInjectionService { get; }
+    public DataSourceInitializer DataSourceInitializer { get; }
+    public TestObjectInitializer TestObjectInitializer { get; }
 
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
@@ -77,8 +82,17 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
             VerbosityService));
 
+        // Create initialization services early as they're needed by other services
+        DataSourceInitializer = Register(new DataSourceInitializer());
+        PropertyInjectionService = Register(new PropertyInjectionService(DataSourceInitializer));
+        TestObjectInitializer = Register(new TestObjectInitializer(PropertyInjectionService));
+        
+        // Initialize the circular dependencies
+        PropertyInjectionService.Initialize(TestObjectInitializer);
+        DataSourceInitializer.Initialize(PropertyInjectionService);
+
         // Register the test argument tracking service to handle object disposal for shared instances
-        var testArgumentTrackingService = Register(new TestArgumentTrackingService());
+        var testArgumentTrackingService = Register(new TestArgumentTrackingService(TestObjectInitializer));
 
         TestFilterService = Register(new TestFilterService(Logger, testArgumentTrackingService));
 
@@ -113,26 +127,18 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var useSourceGeneration = GetUseSourceGeneration(CommandLineOptions);
 #pragma warning disable IL2026 // Using member which has 'RequiresUnreferencedCodeAttribute'
 #pragma warning disable IL3050 // Using member which has 'RequiresDynamicCodeAttribute'
-        Func<HashSet<Type>?, ITestDataCollector> dataCollectorFactory = filterTypes =>
-        {
-            if (useSourceGeneration)
-            {
-                return new AotTestDataCollector(filterTypes);
-            }
-            else
-            {
-                return new ReflectionTestDataCollector();
-            }
-        };
+        ITestDataCollector dataCollector = useSourceGeneration
+            ? new AotTestDataCollector()
+            : new ReflectionTestDataCollector();
 #pragma warning restore IL3050
 #pragma warning restore IL2026
 
         var testBuilder = Register<ITestBuilder>(
-            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider));
+            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, PropertyInjectionService, DataSourceInitializer));
 
         TestBuilderPipeline = Register(
             new TestBuilderPipeline(
-                dataCollectorFactory,
+                dataCollector,
                 testBuilder,
                 ContextProvider,
                 EventReceiverOrchestrator));
@@ -142,7 +148,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
 
-        var testInitializer = new TestInitializer(EventReceiverOrchestrator);
+        var testInitializer = new TestInitializer(EventReceiverOrchestrator, TestObjectInitializer);
 
         // Create the new TestCoordinator that orchestrates the granular services
         var testCoordinator = Register<ITestCoordinator>(

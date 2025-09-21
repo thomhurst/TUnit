@@ -116,11 +116,17 @@ internal class TestExecutor
             // Run after hooks and event receivers in finally before re-throwing
             try
             {
-                // Dispose test instance before After(Class) hooks run
+                // Run After(Test) hooks first (before disposal)
+                await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+                
+                // Invoke test end event receivers
+                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
+                
+                // Then dispose test instance
                 await DisposeTestInstance(executableTest).ConfigureAwait(false);
                 
-                // Always decrement counters and run After hooks if we're the last test
-                await ExecuteAfterHooksBasedOnLifecycle(executableTest, testClass, testAssembly, cancellationToken).ConfigureAwait(false);
+                // Finally run After(Class/Assembly/Session) hooks if we're the last test
+                await ExecuteAfterClassAssemblySessionHooks(executableTest, testClass, testAssembly, cancellationToken).ConfigureAwait(false);
             }
             catch
             {
@@ -144,11 +150,17 @@ internal class TestExecutor
             // This finally block now only runs for the success path
             if (executableTest.State != TestState.Failed)
             {
-                // Dispose test instance before After(Class) hooks run
+                // Run After(Test) hooks first (before disposal)
+                await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+                
+                // Invoke test end event receivers
+                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
+                
+                // Then dispose test instance
                 await DisposeTestInstance(executableTest).ConfigureAwait(false);
                 
-                // Always decrement counters and run After hooks if we're the last test
-                await ExecuteAfterHooksBasedOnLifecycle(executableTest, testClass, testAssembly, cancellationToken).ConfigureAwait(false);
+                // Finally run After(Class/Assembly/Session) hooks if we're the last test
+                await ExecuteAfterClassAssemblySessionHooks(executableTest, testClass, testAssembly, cancellationToken).ConfigureAwait(false);
             }
         }
     }
@@ -176,17 +188,27 @@ internal class TestExecutor
         }
     }
 
-    private async Task ExecuteAfterHooksBasedOnLifecycle(AbstractExecutableTest executableTest,
+    private async Task ExecuteAfterClassAssemblySessionHooks(AbstractExecutableTest executableTest,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties
             | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, Assembly testAssembly, CancellationToken cancellationToken)
     {
-        await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
-        
-        // Invoke test end event receivers
-        await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
-
         var flags = _lifecycleCoordinator.DecrementAndCheckAfterHooks(testClass, testAssembly);
+
+        if (executableTest.Context.Events.OnDispose != null)
+        {
+            try
+            {
+                foreach (var invocation in executableTest.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                {
+                    await invocation.InvokeAsync(executableTest.Context, executableTest.Context);
+                }
+            }
+            catch
+            {
+                // Swallow disposal exceptions
+            }
+        }
 
         if (flags.ShouldExecuteAfterClass)
         {

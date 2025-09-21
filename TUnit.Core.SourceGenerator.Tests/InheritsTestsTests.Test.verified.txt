@@ -34,9 +34,7 @@ internal sealed class BaseClass_Test_TestSource_GUID : global::TUnit.Core.Interf
                 new global::TUnit.Core.ArgumentsAttribute(2),
                 new global::TUnit.Core.ArgumentsAttribute(3),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
             {
                 new global::TUnit.Core.PropertyDataSource
@@ -58,9 +56,7 @@ internal sealed class BaseClass_Test_TestSource_GUID : global::TUnit.Core.Interf
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -114,7 +110,6 @@ internal sealed class BaseClass_Test_TestSource_GUID : global::TUnit.Core.Interf
                         },
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -205,9 +200,7 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
                 new global::TUnit.Core.ArgumentsAttribute(2),
                 new global::TUnit.Core.ArgumentsAttribute(3),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
             {
                 new global::TUnit.Core.PropertyDataSource
@@ -229,9 +222,7 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -272,7 +263,6 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -363,9 +353,7 @@ internal sealed class Tests2_Test_TestSource_GUID : global::TUnit.Core.Interface
                 new global::TUnit.Core.ArgumentsAttribute(2),
                 new global::TUnit.Core.ArgumentsAttribute(3),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
             {
                 new global::TUnit.Core.PropertyDataSource
@@ -387,9 +375,7 @@ internal sealed class Tests2_Test_TestSource_GUID : global::TUnit.Core.Interface
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -430,7 +416,6 @@ internal sealed class Tests2_Test_TestSource_GUID : global::TUnit.Core.Interface
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;
@@ -521,9 +506,7 @@ internal sealed class Tests3_Test_TestSource_GUID : global::TUnit.Core.Interface
                 new global::TUnit.Core.ArgumentsAttribute(2),
                 new global::TUnit.Core.ArgumentsAttribute(3),
             },
-            ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
-            {
-            },
+            ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = new global::TUnit.Core.PropertyDataSource[]
             {
                 new global::TUnit.Core.PropertyDataSource
@@ -545,9 +528,7 @@ internal sealed class Tests3_Test_TestSource_GUID : global::TUnit.Core.Interface
                     Setter = (instance, value) => throw new global::System.NotSupportedException("Setting init-only properties requires .NET 8 or later"),
                     #endif
                     ValueFactory = () => throw new global::System.InvalidOperationException("ValueFactory should be provided by TestDataCombination"),
-                    NestedPropertyInjections = new global::TUnit.Core.PropertyInjectionData[]
-                    {
-                    },
+                    NestedPropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
                     NestedPropertyValueFactory = obj =>
                     {
                         return new global::System.Collections.Generic.Dictionary<string, object?>();
@@ -588,7 +569,6 @@ internal sealed class Tests3_Test_TestSource_GUID : global::TUnit.Core.Interface
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
                     };
-                    // Set ClassMetadata and ContainingTypeMetadata references on properties to avoid circular dependency
                     foreach (var prop in classMetadata.Properties)
                     {
                         prop.ClassMetadata = classMetadata;

@@ -134,7 +134,7 @@ public class AsyncTests
 
     private async IAsyncEnumerable<int> GenerateValuesAsync()
     {
-        for (int i = 1; i <= 10; i++)
+        for (var i = 1; i <= 10; i++)
         {
             await Task.Yield();
             yield return i;

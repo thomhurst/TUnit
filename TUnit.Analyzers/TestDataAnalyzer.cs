@@ -197,6 +197,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 var typesToValidate = propertySymbol != null 
                     ? ImmutableArray.Create(propertySymbol.Type)
                     : parameters.Select(p => p.Type).ToImmutableArray().WithoutCancellationTokenParameter();
+                
                 CheckMethodDataSource(context, attribute, testClassType, typesToValidate, propertySymbol);
             }
 
@@ -556,6 +557,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 testParameterTypes,
                 out var isFunc,
                 out var isTuples);
+            
 
             if (!isFunc && unwrappedTypes.Any(x => x.SpecialType != SpecialType.System_String && x.IsReferenceType))
             {
@@ -577,6 +579,18 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 // object[] can contain any types - skip compile-time type checking
                 return;
             }
+            
+            if (isTuples && unwrappedTypes.Length != testParameterTypes.Length)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    Rules.WrongArgumentTypeTestData,
+                    attribute.GetLocation(),
+                    string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")),
+                    string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
+                );
+                return;
+            }
+            
             var conversions = unwrappedTypes.ZipAll(testParameterTypes,
                 (argument, parameter) => 
                 {
@@ -597,8 +611,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     Diagnostic.Create(
                         Rules.WrongArgumentTypeTestData,
                         attribute.GetLocation(),
-                        string.Join(", ", unwrappedTypes),
-                        string.Join(", ", testParameterTypes))
+                        string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")),
+                        string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
                 );
                 return;
             }
@@ -634,27 +648,14 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (isTuples)
             {
-                // Check if any test method parameters are tuple types when data source returns tuples
-                // This causes a runtime mismatch: data source provides separate arguments, but method expects tuple parameter
-                var tupleParameters = testParameterTypes.Where(p => p is INamedTypeSymbol { IsTupleType: true }).ToArray();
-                if (tupleParameters.Any())
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        Rules.WrongArgumentTypeTestData,
-                        attribute.GetLocation(),
-                        string.Join(", ", unwrappedTypes),
-                        string.Join(", ", testParameterTypes))
-                    );
-                    return;
-                }
 
                 if (unwrappedTypes.Length != testParameterTypes.Length)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
                         Rules.WrongArgumentTypeTestData,
                         attribute.GetLocation(),
-                        string.Join(", ", unwrappedTypes),
-                        string.Join(", ", testParameterTypes))
+                        string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")),
+                        string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
                     );
                     return;
                 }
@@ -689,8 +690,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 Diagnostic.Create(
                     Rules.WrongArgumentTypeTestData,
                     attribute.GetLocation(),
-                    string.Join(", ", unwrappedTypes),
-                    string.Join(", ", testParameterTypes))
+                    string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")),
+                    string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
             );
         }
     }
@@ -777,11 +778,26 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             type = genericType.TypeArguments[0];
         }
 
-        // Check for tuple types first before doing conversion checks
-        if (type is INamedTypeSymbol { IsTupleType: true } tupleType)
+        if (type is INamedTypeSymbol namedType && namedType.IsTupleType)
         {
+            var tupleType = namedType;
+            if (testParameterTypes.Length == 1 && 
+                testParameterTypes[0] is INamedTypeSymbol paramTupleType && 
+                paramTupleType.IsTupleType &&
+                SymbolEqualityComparer.Default.Equals(tupleType, testParameterTypes[0]))
+            {
+                return ImmutableArray.Create(type);
+            }
+            
             isTuples = true;
-            return ImmutableArray.CreateRange(tupleType.TupleElements.Select(x => x.Type));
+            
+            if (testParameterTypes.Length == 1 && 
+                testParameterTypes[0] is INamedTypeSymbol { IsTupleType: true })
+            {
+                return ImmutableArray.CreateRange(tupleType.TupleElements.Select(e => e.Type));
+            }
+            
+            return ImmutableArray.CreateRange(tupleType.TupleElements.Select(e => e.Type));
         }
 
         if (testParameterTypes.Length == 1
@@ -931,6 +947,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             // Decimals can't technically be used in attributes, but we can still write it as a double
             // e.g. [Arguments(1.55)]
+            return true;
+        }
+
+        if (methodParameterType?.SpecialType == SpecialType.System_Decimal &&
+            argument.Type?.SpecialType == SpecialType.System_String &&
+            argument.Value is string strValue &&
+            decimal.TryParse(strValue, out _))
+        {
+            // Allow string literals for decimal parameters for values that can't be expressed as C# numeric literals
+            // e.g. [Arguments("79228162514264337593543950335")] for decimal.MaxValue
             return true;
         }
 

@@ -33,7 +33,7 @@ public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventR
 
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        context.SetParallelConstraint(new NotInParallelConstraint(ConstraintKeys)
+        context.AddParallelConstraint(new NotInParallelConstraint(ConstraintKeys)
         {
             Order = Order
         });
