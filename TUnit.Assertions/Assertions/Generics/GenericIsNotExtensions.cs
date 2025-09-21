@@ -30,6 +30,34 @@ public static class GenericIsNotExtensions
         );
     }
 
+    public static NotNullDelegateAssertionBuilderWrapper<TResult> IsNotNull<TResult>(this IValueSource<Func<TResult>?> valueSource)
+    {
+        return new NotNullDelegateAssertionBuilderWrapper<TResult>(
+            valueSource.RegisterConversionAssertion(new NotNullExpectedValueAssertCondition<Func<TResult>?>(), [])
+        );
+    }
+
+    public static NotNullActionAssertionBuilderWrapper IsNotNull(this IValueSource<Action?> valueSource)
+    {
+        return new NotNullActionAssertionBuilderWrapper(
+            valueSource.RegisterConversionAssertion(new NotNullExpectedValueAssertCondition<Action?>(), [])
+        );
+    }
+
+    public static NotNullAsyncDelegateAssertionBuilderWrapper<TResult> IsNotNull<TResult>(this IValueSource<Func<Task<TResult>>?> valueSource)
+    {
+        return new NotNullAsyncDelegateAssertionBuilderWrapper<TResult>(
+            valueSource.RegisterConversionAssertion(new NotNullExpectedValueAssertCondition<Func<Task<TResult>>?>(), [])
+        );
+    }
+
+    public static NotNullAsyncActionAssertionBuilderWrapper IsNotNull(this IValueSource<Func<Task>?> valueSource)
+    {
+        return new NotNullAsyncActionAssertionBuilderWrapper(
+            valueSource.RegisterConversionAssertion(new NotNullExpectedValueAssertCondition<Func<Task>?>(), [])
+        );
+    }
+
     public static InvokableValueAssertionBuilder<TActual> IsNotEquatableOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new NotEqualsExpectedValueAssertCondition<TActual>(expected)

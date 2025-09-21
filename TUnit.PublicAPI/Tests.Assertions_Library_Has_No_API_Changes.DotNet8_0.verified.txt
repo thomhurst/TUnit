@@ -851,10 +851,26 @@ namespace .
         public ..NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType<TType>() { }
         public ..NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> WithPartialEquivalency() { }
     }
+    public class NotNullActionAssertionBuilderWrapper : .<>
+    {
+        public new .<> GetAwaiter() { }
+    }
     public class NotNullAssertionBuilderWrapper<TActual> : .<TActual>
         where TActual :  class
     {
         public new .<TActual> GetAwaiter() { }
+    }
+    public class NotNullAsyncActionAssertionBuilderWrapper : .<<.>>
+    {
+        public new .<<.>> GetAwaiter() { }
+    }
+    public class NotNullAsyncDelegateAssertionBuilderWrapper<TResult> : .<<.<TResult>>>
+    {
+        public new .<<.<TResult>>> GetAwaiter() { }
+    }
+    public class NotNullDelegateAssertionBuilderWrapper<TResult> : .<<TResult>>
+    {
+        public new .<<TResult>> GetAwaiter() { }
     }
     public class NotNullStructAssertionBuilderWrapper<TActual> : .<TActual>
         where TActual :  struct
@@ -2079,6 +2095,10 @@ namespace .Extensions
         public static ..GenericNotEqualToAssertionBuilderWrapper<TActual> IsNotEqualTo<TActual>(this ..IValueSource<TActual> valueSource, TActual expected, [.("expected")] string? doNotPopulateThisValue = null) { }
         public static .<TActual> IsNotEquatableOrEqualTo<TActual>(this ..IValueSource<TActual> valueSource, TActual expected, [.("expected")] string? doNotPopulateThisValue = null) { }
         public static ..NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IsNotEquivalentTo<[.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties | ..NonPublicProperties)]  TActual, [.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties | ..NonPublicProperties)]  TExpected>(this ..IValueSource<TActual> valueSource, TExpected expected, [.("expected")] string? doNotPopulateThisValue1 = null) { }
+        public static ..NotNullActionAssertionBuilderWrapper IsNotNull(this ..IValueSource<?> valueSource) { }
+        public static ..NotNullAsyncActionAssertionBuilderWrapper IsNotNull(this ..IValueSource<<.>?> valueSource) { }
+        public static ..NotNullAsyncDelegateAssertionBuilderWrapper<TResult> IsNotNull<TResult>(this ..IValueSource<<.<TResult>>?> valueSource) { }
+        public static ..NotNullDelegateAssertionBuilderWrapper<TResult> IsNotNull<TResult>(this ..IValueSource<<TResult>?> valueSource) { }
         public static ..NotNullAssertionBuilderWrapper<TActual> IsNotNull<TActual>(this ..IValueSource<TActual?> valueSource)
             where TActual :  class { }
         public static ..NotNullStructAssertionBuilderWrapper<TActual> IsNotNull<TActual>(this ..IValueSource<TActual?> valueSource)
