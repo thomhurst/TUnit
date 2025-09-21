@@ -15,7 +15,7 @@ public class TestDatabase : ITestDatabase, IDisposable
     public TestDatabase()
     {
         // Simulate expensive initialization
-        for (int i = 0; i < 100; i++)
+        for (var i = 0; i < 100; i++)
         {
             _data[$"init_{i}"] = $"value_{i}";
         }
@@ -48,7 +48,7 @@ public class FixtureTests : IDisposable
     public void SetupTest()
     {
         _testKeys.Clear();
-        for (int i = 0; i < 10; i++)
+        for (var i = 0; i < 10; i++)
         {
             var key = $"test_{i}";
             _testKeys.Add(key);
@@ -83,7 +83,7 @@ public class FixtureTests : IDisposable
     {
         var initialCount = _database.Count;
         
-        for (int i = 0; i < 5; i++)
+        for (var i = 0; i < 5; i++)
         {
             _database.Add($"isolation_{i}", $"value_{i}");
         }

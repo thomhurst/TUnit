@@ -57,7 +57,7 @@ public class BasicTests
     public async Task DictionaryOperationsTest()
     {
         var dictionary = new Dictionary<string, int>();
-        for (int i = 0; i < 50; i++)
+        for (var i = 0; i < 50; i++)
         {
             dictionary[$"key{i}"] = i * i;
         }

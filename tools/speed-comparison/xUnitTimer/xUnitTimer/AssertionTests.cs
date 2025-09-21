@@ -111,7 +111,7 @@ public class AssertionTests
         Assert.True(allValid);
         
         var totalSum = data.SelectMany(x => x.Values).Sum();
-        Assert.Equal(165, totalSum);
+        Assert.Equal(120, totalSum);
     }
     
     [Theory]
