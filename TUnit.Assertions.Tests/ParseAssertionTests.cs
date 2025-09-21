@@ -1,6 +1,7 @@
 using System.Globalization;
+using TUnit.Assertions.Assertions.Strings;
 
-namespace TUnit.TestProject;
+namespace TUnit.Assertions.Tests;
 
 public class ParseAssertionTests
 {
