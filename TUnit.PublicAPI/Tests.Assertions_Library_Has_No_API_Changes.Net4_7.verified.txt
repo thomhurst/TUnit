@@ -839,6 +839,10 @@ namespace .
     {
         public new .<TActual> GetAwaiter() { }
     }
+    public class ParseAssertionBuilderWrapper<TTarget> : .<string?>
+    {
+        public .<string?> WithFormatProvider(? formatProvider) { }
+    }
     public class SingleItemAssertionBuilderWrapper<TActual, TInner> : .<TActual>
         where TActual : .<TInner>
     {
@@ -1077,11 +1081,38 @@ namespace ..Conditions
 }
 namespace ..Conditions
 {
+    public class ParseConversionAssertCondition<TTarget> : .<string?, TTarget>
+    {
+        public ParseConversionAssertCondition(? formatProvider = null) { }
+        public override .<<., TTarget?>> ConvertValue(string? value) { }
+        protected override string GetExpectation() { }
+    }
     public class StringContainsExpectedValueAssertCondition : .<string, string>
     {
         public StringContainsExpectedValueAssertCondition(string expected,  stringComparison) { }
         protected override string GetExpectation() { }
         protected override .<.> GetResult(string? actualValue, string? expectedValue) { }
+    }
+    public class StringIsNotParsableCondition<TTarget> : .<string?, ?>
+    {
+        public StringIsNotParsableCondition(? formatProvider = null) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(string? actualValue, ? formatProvider) { }
+    }
+    public class StringIsParsableCondition<TTarget> : .<string?, ?>
+    {
+        public StringIsParsableCondition(? formatProvider = null) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(string? actualValue, ? formatProvider) { }
+    }
+}
+namespace .
+{
+    public static class StringParsingExtensions
+    {
+        public static ..ParseAssertionBuilderWrapper<TTarget> IsNotParsableInto<TTarget>(this ..IValueSource<string> valueSource, [.("valueSource")] string? doNotPopulateThisValue = null) { }
+        public static ..ParseAssertionBuilderWrapper<TTarget> IsParsableInto<TTarget>(this ..IValueSource<string> valueSource, [.("valueSource")] string? doNotPopulateThisValue = null) { }
+        public static .<TTarget> WhenParsedInto<TTarget>(this ..IValueSource<string> valueSource, ? formatProvider = null, [.("valueSource")] string? doNotPopulateThisValue = null) { }
     }
 }
 namespace .Attributes
