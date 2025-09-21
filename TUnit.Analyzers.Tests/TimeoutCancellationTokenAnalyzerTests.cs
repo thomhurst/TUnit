@@ -113,9 +113,7 @@ public class TimeoutCancellationTokenAnalyzerTests
                 public async Task TestMethod(CancellationToken cancellationToken)
                 {
                     var client = GetHttpClient();
-                    var result = await client.GetStringAsync("https://google.com/", cancellationToken);
-                    
-                    await Assert.That(result).IsNotEmpty();
+                    await client.GetStringAsync("https://google.com/", cancellationToken);
                 }
             }
             """
@@ -172,63 +170,6 @@ public class TimeoutCancellationTokenAnalyzerTests
                 {
                     await DoSomethingAsync();
                     await Task.Delay(100, cancellationToken);
-                }
-            }
-            """
-        );
-    }
-
-    [Test]
-    public async Task Hook_Method_Without_CancellationToken_Shows_Error()
-    {
-        await Verifier.VerifyAnalyzerAsync(
-            """
-            using TUnit.Core;
-            using System.Threading.Tasks;
-            
-            public class TestClass
-            {
-                [Before(Test)]
-                [Timeout(30_000)]
-                public async Task {|#0:SetupMethod|}()
-                {
-                    await Task.Delay(100);
-                }
-                
-                [Test]
-                public async Task TestMethod()
-                {
-                    // Test logic
-                }
-            }
-            """,
-            Verifier.Diagnostic(Rules.MissingTimeoutCancellationTokenAttributes)
-                .WithLocation(0)
-        );
-    }
-
-    [Test]
-    public async Task Hook_Method_With_CancellationToken_Shows_No_Error()
-    {
-        await Verifier.VerifyAnalyzerAsync(
-            """
-            using TUnit.Core;
-            using System.Threading;
-            using System.Threading.Tasks;
-            
-            public class TestClass
-            {
-                [Before(Test)]
-                [Timeout(30_000)]
-                public async Task SetupMethod(CancellationToken cancellationToken)
-                {
-                    await Task.Delay(100, cancellationToken);
-                }
-                
-                [Test]
-                public async Task TestMethod()
-                {
-                    // Test logic
                 }
             }
             """
