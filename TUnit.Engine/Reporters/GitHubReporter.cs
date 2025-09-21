@@ -213,7 +213,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         return WriteFile(stringBuilder.ToString());
     }
 
-    private Task WriteFile(string contents)
+    private async Task WriteFile(string contents)
     {
         var fileInfo = new FileInfo(_outputSummaryFilePath);
         var currentFileSize = fileInfo.Exists ? fileInfo.Length : 0;
@@ -223,16 +223,44 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         if (newSize > MaxFileSizeInBytes)
         {
             Console.WriteLine("Appending to the GitHub Step Summary would exceed the 1MB file size limit.");
-            return Task.CompletedTask;
+            return;
         }
 
+        const int maxAttempts = 5;
+        var random = new Random();
+        
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
 #if NET
-        return File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
+                await File.AppendAllTextAsync(_outputSummaryFilePath, contents, Encoding.UTF8);
 #else
-        File.AppendAllText(_outputSummaryFilePath, contents, Encoding.UTF8);
-
-        return Task.CompletedTask;
+                File.AppendAllText(_outputSummaryFilePath, contents, Encoding.UTF8);
 #endif
+                return;
+            }
+            catch (IOException ex) when (attempt < maxAttempts && IsFileLocked(ex))
+            {
+                var baseDelay = 50 * Math.Pow(2, attempt - 1);
+                var jitter = random.Next(0, 50);
+                var delay = (int)(baseDelay + jitter);
+                
+                Console.WriteLine($"GitHub Summary file is locked, retrying in {delay}ms (attempt {attempt}/{maxAttempts})");
+                await Task.Delay(delay);
+            }
+        }
+    }
+
+    private static bool IsFileLocked(IOException exception)
+    {
+        // Check if the exception is due to the file being locked/in use
+        // HResult 0x80070020 is ERROR_SHARING_VIOLATION on Windows
+        // HResult 0x80070021 is ERROR_LOCK_VIOLATION on Windows
+        var errorCode = exception.HResult & 0xFFFF;
+        return errorCode == 0x20 || errorCode == 0x21 || 
+               exception.Message.Contains("being used by another process") ||
+               exception.Message.Contains("access denied", StringComparison.OrdinalIgnoreCase);
     }
 
     private string GetDetails(IProperty? stateProperty, PropertyBag properties)
