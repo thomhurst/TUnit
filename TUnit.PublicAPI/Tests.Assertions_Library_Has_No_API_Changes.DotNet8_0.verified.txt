@@ -861,6 +861,10 @@ namespace .
     {
         public new .<TActual> GetAwaiter() { }
     }
+    public class ParseAssertionBuilderWrapper<[.(..None | ..PublicMethods | ..Interfaces)]  TTarget> : .<string?>
+    {
+        public .<string?> WithFormatProvider(? formatProvider) { }
+    }
     public class SingleItemAssertionBuilderWrapper<TActual, TInner> : .<TActual>
         where TActual : .<TInner>
     {
@@ -1103,11 +1107,44 @@ namespace ..Conditions
 }
 namespace ..Conditions
 {
+    public class ParseConversionAssertCondition<[.(..None | ..PublicMethods | ..Interfaces)]  TTarget> : .<string?, TTarget>
+    {
+        public ParseConversionAssertCondition(? formatProvider = null) { }
+        [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.", Justification="The generic type is preserved through the DynamicallyAccessedMembers attribute")]
+        public override .<<., TTarget?>> ConvertValue(string? value) { }
+        protected override string GetExpectation() { }
+    }
     public class StringContainsExpectedValueAssertCondition : .<string, string>
     {
         public StringContainsExpectedValueAssertCondition(string expected,  stringComparison) { }
         protected override string GetExpectation() { }
         protected override .<.> GetResult(string? actualValue, string? expectedValue) { }
+    }
+    public class StringIsNotParsableCondition<[.(..None | ..PublicMethods | ..Interfaces)]  TTarget> : .<string?, ?>
+    {
+        public StringIsNotParsableCondition(? formatProvider = null) { }
+        protected override string GetExpectation() { }
+        [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.", Justification="The generic type is preserved through the DynamicallyAccessedMembers attribute")]
+        protected override .<.> GetResult(string? actualValue, ? formatProvider) { }
+    }
+    public class StringIsParsableCondition<[.(..None | ..PublicMethods | ..Interfaces)]  TTarget> : .<string?, ?>
+    {
+        public StringIsParsableCondition(? formatProvider = null) { }
+        protected override string GetExpectation() { }
+        [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.", Justification="The generic type is preserved through the DynamicallyAccessedMembers attribute")]
+        protected override .<.> GetResult(string? actualValue, ? formatProvider) { }
+    }
+}
+namespace .
+{
+    public static class StringParsingExtensions
+    {
+        public static ..ParseAssertionBuilderWrapper<TTarget> IsNotParsableInto<[.(..None | ..PublicMethods | ..Interfaces)]  TTarget>(this ..IValueSource<string> valueSource, [.("valueSource")] string? doNotPopulateThisValue = null) { }
+        public static ..ParseAssertionBuilderWrapper<TTarget> IsParsableInto<[.(..None | ..PublicMethods | ..Interfaces)]  TTarget>(this ..IValueSource<string> valueSource, [.("valueSource")] string? doNotPopulateThisValue = null) { }
+        public static .<TTarget> WhenParsedInto<[.(..None | ..PublicMethods | ..Interfaces)]  TTarget>(this ..IValueSource<string> valueSource, ? formatProvider = null, [.("valueSource")] string? doNotPopulateThisValue = null) { }
     }
 }
 namespace .Attributes
