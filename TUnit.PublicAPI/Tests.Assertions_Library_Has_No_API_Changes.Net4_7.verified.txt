@@ -603,6 +603,13 @@ namespace .
         protected override string GetExpectation() { }
         protected override .<.> GetResult(TActual? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
     }
+    public class ThrowsWithMessageNotContainingAssertCondition<TActual, TException> : .<TActual, >
+        where TException : 
+    {
+        public ThrowsWithMessageNotContainingAssertCondition(string expected,  stringComparison, <?, ?> exceptionSelector) { }
+        protected override string GetExpectation() { }
+        protected override .<.> GetResult(TActual? actualValue, ? exception, .AssertionMetadata assertionMetadata) { }
+    }
     public class ThrowsWithParamNameAssertCondition<TActual, TException> : .<TActual, >
         where TException : 
     {
@@ -2590,6 +2597,8 @@ namespace .Extensions
         public .<TActual, TException> WithMessageContaining(string expected, [.("expected")] string? doNotPopulateThisValue = null) { }
         public .<TActual, TException> WithMessageContaining(string expected,  stringComparison, [.("expected")] string? doNotPopulateThisValue = null, [.("stringComparison")] string? doNotPopulateThisValue2 = null) { }
         public .<TActual, TException> WithMessageMatching(. match, [.("match")] string? doNotPopulateThisValue = null) { }
+        public .<TActual, TException> WithMessageNotContaining(string expected, [.("expected")] string? doNotPopulateThisValue = null) { }
+        public .<TActual, TException> WithMessageNotContaining(string expected,  stringComparison, [.("expected")] string? doNotPopulateThisValue = null, [.("stringComparison")] string? doNotPopulateThisValue2 = null) { }
         public static .<TException?> op_Explicit(.<TActual, TException> throwsException) { }
     }
     public static class ThrowsExtensions
