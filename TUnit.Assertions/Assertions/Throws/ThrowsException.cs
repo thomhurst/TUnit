@@ -50,6 +50,20 @@ public class ThrowsException<TActual, TException> where TException : Exception
         return this;
     }
 
+    public ThrowsException<TActual, TException> WithMessageNotContaining(string expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    {
+        _source.RegisterAssertion(new ThrowsWithMessageNotContainingAssertCondition<TActual, TException>(expected, StringComparison.Ordinal, _selector)
+            , [doNotPopulateThisValue]);
+        return this;
+    }
+
+    public ThrowsException<TActual, TException> WithMessageNotContaining(string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null, [CallerArgumentExpression(nameof(stringComparison))] string? doNotPopulateThisValue2 = null)
+    {
+        _source.RegisterAssertion(new ThrowsWithMessageNotContainingAssertCondition<TActual, TException>(expected, stringComparison, _selector)
+            , [doNotPopulateThisValue, doNotPopulateThisValue2]);
+        return this;
+    }
+
     public ThrowsException<TActual, Exception> WithInnerException()
     {
         _source.AppendExpression($"{nameof(WithInnerException)}()");
