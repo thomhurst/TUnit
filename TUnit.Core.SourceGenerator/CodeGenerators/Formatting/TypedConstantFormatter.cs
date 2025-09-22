@@ -281,6 +281,14 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 return ul.ToString(System.Globalization.CultureInfo.InvariantCulture) + "UL";
             case uint ui:
                 return ui.ToString(System.Globalization.CultureInfo.InvariantCulture) + "U";
+            case byte b:
+                return $"(byte){b.ToInvariantString()}";
+            case sbyte b:
+                return $"(sbyte){b.ToInvariantString()}";
+            case ushort us:
+                return $"(ushort){us.ToInvariantString()}";
+            case short s:
+                return $"(short){s.ToInvariantString()}";
             default:
                 // For other numeric types, use InvariantCulture
                 if (value is IFormattable formattable)

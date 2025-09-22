@@ -22,7 +22,7 @@ internal sealed class NullableByteArgumentTests_Test_TestSource_GUID : global::T
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(1),
+                new global::TUnit.Core.ArgumentsAttribute((byte)1),
                 new global::TUnit.Core.ArgumentsAttribute(),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
@@ -138,7 +138,7 @@ internal sealed class NullableByteArgumentTests_Test2_TestSource_GUID : global::
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute((byte)1, 1),
+                new global::TUnit.Core.ArgumentsAttribute((byte)1, (byte)1),
                 new global::TUnit.Core.ArgumentsAttribute((byte)1, null),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
