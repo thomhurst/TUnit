@@ -1092,7 +1092,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
                 else
                 {
-                    writer.Append(constant.Value?.ToString() ?? "null");
+                    // Handle numeric types with InvariantCulture to ensure consistent formatting
+                    if (constant.Value is IFormattable formattable)
+                    {
+                        writer.Append(formattable.ToString(null, System.Globalization.CultureInfo.InvariantCulture));
+                    }
+                    else
+                    {
+                        writer.Append(constant.Value?.ToString() ?? "null");
+                    }
                 }
                 break;
 

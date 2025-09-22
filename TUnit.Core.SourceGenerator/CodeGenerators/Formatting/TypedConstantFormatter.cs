@@ -6,7 +6,7 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 
 public class TypedConstantFormatter : ITypedConstantFormatter
 {
-    
+
     public string FormatForCode(TypedConstant constant, ITypeSymbol? targetType = null)
     {
         if (constant.IsNull)
@@ -18,8 +18,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
         {
             case TypedConstantKind.Primitive:
                 // Check for special floating-point values first using the TypedConstant's type info
-                if (constant.Type?.SpecialType == SpecialType.System_Single || 
-                    constant.Type?.SpecialType == SpecialType.System_Double)
+                if (constant.Type?.SpecialType is SpecialType.System_Single or SpecialType.System_Double)
                 {
                     var specialValue = Helpers.SpecialFloatingPointValuesHelper.TryFormatSpecialFloatingPointValue(constant.Value);
                     if (specialValue != null)
@@ -28,20 +27,20 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                     }
                 }
                 return FormatPrimitiveForCode(constant.Value, targetType);
-                
+
             case TypedConstantKind.Enum:
                 return FormatEnumForCode(constant, targetType);
-                
+
             case TypedConstantKind.Type:
                 var type = (ITypeSymbol)constant.Value!;
                 return $"typeof({type.GloballyQualified()})";
-                
+
             case TypedConstantKind.Array:
                 return FormatArrayForCode(constant, targetType);
-                
+
             case TypedConstantKind.Error:
                 return "default";
-                
+
             default:
                 return constant.Value?.ToString() ?? "null";
         }
@@ -58,21 +57,21 @@ public class TypedConstantFormatter : ITypedConstantFormatter
         {
             case TypedConstantKind.Primitive:
                 return EscapeForTestId(constant.Value?.ToString() ?? "null");
-                
+
             case TypedConstantKind.Enum:
                 // For test IDs, use the numeric value or member name
                 var enumType = constant.Type as INamedTypeSymbol;
                 var memberName = GetEnumMemberName(enumType, constant.Value);
                 return memberName ?? constant.Value?.ToString() ?? "null";
-                
+
             case TypedConstantKind.Type:
                 var type = (ITypeSymbol)constant.Value!;
                 return type.GloballyQualified();
-                
+
             case TypedConstantKind.Array:
                 var elements = constant.Values.Select(v => FormatForTestId(v));
                 return $"[{string.Join(", ", elements)}]";
-                
+
             default:
                 return EscapeForTestId(constant.Value?.ToString() ?? "null");
         }
@@ -113,10 +112,10 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                     var enumTypeName = targetType.GloballyQualified();
                     return $"{enumTypeName}.{memberName}";
                 }
-                
+
                 // Fallback to cast for non-member values
                 var formattedValue = FormatPrimitive(value);
-                return formattedValue != null && formattedValue.StartsWith("-") 
+                return formattedValue != null && formattedValue.StartsWith("-")
                     ? $"({targetType.GloballyQualified()})({formattedValue})"
                     : $"({targetType.GloballyQualified()}){formattedValue}";
             }
@@ -155,56 +154,56 @@ public class TypedConstantFormatter : ITypedConstantFormatter
             switch (targetType.SpecialType)
             {
                 case SpecialType.System_Byte:
-                    return $"(byte){value}";
+                    return $"(byte){value.ToInvariantString()}";
                 case SpecialType.System_SByte:
-                    return $"(sbyte){value}";
+                    return $"(sbyte){value.ToInvariantString()}";
                 case SpecialType.System_Int16:
-                    return $"(short){value}";
+                    return $"(short){value.ToInvariantString()}";
                 case SpecialType.System_UInt16:
-                    return $"(ushort){value}";
+                    return $"(ushort){value.ToInvariantString()}";
                 case SpecialType.System_Int32:
                     // Int32 is the default for integer literals, no cast needed unless value is not int32
                     return value is int ? value.ToString()! : $"(int){value}";
                 case SpecialType.System_UInt32:
-                    return $"{value}u";
+                    return $"{value.ToInvariantString()}u";
                 case SpecialType.System_Int64:
-                    return $"{value}L";
+                    return $"{value.ToInvariantString()}L";
                 case SpecialType.System_UInt64:
-                    return $"{value}UL";
+                    return $"{value.ToInvariantString()}UL";
                 case SpecialType.System_Single:
-                    return $"{value}f";
+                    return $"{value.ToInvariantString()}f";
                 case SpecialType.System_Double:
-                    // Double is default for floating-point literals
-                    return value.ToString()!;
+                    return $"{value.ToInvariantString()}d";
                 case SpecialType.System_Decimal:
                     // Handle string to decimal conversion for values that can't be expressed as literals
                     if (value is string s)
                     {
                         // Generate code that parses the string at runtime
                         // This allows for maximum precision decimal values
-                        return $"decimal.Parse(\"{s}\", System.Globalization.CultureInfo.InvariantCulture)";
+                        return $"decimal.Parse(\"{s.ToInvariantString()}\", global::System.Globalization.CultureInfo.InvariantCulture)";
                     }
                     // When target is decimal but value is double/float/int, convert and format with m suffix
-                    else if (value is double d)
+                    if (value is double d)
                     {
                         // Use the full precision by formatting with sufficient digits
                         // The 'G29' format gives us the maximum precision for decimal
                         var decimalValue = (decimal)d;
                         return $"{decimalValue.ToString("G29", System.Globalization.CultureInfo.InvariantCulture)}m";
                     }
-                    else if (value is float f)
+                    if (value is float f)
                     {
                         var decimalValue = (decimal)f;
                         return $"{decimalValue.ToString("G29", System.Globalization.CultureInfo.InvariantCulture)}m";
                     }
-                    else if (value is int || value is long || value is short || value is byte ||
-                             value is uint || value is ulong || value is ushort || value is sbyte)
+
+                    if (value is int or long or short or byte or uint or ulong or ushort or sbyte)
                     {
                         // For integer types, convert to decimal
                         var decimalValue = Convert.ToDecimal(value);
                         return $"{decimalValue.ToString(System.Globalization.CultureInfo.InvariantCulture)}m";
                     }
-                    return $"{value}m";
+
+                    return $"{value.ToInvariantString()}m";
             }
         }
 
@@ -244,7 +243,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
         {
             elementType = (constant.Type as IArrayTypeSymbol)?.ElementType;
         }
-        
+
         var elements = constant.Values.Select(v => FormatForCode(v, elementType));
         var elementTypeString = elementType?.GloballyQualified() ?? "object";
         return $"new {elementTypeString}[] {{ {string.Join(", ", elements)} }}";
@@ -288,6 +287,8 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 {
                     return formattable.ToString(null, System.Globalization.CultureInfo.InvariantCulture);
                 }
+                // For non-IFormattable types, fallback to ToString()
+                // This should be safe as we've handled all numeric types above
                 return value.ToString() ?? "null";
         }
     }

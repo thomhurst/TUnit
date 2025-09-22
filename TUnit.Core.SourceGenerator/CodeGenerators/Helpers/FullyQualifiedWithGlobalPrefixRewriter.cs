@@ -21,8 +21,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         if (symbol is IFieldSymbol fieldSymbol && fieldSymbol.IsConst)
         {
             var containingType = fieldSymbol.ContainingType;
-            if (containingType?.SpecialType == SpecialType.System_Double || 
-                containingType?.SpecialType == SpecialType.System_Single)
+            if (containingType?.SpecialType is SpecialType.System_Double or SpecialType.System_Single)
             {
                 // Get the constant value and use the helper to create the appropriate syntax
                 if (fieldSymbol.HasConstantValue)
