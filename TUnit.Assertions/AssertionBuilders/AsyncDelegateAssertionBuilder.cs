@@ -7,7 +7,7 @@ public class AsyncDelegateAssertionBuilder
     : AssertionBuilder,
         IDelegateSource
 {
-    internal AsyncDelegateAssertionBuilder(Func<Task> function, string? expressionBuilder) : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
+    internal AsyncDelegateAssertionBuilder(Func<Task> function, string? expressionBuilder) : base(LazyAssertionData.Create(function, expressionBuilder), expressionBuilder)
     {
     }
 }

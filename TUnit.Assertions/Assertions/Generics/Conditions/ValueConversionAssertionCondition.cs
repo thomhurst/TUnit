@@ -14,6 +14,6 @@ public class ValueConversionAssertionCondition<TFromType, TToType>(
         AssertionMetadata assertionMetadata
     )
     {
-        return await convertToAssertCondition.GetAssertionResult(await source.AssertionDataTask);
+        return await convertToAssertCondition.GetAssertionResult(await source.LazyAssertionData.GetResultAsync());
     }
 }
