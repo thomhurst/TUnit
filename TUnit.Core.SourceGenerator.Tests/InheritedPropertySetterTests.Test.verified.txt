@@ -64,19 +64,22 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                 {
                     PropertyName = "Property4",
                     PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
-                    DataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>() { Shared = global::TUnit.Core.SharedType.PerTestSession },
+                    DataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+{Shared = global::TUnit.Core.SharedType.PerTestSession,},
                 },
                 new global::TUnit.Core.PropertyDataSource
                 {
                     PropertyName = "Property5",
                     PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
-                    DataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>() { Shared = global::TUnit.Core.SharedType.PerClass },
+                    DataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+{Shared = global::TUnit.Core.SharedType.PerClass,},
                 },
                 new global::TUnit.Core.PropertyDataSource
                 {
                     PropertyName = "Property6",
                     PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
-                    DataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>() { Shared = global::TUnit.Core.SharedType.Keyed, Key = "Key" },
+                    DataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+{Shared = global::TUnit.Core.SharedType.Keyed,Key = "Key",},
                 },
                 new global::TUnit.Core.PropertyDataSource
                 {
@@ -400,19 +403,22 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
                 {
                     PropertyName = "Property4",
                     PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
-                    DataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>() { Shared = global::TUnit.Core.SharedType.PerTestSession },
+                    DataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+{Shared = global::TUnit.Core.SharedType.PerTestSession,},
                 },
                 new global::TUnit.Core.PropertyDataSource
                 {
                     PropertyName = "Property5",
                     PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
-                    DataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>() { Shared = global::TUnit.Core.SharedType.PerClass },
+                    DataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+{Shared = global::TUnit.Core.SharedType.PerClass,},
                 },
                 new global::TUnit.Core.PropertyDataSource
                 {
                     PropertyName = "Property6",
                     PropertyType = typeof(global::TUnit.TestProject.PropertySetterTests.InnerModel),
-                    DataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>() { Shared = global::TUnit.Core.SharedType.Keyed, Key = "Key" },
+                    DataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.PropertySetterTests.InnerModel>()
+{Shared = global::TUnit.Core.SharedType.Keyed,Key = "Key",},
                 },
                 new global::TUnit.Core.PropertyDataSource
                 {

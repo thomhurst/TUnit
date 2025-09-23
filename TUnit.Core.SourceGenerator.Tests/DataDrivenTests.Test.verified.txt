@@ -268,7 +268,7 @@ internal sealed class DataDrivenTests_EnumValue_TestSource_GUID : global::TUnit.
             {
                 new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.TestEnum.One),
                 new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.TestEnum.Two),
-                new global::TUnit.Core.ArgumentsAttribute((global::TUnit.TestProject.TestEnum)(-1)),
+                new global::TUnit.Core.ArgumentsAttribute(-1),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -382,7 +382,7 @@ internal sealed class DataDrivenTests_NullValue_TestSource_GUID : global::TUnit.
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(),
+                new global::TUnit.Core.ArgumentsAttribute(null),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -726,7 +726,7 @@ internal sealed class DataDrivenTests_BooleanString_TestSource_GUID : global::TU
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(),
+                new global::TUnit.Core.ArgumentsAttribute(null),
                 new global::TUnit.Core.ArgumentsAttribute(false),
                 new global::TUnit.Core.ArgumentsAttribute(true),
             },
@@ -956,7 +956,7 @@ internal sealed class DataDrivenTests_IntegerArray_TestSource_GUID : global::TUn
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(new int[] { 1, 2, 3 }),
+                new global::TUnit.Core.ArgumentsAttribute(new[] { 1, 2, 3 }),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
