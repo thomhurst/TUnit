@@ -12,6 +12,16 @@ public class TypedConstantFormatter : ITypedConstantFormatter
     {
         if (constant.IsNull)
         {
+            // If we have a nullable enum target type, cast null to that type
+            if (targetType?.IsNullableValueType() == true)
+            {
+                var underlyingType = targetType.GetNullableUnderlyingType();
+                if (underlyingType?.TypeKind == TypeKind.Enum)
+                {
+                    // For nullable enums, we need to cast null to the nullable enum type
+                    return $"({targetType.GloballyQualified()})null";
+                }
+            }
             return "null";
         }
 
@@ -218,7 +228,20 @@ public class TypedConstantFormatter : ITypedConstantFormatter
 
     private string FormatEnumForCode(TypedConstant constant, ITypeSymbol? targetType)
     {
-        var enumType = targetType as INamedTypeSymbol ?? constant.Type as INamedTypeSymbol;
+        // Check if target type is a nullable enum, and if so, get the underlying enum type
+        var isNullableEnum = targetType?.IsNullableValueType() == true;
+        INamedTypeSymbol? enumType = null;
+        
+        if (isNullableEnum)
+        {
+            var underlyingType = targetType!.GetNullableUnderlyingType();
+            enumType = underlyingType as INamedTypeSymbol;
+        }
+        else
+        {
+            enumType = targetType as INamedTypeSymbol ?? constant.Type as INamedTypeSymbol;
+        }
+        
         if (enumType == null)
         {
             return FormatPrimitive(constant.Value);
@@ -227,14 +250,28 @@ public class TypedConstantFormatter : ITypedConstantFormatter
         var memberName = GetEnumMemberName(enumType, constant.Value);
         if (memberName != null)
         {
-            return $"{enumType.GloballyQualified()}.{memberName}";
+            var formattedEnum = $"{enumType.GloballyQualified()}.{memberName}";
+            // If the target type is nullable, cast the enum value to the nullable type
+            if (isNullableEnum)
+            {
+                return $"({targetType!.GloballyQualified()}){formattedEnum}";
+            }
+            return formattedEnum;
         }
 
         // Fallback to cast syntax
         var formattedValue = FormatPrimitive(constant.Value);
-        return formattedValue != null && formattedValue.StartsWith("-")
+        var result = formattedValue != null && formattedValue.StartsWith("-")
             ? $"({enumType.GloballyQualified()})({formattedValue})"
             : $"({enumType.GloballyQualified()}){formattedValue}";
+            
+        // If the target type is nullable, wrap the result in a cast to the nullable type
+        if (isNullableEnum)
+        {
+            return $"({targetType!.GloballyQualified()})({result})";
+        }
+        
+        return result;
     }
 
     private string FormatArrayForCode(TypedConstant constant, ITypeSymbol? targetType = null)
