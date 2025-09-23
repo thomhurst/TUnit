@@ -43,12 +43,31 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentTracki
             }
         }
 
-        // If we have both explicit and non-explicit tests, exclude the explicit ones
-        // This means the filter wasn't specifically targeting explicit tests
+        // Special handling for explicit tests based on filter type and results:
+        // 
+        // If we have both explicit and non-explicit tests that match:
+        // - For property-based filters (like [Category!=Performance]), include both types
+        //   as the explicit tests legitimately match the filter criteria
+        // - For path-based wildcard filters, exclude explicit tests as they weren't specifically targeted
+        // 
+        // If we only have explicit tests, they were specifically targeted by the filter
+        
         if (filteredTests.Count > 0 && filteredExplicitTests.Count > 0)
         {
-            logger.LogTrace($"Filter matched both explicit and non-explicit tests. Excluding {filteredExplicitTests.Count} explicit tests.");
-            return filteredTests;
+            // Check if this is a property-based filter that should include explicit tests
+            if (IsPropertyBasedFilter(testExecutionFilter))
+            {
+                logger.LogTrace($"Property-based filter matched both explicit ({filteredExplicitTests.Count}) and non-explicit ({filteredTests.Count}) tests. Including both.");
+                var allTests = new List<AbstractExecutableTest>();
+                allTests.AddRange(filteredTests);
+                allTests.AddRange(filteredExplicitTests);
+                return allTests;
+            }
+            else
+            {
+                logger.LogTrace($"Path-based filter matched both explicit and non-explicit tests. Excluding {filteredExplicitTests.Count} explicit tests.");
+                return filteredTests;
+            }
         }
 
         // If we only have explicit tests, the filter was specifically targeting them
@@ -153,6 +172,21 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentTracki
         }
 
         return matches;
+    }
+
+    private bool IsPropertyBasedFilter(ITestExecutionFilter? testExecutionFilter)
+    {
+#pragma warning disable TPEXP
+        if (testExecutionFilter is TreeNodeFilter treeNodeFilter)
+        {
+            // A filter is considered property-based if it contains property conditions
+            // like [Category!=Performance] or [Property=Value]
+            var filter = treeNodeFilter.Filter;
+            return filter.Contains('[') && filter.Contains('=');
+        }
+#pragma warning restore TPEXP
+        
+        return false;
     }
 
     private bool UnhandledFilter(ITestExecutionFilter testExecutionFilter)
