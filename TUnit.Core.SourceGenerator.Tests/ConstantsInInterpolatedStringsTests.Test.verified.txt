@@ -21,7 +21,7 @@ internal sealed class ConstantsInInterpolatedStringsTests_SomeTest_TestSource_GU
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute("Value1"),
+                new global::TUnit.Core.ArgumentsAttribute($"{"Value"}1"),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
