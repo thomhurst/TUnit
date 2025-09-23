@@ -85,7 +85,7 @@ public static class TupleArgumentHelper
         }
         
         // Check if last parameter is params array
-        var hasParams = parameters.Count > 0 && parameters[parameters.Count - 1].IsParams;
+        var hasParams = parameters.Count > 0 && parameters[^1].IsParams;
         
         if (!hasParams)
         {
@@ -137,7 +137,7 @@ public static class TupleArgumentHelper
             }
             
             // Handle params array parameter
-            var paramsParam = parameters[parameters.Count - 1];
+            var paramsParam = parameters[^1];
             var elementType = (paramsParam.Type as IArrayTypeSymbol)?.ElementType;
             
             if (elementType != null)

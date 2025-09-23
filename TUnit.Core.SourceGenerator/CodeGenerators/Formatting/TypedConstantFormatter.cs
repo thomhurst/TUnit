@@ -142,11 +142,11 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                     case SpecialType.System_UInt64:
                         return $"{(ulong)charValue}UL";
                     case SpecialType.System_Single:
-                        return $"{(float)charValue}f";
+                        return ((float)charValue).ToString(System.Globalization.CultureInfo.InvariantCulture) + "f";
                     case SpecialType.System_Double:
-                        return $"{(double)charValue}d";
+                        return ((double)charValue).ToString(System.Globalization.CultureInfo.InvariantCulture) + "d";
                     case SpecialType.System_Decimal:
-                        return $"{(decimal)charValue}m";
+                        return ((decimal)charValue).ToString(System.Globalization.CultureInfo.InvariantCulture) + "m";
                 }
             }
 
@@ -268,13 +268,12 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                 return b ? "true" : "false";
             case null:
                 return "null";
-            // Use InvariantCulture for numeric types to ensure consistent formatting
             case double d:
-                return d.ToString(System.Globalization.CultureInfo.InvariantCulture) + "d";
+                return d.ToString("G17", System.Globalization.CultureInfo.InvariantCulture) + "d";
             case float f:
-                return f.ToString(System.Globalization.CultureInfo.InvariantCulture) + "f";
+                return f.ToString("G9", System.Globalization.CultureInfo.InvariantCulture) + "f";
             case decimal dec:
-                return dec.ToString(System.Globalization.CultureInfo.InvariantCulture) + "m";
+                return dec.ToString("G29", System.Globalization.CultureInfo.InvariantCulture) + "m";
             case long l:
                 return l.ToString(System.Globalization.CultureInfo.InvariantCulture) + "L";
             case ulong ul:

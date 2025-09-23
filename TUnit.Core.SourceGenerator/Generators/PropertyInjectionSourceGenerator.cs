@@ -376,6 +376,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         return constant.Kind switch
         {
             TypedConstantKind.Primitive when constant.Value is string str => $"\"{str}\"",
+            TypedConstantKind.Primitive when constant.Value is IFormattable formattable => formattable.ToString(null, System.Globalization.CultureInfo.InvariantCulture),
             TypedConstantKind.Primitive => constant.Value?.ToString() ?? "null",
             TypedConstantKind.Enum => FormatEnumConstant(constant),
             TypedConstantKind.Type => FormatTypeConstant(constant),

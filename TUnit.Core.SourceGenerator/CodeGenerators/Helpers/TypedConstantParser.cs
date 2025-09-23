@@ -9,7 +9,7 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 public static class TypedConstantParser
 {
     private static readonly TypedConstantFormatter _formatter = new();
-    
+
     public static string GetTypedConstantValue(SemanticModel semanticModel,
         (TypedConstant typedConstant, AttributeArgumentSyntax a) element, ITypeSymbol? parameterType)
     {
@@ -68,13 +68,7 @@ public static class TypedConstantParser
 
     public static string GetRawTypedConstantValue(TypedConstant typedConstant, ITypeSymbol? targetType = null)
     {
-        // Use the formatter for consistent handling
         return _formatter.FormatForCode(typedConstant, targetType);
-    }
-
-    private static string FormatPrimitive(TypedConstant typedConstant)
-    {
-        return FormatPrimitive(typedConstant.Value);
     }
 
     public static string FormatPrimitive(object? value)
@@ -96,13 +90,12 @@ public static class TypedConstantParser
                 return b ? "true" : "false";
             case null:
                 return "null";
-            // Use InvariantCulture for numeric types to ensure consistent formatting
             case double d:
-                return d.ToString(System.Globalization.CultureInfo.InvariantCulture) + "d";
+                return d.ToString("G17", System.Globalization.CultureInfo.InvariantCulture) + "d";
             case float f:
-                return f.ToString(System.Globalization.CultureInfo.InvariantCulture) + "f";
+                return f.ToString("G9", System.Globalization.CultureInfo.InvariantCulture) + "f";
             case decimal dec:
-                return dec.ToString(System.Globalization.CultureInfo.InvariantCulture) + "m";
+                return dec.ToString("G29", System.Globalization.CultureInfo.InvariantCulture) + "m";
             default:
                 // For other numeric types, use InvariantCulture
                 if (value is IFormattable formattable)
