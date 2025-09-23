@@ -390,6 +390,24 @@
     <data name="TUXU0001Title" xml:space="preserve">
         <value>xUnit code can be converted to TUnit code</value>
     </data>
+    <data name="TUNU0001Description" xml:space="preserve">
+        <value>NUnit code can be converted to TUnit code.</value>
+    </data>
+    <data name="TUNU0001MessageFormat" xml:space="preserve">
+        <value>NUnit code can be converted to TUnit code</value>
+    </data>
+    <data name="TUNU0001Title" xml:space="preserve">
+        <value>NUnit code can be converted to TUnit code</value>
+    </data>
+    <data name="TUMS0001Description" xml:space="preserve">
+        <value>MSTest code can be converted to TUnit code.</value>
+    </data>
+    <data name="TUMS0001MessageFormat" xml:space="preserve">
+        <value>MSTest code can be converted to TUnit code</value>
+    </data>
+    <data name="TUMS0001Title" xml:space="preserve">
+        <value>MSTest code can be converted to TUnit code</value>
+    </data>
     <data name="TUnit0055Description" xml:space="preserve">
         <value>Overwriting the Console writer can break TUnit logging.</value>
     </data>
