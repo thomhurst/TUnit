@@ -240,7 +240,7 @@ internal sealed class ConstantArgumentsTests_Double_TestSource_GUID : global::TU
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1.23),
+                new global::TUnit.Core.ArgumentsAttribute(1.23d),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -352,12 +352,12 @@ internal sealed class ConstantArgumentsTests_Float_TestSource_GUID : global::TUn
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1.23F),
+                new global::TUnit.Core.ArgumentsAttribute(1.23000002f),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(1.23f),
+                new global::TUnit.Core.ArgumentsAttribute(1.23000002f),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -581,7 +581,7 @@ internal sealed class ConstantArgumentsTests_UInt_TestSource_GUID : global::TUni
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(123u),
+                new global::TUnit.Core.ArgumentsAttribute(123U),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),

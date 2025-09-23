@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -128,16 +129,16 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             bool boolValue => boolValue ? SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression)
                 : SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression),
             int intValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(intValue)),
-            double doubleValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(doubleValue)),
-            float floatValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(floatValue)),
+            double doubleValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(doubleValue.ToString("G17", CultureInfo.InvariantCulture) + "d", doubleValue)),
+            float floatValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(floatValue.ToString("G9", CultureInfo.InvariantCulture) + "f", floatValue)),
             long longValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(longValue)),
-            decimal decimalValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(decimalValue)),
-            uint uintValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(uintValue)),
-            ulong ulongValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(ulongValue)),
-            ushort ushortValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(ushortValue)),
-            byte byteValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(byteValue)),
-            sbyte sbyteValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(sbyteValue)),
-            short shortValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(shortValue)),
+            decimal decimalValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(decimalValue.ToString("G29", CultureInfo.InvariantCulture) + "m", decimalValue)),
+            uint uintValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(uintValue + "U", uintValue)),
+            ulong ulongValue => SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(ulongValue + "UL", ulongValue)),
+            ushort ushortValue => SyntaxFactory.CastExpression(SyntaxFactory.ParseTypeName("ushort"), SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(ushortValue))),
+            byte byteValue => SyntaxFactory.CastExpression(SyntaxFactory.ParseTypeName("byte"), SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(byteValue))),
+            sbyte sbyteValue => SyntaxFactory.CastExpression(SyntaxFactory.ParseTypeName("sbyte"), SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(sbyteValue))),
+            short shortValue => SyntaxFactory.CastExpression(SyntaxFactory.ParseTypeName("short"), SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(shortValue))),
             _ => throw new ArgumentOutOfRangeException(nameof(constantValue), constantValue, $"Unknown constant type: {constantValue?.GetType()}")
         };
     }
@@ -198,11 +199,11 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         // Convert collection expressions to array initializers for property assignments
         // Collection expressions like [1, 2, 3] need to be converted to new object[] { 1, 2, 3 }
         // when used in property initializers to avoid compilation errors
-        
+
         // Get the type info from the semantic model if available
         var typeInfo = semanticModel.GetTypeInfo(node);
         var elementType = "object";
-        
+
         if (typeInfo.ConvertedType is IArrayTypeSymbol arrayTypeSymbol)
         {
             elementType = arrayTypeSymbol.ElementType.GloballyQualified();
@@ -211,7 +212,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         {
             elementType = arrayTypeSymbol2.ElementType.GloballyQualified();
         }
-        
+
         // Visit and rewrite each element
         var rewrittenElements = new List<ExpressionSyntax>();
         foreach (var element in node.Elements)
@@ -222,7 +223,7 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
                 rewrittenElements.Add((ExpressionSyntax)rewrittenExpression);
             }
         }
-        
+
         // Create an array creation expression instead of a collection expression
         // This ensures compatibility with property initializers
         var arrayTypeSyntax = SyntaxFactory.ArrayType(
@@ -235,12 +236,12 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
                 )
             )
         );
-        
+
         var initializer = SyntaxFactory.InitializerExpression(
             SyntaxKind.ArrayInitializerExpression,
             SyntaxFactory.SeparatedList(rewrittenElements)
         );
-        
+
         // Create the array creation expression with proper spacing
         return SyntaxFactory.ArrayCreationExpression(
             SyntaxFactory.Token(SyntaxKind.NewKeyword).WithTrailingTrivia(SyntaxFactory.Whitespace(" ")),
