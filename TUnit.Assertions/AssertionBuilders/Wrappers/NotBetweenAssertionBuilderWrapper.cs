@@ -1,10 +1,10 @@
-﻿using TUnit.Assertions.AssertConditions.Comparable;
+using TUnit.Assertions.AssertConditions.Comparable;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class NotBetweenAssertionBuilderWrapper<TActual> : InvokableValueAssertionBuilder<TActual> where TActual : IComparable<TActual>
+public class NotBetweenAssertionBuilderWrapper<TActual> : AssertionBuilder<TActual> where TActual : IComparable<TActual>
 {
-    internal NotBetweenAssertionBuilderWrapper(InvokableAssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal NotBetweenAssertionBuilderWrapper(AssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

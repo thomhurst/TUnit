@@ -8,17 +8,17 @@ namespace TUnit.Assertions.Extensions;
 
 public static class GenericIsInExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> IsIn<TActual>(this IValueSource<TActual> valueSource, params TActual[] expected)
+    public static AssertionBuilder<TActual> IsIn<TActual>(this IValueSource<TActual> valueSource, params TActual[] expected)
     {
         return IsIn(valueSource, expected, EqualityComparer<TActual>.Default);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsIn<TActual>(this IValueSource<TActual> valueSource, IEnumerable<TActual> expected)
+    public static AssertionBuilder<TActual> IsIn<TActual>(this IValueSource<TActual> valueSource, IEnumerable<TActual> expected)
     {
         return IsIn(valueSource, expected, EqualityComparer<TActual>.Default);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsIn<TActual>(this IValueSource<TActual> valueSource, IEnumerable<TActual> expected, IEqualityComparer<TActual> equalityComparer)
+    public static AssertionBuilder<TActual> IsIn<TActual>(this IValueSource<TActual> valueSource, IEnumerable<TActual> expected, IEqualityComparer<TActual> equalityComparer)
     {
         var expectedArray = expected as TActual[] ?? expected.ToArray();
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual[]>(

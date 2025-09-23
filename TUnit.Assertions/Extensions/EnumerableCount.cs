@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
@@ -8,7 +8,7 @@ namespace TUnit.Assertions.Extensions;
 
 public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource) where TActual : IEnumerable<TInner>
 {
-    public InvokableValueAssertionBuilder<TActual> EqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    public AssertionBuilder<TActual> EqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
             {
@@ -26,7 +26,7 @@ public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource)
             , [doNotPopulateThisValue]);
     }
 
-    public InvokableValueAssertionBuilder<TActual> Empty =>
+    public AssertionBuilder<TActual> Empty =>
         valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(0, (enumerable, _, self) =>
                 {
                     if (enumerable is null)
@@ -42,7 +42,7 @@ public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource)
                 $"to be empty")
         , []);
 
-    public InvokableValueAssertionBuilder<TActual> GreaterThan(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    public AssertionBuilder<TActual> GreaterThan(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected,
             (enumerable, _, self) =>
@@ -61,7 +61,7 @@ public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource)
             , [doNotPopulateThisValue]);
     }
 
-    public InvokableValueAssertionBuilder<TActual> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    public AssertionBuilder<TActual> GreaterThanOrEqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
             {
@@ -79,7 +79,7 @@ public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource)
             , [doNotPopulateThisValue]);
     }
 
-    public InvokableValueAssertionBuilder<TActual> LessThan(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    public AssertionBuilder<TActual> LessThan(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
             {
@@ -97,7 +97,7 @@ public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource)
             , [doNotPopulateThisValue]);
     }
 
-    public InvokableValueAssertionBuilder<TActual> LessThanOrEqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    public AssertionBuilder<TActual> LessThanOrEqualTo(int expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, int>(expected, (enumerable, _, self) =>
             {
@@ -115,12 +115,12 @@ public class EnumerableCount<TActual, TInner>(IValueSource<TActual> valueSource)
             , [doNotPopulateThisValue]);
     }
 
-    public InvokableValueAssertionBuilder<TActual> Negative() => LessThan(0);
+    public AssertionBuilder<TActual> Negative() => LessThan(0);
 
-    public InvokableValueAssertionBuilder<TActual> EqualToZero() => EqualTo(0);
-    public InvokableValueAssertionBuilder<TActual> EqualToOne() => EqualTo(1);
+    public AssertionBuilder<TActual> EqualToZero() => EqualTo(0);
+    public AssertionBuilder<TActual> EqualToOne() => EqualTo(1);
 
-    public InvokableValueAssertionBuilder<TActual> Positive() => GreaterThan(0);
+    public AssertionBuilder<TActual> Positive() => GreaterThan(0);
 
 
     private int GetCount(TActual? actualValue)

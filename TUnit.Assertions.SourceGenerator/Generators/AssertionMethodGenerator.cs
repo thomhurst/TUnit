@@ -722,12 +722,12 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
             extensionTargetType = "T";
-            sourceBuilder.Append($"    public static InvokableValueAssertionBuilder<T> {generatedMethodName}<T>(this IValueSource<T> valueSource");
+            sourceBuilder.Append($"    public static AssertionBuilder<T> {generatedMethodName}<T>(this IValueSource<T> valueSource");
         }
         else
         {
             extensionTargetType = targetTypeName;
-            sourceBuilder.Append($"    public static InvokableValueAssertionBuilder<{targetTypeName}> {generatedMethodName}(this IValueSource<{targetTypeName}> valueSource");
+            sourceBuilder.Append($"    public static AssertionBuilder<{targetTypeName}> {generatedMethodName}(this IValueSource<{targetTypeName}> valueSource");
         }
 
         foreach (var param in additionalParameters)

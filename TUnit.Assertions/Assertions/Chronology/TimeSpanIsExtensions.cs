@@ -1,4 +1,4 @@
-﻿#nullable disable
+#nullable disable
 
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Chronology;
@@ -19,7 +19,7 @@ public static class TimeSpanIsExtensions
         );
     }
 
-    public static InvokableValueAssertionBuilder<TimeSpan> IsZero(this IValueSource<TimeSpan> valueSource)
+    public static AssertionBuilder<TimeSpan> IsZero(this IValueSource<TimeSpan> valueSource)
     {
         return valueSource.RegisterAssertion(new EqualsExpectedValueAssertCondition<TimeSpan>(TimeSpan.Zero)
             , []);

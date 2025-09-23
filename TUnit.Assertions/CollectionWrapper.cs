@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
@@ -8,9 +8,9 @@ namespace TUnit.Assertions;
 
 public class CollectionWrapper<TInner>(IValueSource<IEnumerable<TInner>> valueSource)
 {
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> Satisfy<TExpected>(
+    public AssertionBuilder<IEnumerable<TInner>> Satisfy<TExpected>(
         Func<TInner?, TExpected> mapper,
-        Func<IValueSource<TExpected?>, IInvokableAssertionBuilder> assert,
+        Func<IValueSource<TExpected?>, AssertionBuilder> assert,
         [CallerArgumentExpression(nameof(mapper))] string mapperExpression = "",
         [CallerArgumentExpression(nameof(assert))] string assertionBuilderExpression = "")
     {
@@ -20,9 +20,9 @@ public class CollectionWrapper<TInner>(IValueSource<IEnumerable<TInner>> valueSo
     }
 
 
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> Satisfy<TExpected>(
+    public AssertionBuilder<IEnumerable<TInner>> Satisfy<TExpected>(
         Func<TInner?, Task<TExpected>?> asyncMapper,
-        Func<IValueSource<TExpected?>, IInvokableAssertionBuilder> assert,
+        Func<IValueSource<TExpected?>, AssertionBuilder> assert,
         [CallerArgumentExpression(nameof(asyncMapper))] string mapperExpression = "",
         [CallerArgumentExpression(nameof(assert))] string assertionBuilderExpression = "")
     {
@@ -31,8 +31,8 @@ public class CollectionWrapper<TInner>(IValueSource<IEnumerable<TInner>> valueSo
             [mapperExpression, assertionBuilderExpression]);
     }
 
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> Satisfy(
-        Func<IValueSource<TInner?>, IInvokableAssertionBuilder> assert,
+    public AssertionBuilder<IEnumerable<TInner>> Satisfy(
+        Func<IValueSource<TInner?>, AssertionBuilder> assert,
         [CallerArgumentExpression(nameof(assert))] string assertionBuilderExpression = "")
     {
         return valueSource.RegisterAssertion(new EnumerableSatisfiesAssertCondition<IEnumerable<TInner>, TInner, TInner>(

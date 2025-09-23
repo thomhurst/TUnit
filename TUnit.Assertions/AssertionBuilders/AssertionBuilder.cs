@@ -1,222 +1,265 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Connectors;
 using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.Exceptions;
-using TUnit.Assertions.Helpers;
+
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public abstract class AssertionBuilder : ISource
+public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>, IDelegateSource
 {
-    protected IInvokableAssertionBuilder? OtherTypeAssertionBuilder;
-
-    protected AssertionData? AwaitedAssertionData;
-
-    public AssertionBuilder(ISource source)
-    {
-        _assertionDataTask = source.AssertionDataTask;
-        _actualExpression = source.ActualExpression;
-        _expressionBuilder = source.ExpressionBuilder;
-        _assertions = source.Assertions;
-    }
-
-    public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string actualExpression, StringBuilder expressionBuilder, Stack<BaseAssertCondition> assertions)
-    {
-        _assertionDataTask = assertionDataTask;
-        _actualExpression = actualExpression;
-        _expressionBuilder = expressionBuilder;
-        _assertions = assertions;
-    }
-
-    public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string? actualExpression)
-    {
-        _assertionDataTask = assertionDataTask;
-        _actualExpression = actualExpression;
-
-        if (string.IsNullOrEmpty(actualExpression))
-        {
-            _actualExpression = null;
-            _expressionBuilder = new StringBuilder("Assert.That(UNKNOWN)");
-        }
-        else
-        {
-            _actualExpression = actualExpression;
-            _expressionBuilder = new StringBuilder("Assert.That(");
-            _expressionBuilder.Append(actualExpression);
-            _expressionBuilder.Append(')');
-        }
-    }
-
-    StringBuilder ISource.ExpressionBuilder => _expressionBuilder;
-
-    string? ISource.ActualExpression => _actualExpression;
-
-    ValueTask<AssertionData> ISource.AssertionDataTask => _assertionDataTask;
-
-    Stack<BaseAssertCondition> ISource.Assertions => _assertions;
-
-    protected readonly List<AssertionResult> Results = [];
-    private readonly StringBuilder _expressionBuilder;
     private readonly ValueTask<AssertionData> _assertionDataTask;
-    private readonly Stack<BaseAssertCondition> _assertions = new();
-    private readonly string? _actualExpression;
+    private readonly ValueTask<TActual> _actualValueTask;
+    private readonly ExpressionFormatter _expressionFormatter;
+    private readonly AssertionChain _chain;
+    private readonly AssertionEvaluator _evaluator;
+    private ChainType _currentChainType = ChainType.None;
+    private string? _becauseReason;
+    private string? _becauseExpression;
+    
+    public TActual Actual { get; }
+    public override string? ActualExpression => _expressionFormatter?.GetExpression();
+    
+    // Backward compatibility property for wrapper classes and generated code
+    public override Stack<BaseAssertCondition> Assertions => new Stack<BaseAssertCondition>(_chain.GetAssertions().Reverse());
+
+    public AssertionBuilder(TActual value, string? actualExpression)
+        : this(new ValueTask<AssertionData>(ConvertToAssertionData(value, actualExpression)), actualExpression)
+    {
+        Actual = value;
+        _actualValueTask = new ValueTask<TActual>(value);
+    }
+
+    public AssertionBuilder(Func<TActual> valueFunc, string? actualExpression)
+        : this(EvaluateFunc(valueFunc, actualExpression), actualExpression)
+    {
+    }
+
+    public AssertionBuilder(Func<Task<TActual>> asyncFunc, string? actualExpression)
+        : this(EvaluateAsync(asyncFunc, actualExpression), actualExpression)
+    {
+    }
+
+    public AssertionBuilder(Task<TActual> task, string? actualExpression)
+        : this(EvaluateTask(task, actualExpression), actualExpression)
+    {
+    }
+
+    public AssertionBuilder(ValueTask<TActual> valueTask, string? actualExpression)
+        : this(EvaluateValueTask(valueTask, actualExpression), actualExpression)
+    {
+    }
+
+    // Constructor for wrapper compatibility
+    protected AssertionBuilder(AssertionBuilder<TActual> other)
+        : this(other._assertionDataTask, other.ActualExpression)
+    {
+        Actual = other.Actual;
+        _actualValueTask = other._actualValueTask;
+        
+        // Copy assertions
+        foreach (var assertion in other.GetAssertions())
+        {
+            _chain.AddAssertion(assertion);
+        }
+    }
+
+    private AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string? actualExpression)
+    {
+        _assertionDataTask = assertionDataTask;
+        _expressionFormatter = new ExpressionFormatter(actualExpression);
+        _chain = new AssertionChain();
+        _evaluator = new AssertionEvaluator();
+        Actual = default!; // Will be set by public constructors
+        _actualValueTask = new ValueTask<TActual>(Actual);
+    }
+
+    // IValueSource implementation
+    string? ISource.ActualExpression => _expressionFormatter.ActualExpression;
+    ValueTask<AssertionData> ISource.AssertionDataTask => _assertionDataTask;
+    Stack<BaseAssertCondition> ISource.Assertions => new(_chain.GetAssertions().Reverse());
+    StringBuilder ISource.ExpressionBuilder => new(_expressionFormatter.GetExpression());
 
     ISource ISource.AppendExpression(string expression)
     {
-        if (!string.IsNullOrEmpty(expression))
-        {
-            _expressionBuilder.Append('.');
-            _expressionBuilder.Append(expression);
-        }
-
+        _expressionFormatter.AppendConnector(expression);
         return this;
-    }
-
-    internal AssertionBuilder AppendConnector(ChainType chainType)
-    {
-        if (chainType == ChainType.None)
-        {
-            return this;
-        }
-
-        return (AssertionBuilder) ((ISource) this).AppendExpression(chainType.ToString());
-    }
-
-    internal protected void AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
-    {
-        if (string.IsNullOrEmpty(methodName))
-        {
-            return;
-        }
-
-        _expressionBuilder.Append('.');
-        _expressionBuilder.Append(methodName);
-        _expressionBuilder.Append('(');
-
-        for (var index = 0; index < expressions.Length; index++)
-        {
-            var expression = expressions[index];
-            _expressionBuilder.Append(expression);
-
-            if (index < expressions.Length - 1)
-            {
-                _expressionBuilder.Append(',');
-                _expressionBuilder.Append(' ');
-            }
-        }
-
-        _expressionBuilder.Append(')');
     }
 
     ISource ISource.WithAssertion(BaseAssertCondition assertCondition)
     {
-        assertCondition = this switch
+        switch (_currentChainType)
         {
-            IOrAssertionBuilder => new OrAssertCondition(_assertions.Pop(), assertCondition),
-            IAndAssertionBuilder => new AndAssertCondition(_assertions.Pop(), assertCondition),
-            _ => assertCondition
-        };
+            case ChainType.And:
+                _chain.AddAndAssertion(assertCondition);
+                break;
+            case ChainType.Or:
+                _chain.AddOrAssertion(assertCondition);
+                break;
+            default:
+                _chain.AddAssertion(assertCondition);
+                break;
+        }
+        
+        _currentChainType = ChainType.None;
+        return this;
+    }
+    
+    public override IEnumerable<BaseAssertCondition> GetAssertions()
+    {
+        return _chain.GetAssertions();
+    }
+    
+    public override void WithAssertion(BaseAssertCondition assertion)
+    {
+        _chain.AddAssertion(assertion);
+    }
+    
+    public override void AppendExpression(string expression)
+    {
+        _expressionFormatter.AppendConnector(expression);
+    }
+    
+    public ValueTask<TActual> GetActualValueTask()
+    {
+        return _actualValueTask;
+    }
 
-        _assertions.Push(assertCondition);
+    public AssertionBuilder<TActual> And
+    {
+        get
+        {
+            _currentChainType = ChainType.And;
+            _expressionFormatter.AppendConnector("And");
+            return this;
+        }
+    }
 
+    public AssertionBuilder<TActual> Or
+    {
+        get
+        {
+            _currentChainType = ChainType.Or;
+            _expressionFormatter.AppendConnector("Or");
+            return this;
+        }
+    }
+
+    public override TaskAwaiter GetAwaiter() => ProcessAssertionsAsync().GetAwaiter();
+
+    public async Task ProcessAssertionsAsync()
+    {
+        var data = await GetAssertionData();
+        await ProcessAssertionsAsync(data);
+    }
+    
+    public override async ValueTask<AssertionData> GetAssertionData()
+    {
+        return await _assertionDataTask;
+    }
+    
+    public override async ValueTask ProcessAssertionsAsync(AssertionData data)
+    {
+        await _evaluator.EvaluateAsync(new ValueTask<AssertionData>(data), _chain.GetAssertions(), _expressionFormatter);
+    }
+
+    public async Task<IEnumerable<AssertionResult>> GetAssertionResults()
+    {
+        await ProcessAssertionsAsync();
+        return _evaluator.GetResults();
+    }
+
+    public void AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
+    {
+        if (!string.IsNullOrEmpty(methodName))
+        {
+            _expressionFormatter.AppendMethod(methodName, expressions);
+        }
+    }
+    
+    public string? GetExpression()
+    {
+        return _expressionFormatter.GetExpression();
+    }
+    
+    public AssertionBuilder<TActual> AppendConnector(ChainType chainType)
+    {
+        _currentChainType = chainType;
+        _expressionFormatter.AppendConnector(chainType.ToString());
         return this;
     }
 
-    internal async Task<AssertionData> ProcessAssertionsAsync()
+    
+    public override void SetBecause(string reason, string? expression)
     {
-        if (OtherTypeAssertionBuilder is not null)
-        {
-            await OtherTypeAssertionBuilder;
-        }
-
-        AwaitedAssertionData ??= await GetAssertionData();
-
-        var currentAssertionScope = AssertionScope.GetCurrentAssertionScope();
-
-        foreach (var assertion in _assertions.Reverse())
-        {
-            var result = await assertion.GetAssertionResult(AwaitedAssertionData.Value.Result, AwaitedAssertionData.Value.Exception, new AssertionMetadata
-            {
-                StartTime = AwaitedAssertionData.Value.Start,
-                EndTime = AwaitedAssertionData.Value.End
-            }, AwaitedAssertionData.Value.ActualExpression);
-
-            Results.Add(result);
-
-            if (!result.IsPassed)
-            {
-                if (assertion.Subject is null)
-                {
-                    assertion.SetSubject(AwaitedAssertionData.Value.ActualExpression);
-                }
-
-                var exception = new AssertionException(
-                    $"""
-                     Expected {assertion.Subject} {assertion.GetExpectationWithReason()}
-                     
-                     but {result.Message}
-                     
-                     at {((IInvokableAssertionBuilder) this).GetExpression()}
-                     """
-                );
-
-                if (currentAssertionScope != null)
-                {
-                    currentAssertionScope.AddException(exception);
-                    continue;
-                }
-
-                throw exception;
-            }
-        }
-
-        return AwaitedAssertionData.Value;
+        _becauseReason = reason;
+        _becauseExpression = expression;
     }
 
-    private async Task<AssertionData> GetAssertionData()
-    {
-        var minimumWait = _assertions.Select(x => x.WaitFor).Min();
-
-        if (minimumWait is null)
-        {
-            return await _assertionDataTask;
-        }
-
-        using var cts = new CancellationTokenSource();
-
-        var completedTask = await Task.WhenAny(_assertionDataTask.AsTask(), GetMinimumWaitTask(minimumWait.Value, cts.Token));
-
-        cts.Cancel();
-
-        return await completedTask;
-    }
-
-    private async Task<AssertionData> GetMinimumWaitTask(TimeSpan wait, CancellationToken token)
+    // Static helper methods
+    private static AssertionData ConvertToAssertionData(TActual? value, string? actualExpression)
     {
         var start = DateTimeOffset.Now;
-
-        await Task.Delay(wait, token);
-
-        return new AssertionData(null, new CompleteWithinException($"The assertion did not complete within {wait.PrettyPrint()}"), _actualExpression, start, DateTimeOffset.Now);
+        return new AssertionData(value, null, actualExpression, start, DateTimeOffset.Now);
     }
 
-    [Obsolete("This is a base `object` method that should not be called.", true)]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [DebuggerHidden]
-    public new void Equals(object? obj)
+    private static ValueTask<AssertionData> EvaluateFunc(Func<TActual> func, string? actualExpression)
     {
-        throw new InvalidOperationException("This is a base `object` method that should not be called.");
+        var start = DateTimeOffset.Now;
+        try
+        {
+            var result = func();
+            return new ValueTask<AssertionData>(new AssertionData(result, null, actualExpression, start, DateTimeOffset.Now));
+        }
+        catch (Exception e)
+        {
+            return new ValueTask<AssertionData>(new AssertionData(null, e, actualExpression, start, DateTimeOffset.Now));
+        }
     }
 
-    [Obsolete("This is a base `object` method that should not be called.", true)]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [DebuggerHidden]
-    public new void ReferenceEquals(object a, object b)
+    private static async ValueTask<AssertionData> EvaluateAsync(Func<Task<TActual>> asyncFunc, string? actualExpression)
     {
-        throw new InvalidOperationException("This is a base `object` method that should not be called.");
+        var start = DateTimeOffset.Now;
+        try
+        {
+            var result = await asyncFunc();
+            return new AssertionData(result, null, actualExpression, start, DateTimeOffset.Now);
+        }
+        catch (Exception e)
+        {
+            return new AssertionData(null, e, actualExpression, start, DateTimeOffset.Now);
+        }
     }
+
+    private static async ValueTask<AssertionData> EvaluateTask(Task<TActual> task, string? actualExpression)
+    {
+        var start = DateTimeOffset.Now;
+        try
+        {
+            var result = await task;
+            return new AssertionData(result, null, actualExpression, start, DateTimeOffset.Now);
+        }
+        catch (Exception e)
+        {
+            return new AssertionData(null, e, actualExpression, start, DateTimeOffset.Now);
+        }
+    }
+
+    private static async ValueTask<AssertionData> EvaluateValueTask(ValueTask<TActual> valueTask, string? actualExpression)
+    {
+        var start = DateTimeOffset.Now;
+        try
+        {
+            var result = await valueTask;
+            return new AssertionData(result, null, actualExpression, start, DateTimeOffset.Now);
+        }
+        catch (Exception e)
+        {
+            return new AssertionData(null, e, actualExpression, start, DateTimeOffset.Now);
+        }
+    }
+
+
 }

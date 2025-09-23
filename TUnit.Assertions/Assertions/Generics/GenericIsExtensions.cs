@@ -1,4 +1,4 @@
-﻿#nullable disable
+#nullable disable
 
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -12,7 +12,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static class GenericIsExtensions
 {
-    public static InvokableValueAssertionBuilder<object> IsTypeOf(this IValueSource<object> valueSource, Type type)
+    public static AssertionBuilder<object> IsTypeOf(this IValueSource<object> valueSource, Type type)
     {
         return valueSource.RegisterAssertion(new TypeOfExpectedValueAssertCondition<object>(type)
             , [type.Name]);
@@ -23,7 +23,7 @@ public static class GenericIsExtensions
         return new CastedAssertionBuilder<object, TExpected>(IsTypeOf(valueSource, typeof(TExpected)));
     }
 
-    public static InvokableValueAssertionBuilder<object> IsAssignableTo(this IValueSource<object> valueSource, Type type)
+    public static AssertionBuilder<object> IsAssignableTo(this IValueSource<object> valueSource, Type type)
     {
         return valueSource.RegisterAssertion(new AssignableToExpectedValueAssertCondition<object>(type)
             , [type.Name]);
@@ -35,48 +35,48 @@ public static class GenericIsExtensions
     }
 
 
-    public static InvokableValueAssertionBuilder<object> IsAssignableFrom(this IValueSource<object> valueSource, Type type)
+    public static AssertionBuilder<object> IsAssignableFrom(this IValueSource<object> valueSource, Type type)
     {
         return valueSource.RegisterAssertion(new AssignableFromExpectedValueAssertCondition<object>(type)
             , [type.Name]);
     }
 
-    public static InvokableValueAssertionBuilder<object> IsAssignableFrom<TExpected>(this IValueSource<object> valueSource)
+    public static AssertionBuilder<object> IsAssignableFrom<TExpected>(this IValueSource<object> valueSource)
     {
         return IsAssignableFrom(valueSource, typeof(TExpected));
     }
 
-    public static InvokableValueAssertionBuilder<object> IsNotTypeOf(this IValueSource<object> valueSource, Type type)
+    public static AssertionBuilder<object> IsNotTypeOf(this IValueSource<object> valueSource, Type type)
     {
         return valueSource.RegisterAssertion(new NotTypeOfExpectedValueAssertCondition<object>(type)
             , [type.Name]);
     }
 
-    public static InvokableValueAssertionBuilder<object> IsNotTypeOf<TExpected>(this IValueSource<object> valueSource)
+    public static AssertionBuilder<object> IsNotTypeOf<TExpected>(this IValueSource<object> valueSource)
     {
         return valueSource.RegisterAssertion(new NotTypeOfExpectedValueAssertCondition<object>(typeof(TExpected))
             , [typeof(TExpected).Name]);
     }
 
-    public static InvokableValueAssertionBuilder<object> IsNotAssignableTo(this IValueSource<object> valueSource, Type type)
+    public static AssertionBuilder<object> IsNotAssignableTo(this IValueSource<object> valueSource, Type type)
     {
         return valueSource.RegisterAssertion(new NotAssignableToExpectedValueAssertCondition<object>(type)
             , [type.Name]);
     }
 
-    public static InvokableValueAssertionBuilder<object> IsNotAssignableTo<TExpected>(this IValueSource<object> valueSource)
+    public static AssertionBuilder<object> IsNotAssignableTo<TExpected>(this IValueSource<object> valueSource)
     {
         return valueSource.RegisterAssertion(new NotAssignableToExpectedValueAssertCondition<object>(typeof(TExpected))
             , [typeof(TExpected).Name]);
     }
 
-    public static InvokableValueAssertionBuilder<object> IsNotAssignableFrom(this IValueSource<object> valueSource, Type type)
+    public static AssertionBuilder<object> IsNotAssignableFrom(this IValueSource<object> valueSource, Type type)
     {
         return valueSource.RegisterAssertion(new AssignableFromExpectedValueAssertCondition<object>(type)
             , [type.Name]);
     }
 
-    public static InvokableValueAssertionBuilder<object> IsNotAssignableFrom<TExpected>(this IValueSource<object> valueSource)
+    public static AssertionBuilder<object> IsNotAssignableFrom<TExpected>(this IValueSource<object> valueSource)
     {
         return valueSource.RegisterAssertion(new AssignableFromExpectedValueAssertCondition<object>(typeof(TExpected))
             , [typeof(TExpected).Name]);
@@ -94,7 +94,7 @@ public static class GenericIsExtensions
         return new GenericEqualToAssertionBuilderWrapper<TActual>(assertionBuilder);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsEquatableOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
+    public static AssertionBuilder<TActual> IsEquatableOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
         return valueSource
             .RegisterAssertion(new EqualsExpectedValueAssertCondition<TActual>(expected), [doNotPopulateThisValue1]);
@@ -112,13 +112,13 @@ public static class GenericIsExtensions
         return new EquivalentToAssertionBuilderWrapper<TActual, TExpected>(assertionBuilder);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsSameReferenceAs<TActual, TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
+    public static AssertionBuilder<TActual> IsSameReferenceAs<TActual, TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
         return valueSource.RegisterAssertion(new SameReferenceExpectedValueAssertCondition<TActual, TExpected>(expected)
             , [doNotPopulateThisValue1]);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsNull<TActual>(this IValueSource<TActual> valueSource)
+    public static AssertionBuilder<TActual> IsNull<TActual>(this IValueSource<TActual> valueSource)
     {
         return valueSource.RegisterAssertion(new NullExpectedValueAssertCondition<TActual>()
             , []);

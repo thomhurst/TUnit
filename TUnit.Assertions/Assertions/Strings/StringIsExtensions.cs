@@ -1,4 +1,4 @@
-﻿#nullable disable
+#nullable disable
 
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
@@ -25,7 +25,7 @@ public static class StringIsExtensions
         return new StringEqualToAssertionBuilderWrapper(assertionBuilder);
     }
 
-    public static InvokableValueAssertionBuilder<string> IsEmpty(this IValueSource<string> valueSource)
+    public static AssertionBuilder<string> IsEmpty(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, self) =>
@@ -43,7 +43,7 @@ public static class StringIsExtensions
             , []);
     }
 
-    public static InvokableValueAssertionBuilder<string> IsNullOrEmpty(this IValueSource<string> valueSource)
+    public static AssertionBuilder<string> IsNullOrEmpty(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, _) => string.IsNullOrEmpty(value),
@@ -52,7 +52,7 @@ public static class StringIsExtensions
             , []);
     }
 
-    public static InvokableValueAssertionBuilder<string> IsNullOrWhitespace(this IValueSource<string> valueSource)
+    public static AssertionBuilder<string> IsNullOrWhitespace(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, _) => string.IsNullOrWhiteSpace(value),

@@ -1,4 +1,4 @@
-﻿#nullable disable
+#nullable disable
 
 using System.Collections;
 using System.Runtime.CompilerServices;
@@ -11,7 +11,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class DoesNotExtensions
 {
-    public static InvokableValueAssertionBuilder<TDictionary> DoesNotContainKey<TDictionary, TKey>(this IValueSource<TDictionary> valueSource, TKey expected, IEqualityComparer<TKey> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static AssertionBuilder<TDictionary> DoesNotContainKey<TDictionary, TKey>(this IValueSource<TDictionary> valueSource, TKey expected, IEqualityComparer<TKey> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TDictionary : IDictionary
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TDictionary, TKey>(expected,
@@ -25,7 +25,7 @@ public static partial class DoesNotExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<TDictionary> DoesNotContainValue<TDictionary, TValue>(this IValueSource<TDictionary> valueSource, TValue expected, IEqualityComparer<TValue> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static AssertionBuilder<TDictionary> DoesNotContainValue<TDictionary, TValue>(this IValueSource<TDictionary> valueSource, TValue expected, IEqualityComparer<TValue> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TDictionary : IDictionary
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TDictionary, TValue>(expected,
@@ -39,7 +39,7 @@ public static partial class DoesNotExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<IReadOnlyDictionary<TKey, TValue>> DoesNotContainKey<TKey, TValue>(this IValueSource<IReadOnlyDictionary<TKey, TValue>> valueSource, TKey expected, IEqualityComparer<TKey> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static AssertionBuilder<IReadOnlyDictionary<TKey, TValue>> DoesNotContainKey<TKey, TValue>(this IValueSource<IReadOnlyDictionary<TKey, TValue>> valueSource, TKey expected, IEqualityComparer<TKey> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<IReadOnlyDictionary<TKey, TValue>, TKey>(expected,
                 (actual, _, _) =>
@@ -52,7 +52,7 @@ public static partial class DoesNotExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<IReadOnlyDictionary<TKey, TValue>> DoesNotContainValue<TKey, TValue>(this IValueSource<IReadOnlyDictionary<TKey, TValue>> valueSource, TValue expected, IEqualityComparer<TValue> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static AssertionBuilder<IReadOnlyDictionary<TKey, TValue>> DoesNotContainValue<TKey, TValue>(this IValueSource<IReadOnlyDictionary<TKey, TValue>> valueSource, TValue expected, IEqualityComparer<TValue> equalityComparer = null, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<IReadOnlyDictionary<TKey, TValue>, TValue>(expected,
                 (actual, _, _) =>

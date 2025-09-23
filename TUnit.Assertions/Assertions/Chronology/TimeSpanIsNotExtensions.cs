@@ -1,4 +1,4 @@
-﻿#nullable disable
+#nullable disable
 
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
@@ -8,7 +8,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static class TimeSpanIsNotExtensions
 {
-    public static InvokableValueAssertionBuilder<TimeSpan> IsNotZero(this IValueSource<TimeSpan> valueSource)
+    public static AssertionBuilder<TimeSpan> IsNotZero(this IValueSource<TimeSpan> valueSource)
     {
         return valueSource.RegisterAssertion(new NotEqualsExpectedValueAssertCondition<TimeSpan>(TimeSpan.Zero)
             , []);

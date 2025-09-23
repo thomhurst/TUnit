@@ -13,13 +13,13 @@ namespace TUnit.Assertions.Extensions;
 public static partial class EnumAssertionExtensions
 {
     // Manual extension methods for IsDefined since it requires generic constraints
-    public static InvokableValueAssertionBuilder<TEnum> IsDefined<TEnum>(this IValueSource<TEnum> valueSource)
+    public static AssertionBuilder<TEnum> IsDefined<TEnum>(this IValueSource<TEnum> valueSource)
         where TEnum : struct, Enum
     {
         return valueSource.RegisterAssertion(new EnumIsDefinedAssertCondition<TEnum>(), []);
     }
 
-    public static InvokableValueAssertionBuilder<TEnum> IsNotDefined<TEnum>(this IValueSource<TEnum> valueSource)
+    public static AssertionBuilder<TEnum> IsNotDefined<TEnum>(this IValueSource<TEnum> valueSource)
         where TEnum : struct, Enum
     {
         return valueSource.RegisterAssertion(new EnumIsNotDefinedAssertCondition<TEnum>(), []);

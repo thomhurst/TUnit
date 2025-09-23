@@ -8,7 +8,7 @@ namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
 public class ParseAssertionBuilderWrapper<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] TTarget>
-    : InvokableValueAssertionBuilder<string?>
+    : AssertionBuilder<string?>
 {
     private readonly IValueSource<string?> _valueSource;
     private readonly bool _shouldBeParsable;
@@ -16,7 +16,7 @@ public class ParseAssertionBuilderWrapper<
 
     internal ParseAssertionBuilderWrapper(
         IValueSource<string?> valueSource,
-        InvokableValueAssertionBuilder<string?> invokableAssertionBuilder,
+        AssertionBuilder<string?> invokableAssertionBuilder,
         bool shouldBeParsable,
         string?[] argumentExpressions)
         : base(invokableAssertionBuilder)
@@ -26,7 +26,7 @@ public class ParseAssertionBuilderWrapper<
         _argumentExpressions = argumentExpressions;
     }
 
-    public InvokableValueAssertionBuilder<string?> WithFormatProvider(IFormatProvider? formatProvider)
+    public AssertionBuilder<string?> WithFormatProvider(IFormatProvider? formatProvider)
     {
         // Create a new assertion with the format provider
         BaseAssertCondition<string?> newCondition = _shouldBeParsable

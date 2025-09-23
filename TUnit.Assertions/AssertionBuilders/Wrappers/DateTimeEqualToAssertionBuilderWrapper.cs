@@ -1,11 +1,11 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Chronology;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class DateTimeEqualToAssertionBuilderWrapper : InvokableValueAssertionBuilder<DateTime>
+public class DateTimeEqualToAssertionBuilderWrapper : AssertionBuilder<DateTime>
 {
-    internal DateTimeEqualToAssertionBuilderWrapper(InvokableAssertionBuilder<DateTime> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal DateTimeEqualToAssertionBuilderWrapper(AssertionBuilder<DateTime> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

@@ -17,12 +17,12 @@ public static partial class HasExtensions
         return new SingleItemAssertionBuilderWrapper<ImmutableArray<TInner>, TInner>(invokableValueAssertionBuilder);
     }
 
-    public static InvokableValueAssertionBuilder<ImmutableArray<TInner>> HasDistinctItems<TInner>(this IValueSource<ImmutableArray<TInner>> valueSource)
+    public static AssertionBuilder<ImmutableArray<TInner>> HasDistinctItems<TInner>(this IValueSource<ImmutableArray<TInner>> valueSource)
     {
         return HasDistinctItems(valueSource, EqualityComparer<TInner>.Default);
     }
 
-    public static InvokableValueAssertionBuilder<ImmutableArray<TInner>> HasDistinctItems<TInner>(this IValueSource<ImmutableArray<TInner>> valueSource, IEqualityComparer<TInner> equalityComparer)
+    public static AssertionBuilder<ImmutableArray<TInner>> HasDistinctItems<TInner>(this IValueSource<ImmutableArray<TInner>> valueSource, IEqualityComparer<TInner> equalityComparer)
     {
         return valueSource.RegisterAssertion(new EnumerableDistinctItemsExpectedValueAssertCondition<ImmutableArray<TInner>, TInner>(equalityComparer), []);
     }

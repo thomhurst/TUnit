@@ -1,4 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Connectors;
 using TUnit.Assertions.AssertConditions.Interfaces;
@@ -8,16 +10,16 @@ namespace TUnit.Assertions.AssertionBuilders.Groups;
 public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActual, TAssertionBuilder>
     where TAssertionBuilder : AssertionBuilder
 {
-    private readonly Stack<BaseAssertCondition> _assertConditions = [];
-    private InvokableAssertionBuilder<TActual>? _invokableAssertionBuilder;
+    private readonly List<BaseAssertCondition> _conditions = [];
+    private AssertionBuilder<TActual>? _assertionBuilder;
 
-    internal OrAssertionGroup(Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> initialAssert, Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> assert, TAssertionBuilder assertionBuilder) : base(assertionBuilder)
+    internal OrAssertionGroup(Func<TAssertionBuilder, AssertionBuilder<TActual>> initialAssert, Func<TAssertionBuilder, AssertionBuilder<TActual>> assert, TAssertionBuilder assertionBuilder) : base(assertionBuilder)
     {
         Push(assertionBuilder, initialAssert);
         Push(assertionBuilder, assert);
     }
 
-    public OrAssertionGroup<TActual, TAssertionBuilder> Or(Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> assert)
+    public OrAssertionGroup<TActual, TAssertionBuilder> Or(Func<TAssertionBuilder, AssertionBuilder<TActual>> assert)
     {
         Push(AssertionBuilder, assert);
         return this;
@@ -30,28 +32,44 @@ public class OrAssertionGroup<TActual, TAssertionBuilder> : AssertionGroup<TActu
 
     private async Task<TActual?> GetResult()
     {
-        ((ISource) AssertionBuilder).Assertions.Clear();
-
-        foreach (var condition in _assertConditions)
+        // Create a combined OR condition from all collected conditions
+        BaseAssertCondition? combinedCondition = null;
+        foreach (var condition in _conditions)
         {
-            ((ISource) AssertionBuilder).Assertions.Push(condition);
+            if (combinedCondition == null)
+            {
+                combinedCondition = condition;
+            }
+            else
+            {
+                combinedCondition = new OrAssertCondition(combinedCondition, condition);
+            }
         }
 
-        return (TActual?) await _invokableAssertionBuilder!.ProcessAssertionsAsync(x => Task.FromResult(x.Result));
+        if (combinedCondition != null && _assertionBuilder != null)
+        {
+            // Clear existing assertions and add the combined one
+            var newBuilder = new AssertionBuilder<TActual>(_assertionBuilder.Actual, _assertionBuilder.ActualExpression);
+            ((ISource)newBuilder).WithAssertion(combinedCondition);
+            
+            var data = await newBuilder.GetAssertionData();
+            await newBuilder.ProcessAssertionsAsync(data);
+            return (TActual?)data.Result;
+        }
+
+        return default;
     }
 
-    private void Push(TAssertionBuilder assertionBuilder, Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> assert)
+    private void Push(TAssertionBuilder assertionBuilder, Func<TAssertionBuilder, AssertionBuilder<TActual>> assert)
     {
-        if (_assertConditions.Count > 0)
+        var builder = assert(assertionBuilder);
+        _assertionBuilder = builder;
+        
+        // Extract the last assertion from the builder
+        var assertions = builder.GetAssertions().ToList();
+        if (assertions.Count > 0)
         {
-            _assertConditions.Push(new OrAssertCondition(_assertConditions.Pop(), ((ISource) assert(assertionBuilder)).Assertions.Pop()));
-        }
-        else
-        {
-            var invokableAssertionBuilder = assert(assertionBuilder);
-            assertionBuilder.AppendConnector(ChainType.Or);
-            _invokableAssertionBuilder = invokableAssertionBuilder;
-            _assertConditions.Push(((ISource) _invokableAssertionBuilder).Assertions.Pop());
+            _conditions.Add(assertions.Last());
         }
     }
 }

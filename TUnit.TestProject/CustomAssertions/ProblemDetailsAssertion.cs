@@ -55,12 +55,12 @@ public class HttpResponseDeserializesToAssertCondition<TToType>(JsonTypeInfo<TTo
 
 public static class HttpResponseAssertionExtensions
 {
-    public static InvokableValueAssertionBuilder<TToType> DeSerializesTo<TToType>(this IValueSource<HttpResponseMessage> valueSource, JsonTypeInfo<TToType> jsonTypeInfo)
+    public static AssertionBuilder<TToType> DeSerializesTo<TToType>(this IValueSource<HttpResponseMessage> valueSource, JsonTypeInfo<TToType> jsonTypeInfo)
     {
         return valueSource.RegisterConversionAssertion(new HttpResponseDeserializesToAssertCondition<TToType>(jsonTypeInfo), []);
     }
     
-    public static InvokableValueAssertionBuilder<ProblemDetails> IsProblemDetails(this IValueSource<HttpResponseMessage> valueSource)
+    public static AssertionBuilder<ProblemDetails> IsProblemDetails(this IValueSource<HttpResponseMessage> valueSource)
     {
         return valueSource.DeSerializesTo(ProblemDetailsSourceGenerationContext.Default.ProblemDetails);
     }
@@ -68,13 +68,13 @@ public static class HttpResponseAssertionExtensions
 
 public static class ProblemDetailsAssertionExtensions
 {
-    public static InvokableValueAssertionBuilder<ProblemDetails> HasTitle(this IValueSource<ProblemDetails> valueSource,
+    public static AssertionBuilder<ProblemDetails> HasTitle(this IValueSource<ProblemDetails> valueSource,
         string title, [CallerArgumentExpression("title")] string? titleExpression = null)
     {
         return valueSource.RegisterAssertion(new ProblemDetailsHasTitleAssertCondition(title), [titleExpression]);
     }
     
-    public static InvokableValueAssertionBuilder<ProblemDetails> HasDetail(this IValueSource<ProblemDetails> valueSource,
+    public static AssertionBuilder<ProblemDetails> HasDetail(this IValueSource<ProblemDetails> valueSource,
         string detail, [CallerArgumentExpression("detail")] string? detailExpression = null)
     {
         return valueSource.RegisterAssertion(new ProblemDetailsHasDetailAssertCondition(detail), [detailExpression]);

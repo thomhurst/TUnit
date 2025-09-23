@@ -1,11 +1,11 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Chronology;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class TimeSpanEqualToAssertionBuilderWrapper : InvokableValueAssertionBuilder<TimeSpan>
+public class TimeSpanEqualToAssertionBuilderWrapper : AssertionBuilder<TimeSpan>
 {
-    internal TimeSpanEqualToAssertionBuilderWrapper(InvokableAssertionBuilder<TimeSpan> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal TimeSpanEqualToAssertionBuilderWrapper(AssertionBuilder<TimeSpan> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

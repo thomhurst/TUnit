@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.Operators;
@@ -9,11 +9,11 @@ namespace TUnit.Assertions.Extensions;
 
 public class ThrowsException<TActual, TException> where TException : Exception
 {
-    private readonly InvokableDelegateAssertionBuilder _delegateAssertionBuilder;
+    private readonly DelegateAssertionBuilder _delegateAssertionBuilder;
     private readonly IDelegateSource _source;
     private readonly Func<Exception?, Exception?> _selector;
 
-    public ThrowsException(InvokableDelegateAssertionBuilder delegateAssertionBuilder,
+    public ThrowsException(DelegateAssertionBuilder delegateAssertionBuilder,
         IDelegateSource source,
         Func<Exception?, Exception?> selector)
     {
@@ -72,19 +72,23 @@ public class ThrowsException<TActual, TException> where TException : Exception
 
     public TaskAwaiter<TException?> GetAwaiter()
     {
-        var task = _delegateAssertionBuilder.ProcessAssertionsAsync(d => Task.FromResult(d.Exception as TException));
-        return task.GetAwaiter();
+        return ProcessAsync().GetAwaiter();
+    }
+    
+    private async Task<TException?> ProcessAsync()
+    {
+        var assertionData = await _delegateAssertionBuilder.GetAssertionData();
+        await _delegateAssertionBuilder.ProcessAssertionsAsync(assertionData);
+        return assertionData.Exception as TException;
     }
 
     public ValueAnd<TException> And =>
         new(
-            new AndAssertionBuilder(
-                _delegateAssertionBuilder.RegisterConversionAssertion<TException>()
-                    .AppendConnector(ChainType.And)
-            )
+            _delegateAssertionBuilder.RegisterConversionAssertion<TException>()
+                .AppendConnector(ChainType.And)
         );
 
-    public DelegateOr<object?> Or => _delegateAssertionBuilder.Or;
+    public DelegateOr<object?> Or => DelegateOr<object?>.Create(_delegateAssertionBuilder.Or);
 
     internal void RegisterAssertion(Func<Func<Exception?, Exception?>, BaseAssertCondition<TActual>> conditionFunc, string?[] argumentExpressions, [CallerMemberName] string? caller = null) => _source.RegisterAssertion(conditionFunc(_selector), argumentExpressions, caller);
 

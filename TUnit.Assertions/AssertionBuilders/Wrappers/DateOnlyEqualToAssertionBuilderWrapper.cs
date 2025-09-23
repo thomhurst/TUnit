@@ -5,10 +5,15 @@ using TUnit.Assertions.AssertConditions.Chronology;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class DateOnlyEqualToAssertionBuilderWrapper : InvokableValueAssertionBuilder<DateOnly>
+public class DateOnlyEqualToAssertionBuilderWrapper : AssertionBuilder<DateOnly>
 {
-    internal DateOnlyEqualToAssertionBuilderWrapper(InvokableAssertionBuilder<DateOnly> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal DateOnlyEqualToAssertionBuilderWrapper(AssertionBuilder<DateOnly> assertionBuilder) : base(assertionBuilder.Actual, assertionBuilder.ActualExpression)
     {
+        // Copy the assertion chain from the original builder
+        foreach (var assertion in assertionBuilder.GetAssertions())
+        {
+            WithAssertion(assertion);
+        }
     }
 
     public DateOnlyEqualToAssertionBuilderWrapper WithinDays(int days, [CallerArgumentExpression(nameof(days))] string doNotPopulateThis = "")

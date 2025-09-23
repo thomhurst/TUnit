@@ -59,7 +59,7 @@ public static class StringParsingExtensions
     /// <param name="formatProvider">Optional format provider to use during parsing.</param>
     /// <param name="doNotPopulateThisValue">Do not use. This is populated by the compiler to get the expression of the value.</param>
     /// <returns>An assertion builder for the parsed value.</returns>
-    public static InvokableValueAssertionBuilder<TTarget> WhenParsedInto<
+    public static AssertionBuilder<TTarget> WhenParsedInto<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] TTarget>(
         this IValueSource<string> valueSource,
         IFormatProvider? formatProvider = null,

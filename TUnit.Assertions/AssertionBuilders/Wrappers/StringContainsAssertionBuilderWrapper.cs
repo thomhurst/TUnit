@@ -1,11 +1,11 @@
-﻿using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Assertions.Strings.Conditions;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class StringContainsAssertionBuilderWrapper : InvokableValueAssertionBuilder<string>
+public class StringContainsAssertionBuilderWrapper : AssertionBuilder<string>
 {
-    internal StringContainsAssertionBuilderWrapper(InvokableAssertionBuilder<string> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal StringContainsAssertionBuilderWrapper(AssertionBuilder<string> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

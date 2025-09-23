@@ -43,8 +43,10 @@ public class ConvertedDelegateSource<TToType> : IValueSource<TToType?> where TTo
     {
         var invokableAssertionBuilder = delegateSource.RegisterAssertion(convertToAssertCondition, [], null);
 
-        return await invokableAssertionBuilder.ProcessAssertionsAsync(assertionData =>
-            Task.FromResult(assertionData with { Result = convertToAssertCondition.ConvertedExceptionValue, Exception = null, End = DateTimeOffset.Now }));
+        var assertionData = await invokableAssertionBuilder.GetAssertionData();
+        var modifiedData = assertionData with { Result = convertToAssertCondition.ConvertedExceptionValue, Exception = null, End = DateTimeOffset.Now };
+        await invokableAssertionBuilder.ProcessAssertionsAsync(modifiedData);
+        return modifiedData;
 
     }
 }

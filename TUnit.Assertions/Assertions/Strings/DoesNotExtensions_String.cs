@@ -1,4 +1,4 @@
-﻿#nullable disable
+#nullable disable
 
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -13,12 +13,12 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class DoesNotExtensions
 {
-    public static InvokableValueAssertionBuilder<string> DoesNotMatch(this IValueSource<string> valueSource, string regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
+    public static AssertionBuilder<string> DoesNotMatch(this IValueSource<string> valueSource, string regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
     {
         return DoesNotMatch(valueSource, new Regex(regex), expression);
     }
 
-    public static InvokableValueAssertionBuilder<string> DoesNotMatch(this IValueSource<string> valueSource, Regex regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
+    public static AssertionBuilder<string> DoesNotMatch(this IValueSource<string> valueSource, Regex regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, Regex>(regex,
                 (actual, _, _) =>

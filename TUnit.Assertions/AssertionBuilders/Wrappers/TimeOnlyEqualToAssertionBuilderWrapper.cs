@@ -1,13 +1,13 @@
-﻿#if NET
+#if NET
 
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Chronology;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class TimeOnlyEqualToAssertionBuilderWrapper : InvokableValueAssertionBuilder<TimeOnly>
+public class TimeOnlyEqualToAssertionBuilderWrapper : AssertionBuilder<TimeOnly>
 {
-    internal TimeOnlyEqualToAssertionBuilderWrapper(InvokableAssertionBuilder<TimeOnly> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal TimeOnlyEqualToAssertionBuilderWrapper(AssertionBuilder<TimeOnly> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

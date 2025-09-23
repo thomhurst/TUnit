@@ -1,25 +1,28 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class SingleItemAssertionBuilderWrapper<TActual, TInner> : InvokableValueAssertionBuilder<TActual> where TActual : IEnumerable<TInner>
+public class SingleItemAssertionBuilderWrapper<TActual, TInner> : AssertionBuilder<TActual> where TActual : IEnumerable<TInner>
 {
-    internal SingleItemAssertionBuilderWrapper(InvokableAssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal SingleItemAssertionBuilderWrapper(AssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 
     public new TaskAwaiter<TInner> GetAwaiter()
     {
-        var task = ProcessAssertionsAsync(d =>
+        return Process().GetAwaiter();
+    }
+    
+    private async Task<TInner> Process()
+    {
+        var assertionData = await GetAssertionData();
+        await ProcessAssertionsAsync(assertionData);
+        
+        if (assertionData.Result is IEnumerable<TInner> enumerable)
         {
-            if (d.Result is IEnumerable<TInner> enumerable)
-            {
-                return Task.FromResult(enumerable.SingleOrDefault()!);
-            }
+            return enumerable.SingleOrDefault()!;
+        }
 
-            return Task.FromResult<TInner>(default(TInner)!);
-        });
-
-        return task.GetAwaiter();
+        return default(TInner)!;
     }
 }

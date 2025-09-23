@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Interfaces;
@@ -11,7 +11,7 @@ public class Member<TActualRootType, TPropertyType>(IValueSource<TActualRootType
 {
     [RequiresUnreferencedCode("Expression compilation requires unreferenced code")]
     [RequiresDynamicCode("Expression compilation requires dynamic code generation")]
-    public InvokableValueAssertionBuilder<TActualRootType> EqualTo(TPropertyType expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    public AssertionBuilder<TActualRootType> EqualTo(TPropertyType expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new PropertyEqualsExpectedValueAssertCondition<TActualRootType, TPropertyType>(selector, expected, true)
             , [doNotPopulateThisValue]);
@@ -19,7 +19,7 @@ public class Member<TActualRootType, TPropertyType>(IValueSource<TActualRootType
 
     [RequiresUnreferencedCode("Expression compilation requires unreferenced code")]
     [RequiresDynamicCode("Expression compilation requires dynamic code generation")]
-    public InvokableValueAssertionBuilder<TActualRootType> NotEqualTo(TPropertyType expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
+    public AssertionBuilder<TActualRootType> NotEqualTo(TPropertyType expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new PropertyEqualsExpectedValueAssertCondition<TActualRootType, TPropertyType>(selector, expected, false)
             , [doNotPopulateThisValue]);

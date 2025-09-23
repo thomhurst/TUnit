@@ -1,42 +1,57 @@
-﻿using TUnit.Assertions.AssertConditions.String;
+﻿using System.Linq;
+using TUnit.Assertions.AssertConditions.String;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class StringEqualToAssertionBuilderWrapper : InvokableValueAssertionBuilder<string>
+public class StringEqualToAssertionBuilderWrapper : AssertionBuilder<string>
 {
-    internal StringEqualToAssertionBuilderWrapper(InvokableAssertionBuilder<string> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal StringEqualToAssertionBuilderWrapper(AssertionBuilder<string> assertionBuilder) : base(assertionBuilder.Actual, assertionBuilder.ActualExpression)
     {
+        // Copy the assertion chain from the original builder
+        foreach (var assertion in assertionBuilder.GetAssertions())
+        {
+            WithAssertion(assertion);
+        }
     }
 
     public StringEqualToAssertionBuilderWrapper WithTrimming()
     {
-        var assertion = (StringEqualsExpectedValueAssertCondition) Assertions.Peek();
-
-        assertion.WithTrimming();
-
-        AppendCallerMethod([]);
+        var assertions = GetAssertions();
+        var assertion = assertions.LastOrDefault() as StringEqualsExpectedValueAssertCondition;
+        
+        if (assertion != null)
+        {
+            assertion.WithTrimming();
+            AppendExpression("WithTrimming()");
+        }
 
         return this;
     }
 
     public StringEqualToAssertionBuilderWrapper WithNullAndEmptyEquality()
     {
-        var assertion = (StringEqualsExpectedValueAssertCondition) Assertions.Peek();
-
-        assertion.WithNullAndEmptyEquality();
-
-        AppendCallerMethod([]);
+        var assertions = GetAssertions();
+        var assertion = assertions.LastOrDefault() as StringEqualsExpectedValueAssertCondition;
+        
+        if (assertion != null)
+        {
+            assertion.WithNullAndEmptyEquality();
+            AppendExpression("WithNullAndEmptyEquality()");
+        }
 
         return this;
     }
 
     public StringEqualToAssertionBuilderWrapper IgnoringWhitespace()
     {
-        var assertion = (StringEqualsExpectedValueAssertCondition) Assertions.Peek();
-
-        assertion.IgnoringWhitespace();
-
-        AppendCallerMethod([]);
+        var assertions = GetAssertions();
+        var assertion = assertions.LastOrDefault() as StringEqualsExpectedValueAssertCondition;
+        
+        if (assertion != null)
+        {
+            assertion.IgnoringWhitespace();
+            AppendExpression("IgnoringWhitespace()");
+        }
 
         return this;
     }

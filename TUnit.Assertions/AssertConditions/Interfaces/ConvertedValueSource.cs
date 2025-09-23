@@ -41,8 +41,10 @@ public class ConvertedValueSource<TFromType, TToType> : IValueSource<TToType?>
     {
         var invokableAssertionBuilder = valueSource.RegisterAssertion(convertToAssertCondition, [], null);
 
-        return await invokableAssertionBuilder.ProcessAssertionsAsync(assertionData =>
-            Task.FromResult(assertionData with { Result = convertToAssertCondition.ConvertedValue, End = DateTimeOffset.Now }));
+        var assertionData = await invokableAssertionBuilder.GetAssertionData();
+        var modifiedData = assertionData with { Result = convertToAssertCondition.ConvertedValue, End = DateTimeOffset.Now };
+        await invokableAssertionBuilder.ProcessAssertionsAsync(modifiedData);
+        return modifiedData;
 
     }
 }

@@ -1,12 +1,12 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.Assertions.Generics.Conditions;
 using TUnit.Assertions.Enums;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> : InvokableValueAssertionBuilder<TActual>
+public class NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> : AssertionBuilder<TActual>
 {
-    internal NotEquivalentToAssertionBuilderWrapper(InvokableAssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal NotEquivalentToAssertionBuilderWrapper(AssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 
