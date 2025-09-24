@@ -1863,6 +1863,10 @@ namespace .Helpers
         public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7>(<T1, T2, T3, T4, T5, T6, T7> tuple) { }
         public static object?[] UnwrapTupleAot(object? value) { }
     }
+    public static class DecimalParsingHelper
+    {
+        public static decimal ParseDecimalWithCultureFallback(string value) { }
+    }
     public static class GenericTypeHelper
     {
         public static  GetGenericTypeDefinition( type) { }
