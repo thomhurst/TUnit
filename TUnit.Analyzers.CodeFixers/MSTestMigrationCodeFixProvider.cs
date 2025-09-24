@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Analyzers.CodeFixers.Base;
+using TUnit.Analyzers.Migrators.Base;
 
 namespace TUnit.Analyzers.CodeFixers;
 
