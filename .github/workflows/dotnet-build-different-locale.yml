@@ -1,4 +1,4 @@
-name: .NET
+name: Locale Test
 
 on:
   pull_request:
