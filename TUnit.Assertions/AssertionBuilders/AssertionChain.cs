@@ -1,9 +1,12 @@
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Connectors;
+using TUnit.Assertions.AssertionBuilders.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class AssertionChain
+public record ChainedAssertion(BaseAssertCondition Condition, ChainType ChainType);
+
+public class AssertionChain : IAssertionChain
 {
     private readonly List<ChainedAssertion> _assertions = [];
     
@@ -49,10 +52,23 @@ public class AssertionChain
         return _assertions.Select(a => a.Condition);
     }
 
+    IEnumerable<ChainedAssertion> IAssertionChain.GetAssertions()
+    {
+        return _assertions;
+    }
+    
+    public IEnumerable<BaseAssertCondition> GetBaseAssertions()
+    {
+        return _assertions.Select(a => a.Condition);
+    }
+
     public BaseAssertCondition? GetLastAssertion()
     {
         return _assertions.Count > 0 ? _assertions[^1].Condition : null;
     }
 
-    private record ChainedAssertion(BaseAssertCondition Condition, ChainType ChainType);
+    public void AddAssertion(BaseAssertCondition assertion)
+    {
+        AddAssertion(assertion, ChainType.None);
+    }
 }

@@ -1,17 +1,36 @@
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Helpers;
+using TUnit.Assertions.AssertionBuilders.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class AssertionEvaluator
+public class AssertionEvaluator : IAssertionEvaluator
 {
     private readonly List<AssertionResult> _results = [];
 
-    public async Task<AssertionData> EvaluateAsync(
+    async ValueTask<bool> IAssertionEvaluator.EvaluateAsync(
         ValueTask<AssertionData> assertionDataTask,
-        IEnumerable<BaseAssertCondition> assertions, 
+        IEnumerable<ChainedAssertion> chainedAssertions,
+        IExpressionFormatter expressionFormatter)
+    {
+        var assertions = chainedAssertions.Select(ca => ca.Condition).ToList();
+        await EvaluateInternalAsync(assertionDataTask, assertions, expressionFormatter as ExpressionFormatter ?? new ExpressionFormatter(null));
+        return true; // Return true if no exceptions were thrown
+    }
+
+    public async ValueTask<AssertionData> EvaluateAsync(
+        ValueTask<AssertionData> assertionDataTask,
+        IEnumerable<BaseAssertCondition> assertions,
         ExpressionFormatter expressionFormatter)
+    {
+        return await EvaluateInternalAsync(assertionDataTask, assertions, expressionFormatter);
+    }
+
+    private async Task<AssertionData> EvaluateInternalAsync(
+        ValueTask<AssertionData> assertionDataTask,
+        IEnumerable<BaseAssertCondition> assertions,
+        IExpressionFormatter expressionFormatter)
     {
         var assertionData = await GetAssertionDataWithTimeout(assertionDataTask, assertions);
         var currentScope = AssertionScope.GetCurrentAssertionScope();

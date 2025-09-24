@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.AssertionBuilders.Interfaces;
 
 
 namespace TUnit.Assertions.AssertionBuilders;
@@ -12,9 +13,9 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
 {
     private readonly ValueTask<AssertionData> _assertionDataTask;
     private readonly ValueTask<TActual> _actualValueTask;
-    private readonly ExpressionFormatter _expressionFormatter;
-    private readonly AssertionChain _chain;
-    private readonly AssertionEvaluator _evaluator;
+    private readonly IExpressionFormatter _expressionFormatter;
+    private readonly IAssertionChain _chain;
+    private readonly IAssertionEvaluator _evaluator;
     private ChainType _currentChainType = ChainType.None;
     private string? _becauseReason;
     private string? _becauseExpression;
@@ -65,7 +66,7 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
     // IValueSource implementation
     string? ISource.ActualExpression => _expressionFormatter.ActualExpression;
     ValueTask<AssertionData> ISource.AssertionDataTask => _assertionDataTask;
-    IEnumerable<BaseAssertCondition> ISource.GetAssertions() => _chain.GetAssertions();
+    IEnumerable<BaseAssertCondition> ISource.GetAssertions() => _chain.GetBaseAssertions();
     BaseAssertCondition? ISource.GetLastAssertion() => _chain.GetLastAssertion();
     StringBuilder ISource.ExpressionBuilder => new(_expressionFormatter.GetExpression());
 
@@ -96,7 +97,7 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
 
     public override IEnumerable<BaseAssertCondition> GetAssertions()
     {
-        return _chain.GetAssertions();
+        return _chain.GetBaseAssertions();
     }
 
     public override void WithAssertion(BaseAssertCondition assertion)
@@ -194,52 +195,30 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
 
     private static ValueTask<AssertionData> EvaluateFunc(Func<TActual> func, string? actualExpression)
     {
-        var start = DateTimeOffset.Now;
-        try
-        {
-            var result = func();
-            return new ValueTask<AssertionData>(new AssertionData(result, null, actualExpression, start, DateTimeOffset.Now));
-        }
-        catch (Exception e)
-        {
-            return new ValueTask<AssertionData>(new AssertionData(null, e, actualExpression, start, DateTimeOffset.Now));
-        }
+        return EvaluateWithTiming(() => new ValueTask<TActual>(func()), actualExpression);
     }
 
-    private static async ValueTask<AssertionData> EvaluateAsync(Func<Task<TActual>> asyncFunc, string? actualExpression)
+    private static ValueTask<AssertionData> EvaluateAsync(Func<Task<TActual>> asyncFunc, string? actualExpression)
+    {
+        return EvaluateWithTiming(() => new ValueTask<TActual>(asyncFunc()), actualExpression);
+    }
+
+    private static ValueTask<AssertionData> EvaluateTask(Task<TActual> task, string? actualExpression)
+    {
+        return EvaluateWithTiming(() => new ValueTask<TActual>(task), actualExpression);
+    }
+
+    private static ValueTask<AssertionData> EvaluateValueTask(ValueTask<TActual> valueTask, string? actualExpression)
+    {
+        return EvaluateWithTiming(() => valueTask, actualExpression);
+    }
+
+    private static async ValueTask<AssertionData> EvaluateWithTiming(Func<ValueTask<TActual>> getValueTask, string? actualExpression)
     {
         var start = DateTimeOffset.Now;
         try
         {
-            var result = await asyncFunc();
-            return new AssertionData(result, null, actualExpression, start, DateTimeOffset.Now);
-        }
-        catch (Exception e)
-        {
-            return new AssertionData(null, e, actualExpression, start, DateTimeOffset.Now);
-        }
-    }
-
-    private static async ValueTask<AssertionData> EvaluateTask(Task<TActual> task, string? actualExpression)
-    {
-        var start = DateTimeOffset.Now;
-        try
-        {
-            var result = await task;
-            return new AssertionData(result, null, actualExpression, start, DateTimeOffset.Now);
-        }
-        catch (Exception e)
-        {
-            return new AssertionData(null, e, actualExpression, start, DateTimeOffset.Now);
-        }
-    }
-
-    private static async ValueTask<AssertionData> EvaluateValueTask(ValueTask<TActual> valueTask, string? actualExpression)
-    {
-        var start = DateTimeOffset.Now;
-        try
-        {
-            var result = await valueTask;
+            var result = await getValueTask();
             return new AssertionData(result, null, actualExpression, start, DateTimeOffset.Now);
         }
         catch (Exception e)

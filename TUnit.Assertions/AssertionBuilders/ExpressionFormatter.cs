@@ -1,9 +1,10 @@
 using System.Runtime.CompilerServices;
 using System.Text;
+using TUnit.Assertions.AssertionBuilders.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class ExpressionFormatter
+public class ExpressionFormatter : IExpressionFormatter
 {
     private readonly StringBuilder _builder;
     private readonly string? _actualExpression;

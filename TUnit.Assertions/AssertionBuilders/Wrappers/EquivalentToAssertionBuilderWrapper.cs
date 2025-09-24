@@ -1,10 +1,15 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Assertions.Generics.Conditions;
 using TUnit.Assertions.Enums;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : AssertionBuilderWrapperBase<TActual>
+public class EquivalentToAssertionBuilderWrapper<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+    TActual,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+    TExpected> : AssertionBuilderWrapperBase<TActual>
 {
     internal EquivalentToAssertionBuilderWrapper(AssertionBuilder<TActual> invokableAssertionBuilder)
         : base(invokableAssertionBuilder)
