@@ -1,8 +1,10 @@
 ﻿#if NET
 
+using TUnit.Assertions.AssertConditions.Interfaces;
+
 namespace TUnit.Assertions.AssertConditions.Chronology;
 
-public class DateOnlyEqualsExpectedValueAssertCondition(DateOnly expected) : ExpectedValueAssertCondition<DateOnly, DateOnly>(expected) 
+public class DateOnlyEqualsExpectedValueAssertCondition(DateOnly expected) : ExpectedValueAssertCondition<DateOnly, DateOnly>(expected), IDateToleranceCondition 
 {
     private int? _tolerance;
 

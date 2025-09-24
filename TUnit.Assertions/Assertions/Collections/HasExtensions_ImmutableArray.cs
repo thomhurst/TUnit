@@ -4,17 +4,16 @@ using System.Collections.Immutable;
 using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class HasExtensions
 {
-    public static SingleItemAssertionBuilderWrapper<ImmutableArray<TInner>, TInner> HasSingleItem<TInner>(this IValueSource<ImmutableArray<TInner>> valueSource)
+    public static SingleItemAssertion<ImmutableArray<TInner>, TInner> HasSingleItem<TInner>(this IValueSource<ImmutableArray<TInner>> valueSource)
     {
         var invokableValueAssertionBuilder = valueSource.RegisterAssertion(new EnumerableCountEqualToExpectedValueAssertCondition<ImmutableArray<TInner>, TInner>(1), []);
 
-        return new SingleItemAssertionBuilderWrapper<ImmutableArray<TInner>, TInner>(invokableValueAssertionBuilder);
+        return new SingleItemAssertion<ImmutableArray<TInner>, TInner>(invokableValueAssertionBuilder);
     }
 
     public static AssertionBuilder<ImmutableArray<TInner>> HasDistinctItems<TInner>(this IValueSource<ImmutableArray<TInner>> valueSource)

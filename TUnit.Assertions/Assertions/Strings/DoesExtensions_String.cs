@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.AssertionBuilders.Wrappers;
 using TUnit.Assertions.Assertions.Strings.Conditions;
 using TUnit.Assertions.Attributes;
 using TUnit.Engine;

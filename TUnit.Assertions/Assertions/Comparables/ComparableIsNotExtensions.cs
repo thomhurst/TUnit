@@ -5,7 +5,6 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Comparable;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions;
 
@@ -59,12 +58,12 @@ public static class ComparableIsNotExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static NotBetweenAssertionBuilderWrapper<TActual> IsNotBetween<TActual>(this IValueSource<TActual> valueSource, TActual lowerBound, TActual upperBound, [CallerArgumentExpression(nameof(lowerBound))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(upperBound))] string doNotPopulateThisValue2 = null)
+    public static NotBetweenAssertion<TActual> IsNotBetween<TActual>(this IValueSource<TActual> valueSource, TActual lowerBound, TActual upperBound, [CallerArgumentExpression(nameof(lowerBound))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(upperBound))] string doNotPopulateThisValue2 = null)
         where TActual : IComparable<TActual>
     {
         var assertionBuilder = valueSource.RegisterAssertion(new NotBetweenAssertCondition<TActual>(lowerBound, upperBound)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
 
-        return new NotBetweenAssertionBuilderWrapper<TActual>(assertionBuilder);
+        return new NotBetweenAssertion<TActual>(assertionBuilder);
     }
 }

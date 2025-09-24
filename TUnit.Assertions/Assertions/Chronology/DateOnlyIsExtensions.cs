@@ -7,15 +7,14 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Chronology;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions;
 
 public static class DateOnlyIsExtensions
 {
-    public static DateOnlyEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<DateOnly> valueSource, DateOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
+    public static DateOnlyEqualToAssertion IsEqualTo(this IValueSource<DateOnly> valueSource, DateOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
-        return new DateOnlyEqualToAssertionBuilderWrapper(
+        return new DateOnlyEqualToAssertion(
             valueSource.RegisterAssertion(new DateOnlyEqualsExpectedValueAssertCondition(expected),
                 [doNotPopulateThisValue1])
         );

@@ -3,17 +3,16 @@
 using TUnit.Assertions.AssertConditions.Collections;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.AssertionBuilders.Wrappers;
 
 namespace TUnit.Assertions.Extensions;
 
 public static partial class HasExtensions
 {
-    public static SingleItemAssertionBuilderWrapper<IEnumerable<TInner>, TInner> HasSingleItem<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)
+    public static SingleItemAssertion<IEnumerable<TInner>, TInner> HasSingleItem<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)
     {
         var invokableValueAssertionBuilder = valueSource.RegisterAssertion(new EnumerableCountEqualToExpectedValueAssertCondition<IEnumerable<TInner>, TInner>(1), []);
 
-        return new SingleItemAssertionBuilderWrapper<IEnumerable<TInner>, TInner>(invokableValueAssertionBuilder);
+        return new SingleItemAssertion<IEnumerable<TInner>, TInner>(invokableValueAssertionBuilder);
     }
 
     public static AssertionBuilder<IEnumerable<TInner>> HasDistinctItems<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)

@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.AssertionBuilders.Wrappers;
 using TUnit.Assertions.Assertions.Strings.Conditions;
 using TUnit.Assertions.Extensions;
 
@@ -17,7 +16,7 @@ public static class StringParsingExtensions
     /// <param name="valueSource">The source containing the string value to test.</param>
     /// <param name="doNotPopulateThisValue">Do not use. This is populated by the compiler to get the expression of the value.</param>
     /// <returns>An assertion builder that can be used to add a format provider.</returns>
-    public static ParseAssertionBuilderWrapper<TTarget>
+    public static ParseAssertion<string?>
         IsParsableInto<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] TTarget>(
         this IValueSource<string> valueSource,
         [CallerArgumentExpression(nameof(valueSource))] string? doNotPopulateThisValue = null)
@@ -27,7 +26,7 @@ public static class StringParsingExtensions
             new StringIsParsableCondition<TTarget>(),
             [doNotPopulateThisValue]);
 
-        return new ParseAssertionBuilderWrapper<TTarget>(nullableSource, assertionBuilder, true, [doNotPopulateThisValue]);
+        return new ParseAssertion<string?>((AssertionBuilder<string?>)assertionBuilder);
     }
 
     /// <summary>
@@ -37,7 +36,7 @@ public static class StringParsingExtensions
     /// <param name="valueSource">The source containing the string value to test.</param>
     /// <param name="doNotPopulateThisValue">Do not use. This is populated by the compiler to get the expression of the value.</param>
     /// <returns>An assertion builder that can be used to add a format provider.</returns>
-    public static ParseAssertionBuilderWrapper<TTarget>
+    public static ParseAssertion<string?>
         IsNotParsableInto<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] TTarget>(
         this IValueSource<string> valueSource,
         [CallerArgumentExpression(nameof(valueSource))] string? doNotPopulateThisValue = null)
@@ -47,7 +46,7 @@ public static class StringParsingExtensions
             new StringIsNotParsableCondition<TTarget>(),
             [doNotPopulateThisValue]);
 
-        return new ParseAssertionBuilderWrapper<TTarget>(nullableSource, assertionBuilder, false, [doNotPopulateThisValue]);
+        return new ParseAssertion<string?>((AssertionBuilder<string?>)assertionBuilder);
     }
 
     /// <summary>

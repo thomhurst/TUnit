@@ -5,16 +5,15 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Chronology;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.AssertionBuilders.Wrappers;
 using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.Extensions;
 
 public static class DateTimeOffsetIsExtensions
 {
-    public static DateTimeOffsetEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<DateTimeOffset> valueSource, DateTimeOffset expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
+    public static DateTimeOffsetEqualToAssertion IsEqualTo(this IValueSource<DateTimeOffset> valueSource, DateTimeOffset expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
-        return new DateTimeOffsetEqualToAssertionBuilderWrapper(
+        return new DateTimeOffsetEqualToAssertion(
             valueSource.RegisterAssertion(new DateTimeOffsetEqualsExpectedValueAssertCondition(expected),
                 [doNotPopulateThisValue1])
         );

@@ -7,16 +7,15 @@ using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Chronology;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.AssertionBuilders.Wrappers;
 using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.Extensions;
 
 public static class TimeOnlyIsExtensions
 {
-    public static TimeOnlyEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<TimeOnly> valueSource, TimeOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
+    public static TimeOnlyEqualToAssertion IsEqualTo(this IValueSource<TimeOnly> valueSource, TimeOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
-        return new TimeOnlyEqualToAssertionBuilderWrapper(
+        return new TimeOnlyEqualToAssertion(
             valueSource.RegisterAssertion(new TimeOnlyEqualsExpectedValueAssertCondition(expected),
                 [doNotPopulateThisValue1])
         );

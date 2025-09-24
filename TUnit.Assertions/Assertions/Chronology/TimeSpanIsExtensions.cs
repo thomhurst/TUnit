@@ -4,16 +4,15 @@ using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions.Chronology;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.AssertionBuilders.Wrappers;
 using TUnit.Assertions.Assertions.Generics.Conditions;
 
 namespace TUnit.Assertions.Extensions;
 
 public static class TimeSpanIsExtensions
 {
-    public static TimeSpanEqualToAssertionBuilderWrapper IsEqualTo(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
+    public static TimeSpanEqualToAssertion IsEqualTo(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
-        return new TimeSpanEqualToAssertionBuilderWrapper(
+        return new TimeSpanEqualToAssertion(
             valueSource.RegisterAssertion(new TimeSpanEqualsExpectedValueAssertCondition(expected),
                 [doNotPopulateThisValue1])
         );

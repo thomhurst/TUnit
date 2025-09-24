@@ -1,6 +1,8 @@
-﻿namespace TUnit.Assertions.AssertConditions.Comparable;
+﻿using TUnit.Assertions.AssertConditions.Interfaces;
 
-public class BetweenAssertCondition<TActual>(TActual minimum, TActual maximum) : BaseAssertCondition<TActual>
+namespace TUnit.Assertions.AssertConditions.Comparable;
+
+public class BetweenAssertCondition<TActual>(TActual minimum, TActual maximum) : BaseAssertCondition<TActual>, IBetweenCondition
     where TActual : IComparable<TActual>
 {
     private bool _inclusiveBounds;
