@@ -14,17 +14,17 @@ namespace TUnit.Assertions.Extensions;
 
 public static partial class DoesExtensions
 {
-    public static StringContainsAssertionBuilderWrapper Contains(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static StringContainsAssertion Contains(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return Contains(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
 
-    public static StringContainsAssertionBuilderWrapper Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
+    public static StringContainsAssertion Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         var assertionBuilder = valueSource.RegisterAssertion(new StringContainsExpectedValueAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
 
-        return new StringContainsAssertionBuilderWrapper(assertionBuilder);
+        return new StringContainsAssertion(assertionBuilder);
     }
 
     public static AssertionBuilder<string> Matches(this IValueSource<string> valueSource, string regex, [CallerArgumentExpression(nameof(regex))] string expression = "")

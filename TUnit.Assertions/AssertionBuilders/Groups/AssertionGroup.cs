@@ -55,29 +55,29 @@ public static class AssertionGroup
         return new AssertionGroupBuilder<TActual, AssertionBuilder<TActual>>(TUnit.Assertions.Assert.That(value));
     }
 
-    public static AssertionGroupBuilder<object?, DelegateAssertionBuilder> For(Action value)
+    public static AssertionGroupBuilder<object?, AssertionBuilder<object?>> For(Action value)
     {
-        return new AssertionGroupBuilder<object?, DelegateAssertionBuilder>(TUnit.Assertions.Assert.That(value));
+        return new AssertionGroupBuilder<object?, AssertionBuilder<object?>>(TUnit.Assertions.Assert.That(value));
     }
 
-    public static AssertionGroupBuilder<object?, DelegateAssertionBuilder> ForSameValueAs(AssertionGroup<object?, DelegateAssertionBuilder> otherGroup)
+    public static AssertionGroupBuilder<object?, AssertionBuilder<object?>> ForSameValueAs(AssertionGroup<object?, AssertionBuilder<object?>> otherGroup)
     {
-        return new AssertionGroupBuilder<object?, DelegateAssertionBuilder>(otherGroup.AssertionBuilder);
+        return new AssertionGroupBuilder<object?, AssertionBuilder<object?>>(otherGroup.AssertionBuilder);
     }
 
-    public static AssertionGroupBuilder<object?, DelegateAssertionBuilder> For(Task value)
+    public static AssertionGroupBuilder<object?, AssertionBuilder<object?>> For(Task value)
     {
-        return new AssertionGroupBuilder<object?, DelegateAssertionBuilder>(TUnit.Assertions.Assert.That(value));
+        return new AssertionGroupBuilder<object?, AssertionBuilder<object?>>(TUnit.Assertions.Assert.That(value));
     }
 
-    public static AssertionGroupBuilder<object?, DelegateAssertionBuilder> For(ValueTask value)
+    public static AssertionGroupBuilder<object?, AssertionBuilder<object?>> For(ValueTask value)
     {
-        return new AssertionGroupBuilder<object?, DelegateAssertionBuilder>(TUnit.Assertions.Assert.That(value));
+        return new AssertionGroupBuilder<object?, AssertionBuilder<object?>>(TUnit.Assertions.Assert.That(value));
     }
 
-    public static AssertionGroupBuilder<object?, DelegateAssertionBuilder> For(Func<Task> value)
+    public static AssertionGroupBuilder<object?, AssertionBuilder<object?>> For(Func<Task> value)
     {
-        return new AssertionGroupBuilder<object?, DelegateAssertionBuilder>(TUnit.Assertions.Assert.That(value));
+        return new AssertionGroupBuilder<object?, AssertionBuilder<object?>>(TUnit.Assertions.Assert.That(value));
     }
 }
 

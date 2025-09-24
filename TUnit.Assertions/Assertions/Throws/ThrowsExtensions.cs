@@ -62,15 +62,24 @@ public static class ThrowsExtensions
             e => e);
     }
 
-    public static DelegateAssertionBuilder ThrowsNothing(this IDelegateSource delegateSource)
+    public static AssertionBuilder<object?> ThrowsNothing(this IDelegateSource delegateSource)
     {
         return delegateSource.RegisterAssertion(new ThrowsNothingAssertCondition<object?>(), []);
     }
 
-    public static AssertionBuilder<TActual> ThrowsNothing<TActual>(this IValueDelegateSource<TActual> delegateSource)
+    public static AwaitableAssertionBuilder<TActual> ThrowsNothing<TActual>(this IValueDelegateSource<TActual> delegateSource)
     {
         IValueSource<TActual> valueSource = delegateSource;
-        return valueSource.RegisterAssertion(new ThrowsNothingAssertCondition<TActual>(), []);
+        var builder = valueSource.RegisterAssertion(new ThrowsNothingAssertCondition<TActual>(), []);
+        
+        // Return an AwaitableAssertionBuilder so it returns the value when awaited
+        return new AwaitableAssertionBuilder<TActual>(
+            async () => {
+                await builder.ProcessAssertionsAsync();
+                var data = await builder.GetAssertionData();
+                return (TActual)data.Result!;
+            },
+            builder.ActualExpression);
     }
 
     public static ThrowsException<TActual, TException> WithParameterName<TActual, TException>(this ThrowsException<TActual, TException> throwsException, string expected, [CallerArgumentExpression(nameof(expected))] string? doNotPopulateThisValue = null)

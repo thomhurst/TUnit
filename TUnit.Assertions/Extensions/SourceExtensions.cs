@@ -35,7 +35,7 @@ public static class SourceExtensions
         return new AssertionBuilder<TToType>(default(TToType)!, source.ActualExpression);
     }
 
-    public static DelegateAssertionBuilder RegisterAssertion<TActual>(this IDelegateSource delegateSource,
+    public static AssertionBuilder<object?> RegisterAssertion<TActual>(this IDelegateSource delegateSource,
         BaseAssertCondition<TActual> assertCondition, string?[] argumentExpressions, [CallerMemberName] string? caller = null)
     {
         if (!string.IsNullOrEmpty(caller))
@@ -45,12 +45,12 @@ public static class SourceExtensions
 
         delegateSource.WithAssertion(assertCondition);
 
-        if (delegateSource is DelegateAssertionBuilder delegateAssertionBuilder)
+        if (delegateSource is AssertionBuilder<object?> delegateAssertionBuilder)
         {
             return delegateAssertionBuilder;
         }
 
-        throw new InvalidOperationException("Source is not a DelegateAssertionBuilder");
+        throw new InvalidOperationException("Source is not an AssertionBuilder<object?>");
     }
 
     public static AssertionBuilder<TToType> RegisterConversionAssertion<TToType>(this IDelegateSource source) where TToType : Exception

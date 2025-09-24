@@ -7,7 +7,7 @@ namespace TUnit.Assertions.Assertions.Delegates;
 
 public static class DelegateExtensions
 {
-    public static DelegateAssertionBuilder CompletesWithin(this IDelegateSource delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null)
+    public static AssertionBuilder<object?> CompletesWithin(this IDelegateSource delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null)
     {
         return delegateSource.RegisterAssertion(new CompleteWithinAssertCondition<object?>(timeSpan), [doNotPopulateThisValue]);
     }

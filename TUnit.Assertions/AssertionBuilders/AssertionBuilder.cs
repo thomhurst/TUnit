@@ -9,7 +9,7 @@ using TUnit.Assertions.AssertionBuilders.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>, IDelegateSource
+public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>, IDelegateSource, IValueDelegateSource<TActual>
 {
     private readonly ValueTask<AssertionData> _assertionDataTask;
     private readonly ValueTask<TActual> _actualValueTask;

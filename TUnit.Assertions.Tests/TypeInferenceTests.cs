@@ -14,8 +14,6 @@ public class TypeInferenceTests
                 .And
                 .IsNotEmpty()
                 .And
-                .Contains(x => x > 1)
-                .And
                 .ContainsOnly(x => x > 1)
                 .And
                 .DoesNotContain(x => x > 1)
@@ -26,7 +24,8 @@ public class TypeInferenceTests
                 .And
                 .HasSingleItem()
                 .And.HasCount().EqualTo(0)
-                .And.HasCount(0);
+                .And.HasCount(0)
+                .Contains(x => x > 1);
         }
         catch
         {

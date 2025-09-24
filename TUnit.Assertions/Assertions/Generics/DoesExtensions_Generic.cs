@@ -16,11 +16,11 @@ public static partial class DoesExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static AssertionBuilder<IEnumerable<TInner>> Contains<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string doNotPopulateThisValue = null)
+    public static ContainsAssertionBuilder<IEnumerable<TInner>, TInner> Contains<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string doNotPopulateThisValue = null)
     {
-        var enumerableContainsExpectedFuncAssertCondition = new EnumerableContainsExpectedFuncAssertCondition<IEnumerable<TInner>, TInner>(matcher, doNotPopulateThisValue);
-
-        return valueSource.RegisterAssertion(enumerableContainsExpectedFuncAssertCondition, [doNotPopulateThisValue]);
+        var containsCondition = new EnumerableContainsExpectedFuncAssertCondition<IEnumerable<TInner>, TInner>(matcher, doNotPopulateThisValue);
+        var assertionBuilder = valueSource.RegisterAssertion(containsCondition, [doNotPopulateThisValue]);
+        return new ContainsAssertionBuilder<IEnumerable<TInner>, TInner>(assertionBuilder, containsCondition);
     }
 
     public static AssertionBuilder<IEnumerable<TInner>> ContainsOnly<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string doNotPopulateThisValue = null)

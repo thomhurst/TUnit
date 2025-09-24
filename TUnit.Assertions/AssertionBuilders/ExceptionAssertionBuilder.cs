@@ -4,16 +4,16 @@ using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class ExceptionAssertionBuilder<TException> : AssertionBuilder<TException> 
+public class ExceptionAssertionBuilder<TException> : AwaitableAssertionBuilder<TException> 
     where TException : Exception
 {
     public ExceptionAssertionBuilder(Func<Task> asyncFunc, string? actualExpression)
-        : base(CaptureException(asyncFunc), actualExpression)
+        : base(async () => await CaptureException(asyncFunc), actualExpression)
     {
     }
 
     public ExceptionAssertionBuilder(Action action, string? actualExpression)
-        : base(CaptureException(action), actualExpression)
+        : base(async () => await CaptureException(action), actualExpression)
     {
     }
 
@@ -55,6 +55,13 @@ public class ExceptionAssertionBuilder<TException> : AssertionBuilder<TException
     {
         AppendCallerMethod([expression ?? $"\"{parameterName}\""]);
         // Add assertion for parameter name checking
+        return this;
+    }
+    
+    public ExceptionAssertionBuilder<TException> WithExceptionTypeValidation(Type expectedType)
+    {
+        // Add an assertion that validates the exception type
+        WithAssertion(new ExceptionTypeAssertCondition(expectedType));
         return this;
     }
 }

@@ -13,8 +13,6 @@ Public Class Tests
     Public Async Function TestAsync() As Task
         Dim result = 1 + 1
         Await Assert.That(result).IsPositive()
-        Dim assertionResult = Await Assert.That(result).IsPositive()
-        Console.WriteLine(assertionResult)
     End Function
 #End If
 
