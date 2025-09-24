@@ -3,42 +3,24 @@ using TUnit.Assertions.AssertConditions.Comparable;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class BetweenAssertionBuilderWrapper<TActual> : AssertionBuilder<TActual> where TActual : IComparable<TActual>
+public class BetweenAssertionBuilderWrapper<TActual> : AssertionBuilderWrapperBase<TActual> where TActual : IComparable<TActual>
 {
-    internal BetweenAssertionBuilderWrapper(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder.Actual, assertionBuilder.ActualExpression)
+    internal BetweenAssertionBuilderWrapper(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder)
     {
-        // Copy the assertion chain from the original builder
-        foreach (var assertion in assertionBuilder.GetAssertions())
-        {
-            WithAssertion(assertion);
-        }
-    }
 
     public BetweenAssertionBuilderWrapper<TActual> WithInclusiveBounds()
     {
-        var assertions = GetAssertions();
-        var assertion = assertions.LastOrDefault() as BetweenAssertCondition<TActual>;
-        
-        if (assertion != null)
-        {
-            assertion.Inclusive();
-            AppendExpression("WithInclusiveBounds()");
-        }
-
+        var assertion = GetLastAssertionAs<BetweenAssertCondition<TActual>>();
+        assertion.Inclusive();
+        AppendCallerMethod([]);
         return this;
     }
 
     public BetweenAssertionBuilderWrapper<TActual> WithExclusiveBounds()
     {
-        var assertions = GetAssertions();
-        var assertion = assertions.LastOrDefault() as BetweenAssertCondition<TActual>;
-        
-        if (assertion != null)
-        {
-            assertion.Exclusive();
-            AppendExpression("WithExclusiveBounds()");
-        }
-
+        var assertion = GetLastAssertionAs<BetweenAssertCondition<TActual>>();
+        assertion.Exclusive();
+        AppendCallerMethod([]);
         return this;
     }
 }

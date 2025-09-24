@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class SingleItemAssertionBuilderWrapper<TActual, TInner> : AssertionBuilder<TActual> where TActual : IEnumerable<TInner>
+public class SingleItemAssertionBuilderWrapper<TActual, TInner> : AssertionBuilderWrapperBase<TActual> where TActual : IEnumerable<TInner>
 {
     internal SingleItemAssertionBuilderWrapper(AssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {

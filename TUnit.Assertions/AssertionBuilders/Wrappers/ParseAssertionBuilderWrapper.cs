@@ -8,7 +8,7 @@ namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
 public class ParseAssertionBuilderWrapper<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] TTarget>
-    : AssertionBuilder<string?>
+    : AssertionBuilderWrapperBase<string?>
 {
     private readonly IValueSource<string?> _valueSource;
     private readonly bool _shouldBeParsable;

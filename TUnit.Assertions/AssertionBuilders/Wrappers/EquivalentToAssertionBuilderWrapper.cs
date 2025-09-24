@@ -4,15 +4,16 @@ using TUnit.Assertions.Enums;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : AssertionBuilder<TActual>
+public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : AssertionBuilderWrapperBase<TActual>
 {
-    internal EquivalentToAssertionBuilderWrapper(AssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal EquivalentToAssertionBuilderWrapper(AssertionBuilder<TActual> invokableAssertionBuilder)
+        : base(invokableAssertionBuilder)
     {
     }
 
     public EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMember(string propertyName, [CallerArgumentExpression(nameof(propertyName))] string doNotPopulateThis = "")
     {
-        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) base.Assertions.Peek();
+        var assertion = GetLastAssertionAs<EquivalentToExpectedValueAssertCondition<TActual, TExpected>>();
 
         assertion.IgnoringMember(propertyName);
 
@@ -23,7 +24,7 @@ public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : Assertion
 
     public EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType<TType>()
     {
-        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) base.Assertions.Peek();
+        var assertion = GetLastAssertionAs<EquivalentToExpectedValueAssertCondition<TActual, TExpected>>();
 
         assertion.IgnoringType(typeof(TType));
 
@@ -34,7 +35,7 @@ public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : Assertion
 
     public EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType(Type type, [CallerArgumentExpression(nameof(type))] string doNotPopulateThis = "")
     {
-        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) base.Assertions.Peek();
+        var assertion = GetLastAssertionAs<EquivalentToExpectedValueAssertCondition<TActual, TExpected>>();
 
         assertion.IgnoringType(type);
 
@@ -45,7 +46,7 @@ public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : Assertion
 
     public EquivalentToAssertionBuilderWrapper<TActual, TExpected> WithPartialEquivalency()
     {
-        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) base.Assertions.Peek();
+        var assertion = GetLastAssertionAs<EquivalentToExpectedValueAssertCondition<TActual, TExpected>>();
 
         assertion.EquivalencyKind = EquivalencyKind.Partial;
 

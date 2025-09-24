@@ -3,15 +3,16 @@ using TUnit.Assertions.AssertConditions.Chronology;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class DateTimeOffsetEqualToAssertionBuilderWrapper : AssertionBuilder<DateTimeOffset>
+public class DateTimeOffsetEqualToAssertionBuilderWrapper : AssertionBuilderWrapperBase<DateTimeOffset>
 {
-    internal DateTimeOffsetEqualToAssertionBuilderWrapper(AssertionBuilder<DateTimeOffset> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal DateTimeOffsetEqualToAssertionBuilderWrapper(AssertionBuilder<DateTimeOffset> invokableAssertionBuilder)
+        : base(invokableAssertionBuilder)
     {
     }
 
     public DateTimeOffsetEqualToAssertionBuilderWrapper Within(TimeSpan tolerance, [CallerArgumentExpression(nameof(tolerance))] string doNotPopulateThis = "")
     {
-        var assertion = (DateTimeOffsetEqualsExpectedValueAssertCondition) base.Assertions.Peek();
+        var assertion = GetLastAssertionAs<DateTimeOffsetEqualsExpectedValueAssertCondition>();
 
         assertion.SetTolerance(tolerance);
 

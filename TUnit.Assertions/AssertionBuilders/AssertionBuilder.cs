@@ -21,8 +21,11 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
     
     public TActual Actual { get; }
     public override string? ActualExpression => _expressionFormatter?.GetExpression();
-    
-    // Backward compatibility property for wrapper classes and generated code
+
+    // Get the last assertion added to the chain (used by wrapper classes to configure assertions)
+    public BaseAssertCondition? GetLastAssertion() => _chain.GetLastAssertion();
+
+    // Override to provide actual Stack when needed (for IInvokableAssertionBuilder compatibility)
     public override Stack<BaseAssertCondition> Assertions => new Stack<BaseAssertCondition>(_chain.GetAssertions().Reverse());
 
     public AssertionBuilder(TActual value, string? actualExpression)
@@ -50,20 +53,6 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
     public AssertionBuilder(ValueTask<TActual> valueTask, string? actualExpression)
         : this(EvaluateValueTask(valueTask, actualExpression), actualExpression)
     {
-    }
-
-    // Constructor for wrapper compatibility
-    protected AssertionBuilder(AssertionBuilder<TActual> other)
-        : this(other._assertionDataTask, other.ActualExpression)
-    {
-        Actual = other.Actual;
-        _actualValueTask = other._actualValueTask;
-        
-        // Copy assertions
-        foreach (var assertion in other.GetAssertions())
-        {
-            _chain.AddAssertion(assertion);
-        }
     }
 
     private AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string? actualExpression)

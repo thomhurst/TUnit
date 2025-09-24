@@ -3,15 +3,16 @@ using TUnit.Assertions.Assertions.Strings.Conditions;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class StringContainsAssertionBuilderWrapper : AssertionBuilder<string>
+public class StringContainsAssertionBuilderWrapper : AssertionBuilderWrapperBase<string>
 {
-    internal StringContainsAssertionBuilderWrapper(AssertionBuilder<string> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal StringContainsAssertionBuilderWrapper(AssertionBuilder<string> invokableAssertionBuilder)
+        : base(invokableAssertionBuilder)
     {
     }
 
     public StringContainsAssertionBuilderWrapper WithTrimming()
     {
-        var assertion = (ExpectedValueAssertCondition<string, string>) base.Assertions.Peek();
+        var assertion = GetLastAssertionAs<ExpectedValueAssertCondition<string, string>>();
 
         assertion.WithTransform(s => s?.Trim(), s => s?.Trim());
 
@@ -22,7 +23,7 @@ public class StringContainsAssertionBuilderWrapper : AssertionBuilder<string>
 
     public StringContainsAssertionBuilderWrapper IgnoringWhitespace()
     {
-        var assertion = (StringContainsExpectedValueAssertCondition) base.Assertions.Peek();
+        var assertion = GetLastAssertionAs<StringContainsExpectedValueAssertCondition>();
 
         assertion.WithTransform(StringUtils.StripWhitespace, StringUtils.StripWhitespace);
         assertion.IgnoreWhitespace = true;

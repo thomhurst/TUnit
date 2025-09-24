@@ -5,15 +5,17 @@ using TUnit.Assertions.AssertConditions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-// Non-generic base class for compatibility with existing code
-// Non-generic base class for compatibility with existing code
+// Non-generic base class for common functionality
 public abstract class AssertionBuilder : IInvokableAssertionBuilder
 {
-    public virtual Stack<BaseAssertCondition> Assertions => new Stack<BaseAssertCondition>();
     public abstract TaskAwaiter GetAwaiter();
-    
+
     public abstract ValueTask<AssertionData> GetAssertionData();
     public abstract ValueTask ProcessAssertionsAsync(AssertionData data);
+
+    // Required by IInvokableAssertionBuilder but should not be used directly
+    // Use GetAssertions() or GetLastAssertion() on concrete implementations
+    public virtual Stack<BaseAssertCondition> Assertions => new Stack<BaseAssertCondition>();
     
     // Methods needed by wrapper classes
     public virtual IEnumerable<BaseAssertCondition> GetAssertions()

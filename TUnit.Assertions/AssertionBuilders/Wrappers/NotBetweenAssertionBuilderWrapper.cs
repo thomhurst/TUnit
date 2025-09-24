@@ -2,15 +2,16 @@ using TUnit.Assertions.AssertConditions.Comparable;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class NotBetweenAssertionBuilderWrapper<TActual> : AssertionBuilder<TActual> where TActual : IComparable<TActual>
+public class NotBetweenAssertionBuilderWrapper<TActual> : AssertionBuilderWrapperBase<TActual> where TActual : IComparable<TActual>
 {
-    internal NotBetweenAssertionBuilderWrapper(AssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal NotBetweenAssertionBuilderWrapper(AssertionBuilder<TActual> invokableAssertionBuilder)
+        : base(invokableAssertionBuilder)
     {
     }
 
     public NotBetweenAssertionBuilderWrapper<TActual> WithInclusiveBounds()
     {
-        var assertion = (NotBetweenAssertCondition<TActual>) base.Assertions.Peek();
+        var assertion = GetLastAssertionAs<NotBetweenAssertCondition<TActual>>();
 
         assertion.Inclusive();
 
@@ -21,7 +22,7 @@ public class NotBetweenAssertionBuilderWrapper<TActual> : AssertionBuilder<TActu
 
     public NotBetweenAssertionBuilderWrapper<TActual> WithExclusiveBounds()
     {
-        var assertion = (NotBetweenAssertCondition<TActual>) base.Assertions.Peek();
+        var assertion = GetLastAssertionAs<NotBetweenAssertCondition<TActual>>();
 
         assertion.Exclusive();
 

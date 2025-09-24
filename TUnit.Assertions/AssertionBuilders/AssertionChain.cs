@@ -49,5 +49,10 @@ public class AssertionChain
         return _assertions.Select(a => a.Condition);
     }
 
+    public BaseAssertCondition? GetLastAssertion()
+    {
+        return _assertions.Count > 0 ? _assertions[^1].Condition : null;
+    }
+
     private record ChainedAssertion(BaseAssertCondition Condition, ChainType ChainType);
 }
