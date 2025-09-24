@@ -201,7 +201,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
                     }
                     if (value is string s)
                     {
-                        return $"decimal.Parse(\"{s.ToInvariantString()}\", global::System.Globalization.CultureInfo.InvariantCulture)";
+                        return $"global::TUnit.Core.Helpers.DecimalParsingHelper.ParseDecimalWithCultureFallback(\"{s.ToInvariantString()}\")";
                     }
                     if (value is double d)
                     {
