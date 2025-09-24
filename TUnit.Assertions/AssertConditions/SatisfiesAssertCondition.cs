@@ -40,7 +40,7 @@ public class SatisfiesAssertCondition<TActual, TExpected> : BaseAssertCondition<
 
         var assertion = _assertionBuilder(innerAssertionBuilder);
 
-        foreach (var baseAssertCondition in ((ISource) assertion).Assertions)
+        foreach (var baseAssertCondition in ((ISource) assertion).GetAssertions())
         {
             var result = await baseAssertCondition.GetAssertionResult(innerItem, exception, assertionMetadata, "");
 

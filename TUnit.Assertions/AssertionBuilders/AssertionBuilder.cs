@@ -23,10 +23,7 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
     public override string? ActualExpression => _expressionFormatter?.GetExpression();
 
     // Get the last assertion added to the chain (used by wrapper classes to configure assertions)
-    public BaseAssertCondition? GetLastAssertion() => _chain.GetLastAssertion();
-
-    // Override to provide actual Stack when needed (for IInvokableAssertionBuilder compatibility)
-    public override Stack<BaseAssertCondition> Assertions => new Stack<BaseAssertCondition>(_chain.GetAssertions().Reverse());
+    public override BaseAssertCondition? GetLastAssertion() => _chain.GetLastAssertion();
 
     public AssertionBuilder(TActual value, string? actualExpression)
         : this(new ValueTask<AssertionData>(ConvertToAssertionData(value, actualExpression)), actualExpression)
@@ -68,7 +65,8 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
     // IValueSource implementation
     string? ISource.ActualExpression => _expressionFormatter.ActualExpression;
     ValueTask<AssertionData> ISource.AssertionDataTask => _assertionDataTask;
-    Stack<BaseAssertCondition> ISource.Assertions => new(_chain.GetAssertions().Reverse());
+    IEnumerable<BaseAssertCondition> ISource.GetAssertions() => _chain.GetAssertions();
+    BaseAssertCondition? ISource.GetLastAssertion() => _chain.GetLastAssertion();
     StringBuilder ISource.ExpressionBuilder => new(_expressionFormatter.GetExpression());
 
     ISource ISource.AppendExpression(string expression)
@@ -95,12 +93,12 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
         _currentChainType = ChainType.None;
         return this;
     }
-    
+
     public override IEnumerable<BaseAssertCondition> GetAssertions()
     {
         return _chain.GetAssertions();
     }
-    
+
     public override void WithAssertion(BaseAssertCondition assertion)
     {
         _chain.AddAssertion(assertion);

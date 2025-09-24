@@ -68,7 +68,7 @@ public class EnumerableSatisfiesAssertCondition<TActual, TInner, TExpected> : Ba
 
         var assertion = _assertionBuilder(innerAssertionBuilder);
 
-        foreach (var baseAssertCondition in assertion.Assertions)
+        foreach (var baseAssertCondition in assertion.GetAssertions())
         {
             var result = await baseAssertCondition.GetAssertionResult(innerItem, exception, assertionMetadata, "");
 

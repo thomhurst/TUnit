@@ -6,18 +6,28 @@ namespace TUnit.Assertions.AssertConditions.Interfaces;
 
 public class ConvertedDelegateSource<TToType> : IValueSource<TToType?> where TToType : Exception
 {
+    private readonly List<BaseAssertCondition> _assertions = new();
+
     public ConvertedDelegateSource(IDelegateSource source)
     {
         var convertToAssertCondition = new ConvertExceptionToValueAssertCondition<TToType>();
 
         ActualExpression = source.ActualExpression;
-        Assertions = new Stack<BaseAssertCondition>([new DelegateConversionAssertionCondition<TToType>(source, (BaseAssertCondition<object?>) source.Assertions.Peek())]);
+
+        var lastAssertion = source.GetLastAssertion();
+        if (lastAssertion is null)
+        {
+            throw new InvalidOperationException("No assertion found on source to convert");
+        }
+
+        _assertions.Add(new DelegateConversionAssertionCondition<TToType>(source, (BaseAssertCondition<object?>) lastAssertion));
         AssertionDataTask = ConvertAsync(source, convertToAssertCondition);
         ExpressionBuilder = source.ExpressionBuilder;
     }
 
     public string? ActualExpression { get; }
-    public Stack<BaseAssertCondition> Assertions { get; }
+    IEnumerable<BaseAssertCondition> ISource.GetAssertions() => _assertions;
+    BaseAssertCondition? ISource.GetLastAssertion() => _assertions.Count > 0 ? _assertions[^1] : null;
     public ValueTask<AssertionData> AssertionDataTask { get; }
 
     public StringBuilder ExpressionBuilder { get; }
@@ -35,7 +45,7 @@ public class ConvertedDelegateSource<TToType> : IValueSource<TToType?> where TTo
 
     public ISource WithAssertion(BaseAssertCondition assertCondition)
     {
-        Assertions.Push(assertCondition);
+        _assertions.Add(assertCondition);
         return this;
     }
 

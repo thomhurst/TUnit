@@ -13,29 +13,31 @@ public abstract class AssertionBuilder : IInvokableAssertionBuilder
     public abstract ValueTask<AssertionData> GetAssertionData();
     public abstract ValueTask ProcessAssertionsAsync(AssertionData data);
 
-    // Required by IInvokableAssertionBuilder but should not be used directly
-    // Use GetAssertions() or GetLastAssertion() on concrete implementations
-    public virtual Stack<BaseAssertCondition> Assertions => new Stack<BaseAssertCondition>();
-    
-    // Methods needed by wrapper classes
+    // IInvokableAssertionBuilder interface methods
     public virtual IEnumerable<BaseAssertCondition> GetAssertions()
     {
         return Enumerable.Empty<BaseAssertCondition>();
     }
-    
+
+    public virtual BaseAssertCondition? GetLastAssertion()
+    {
+        return null;
+    }
+
+    // Methods needed by wrapper classes
     public virtual void WithAssertion(BaseAssertCondition assertion)
     {
         // Default implementation - overridden in derived classes
     }
-    
+
     public virtual string? ActualExpression { get; protected set; }
-    
+
     public virtual void AppendExpression(string expression)
     {
         // Default implementation - overridden in derived classes
     }
-    
-    
+
+
     public virtual void SetBecause(string reason, string? expression)
     {
         // Default implementation - overridden in derived classes

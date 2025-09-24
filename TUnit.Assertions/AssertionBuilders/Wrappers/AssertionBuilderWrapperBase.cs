@@ -48,10 +48,10 @@ public abstract class AssertionBuilderWrapperBase<TActual> : AssertionBuilder<TA
     public override ValueTask<AssertionData> GetAssertionData() => InnerBuilder.GetAssertionData();
     public override ValueTask ProcessAssertionsAsync(AssertionData data) => InnerBuilder.ProcessAssertionsAsync(data);
     public override string? ActualExpression => InnerBuilder.ActualExpression;
-    public override Stack<BaseAssertCondition> Assertions => InnerBuilder.Assertions;
 
-    // Forward other important methods
+    // Forward interface methods
     public override IEnumerable<BaseAssertCondition> GetAssertions() => InnerBuilder.GetAssertions();
+    public override BaseAssertCondition? GetLastAssertion() => InnerBuilder.GetLastAssertion();
     public override void WithAssertion(BaseAssertCondition assertion) => InnerBuilder.WithAssertion(assertion);
     public override void AppendExpression(string expression) => InnerBuilder.AppendExpression(expression);
     public override void SetBecause(string reason, string? expression) => InnerBuilder.SetBecause(reason, expression);

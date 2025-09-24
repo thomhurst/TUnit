@@ -23,8 +23,12 @@ public class DelegateAssertionBuilder : AssertionBuilder, IDelegateSource, ISour
         _expressionFormatter = new ExpressionFormatter(actualExpression);
         _chain = new AssertionChain();
     }
-    
+
     public override string? ActualExpression => _expressionFormatter.GetExpression();
+
+    public override IEnumerable<BaseAssertCondition> GetAssertions() => _chain.GetAssertions();
+
+    public override BaseAssertCondition? GetLastAssertion() => _chain.GetLastAssertion();
     
     public DelegateAssertionBuilder Or
     {
@@ -44,7 +48,8 @@ public class DelegateAssertionBuilder : AssertionBuilder, IDelegateSource, ISour
         }
     }
     
-    Stack<BaseAssertCondition> ISource.Assertions => new Stack<BaseAssertCondition>(_chain.GetAssertions().Reverse());
+    IEnumerable<BaseAssertCondition> ISource.GetAssertions() => _chain.GetAssertions();
+    BaseAssertCondition? ISource.GetLastAssertion() => _chain.GetLastAssertion();
     
     ValueTask<AssertionData> ISource.AssertionDataTask => GetAssertionData();
     

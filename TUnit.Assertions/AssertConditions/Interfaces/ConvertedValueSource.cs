@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using TUnit.Assertions.Assertions.Generics.Conditions;
 using TUnit.Assertions.Extensions;
 
@@ -9,13 +9,15 @@ public class ConvertedValueSource<TFromType, TToType> : IValueSource<TToType?>
     public ConvertedValueSource(IValueSource<TFromType> source, ConvertToAssertCondition<TFromType, TToType> convertToAssertCondition)
     {
         ActualExpression = source.ActualExpression;
-        Assertions = new Stack<BaseAssertCondition>([new ValueConversionAssertionCondition<TFromType, TToType>(source, convertToAssertCondition)]);
+        _assertions.Add(new ValueConversionAssertionCondition<TFromType, TToType>(source, convertToAssertCondition));
         AssertionDataTask = ConvertAsync(source, convertToAssertCondition);
         ExpressionBuilder = source.ExpressionBuilder;
     }
 
     public string? ActualExpression { get; }
-    public Stack<BaseAssertCondition> Assertions { get; }
+    private readonly List<BaseAssertCondition> _assertions = new();
+    IEnumerable<BaseAssertCondition> ISource.GetAssertions() => _assertions;
+    BaseAssertCondition? ISource.GetLastAssertion() => _assertions.Count > 0 ? _assertions[^1] : null;
     public ValueTask<AssertionData> AssertionDataTask { get; }
 
     public StringBuilder ExpressionBuilder { get; }
@@ -33,7 +35,7 @@ public class ConvertedValueSource<TFromType, TToType> : IValueSource<TToType?>
 
     public ISource WithAssertion(BaseAssertCondition assertCondition)
     {
-        Assertions.Push(assertCondition);
+        _assertions.Add(assertCondition);
         return this;
     }
 

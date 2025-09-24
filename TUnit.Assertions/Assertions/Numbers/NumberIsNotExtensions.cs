@@ -18,7 +18,11 @@ public static class NumberIsNotExtensions
         this GenericNotEqualToAssertionBuilderWrapper<TActual> assertionBuilder, TActual tolerance, [CallerArgumentExpression(nameof(tolerance))] string doNotPopulateThis = "")
         where TActual : INumber<TActual>
     {
-        var assertion = (NotEqualsExpectedValueAssertCondition<TActual>) assertionBuilder.Assertions.Peek();
+        var assertion = assertionBuilder.GetLastAssertion() as NotEqualsExpectedValueAssertCondition<TActual>;
+        if (assertion is null)
+        {
+            throw new InvalidOperationException($"Expected last assertion to be NotEqualsExpectedValueAssertCondition<{typeof(TActual).Name}>");
+        }
 
         assertion.WithComparer((actual, expected) =>
         {

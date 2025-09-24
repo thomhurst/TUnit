@@ -11,7 +11,8 @@ public class ValueAnd<TActual>(AssertionBuilder assertionBuilder) : IValueSource
         return new ValueAnd<TActual>(assertionBuilder);
     }
 
-    Stack<BaseAssertCondition> ISource.Assertions => ((ISource) assertionBuilder).Assertions;
+    IEnumerable<BaseAssertCondition> ISource.GetAssertions() => ((ISource) assertionBuilder).GetAssertions();
+    BaseAssertCondition? ISource.GetLastAssertion() => ((ISource) assertionBuilder).GetLastAssertion();
     ValueTask<AssertionData> ISource.AssertionDataTask => ((ISource) assertionBuilder).AssertionDataTask;
     StringBuilder ISource.ExpressionBuilder => ((ISource) assertionBuilder).ExpressionBuilder;
     string? ISource.ActualExpression => ((ISource) assertionBuilder).ActualExpression;

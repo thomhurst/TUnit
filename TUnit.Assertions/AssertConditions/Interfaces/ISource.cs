@@ -5,7 +5,8 @@ namespace TUnit.Assertions.AssertConditions.Interfaces;
 public interface ISource
 {
     string? ActualExpression { get; }
-    internal Stack<BaseAssertCondition> Assertions { get; }
+    internal IEnumerable<BaseAssertCondition> GetAssertions();
+    internal BaseAssertCondition? GetLastAssertion();
     internal ValueTask<AssertionData> AssertionDataTask { get; }
     internal StringBuilder ExpressionBuilder { get; }
 

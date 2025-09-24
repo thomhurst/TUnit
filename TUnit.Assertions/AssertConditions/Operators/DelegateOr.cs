@@ -13,7 +13,8 @@ public class DelegateOr<TActual>(AssertionBuilder assertionBuilder) : IDelegateS
 
     string? ISource.ActualExpression => ((ISource) assertionBuilder).ActualExpression;
 
-    Stack<BaseAssertCondition> ISource.Assertions => ((ISource) assertionBuilder).Assertions;
+    IEnumerable<BaseAssertCondition> ISource.GetAssertions() => ((ISource) assertionBuilder).GetAssertions();
+    BaseAssertCondition? ISource.GetLastAssertion() => ((ISource) assertionBuilder).GetLastAssertion();
     ValueTask<AssertionData> ISource.AssertionDataTask => ((ISource) assertionBuilder).AssertionDataTask;
     StringBuilder ISource.ExpressionBuilder => ((ISource) assertionBuilder).ExpressionBuilder;
 

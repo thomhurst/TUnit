@@ -7,6 +7,7 @@ public class BetweenAssertionBuilderWrapper<TActual> : AssertionBuilderWrapperBa
 {
     internal BetweenAssertionBuilderWrapper(AssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder)
     {
+    }
 
     public BetweenAssertionBuilderWrapper<TActual> WithInclusiveBounds()
     {

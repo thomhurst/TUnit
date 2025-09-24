@@ -9,6 +9,7 @@ public interface IInvokableAssertionBuilder
 {
     ValueTask<AssertionData> GetAssertionData();
     ValueTask ProcessAssertionsAsync(AssertionData data);
-    Stack<BaseAssertCondition> Assertions { get; }
+    IEnumerable<BaseAssertCondition> GetAssertions();
+    BaseAssertCondition? GetLastAssertion();
     TaskAwaiter GetAwaiter();
 }
