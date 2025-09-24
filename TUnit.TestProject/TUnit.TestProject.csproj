@@ -56,6 +56,7 @@
         <None Update="testconfig.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Remove="test-method-datasource.ps1" />
     </ItemGroup>
 
     <Import Project="..\TestProject.targets" />

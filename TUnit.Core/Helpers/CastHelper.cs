@@ -8,9 +8,9 @@ namespace TUnit.Core.Helpers;
 
 public static class CastHelper
 {
-    [UnconditionalSuppressMessage("Trimming", "IL2072", 
+    [UnconditionalSuppressMessage("Trimming", "IL2072",
         Justification = "Type conversion uses DynamicallyAccessedMembers for known conversion patterns. For AOT scenarios, use explicit type conversions.")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", 
+    [UnconditionalSuppressMessage("AOT", "IL3050",
         Justification = "Reflection-based conversion is a fallback for runtime scenarios. AOT applications should use explicit conversions.")]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(object? value)
     {
@@ -30,11 +30,23 @@ public static class CastHelper
         {
             return (T) value;
         }
-        
+
         // Try AOT converter registry first
         if (AotConverterRegistry.TryConvert(value.GetType(), underlyingType, value, out var converted))
         {
             return (T?) converted;
+        }
+
+        if (value is IConvertible && underlyingType.IsPrimitive)
+        {
+            try
+            {
+                return (T?) Convert.ChangeType(value, underlyingType);
+            }
+            catch
+            {
+                // If direct conversion fails, continue with other approaches
+            }
         }
 
         if (value is not string
@@ -42,34 +54,7 @@ public static class CastHelper
             && !value.GetType().IsArray  // Don't unwrap arrays
             && !typeof(IEnumerable).IsAssignableFrom(typeof(T)))
         {
-            // Special handling for CustomAttributeTypedArgument collections in .NET Framework
-            var typeName = value.GetType().FullName;
-            if (typeName != null && typeName.Contains("CustomAttributeTypedArgument"))
-            {
-                // For ReadOnlyCollection<CustomAttributeTypedArgument>, we need to extract the actual values
-                var firstItem = enumerable.Cast<object>().FirstOrDefault();
-                if (firstItem != null)
-                {
-                    // Use reflection to get the Value property
-                    var valueProperty = GetValuePropertySafe(firstItem.GetType());
-                    if (valueProperty != null)
-                    {
-                        value = valueProperty.GetValue(firstItem);
-                    }
-                    else
-                    {
-                        value = firstItem;
-                    }
-                }
-                else
-                {
-                    value = null;
-                }
-            }
-            else
-            {
-                value = enumerable.Cast<object>().ElementAtOrDefault(0);
-            }
+            value = enumerable.Cast<object>().ElementAtOrDefault(0);
         }
 
         if (underlyingType.IsEnum)
@@ -81,13 +66,13 @@ public static class CastHelper
         if (underlyingType.IsArray)
         {
             var targetElementType = underlyingType.GetElementType()!;
-            
+
             // Handle null -> empty array
             if (value is null)
             {
                 return (T?)(object)Array.CreateInstance(targetElementType, 0);
             }
-            
+
             // Handle single value -> single element array
             if (!value.GetType().IsArray)
             {
@@ -110,13 +95,13 @@ public static class CastHelper
             else if (value is Array sourceArray)
             {
                 var sourceElementType = value.GetType().GetElementType()!;
-                
+
                 // If element types match, return as-is
                 if (sourceElementType == targetElementType)
                 {
                     return (T?)value;
                 }
-                
+
                 // Otherwise, convert each element
                 try
                 {
@@ -124,7 +109,7 @@ public static class CastHelper
                     for (var i = 0; i < sourceArray.Length; i++)
                     {
                         var sourceElement = sourceArray.GetValue(i);
-                        var convertedElement = sourceElement is IConvertible 
+                        var convertedElement = sourceElement is IConvertible
                             ? Convert.ChangeType(sourceElement, targetElementType)
                             : sourceElement;
                         targetArray.SetValue(convertedElement, i);
@@ -159,13 +144,13 @@ public static class CastHelper
                     // If unboxing fails, continue with the original approach
                 }
             }
-            
+
             // Log diagnostic information for debugging single file mode issues
             if (Environment.GetEnvironmentVariable("TUNIT_DIAGNOSTIC_CAST") == "true")
             {
                 Console.WriteLine($"[CastHelper] No conversion found from {value.GetType().FullName} to {underlyingType.FullName}");
             }
-            
+
             return (T?) value;
         }
 
@@ -191,9 +176,9 @@ public static class CastHelper
         }
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2072", 
+    [UnconditionalSuppressMessage("Trimming", "IL2072",
         Justification = "Type conversion uses DynamicallyAccessedMembers for known conversion patterns. For AOT scenarios, use explicit type conversions.")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", 
+    [UnconditionalSuppressMessage("AOT", "IL3050",
         Justification = "Reflection-based conversion is a fallback for runtime scenarios. AOT applications should use explicit conversions.")]
     public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, object? value)
     {
@@ -264,13 +249,13 @@ public static class CastHelper
         if (underlyingType.IsArray)
         {
             var targetElementType = underlyingType.GetElementType()!;
-            
+
             // Handle null -> empty array
             if (value is null)
             {
                 return Array.CreateInstance(targetElementType, 0);
             }
-            
+
             // Handle single value -> single element array
             if (!value.GetType().IsArray)
             {
@@ -293,13 +278,13 @@ public static class CastHelper
             else if (value is Array sourceArray)
             {
                 var sourceElementType = value.GetType().GetElementType()!;
-                
+
                 // If element types match, return as-is
                 if (sourceElementType == targetElementType)
                 {
                     return value;
                 }
-                
+
                 // Otherwise, convert each element
                 try
                 {
@@ -307,7 +292,7 @@ public static class CastHelper
                     for (var i = 0; i < sourceArray.Length; i++)
                     {
                         var sourceElement = sourceArray.GetValue(i);
-                        var convertedElement = sourceElement is IConvertible 
+                        var convertedElement = sourceElement is IConvertible
                             ? Convert.ChangeType(sourceElement, targetElementType)
                             : sourceElement;
                         targetArray.SetValue(convertedElement, i);
@@ -356,18 +341,18 @@ public static class CastHelper
         // First try the base type methods (including inherited and declared only)
         var baseMethods = baseType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
             .Concat(baseType.GetMethods(BindingFlags.Public | BindingFlags.Static));
-        
+
         // Then try the target type methods
         var targetMethods = targetType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
             .Concat(targetType.GetMethods(BindingFlags.Public | BindingFlags.Static));
-        
+
         var methods = baseMethods.Concat(targetMethods).Distinct().ToArray();
 
         // Look for implicit conversion first
         var implicitMethod = methods
             .FirstOrDefault(mi =>
                 mi.Name == "op_Implicit" && mi.ReturnType == targetType && HasCorrectInputType(baseType, mi));
-        
+
         if (implicitMethod != null)
         {
             return implicitMethod;
@@ -384,7 +369,7 @@ public static class CastHelper
         var pi = mi.GetParameters().FirstOrDefault();
         return pi != null && pi.ParameterType == baseType;
     }
-    
+
     /// <summary>
     /// Gets the "Value" property from a type in an AOT-safer manner.
     /// </summary>
@@ -394,5 +379,5 @@ public static class CastHelper
     {
         return type.GetProperty("Value");
     }
-    
+
 }

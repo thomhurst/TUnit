@@ -8,10 +8,7 @@ public class BenchmarkBase
 {
     protected readonly Stream OutputStream = Console.OpenStandardOutput();
 
-    protected static readonly string UnitPath = GetProjectPath("TUnitTimer");
-    protected static readonly string NUnitPath = GetProjectPath("NUnitTimer");
-    protected static readonly string XUnitPath = GetProjectPath("xUnitTimer");
-    protected static readonly string MsTestPath = GetProjectPath("MSTestTimer");
+    protected static readonly string UnifiedPath = GetProjectPath("UnifiedTests");
     
     protected static readonly string Framework = GetFramework();
 
@@ -35,16 +32,16 @@ public class BenchmarkBase
             folder = folder.Parent!;
         }
         
-        return Path.Combine(folder.FullName, name, name);
+        return Path.Combine(folder.FullName, name);
     }
 
     protected string GetExecutableFileName()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            return "TUnitTimer.exe";
+            return "UnifiedTests.exe";
         }
 
-        return "TUnitTimer";
+        return "UnifiedTests";
     }
 }

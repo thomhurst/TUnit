@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <OutputType Condition="'$(TestFramework)' == 'TUNIT'">Exe</OutputType>
+  </PropertyGroup>
+
+  <!-- Define constants based on TestFramework property -->
+  <PropertyGroup>
+    <DefineConstants Condition="'$(TestFramework)' == 'TUNIT'">$(DefineConstants);TUNIT</DefineConstants>
+    <DefineConstants Condition="'$(TestFramework)' == 'XUNIT'">$(DefineConstants);XUNIT</DefineConstants>
+    <DefineConstants Condition="'$(TestFramework)' == 'NUNIT'">$(DefineConstants);NUNIT</DefineConstants>
+    <DefineConstants Condition="'$(TestFramework)' == 'MSTEST'">$(DefineConstants);MSTEST</DefineConstants>
+  </PropertyGroup>
+
+  <!-- TUnit packages -->
+  <ItemGroup Condition="'$(TestFramework)' == 'TUNIT'">
+    <PackageReference Include="TUnit" VersionOverride="*" />
+  </ItemGroup>
+
+  <!-- xUnit packages -->
+  <ItemGroup Condition="'$(TestFramework)' == 'XUNIT'">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- NUnit packages -->
+  <ItemGroup Condition="'$(TestFramework)' == 'NUNIT'">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit3TestAdapter" />
+  </ItemGroup>
+
+  <!-- MSTest packages -->
+  <ItemGroup Condition="'$(TestFramework)' == 'MSTEST'">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="MSTest.TestAdapter" />
+    <PackageReference Include="MSTest.TestFramework" />
+  </ItemGroup>
+
+  <!-- AOT and SingleFile configurations for TUnit -->
+  <PropertyGroup Condition="'$(TestFramework)' == 'TUNIT' AND '$(Aot)' == 'true'">
+    <PublishAot>true</PublishAot>
+    <PublishTrimmed>true</PublishTrimmed>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TestFramework)' == 'TUNIT' AND '$(SingleFile)' == 'true'">
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+
+</Project>

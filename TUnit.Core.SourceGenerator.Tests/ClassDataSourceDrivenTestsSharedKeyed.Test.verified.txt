@@ -22,7 +22,8 @@ internal sealed class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Tes
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>() { Shared = global::TUnit.Core.SharedType.Keyed, Key = "🔑" },
+                new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
+{Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -137,7 +138,8 @@ internal sealed class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Gen
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>() { Shared = global::TUnit.Core.SharedType.Keyed, Key = "🔑" },
+                new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
+{Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),

@@ -1,0 +1,52 @@
+name: Locale Test
+
+on:
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  modularpipeline:
+    strategy:
+      matrix:
+        locale: [fr-FR, pl-PL, de-DE]
+      fail-fast: true
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Generate and set locale for subsequent steps
+        run: |
+          # Convert hyphen (fr-FR) to underscore (fr_FR) which is the correct locale name on Ubuntu
+          LOCALE=${{ matrix.locale }}
+          LOCALE=${LOCALE/-/_}
+
+          sudo apt-get update
+          sudo apt-get install -y locales
+          sudo locale-gen "${LOCALE}.UTF-8"
+          sudo update-locale LANG="${LOCALE}.UTF-8"
+
+          # Export for subsequent GitHub Actions steps
+          echo "LANG=${LOCALE}.UTF-8" >> $GITHUB_ENV
+          echo "LC_ALL=${LOCALE}.UTF-8" >> $GITHUB_ENV
+
+      - name: Build
+        run: dotnet build -c Release
+        working-directory: TUnit.TestProject

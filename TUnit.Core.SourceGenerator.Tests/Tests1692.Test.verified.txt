@@ -23,7 +23,7 @@ internal sealed class Tests_NullTest_TestSource_GUID : global::TUnit.Core.Interf
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
                 new global::TUnit.Core.ArgumentsAttribute(null),
-                new global::TUnit.Core.ArgumentsAttribute(),
+                new global::TUnit.Core.ArgumentsAttribute(null),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),

@@ -17,8 +17,8 @@ internal sealed class Tests_MyTest_TestSource_GUID : global::TUnit.Core.Interfac
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.ArgumentsAttribute(0),
-                new global::TUnit.Core.ArgumentsAttribute(255),
-                new global::TUnit.Core.ArgumentsAttribute(32767),
+                new global::TUnit.Core.ArgumentsAttribute((byte)255),
+                new global::TUnit.Core.ArgumentsAttribute((short)32767),
                 new global::TUnit.Core.ArgumentsAttribute('\uffff'),
                 new global::TUnit.Core.ArgumentsAttribute(2147483647),
                 new global::TUnit.Core.ArgumentsAttribute(9223372036854775807L),
@@ -26,11 +26,11 @@ internal sealed class Tests_MyTest_TestSource_GUID : global::TUnit.Core.Interfac
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ArgumentsAttribute(0L),
-                new global::TUnit.Core.ArgumentsAttribute(255L),
-                new global::TUnit.Core.ArgumentsAttribute(32767L),
-                new global::TUnit.Core.ArgumentsAttribute(65535L),
-                new global::TUnit.Core.ArgumentsAttribute(2147483647L),
+                new global::TUnit.Core.ArgumentsAttribute(0),
+                new global::TUnit.Core.ArgumentsAttribute((byte)255),
+                new global::TUnit.Core.ArgumentsAttribute((short)32767),
+                new global::TUnit.Core.ArgumentsAttribute('\uffff'),
+                new global::TUnit.Core.ArgumentsAttribute(2147483647),
                 new global::TUnit.Core.ArgumentsAttribute(9223372036854775807L),
             },
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),

@@ -23,7 +23,8 @@ internal sealed class MyTests_Test1_TestSource_GUID : global::TUnit.Core.Interfa
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>() { Shared = global::TUnit.Core.SharedType.None },
+                new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1589.MyFixture>()
+{Shared = global::TUnit.Core.SharedType.None,},
             },
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),

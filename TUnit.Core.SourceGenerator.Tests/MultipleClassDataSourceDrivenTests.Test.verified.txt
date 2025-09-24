@@ -23,7 +23,8 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test1_TestSource_GUID :
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>() { Shared = null },
+                new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
+{Shared = new global::TUnit.Core.SharedType[]{global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None},},
             },
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
@@ -155,7 +156,8 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test2_TestSource_GUID :
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
-                new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>() { Shared = null },
+                new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4, global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>()
+{Shared = new global::TUnit.Core.SharedType[]{global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None,global::TUnit.Core.SharedType.None},},
             },
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),

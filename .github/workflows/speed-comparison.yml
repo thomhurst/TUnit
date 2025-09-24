@@ -29,36 +29,28 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Build TUnit AOT .NET 8.0
-        run: dotnet publish TUnitTimer.csproj -c Release --framework net8.0 --output aot-publish-net8 --property:Aot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
-        working-directory: "tools/speed-comparison/TUnitTimer/TUnitTimer"
+        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net8.0 --output aot-publish-net8 -p:PublishAot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
+        working-directory: "tools/speed-comparison/UnifiedTests"
           
       - name: Build TUnit AOT .NET 9.0
-        run: dotnet publish TUnitTimer.csproj -c Release --framework net9.0 --output aot-publish-net9 --property:Aot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
-        working-directory: "tools/speed-comparison/TUnitTimer/TUnitTimer"
+        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net9.0 --output aot-publish-net9 -p:PublishAot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
+        working-directory: "tools/speed-comparison/UnifiedTests"
 
       - name: Build TUnit Single File .NET 8.0
-        run: dotnet publish TUnitTimer.csproj -c Release --framework net8.0 --output singlefile-publish-net8 --property:SingleFile=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
-        working-directory: "tools/speed-comparison/TUnitTimer/TUnitTimer"
+        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net8.0 --output singlefile-publish-net8 -p:PublishSingleFile=true -p:SelfContained=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
+        working-directory: "tools/speed-comparison/UnifiedTests"
           
       - name: Build TUnit Single File .NET 9.0
-        run: dotnet publish TUnitTimer.csproj -c Release --framework net9.0 --output singlefile-publish-net9 --property:SingleFile=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
-        working-directory: "tools/speed-comparison/TUnitTimer/TUnitTimer"
+        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net9.0 --output singlefile-publish-net9 -p:PublishSingleFile=true -p:SelfContained=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
+        working-directory: "tools/speed-comparison/UnifiedTests"
 
-      - name: Build TUnit
-        run: dotnet build -c Release
-        working-directory: "tools/speed-comparison/TUnitTimer"
- 
-      - name: Build xUnit
-        run: dotnet build -c Release
-        working-directory: "tools/speed-comparison/xUnitTimer"
-            
-      - name: Build NUnit
-        run: dotnet build -c Release
-        working-directory: "tools/speed-comparison/NUnitTimer"
-                    
-      - name: Build MSTest
-        run: dotnet build -c Release
-        working-directory: "tools/speed-comparison/MSTestTimer"
+      - name: Build All Frameworks
+        run: |
+          dotnet build -c Release -p:TestFramework=TUNIT
+          dotnet build -c Release -p:TestFramework=XUNIT
+          dotnet build -c Release -p:TestFramework=NUNIT
+          dotnet build -c Release -p:TestFramework=MSTEST
+        working-directory: "tools/speed-comparison/UnifiedTests"
       
       - name: Run Benchmark
         run: dotnet run -c Release --framework net9.0 --allCategories=Runtime
@@ -96,6 +88,11 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 9.0.x
+
+      - name: Prepare builds
+        run: |
+          dotnet restore UnifiedTests/UnifiedTests.csproj
+        working-directory: "tools/speed-comparison"
 
       - name: Run Benchmark
         run: dotnet run -c Release --allCategories=Build --framework net9.0

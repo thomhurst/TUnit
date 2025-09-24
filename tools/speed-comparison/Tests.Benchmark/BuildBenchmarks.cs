@@ -10,8 +10,8 @@ public class BuildBenchmarks : BenchmarkBase
     public async Task Build_TUnit()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["build", "--no-incremental", "-c", "Release", "--framework", Framework])
-            .WithWorkingDirectory(UnitPath)
+            .WithArguments(["build", "--no-incremental", "-c", "Release", "-p:TestFramework=TUNIT", "--framework", Framework])
+            .WithWorkingDirectory(UnifiedPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteAsync();
     }
@@ -20,8 +20,8 @@ public class BuildBenchmarks : BenchmarkBase
     public async Task Build_NUnit()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["build", "--no-incremental", "-c", "Release", "--framework", Framework])
-            .WithWorkingDirectory(NUnitPath)
+            .WithArguments(["build", "--no-incremental", "-c", "Release", "-p:TestFramework=NUNIT", "--framework", Framework])
+            .WithWorkingDirectory(UnifiedPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteAsync();
     }
@@ -30,8 +30,8 @@ public class BuildBenchmarks : BenchmarkBase
     public async Task Build_xUnit()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["build", "--no-incremental", "-c", "Release", "--framework", Framework])
-            .WithWorkingDirectory(XUnitPath)
+            .WithArguments(["build", "--no-incremental", "-c", "Release", "-p:TestFramework=XUNIT", "--framework", Framework])
+            .WithWorkingDirectory(UnifiedPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteAsync();
     }
@@ -40,8 +40,8 @@ public class BuildBenchmarks : BenchmarkBase
     public async Task Build_MSTest()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["build", "--no-incremental", "-c", "Release", "--framework", Framework])
-            .WithWorkingDirectory(MsTestPath)
+            .WithArguments(["build", "--no-incremental", "-c", "Release", "-p:TestFramework=MSTEST", "--framework", Framework])
+            .WithWorkingDirectory(UnifiedPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteAsync();
     }

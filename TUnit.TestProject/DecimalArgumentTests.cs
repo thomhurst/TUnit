@@ -76,6 +76,15 @@ public class DecimalArgumentTests
     [Arguments(1)]
     public void Test(decimal test)
     {
-        return;
+    }
+
+
+    [Test]
+    [Arguments(50, 75, 70, 5, 0, true)]
+    [Arguments(70, 75, 70, 5, 5, true)]
+    [Arguments(70, 75, 70, 5, 0, false)]
+    public void TransactionDiscountCalculations(decimal amountPaying, decimal invoiceBalance,
+        decimal invoiceBalanceDue, decimal discountAmount, decimal appliedDiscountAmount, bool discountAllowedForUser)
+    {
     }
 }
