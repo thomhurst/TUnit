@@ -12,7 +12,7 @@ public class NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> : Assert
 
     public NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMember(string propertyName, [CallerArgumentExpression(nameof(propertyName))] string doNotPopulateThis = "")
     {
-        var assertion = (NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+        var assertion = (NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>) base.Assertions.Peek();
 
         assertion.IgnoringMember(propertyName);
 
@@ -23,7 +23,7 @@ public class NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> : Assert
 
     public NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType<TType>()
     {
-        var assertion = (NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+        var assertion = (NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>) base.Assertions.Peek();
 
         assertion.IgnoringType(typeof(TType));
 
@@ -34,7 +34,7 @@ public class NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> : Assert
 
     public NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType(Type type, [CallerArgumentExpression(nameof(type))] string doNotPopulateThis = "")
     {
-        var assertion = (NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+        var assertion = (NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>) base.Assertions.Peek();
 
         assertion.IgnoringType(type);
 
@@ -45,7 +45,7 @@ public class NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> : Assert
 
     public NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> WithPartialEquivalency()
     {
-        var assertion = (NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+        var assertion = (NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>) base.Assertions.Peek();
 
         assertion.EquivalencyKind = EquivalencyKind.Partial;
 

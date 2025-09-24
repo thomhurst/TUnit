@@ -10,7 +10,7 @@ public class NotBetweenAssertionBuilderWrapper<TActual> : AssertionBuilder<TActu
 
     public NotBetweenAssertionBuilderWrapper<TActual> WithInclusiveBounds()
     {
-        var assertion = (NotBetweenAssertCondition<TActual>) Assertions.Peek();
+        var assertion = (NotBetweenAssertCondition<TActual>) base.Assertions.Peek();
 
         assertion.Inclusive();
 
@@ -21,7 +21,7 @@ public class NotBetweenAssertionBuilderWrapper<TActual> : AssertionBuilder<TActu
 
     public NotBetweenAssertionBuilderWrapper<TActual> WithExclusiveBounds()
     {
-        var assertion = (NotBetweenAssertCondition<TActual>) Assertions.Peek();
+        var assertion = (NotBetweenAssertCondition<TActual>) base.Assertions.Peek();
 
         assertion.Exclusive();
 

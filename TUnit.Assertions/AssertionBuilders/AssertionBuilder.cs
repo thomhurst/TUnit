@@ -171,7 +171,7 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
         return _evaluator.GetResults();
     }
 
-    public void AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
+    public virtual void AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
     {
         if (!string.IsNullOrEmpty(methodName))
         {

@@ -11,7 +11,7 @@ public class TimeSpanEqualToAssertionBuilderWrapper : AssertionBuilder<TimeSpan>
 
     public TimeSpanEqualToAssertionBuilderWrapper Within(TimeSpan tolerance, [CallerArgumentExpression(nameof(tolerance))] string doNotPopulateThis = "")
     {
-        var assertion = (TimeSpanEqualsExpectedValueAssertCondition) Assertions.Peek();
+        var assertion = (TimeSpanEqualsExpectedValueAssertCondition) base.Assertions.Peek();
 
         assertion.SetTolerance(tolerance);
 

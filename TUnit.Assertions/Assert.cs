@@ -28,7 +28,7 @@ public static class Assert
     public static DelegateAssertionBuilder That(Action value,
         [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
-        return new DelegateAssertionBuilder(() => { value(); return null; }, doNotPopulateThisValue);
+        return new DelegateAssertionBuilder(() => { value(); return null; }, doNotPopulateThisValue ?? "");
     }
 
     // This overload returns AssertionBuilder<T> for normal value assertions
@@ -43,19 +43,19 @@ public static class Assert
     public static DelegateAssertionBuilder ThatAction<TActual>(Func<TActual> value,
         [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
-        return new DelegateAssertionBuilder(() => value(), doNotPopulateThisValue);
+        return new DelegateAssertionBuilder(() => value(), doNotPopulateThisValue ?? "");
     }
 
     public static DelegateAssertionBuilder That(Func<Task> value,
         [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
-        return new DelegateAssertionBuilder(() => { value().GetAwaiter().GetResult(); return null; }, doNotPopulateThisValue);
+        return new DelegateAssertionBuilder(() => { value().GetAwaiter().GetResult(); return null; }, doNotPopulateThisValue ?? "");
     }
 
     public static DelegateAssertionBuilder That(Task value,
         [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
-        return new DelegateAssertionBuilder(() => { value.GetAwaiter().GetResult(); return null; }, doNotPopulateThisValue);
+        return new DelegateAssertionBuilder(() => { value.GetAwaiter().GetResult(); return null; }, doNotPopulateThisValue ?? "");
     }
 
     public static AssertionBuilder<TActual> That<TActual>(Func<Task<TActual>> value,
@@ -73,7 +73,7 @@ public static class Assert
     public static DelegateAssertionBuilder That(ValueTask value,
         [CallerArgumentExpression(nameof(value))] string? doNotPopulateThisValue = null)
     {
-        return new DelegateAssertionBuilder(() => { value.AsTask().GetAwaiter().GetResult(); return null; }, doNotPopulateThisValue);
+        return new DelegateAssertionBuilder(() => { value.AsTask().GetAwaiter().GetResult(); return null; }, doNotPopulateThisValue ?? "");
     }
 
     public static AssertionBuilder<TActual> That<TActual>(ValueTask<TActual> value,

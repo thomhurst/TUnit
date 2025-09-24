@@ -11,7 +11,7 @@ public class DateTimeOffsetEqualToAssertionBuilderWrapper : AssertionBuilder<Dat
 
     public DateTimeOffsetEqualToAssertionBuilderWrapper Within(TimeSpan tolerance, [CallerArgumentExpression(nameof(tolerance))] string doNotPopulateThis = "")
     {
-        var assertion = (DateTimeOffsetEqualsExpectedValueAssertCondition) Assertions.Peek();
+        var assertion = (DateTimeOffsetEqualsExpectedValueAssertCondition) base.Assertions.Peek();
 
         assertion.SetTolerance(tolerance);
 

@@ -12,7 +12,7 @@ public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : Assertion
 
     public EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringMember(string propertyName, [CallerArgumentExpression(nameof(propertyName))] string doNotPopulateThis = "")
     {
-        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) base.Assertions.Peek();
 
         assertion.IgnoringMember(propertyName);
 
@@ -23,7 +23,7 @@ public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : Assertion
 
     public EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType<TType>()
     {
-        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) base.Assertions.Peek();
 
         assertion.IgnoringType(typeof(TType));
 
@@ -34,7 +34,7 @@ public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : Assertion
 
     public EquivalentToAssertionBuilderWrapper<TActual, TExpected> IgnoringType(Type type, [CallerArgumentExpression(nameof(type))] string doNotPopulateThis = "")
     {
-        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) base.Assertions.Peek();
 
         assertion.IgnoringType(type);
 
@@ -45,7 +45,7 @@ public class EquivalentToAssertionBuilderWrapper<TActual, TExpected> : Assertion
 
     public EquivalentToAssertionBuilderWrapper<TActual, TExpected> WithPartialEquivalency()
     {
-        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) Assertions.Peek();
+        var assertion = (EquivalentToExpectedValueAssertCondition<TActual, TExpected>) base.Assertions.Peek();
 
         assertion.EquivalencyKind = EquivalencyKind.Partial;
 

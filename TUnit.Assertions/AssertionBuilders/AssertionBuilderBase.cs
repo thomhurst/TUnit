@@ -39,6 +39,7 @@ public abstract class AssertionBuilder : IInvokableAssertionBuilder
         // Default implementation - overridden in derived classes
     }
 
+
     [Obsolete("This is a base `object` method that should not be called.", true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     [DebuggerHidden]

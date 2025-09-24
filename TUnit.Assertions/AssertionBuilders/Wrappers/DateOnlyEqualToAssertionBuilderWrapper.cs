@@ -18,7 +18,7 @@ public class DateOnlyEqualToAssertionBuilderWrapper : AssertionBuilder<DateOnly>
 
     public DateOnlyEqualToAssertionBuilderWrapper WithinDays(int days, [CallerArgumentExpression(nameof(days))] string doNotPopulateThis = "")
     {
-        var assertion = (DateOnlyEqualsExpectedValueAssertCondition) Assertions.Peek();
+        var assertion = (DateOnlyEqualsExpectedValueAssertCondition) base.Assertions.Peek();
 
         assertion.SetTolerance(days);
         

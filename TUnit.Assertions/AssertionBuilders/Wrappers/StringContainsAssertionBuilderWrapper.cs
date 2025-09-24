@@ -11,7 +11,7 @@ public class StringContainsAssertionBuilderWrapper : AssertionBuilder<string>
 
     public StringContainsAssertionBuilderWrapper WithTrimming()
     {
-        var assertion = (ExpectedValueAssertCondition<string, string>) Assertions.Peek();
+        var assertion = (ExpectedValueAssertCondition<string, string>) base.Assertions.Peek();
 
         assertion.WithTransform(s => s?.Trim(), s => s?.Trim());
 
@@ -22,7 +22,7 @@ public class StringContainsAssertionBuilderWrapper : AssertionBuilder<string>
 
     public StringContainsAssertionBuilderWrapper IgnoringWhitespace()
     {
-        var assertion = (StringContainsExpectedValueAssertCondition) Assertions.Peek();
+        var assertion = (StringContainsExpectedValueAssertCondition) base.Assertions.Peek();
 
         assertion.WithTransform(StringUtils.StripWhitespace, StringUtils.StripWhitespace);
         assertion.IgnoreWhitespace = true;
