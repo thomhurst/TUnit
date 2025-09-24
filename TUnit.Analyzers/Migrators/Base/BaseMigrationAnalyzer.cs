@@ -64,14 +64,7 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            var namedTypeSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
-
-            if (namedTypeSymbol is null)
-            {
-                return;
-            }
-
-            if (HasFrameworkTypes(namedTypeSymbol))
+            if (HasFrameworkTypes(symbol))
             {
                 Flag(context);
                 return;

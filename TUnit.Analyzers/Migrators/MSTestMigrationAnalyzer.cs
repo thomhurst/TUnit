@@ -7,7 +7,7 @@ namespace TUnit.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class MSTestMigrationAnalyzer : BaseMigrationAnalyzer
 {
-    protected override string TargetFrameworkNamespace => "Microsoft";
+    protected override string TargetFrameworkNamespace => "Microsoft.VisualStudio.TestTools.UnitTesting";
     
     protected override DiagnosticDescriptor DiagnosticRule => Rules.MSTestMigration;
     

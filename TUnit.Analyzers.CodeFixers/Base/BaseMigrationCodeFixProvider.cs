@@ -46,30 +46,38 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             return document;
         }
 
-        // Remove framework usings and add TUnit usings
-        compilationUnit = MigrationHelpers.RemoveFrameworkUsings(compilationUnit, FrameworkName);
-        compilationUnit = MigrationHelpers.AddTUnitUsings(compilationUnit);
-        
-        // Convert attributes
-        var attributeRewriter = CreateAttributeRewriter();
-        compilationUnit = (CompilationUnitSyntax)attributeRewriter.Visit(compilationUnit);
-        
-        // Convert assertions
-        var assertionRewriter = CreateAssertionRewriter(semanticModel);
-        compilationUnit = (CompilationUnitSyntax)assertionRewriter.Visit(compilationUnit);
-        
-        // Framework-specific conversions
-        compilationUnit = ApplyFrameworkSpecificConversions(compilationUnit, semanticModel);
-        
-        // Remove unnecessary base classes and interfaces
-        var baseTypeRewriter = CreateBaseTypeRewriter(semanticModel);
-        compilationUnit = (CompilationUnitSyntax)baseTypeRewriter.Visit(compilationUnit);
-        
-        // Update lifecycle methods
-        var lifecycleRewriter = CreateLifecycleRewriter();
-        compilationUnit = (CompilationUnitSyntax)lifecycleRewriter.Visit(compilationUnit);
-        
-        return document.WithSyntaxRoot(compilationUnit);
+        try
+        {
+            // Remove framework usings and add TUnit usings
+            compilationUnit = MigrationHelpers.RemoveFrameworkUsings(compilationUnit, FrameworkName);
+            compilationUnit = MigrationHelpers.AddTUnitUsings(compilationUnit);
+            
+            // Convert attributes
+            var attributeRewriter = CreateAttributeRewriter();
+            compilationUnit = (CompilationUnitSyntax)attributeRewriter.Visit(compilationUnit);
+            
+            // Convert assertions
+            var assertionRewriter = CreateAssertionRewriter(semanticModel);
+            compilationUnit = (CompilationUnitSyntax)assertionRewriter.Visit(compilationUnit);
+            
+            // Framework-specific conversions
+            compilationUnit = ApplyFrameworkSpecificConversions(compilationUnit, semanticModel);
+            
+            // Remove unnecessary base classes and interfaces
+            var baseTypeRewriter = CreateBaseTypeRewriter(semanticModel);
+            compilationUnit = (CompilationUnitSyntax)baseTypeRewriter.Visit(compilationUnit);
+            
+            // Update lifecycle methods
+            var lifecycleRewriter = CreateLifecycleRewriter();
+            compilationUnit = (CompilationUnitSyntax)lifecycleRewriter.Visit(compilationUnit);
+            
+            return document.WithSyntaxRoot(compilationUnit);
+        }
+        catch
+        {
+            // If any transformation fails, return the original document unchanged
+            return document;
+        }
     }
     
     protected abstract AttributeRewriter CreateAttributeRewriter();
