@@ -47,6 +47,7 @@ public class NUnitMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             $$"""
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -58,7 +59,6 @@ public class NUnitMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
-            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             ConfigureNUnitTest
         );
     }
@@ -77,6 +77,7 @@ public class NUnitMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -88,7 +89,6 @@ public class NUnitMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
-            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             ConfigureNUnitTest
         );
     }
@@ -111,6 +111,7 @@ public class NUnitMigrationAnalyzerTests
                     }
                 }
                 """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -127,7 +128,6 @@ public class NUnitMigrationAnalyzerTests
                     }
                 }
                 """,
-            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             ConfigureNUnitTest
         );
     }
@@ -151,6 +151,7 @@ public class NUnitMigrationAnalyzerTests
                     }
                 }
                 """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -168,7 +169,6 @@ public class NUnitMigrationAnalyzerTests
                     }
                 }
                 """,
-            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             ConfigureNUnitTest
         );
     }
@@ -202,6 +202,7 @@ public class NUnitMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -212,7 +213,6 @@ public class NUnitMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
-            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             ConfigureNUnitTest
         );
     }
@@ -236,6 +236,7 @@ public class NUnitMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
+            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -253,7 +254,6 @@ public class NUnitMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
-            Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             ConfigureNUnitTest
         );
     }

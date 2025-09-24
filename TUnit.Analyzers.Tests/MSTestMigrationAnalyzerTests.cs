@@ -45,6 +45,7 @@ public class MSTestMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             $$"""
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -56,7 +57,6 @@ public class MSTestMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
-            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             ConfigureMSTestTest
         );
     }
@@ -75,6 +75,7 @@ public class MSTestMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -86,7 +87,6 @@ public class MSTestMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
-            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             ConfigureMSTestTest
         );
     }
@@ -110,6 +110,7 @@ public class MSTestMigrationAnalyzerTests
                     }
                 }
                 """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -127,7 +128,6 @@ public class MSTestMigrationAnalyzerTests
                     }
                 }
                 """,
-            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             ConfigureMSTestTest
         );
     }
@@ -161,6 +161,7 @@ public class MSTestMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -171,7 +172,6 @@ public class MSTestMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
-            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             ConfigureMSTestTest
         );
     }
@@ -195,6 +195,7 @@ public class MSTestMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -212,7 +213,6 @@ public class MSTestMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
-            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             ConfigureMSTestTest
         );
     }
@@ -236,6 +236,7 @@ public class MSTestMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -253,7 +254,6 @@ public class MSTestMigrationAnalyzerTests
                     public void MyMethod() { }
                 }
                 """,
-            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             ConfigureMSTestTest
         );
     }
@@ -277,6 +277,7 @@ public class MSTestMigrationAnalyzerTests
                     }
                 }
                 """,
+            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
                 using static TUnit.Assertions.Assert;
@@ -294,7 +295,6 @@ public class MSTestMigrationAnalyzerTests
                     }
                 }
                 """,
-            Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             ConfigureMSTestTest
         );
     }
