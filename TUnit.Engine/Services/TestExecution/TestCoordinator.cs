@@ -69,6 +69,9 @@ internal sealed class TestCoordinator : ITestCoordinator
                 test.Context.Dependencies.Add(dependency);
             }
             
+            // Ensure TestSession hooks run before creating test instances
+            await _testExecutor.EnsureTestSessionHooksExecutedAsync();
+
             test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
 
             // Check if this test should be skipped (after creating instance)

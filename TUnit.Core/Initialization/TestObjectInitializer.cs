@@ -70,7 +70,8 @@ internal sealed class TestObjectInitializer
         object?[] arguments,
         Dictionary<string, object?> objectBag,
         MethodMetadata methodMetadata,
-        TestContextEvents events)
+        TestContextEvents events,
+        bool isRegistrationPhase = false)
     {
         if (arguments == null || arguments.Length == 0)
         {
@@ -82,7 +83,8 @@ internal sealed class TestObjectInitializer
             ObjectBag = objectBag,
             MethodMetadata = methodMetadata,
             Events = events,
-            TestContext = TestContext.Current
+            TestContext = TestContext.Current,
+            IsRegistrationPhase = isRegistrationPhase
         };
 
         // Process arguments in parallel for performance
@@ -139,7 +141,12 @@ internal sealed class TestObjectInitializer
             // Step 2: Object Initialization (IAsyncInitializer)
             if (instance is IAsyncInitializer asyncInitializer)
             {
-                await ObjectInitializer.InitializeAsync(instance);
+                // During registration phase, only initialize data source attributes.
+                // Other IAsyncInitializer objects are deferred until test execution.
+                if (!context.IsRegistrationPhase || instance is IDataSourceAttribute)
+                {
+                    await ObjectInitializer.InitializeAsync(instance);
+                }
             }
 
             // Step 3: Tracking (if not already tracked)
@@ -208,6 +215,7 @@ internal sealed class TestObjectInitializer
         public MethodMetadata? MethodMetadata { get; set; }
         public TestContextEvents Events { get; set; } = null!;
         public TestContext? TestContext { get; set; }
+        public bool IsRegistrationPhase { get; set; }
     }
 }
 
