@@ -30,20 +30,21 @@ internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
         var classArguments = testContext.TestDetails.TestClassArguments;
         var methodArguments = testContext.TestDetails.TestMethodArguments;
         
-        // Use centralized TestObjectInitializer for all initialization
-        // Initialize class arguments
+        // Initialize class arguments (registration phase)
         await _testObjectInitializer.InitializeArgumentsAsync(
             classArguments,
             testContext.ObjectBag,
             testContext.TestDetails.MethodMetadata,
-            testContext.Events);
-        
-        // Initialize method arguments
+            testContext.Events,
+            isRegistrationPhase: true);
+
+        // Initialize method arguments (registration phase)
         await _testObjectInitializer.InitializeArgumentsAsync(
             methodArguments,
             testContext.ObjectBag,
             testContext.TestDetails.MethodMetadata,
-            testContext.Events);
+            testContext.Events,
+            isRegistrationPhase: true);
         
         // Track all constructor and method arguments
         // Note: TestObjectInitializer already handles tracking, but we ensure it here for clarity

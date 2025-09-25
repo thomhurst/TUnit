@@ -1963,6 +1963,10 @@ namespace .Helpers
             "ute\' in target method or type.", Justification="We handle specific known tuple types without reflection")]
         public static object?[] UnwrapTupleAot(object? value) { }
     }
+    public static class DecimalParsingHelper
+    {
+        public static decimal ParseDecimalWithCultureFallback(string value) { }
+    }
     public static class GenericTypeHelper
     {
         public static  GetGenericTypeDefinition( type) { }
