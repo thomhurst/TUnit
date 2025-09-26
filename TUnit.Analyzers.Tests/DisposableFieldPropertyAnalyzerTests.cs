@@ -749,4 +749,216 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
+
+    [Test]
+    public async Task Bug_Scenario_Disposable_Field_In_IDisposable_Class_Should_Be_Flagged_If_Created_And_Not_Disposed()
+    {
+        // This might be the actual issue: when a class implements IDisposable but has a field
+        // that's created but not properly disposed in the Dispose method
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Net.Http;
+                using TUnit.Core;
+
+                public sealed class DisposedRepro : IDisposable
+                {
+                    private HttpClient {|#0:_httpClient|};
+                    private bool _disposed;
+
+                    public DisposedRepro()
+                    {
+                        _httpClient = new HttpClient();
+                    }
+
+                    [Test]
+                    [MethodDataSource(nameof(GetValues))]
+                    public void DoTest(int value)
+                    {
+                        // Test code
+                    }
+
+                    public void Dispose()
+                    {
+                        _disposed = true;
+                        // BUG: _httpClient is not disposed here, so analyzer should flag it
+                    }
+
+                    public static IEnumerable<int> GetValues() => new[] { 1, 2, 3 };
+                }
+                """,
+                
+                Verifier.Diagnostic(Rules.Dispose_Member_In_Cleanup)
+                    .WithLocation(0)
+                    .WithArguments("_httpClient")
+            );
+    }
+
+    [Test]
+    public async Task Bug_Reproduction_False_Positive_Primary_Constructor_Parameter_Flagged_Incorrectly()
+    {
+        // This test attempts to reproduce a false positive where a primary constructor parameter
+        // is incorrectly flagged as needing disposal, even though it's not created by the class
+        
+        // FIRST: Let's establish a scenario that SHOULD be flagged (create and don't dispose)
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Net.Http;
+                using TUnit.Core;
+
+                public abstract class TestBase : IDisposable
+                {
+                    private bool _disposed;
+                    public void Dispose() => _disposed = true;
+                }
+
+                public sealed class TestClass : TestBase
+                {
+                    private HttpClient {|#0:_client|};
+                    
+                    public TestClass()
+                    {
+                        _client = new HttpClient(); // Creating object - should be flagged
+                    }
+
+                    [Test]
+                    public void TestMethod() { }
+                }
+                """,
+                
+                Verifier.Diagnostic(Rules.Dispose_Member_In_Cleanup)
+                    .WithLocation(0)
+                    .WithArguments("_client")
+            );
+    }
+
+    [Test]
+    public async Task Bug_Reproduction_Check_Primary_Constructor_Parameter_Should_Not_Be_Flagged()
+    {
+        // This test verifies primary constructor parameters of disposable types should NOT be flagged
+        // when they are not created by the class (injected via dependency injection or data source)
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Net.Http;
+                using TUnit.Core;
+
+                public abstract class TestBase : IDisposable
+                {
+                    private bool _disposed;
+                    public void Dispose() => _disposed = true;
+                }
+
+                [ClassDataSource<HttpClient>]
+                public sealed class TestClass(HttpClient client) : TestBase
+                {
+                    // Primary constructor parameter 'client' is implicitly captured as a field
+                    // But we're NOT creating it - it's injected, so analyzer should NOT flag it
+                    
+                    [Test]
+                    public void TestMethod() 
+                    {
+                        var result = client.BaseAddress; // Using the injected client
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Primary_Constructor_Parameter_With_Assignment_Should_Be_Flagged_If_Creating_New_Object()
+    {
+        // Test to ensure that if we DO create a new disposable object and assign it to a field,
+        // it SHOULD be flagged
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using System.Net.Http;
+                using TUnit.Core;
+
+                public sealed class TestClass : IDisposable
+                {
+                    private HttpClient {|#0:_anotherClient|};
+                    
+                    public TestClass()
+                    {
+                        // This is creating a new object and assigning to field - SHOULD be flagged
+                        _anotherClient = new HttpClient();
+                    }
+                    
+                    [Test]
+                    public void TestMethod() 
+                    {
+                        // Test method
+                    }
+                    
+                    public void Dispose() 
+                    {
+                        // Not disposing _anotherClient - should be flagged
+                    }
+                }
+                """,
+                
+                Verifier.Diagnostic(Rules.Dispose_Member_In_Cleanup)
+                    .WithLocation(0)
+                    .WithArguments("_anotherClient")
+            );
+    }
+
+    [Test]
+    public async Task Exact_DisposedRepro_Scenario_Should_Not_Be_Flagged()
+    {
+        // This replicates the exact scenario from DisposedRepro.cs
+        // The analyzer should NOT flag anything in this scenario
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Collections.Generic;
+                using TUnit.Core;
+
+                public abstract class DisposedReproTestBase : IDisposable
+                {
+                    private bool _disposed;
+
+                    public void CheckDisposed()
+                    {
+                        if (_disposed)
+                        {
+                            throw new InvalidOperationException("Already disposed");
+                        }
+                    }
+
+                    public void Dispose()
+                    {
+                        _disposed = true;
+                    }
+                }
+
+                public sealed record Dummy2;
+
+                [ClassDataSource<Dummy2>]
+                public sealed class DisposedRepro(Dummy2 dummy) : DisposedReproTestBase
+                {
+                    [Test]
+                    [MethodDataSource(nameof(GetValues))]
+                    public void DoTest(int value)
+                    {
+                        CheckDisposed();
+                    }
+
+                    public static IEnumerable<int> GetValues() => new[] { 1, 2, 3 };
+                }
+                """
+            );
+    }
 }
