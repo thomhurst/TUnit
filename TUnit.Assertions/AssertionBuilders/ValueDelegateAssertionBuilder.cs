@@ -6,7 +6,7 @@ namespace TUnit.Assertions.AssertionBuilders;
 public class ValueDelegateAssertionBuilder<TActual>
     : AssertionBuilder, IValueDelegateSource<TActual>
 {
-    internal ValueDelegateAssertionBuilder(Func<TActual> function, string? expressionBuilder) : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
+    internal ValueDelegateAssertionBuilder(Func<TActual> function, string? expressionBuilder) : base(LazyAssertionData.Create(function, expressionBuilder), expressionBuilder)
     {
     }
 }
