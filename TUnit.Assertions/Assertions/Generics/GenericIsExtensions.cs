@@ -81,6 +81,16 @@ public static class GenericIsExtensions
         return valueSource.RegisterAssertion(new AssignableFromExpectedValueAssertCondition<object>(typeof(TExpected))
             , [typeof(TExpected).Name]);
     }
+
+    public static GenericEqualToAssertionBuilderWrapper<TActual> IsEquatableTo<TActual, TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
+        where TActual : IEquatable<TExpected>
+    {
+        var assertionBuilder = valueSource
+            .RegisterAssertion(new GenericEqualsExpectedValueAssertCondition<TActual, TExpected>(expected), [doNotPopulateThisValue1]);
+
+        return new GenericEqualToAssertionBuilderWrapper<TActual>(assertionBuilder);
+    }
+
     public static GenericEqualToAssertionBuilderWrapper<TActual> IsEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
         return IsEqualTo(valueSource, expected, EqualityComparer<TActual>.Default, doNotPopulateThisValue1);
