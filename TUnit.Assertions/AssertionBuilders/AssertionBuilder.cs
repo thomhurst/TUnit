@@ -732,42 +732,42 @@ public static class ObjectReferenceAssertionExtensions
 // Extension methods for DateTime-specific assertions
 public static class DateTimeAssertionBuilderExtensions
 {
-    public static DateTimeAssertion IsEqualTo(this AssertionBuilder<DateTime> builder, DateTime expected)
+    public static DateTimeAssertion IsEqualTo(this ValueAssertionBuilder<DateTime> builder, DateTime expected)
     {
         return new DateTimeAssertion(builder.ActualValueProvider, expected);
     }
 
-    public static CustomAssertion<DateTime> IsAfterOrEqualTo(this AssertionBuilder<DateTime> builder, DateTime other)
+    public static CustomAssertion<DateTime> IsAfterOrEqualTo(this ValueAssertionBuilder<DateTime> builder, DateTime other)
     {
         return new CustomAssertion<DateTime>(builder.ActualValueProvider,
             dt => dt >= other,
             $"Expected DateTime to be after or equal to {other:O}");
     }
 
-    public static CustomAssertion<DateTime> IsBeforeOrEqualTo(this AssertionBuilder<DateTime> builder, DateTime other)
+    public static CustomAssertion<DateTime> IsBeforeOrEqualTo(this ValueAssertionBuilder<DateTime> builder, DateTime other)
     {
         return new CustomAssertion<DateTime>(builder.ActualValueProvider,
             dt => dt <= other,
             $"Expected DateTime to be before or equal to {other:O}");
     }
 
-    public static DateTimeOffsetAssertion IsEqualTo(this AssertionBuilder<DateTimeOffset> builder, DateTimeOffset expected)
+    public static DateTimeOffsetAssertion IsEqualTo(this ValueAssertionBuilder<DateTimeOffset> builder, DateTimeOffset expected)
     {
         return new DateTimeOffsetAssertion(builder.ActualValueProvider, expected);
     }
 
-    public static TimeSpanAssertion IsEqualTo(this AssertionBuilder<TimeSpan> builder, TimeSpan expected)
+    public static TimeSpanAssertion IsEqualTo(this ValueAssertionBuilder<TimeSpan> builder, TimeSpan expected)
     {
         return new TimeSpanAssertion(builder.ActualValueProvider, expected);
     }
 
 #if NET6_0_OR_GREATER
-    public static DateOnlyAssertion IsEqualTo(this AssertionBuilder<DateOnly> builder, DateOnly expected)
+    public static DateOnlyAssertion IsEqualTo(this ValueAssertionBuilder<DateOnly> builder, DateOnly expected)
     {
         return new DateOnlyAssertion(builder.ActualValueProvider, expected);
     }
 
-    public static TimeOnlyAssertion IsEqualTo(this AssertionBuilder<TimeOnly> builder, TimeOnly expected)
+    public static TimeOnlyAssertion IsEqualTo(this ValueAssertionBuilder<TimeOnly> builder, TimeOnly expected)
     {
         return new TimeOnlyAssertion(builder.ActualValueProvider, expected);
     }
@@ -1032,63 +1032,63 @@ public static class NullableStringAssertionBuilderExtensions
 // Extension methods for CultureInfo assertions
 public static class CultureInfoAssertionExtensions
 {
-    public static CustomAssertion<System.Globalization.CultureInfo> IsInvariant(this AssertionBuilder<System.Globalization.CultureInfo> builder)
+    public static CustomAssertion<System.Globalization.CultureInfo> IsInvariant(this ValueAssertionBuilder<System.Globalization.CultureInfo> builder)
     {
         return new CustomAssertion<System.Globalization.CultureInfo>(builder.ActualValueProvider,
             ci => ci != null && ci.Equals(System.Globalization.CultureInfo.InvariantCulture),
             "Expected CultureInfo to be InvariantCulture");
     }
 
-    public static CustomAssertion<System.Globalization.CultureInfo> IsNotInvariant(this AssertionBuilder<System.Globalization.CultureInfo> builder)
+    public static CustomAssertion<System.Globalization.CultureInfo> IsNotInvariant(this ValueAssertionBuilder<System.Globalization.CultureInfo> builder)
     {
         return new CustomAssertion<System.Globalization.CultureInfo>(builder.ActualValueProvider,
             ci => ci != null && !ci.Equals(System.Globalization.CultureInfo.InvariantCulture),
             "Expected CultureInfo not to be InvariantCulture");
     }
 
-    public static CustomAssertion<System.Globalization.CultureInfo> IsNeutralCulture(this AssertionBuilder<System.Globalization.CultureInfo> builder)
+    public static CustomAssertion<System.Globalization.CultureInfo> IsNeutralCulture(this ValueAssertionBuilder<System.Globalization.CultureInfo> builder)
     {
         return new CustomAssertion<System.Globalization.CultureInfo>(builder.ActualValueProvider,
             ci => ci?.IsNeutralCulture ?? false,
             "Expected CultureInfo to be a neutral culture");
     }
 
-    public static CustomAssertion<System.Globalization.CultureInfo> IsNotNeutralCulture(this AssertionBuilder<System.Globalization.CultureInfo> builder)
+    public static CustomAssertion<System.Globalization.CultureInfo> IsNotNeutralCulture(this ValueAssertionBuilder<System.Globalization.CultureInfo> builder)
     {
         return new CustomAssertion<System.Globalization.CultureInfo>(builder.ActualValueProvider,
             ci => ci == null || !ci.IsNeutralCulture,
             "Expected CultureInfo to not be a neutral culture");
     }
 
-    public static CustomAssertion<System.Globalization.CultureInfo> IsReadOnly(this AssertionBuilder<System.Globalization.CultureInfo> builder)
+    public static CustomAssertion<System.Globalization.CultureInfo> IsReadOnly(this ValueAssertionBuilder<System.Globalization.CultureInfo> builder)
     {
         return new CustomAssertion<System.Globalization.CultureInfo>(builder.ActualValueProvider,
             ci => ci?.IsReadOnly ?? false,
             "Expected CultureInfo to be read-only");
     }
 
-    public static CustomAssertion<System.Globalization.CultureInfo> IsEnglish(this AssertionBuilder<System.Globalization.CultureInfo> builder)
+    public static CustomAssertion<System.Globalization.CultureInfo> IsEnglish(this ValueAssertionBuilder<System.Globalization.CultureInfo> builder)
     {
         return new CustomAssertion<System.Globalization.CultureInfo>(builder.ActualValueProvider,
             ci => ci?.TwoLetterISOLanguageName == "en",
             "Expected CultureInfo to be English");
     }
 
-    public static CustomAssertion<System.Globalization.CultureInfo> IsNotEnglish(this AssertionBuilder<System.Globalization.CultureInfo> builder)
+    public static CustomAssertion<System.Globalization.CultureInfo> IsNotEnglish(this ValueAssertionBuilder<System.Globalization.CultureInfo> builder)
     {
         return new CustomAssertion<System.Globalization.CultureInfo>(builder.ActualValueProvider,
             ci => ci?.TwoLetterISOLanguageName != "en",
             "Expected CultureInfo to not be English");
     }
 
-    public static CustomAssertion<System.Globalization.CultureInfo> IsLeftToRight(this AssertionBuilder<System.Globalization.CultureInfo> builder)
+    public static CustomAssertion<System.Globalization.CultureInfo> IsLeftToRight(this ValueAssertionBuilder<System.Globalization.CultureInfo> builder)
     {
         return new CustomAssertion<System.Globalization.CultureInfo>(builder.ActualValueProvider,
             ci => ci?.TextInfo?.IsRightToLeft == false,
             "Expected CultureInfo to be left-to-right");
     }
 
-    public static CustomAssertion<System.Globalization.CultureInfo> IsRightToLeft(this AssertionBuilder<System.Globalization.CultureInfo> builder)
+    public static CustomAssertion<System.Globalization.CultureInfo> IsRightToLeft(this ValueAssertionBuilder<System.Globalization.CultureInfo> builder)
     {
         return new CustomAssertion<System.Globalization.CultureInfo>(builder.ActualValueProvider,
             ci => ci?.TextInfo?.IsRightToLeft == true,

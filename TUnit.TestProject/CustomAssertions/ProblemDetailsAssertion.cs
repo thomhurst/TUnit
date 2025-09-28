@@ -55,8 +55,8 @@ public class HttpResponseDeserializesToAssertCondition<TToType>(JsonTypeInfo<TTo
 
 public static class HttpResponseAssertionExtensions
 {
-    // Overload for AssertionBuilder
-    public static AssertionBuilder<TToType> DeSerializesTo<TToType>(this AssertionBuilder<HttpResponseMessage> builder, JsonTypeInfo<TToType> jsonTypeInfo)
+    // Overload for ValueAssertionBuilder
+    public static AssertionBuilder<TToType> DeSerializesTo<TToType>(this ValueAssertionBuilder<HttpResponseMessage> builder, JsonTypeInfo<TToType> jsonTypeInfo)
     {
         return builder.RegisterConversionAssertion(new HttpResponseDeserializesToAssertCondition<TToType>(jsonTypeInfo), []);
     }
@@ -67,8 +67,8 @@ public static class HttpResponseAssertionExtensions
         return valueSource.RegisterConversionAssertion(new HttpResponseDeserializesToAssertCondition<TToType>(jsonTypeInfo), []);
     }
 
-    // Overload for AssertionBuilder
-    public static AssertionBuilder<ProblemDetails> IsProblemDetails(this AssertionBuilder<HttpResponseMessage> builder)
+    // Overload for ValueAssertionBuilder
+    public static AssertionBuilder<ProblemDetails> IsProblemDetails(this ValueAssertionBuilder<HttpResponseMessage> builder)
     {
         return builder.DeSerializesTo(ProblemDetailsSourceGenerationContext.Default.ProblemDetails);
     }

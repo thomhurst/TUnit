@@ -63,6 +63,24 @@ public static class CustomAssertionExtensions
         });
     }
 
+    // Extension for ValueAssertionBuilder conversion assertions
+    public static AssertionBuilder<TToType> RegisterConversionAssertion<TActual, TToType>(
+        this ValueAssertionBuilder<TActual> builder,
+        ConvertToAssertCondition<TActual, TToType> condition,
+        string[]? expressions = null)
+    {
+        return new AssertionBuilder<TToType>(async () =>
+        {
+            var value = await builder.ActualValueProvider();
+            var (result, convertedValue) = await condition.ConvertValue(value);
+            if (!result.IsPassed)
+            {
+                throw new AssertionException(result.Message ?? "Conversion failed");
+            }
+            return convertedValue!;
+        });
+    }
+
     // Extension for IValueSource conversion for backward compatibility
     public static AssertionBuilder<TToType> RegisterConversionAssertion<TActual, TToType>(
         this IValueSource<TActual> valueSource,

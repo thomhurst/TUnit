@@ -8,6 +8,8 @@ public class StringContainsAssertion : AssertionBase<string?>
 {
     private readonly string _substring;
     private StringComparison _stringComparison = StringComparison.Ordinal;
+    private bool _trimming = false;
+    private bool _ignoringWhitespace = false;
 
     public StringContainsAssertion(Func<Task<string?>> actualValueProvider, string substring)
         : base(actualValueProvider)
@@ -39,6 +41,18 @@ public class StringContainsAssertion : AssertionBase<string?>
         return this;
     }
 
+    public StringContainsAssertion WithTrimming()
+    {
+        _trimming = true;
+        return this;
+    }
+
+    public StringContainsAssertion IgnoringWhitespace()
+    {
+        _ignoringWhitespace = true;
+        return this;
+    }
+
     protected override async Task<AssertionResult> AssertAsync()
     {
         var actual = await GetActualValueAsync();
@@ -48,7 +62,22 @@ public class StringContainsAssertion : AssertionBase<string?>
             return AssertionResult.Fail($"Expected string to contain '{_substring}' but was null");
         }
 
-        if (actual.Contains(_substring, _stringComparison))
+        var processedActual = actual;
+        var processedSubstring = _substring;
+
+        if (_trimming)
+        {
+            processedActual = processedActual.Trim();
+            processedSubstring = processedSubstring.Trim();
+        }
+
+        if (_ignoringWhitespace)
+        {
+            processedActual = System.Text.RegularExpressions.Regex.Replace(processedActual, @"\s+", "");
+            processedSubstring = System.Text.RegularExpressions.Regex.Replace(processedSubstring, @"\s+", "");
+        }
+
+        if (processedActual.Contains(processedSubstring, _stringComparison))
         {
             return AssertionResult.Passed;
         }
