@@ -106,7 +106,6 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                         method = method.MakeGenericMethod(typeArgs);
                     }
                 }
-                // Prepare method arguments
                 var methodArgs = new object?[args.Length];
                 args.CopyTo(methodArgs, 0);
                 // Invoke the method
