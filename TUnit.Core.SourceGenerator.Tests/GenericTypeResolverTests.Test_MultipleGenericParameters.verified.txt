@@ -75,7 +75,6 @@ internal sealed class MultiGenericTestClass_TestMethod_TestSource_GUID : global:
                 {
                     throw new global::System.InvalidOperationException($"Method 'TestMethod' not found on type {instanceType.FullName}");
                 }
-                // Prepare method arguments
                 var methodArgs = new object?[args.Length];
                 args.CopyTo(methodArgs, 0);
                 // Invoke the method
