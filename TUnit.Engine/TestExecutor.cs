@@ -37,6 +37,17 @@ internal class TestExecutor
 
 
     /// <summary>
+    /// Ensures that Before(TestSession) hooks have been executed.
+    /// This is called before creating test instances to ensure resources are available.
+    /// </summary>
+    public async Task EnsureTestSessionHooksExecutedAsync()
+    {
+        // Get or create and cache Before hooks - these run only once
+        await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(() =>
+            _hookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken.None)).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Creates a test executor delegate that wraps the provided executor with hook orchestration.
     /// Uses focused services that follow SRP to manage lifecycle and execution.
     /// </summary>
@@ -48,10 +59,8 @@ internal class TestExecutor
 
         try
         {
-            // Get or create and cache Before hooks - these run only once
-            // We use cached delegates to prevent lambda capture issues
-            // Event receivers will be handled separately with their own internal coordination
-            await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(() => _hookExecutor.ExecuteBeforeTestSessionHooksAsync(CancellationToken.None)).ConfigureAwait(false);
+            // Ensure TestSession hooks have been executed
+            await EnsureTestSessionHooksExecutedAsync().ConfigureAwait(false);
 
             // Event receivers have their own internal coordination to run once
             await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(

@@ -34,8 +34,33 @@ internal sealed class TestBuilder : ITestBuilder
         _dataSourceInitializer = dataSourceInitializer;
     }
 
+    /// <summary>
+    /// Initializes any IAsyncInitializer objects in class data that were deferred during registration.
+    /// </summary>
+    private async Task InitializeDeferredClassDataAsync(object?[] classData)
+    {
+        if (classData == null || classData.Length == 0)
+        {
+            return;
+        }
+
+        foreach (var data in classData)
+        {
+            if (data is IAsyncInitializer asyncInitializer && data is not IDataSourceAttribute)
+            {
+                if (!ObjectInitializer.IsInitialized(data))
+                {
+                    await ObjectInitializer.InitializeAsync(data);
+                }
+            }
+        }
+    }
+
     private async Task<object> CreateInstance(TestMetadata metadata, Type[] resolvedClassGenericArgs, object?[] classData, TestBuilderContext builderContext)
     {
+        // Initialize any deferred IAsyncInitializer objects in class data
+        await InitializeDeferredClassDataAsync(classData);
+
         // First try to create instance with ClassConstructor attribute
         // Use attributes from context if available
         var attributes = builderContext.InitializedAttributes ?? metadata.AttributeFactory();
