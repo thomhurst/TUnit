@@ -9,15 +9,12 @@ namespace TUnit.Assertions.Extensions;
 
 public class ThrowsException<TActual, TException> where TException : Exception
 {
-    private readonly AssertionBuilder<object?> _delegateAssertionBuilder;
     private readonly IDelegateSource _source;
     private readonly Func<Exception?, Exception?> _selector;
 
-    public ThrowsException(AssertionBuilder<object?> delegateAssertionBuilder,
-        IDelegateSource source,
+    public ThrowsException(IDelegateSource source,
         Func<Exception?, Exception?> selector)
     {
-        _delegateAssertionBuilder = delegateAssertionBuilder;
         _source = source;
         _selector = selector;
     }
@@ -67,7 +64,7 @@ public class ThrowsException<TActual, TException> where TException : Exception
     public ThrowsException<TActual, Exception> WithInnerException()
     {
         _source.AppendExpression($"{nameof(WithInnerException)}()");
-        return new ThrowsException<TActual, Exception>(_delegateAssertionBuilder, _source, e => _selector(e)?.InnerException);
+        return new ThrowsException<TActual, Exception>(_source, e => _selector(e)?.InnerException);
     }
 
     public TaskAwaiter<TException?> GetAwaiter()
@@ -77,18 +74,14 @@ public class ThrowsException<TActual, TException> where TException : Exception
     
     private async Task<TException?> ProcessAsync()
     {
-        var assertionData = await _delegateAssertionBuilder.GetAssertionData();
-        await _delegateAssertionBuilder.ProcessAssertionsAsync(assertionData);
+        var assertionData = await _source.GetAssertionData();
+        await _source.ProcessAssertionsAsync(assertionData);
         return assertionData.Exception as TException;
     }
 
-    public ValueAnd<TException> And =>
-        new(
-            _delegateAssertionBuilder.RegisterConversionAssertion<TException>()
-                .AppendConnector(ChainType.And)
-        );
+    public IDelegateSource And => _source;
 
-    public DelegateOr<object?> Or => DelegateOr<object?>.Create(_delegateAssertionBuilder.Or);
+    public IDelegateSource Or => _source;
 
     internal void RegisterAssertion(Func<Func<Exception?, Exception?>, BaseAssertCondition<TActual>> conditionFunc, string?[] argumentExpressions, [CallerMemberName] string? caller = null) => _source.RegisterAssertion(conditionFunc(_selector), argumentExpressions, caller);
 

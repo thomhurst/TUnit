@@ -1,6 +1,26 @@
-MSBUILD : error MSB1008: Only one project can be specified.
-    Full command line: 'C:\Program Files\dotnet\sdk\9.0.302\MSBuild.dll -maxcpucount -verbosity:m -tlp:default=auto -nologo -restore -consoleloggerparameters:Summary -target:Rebuild p:TreatWarningsAsErrors=false 2 -distributedlogger:Microsoft.DotNet.Tools.MSBuild.MSBuildLogger,C:\Program Files\dotnet\sdk\9.0.302\dotnet.dll*Microsoft.DotNet.Tools.MSBuild.MSBuildForwardingLogger,C:\Program Files\dotnet\sdk\9.0.302\dotnet.dll'
-  Switches appended by response files:
-Switch: 2
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+D:\git\TUnit\TUnit.Assertions.Analyzers\AnalyzerReleases.Shipped.md(5,1): warning RS2007: Analyzer release file 'AnalyzerReleases.Shipped.md' has a missing or invalid release header '#### Assertion Usage Rules' (https://github.com/dotnet/roslyn-analyzers/blob/main/src/Microsoft.CodeAnalysis.Analyzers/ReleaseTrackingAnalyzers.Help.md) [D:\git\TUnit\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj::TargetFramework=netstandard2.0]
+  TUnit.Assertions.Analyzers -> D:\git\TUnit\TUnit.Assertions.Analyzers\bin\Debug\netstandard2.0\TUnit.Assertions.Analyzers.dll
+  TUnit.Assertions.Analyzers.CodeFixers -> D:\git\TUnit\TUnit.Assertions.Analyzers.CodeFixers\bin\Debug\netstandard2.0\TUnit.Assertions.Analyzers.CodeFixers.dll
+D:\git\TUnit\TUnit.Assertions.SourceGenerator\Generators\AssertionMethodGenerator.cs(113,21): warning CS8604: Possible null reference argument for parameter 'MethodName' in 'CreateAssertionAttributeData.CreateAssertionAttributeData(INamedTypeSymbol TargetType, INamedTypeSymbol ContainingType, string MethodName, string? CustomName, bool NegateLogic, bool RequiresGenericTypeParameter, bool TreatAsInstance)'. [D:\git\TUnit\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj::TargetFramework=netstandard2.0]
+D:\git\TUnit\TUnit.Assertions.SourceGenerator\Generators\AssertionMethodGenerator.cs(220,21): warning CS8604: Possible null reference argument for parameter 'MethodName' in 'CreateAssertionAttributeData.CreateAssertionAttributeData(INamedTypeSymbol TargetType, INamedTypeSymbol ContainingType, string MethodName, string? CustomName, bool NegateLogic, bool RequiresGenericTypeParameter, bool TreatAsInstance)'. [D:\git\TUnit\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj::TargetFramework=netstandard2.0]
+  TUnit.Assertions.SourceGenerator -> D:\git\TUnit\TUnit.Assertions.SourceGenerator\bin\Debug\netstandard2.0\TUnit.Assertions.SourceGenerator.dll
+D:\git\TUnit\TUnit.Assertions\Extensions\SourceExtensions.cs(35,27): error CS0111: Type 'SourceExtensions' already defines a member called 'RegisterAssertion' with the same parameter types [D:\git\TUnit\TUnit.Assertions\TUnit.Assertions.csproj::TargetFramework=netstandard2.0]
+D:\git\TUnit\TUnit.Assertions\Extensions\SourceExtensions.cs(35,27): error CS0111: Type 'SourceExtensions' already defines a member called 'RegisterAssertion' with the same parameter types [D:\git\TUnit\TUnit.Assertions\TUnit.Assertions.csproj::TargetFramework=net8.0]
+D:\git\TUnit\TUnit.Assertions\Extensions\SourceExtensions.cs(35,27): error CS0111: Type 'SourceExtensions' already defines a member called 'RegisterAssertion' with the same parameter types [D:\git\TUnit\TUnit.Assertions\TUnit.Assertions.csproj::TargetFramework=net9.0]
 
-For switch syntax, type "MSBuild -help"
+Build FAILED.
+
+D:\git\TUnit\TUnit.Assertions.Analyzers\AnalyzerReleases.Shipped.md(5,1): warning RS2007: Analyzer release file 'AnalyzerReleases.Shipped.md' has a missing or invalid release header '#### Assertion Usage Rules' (https://github.com/dotnet/roslyn-analyzers/blob/main/src/Microsoft.CodeAnalysis.Analyzers/ReleaseTrackingAnalyzers.Help.md) [D:\git\TUnit\TUnit.Assertions.Analyzers\TUnit.Assertions.Analyzers.csproj::TargetFramework=netstandard2.0]
+D:\git\TUnit\TUnit.Assertions.SourceGenerator\Generators\AssertionMethodGenerator.cs(113,21): warning CS8604: Possible null reference argument for parameter 'MethodName' in 'CreateAssertionAttributeData.CreateAssertionAttributeData(INamedTypeSymbol TargetType, INamedTypeSymbol ContainingType, string MethodName, string? CustomName, bool NegateLogic, bool RequiresGenericTypeParameter, bool TreatAsInstance)'. [D:\git\TUnit\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj::TargetFramework=netstandard2.0]
+D:\git\TUnit\TUnit.Assertions.SourceGenerator\Generators\AssertionMethodGenerator.cs(220,21): warning CS8604: Possible null reference argument for parameter 'MethodName' in 'CreateAssertionAttributeData.CreateAssertionAttributeData(INamedTypeSymbol TargetType, INamedTypeSymbol ContainingType, string MethodName, string? CustomName, bool NegateLogic, bool RequiresGenericTypeParameter, bool TreatAsInstance)'. [D:\git\TUnit\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj::TargetFramework=netstandard2.0]
+D:\git\TUnit\TUnit.Assertions\Extensions\SourceExtensions.cs(35,27): error CS0111: Type 'SourceExtensions' already defines a member called 'RegisterAssertion' with the same parameter types [D:\git\TUnit\TUnit.Assertions\TUnit.Assertions.csproj::TargetFramework=netstandard2.0]
+D:\git\TUnit\TUnit.Assertions\Extensions\SourceExtensions.cs(35,27): error CS0111: Type 'SourceExtensions' already defines a member called 'RegisterAssertion' with the same parameter types [D:\git\TUnit\TUnit.Assertions\TUnit.Assertions.csproj::TargetFramework=net8.0]
+D:\git\TUnit\TUnit.Assertions\Extensions\SourceExtensions.cs(35,27): error CS0111: Type 'SourceExtensions' already defines a member called 'RegisterAssertion' with the same parameter types [D:\git\TUnit\TUnit.Assertions\TUnit.Assertions.csproj::TargetFramework=net9.0]
+    3 Warning(s)
+    3 Error(s)
+
+Time Elapsed 00:00:04.10
+
+Workload updates are available. Run `dotnet workload list` for more information.

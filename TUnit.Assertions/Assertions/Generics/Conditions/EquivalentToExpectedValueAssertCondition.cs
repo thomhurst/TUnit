@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.Enums;
 using TUnit.Assertions.Extensions;
 using TUnit.Assertions.Helpers;
@@ -12,7 +11,7 @@ public class EquivalentToExpectedValueAssertCondition<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
 TActual,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
-TExpected>(TExpected expected, string? expectedExpression) : ExpectedValueAssertCondition<TActual, TExpected>(expected), IEquivalentCondition
+TExpected>(TExpected expected, string? expectedExpression) : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
     private readonly List<string> _ignoredMembers = [];
     private readonly List<Type> _ignoredTypes = [];

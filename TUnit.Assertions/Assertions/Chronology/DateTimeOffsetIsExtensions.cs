@@ -13,10 +13,8 @@ public static class DateTimeOffsetIsExtensions
 {
     public static DateTimeOffsetEqualToAssertion IsEqualTo(this IValueSource<DateTimeOffset> valueSource, DateTimeOffset expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
-        return new DateTimeOffsetEqualToAssertion(
-            valueSource.RegisterAssertion(new DateTimeOffsetEqualsExpectedValueAssertCondition(expected),
-                [doNotPopulateThisValue1])
-        );
+        // Don't create condition yet! Just return configuration object
+        return new DateTimeOffsetEqualToAssertion(valueSource, expected, [doNotPopulateThisValue1]);
     }
 
     public static AssertionBuilder<DateTimeOffset> IsAfter(this IValueSource<DateTimeOffset> valueSource, DateTimeOffset expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)

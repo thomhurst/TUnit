@@ -1,11 +1,12 @@
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertionBuilders.Core;
 
 namespace TUnit.Assertions.AssertionBuilders.Interfaces;
 
 /// <summary>
 /// Internal interface for managing the chain of assertions with logical connectors
 /// </summary>
-internal interface IAssertionChain
+public interface IAssertionChain
 {
     void AddAssertion(BaseAssertCondition assertion, ChainType chainType = ChainType.None);
     void AddAndAssertion(BaseAssertCondition assertion);

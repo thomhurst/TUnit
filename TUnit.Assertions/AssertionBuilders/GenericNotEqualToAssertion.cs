@@ -1,33 +1,44 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.Assertions.Base;
 using TUnit.Assertions.Assertions.Generics.Conditions;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 /// <summary>
-/// Fluent assertion builder for generic not-equal comparisons
+/// Clean generic not-equal assertion - no inheritance, just configuration
 /// </summary>
-public class GenericNotEqualToAssertion<TActual> : FluentAssertionBase<TActual, GenericNotEqualToAssertion<TActual>>
+public class GenericNotEqualToAssertion<TActual> : Assertion<TActual>
 {
-    internal GenericNotEqualToAssertion(AssertionBuilder<TActual> assertionBuilder)
-        : base(assertionBuilder)
+    private readonly IValueSource<TActual> _source;
+    private readonly TActual _expected;
+    private readonly string?[] _expressions;
+    
+    // Configuration
+#if NET
+    private Func<TActual?, TActual?, AssertionDecision>? _customComparer;
+#else
+    private readonly Func<TActual?, TActual?, AssertionDecision>? _customComparer = null;
+#endif
+
+    internal GenericNotEqualToAssertion(IValueSource<TActual> source, TActual expected, string?[] expressions)
     {
+        _source = source;
+        _expected = expected;
+        _expressions = expressions;
     }
 
 #if NET
     public GenericNotEqualToAssertion<TActual> Within<T>(T tolerance, [CallerArgumentExpression(nameof(tolerance))] string doNotPopulateThis = "")
         where T : IComparable<T>
     {
-        var assertion = GetLastAssertionAs<NotEqualsExpectedValueAssertCondition<TActual>>();
-        if (assertion is null)
-        {
-            throw new InvalidOperationException($"Expected last assertion to be NotEqualsExpectedValueAssertCondition<{typeof(TActual).Name}>");
-        }
-
         if (typeof(TActual) == typeof(T))
         {
-            assertion.WithComparer((actual, expected) =>
+            _customComparer = (actual, expected) =>
             {
                 dynamic actualDynamic = actual!;
                 dynamic expectedDynamic = expected!;
@@ -40,12 +51,30 @@ public class GenericNotEqualToAssertion<TActual> : FluentAssertionBase<TActual, 
                 }
 
                 return AssertionDecision.Fail($"Expected {actual} to not be equal to {expected} ±{tolerance}.");
-            });
+            };
         }
 
-        AppendCallerMethod([doNotPopulateThis]);
-
-        return Self;
+        return this;
     }
 #endif
+
+    public TaskAwaiter GetAwaiter()
+    {
+        return ExecuteAsync().GetAwaiter();
+    }
+
+    private async Task ExecuteAsync()
+    {
+        // Create condition with all configuration
+        var condition = new NotEqualsExpectedValueAssertCondition<TActual>(_expected);
+        
+        // Apply configuration
+        if (_customComparer != null)
+            condition.WithComparer(_customComparer);
+        
+        // Register and execute
+        var builder = _source.RegisterAssertion(condition, _expressions);
+        var data = await builder.GetAssertionData();
+        await builder.ProcessAssertionsAsync(data);
+    }
 }

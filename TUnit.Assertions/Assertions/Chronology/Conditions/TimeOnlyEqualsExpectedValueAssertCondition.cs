@@ -1,10 +1,8 @@
 ﻿#if NET
 
-using TUnit.Assertions.AssertConditions.Interfaces;
-
 namespace TUnit.Assertions.AssertConditions.Chronology;
 
-public class TimeOnlyEqualsExpectedValueAssertCondition(TimeOnly expected) : ExpectedValueAssertCondition<TimeOnly, TimeOnly>(expected), ITimeToleranceCondition 
+public class TimeOnlyEqualsExpectedValueAssertCondition(TimeOnly expected) : ExpectedValueAssertCondition<TimeOnly, TimeOnly>(expected) 
 {
     private TimeSpan? _tolerance;
 

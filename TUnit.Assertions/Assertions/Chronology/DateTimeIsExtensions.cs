@@ -13,10 +13,8 @@ public static class DateTimeIsExtensions
 {
     public static DateTimeEqualToAssertion IsEqualTo(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
-        return new DateTimeEqualToAssertion(
-            valueSource.RegisterAssertion(new DateTimeEqualsExpectedValueAssertCondition(expected),
-                [doNotPopulateThisValue1])
-        );
+        // Don't create condition yet! Just return configuration object
+        return new DateTimeEqualToAssertion(valueSource, expected, [doNotPopulateThisValue1]);
     }
 
     public static AssertionBuilder<DateTime> IsAfter(this IValueSource<DateTime> valueSource, DateTime expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)

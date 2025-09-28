@@ -1,15 +1,15 @@
+using System.Collections.Generic;
+using System.Linq;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Connectors;
+using TUnit.Assertions.AssertionBuilders.Core;
 using TUnit.Assertions.AssertionBuilders.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public record ChainedAssertion(BaseAssertCondition Condition, ChainType ChainType);
-
-public class AssertionChain : IAssertionChain
+internal class AssertionChain : IAssertionChain
 {
-    private readonly List<ChainedAssertion> _assertions = [];
-    
+    private readonly List<ChainedAssertion> _assertions = new();
+
     public void AddAssertion(BaseAssertCondition assertion, ChainType chainType = ChainType.None)
     {
         _assertions.Add(new ChainedAssertion(assertion, chainType));
@@ -17,46 +17,19 @@ public class AssertionChain : IAssertionChain
 
     public void AddAndAssertion(BaseAssertCondition assertion)
     {
-        if (_assertions.Count > 0)
-        {
-            var previous = _assertions[^1];
-            _assertions[^1] = new ChainedAssertion(
-                new AndAssertCondition(previous.Condition, assertion), 
-                previous.ChainType
-            );
-        }
-        else
-        {
-            AddAssertion(assertion);
-        }
+        AddAssertion(assertion, ChainType.And);
     }
 
     public void AddOrAssertion(BaseAssertCondition assertion)
     {
-        if (_assertions.Count > 0)
-        {
-            var previous = _assertions[^1];
-            _assertions[^1] = new ChainedAssertion(
-                new OrAssertCondition(previous.Condition, assertion),
-                previous.ChainType
-            );
-        }
-        else
-        {
-            AddAssertion(assertion);
-        }
+        AddAssertion(assertion, ChainType.Or);
     }
 
-    public IEnumerable<BaseAssertCondition> GetAssertions()
-    {
-        return _assertions.Select(a => a.Condition);
-    }
-
-    IEnumerable<ChainedAssertion> IAssertionChain.GetAssertions()
+    public IEnumerable<ChainedAssertion> GetAssertions()
     {
         return _assertions;
     }
-    
+
     public IEnumerable<BaseAssertCondition> GetBaseAssertions()
     {
         return _assertions.Select(a => a.Condition);
@@ -64,11 +37,6 @@ public class AssertionChain : IAssertionChain
 
     public BaseAssertCondition? GetLastAssertion()
     {
-        return _assertions.Count > 0 ? _assertions[^1].Condition : null;
-    }
-
-    public void AddAssertion(BaseAssertCondition assertion)
-    {
-        AddAssertion(assertion, ChainType.None);
+        return _assertions.LastOrDefault()?.Condition;
     }
 }

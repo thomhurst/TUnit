@@ -23,8 +23,10 @@ public class NullabilityInferenceTests
         // ReSharper disable once VariableCanBeNotNullable
         int? nullableValue = 1;
 
-        var notNullValue = await Assert.That(nullableValue).IsNotNull();
-
-        Console.WriteLine(notNullValue.ToString());
+        await Assert.That(nullableValue).IsNotNull();
+        
+        // For nullable value types, IsNotNull returns AssertionBuilder which doesn't return a value
+        // Use the original value after the assertion passes
+        Console.WriteLine(nullableValue!.Value.ToString());
     }
 }

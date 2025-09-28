@@ -61,9 +61,7 @@ public static class ComparableIsExtensions
     public static BetweenAssertion<TActual> IsBetween<TActual>(this IValueSource<TActual> valueSource, TActual lowerBound, TActual upperBound, [CallerArgumentExpression(nameof(lowerBound))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(upperBound))] string doNotPopulateThisValue2 = null)
         where TActual : IComparable<TActual>
     {
-        var assertionBuilder = valueSource.RegisterAssertion(new BetweenAssertCondition<TActual>(lowerBound, upperBound)
-            , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
-
-        return new BetweenAssertion<TActual>(assertionBuilder);
+        // Don't create condition yet! Just return configuration object
+        return new BetweenAssertion<TActual>(valueSource, lowerBound, upperBound, [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 }

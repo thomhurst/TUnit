@@ -5,6 +5,8 @@ using System.Runtime.CompilerServices;
 using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.AssertionBuilders.Interfaces;
+using TUnit.Assertions.Assertions.Base;
 using TUnit.Assertions.Assertions.Generics.Conditions;
 
 namespace TUnit.Assertions.Extensions;
@@ -93,10 +95,11 @@ public static class GenericExtensions
 
     public static GenericEqualToAssertion<TActual> IsEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, IEqualityComparer<TActual> equalityComparer, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
-        var assertionBuilder = valueSource
-            .RegisterAssertion(new EqualsExpectedValueAssertCondition<TActual>(expected, equalityComparer), [doNotPopulateThisValue1]);
-
-        return new GenericEqualToAssertion<TActual>(assertionBuilder);
+        IAssertionChain chain = null;
+        if (valueSource is Assertion<TActual> assertion)
+            chain = assertion.GetChain();
+            
+        return new GenericEqualToAssertion<TActual>(valueSource, expected, equalityComparer, chain);
     }
 
     public static AssertionBuilder<TActual> IsEquatableOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
@@ -105,16 +108,14 @@ public static class GenericExtensions
             .RegisterAssertion(new EqualsExpectedValueAssertCondition<TActual>(expected), [doNotPopulateThisValue1]);
     }
 
-    public static EquivalentToAssertion<TActual> IsEquivalentTo<
+    public static EquivalentToAssertion<TActual, TExpected> IsEquivalentTo<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
     TActual,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
     TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
-        var assertionBuilder = valueSource.RegisterAssertion(new EquivalentToExpectedValueAssertCondition<TActual, TExpected>(expected, doNotPopulateThisValue1)
-            , [doNotPopulateThisValue1]);
-
-        return new EquivalentToAssertion<TActual>(assertionBuilder);
+        // Don't create condition yet! Just return configuration object
+        return new EquivalentToAssertion<TActual, TExpected>(valueSource, expected, doNotPopulateThisValue1, [doNotPopulateThisValue1]);
     }
 
     public static AssertionBuilder<TActual> IsSameReferenceAs<TActual, TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
@@ -131,15 +132,14 @@ public static class GenericExtensions
     
     public static GenericNotEqualToAssertion<TActual> IsNotEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
-        var assertionBuilder = valueSource.RegisterAssertion(new NotEqualsExpectedValueAssertCondition<TActual>(expected)
-            , [doNotPopulateThisValue]);
-
-        return new GenericNotEqualToAssertion<TActual>(assertionBuilder);
+        // Don't create condition yet! Just return configuration object
+        return new GenericNotEqualToAssertion<TActual>(valueSource, expected, [doNotPopulateThisValue]);
     }
 
     public static NotNullAssertion<TActual> IsNotNull<TActual>(this IValueSource<TActual> valueSource) where TActual : class
     {
-        return new NotNullAssertion<TActual>(valueSource.RegisterConversionAssertion(new NotNullExpectedValueAssertCondition<TActual>(), []));
+        // Don't create condition yet! Just return configuration object
+        return new NotNullAssertion<TActual>(valueSource, []);
     }
 
     public static AssertionBuilder<TActual> IsNotNull<TActual>(this IValueSource<TActual?> valueSource) where TActual : struct
@@ -153,16 +153,14 @@ public static class GenericExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static NotEquivalentToAssertion<TActual> IsNotEquivalentTo<
+    public static NotEquivalentToAssertion<TActual, TExpected> IsNotEquivalentTo<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
     TActual,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
     TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
-        var assertionBuilder = valueSource.RegisterAssertion(new NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>(expected, doNotPopulateThisValue1)
-            , [doNotPopulateThisValue1]);
-
-        return new NotEquivalentToAssertion<TActual>(assertionBuilder);
+        // Don't create condition yet! Just return configuration object
+        return new NotEquivalentToAssertion<TActual, TExpected>(valueSource, expected, doNotPopulateThisValue1, [doNotPopulateThisValue1]);
     }
 
     public static AssertionBuilder<TActual> IsNotSameReferenceAs<TActual, TExpected>(this IValueSource<TActual> valueSource, TExpected expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)

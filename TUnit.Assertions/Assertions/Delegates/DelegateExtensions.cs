@@ -15,7 +15,6 @@ public static class DelegateExtensions
     public static AssertionBuilder<TActual> CompletesWithin<TActual>(this IValueDelegateSource<TActual> delegateSource, TimeSpan timeSpan, [CallerArgumentExpression("timeSpan")] string? doNotPopulateThisValue = null)
     {
         IValueSource<TActual> valueSource = delegateSource;
-
         return valueSource.RegisterAssertion(new CompleteWithinAssertCondition<TActual>(timeSpan), [doNotPopulateThisValue]);
     }
 }

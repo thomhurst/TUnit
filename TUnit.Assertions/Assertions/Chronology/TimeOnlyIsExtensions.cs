@@ -15,10 +15,8 @@ public static class TimeOnlyIsExtensions
 {
     public static TimeOnlyEqualToAssertion IsEqualTo(this IValueSource<TimeOnly> valueSource, TimeOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
-        return new TimeOnlyEqualToAssertion(
-            valueSource.RegisterAssertion(new TimeOnlyEqualsExpectedValueAssertCondition(expected),
-                [doNotPopulateThisValue1])
-        );
+        // Don't create condition yet! Just return configuration object
+        return new TimeOnlyEqualToAssertion(valueSource, expected, [doNotPopulateThisValue1]);
     }
     
     public static AssertionBuilder<TimeOnly> IsAfter(this IValueSource<TimeOnly> valueSource,

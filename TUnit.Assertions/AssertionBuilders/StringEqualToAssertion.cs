@@ -1,58 +1,86 @@
-using System.Linq;
-using System.Runtime.CompilerServices;
+using System;
+using TUnit.Assertions.Assertions.Base;
+using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.AssertConditions.String;
+using TUnit.Assertions.AssertionBuilders;
+using TUnit.Assertions.AssertionBuilders.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 /// <summary>
-/// Fluent assertion builder for string equality comparisons
+/// String equality assertion
 /// </summary>
-public class StringEqualToAssertion : FluentAssertionBase<string, StringEqualToAssertion>
+public class StringEqualToAssertion : Assertion<string>
 {
-    internal StringEqualToAssertion(AssertionBuilder<string> assertionBuilder) 
-        : base(assertionBuilder)
+    private readonly string _expected;
+    private readonly StringComparison _stringComparison;
+    private bool _trim = false;
+    private bool _nullAndEmptyEqual = false;
+    private bool _ignoreWhitespace = false;
+
+    internal StringEqualToAssertion(IValueSource<string> source, string expected, 
+        StringComparison stringComparison, IAssertionChain chain = null!)
+        : base(source, chain)
     {
+        _expected = expected;
+        _stringComparison = stringComparison;
     }
 
     public StringEqualToAssertion WithTrimming()
     {
-        var assertions = GetAssertions();
-        var assertion = assertions.LastOrDefault() as StringEqualsExpectedValueAssertCondition;
-        
-        if (assertion != null)
-        {
-            assertion?.WithTrimming();
-            AppendExpression("WithTrimming()");
-        }
-
-        return Self;
+        _trim = true;
+        return this;
     }
 
     public StringEqualToAssertion WithNullAndEmptyEquality()
     {
-        var assertions = GetAssertions();
-        var assertion = assertions.LastOrDefault() as StringEqualsExpectedValueAssertCondition;
-        
-        if (assertion != null)
-        {
-            assertion?.WithNullAndEmptyEquality();
-            AppendExpression("WithNullAndEmptyEquality()");
-        }
-
-        return Self;
+        _nullAndEmptyEqual = true;
+        return this;
     }
 
     public StringEqualToAssertion IgnoringWhitespace()
     {
-        var assertions = GetAssertions();
-        var assertion = assertions.LastOrDefault() as StringEqualsExpectedValueAssertCondition;
-        
-        if (assertion != null)
-        {
-            assertion?.IgnoringWhitespace();
-            AppendExpression("IgnoringWhitespace()");
-        }
+        _ignoreWhitespace = true;
+        return this;
+    }
 
-        return Self;
+    protected override BaseAssertCondition CreateCondition()
+    {
+        var condition = new StringEqualsExpectedValueAssertCondition(_expected, _stringComparison);
+        
+        if (_trim)
+            condition.WithTrimming();
+        if (_nullAndEmptyEqual)
+            condition.WithNullAndEmptyEquality();
+        if (_ignoreWhitespace)
+            condition.IgnoringWhitespace();
+        
+        return condition;
+    }
+    
+    // Override And and Or to return the correct type
+    public new StringEqualToAssertion And 
+    { 
+        get 
+        {
+            _ = base.And;
+            return this;
+        }
+    }
+    
+    public new StringEqualToAssertion Or
+    {
+        get
+        {
+            _ = base.Or;
+            return this;
+        }
+    }
+    
+    public new StringEqualToAssertion Because(string reason, string? expression = null)
+    {
+        base.Because(reason, expression);
+        return this;
     }
 }

@@ -1,4 +1,5 @@
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertionBuilders.Core;
 
 namespace TUnit.Assertions.AssertionBuilders.Interfaces;
 

@@ -1,24 +1,43 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Chronology;
+using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.Assertions.Base;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 /// <summary>
-/// Fluent assertion builder for DateTime equality comparisons
+/// Clean DateTime equality assertion - no inheritance, just configuration
 /// </summary>
-public class DateTimeEqualToAssertion : FluentAssertionBase<DateTime, DateTimeEqualToAssertion>
+public class DateTimeEqualToAssertion : Assertion<DateTime>
 {
-    internal DateTimeEqualToAssertion(AssertionBuilder<DateTime> assertionBuilder)
-        : base(assertionBuilder)
+    private readonly DateTime _expected;
+    private readonly string?[] _expressions;
+    
+    // Configuration
+    private TimeSpan? _tolerance;
+
+    internal DateTimeEqualToAssertion(IValueSource<DateTime> source, DateTime expected, string?[] expressions, IAssertionChain chain = null!)
+        : base(source, chain)
     {
+        _expected = expected;
+        _expressions = expressions;
     }
 
     public DateTimeEqualToAssertion Within(TimeSpan tolerance, [CallerArgumentExpression(nameof(tolerance))] string doNotPopulateThis = "")
     {
-        var assertion = GetLastAssertionAs<DateTimeEqualsExpectedValueAssertCondition>();
-        assertion?.SetTolerance(tolerance);
-        AppendCallerMethod([doNotPopulateThis]);
-        return Self;
+        _tolerance = tolerance;
+        return this;
+    }
+
+    protected override BaseAssertCondition? CreateCondition()
+    {
+        var condition = new DateTimeEqualsExpectedValueAssertCondition(_expected);
+        if (_tolerance.HasValue)
+            condition.SetTolerance(_tolerance.Value);
+        return condition;
     }
 }

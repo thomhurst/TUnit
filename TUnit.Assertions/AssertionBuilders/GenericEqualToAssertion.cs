@@ -1,34 +1,46 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.Assertions.Base;
 using TUnit.Assertions.Assertions.Generics.Conditions;
+using TUnit.Assertions.AssertionBuilders.Interfaces;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 /// <summary>
-/// Fluent assertion builder for generic equality comparisons
+/// Clean generic equality assertion - no inheritance, just configuration
 /// </summary>
-public class GenericEqualToAssertion<TActual> : FluentAssertionBase<TActual, GenericEqualToAssertion<TActual>>
+public class GenericEqualToAssertion<TActual> : Assertion<TActual>
 {
-    internal GenericEqualToAssertion(AssertionBuilder<TActual> assertionBuilder) 
-        : base(assertionBuilder)
+    private readonly TActual _expected;
+    private readonly IEqualityComparer<TActual> _comparer;
+    
+    // Configuration
+#if NET
+    private Func<TActual?, TActual?, AssertionDecision>? _customComparer;
+#else
+    private readonly Func<TActual?, TActual?, AssertionDecision>? _customComparer = null;
+#endif
+
+    internal GenericEqualToAssertion(IValueSource<TActual> source, TActual expected, IEqualityComparer<TActual> comparer, IAssertionChain chain = null!)
+        : base(source, chain)
     {
+        _expected = expected;
+        _comparer = comparer;
     }
 
 #if NET
     public GenericEqualToAssertion<TActual> Within<T>(T tolerance, [CallerArgumentExpression(nameof(tolerance))] string doNotPopulateThis = "")
         where T : IComparable<T>
     {
-        var assertion = GetLastAssertion() as EqualsExpectedValueAssertCondition<TActual>;
-        if (assertion is null)
-        {
-            throw new InvalidOperationException($"Expected last assertion to be EqualsExpectedValueAssertCondition<{typeof(TActual).Name}>");
-        }
-
         if (typeof(TActual) == typeof(T))
         {
-            assertion.WithComparer((actual, expected) =>
+            _customComparer = (actual, expected) =>
             {
                 dynamic actualDynamic = actual!;
                 dynamic expectedDynamic = expected!;
@@ -40,12 +52,20 @@ public class GenericEqualToAssertion<TActual> : FluentAssertionBase<TActual, Gen
                 }
                 
                 return AssertionDecision.Fail($"Expected {actual} to be equal to {expected} ±{tolerance}.");
-            });
+            };
         }
         
-        AppendCallerMethod([doNotPopulateThis]);
-        
-        return Self;
+        return this;
     }
 #endif
+
+    protected override BaseAssertCondition? CreateCondition()
+    {
+        var condition = new EqualsExpectedValueAssertCondition<TActual>(_expected, _comparer);
+        
+        if (_customComparer != null)
+            condition.WithComparer(_customComparer);
+        
+        return condition;
+    }
 }

@@ -16,17 +16,14 @@ public static class StringParsingExtensions
     /// <param name="valueSource">The source containing the string value to test.</param>
     /// <param name="doNotPopulateThisValue">Do not use. This is populated by the compiler to get the expression of the value.</param>
     /// <returns>An assertion builder that can be used to add a format provider.</returns>
-    public static ParseAssertion<string?>
+    public static IsParsableAssertion<TTarget>
         IsParsableInto<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] TTarget>(
         this IValueSource<string> valueSource,
         [CallerArgumentExpression(nameof(valueSource))] string? doNotPopulateThisValue = null)
     {
         IValueSource<string?> nullableSource = valueSource;
-        var assertionBuilder = nullableSource.RegisterAssertion(
-            new StringIsParsableCondition<TTarget>(),
-            [doNotPopulateThisValue]);
-
-        return new ParseAssertion<string?>((AssertionBuilder<string?>)assertionBuilder);
+        // Don't create condition yet! Just return configuration object
+        return new IsParsableAssertion<TTarget>(nullableSource, shouldBeParsable: true, [doNotPopulateThisValue]);
     }
 
     /// <summary>
@@ -36,17 +33,14 @@ public static class StringParsingExtensions
     /// <param name="valueSource">The source containing the string value to test.</param>
     /// <param name="doNotPopulateThisValue">Do not use. This is populated by the compiler to get the expression of the value.</param>
     /// <returns>An assertion builder that can be used to add a format provider.</returns>
-    public static ParseAssertion<string?>
+    public static IsParsableAssertion<TTarget>
         IsNotParsableInto<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] TTarget>(
         this IValueSource<string> valueSource,
         [CallerArgumentExpression(nameof(valueSource))] string? doNotPopulateThisValue = null)
     {
         IValueSource<string?> nullableSource = valueSource;
-        var assertionBuilder = nullableSource.RegisterAssertion(
-            new StringIsNotParsableCondition<TTarget>(),
-            [doNotPopulateThisValue]);
-
-        return new ParseAssertion<string?>((AssertionBuilder<string?>)assertionBuilder);
+        // Don't create condition yet! Just return configuration object
+        return new IsParsableAssertion<TTarget>(nullableSource, shouldBeParsable: false, [doNotPopulateThisValue]);
     }
 
     /// <summary>
@@ -57,8 +51,8 @@ public static class StringParsingExtensions
     /// <param name="valueSource">The source containing the string value to parse.</param>
     /// <param name="formatProvider">Optional format provider to use during parsing.</param>
     /// <param name="doNotPopulateThisValue">Do not use. This is populated by the compiler to get the expression of the value.</param>
-    /// <returns>An assertion builder for the parsed value.</returns>
-    public static AssertionBuilder<TTarget> WhenParsedInto<
+    /// <returns>An assertion for the parsed value.</returns>
+    public static IValueSource<TTarget> WhenParsedInto<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] TTarget>(
         this IValueSource<string> valueSource,
         IFormatProvider? formatProvider = null,

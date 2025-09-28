@@ -1,59 +1,83 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.AssertConditions;
 using TUnit.Assertions.AssertConditions.Interfaces;
+using TUnit.Assertions.Assertions.Base;
 using TUnit.Assertions.Assertions.Generics.Conditions;
 using TUnit.Assertions.Enums;
+using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 /// <summary>
-/// Fluent assertion builder for not-equivalent comparisons
+/// Clean not-equivalent assertion - no inheritance, just configuration
 /// </summary>
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-public class NotEquivalentToAssertion<TActual> : FluentAssertionBase<TActual, NotEquivalentToAssertion<TActual>>
+public class NotEquivalentToAssertion<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+    TActual,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+    TExpected> : Assertion<TActual>
 {
-    internal NotEquivalentToAssertion(AssertionBuilder<TActual> assertionBuilder)
-        : base(assertionBuilder)
+    private readonly TExpected _expected;
+    private readonly string? _expectedExpression;
+    private readonly string?[] _expressions;
+    
+    // Configuration
+    private readonly List<string> _ignoredMembers = new();
+    private readonly List<Type> _ignoredTypes = new();
+    private EquivalencyKind _equivalencyKind = EquivalencyKind.Full;
+
+    internal NotEquivalentToAssertion(IValueSource<TActual> source, TExpected expected, 
+        string? expectedExpression, string?[] expressions, IAssertionChain chain = null!)
+        : base(source, chain)
     {
+        _expected = expected;
+        _expectedExpression = expectedExpression;
+        _expressions = expressions;
     }
 
-    public NotEquivalentToAssertion<TActual> IgnoringMember(string propertyName, [CallerArgumentExpression(nameof(propertyName))] string doNotPopulateThis = "")
+    public NotEquivalentToAssertion<TActual, TExpected> IgnoringMember(string propertyName, 
+        [CallerArgumentExpression(nameof(propertyName))] string doNotPopulateThis = "")
     {
-        var assertion = GetLastAssertionAs<IEquivalentCondition>();
-        assertion?.IgnoringMember(propertyName);
-
-        AppendCallerMethod([doNotPopulateThis]);
+        _ignoredMembers.Add(propertyName);
         return this;
     }
 
-    public NotEquivalentToAssertion<TActual> IgnoringType<TType>()
+    public NotEquivalentToAssertion<TActual, TExpected> IgnoringType<TType>()
     {
-        var assertion = GetLastAssertionAs<IEquivalentCondition>();
-        assertion?.IgnoringType(typeof(TType));
-
-        AppendCallerMethod([$"<{typeof(TType).Name}>"]);
+        _ignoredTypes.Add(typeof(TType));
         return this;
     }
 
-    public NotEquivalentToAssertion<TActual> IgnoringType(Type type, [CallerArgumentExpression(nameof(type))] string doNotPopulateThis = "")
+    public NotEquivalentToAssertion<TActual, TExpected> IgnoringType(Type type, 
+        [CallerArgumentExpression(nameof(type))] string doNotPopulateThis = "")
     {
-        var assertion = GetLastAssertionAs<IEquivalentCondition>();
-        assertion?.IgnoringType(type);
-
-        AppendCallerMethod([doNotPopulateThis]);
+        _ignoredTypes.Add(type);
         return this;
     }
 
-    public NotEquivalentToAssertion<TActual> WithPartialEquivalency()
+    public NotEquivalentToAssertion<TActual, TExpected> WithPartialEquivalency()
     {
-        var assertion = GetLastAssertionAs<IEquivalentCondition>();
-        if (assertion != null)
-        {
-            assertion.EquivalencyKind = EquivalencyKind.Partial;
-        }
-
-        AppendCallerMethod([]);
+        _equivalencyKind = EquivalencyKind.Partial;
         return this;
+    }
+
+    protected override BaseAssertCondition? CreateCondition()
+    {
+        var condition = new NotEquivalentToExpectedValueAssertCondition<TActual, TExpected>(_expected, _expectedExpression);
+        
+        foreach (var member in _ignoredMembers)
+            condition.IgnoringMember(member);
+        
+        foreach (var type in _ignoredTypes)
+            condition.IgnoringType(type);
+        
+        condition.EquivalencyKind = _equivalencyKind;
+        
+        return condition;
     }
 }

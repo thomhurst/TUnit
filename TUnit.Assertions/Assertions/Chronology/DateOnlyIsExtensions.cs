@@ -14,10 +14,8 @@ public static class DateOnlyIsExtensions
 {
     public static DateOnlyEqualToAssertion IsEqualTo(this IValueSource<DateOnly> valueSource, DateOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
-        return new DateOnlyEqualToAssertion(
-            valueSource.RegisterAssertion(new DateOnlyEqualsExpectedValueAssertCondition(expected),
-                [doNotPopulateThisValue1])
-        );
+        // Don't create condition yet! Just return configuration object
+        return new DateOnlyEqualToAssertion(valueSource, expected, [doNotPopulateThisValue1]);
     }
     
     public static AssertionBuilder<DateOnly> IsAfter(this IValueSource<DateOnly> valueSource, DateOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)

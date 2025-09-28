@@ -12,10 +12,8 @@ public static class TimeSpanIsExtensions
 {
     public static TimeSpanEqualToAssertion IsEqualTo(this IValueSource<TimeSpan> valueSource, TimeSpan expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null)
     {
-        return new TimeSpanEqualToAssertion(
-            valueSource.RegisterAssertion(new TimeSpanEqualsExpectedValueAssertCondition(expected),
-                [doNotPopulateThisValue1])
-        );
+        // Don't create condition yet! Just return configuration object
+        return new TimeSpanEqualToAssertion(valueSource, expected, [doNotPopulateThisValue1]);
     }
 
     public static AssertionBuilder<TimeSpan> IsZero(this IValueSource<TimeSpan> valueSource)

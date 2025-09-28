@@ -17,8 +17,6 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
     private readonly IAssertionChain _chain;
     private readonly IAssertionEvaluator _evaluator;
     private ChainType _currentChainType = ChainType.None;
-    private string? _becauseReason;
-    private string? _becauseExpression;
     
     public TActual Actual { get; }
     public override string? ActualExpression => _expressionFormatter?.GetExpression();
@@ -61,6 +59,14 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
         _evaluator = new AssertionEvaluator();
         Actual = default!; // Will be set by public constructors
         _actualValueTask = new ValueTask<TActual>(Actual);
+    }
+    
+    internal AssertionBuilder(TActual value, string? actualExpression, IAssertionChain existingChain)
+        : this(new ValueTask<AssertionData>(ConvertToAssertionData(value, actualExpression)), actualExpression)
+    {
+        _chain = existingChain; // Use the existing chain instead of creating new one
+        Actual = value;
+        _actualValueTask = new ValueTask<TActual>(value);
     }
 
     // IValueSource implementation
@@ -182,8 +188,12 @@ public class AssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
     
     public override void SetBecause(string reason, string? expression)
     {
-        _becauseReason = reason;
-        _becauseExpression = expression;
+        // Apply the because reason to all existing assertions in the chain
+        var becauseReason = new BecauseReason(reason);
+        foreach (var assertion in _chain.GetBaseAssertions())
+        {
+            assertion.SetBecauseReason(becauseReason);
+        }
     }
 
     // Static helper methods
