@@ -1,9 +1,10 @@
 using TUnit.Core;
 using TUnit.Core.Interfaces;
+using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs.Bug3219;
 
-// This is the exact repro from issue #3219
+[EngineTest(ExpectedResult.Pass)]
 public class Issue3219DataClass : IAsyncInitializer, IAsyncDisposable
 {
     public int Value { get; private set; } = 0;
