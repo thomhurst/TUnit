@@ -1,14 +1,13 @@
 using System.Collections.Immutable;
-using System.Linq;
+using System.Globalization;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Generators;
@@ -20,7 +19,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // Find all test methods using the more performant ForAttributeWithMetadataName
         var testMethodsProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.TestAttribute",
@@ -28,7 +26,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetTestMethodMetadata(ctx))
             .Where(static m => m is not null);
 
-        // Find classes with [InheritsTests] attribute
         var inheritsTestsClassesProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.InheritsTestsAttribute",
@@ -36,11 +33,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetInheritsTestsClassMetadata(ctx))
             .Where(static m => m is not null);
 
-        // Generate one source file per test method
         context.RegisterSourceOutput(testMethodsProvider.Combine(context.CompilationProvider),
             static (context, tuple) => GenerateTestMethodSource(context, tuple.Right, tuple.Left));
 
-        // Generate test methods for inherited tests
         context.RegisterSourceOutput(inheritsTestsClassesProvider.Combine(context.CompilationProvider),
             static (context, tuple) => GenerateInheritedTestSources(context, tuple.Right, tuple.Left));
     }
@@ -54,7 +49,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        // Skip abstract classes
         if (classSymbol.IsAbstract)
         {
             return null;
@@ -81,22 +75,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var testAttribute = methodSymbol!.GetRequiredTestAttribute();
 
-        // Skip abstract classes (cannot be instantiated)
         if (containingType.IsAbstract)
         {
             return null;
         }
 
-        // For generic types and methods, we now emit metadata that will be resolved at runtime
         var isGenericType = containingType is { IsGenericType: true, TypeParameters.Length: > 0 };
         var isGenericMethod = methodSymbol is { IsGenericMethod: true };
+
+        var (filePath, lineNumber) = GetTestMethodSourceLocation(methodSyntax, testAttribute);
 
         return new TestMethodMetadata
         {
             MethodSymbol = methodSymbol ?? throw new InvalidOperationException("Symbol is not a method"),
             TypeSymbol = containingType,
-            FilePath = methodSyntax.GetLocation().SourceTree?.FilePath ?? testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? methodSyntax.SyntaxTree.FilePath,
-            LineNumber = methodSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+            FilePath = filePath,
+            LineNumber = lineNumber,
             TestAttribute = context.Attributes.First(),
             Context = context,
             MethodSyntax = methodSyntax,
@@ -113,32 +107,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return;
         }
 
-        // Find all test methods in base classes
         var inheritedTestMethods = CollectInheritedTestMethods(classInfo.TypeSymbol);
 
-        // Generate test metadata for each inherited test method
         foreach (var method in inheritedTestMethods)
         {
             var testAttribute = method.GetAttributes().FirstOrDefault(a => a.IsTestAttribute());
 
-            // Skip if no test attribute found
             if (testAttribute == null)
             {
                 continue;
             }
 
-            // Find the concrete implementation of this method in the derived class
             var concreteMethod = FindConcreteMethodImplementation(classInfo.TypeSymbol, method);
 
-            // Calculate inheritance depth for this test
             var inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
-
-            var filePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ??
-                          classInfo.ClassSyntax.GetLocation().SourceTree?.FilePath ??
-                          classInfo.ClassSyntax.SyntaxTree.FilePath;
-
-            var lineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
-                            classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+            var (filePath, lineNumber) = GetTestMethodSourceLocation(method, testAttribute, classInfo);
 
             var testMethodMetadata = new TestMethodMetadata
             {
@@ -161,13 +144,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static int CalculateInheritanceDepth(INamedTypeSymbol testClass, IMethodSymbol testMethod)
     {
-        // If the method is declared directly in the test class, depth is 0
         if (testMethod.ContainingType.Equals(testClass, SymbolEqualityComparer.Default))
         {
             return 0;
         }
 
-        // Count how many levels up the inheritance chain the method is declared
         var depth = 0;
         var currentType = testClass.BaseType;
 
@@ -181,7 +162,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             currentType = currentType.BaseType;
         }
 
-        // This shouldn't happen in normal cases, but return the depth anyway
         return depth;
     }
 
@@ -225,7 +205,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         writer.AppendLine("#nullable enable");
         writer.AppendLine();
-        // No using statements - use globally qualified types
         writer.AppendLine();
         writer.AppendLine($"namespace {GeneratedNamespace};");
         writer.AppendLine();
@@ -242,7 +221,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        // Generate reflection-based field accessors for init-only properties with data source attributes
         GenerateReflectionFieldAccessors(writer, testMethod.TypeSymbol, className);
 
         writer.AppendLine("public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)");
@@ -251,55 +229,43 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine();
 
-        // Check if we have generic types or methods
         if (testMethod.IsGenericType || testMethod is { IsGenericMethod: true, MethodSymbol.TypeParameters.Length: > 0 })
         {
-            // Check if we can use the concrete types approach (AOT-compatible)
-            // This is possible when we have typed data sources that can inform the generic type arguments
             var hasTypedDataSource = testMethod.MethodAttributes
                 .Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass) &&
                          InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, a) != null);
 
-            // Check if we have GenerateGenericTest attributes on methods or classes
             var hasGenerateGenericTest = (testMethod.IsGenericMethod && testMethod.MethodAttributes
                 .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)) ||
                 (testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributes()
                 .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true));
 
-            // Check if class has class-level Arguments attributes (for both generic and non-generic classes)
             var hasClassArguments = testMethod.TypeSymbol.GetAttributes()
                 .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") is true);
 
-            // Check if generic class has method-level typed data source attributes that can provide type information
             var hasTypedDataSourceForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
                 .Any(a => a.AttributeClass != null &&
                     a.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") &&
                     InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol) != null);
 
-            // Check if generic class has method-level Arguments attributes that can provide type information
             var hasMethodArgumentsForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
                 .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") is true);
 
-            // Check if generic class has MethodDataSource that can provide type information
             var hasMethodDataSourceForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
                 .Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute" &&
                           InferClassTypesFromMethodDataSource(compilation, testMethod, a) != null);
 
             if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArguments || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType || hasMethodDataSourceForGenericType)
             {
-                // Use concrete types approach for AOT compatibility
-                // For generic methods and classes with Arguments attributes, we always use this approach
                 GenerateGenericTestWithConcreteTypes(writer, compilation, testMethod, className, combinationGuid);
             }
             else
             {
-                // Fall back to runtime resolution for other cases
                 GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
             }
         }
         else
         {
-            // Non-generic method in non-generic class
             GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
         }
 
@@ -310,7 +276,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
 
-        // Generate module initializer
         GenerateModuleInitializer(writer, testMethod, guid);
     }
 
@@ -326,7 +291,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var typeArgsString = string.Join(", ", typeArguments.Select(t => t.GloballyQualified()));
         var instantiatedMethodName = $"{methodName}<{typeArgsString}>";
 
-        // Create a modified test method metadata with concrete types
         var concreteTestMethod = new TestMethodMetadata
         {
             MethodSymbol = testMethod.MethodSymbol,
@@ -345,7 +309,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        // Generate metadata for this specific instantiation
         writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{className}>");
         writer.AppendLine("{");
         writer.Indent();
@@ -355,20 +318,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
         writer.AppendLine($"GenericMethodTypeArguments = new global::System.Type[] {{ {string.Join(", ", typeArguments.Select(t => $"typeof({t.GloballyQualified()})"))}}},");
 
-        // Add basic metadata
         GenerateMetadata(writer, compilation, concreteTestMethod);
 
-        // Generate generic type info if needed
         if (testMethod.IsGenericType)
         {
             GenerateGenericTypeInfo(writer, testMethod.TypeSymbol);
         }
 
-        // Generate AOT-friendly invokers that use the specific types
         GenerateAotFriendlyInvokers(writer, testMethod, className, typeArguments);
 
-        // Add file location metadata
-        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         writer.Unindent();
@@ -394,7 +353,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             p.Type.Name == "CancellationToken" &&
             p.Type.ContainingNamespace?.ToString() == "System.Threading");
 
-        // Generate the instance factory
         writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
@@ -404,7 +362,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("},");
 
-        // Generate InvokeTypedTest for the specific generic instantiation
         writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
@@ -412,7 +369,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate direct method call with specific types (no MakeGenericMethod)
         writer.AppendLine($"var typedInstance = ({className})instance;");
 
-        // Prepare method arguments
         writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationToken ? " + 1" : "") + "];");
         writer.AppendLine("global::System.Array.Copy(args, methodArgs, args.Length);");
 
@@ -421,7 +377,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("methodArgs[args.Length] = cancellationToken;");
         }
 
-        // Direct method invocation with known types
         var parameterCasts = new List<string>();
         for (var i = 0; i < testMethod.MethodSymbol.Parameters.Length; i++)
         {
@@ -502,10 +457,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestClassType = {GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)},");
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
 
-        // Add basic metadata
         GenerateMetadata(writer, compilation, testMethod);
 
-        // Generate generic type info if needed
         if (testMethod.IsGenericType)
         {
             GenerateGenericTypeInfo(writer, testMethod.TypeSymbol);
@@ -523,7 +476,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("};");
 
-        // Set the test to use runtime data generation
         if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
             writer.AppendLine("metadata.UseRuntimeDataGeneration(testSessionId);");
@@ -542,7 +494,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodSymbol = testMethod.MethodSymbol;
 
 
-        // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
 
         writer.AppendLine("AttributeFactory = () =>");
@@ -559,17 +510,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("],");
 
-        // Generate data sources with factory methods
         GenerateDataSources(writer, compilation, testMethod);
 
-        // Generate property injections
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
         // Inheritance depth
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
 
         // File location metadata
-        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         // Method metadata
@@ -582,7 +531,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodSymbol = testMethod.MethodSymbol;
 
 
-        // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
 
         writer.AppendLine("AttributeFactory = () =>");
@@ -606,14 +554,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
         writer.AppendLine("PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),");
 
-        // Generate property injections
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
         // Inheritance depth
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
 
         // File location metadata
-        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         // Method metadata
@@ -836,7 +783,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // For collections (IEnumerable, IAsyncEnumerable), we need to evaluate once to iterate
         // For single values, we'll generate a lambda that invokes the method each time
-        var returnTypeName = returnType.ToDisplayString();
+        returnType.ToDisplayString();
 
         if (IsAsyncEnumerable(returnType))
         {
@@ -1069,7 +1016,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Handle numeric types with InvariantCulture to ensure consistent formatting
                     if (constant.Value is IFormattable formattable)
                     {
-                        writer.Append(formattable.ToString(null, System.Globalization.CultureInfo.InvariantCulture));
+                        writer.Append(formattable.ToString(null, CultureInfo.InvariantCulture));
                     }
                     else
                     {
@@ -1597,8 +1544,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine();
         }
 
-        writer.AppendLine("// Prepare method arguments");
-        writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationToken ? " + 1" : "") + "];");
+writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationToken ? " + 1" : "") + "];");
         writer.AppendLine("args.CopyTo(methodArgs, 0);");
 
         if (hasCancellationToken)
@@ -2247,6 +2193,61 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return false;
+    }
+
+    private static (string filePath, int lineNumber) GetTestMethodSourceLocation(
+        MethodDeclarationSyntax methodSyntax,
+        AttributeData testAttribute)
+    {
+        var methodLocation = methodSyntax.GetLocation();
+        var filePath = methodLocation.SourceTree?.FilePath;
+        if (!string.IsNullOrEmpty(filePath))
+        {
+            var lineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
+            return (filePath, lineNumber);
+        }
+
+        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+        if (!string.IsNullOrEmpty(attrFilePath))
+        {
+            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
+                                 methodLocation.GetLineSpan().StartLinePosition.Line + 1;
+            return (attrFilePath, attrLineNumber);
+        }
+
+        filePath = methodSyntax.SyntaxTree.FilePath ?? "";
+        var fallbackLineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
+        return (filePath, fallbackLineNumber);
+    }
+
+    private static (string filePath, int lineNumber) GetTestMethodSourceLocation(
+        IMethodSymbol method,
+        AttributeData testAttribute,
+        InheritsTestsClassMetadata classInfo)
+    {
+        var methodLocation = method.Locations.FirstOrDefault();
+        if (methodLocation != null && methodLocation.IsInSource)
+        {
+            var filePath = methodLocation.SourceTree?.FilePath;
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                var lineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
+                return (filePath, lineNumber);
+            }
+        }
+
+        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+        if (!string.IsNullOrEmpty(attrFilePath))
+        {
+            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
+                                 classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+            return (attrFilePath, attrLineNumber);
+        }
+
+        var classLocation = classInfo.ClassSyntax.GetLocation();
+        var derivedFilePath = classLocation.SourceTree?.FilePath ?? classInfo.ClassSyntax.SyntaxTree.FilePath ?? "";
+        var derivedLineNumber = classLocation.GetLineSpan().StartLinePosition.Line + 1;
+        return (derivedFilePath, derivedLineNumber);
     }
 
     private static void GenerateReflectionFieldAccessors(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
@@ -3254,46 +3255,53 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             return compilation?.GetSpecialType(SpecialType.System_Int32);
         }
-        else if (value is string)
+
+        if (value is string)
         {
             return compilation?.GetSpecialType(SpecialType.System_String);
         }
-        else if (value is bool)
+
+        if (value is bool)
         {
             return compilation?.GetSpecialType(SpecialType.System_Boolean);
         }
-        else if (value is double)
+
+        if (value is double)
         {
             return compilation?.GetSpecialType(SpecialType.System_Double);
         }
-        else if (value is float)
+
+        if (value is float)
         {
             return compilation?.GetSpecialType(SpecialType.System_Single);
         }
-        else if (value is long)
+
+        if (value is long)
         {
             return compilation?.GetSpecialType(SpecialType.System_Int64);
         }
-        else if (value is byte)
+
+        if (value is byte)
         {
             return compilation?.GetSpecialType(SpecialType.System_Byte);
         }
-        else if (value is char)
+
+        if (value is char)
         {
             return compilation?.GetSpecialType(SpecialType.System_Char);
         }
-        else if (value is decimal)
+
+        if (value is decimal)
         {
             return compilation?.GetSpecialType(SpecialType.System_Decimal);
         }
-        else if (value is ITypeSymbol typeSymbol)
+
+        if (value is ITypeSymbol)
         {
             return compilation?.GetTypeByMetadataName("System.Type");
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
     private static ITypeSymbol[]? InferTypesFromClassArgumentsAttribute(INamedTypeSymbol classSymbol, AttributeData argAttr, Compilation compilation)
@@ -3317,8 +3325,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Find the primary constructor
         var primaryConstructor = classSymbol.Constructors
             .FirstOrDefault(c => c.DeclaringSyntaxReferences.Any(sr =>
-                sr.GetSyntax() is Microsoft.CodeAnalysis.CSharp.Syntax.ConstructorDeclarationSyntax cds &&
-                cds.Modifiers.Any(m => m.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword))))
+                sr.GetSyntax() is ConstructorDeclarationSyntax cds &&
+                cds.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword))))
             ?? classSymbol.Constructors.FirstOrDefault();
 
         if (primaryConstructor == null)
@@ -4054,7 +4062,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        var hasCancellationToken = testMethod.MethodSymbol.Parameters.Any(p =>
+        testMethod.MethodSymbol.Parameters.Any(p =>
             p.Type.Name == "CancellationToken" &&
             p.Type.ContainingNamespace?.ToString() == "System.Threading");
 
@@ -4157,7 +4165,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var typeSymbol = testMethod.TypeSymbol;
 
 
-        // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
 
         // Generate attribute factory with filtered attributes
@@ -4273,14 +4280,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Empty property data sources for concrete instantiations
         writer.AppendLine("PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),");
 
-        // Generate property injections
         GeneratePropertyInjections(writer, typeSymbol, typeSymbol.GloballyQualified());
 
         // Other metadata
-        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
-        writer.AppendLine($"TestSessionId = testSessionId,");
+        writer.AppendLine("TestSessionId = testSessionId,");
 
         // Method metadata
         writer.Append("MethodMetadata = ");
@@ -4328,7 +4334,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     {
                         // Look for IInfersType<T> in the attribute's interfaces
                         var infersTypeInterface = attr.AttributeClass.AllInterfaces
-                            .FirstOrDefault(i => ((ISymbol)i).GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" &&
+                            .FirstOrDefault(i => i.GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" &&
                                                  i.IsGenericType &&
                                                  i.TypeArguments.Length == 1);
 
@@ -4387,7 +4393,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         {
                             // Look for IInfersType<T> in the attribute's interfaces
                             var infersTypeInterface = attr.AttributeClass.AllInterfaces
-                                .FirstOrDefault(i => ((ISymbol)i).GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" &&
+                                .FirstOrDefault(i => i.GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" &&
                                                      i.IsGenericType &&
                                                      i.TypeArguments.Length == 1);
 
@@ -4499,7 +4505,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate metadata
 
-        // Generate dependencies
         GenerateDependencies(writer, compilation, testMethod.MethodSymbol);
 
         // Generate attribute factory
@@ -4517,7 +4522,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("],");
 
-        // Generate data sources
         if (methodDataSourceAttribute == null)
         {
             writer.AppendLine("DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
@@ -4599,7 +4603,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"return new {className}({string.Join(", ", Enumerable.Range(0, constructorParamCount).Select(i => $"args[{i}]"))});");
                 writer.Unindent();
                 writer.AppendLine("}");
-                writer.AppendLine($"throw new global::System.InvalidOperationException(\"Not enough arguments provided for class constructor\");");
+                writer.AppendLine("throw new global::System.InvalidOperationException(\"Not enough arguments provided for class constructor\");");
             }
         }
         else
@@ -4614,8 +4618,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate typed invoker
         GenerateTypedInvokers(writer, testMethod, className);
 
-        // Add file location metadata
-        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         writer.Unindent();
