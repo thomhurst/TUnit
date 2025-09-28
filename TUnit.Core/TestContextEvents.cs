@@ -12,4 +12,10 @@ public class TestContextEvents
     public AsyncEvent<TestContext>? OnTestEnd { get; set; }
     public AsyncEvent<TestContext>? OnTestSkipped { get; set; }
     public AsyncEvent<(TestContext, int RetryAttempt)>? OnTestRetry { get; set; }
+
+    /// <summary>
+    /// Internal framework event that fires after all retry attempts are complete.
+    /// Used for framework resource management and reference counting.
+    /// </summary>
+    internal AsyncEvent<TestContext>? OnTestFinalized { get; set; }
 }

@@ -50,7 +50,7 @@ public static class ObjectTracker
 
         var newCount = counter.Increment();
 
-        events.OnDispose += async (_, _) =>
+        events.OnTestFinalized += async (_, _) =>
         {
             var count = counter.Decrement();
 

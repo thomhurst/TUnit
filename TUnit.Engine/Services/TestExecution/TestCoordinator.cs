@@ -103,6 +103,21 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
+            if (test.Context.Events.OnTestFinalized != null)
+            {
+                try
+                {
+                    foreach (var invocation in test.Context.Events.OnTestFinalized.InvocationList.OrderBy(x => x.Order))
+                    {
+                        await invocation.InvokeAsync(test.Context, test.Context);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Error during test finalization for {test.TestId}: {ex}");
+                }
+            }
+
             switch (test.State)
             {
                 case TestState.NotStarted:
@@ -128,7 +143,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
+
         }
     }
 
