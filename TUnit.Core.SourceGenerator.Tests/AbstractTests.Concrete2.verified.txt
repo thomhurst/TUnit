@@ -113,7 +113,7 @@ internal sealed class ConcreteClass2_AssertClassName_TestSource_GUID : global::T
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 2,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 6,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AbstractTests.AbstractBaseClass),
@@ -199,7 +199,7 @@ internal sealed class ConcreteClass2_SecondTest_TestSource_GUID : global::TUnit.
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 11,
+            LineNumber = 12,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2),
@@ -286,7 +286,7 @@ internal sealed class ConcreteClass1_AssertClassName_TestSource_GUID : global::T
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 5,
+            LineNumber = 6,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.AbstractTests.AbstractBaseClass),
