@@ -23,14 +23,12 @@ public class DataClass : IAsyncInitializer, IAsyncDisposable
     {
         _initCount++;
         Value = 42;
-        Console.WriteLine($"DataClass initialized (count: {_initCount}), Value set to {Value}");
         return Task.CompletedTask;
     }
 
     public ValueTask DisposeAsync()
     {
         _disposeCount++;
-        Console.WriteLine($"DataClass disposing (count: {_disposeCount}), Value was {Value}");
         Value = -1;
         return default;
     }
@@ -44,14 +42,11 @@ public class ClassDataSourceRetryTests
     [ClassDataSource<DataClass>(Shared = SharedType.PerTestSession)]
     public required DataClass DataClass { get; init; }
 
-    [BeforeEvery(Test)]
-    public static void ResetAttemptCount()
+    [Before(TestSession)]
+    public static void ResetCountersForSession()
     {
-        if (_attemptCount == 0)
-        {
-            // Reset counters only on the first test run
-            DataClass.ResetCounters();
-        }
+        DataClass.ResetCounters();
+        _attemptCount = 0;
     }
 
     [Test]
@@ -59,29 +54,28 @@ public class ClassDataSourceRetryTests
     public async Task TestThatFailsAndRetries()
     {
         _attemptCount++;
-        Console.WriteLine($"Test attempt {_attemptCount}, DataClass.Value = {DataClass.Value}, InitCount = {DataClass.InitCount}, DisposeCount = {DataClass.DisposeCount}");
 
-        // The value should be 42 on all attempts (not -1 after disposal)
         await Assert.That(DataClass.Value).IsEqualTo(42);
 
-        // Fail on attempts 1 and 2, succeed on attempt 3
         if (_attemptCount < 3)
         {
             throw new Exception($"Deliberate failure on attempt {_attemptCount}");
         }
 
-        // On the successful attempt (3rd), verify that initialization only happened once
-        // and disposal hasn't happened yet (will happen after test finalization)
-        Console.WriteLine($"Success on attempt {_attemptCount}! Checking counts...");
         await Assert.That(DataClass.DisposeCount).IsEqualTo(0);
     }
 
     [Test]
     [DependsOn(nameof(TestThatFailsAndRetries))]
-    public async Task VerifyDisposalAfterRetries()
+    public async Task VerifyNotDisposedDuringTests()
     {
-        // After the previous test completed (including all retries),
-        // the DataClass should now be disposed
+        await Assert.That(DataClass.DisposeCount).IsEqualTo(0);
+        await Assert.That(DataClass.Value).IsEqualTo(42);
+    }
+
+    [After(TestSession)]
+    public static async Task VerifyDisposalAfterTestSession()
+    {
         await Assert.That(DataClass.DisposeCount).IsEqualTo(1);
     }
 }
