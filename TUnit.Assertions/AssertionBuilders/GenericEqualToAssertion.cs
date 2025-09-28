@@ -173,27 +173,3 @@ public class GenericEqualToAssertion<TActual> : AssertionBase<TActual>
     }
 #endif
 }
-
-// Extension methods to make it easy to use
-public static class GenericAssertionExtensions
-{
-    public static GenericEqualToAssertion<T> IsEqualTo<T>(this T actual, T expected)
-    {
-        return new GenericEqualToAssertion<T>(actual, expected);
-    }
-
-    public static GenericEqualToAssertion<T> IsEqualTo<T>(this Func<T> actualProvider, T expected)
-    {
-        return new GenericEqualToAssertion<T>(actualProvider, expected);
-    }
-
-    public static GenericEqualToAssertion<T> IsEqualTo<T>(this Task<T> actualTask, T expected)
-    {
-        return new GenericEqualToAssertion<T>(() => actualTask, expected);
-    }
-
-    public static GenericEqualToAssertion<T> IsEqualTo<T>(this Func<Task<T>> actualProvider, T expected)
-    {
-        return new GenericEqualToAssertion<T>(actualProvider, expected);
-    }
-}
