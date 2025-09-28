@@ -60,15 +60,15 @@ internal sealed class TestCoordinator : ITestCoordinator
             test.Context.TestEnd = null;
 
             TestContext.Current = test.Context;
-            
+
             var allDependencies = new HashSet<TestDetails>();
             CollectAllDependencies(test, allDependencies, new HashSet<AbstractExecutableTest>());
-            
+
             foreach (var dependency in allDependencies)
             {
                 test.Context.Dependencies.Add(dependency);
             }
-            
+
             // Ensure TestSession hooks run before creating test instances
             await _testExecutor.EnsureTestSessionHooksExecutedAsync();
 
@@ -103,7 +103,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
-            if (test.Context.Events.OnTestFinalized != null)
+            if (test.Context.Events.OnTestFinalized?.InvocationList != null)
             {
                 try
                 {
@@ -114,7 +114,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Error during test finalization for {test.TestId}: {ex}");
+                    await _logger.LogErrorAsync($"Error during test finalization for {test.TestId}: {ex}");
                 }
             }
 
