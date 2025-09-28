@@ -265,7 +265,7 @@ public class Tests
     public async Task Single()
     {
         var list = new List<int> { 1 };
-        var item = await Assert.That(list).HasSingleItem();
+        var item = await Assert.That(list).GetSingleItem();
         await Assert.That(item).IsEqualTo(1);
     }
 

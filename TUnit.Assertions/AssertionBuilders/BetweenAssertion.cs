@@ -1,63 +1,95 @@
-using System.Runtime.CompilerServices;
+using System;
 using System.Threading.Tasks;
-using TUnit.Assertions.AssertConditions.Comparable;
-using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.Extensions;
+using TUnit.Assertions.AssertConditions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 /// <summary>
-/// Clean between assertion - no inheritance, just configuration
+/// Range/between assertion with lazy evaluation
 /// </summary>
-public class BetweenAssertion<TActual> where TActual : IComparable<TActual>
+public class BetweenAssertion<TActual> : AssertionBase<TActual>
+    where TActual : IComparable<TActual>
 {
-    private readonly IValueSource<TActual> _source;
-    private readonly TActual _minimum;
-    private readonly TActual _maximum;
-    private readonly string?[] _expressions;
-    
-    // Configuration
-    private bool _inclusive = false;
+    private readonly TActual _min;
+    private readonly TActual _max;
+    private readonly bool _inclusive;
+    private readonly bool _shouldBeInRange;
 
-    internal BetweenAssertion(IValueSource<TActual> source, TActual minimum, TActual maximum, string?[] expressions)
+    public BetweenAssertion(Func<Task<TActual>> actualValueProvider, TActual min, TActual max, bool inclusive = true, bool shouldBeInRange = true)
+        : base(actualValueProvider)
     {
-        _source = source;
-        _minimum = minimum;
-        _maximum = maximum;
-        _expressions = expressions;
+        _min = min;
+        _max = max;
+        _inclusive = inclusive;
+        _shouldBeInRange = shouldBeInRange;
     }
 
-    public BetweenAssertion<TActual> Inclusive()
+    public BetweenAssertion(Func<TActual> actualValueProvider, TActual min, TActual max, bool inclusive = true, bool shouldBeInRange = true)
+        : base(actualValueProvider)
     {
-        _inclusive = true;
-        return this;
-    }
-    
-    public BetweenAssertion<TActual> Exclusive()
-    {
-        _inclusive = false;
-        return this;
+        _min = min;
+        _max = max;
+        _inclusive = inclusive;
+        _shouldBeInRange = shouldBeInRange;
     }
 
-    public TaskAwaiter GetAwaiter()
+    public BetweenAssertion(TActual actualValue, TActual min, TActual max, bool inclusive = true, bool shouldBeInRange = true)
+        : base(actualValue)
     {
-        return ExecuteAsync().GetAwaiter();
+        _min = min;
+        _max = max;
+        _inclusive = inclusive;
+        _shouldBeInRange = shouldBeInRange;
     }
 
-    private async Task ExecuteAsync()
+    protected override async Task<AssertionResult> AssertAsync()
     {
-        // Create condition with all configuration
-        var condition = new BetweenAssertCondition<TActual>(_minimum, _maximum);
-        
-        // Apply configuration
+        var actual = await GetActualValueAsync();
+
+        if (actual == null)
+        {
+            return AssertionResult.Fail($"Cannot compare null value to range [{_min}, {_max}]");
+        }
+
+        bool isInRange;
         if (_inclusive)
-            condition.Inclusive();
+        {
+            isInRange = actual.CompareTo(_min) >= 0 && actual.CompareTo(_max) <= 0;
+        }
         else
-            condition.Exclusive();
-        
-        // Register and execute
-        var builder = _source.RegisterAssertion(condition, _expressions);
-        var data = await builder.GetAssertionData();
-        await builder.ProcessAssertionsAsync(data);
+        {
+            isInRange = actual.CompareTo(_min) > 0 && actual.CompareTo(_max) < 0;
+        }
+
+        if (isInRange == _shouldBeInRange)
+        {
+            return AssertionResult.Passed;
+        }
+
+        var rangeText = _inclusive ? $"[{_min}, {_max}]" : $"({_min}, {_max})";
+        if (_shouldBeInRange)
+        {
+            return AssertionResult.Fail($"Expected {actual} to be between {rangeText}");
+        }
+        else
+        {
+            return AssertionResult.Fail($"Expected {actual} to not be between {rangeText}");
+        }
+    }
+}
+
+// Extension methods for range assertions
+public static class BetweenAssertionExtensions
+{
+    public static BetweenAssertion<TActual> IsBetween<TActual>(this AssertionBuilder<TActual> builder, TActual min, TActual max, bool inclusive = true)
+        where TActual : IComparable<TActual>
+    {
+        return new BetweenAssertion<TActual>(builder.ActualValueProvider, min, max, inclusive, shouldBeInRange: true);
+    }
+
+    public static BetweenAssertion<TActual> IsNotBetween<TActual>(this AssertionBuilder<TActual> builder, TActual min, TActual max, bool inclusive = true)
+        where TActual : IComparable<TActual>
+    {
+        return new BetweenAssertion<TActual>(builder.ActualValueProvider, min, max, inclusive, shouldBeInRange: false);
     }
 }

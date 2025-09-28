@@ -55,11 +55,25 @@ public class HttpResponseDeserializesToAssertCondition<TToType>(JsonTypeInfo<TTo
 
 public static class HttpResponseAssertionExtensions
 {
+    // Overload for AssertionBuilder
+    public static AssertionBuilder<TToType> DeSerializesTo<TToType>(this AssertionBuilder<HttpResponseMessage> builder, JsonTypeInfo<TToType> jsonTypeInfo)
+    {
+        return builder.RegisterConversionAssertion(new HttpResponseDeserializesToAssertCondition<TToType>(jsonTypeInfo), []);
+    }
+
+    // Overload for IValueSource (for backward compatibility)
     public static AssertionBuilder<TToType> DeSerializesTo<TToType>(this IValueSource<HttpResponseMessage> valueSource, JsonTypeInfo<TToType> jsonTypeInfo)
     {
         return valueSource.RegisterConversionAssertion(new HttpResponseDeserializesToAssertCondition<TToType>(jsonTypeInfo), []);
     }
-    
+
+    // Overload for AssertionBuilder
+    public static AssertionBuilder<ProblemDetails> IsProblemDetails(this AssertionBuilder<HttpResponseMessage> builder)
+    {
+        return builder.DeSerializesTo(ProblemDetailsSourceGenerationContext.Default.ProblemDetails);
+    }
+
+    // Overload for IValueSource (for backward compatibility)
     public static AssertionBuilder<ProblemDetails> IsProblemDetails(this IValueSource<HttpResponseMessage> valueSource)
     {
         return valueSource.DeSerializesTo(ProblemDetailsSourceGenerationContext.Default.ProblemDetails);
@@ -68,12 +82,28 @@ public static class HttpResponseAssertionExtensions
 
 public static class ProblemDetailsAssertionExtensions
 {
+    // Overload for AssertionBuilder
+    public static AssertionBuilder<ProblemDetails> HasTitle(this AssertionBuilder<ProblemDetails> builder,
+        string title, [CallerArgumentExpression("title")] string? titleExpression = null)
+    {
+        return builder.RegisterAssertion(new ProblemDetailsHasTitleAssertCondition(title), [titleExpression]);
+    }
+
+    // Overload for IValueSource (for backward compatibility)
     public static AssertionBuilder<ProblemDetails> HasTitle(this IValueSource<ProblemDetails> valueSource,
         string title, [CallerArgumentExpression("title")] string? titleExpression = null)
     {
         return valueSource.RegisterAssertion(new ProblemDetailsHasTitleAssertCondition(title), [titleExpression]);
     }
-    
+
+    // Overload for AssertionBuilder
+    public static AssertionBuilder<ProblemDetails> HasDetail(this AssertionBuilder<ProblemDetails> builder,
+        string detail, [CallerArgumentExpression("detail")] string? detailExpression = null)
+    {
+        return builder.RegisterAssertion(new ProblemDetailsHasDetailAssertCondition(detail), [detailExpression]);
+    }
+
+    // Overload for IValueSource (for backward compatibility)
     public static AssertionBuilder<ProblemDetails> HasDetail(this IValueSource<ProblemDetails> valueSource,
         string detail, [CallerArgumentExpression("detail")] string? detailExpression = null)
     {

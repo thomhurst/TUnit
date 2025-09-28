@@ -1,5 +1,4 @@
-﻿using TUnit.Assertions.Assertions.Enums;
-
+﻿
 namespace TUnit.Assertions.Tests;
 
 public class EnumTests

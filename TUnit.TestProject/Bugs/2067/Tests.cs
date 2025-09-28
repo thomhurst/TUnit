@@ -34,7 +34,7 @@ public class Tests(DataClass dataClass)
 
         using var _ = Assert.Multiple();
 
-        var dataClass = await Assert.That(dataClasses).HasSingleItem();
+        var dataClass = await Assert.That(dataClasses).GetSingleItem();
 
         await Assert.That(dataClass).IsNotNull();
         await Assert.That(dataClass!.IsRegistered).IsTrue();

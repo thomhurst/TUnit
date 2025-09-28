@@ -26,7 +26,7 @@ public class EnumerableTests
     {
         int[] array = [1, 2, 3];
 
-        var item = await Assert.That(array).Contains(x => x == 1);
+        var item = await Assert.That(array).Contains((int x) => x == 1);
 
         await Assert.That(item).IsEqualTo(1);
     }
@@ -37,7 +37,7 @@ public class EnumerableTests
         int[] array = [1, 2, 3];
 
         await Assert.That(
-            async () => await Assert.That(array).Contains(x => x == 4)
+            async () => await Assert.That(array).Contains((int x) => x == 4)
         ).Throws<AssertionException>();
     }
 

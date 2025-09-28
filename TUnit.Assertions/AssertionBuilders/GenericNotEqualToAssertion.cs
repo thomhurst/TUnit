@@ -1,72 +1,54 @@
 using System;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.Assertions.Base;
-using TUnit.Assertions.Assertions.Generics.Conditions;
-using TUnit.Assertions.Extensions;
-using TUnit.Assertions.AssertionBuilders.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 /// <summary>
-/// Clean generic not-equal assertion - no inheritance, just configuration
+///  generic not-equal assertion with lazy evaluation
 /// </summary>
-public class GenericNotEqualToAssertion<TActual> : Assertion<TActual>
+public class GenericNotEqualToAssertion<TActual> : AssertionBase<TActual>
 {
     private readonly TActual _expected;
-    private readonly string?[] _expressions;
+    private IEqualityComparer<TActual>? _comparer;
 
-    // Configuration
-#if NET
-    private Func<TActual?, TActual?, AssertionDecision>? _customComparer;
-#else
-    private readonly Func<TActual?, TActual?, AssertionDecision>? _customComparer = null;
-#endif
-
-    internal GenericNotEqualToAssertion(IValueSource<TActual> source, TActual expected, string?[] expressions, IAssertionChain chain = null!)
-        : base(source, chain)
+    public GenericNotEqualToAssertion(Func<Task<TActual>> actualValueProvider, TActual expected)
+        : base(actualValueProvider)
     {
         _expected = expected;
-        _expressions = expressions;
     }
 
-#if NET
-    public GenericNotEqualToAssertion<TActual> Within<T>(T tolerance, [CallerArgumentExpression(nameof(tolerance))] string doNotPopulateThis = "")
-        where T : IComparable<T>
+    public GenericNotEqualToAssertion(Func<TActual> actualValueProvider, TActual expected)
+        : base(actualValueProvider)
     {
-        if (typeof(TActual) == typeof(T))
-        {
-            _customComparer = (actual, expected) =>
-            {
-                dynamic actualDynamic = actual!;
-                dynamic expectedDynamic = expected!;
-                dynamic toleranceDynamic = tolerance;
+        _expected = expected;
+    }
 
-                // Not equal means outside the tolerance range
-                if (actualDynamic < expectedDynamic - toleranceDynamic || actualDynamic > expectedDynamic + toleranceDynamic)
-                {
-                    return AssertionDecision.Pass;
-                }
+    public GenericNotEqualToAssertion(TActual actualValue, TActual expected)
+        : base(actualValue)
+    {
+        _expected = expected;
+    }
 
-                return AssertionDecision.Fail($"Expected {actual} to not be equal to {expected} ±{tolerance}.");
-            };
-        }
-
+    public GenericNotEqualToAssertion<TActual> WithComparer(IEqualityComparer<TActual> comparer)
+    {
+        _comparer = comparer;
         return this;
     }
-#endif
 
-    protected override BaseAssertCondition? CreateCondition()
+    protected override async Task<AssertionResult> AssertAsync()
     {
-        // Create condition with all configuration
-        var condition = new NotEqualsExpectedValueAssertCondition<TActual>(_expected);
+        var actual = await GetActualValueAsync();
 
-        // Apply configuration
-        if (_customComparer != null)
-            condition.WithComparer(_customComparer);
+        // Use custom comparer if provided
+        var comparer = _comparer ?? EqualityComparer<TActual>.Default;
 
-        return condition;
+        if (!comparer.Equals(actual, _expected))
+        {
+            return AssertionResult.Passed;
+        }
+
+        return AssertionResult.Fail($"Expected value to not be {_expected} but it was");
     }
 }

@@ -95,68 +95,58 @@ public static class Assert
         return new AssertionScope();
     }
 
-    public static ExceptionAssertionBuilder<Exception> ThrowsAsync(Type exceptionType, Func<Task> @delegate,
+    public static ExceptionAssertion ThrowsAsync(Type exceptionType, Func<Task> @delegate,
         [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
     {
-        // Create an ExceptionAssertionBuilder with a delegate that validates the exception type
-        return new ExceptionAssertionBuilder<Exception>(
-            async () => {
-                await @delegate();
-                throw new AssertionException($"Expected exception of type {exceptionType.Name} but no exception was thrown");
-            }, 
-            doNotPopulateThisValue).WithExceptionTypeValidation(exceptionType);
-    }
-    
-    public static ExceptionAssertionBuilder<Exception> ThrowsAsync(Func<Task> @delegate,
-        [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
-    {
-        return new ExceptionAssertionBuilder<Exception>(@delegate, doNotPopulateThisValue);
+        return new ExceptionAssertion(@delegate, exceptionType);
     }
 
-    public static ExceptionAssertionBuilder<TException> ThrowsAsync<TException>(Func<Task> @delegate,
+    public static ExceptionAssertion ThrowsAsync(Func<Task> @delegate,
+        [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
+    {
+        return new ExceptionAssertion(@delegate);
+    }
+
+    public static Task<TException> ThrowsAsync<TException>(Func<Task> @delegate,
         [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
         where TException : Exception
     {
-        return new ExceptionAssertionBuilder<TException>(@delegate, doNotPopulateThisValue);
+        var assertion = new ExceptionAssertion<TException>(@delegate);
+        return assertion.GetExceptionAsync();
     }
 
     // Overload for Task directly
-    public static ExceptionAssertionBuilder<Exception> ThrowsAsync(Task task,
+    public static ExceptionAssertion ThrowsAsync(Task task,
         [CallerArgumentExpression(nameof(task))] string? doNotPopulateThisValue = null)
     {
-        return new ExceptionAssertionBuilder<Exception>(() => task, doNotPopulateThisValue);
+        return new ExceptionAssertion(() => task);
     }
 
     // Overload for ValueTask directly
-    public static ExceptionAssertionBuilder<Exception> ThrowsAsync(ValueTask valueTask,
+    public static ExceptionAssertion ThrowsAsync(ValueTask valueTask,
         [CallerArgumentExpression(nameof(valueTask))] string? doNotPopulateThisValue = null)
     {
-        return new ExceptionAssertionBuilder<Exception>(() => valueTask.AsTask(), doNotPopulateThisValue);
+        return new ExceptionAssertion(() => valueTask.AsTask());
     }
 
-    public static ExceptionAssertionBuilder<Exception> Throws(Type exceptionType, Action @delegate,
+    public static ExceptionAssertion Throws(Type exceptionType, Action @delegate,
         [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
     {
-        // Create an ExceptionAssertionBuilder with a delegate that validates the exception type  
-        return new ExceptionAssertionBuilder<Exception>(
-            () => {
-                @delegate();
-                throw new AssertionException($"Expected exception of type {exceptionType.Name} but no exception was thrown");
-            }, 
-            doNotPopulateThisValue).WithExceptionTypeValidation(exceptionType);
-    }
-    
-    public static ExceptionAssertionBuilder<Exception> Throws(Action @delegate,
-        [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
-    {
-        return new ExceptionAssertionBuilder<Exception>(@delegate, doNotPopulateThisValue);
+        return new ExceptionAssertion(@delegate, exceptionType);
     }
 
-    public static ExceptionAssertionBuilder<TException> Throws<TException>(Action @delegate,
+    public static ExceptionAssertion Throws(Action @delegate,
+        [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
+    {
+        return new ExceptionAssertion(@delegate);
+    }
+
+    public static Task<TException> Throws<TException>(Action @delegate,
         [CallerArgumentExpression(nameof(@delegate))] string? doNotPopulateThisValue = null)
         where TException : Exception
     {
-        return new ExceptionAssertionBuilder<TException>(@delegate, doNotPopulateThisValue);
+        var assertion = new ExceptionAssertion<TException>(@delegate);
+        return assertion.GetExceptionAsync();
     }
 
     public static void Fail(string reason)

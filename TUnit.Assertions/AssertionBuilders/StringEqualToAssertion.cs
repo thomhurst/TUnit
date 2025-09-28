@@ -1,30 +1,45 @@
 using System;
-using TUnit.Assertions.Assertions.Base;
+using System.Threading.Tasks;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.AssertConditions.String;
-using TUnit.Assertions.AssertionBuilders;
-using TUnit.Assertions.AssertionBuilders.Interfaces;
+using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
 /// <summary>
-/// String equality assertion
+/// Simplified string equality assertion with lazy evaluation
 /// </summary>
-public class StringEqualToAssertion : Assertion<string>
+public class StringEqualToAssertion : AssertionBase<string?>
 {
-    private readonly string _expected;
-    private readonly StringComparison _stringComparison;
+    private readonly string? _expected;
+    private StringComparison _stringComparison = StringComparison.Ordinal;
     private bool _trim = false;
     private bool _nullAndEmptyEqual = false;
     private bool _ignoreWhitespace = false;
 
-    internal StringEqualToAssertion(IValueSource<string> source, string expected, 
-        StringComparison stringComparison, IAssertionChain chain = null!)
-        : base(source, chain)
+    // Constructor takes lazy value provider and expected value
+    public StringEqualToAssertion(Func<Task<string?>> actualValueProvider, string? expected)
+        : base(actualValueProvider)
     {
         _expected = expected;
-        _stringComparison = stringComparison;
+    }
+
+    public StringEqualToAssertion(Func<string?> actualValueProvider, string? expected)
+        : base(actualValueProvider)
+    {
+        _expected = expected;
+    }
+
+    public StringEqualToAssertion(string? actualValue, string? expected)
+        : base(actualValue)
+    {
+        _expected = expected;
+    }
+
+    // Fluent configuration methods - NO EVALUATION happens here
+    public StringEqualToAssertion WithStringComparison(StringComparison comparison)
+    {
+        _stringComparison = comparison;
+        return this;
     }
 
     public StringEqualToAssertion WithTrimming()
@@ -45,42 +60,101 @@ public class StringEqualToAssertion : Assertion<string>
         return this;
     }
 
-    protected override BaseAssertCondition CreateCondition()
+    public StringEqualToAssertion IgnoringCase()
     {
-        var condition = new StringEqualsExpectedValueAssertCondition(_expected, _stringComparison);
-        
-        if (_trim)
-            condition.WithTrimming();
-        if (_nullAndEmptyEqual)
-            condition.WithNullAndEmptyEquality();
-        if (_ignoreWhitespace)
-            condition.IgnoringWhitespace();
-        
-        return condition;
-    }
-    
-    // Override And and Or to return the correct type
-    public new StringEqualToAssertion And 
-    { 
-        get 
+        _stringComparison = _stringComparison switch
         {
-            _ = base.And;
-            return this;
-        }
-    }
-    
-    public new StringEqualToAssertion Or
-    {
-        get
-        {
-            _ = base.Or;
-            return this;
-        }
-    }
-    
-    public new StringEqualToAssertion Because(string reason, string? expression = null)
-    {
-        base.Because(reason, expression);
+            StringComparison.Ordinal => StringComparison.OrdinalIgnoreCase,
+            StringComparison.CurrentCulture => StringComparison.CurrentCultureIgnoreCase,
+            StringComparison.InvariantCulture => StringComparison.InvariantCultureIgnoreCase,
+            _ => _stringComparison
+        };
         return this;
+    }
+
+    /// <summary>
+    /// The actual assertion logic - ONLY called when awaited
+    /// </summary>
+    protected override async Task<AssertionResult> AssertAsync()
+    {
+        // NOW we get the actual value (lazy evaluation)
+        var actual = await GetActualValueAsync();
+        var expected = _expected;
+
+        // Handle null/empty equality option
+        if (_nullAndEmptyEqual)
+        {
+            var actualIsNullOrEmpty = string.IsNullOrEmpty(actual);
+            var expectedIsNullOrEmpty = string.IsNullOrEmpty(expected);
+
+            if (actualIsNullOrEmpty && expectedIsNullOrEmpty)
+            {
+                return AssertionResult.Passed;
+            }
+        }
+
+        // Apply transformations
+        if (_trim)
+        {
+            actual = actual?.Trim();
+            expected = expected?.Trim();
+        }
+
+        if (_ignoreWhitespace)
+        {
+            actual = actual?.Replace(" ", "").Replace("\t", "").Replace("\r", "").Replace("\n", "");
+            expected = expected?.Replace(" ", "").Replace("\t", "").Replace("\r", "").Replace("\n", "");
+        }
+
+        // Perform the comparison
+        if (string.Equals(actual, expected, _stringComparison))
+        {
+            return AssertionResult.Passed;
+        }
+
+        // Generate failure message
+        var message = GenerateFailureMessage(actual, expected);
+        return AssertionResult.Fail(message);
+    }
+
+    private string GenerateFailureMessage(string? actual, string? expected)
+    {
+        if (actual == null && expected != null)
+        {
+            return $"Expected string to be \"{expected}\" but was null";
+        }
+
+        if (actual != null && expected == null)
+        {
+            return $"Expected string to be null but was \"{actual}\"";
+        }
+
+        // Try to find where they differ
+        if (actual != null && expected != null)
+        {
+            var difference = new StringDifference(actual, expected);
+            return $"Expected string to be \"{expected}\" but was \"{actual}\"\n{difference}";
+        }
+
+        return $"Expected \"{expected}\" but was \"{actual}\"";
+    }
+}
+
+// Extension method to make it easy to use
+public static class StringAssertionExtensions
+{
+    public static StringEqualToAssertion IsEqualToSimplified(this string? actual, string? expected)
+    {
+        return new StringEqualToAssertion(actual, expected);
+    }
+
+    public static StringEqualToAssertion IsEqualToSimplified(this Func<string?> actualProvider, string? expected)
+    {
+        return new StringEqualToAssertion(actualProvider, expected);
+    }
+
+    public static StringEqualToAssertion IsEqualToSimplified(this Task<string?> actualTask, string? expected)
+    {
+        return new StringEqualToAssertion(() => actualTask, expected);
     }
 }

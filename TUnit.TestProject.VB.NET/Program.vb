@@ -1,5 +1,6 @@
 Imports TUnit.Assertions
 Imports TUnit.Assertions.Extensions
+Imports TUnit.Assertions.AssertionBuilders
 Imports TUnit.Core
 
 Public Class Tests

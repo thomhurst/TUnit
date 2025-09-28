@@ -1,77 +1,58 @@
 using System;
-using TUnit.Assertions.Assertions.Base;
+using System.Threading.Tasks;
 using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.Assertions.Strings.Conditions;
-using TUnit.Assertions.AssertionBuilders.Core;
-using TUnit.Assertions.AssertionBuilders.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-/// <summary>
-/// String contains assertion
-/// </summary>
-public class StringContainsAssertion : Assertion<string>
+public class StringContainsAssertion : AssertionBase<string?>
 {
-    private readonly string _expected;
-    private readonly StringComparison _stringComparison;
-    // private bool _withTrimming; // TODO: Implement when available in the condition
-    private bool _ignoringWhitespace;
+    private readonly string _substring;
+    private StringComparison _stringComparison = StringComparison.Ordinal;
 
-    internal StringContainsAssertion(IValueSource<string> source, string expected, 
-        StringComparison stringComparison, IAssertionChain chain = null!)
-        : base(source, chain)
+    public StringContainsAssertion(Func<Task<string?>> actualValueProvider, string substring)
+        : base(actualValueProvider)
     {
-        _expected = expected;
-        _stringComparison = stringComparison;
+        _substring = substring;
     }
 
-    public StringContainsAssertion WithTrimming()
+    public StringContainsAssertion(Func<string?> actualValueProvider, string substring)
+        : base(actualValueProvider)
     {
-        // _withTrimming = true; // TODO: Implement when available in the condition
+        _substring = substring;
+    }
+
+    public StringContainsAssertion(string? actualValue, string substring)
+        : base(actualValue)
+    {
+        _substring = substring;
+    }
+
+    public StringContainsAssertion IgnoringCase()
+    {
+        _stringComparison = StringComparison.OrdinalIgnoreCase;
         return this;
     }
 
-    public StringContainsAssertion IgnoringWhitespace()
+    public StringContainsAssertion WithComparison(StringComparison comparison)
     {
-        _ignoringWhitespace = true;
+        _stringComparison = comparison;
         return this;
     }
 
-    protected override BaseAssertCondition CreateCondition()
+    protected override async Task<AssertionResult> AssertAsync()
     {
-        var condition = new StringContainsExpectedValueAssertCondition(_expected, _stringComparison);
-        
-        if (_ignoringWhitespace)
-            condition.IgnoreWhitespace = true;
-        
-        // TODO: Add support for WithTrimming when available in the condition
-        
-        return condition;
-    }
-    
-    // Override And and Or to return the correct type
-    public new StringContainsAssertion And 
-    { 
-        get 
+        var actual = await GetActualValueAsync();
+
+        if (actual == null)
         {
-            _ = base.And;
-            return this;
+            return AssertionResult.Fail($"Expected string to contain '{_substring}' but was null");
         }
-    }
-    
-    public new StringContainsAssertion Or
-    {
-        get
+
+        if (actual.Contains(_substring, _stringComparison))
         {
-            _ = base.Or;
-            return this;
+            return AssertionResult.Passed;
         }
-    }
-    
-    public new StringContainsAssertion Because(string reason, string? expression = null)
-    {
-        base.Because(reason, expression);
-        return this;
+
+        return AssertionResult.Fail($"Expected string to contain '{_substring}' but was '{actual}'");
     }
 }

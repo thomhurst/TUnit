@@ -1,5 +1,5 @@
 using System.Globalization;
-using TUnit.Assertions.Assertions.Strings;
+using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Tests;
 

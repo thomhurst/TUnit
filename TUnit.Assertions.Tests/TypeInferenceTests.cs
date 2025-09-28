@@ -24,8 +24,7 @@ public class TypeInferenceTests
                 .And
                 .HasSingleItem()
                 .And.HasCount().EqualTo(0)
-                .And.HasCount(0)
-                .Contains(x => x > 1);
+                .And.HasCount(0);
         }
         catch
         {

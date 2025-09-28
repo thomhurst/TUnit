@@ -18,7 +18,7 @@ module Operations =
                             ccont (System.OperationCanceledException())
                     with ex ->
                         econt ex)
-            | :? ThrowsException<obj, exn> as throwsExn ->
+            | :? ExceptionAssertion<exn> as throwsExn ->
                 let awaiter = throwsExn.GetAwaiter()
                 awaiter.OnCompleted(fun () ->
                     try
