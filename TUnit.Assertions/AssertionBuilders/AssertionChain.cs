@@ -32,11 +32,11 @@ internal class AssertionChain : IAssertionChain
 
     public IEnumerable<BaseAssertCondition> GetBaseAssertions()
     {
-        return _assertions.Select(a => a.Condition);
+        return _assertions.Select(a => a.Assertion);
     }
 
     public BaseAssertCondition? GetLastAssertion()
     {
-        return _assertions.LastOrDefault()?.Condition;
+        return _assertions.LastOrDefault()?.Assertion;
     }
 }

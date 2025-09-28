@@ -9,6 +9,7 @@ using TUnit.Assertions.Assertions.Base;
 using TUnit.Assertions.Assertions.Generics.Conditions;
 using TUnit.Assertions.Enums;
 using TUnit.Assertions.Extensions;
+using TUnit.Assertions.AssertionBuilders.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 

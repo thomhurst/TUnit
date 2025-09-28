@@ -15,7 +15,7 @@ public class AssertionEvaluator : IAssertionEvaluator
         IEnumerable<ChainedAssertion> chainedAssertions,
         IExpressionFormatter expressionFormatter)
     {
-        var assertions = chainedAssertions.Select(ca => ca.Condition).ToList();
+        var assertions = chainedAssertions.Select(ca => ca.Assertion).ToList();
         await EvaluateInternalAsync(assertionDataTask, assertions, expressionFormatter as ExpressionFormatter ?? new ExpressionFormatter(null));
         return true; // Return true if no exceptions were thrown
     }
@@ -26,6 +26,16 @@ public class AssertionEvaluator : IAssertionEvaluator
         ExpressionFormatter expressionFormatter)
     {
         return await EvaluateInternalAsync(assertionDataTask, assertions, expressionFormatter);
+    }
+
+    public async ValueTask EvaluateAsync(IAssertionChain chain)
+    {
+        var assertions = chain.GetBaseAssertions().ToList();
+        if (assertions.Any())
+        {
+            var assertionData = new AssertionData(null, null, "", DateTimeOffset.Now, DateTimeOffset.Now);
+            await EvaluateInternalAsync(new ValueTask<AssertionData>(assertionData), assertions, new ExpressionFormatter(null));
+        }
     }
 
     private async Task<AssertionData> EvaluateInternalAsync(

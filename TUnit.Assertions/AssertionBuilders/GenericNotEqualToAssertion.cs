@@ -6,6 +6,7 @@ using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.Assertions.Base;
 using TUnit.Assertions.Assertions.Generics.Conditions;
 using TUnit.Assertions.Extensions;
+using TUnit.Assertions.AssertionBuilders.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
@@ -14,10 +15,9 @@ namespace TUnit.Assertions.AssertionBuilders;
 /// </summary>
 public class GenericNotEqualToAssertion<TActual> : Assertion<TActual>
 {
-    private readonly IValueSource<TActual> _source;
     private readonly TActual _expected;
     private readonly string?[] _expressions;
-    
+
     // Configuration
 #if NET
     private Func<TActual?, TActual?, AssertionDecision>? _customComparer;
@@ -25,9 +25,9 @@ public class GenericNotEqualToAssertion<TActual> : Assertion<TActual>
     private readonly Func<TActual?, TActual?, AssertionDecision>? _customComparer = null;
 #endif
 
-    internal GenericNotEqualToAssertion(IValueSource<TActual> source, TActual expected, string?[] expressions)
+    internal GenericNotEqualToAssertion(IValueSource<TActual> source, TActual expected, string?[] expressions, IAssertionChain chain = null!)
+        : base(source, chain)
     {
-        _source = source;
         _expected = expected;
         _expressions = expressions;
     }
@@ -58,23 +58,15 @@ public class GenericNotEqualToAssertion<TActual> : Assertion<TActual>
     }
 #endif
 
-    public TaskAwaiter GetAwaiter()
-    {
-        return ExecuteAsync().GetAwaiter();
-    }
-
-    private async Task ExecuteAsync()
+    protected override BaseAssertCondition? CreateCondition()
     {
         // Create condition with all configuration
         var condition = new NotEqualsExpectedValueAssertCondition<TActual>(_expected);
-        
+
         // Apply configuration
         if (_customComparer != null)
             condition.WithComparer(_customComparer);
-        
-        // Register and execute
-        var builder = _source.RegisterAssertion(condition, _expressions);
-        var data = await builder.GetAssertionData();
-        await builder.ProcessAssertionsAsync(data);
+
+        return condition;
     }
 }

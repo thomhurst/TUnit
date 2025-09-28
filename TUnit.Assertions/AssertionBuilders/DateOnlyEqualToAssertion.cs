@@ -6,6 +6,7 @@ using TUnit.Assertions.AssertConditions.Chronology;
 using TUnit.Assertions.AssertConditions.Interfaces;
 using TUnit.Assertions.Assertions.Base;
 using TUnit.Assertions.Extensions;
+using TUnit.Assertions.AssertionBuilders.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
