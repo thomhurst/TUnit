@@ -74,6 +74,28 @@ public class GenericEqualToAssertion<TActual> : AssertionBase<TActual>
         // NOW we get the actual value (lazy evaluation)
         var actual = await GetActualValueAsync();
 
+        return PerformComparison(actual);
+    }
+
+    /// <summary>
+    /// Executes assertion with exception handling for delegate exceptions
+    /// </summary>
+    protected override Task<AssertionResult> AssertWithExceptionAsync(TActual actualValue, Exception? valueException)
+    {
+        if (valueException != null)
+        {
+            // Build the complete assertion message for delegate exceptions
+            var expectedMessage = $"Expected () => ... to be equal to {FormatValue(_expected)}";
+            var exceptionMessage = $"{valueException.GetType().FullName}: {valueException.Message}";
+            var fullMessage = $"{expectedMessage}\n\nbut An exception was thrown during the assertion: {exceptionMessage}";
+            return Task.FromResult(AssertionResult.Fail(fullMessage));
+        }
+
+        return Task.FromResult(PerformComparison(actualValue));
+    }
+
+    private AssertionResult PerformComparison(TActual actual)
+    {
         // Check for custom comparison first
         if (_customComparison != null)
         {

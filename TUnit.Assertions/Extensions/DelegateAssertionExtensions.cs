@@ -36,7 +36,7 @@ public static class DelegateAssertionExtensions
                     sw.Stop();
                 }
             },
-            $"Expected delegate to complete within {timeout.TotalMilliseconds}ms");
+            $"Expected action to complete within {timeout.TotalMilliseconds} milliseconds\nbut it took too long to complete");
     }
 
     public static CustomAssertion<Action> DoesNotCompleteWithin(
@@ -58,7 +58,7 @@ public static class DelegateAssertionExtensions
                     return false;
                 }
             },
-            $"Expected delegate to not complete within {timeout.TotalMilliseconds}ms");
+            $"Expected action to not complete within {timeout.TotalMilliseconds} milliseconds but it completed too quickly");
     }
 
     // === For DelegateAssertionBuilder<Func<Task>> ===
@@ -81,7 +81,7 @@ public static class DelegateAssertionExtensions
                     return true;
                 }
             },
-            $"Expected async delegate to complete within {timeout.TotalMilliseconds}ms");
+            $"Expected action to complete within {timeout.TotalMilliseconds} milliseconds\nbut it took too long to complete");
     }
 
     public static CustomAssertion<Func<Task>> DoesNotCompleteWithin(
@@ -103,7 +103,7 @@ public static class DelegateAssertionExtensions
                     return false;
                 }
             },
-            $"Expected async delegate to not complete within {timeout.TotalMilliseconds}ms");
+            $"Expected action to not complete within {timeout.TotalMilliseconds} milliseconds but it completed too quickly");
     }
 
     // === For DualAssertionBuilder (value-returning delegates) ===
@@ -127,7 +127,7 @@ public static class DelegateAssertionExtensions
                     return sw.Elapsed <= timeout;
                 }
             },
-            $"Expected delegate to complete within {timeout.TotalMilliseconds}ms");
+            $"Expected action to complete within {timeout.TotalMilliseconds} milliseconds\nbut it took too long to complete");
     }
 
     public static CustomAssertion<T> DoesNotCompleteWithin<T>(
@@ -147,6 +147,6 @@ public static class DelegateAssertionExtensions
                     return false;
                 }
             },
-            $"Expected delegate to not complete within {timeout.TotalMilliseconds}ms");
+            $"Expected action to not complete within {timeout.TotalMilliseconds} milliseconds but it completed too quickly");
     }
 }

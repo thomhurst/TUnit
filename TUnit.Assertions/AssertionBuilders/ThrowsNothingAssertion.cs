@@ -10,78 +10,16 @@ namespace TUnit.Assertions.AssertionBuilders;
 /// </summary>
 public class ThrowsNothingAssertion<TResult> : AssertionBase<TResult>
 {
-    public ThrowsNothingAssertion(Func<Task<object?>> actualValueProvider)
-        : base(async () =>
-        {
-            var actual = await actualValueProvider();
-
-            if (actual is Func<TResult> func)
-            {
-                try
-                {
-                    return func();
-                }
-                catch (Exception ex)
-                {
-                    throw new AssertionException($"Expected no exception but got {ex.GetType().Name}: {ex.Message}");
-                }
-            }
-            else if (actual is Func<Task<TResult>> asyncFunc)
-            {
-                try
-                {
-                    return await asyncFunc();
-                }
-                catch (Exception ex)
-                {
-                    throw new AssertionException($"Expected no exception but got {ex.GetType().Name}: {ex.Message}");
-                }
-            }
-            else if (actual is Action action)
-            {
-                try
-                {
-                    action();
-                    return default(TResult)!;
-                }
-                catch (Exception ex)
-                {
-                    throw new AssertionException($"Expected no exception but got {ex.GetType().Name}: {ex.Message}");
-                }
-            }
-            else if (actual is Func<Task> asyncAction)
-            {
-                try
-                {
-                    await asyncAction();
-                    return default(TResult)!;
-                }
-                catch (Exception ex)
-                {
-                    throw new AssertionException($"Expected no exception but got {ex.GetType().Name}: {ex.Message}");
-                }
-            }
-
-            throw new AssertionException($"Expected a delegate but got {actual?.GetType().Name ?? "null"}");
-        })
+    public ThrowsNothingAssertion(Func<Task<TResult>> actualValueProvider)
+        : base(actualValueProvider)
     {
     }
 
-    protected override async Task<AssertionResult> AssertAsync()
+    protected override Task<AssertionResult> AssertAsync()
     {
-        try
-        {
-            await GetActualValueAsync();
-            return AssertionResult.Passed;
-        }
-        catch (AssertionException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            return AssertionResult.Fail($"Unexpected error: {ex.Message}");
-        }
+        // This assertion just validates that the value provider doesn't throw
+        // The actual execution happens in the value provider passed to the constructor
+        return Task.FromResult(AssertionResult.Passed);
     }
 
     // Implicit conversion to Task<TResult>

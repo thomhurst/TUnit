@@ -14,33 +14,49 @@ public class ExceptionAssertion<TException> : AssertionBase<TException>
     private readonly Type? _expectedType;
     private string? _expectedMessage;
     private Func<TException, bool>? _predicate;
+    private readonly string _assertionMethod;
+    private readonly string _callerExpression;
+    private readonly Func<Task>? _asyncDelegate;
+    private readonly Action? _syncDelegate;
 
     // Internal property to access the actual value provider for chaining extensions
     internal Func<Task<TException>> ActualValueProvider => GetActualValueAsync;
 
     // Constructor for async delegates that should throw
-    public ExceptionAssertion(Func<Task> asyncDelegate)
-        : base(async () => await CaptureExceptionAsync(asyncDelegate))
+    public ExceptionAssertion(Func<Task> asyncDelegate, string assertionMethod = "ThrowsException", string callerExpression = "action")
+        : base(() => Task.FromResult(default(TException)!))
     {
+        _asyncDelegate = asyncDelegate;
+        _assertionMethod = assertionMethod;
+        _callerExpression = callerExpression;
     }
 
     // Constructor for sync delegates that should throw
-    public ExceptionAssertion(Action syncDelegate)
-        : base(() => Task.FromResult(CaptureException(syncDelegate)))
+    public ExceptionAssertion(Action syncDelegate, string assertionMethod = "ThrowsException", string callerExpression = "action")
+        : base(() => Task.FromResult(default(TException)!))
     {
+        _syncDelegate = syncDelegate;
+        _assertionMethod = assertionMethod;
+        _callerExpression = callerExpression;
     }
 
     // Constructor with expected type validation
-    public ExceptionAssertion(Func<Task> asyncDelegate, Type expectedType)
-        : base(async () => await CaptureExceptionAsync(asyncDelegate))
+    public ExceptionAssertion(Func<Task> asyncDelegate, Type expectedType, string assertionMethod = "ThrowsException", string callerExpression = "action")
+        : base(() => Task.FromResult(default(TException)!))
     {
+        _asyncDelegate = asyncDelegate;
         _expectedType = expectedType;
+        _assertionMethod = assertionMethod;
+        _callerExpression = callerExpression;
     }
 
-    public ExceptionAssertion(Action syncDelegate, Type expectedType)
-        : base(() => Task.FromResult(CaptureException(syncDelegate)))
+    public ExceptionAssertion(Action syncDelegate, Type expectedType, string assertionMethod = "ThrowsException", string callerExpression = "action")
+        : base(() => Task.FromResult(default(TException)!))
     {
+        _syncDelegate = syncDelegate;
         _expectedType = expectedType;
+        _assertionMethod = assertionMethod;
+        _callerExpression = callerExpression;
     }
 
     // Fluent configuration methods
@@ -82,17 +98,9 @@ public class ExceptionAssertion<TException> : AssertionBase<TException>
 
     public ExceptionAssertion<TException> WithMessageMatching(string pattern)
     {
-        // Store the existing predicate and combine with new one
-        var existingPredicate = _predicate;
-        if (existingPredicate != null)
-        {
-            _predicate = ex => existingPredicate(ex) && System.Text.RegularExpressions.Regex.IsMatch(ex.Message ?? "", pattern);
-        }
-        else
-        {
-            _predicate = ex => System.Text.RegularExpressions.Regex.IsMatch(ex.Message ?? "", pattern);
-        }
-        return this;
+        // Convert string pattern to StringMatcher (defaults to wildcard)
+        StringMatcher matcher = pattern; // Uses implicit operator to convert to wildcard
+        return WithMessageMatching(matcher);
     }
 
     public ExceptionAssertion<TException> WithMessageMatching(StringMatcher matcher)
@@ -198,66 +206,164 @@ public class ExceptionAssertion<TException> : AssertionBase<TException>
 
     protected override async Task<AssertionResult> AssertAsync()
     {
-        var exception = await GetActualValueAsync();
+        TException? exception = null;
+        Exception? wrongException = null;
 
-        // Check if we got an exception
-        if (exception == null)
+        // Capture the exception by executing the delegate
+        try
         {
-            return AssertionResult.Fail("Expected an exception but none was thrown");
+            if (_asyncDelegate != null)
+            {
+                await _asyncDelegate();
+            }
+            else if (_syncDelegate != null)
+            {
+                _syncDelegate();
+            }
+            // No exception was thrown
+        }
+        catch (TException ex)
+        {
+            exception = ex;
+        }
+        catch (Exception ex)
+        {
+            wrongException = ex;
         }
 
-        // Check type if specified
+        // Check if we got an exception
+        if (exception == null && wrongException == null)
+        {
+            // Format the message based on the assertion method
+            string message;
+            if (_assertionMethod == "ThrowsExactly" && typeof(TException) != typeof(Exception))
+            {
+                var article = GetArticleFor(typeof(TException).Name);
+                message = $"Expected action to throw exactly {article} {typeof(TException).Name}\n\nbut none was thrown\n\nat Assert.That({_callerExpression}).{_assertionMethod}<{typeof(TException).Name}>()";
+            }
+            else if (_assertionMethod == "Throws" && typeof(TException) != typeof(Exception))
+            {
+                var article = GetArticleFor(typeof(TException).Name);
+                message = $"Expected action to throw {article} {typeof(TException).Name}\n\nbut none was thrown\n\nat Assert.That({_callerExpression}).{_assertionMethod}<{typeof(TException).Name}>()";
+            }
+            else if (_assertionMethod == "ThrowsException")
+            {
+                message = $"Expected action to throw an exception\n\nbut none was thrown\n\nat Assert.That({_callerExpression}).{_assertionMethod}()";
+            }
+            else
+            {
+                // Fallback for other cases
+                message = "Expected an exception but none was thrown";
+            }
+            return AssertionResult.Fail(message);
+        }
+
+        // Check if wrong exception type was thrown
+        if (wrongException != null)
+        {
+            string message;
+            if (_assertionMethod == "ThrowsExactly")
+            {
+                var expectedArticle = GetArticleFor(typeof(TException).Name);
+                var actualArticle = GetArticleFor(wrongException.GetType().Name);
+                message = $"Expected action to throw exactly {expectedArticle} {typeof(TException).Name}\n\nbut {actualArticle} {wrongException.GetType().Name} was thrown\n\nat Assert.That({_callerExpression}).{_assertionMethod}<{typeof(TException).Name}>()";
+            }
+            else if (_assertionMethod == "Throws")
+            {
+                var expectedArticle = GetArticleFor(typeof(TException).Name);
+                var actualArticle = GetArticleFor(wrongException.GetType().Name);
+                message = $"Expected action to throw {expectedArticle} {typeof(TException).Name}\n\nbut {actualArticle} {wrongException.GetType().Name} was thrown\n\nat Assert.That({_callerExpression}).{_assertionMethod}<{typeof(TException).Name}>()";
+            }
+            else
+            {
+                message = $"Expected exception of type {typeof(TException).Name} but got {wrongException.GetType().Name}";
+            }
+            return AssertionResult.Fail(message);
+        }
+
+        // Check type if specified (when we have _expectedType but got different type)
         if (_expectedType != null && !_expectedType.IsInstanceOfType(exception))
         {
-            return AssertionResult.Fail($"Expected exception of type {_expectedType.Name} but got {exception.GetType().Name}");
+            string message;
+            if (_assertionMethod == "ThrowsExactly")
+            {
+                var expectedArticle = GetArticleFor(_expectedType.Name);
+                var actualArticle = GetArticleFor(exception!.GetType().Name);
+                message = $"Expected action to throw exactly {expectedArticle} {_expectedType.Name}\n\nbut {actualArticle} {exception.GetType().Name} was thrown\n\nat Assert.That({_callerExpression}).{_assertionMethod}<{_expectedType.Name}>()";
+            }
+            else if (_assertionMethod == "Throws")
+            {
+                var expectedArticle = GetArticleFor(_expectedType.Name);
+                var actualArticle = GetArticleFor(exception!.GetType().Name);
+                message = $"Expected action to throw {expectedArticle} {_expectedType.Name}\n\nbut {actualArticle} {exception.GetType().Name} was thrown\n\nat Assert.That({_callerExpression}).{_assertionMethod}<{_expectedType.Name}>()";
+            }
+            else
+            {
+                message = $"Expected exception of type {_expectedType.Name} but got {exception!.GetType().Name}";
+            }
+            return AssertionResult.Fail(message);
         }
 
         // Check message if specified
-        if (_expectedMessage != null && exception.Message != _expectedMessage)
+        if (_expectedMessage != null && exception!.Message != _expectedMessage)
         {
             return AssertionResult.Fail($"Expected exception message '{_expectedMessage}' but got '{exception.Message}'");
         }
 
         // Check predicate if specified
-        if (_predicate != null && !_predicate(exception))
+        if (_predicate != null && !_predicate(exception!))
         {
-            return AssertionResult.Fail($"Exception did not match the specified condition");
+            return AssertionResult.Fail($"Exception message '{exception!.Message}' did not match the specified condition");
         }
 
         return AssertionResult.Passed;
     }
 
-    private static async Task<TException> CaptureExceptionAsync(Func<Task> asyncDelegate)
+    /// <summary>
+    /// Override message building to provide proper exception assertion formatting
+    /// </summary>
+    protected override string BuildSingleAssertionErrorMessage(AssertionResult result, TException actualValue)
     {
-        try
-        {
-            await asyncDelegate();
-            return null!; // Will be caught by assertion logic
-        }
-        catch (TException ex)
-        {
-            return ex;
-        }
-        catch (Exception ex)
-        {
-            throw new AssertionException($"Expected {typeof(TException).Name} but got {ex.GetType().Name}: {ex.Message}");
-        }
+        // For exception assertions, don't do custom formatting - let the base class handle it
+        // or just return the original message as exception assertions have their own specific formats
+        return result.Message;
     }
 
-    private static TException CaptureException(Action syncDelegate)
+    /// <summary>
+    /// Gets the correct article ("a" or "an") for an exception type name
+    /// </summary>
+    private static string GetArticleFor(string typeName)
+    {
+        if (string.IsNullOrEmpty(typeName))
+            return "a";
+
+        // Check if the first letter is a vowel
+        var firstChar = char.ToLowerInvariant(typeName[0]);
+        return (firstChar == 'a' || firstChar == 'e' || firstChar == 'i' || firstChar == 'o' || firstChar == 'u')
+            ? "an" : "a";
+    }
+
+    private async Task<TException> CaptureExceptionForReturnAsync()
     {
         try
         {
-            syncDelegate();
-            return null!; // Will be caught by assertion logic
+            if (_asyncDelegate != null)
+            {
+                await _asyncDelegate();
+            }
+            else if (_syncDelegate != null)
+            {
+                _syncDelegate();
+            }
+            return null!; // No exception was thrown
         }
         catch (TException ex)
         {
             return ex;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            throw new AssertionException($"Expected {typeof(TException).Name} but got {ex.GetType().Name}: {ex.Message}");
+            return null!; // Wrong type - will be handled in AssertAsync
         }
     }
 
@@ -318,7 +424,7 @@ public class ExceptionAssertion<TException> : AssertionBase<TException>
     public async Task<TException> GetExceptionAsync()
     {
         await ExecuteAsync();
-        return await GetActualValueAsync();
+        return await CaptureExceptionForReturnAsync();
     }
 
     /// <summary>
@@ -333,19 +439,23 @@ public class ExceptionAssertion<TException> : AssertionBase<TException>
 // Non-generic version for type validation at runtime
 public class ExceptionAssertion : ExceptionAssertion<Exception>
 {
-    public ExceptionAssertion(Func<Task> asyncDelegate) : base(asyncDelegate)
+    public ExceptionAssertion(Func<Task> asyncDelegate, string assertionMethod = "ThrowsException", string callerExpression = "action")
+        : base(asyncDelegate, assertionMethod, callerExpression)
     {
     }
 
-    public ExceptionAssertion(Action syncDelegate) : base(syncDelegate)
+    public ExceptionAssertion(Action syncDelegate, string assertionMethod = "ThrowsException", string callerExpression = "action")
+        : base(syncDelegate, assertionMethod, callerExpression)
     {
     }
 
-    public ExceptionAssertion(Func<Task> asyncDelegate, Type expectedType) : base(asyncDelegate, expectedType)
+    public ExceptionAssertion(Func<Task> asyncDelegate, Type expectedType, string assertionMethod = "ThrowsException", string callerExpression = "action")
+        : base(asyncDelegate, expectedType, assertionMethod, callerExpression)
     {
     }
 
-    public ExceptionAssertion(Action syncDelegate, Type expectedType) : base(syncDelegate, expectedType)
+    public ExceptionAssertion(Action syncDelegate, Type expectedType, string assertionMethod = "ThrowsException", string callerExpression = "action")
+        : base(syncDelegate, expectedType, assertionMethod, callerExpression)
     {
     }
 

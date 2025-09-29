@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TUnit.Assertions.AssertConditions;
+using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
@@ -67,7 +68,7 @@ public class DelegateAssertionBuilder<TDelegate> : AssertionBuilder
             {
                 throw new InvalidOperationException($"Cannot use Throws with {typeof(TDelegate).Name}. Expected Action or Func<Task>.");
             }
-        });
+        }, "Throws", _expression ?? "action");
     }
 
     public ExceptionAssertion Throws(Type exceptionType)
@@ -88,7 +89,7 @@ public class DelegateAssertionBuilder<TDelegate> : AssertionBuilder
             {
                 throw new InvalidOperationException($"Cannot use Throws with {typeof(TDelegate).Name}. Expected Action or Func<Task>.");
             }
-        }, exceptionType);
+        }, exceptionType, "Throws", _expression ?? "action");
     }
 
     public ExceptionAssertion<TException> ThrowsException<TException>()
@@ -115,7 +116,7 @@ public class DelegateAssertionBuilder<TDelegate> : AssertionBuilder
             {
                 throw new InvalidOperationException($"Cannot use ThrowsException with {typeof(TDelegate).Name}. Expected Action or Func<Task>.");
             }
-        });
+        }, "ThrowsException", _expression ?? "action");
     }
 
     public ExceptionAssertion<TException> ThrowsExactly<TException>()
@@ -137,7 +138,7 @@ public class DelegateAssertionBuilder<TDelegate> : AssertionBuilder
             {
                 throw new InvalidOperationException($"Cannot use ThrowsExactly with {typeof(TDelegate).Name}. Expected Action or Func<Task>.");
             }
-        });
+        }, "ThrowsExactly", _expression ?? "action");
     }
 
     public ThrowsNothingAssertion<object?> ThrowsNothing()
@@ -146,19 +147,26 @@ public class DelegateAssertionBuilder<TDelegate> : AssertionBuilder
         {
             var delegateValue = await _delegateProvider();
 
-            if (delegateValue is Action action)
+            try
             {
-                action();
-                return null;
+                if (delegateValue is Action action)
+                {
+                    action();
+                    return null;
+                }
+                else if (delegateValue is Func<Task> asyncFunc)
+                {
+                    await asyncFunc();
+                    return null;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Cannot use ThrowsNothing with {typeof(TDelegate).Name}. Expected Action or Func<Task>.");
+                }
             }
-            else if (delegateValue is Func<Task> asyncFunc)
+            catch (Exception ex)
             {
-                await asyncFunc();
-                return null;
-            }
-            else
-            {
-                throw new InvalidOperationException($"Cannot use ThrowsNothing with {typeof(TDelegate).Name}. Expected Action or Func<Task>.");
+                throw new AssertionException($"Expected action to throw nothing\\n\\nbut a {ex.GetType().Name} was thrown\\n\\nat Assert.That({_expression ?? "action"}).ThrowsNothing()");
             }
         });
     }

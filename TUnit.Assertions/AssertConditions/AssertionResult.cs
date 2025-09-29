@@ -132,6 +132,9 @@ public class AssertionResult
     public static AssertionResult Fail(string message)
         => new(false, message);
 
+    public static AssertionResult Pass(string message)
+        => new(true, message);
+
     public static AssertionResult Passed { get; } = new(true, string.Empty);
 
     public static implicit operator Task<AssertionResult>(AssertionResult result) => Task.FromResult(result);

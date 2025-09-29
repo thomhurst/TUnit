@@ -13,8 +13,6 @@ namespace TUnit.Assertions.AssertionBuilders;
 public class DualCollectionAssertionBuilder<TCollection, TElement> : CollectionAssertionBuilder<TCollection, TElement>
     where TCollection : IEnumerable<TElement>
 {
-    // New And property that returns the correct type for fluent chaining
-    public new DualCollectionAssertionBuilder<TCollection, TElement> And => this;
 
     public DualCollectionAssertionBuilder(Func<TCollection> funcValue, string? expression = null)
         : base(() => Task.FromResult(funcValue()), expression)

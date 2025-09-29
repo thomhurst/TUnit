@@ -11,8 +11,6 @@ namespace TUnit.Assertions.AssertionBuilders;
 /// </summary>
 public class DualAssertionBuilder<T> : ValueAssertionBuilder<T>
 {
-    // New And property that returns the correct type for fluent chaining
-    public new DualAssertionBuilder<T> And => this;
 
     public DualAssertionBuilder(Func<T> funcValue, string? expression = null)
         : base(() => Task.FromResult(funcValue()), expression)

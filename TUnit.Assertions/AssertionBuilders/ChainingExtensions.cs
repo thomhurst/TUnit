@@ -283,13 +283,22 @@ public class ExecutionTimeAssertion<T> : AssertionBase<T>
                 return AssertionResult.Passed;
             }
 
-            return AssertionResult.Fail($"Expected operation to complete within {_timeout.TotalMilliseconds}ms but took {elapsed.TotalMilliseconds}ms");
+            return AssertionResult.Fail($"Expected action to complete within {_timeout.TotalMilliseconds} milliseconds\nbut it took too long to complete");
         }
         catch (Exception ex)
         {
             var elapsed = DateTime.UtcNow - startTime;
             return AssertionResult.Fail($"Operation failed after {elapsed.TotalMilliseconds}ms with exception: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Override message building to preserve original execution time messages
+    /// </summary>
+    protected override string BuildSingleAssertionErrorMessage(AssertionResult result, T actualValue)
+    {
+        // For execution time assertions, preserve the original error message without reformatting
+        return result.Message;
     }
 }
 

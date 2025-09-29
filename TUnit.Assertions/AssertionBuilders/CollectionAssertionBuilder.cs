@@ -15,11 +15,6 @@ namespace TUnit.Assertions.AssertionBuilders;
 public class CollectionAssertionBuilder<TCollection, TElement> : ValueAssertionBuilder<TCollection>
     where TCollection : IEnumerable<TElement>
 {
-    // New And property that returns the correct type for fluent chaining
-    public new CollectionAssertionBuilder<TCollection, TElement> And => this;
-
-    // Or property for alternative assertions
-    public new CollectionAssertionBuilder<TCollection, TElement> Or => this;
 
     public CollectionAssertionBuilder(TCollection value, string? expression = null)
         : base(value, expression)
@@ -47,23 +42,15 @@ public class CollectionAssertionBuilder<TCollection, TElement> : ValueAssertionB
     }
 
     // Collection-specific assertions
-    public CollectionAssertionBuilder<TCollection, TElement> IsEmpty()
+    public CustomAssertion<TCollection> IsEmpty()
     {
-        // Store the assertion for later execution
-        var assertion = new CustomAssertion<TCollection>(_actualValueProvider,
+        return new CustomAssertion<TCollection>(_actualValueProvider,
             collection =>
             {
                 if (collection == null) return false; // null is not empty
                 return !collection.Any();
             },
             "Expected collection to be empty but it contained items");
-
-        // Return a new builder that will execute this assertion
-        return new CollectionAssertionBuilder<TCollection, TElement>(async () =>
-        {
-            await assertion;
-            return await _actualValueProvider();
-        });
     }
 
     // All() returns a CollectionAllAssertion for chaining with Satisfy
@@ -73,65 +60,41 @@ public class CollectionAssertionBuilder<TCollection, TElement> : ValueAssertionB
     }
 
     // Predicate assertions for collections
-    public CollectionAssertionBuilder<TCollection, TElement> All(Func<TElement, bool> predicate)
+    public CustomAssertion<TCollection> All(Func<TElement, bool> predicate)
     {
-        var assertion = new CustomAssertion<TCollection>(_actualValueProvider,
+        return new CustomAssertion<TCollection>(_actualValueProvider,
             collection => collection != null && collection.All(predicate),
             "Expected all elements in collection to match the predicate");
-
-        return new CollectionAssertionBuilder<TCollection, TElement>(async () =>
-        {
-            await assertion;
-            return await _actualValueProvider();
-        });
     }
 
-    public CollectionAssertionBuilder<TCollection, TElement> Any(Func<TElement, bool> predicate)
+    public CustomAssertion<TCollection> Any(Func<TElement, bool> predicate)
     {
-        var assertion = new CustomAssertion<TCollection>(_actualValueProvider,
+        return new CustomAssertion<TCollection>(_actualValueProvider,
             collection => collection != null && collection.Any(predicate),
             "Expected at least one element in collection to match the predicate");
-
-        return new CollectionAssertionBuilder<TCollection, TElement>(async () =>
-        {
-            await assertion;
-            return await _actualValueProvider();
-        });
     }
 
-    public CollectionAssertionBuilder<TCollection, TElement> None(Func<TElement, bool> predicate)
+    public CustomAssertion<TCollection> None(Func<TElement, bool> predicate)
     {
-        var assertion = new CustomAssertion<TCollection>(_actualValueProvider,
+        return new CustomAssertion<TCollection>(_actualValueProvider,
             collection => collection == null || !collection.Any(predicate),
             "Expected no elements in collection to match the predicate");
-
-        return new CollectionAssertionBuilder<TCollection, TElement>(async () =>
-        {
-            await assertion;
-            return await _actualValueProvider();
-        });
     }
 
-    public CollectionAssertionBuilder<TCollection, TElement> IsNotEmpty()
+    public CustomAssertion<TCollection> IsNotEmpty()
     {
-        var assertion = new CustomAssertion<TCollection>(_actualValueProvider,
+        return new CustomAssertion<TCollection>(_actualValueProvider,
             collection =>
             {
                 if (collection == null) return false;
                 return collection.Any();
             },
             "Expected collection to be non-empty but it was empty");
-
-        return new CollectionAssertionBuilder<TCollection, TElement>(async () =>
-        {
-            await assertion;
-            return await _actualValueProvider();
-        });
     }
 
-    public CollectionAssertionBuilder<TCollection, TElement> HasCount(int expectedCount)
+    public CustomAssertion<TCollection> HasCount(int expectedCount)
     {
-        var assertion = new CustomAssertion<TCollection>(_actualValueProvider,
+        return new CustomAssertion<TCollection>(_actualValueProvider,
             collection =>
             {
                 if (collection == null) return false;
@@ -139,12 +102,6 @@ public class CollectionAssertionBuilder<TCollection, TElement> : ValueAssertionB
                 return count == expectedCount;
             },
             $"Expected collection to have {expectedCount} items but had {{0}} items");
-
-        return new CollectionAssertionBuilder<TCollection, TElement>(async () =>
-        {
-            await assertion;
-            return await _actualValueProvider();
-        });
     }
 
     // HasCount that returns an AssertionBuilder<int> for further chaining
@@ -159,21 +116,15 @@ public class CollectionAssertionBuilder<TCollection, TElement> : ValueAssertionB
         });
     }
 
-    public CollectionAssertionBuilder<TCollection, TElement> Contains(TElement item)
+    public CustomAssertion<TCollection> Contains(TElement item)
     {
-        var assertion = new CustomAssertion<TCollection>(_actualValueProvider,
+        return new CustomAssertion<TCollection>(_actualValueProvider,
             collection =>
             {
                 if (collection == null) return false;
                 return collection.Contains(item);
             },
             $"Expected collection to contain {item} but it didn't");
-
-        return new CollectionAssertionBuilder<TCollection, TElement>(async () =>
-        {
-            await assertion;
-            return await _actualValueProvider();
-        });
     }
 
     // Contains with predicate - returns assertion that yields the found item
@@ -182,62 +133,44 @@ public class CollectionAssertionBuilder<TCollection, TElement> : ValueAssertionB
         return new ContainsPredicateAssertion<TCollection, TElement>(_actualValueProvider, predicate);
     }
 
-    public CollectionAssertionBuilder<TCollection, TElement> DoesNotContain(TElement item)
+    public CustomAssertion<TCollection> DoesNotContain(TElement item)
     {
-        var assertion = new CustomAssertion<TCollection>(_actualValueProvider,
+        return new CustomAssertion<TCollection>(_actualValueProvider,
             collection =>
             {
                 if (collection == null) return true;
                 return !collection.Contains(item);
             },
             $"Expected collection not to contain {item} but it did");
-
-        return new CollectionAssertionBuilder<TCollection, TElement>(async () =>
-        {
-            await assertion;
-            return await _actualValueProvider();
-        });
     }
 
     // DoesNotContain with predicate
-    public CollectionAssertionBuilder<TCollection, TElement> DoesNotContain(Func<TElement, bool> predicate)
+    public CustomAssertion<TCollection> DoesNotContain(Func<TElement, bool> predicate)
     {
-        var assertion = new CustomAssertion<TCollection>(_actualValueProvider,
+        return new CustomAssertion<TCollection>(_actualValueProvider,
             actual =>
             {
                 if (actual == null) return true;
                 return !actual.Any(predicate);
             },
             "Expected collection to not contain items matching the predicate");
-
-        return new CollectionAssertionBuilder<TCollection, TElement>(async () =>
-        {
-            await assertion;
-            return await _actualValueProvider();
-        });
     }
 
     // ContainsOnly with predicate
-    public CollectionAssertionBuilder<TCollection, TElement> ContainsOnly(Func<TElement, bool> predicate)
+    public CustomAssertion<TCollection> ContainsOnly(Func<TElement, bool> predicate)
     {
-        var assertion = new CustomAssertion<TCollection>(_actualValueProvider,
+        return new CustomAssertion<TCollection>(_actualValueProvider,
             actual =>
             {
                 if (actual == null) return false;
                 return actual.All(predicate);
             },
             "Expected collection to contain only items matching the predicate");
-
-        return new CollectionAssertionBuilder<TCollection, TElement>(async () =>
-        {
-            await assertion;
-            return await _actualValueProvider();
-        });
     }
 
-    public CollectionAssertionBuilder<TCollection, TElement> HasSingleItem()
+    public CustomAssertion<TCollection> HasSingleItem()
     {
-        var assertion = new CustomAssertion<TCollection>(_actualValueProvider,
+        return new CustomAssertion<TCollection>(_actualValueProvider,
             collection =>
             {
                 if (collection == null) return false;
@@ -245,12 +178,6 @@ public class CollectionAssertionBuilder<TCollection, TElement> : ValueAssertionB
                 return count == 1;
             },
             "Expected collection to have a single item but had {{0}} items");
-
-        return new CollectionAssertionBuilder<TCollection, TElement>(async () =>
-        {
-            await assertion;
-            return await _actualValueProvider();
-        });
     }
 
     public async Task<TElement> GetSingleItem()
@@ -266,9 +193,9 @@ public class CollectionAssertionBuilder<TCollection, TElement> : ValueAssertionB
         return list[0];
     }
 
-    public CollectionAssertionBuilder<TCollection, TElement> HasDistinctItems()
+    public CustomAssertion<TCollection> HasDistinctItems()
     {
-        var assertion = new CustomAssertion<TCollection>(_actualValueProvider,
+        return new CustomAssertion<TCollection>(_actualValueProvider,
             collection =>
             {
                 if (collection == null) return true;
@@ -276,12 +203,6 @@ public class CollectionAssertionBuilder<TCollection, TElement> : ValueAssertionB
                 return list.Count == list.Distinct().Count();
             },
             "Expected collection to have distinct items but found duplicates");
-
-        return new CollectionAssertionBuilder<TCollection, TElement>(async () =>
-        {
-            await assertion;
-            return await _actualValueProvider();
-        });
     }
 
     // Collection ordering assertions

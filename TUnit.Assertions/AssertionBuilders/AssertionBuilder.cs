@@ -640,13 +640,17 @@ public class AssertionBuilder<TActual>
     // For generic return type
     public ThrowsNothingAssertion<TResult> ThrowsNothing<TResult>()
     {
-        return new ThrowsNothingAssertion<TResult>(async () => (object?)await _actualValueProvider());
+        return new ThrowsNothingAssertion<TResult>(async () =>
+        {
+            var actual = await _actualValueProvider();
+            return (TResult)(object?)actual!;
+        });
     }
 
     // For non-generic case (returns actual type)
     public ThrowsNothingAssertion<TActual> ThrowsNothing()
     {
-        return new ThrowsNothingAssertion<TActual>(async () => (object?)await _actualValueProvider());
+        return new ThrowsNothingAssertion<TActual>(_actualValueProvider);
     }
 
     // Generic version of IsTypeOf - returns TypeOfAssertion for chaining
