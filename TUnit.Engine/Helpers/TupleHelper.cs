@@ -26,9 +26,7 @@ internal class TupleHelper
         {
             // Handle Tuple recursively with pre-sized list
             var result = new List<object?>(8); // Most tuples have <= 8 items
-#pragma warning disable IL2026 // Suppressed as this method already has UnconditionalSuppressMessage
             FlattenTuple(tuple, result);
-#pragma warning restore IL2026
             objectArray = result.ToArray();
 
             return true;
@@ -38,9 +36,7 @@ internal class TupleHelper
         {
             // Handle ValueTuple recursively with pre-sized list
             var result = new List<object?>(8); // Most tuples have <= 8 items
-#pragma warning disable IL2026 // Suppressed as this method already has UnconditionalSuppressMessage
             FlattenValueTuple(tuple, result);
-#pragma warning restore IL2026
             objectArray = result.ToArray();
 
             return true;
@@ -49,7 +45,8 @@ internal class TupleHelper
         return false;
     }
 
-    [RequiresUnreferencedCode("Reflects on tuple type to find Item properties")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Tuple reflection is handled by the calling method's suppressions")]
+    [UnconditionalSuppressMessage("Trimming", "IL2111:Method with parameters or return value with 'DynamicallyAccessedMembersAttribute' is accessed via reflection", Justification = "Tuple type analysis is controlled at the entry point")]
     private static void FlattenTuple(object tuple, List<object?> result)
     {
         var type = tuple.GetType();
@@ -82,7 +79,8 @@ internal class TupleHelper
         }
     }
 
-    [RequiresUnreferencedCode("Reflects on value tuple type to find fields")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "ValueTuple reflection is handled by the calling method's suppressions")]
+    [UnconditionalSuppressMessage("Trimming", "IL2111:Method with parameters or return value with 'DynamicallyAccessedMembersAttribute' is accessed via reflection", Justification = "ValueTuple type analysis is controlled at the entry point")]
     private static void FlattenValueTuple(object tuple, List<object?> result)
     {
         var type = tuple.GetType();
@@ -119,7 +117,6 @@ internal class TupleHelper
     /// <summary>
     /// Get tuple properties with caching
     /// </summary>
-    [RequiresUnreferencedCode("Reflects on tuple type to find Item properties")]
     private static PropertyInfo[] GetTupleProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         var allProperties = type.GetProperties();
@@ -143,7 +140,6 @@ internal class TupleHelper
     /// <summary>
     /// Get value tuple fields with caching
     /// </summary>
-    [RequiresUnreferencedCode("Reflects on value tuple type to find fields")]
     private static FieldInfo[] GetValueTupleFields([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] Type type)
     {
         var allFields = type.GetFields();
