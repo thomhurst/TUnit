@@ -1,0 +1,1 @@
+// This file was split into PartialClassTests1.cs and PartialClassTests2.cs to demonstrate the issue
