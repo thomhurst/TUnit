@@ -23,8 +23,6 @@ internal static class TestDataCollectorFactory
     /// Creates a test data collector based on the specified or detected mode.
     /// Source generation mode is preferred for AOT compatibility.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Using member 'TUnit.Engine.Discovery.ReflectionTestDataCollector.ReflectionTestDataCollector()' which has 'RequiresUnreferencedCodeAttribute' can break functionality when trimming application code", Justification = "Reflection mode is explicitly chosen and cannot support trimming")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Using member 'TUnit.Engine.Discovery.ReflectionTestDataCollector.ReflectionTestDataCollector()' which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling", Justification = "Reflection mode is explicitly chosen and cannot support AOT")]
     public static ITestDataCollector Create(bool? useSourceGeneration = null, Assembly[]? assembliesToScan = null)
     {
         var isSourceGenerationEnabled = useSourceGeneration ?? SourceRegistrar.IsEnabled;
@@ -43,8 +41,6 @@ internal static class TestDataCollectorFactory
     /// Attempts AOT mode first, falls back to reflection if no source-generated tests found.
     /// This provides automatic mode selection for optimal performance and compatibility.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Using member 'TUnit.Engine.Discovery.ReflectionTestDataCollector.ReflectionTestDataCollector()' which has 'RequiresUnreferencedCodeAttribute' can break functionality when trimming application code", Justification = "Reflection mode is a fallback and cannot support trimming")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Using member 'TUnit.Engine.Discovery.ReflectionTestDataCollector.ReflectionTestDataCollector()' which has 'RequiresDynamicCodeAttribute' can break functionality when AOT compiling", Justification = "Reflection mode is a fallback and cannot support AOT")]
     public static async Task<ITestDataCollector> CreateAutoDetectAsync(string testSessionId, Assembly[]? assembliesToScan = null)
     {
         // Try AOT mode first (check if any tests were registered)

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Core.Interfaces;
@@ -10,8 +11,13 @@ namespace TUnit.Engine.Discovery;
 /// <summary>
 /// Discovers hooks at runtime using reflection for VB.NET and other languages that don't support source generation.
 /// </summary>
-[RequiresUnreferencedCode("Reflection-based hook discovery requires unreferenced code")]
-[RequiresDynamicCode("Hook invocation may require dynamic code generation")]
+[UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Reflection mode cannot support trimming")]
+[UnconditionalSuppressMessage("Trimming", "IL2055:Call to 'System.Type.MakeGenericType' can not be statically analyzed", Justification = "Reflection mode requires dynamic access")]
+[UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+[UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+[UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' requirements", Justification = "Reflection mode requires dynamic access")]
+[UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
+[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Reflection mode cannot support AOT")]
 internal sealed class ReflectionHookDiscoveryService
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
@@ -19,8 +25,15 @@ internal sealed class ReflectionHookDiscoveryService
 
     public static void DiscoverHooks()
     {
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            throw new Exception("Using TUnit Reflection mechanisms isn't supported in AOT mode");
+        }
+#endif
+
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        
+
         foreach (var assembly in assemblies)
         {
             if (ShouldScanAssembly(assembly))
@@ -44,7 +57,7 @@ internal sealed class ReflectionHookDiscoveryService
         }
 
         // Skip system and framework assemblies
-        if (name.StartsWith("System.") || 
+        if (name.StartsWith("System.") ||
             name.StartsWith("Microsoft.") ||
             name == "mscorlib" ||
             name == "netstandard" ||
@@ -54,9 +67,9 @@ internal sealed class ReflectionHookDiscoveryService
         }
 
         // Skip TUnit framework assemblies (but not test projects)
-        if (name == "TUnit" || 
-            name == "TUnit.Core" || 
-            name == "TUnit.Engine" || 
+        if (name == "TUnit" ||
+            name == "TUnit.Core" ||
+            name == "TUnit.Engine" ||
             name == "TUnit.Assertions")
         {
             return false;
@@ -92,7 +105,7 @@ internal sealed class ReflectionHookDiscoveryService
         try
         {
             var types = assembly.GetTypes();
-            
+
             foreach (var type in types)
             {
                 DiscoverHooksInType(type, assembly);
@@ -107,7 +120,7 @@ internal sealed class ReflectionHookDiscoveryService
     private static void DiscoverHooksInType(Type type, Assembly assembly)
     {
         var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
-        
+
         foreach (var method in methods)
         {
             // Check for Before attributes
@@ -144,7 +157,7 @@ internal sealed class ReflectionHookDiscoveryService
     {
         var hookType = attr.HookType;
         var order = attr.Order;
-        
+
         switch (hookType)
         {
             case HookType.Test:
@@ -206,7 +219,7 @@ internal sealed class ReflectionHookDiscoveryService
     {
         var hookType = attr.HookType;
         var order = attr.Order;
-        
+
         switch (hookType)
         {
             case HookType.Test:
@@ -268,7 +281,7 @@ internal sealed class ReflectionHookDiscoveryService
     {
         var hookType = attr.HookType;
         var order = attr.Order;
-        
+
         switch (hookType)
         {
             case HookType.Test:
@@ -343,7 +356,7 @@ internal sealed class ReflectionHookDiscoveryService
     {
         var hookType = attr.HookType;
         var order = attr.Order;
-        
+
         switch (hookType)
         {
             case HookType.Test:
@@ -574,7 +587,7 @@ internal sealed class ReflectionHookDiscoveryService
             }
 
             var result = method.Invoke(instance, args);
-            
+
             if (result is Task task)
             {
                 await task;
@@ -619,7 +632,7 @@ internal sealed class ReflectionHookDiscoveryService
             }
 
             var result = method.Invoke(instance, args);
-            
+
             if (result is Task task)
             {
                 await task;

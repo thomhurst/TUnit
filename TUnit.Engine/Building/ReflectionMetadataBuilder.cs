@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using TUnit.Core;
 
 namespace TUnit.Engine.Building;
@@ -20,6 +21,13 @@ internal static class ReflectionMetadataBuilder
             | DynamicallyAccessedMemberTypes.PublicProperties)] Type type,
         System.Reflection.MethodInfo method)
     {
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            throw new Exception("Using TUnit Reflection mechanisms isn't supported in AOT mode");
+        }
+#endif
+
         return new MethodMetadata
         {
             Name = method.Name,
