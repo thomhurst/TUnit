@@ -16,9 +16,11 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 predicate: (node, _) => IsClassWithDataSourceProperties(node),
                 transform: (ctx, _) => GetClassWithDataSourceProperties(ctx))
             .Where(x => x != null)
-            .Select((x, _) => x!);
+            .Select((x, _) => x!)
+            .Collect()
+            .SelectMany((classes, _) => classes.DistinctBy(c => c.ClassSymbol, SymbolEqualityComparer.Default));
 
-        // Generate individual files for each class instead of collecting them all
+        // Generate individual files for each unique class
         context.RegisterSourceOutput(classesWithPropertyInjection, GenerateIndividualPropertyInjectionSource);
     }
 
@@ -87,6 +89,12 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                     break; // Only one data source per property
                 }
             }
+        }
+
+        // Only return if there are actually properties with data sources
+        if (propertiesWithDataSources.Count == 0)
+        {
+            return null;
         }
 
         return new ClassWithDataSourceProperties

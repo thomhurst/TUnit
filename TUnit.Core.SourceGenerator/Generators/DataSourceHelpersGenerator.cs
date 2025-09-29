@@ -17,9 +17,11 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             .CreateSyntaxProvider(
                 predicate: static (s, _) => s is ClassDeclarationSyntax,
                 transform: static (ctx, _) => GetTypeWithDataSourceProperties(ctx))
-            .Where(static t => t is not null);
+            .Where(static t => t is not null)
+            .Collect()
+            .SelectMany((types, _) => types.DistinctBy(t => t!.Value.TypeSymbol, SymbolEqualityComparer.Default));
 
-        // Generate individual files for each type instead of collecting them all
+        // Generate individual files for each unique type
         context.RegisterSourceOutput(typesWithDataSourceProperties, (spc, type) => { if (type != null) GenerateIndividualDataSourceHelper(spc, type); });
     }
 
