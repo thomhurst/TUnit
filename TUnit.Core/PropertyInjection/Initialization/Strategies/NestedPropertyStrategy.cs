@@ -1,6 +1,9 @@
+using System.Linq;
 using System.Threading.Tasks;
 using TUnit.Core.DataSources;
 using TUnit.Core.Initialization;
+using TUnit.Core.Interfaces;
+using TUnit.Core.Tracking;
 
 namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
 
@@ -131,11 +134,16 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
         object instance,
         Interfaces.SourceGenerator.PropertyInjectionMetadata metadata)
     {
+        // Build hierarchical property name for nested properties
+        var propertyName = parentContext.IsNestedProperty
+            ? $"{parentContext.PropertyName}.{metadata.PropertyName}"
+            : metadata.PropertyName;
+
         return new PropertyInitializationContext
         {
             Instance = instance,
             SourceGeneratedMetadata = metadata,
-            PropertyName = metadata.PropertyName,
+            PropertyName = propertyName,
             PropertyType = metadata.PropertyType,
             PropertySetter = metadata.SetProperty,
             ObjectBag = parentContext.ObjectBag,
@@ -157,12 +165,17 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
         System.Reflection.PropertyInfo property,
         IDataSourceAttribute dataSource)
     {
+        // Build hierarchical property name for nested properties
+        var propertyName = parentContext.IsNestedProperty
+            ? $"{parentContext.PropertyName}.{property.Name}"
+            : property.Name;
+
         return new PropertyInitializationContext
         {
             Instance = instance,
             PropertyInfo = property,
             DataSource = dataSource,
-            PropertyName = property.Name,
+            PropertyName = propertyName,
             PropertyType = property.PropertyType,
             PropertySetter = PropertySetterFactory.CreateSetter(property),
             ObjectBag = parentContext.ObjectBag,
