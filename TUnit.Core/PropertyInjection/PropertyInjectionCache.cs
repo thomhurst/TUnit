@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using TUnit.Core.Data;
 
@@ -17,6 +18,7 @@ internal static class PropertyInjectionCache
     /// <summary>
     /// Gets or creates an injection plan for the specified type.
     /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Type comes from runtime objects that cannot be annotated")]
     public static PropertyInjectionPlan GetOrCreatePlan(Type type)
     {
         return _injectionPlans.GetOrAdd(type, _ => PropertyInjectionPlanBuilder.Build(type));
@@ -25,6 +27,7 @@ internal static class PropertyInjectionCache
     /// <summary>
     /// Checks if a type has injectable properties using caching.
     /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Type comes from runtime objects that cannot be annotated")]
     public static bool HasInjectableProperties(Type type)
     {
         return _shouldInjectCache.GetOrAdd(type, t =>
