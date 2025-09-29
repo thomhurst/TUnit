@@ -31,16 +31,16 @@ public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribu
 {
     private readonly Type[] _types;
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "These constructors delegate to the params constructor but are AOT-safe when used with typeof() expressions at compile time. The DynamicallyAccessedMembers annotations ensure required members are preserved.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.", Justification = "These constructors are AOT-compatible when types are specified using typeof() at compile time. Only the params constructor requires dynamic code.")]
     public ClassDataSourceAttribute(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type) : this([type])
     {
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "These constructors delegate to the params constructor but are AOT-safe when used with typeof() expressions at compile time. The DynamicallyAccessedMembers annotations ensure required members are preserved.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.", Justification = "These constructors are AOT-compatible when types are specified using typeof() at compile time. Only the params constructor requires dynamic code.")]
     public ClassDataSourceAttribute(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type,
@@ -49,8 +49,8 @@ public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribu
     {
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "These constructors delegate to the params constructor but are AOT-safe when used with typeof() expressions at compile time. The DynamicallyAccessedMembers annotations ensure required members are preserved.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.", Justification = "These constructors are AOT-compatible when types are specified using typeof() at compile time. Only the params constructor requires dynamic code.")]
     public ClassDataSourceAttribute(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type,
@@ -61,8 +61,8 @@ public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribu
     {
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "These constructors delegate to the params constructor but are AOT-safe when used with typeof() expressions at compile time. The DynamicallyAccessedMembers annotations ensure required members are preserved.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.", Justification = "These constructors are AOT-compatible when types are specified using typeof() at compile time. Only the params constructor requires dynamic code.")]
     public ClassDataSourceAttribute(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type,
@@ -75,8 +75,8 @@ public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribu
     {
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "These constructors delegate to the params constructor but are AOT-safe when used with typeof() expressions at compile time. The DynamicallyAccessedMembers annotations ensure required members are preserved.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.", Justification = "These constructors are AOT-compatible when types are specified using typeof() at compile time. Only the params constructor requires dynamic code.")]
     public ClassDataSourceAttribute(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type type,
@@ -101,7 +101,7 @@ public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribu
     public SharedType[] Shared { get; set; } = [SharedType.None];
     public string[] Keys { get; set; } = [];
 
-    [UnconditionalSuppressMessage("Trimming", "IL2062:The parameter of method has a DynamicallyAccessedMembersAttribute, but the value passed to it can not be statically analyzed.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2062:The parameter of method has a DynamicallyAccessedMembersAttribute, but the value passed to it can not be statically analyzed.", Justification = "The _types array is populated from constructor parameters that have DynamicallyAccessedMembers attributes, ensuring the required members are preserved at the call site.")]
     protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () =>
