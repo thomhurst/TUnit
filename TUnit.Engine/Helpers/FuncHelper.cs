@@ -2,14 +2,17 @@
 
 namespace TUnit.Engine.Helpers;
 
-[UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+/// <summary>
+/// Helper for invoking Func delegates using reflection.
+/// Used in reflection mode to execute data source factories dynamically.
+/// </summary>
 internal class FuncHelper
 {
     public static bool TryInvokeFunc(object? func, out object? result)
     {
-        if (func?.GetType().GetMethod("Invoke") is { } method)
+        if (func is Delegate method)
         {
-            result = method.Invoke(func, []);
+            result = method.DynamicInvoke();
             return true;
         }
 
@@ -19,6 +22,6 @@ internal class FuncHelper
 
     public static object? InvokeFunc(object func)
     {
-        return func.GetType().GetMethod("Invoke")!.Invoke(func, []);
+        return ((Delegate)func).DynamicInvoke();
     }
 }

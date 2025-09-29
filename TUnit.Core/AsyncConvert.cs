@@ -124,8 +124,6 @@ public static class AsyncConvert
         Justification = "Generic method instantiation for F# async types. The type parameter comes from the F# async type itself.")]
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
         Justification = "F# async support is optional. Tests using F# async should ensure FSharp.Core is preserved in AOT scenarios.")]
-    [RequiresUnreferencedCode("F# async support requires dynamic access to FSharp.Core types.")]
-    [RequiresDynamicCode("F# async support requires runtime code generation for generic method instantiation.")]
     private static ValueTask StartAsFSharpTask(object invoke, Type type)
     {
         var startAsTaskOpenGenericMethod = (_fSharpAsyncType ??= type.Assembly.GetType("Microsoft.FSharp.Control.FSharpAsync"))!

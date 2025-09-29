@@ -748,9 +748,13 @@ namespace .
         public ..AndAssertionGroup<TActual, TAssertionBuilder> And(<TAssertionBuilder, .<TActual>> assert) { }
         public override .<TActual?> GetAwaiter() { }
     }
-    [.("Usage", "TUnitAssertions0002:Assert statements must be awaited")]
+    [.("Usage", "TUnitAssertions0002:Assert statements must be awaited", Justification="This is a factory class for creating assertion groups. The factory methods return" +
+        " builders that create awaitable assertion groups; the factory methods themselves" +
+        " are not awaitable.")]
     [.("Usage", "TUnitAssertions0008:ValueTasks should be awaited when used within (..." +
-        ")")]
+        ")", Justification="The () calls within this factory class return assertion builders that " +
+        "will be composed into groups and awaited by the consumer. The factory methods th" +
+        "emselves do not need to await these builders.")]
     public static class AssertionGroup
     {
         public static ..AndAssertionGroupInvoker<TActual, TAssertionBuilder> And<TActual, TAssertionBuilder>(..AssertionGroup<TActual, TAssertionBuilder> group1, ..AssertionGroup<TActual, TAssertionBuilder> group2)

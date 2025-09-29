@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Discovery;
 
@@ -154,9 +155,9 @@ internal static class AsyncDataSourceHelper
         else if (item != null)
         {
             // Try tuple parsing
-            if (Helpers.TupleHelper.TryParseTupleToObjectArray(item, out var tupleValues))
+            if (TupleHelper.IsTupleType(item))
             {
-                items.Add(tupleValues!);
+                items.Add(TupleHelper.UnwrapTuple(item));
             }
             else
             {
