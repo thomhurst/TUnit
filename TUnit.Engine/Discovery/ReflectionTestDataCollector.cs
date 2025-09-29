@@ -1433,10 +1433,21 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         }
                     }
 
-                    methodToInvoke = testMethod.MakeGenericMethod(typeArguments);
+                    // Check if we have a pre-compiled method for these type arguments (AOT-friendly)
+                    var compiledMethod = TUnit.Core.AotCompatibility.GenericTestRegistry.GetCompiledMethod(
+                        testClass, testMethod.Name, typeArguments);
 
-                    // Pre-JIT the constructed generic method on first invocation
-                    RuntimeHelpers.PrepareMethod(methodToInvoke.MethodHandle);
+                    if (compiledMethod != null)
+                    {
+                        methodToInvoke = compiledMethod;
+                    }
+                    else
+                    {
+                        methodToInvoke = testMethod.MakeGenericMethod(typeArguments);
+
+                        // Pre-JIT the constructed generic method on first invocation
+                        RuntimeHelpers.PrepareMethod(methodToInvoke.MethodHandle);
+                    }
                 }
 
                 // Cast arguments to the expected parameter types
