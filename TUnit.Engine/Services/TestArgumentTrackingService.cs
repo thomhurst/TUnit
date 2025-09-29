@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TUnit.Core;
@@ -8,6 +9,7 @@ using TUnit.Core.Enums;
 using TUnit.Core.Initialization;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
+using TUnit.Core.PropertyInjection;
 using TUnit.Core.Tracking;
 
 namespace TUnit.Engine.Services;
@@ -77,10 +79,98 @@ internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
     /// </summary>
     private async ValueTask TrackPropertiesAsync(TestContext testContext)
     {
-        // For now, we'll skip property tracking during registration
-        // since the implementation is complex with different ClassDataSource variants.
-        // Properties will be tracked when they're actually injected during test execution.
-        // This is a simplified approach that focuses purely on reference counting.
-        await Task.CompletedTask;
+        // Track properties during registration for proper reference counting
+        // This is critical for SharedType.PerTestSession properties to have the right count
+
+        var classType = testContext.TestDetails.ClassType;
+        if (classType == null)
+        {
+            return;
+        }
+
+        // Get the property source for the class
+        var propertySource = PropertySourceRegistry.GetSource(classType);
+        if (propertySource?.ShouldInitialize != true)
+        {
+            // No properties to inject for this class
+            return;
+        }
+
+        // Get all properties that need injection
+        var propertyMetadata = propertySource.GetPropertyMetadata();
+
+        foreach (var metadata in propertyMetadata)
+        {
+            // Create the data source for this property
+            var dataSource = metadata.CreateDataSource();
+
+            // Check if this is a ClassDataSource (generic or untyped)
+            var dataSourceType = dataSource.GetType();
+
+            // Skip MethodDataSource and other dynamic sources - they'll be handled during execution
+            if (dataSourceType.Name.Contains("MethodDataSource"))
+            {
+                continue;
+            }
+
+            // For ClassDataSource properties, we need to resolve and track them
+            if (dataSourceType.Name.Contains("ClassDataSource"))
+            {
+                try
+                {
+                    // Create minimal DataGeneratorMetadata for property resolution during registration
+                    var testBuilderContext = new TestBuilderContext
+                    {
+                        TestMetadata = testContext.TestDetails.MethodMetadata,
+                        DataSourceAttribute = dataSource,
+                        Events = testContext.Events,
+                        ObjectBag = testContext.ObjectBag
+                    };
+
+                    var dataGenMetadata = new DataGeneratorMetadata
+                    {
+                        TestBuilderContext = new TestBuilderContextAccessor(testBuilderContext),
+                        MembersToGenerate = [], // Properties don't use member generation
+                        TestInformation = testContext.TestDetails.MethodMetadata,
+                        Type = DataGeneratorType.Property,
+                        TestSessionId = TestSessionContext.Current?.Id ?? "registration",
+                        TestClassInstance = null, // Not available during registration
+                        ClassInstanceArguments = testContext.TestDetails.TestClassArguments
+                    };
+
+                    // Get the data rows from the data source
+                    var dataRows = dataSource.GetDataRowsAsync(dataGenMetadata);
+
+                    // Get the first data row (properties get single values, not multiple)
+                    await foreach (var dataRowFunc in dataRows)
+                    {
+                        var dataRow = await dataRowFunc();
+                        if (dataRow != null && dataRow.Length > 0)
+                        {
+                            var data = dataRow[0];
+
+                            if (data != null)
+                            {
+                                // Store for later injection
+                                testContext.TestDetails.TestClassInjectedPropertyArguments[metadata.PropertyName] = data;
+
+                                // Track the object - this increments the reference count
+                                ObjectTracker.TrackObject(testContext.Events, data);
+
+
+                                // Initialize if it implements IAsyncInitializer but defer to execution time
+                                // We don't initialize here as the test hasn't started yet
+                            }
+                        }
+                        break; // Only take the first result for property injection
+                    }
+                }
+                catch
+                {
+                    // If we can't resolve during registration, it will be resolved during execution
+                    // This is OK for dynamic data sources
+                }
+            }
+        }
     }
 }
