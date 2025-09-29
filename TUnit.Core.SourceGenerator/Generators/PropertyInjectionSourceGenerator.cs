@@ -92,7 +92,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         return new ClassWithDataSourceProperties
         {
             ClassSymbol = typeSymbol,
-            Properties = propertiesWithDataSources.ToImmutableArray()
+            Properties = propertiesWithDataSources.ToImmutableArray(),
+            SyntaxLocation = typeDecl.GetLocation()
         };
     }
 
@@ -140,16 +141,20 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         var sourceClassName = GetPropertySourceClassName(classInfo.ClassSymbol);
         var safeName = GetSafeClassName(classInfo.ClassSymbol);
-        var fileName = $"{safeName}_PropertyInjection.g.cs";
+        
+        // Create a deterministic unique identifier based on syntax location to handle partial classes
+        var locationHash = classInfo.SyntaxLocation?.GetHashCode().ToString("x") ?? "0";
+        var fileName = $"{safeName}_PropertyInjection_{locationHash}.g.cs";
 
         var sourceBuilder = new StringBuilder();
         WriteFileHeader(sourceBuilder);
         
         // Generate individual module initializer for this class
-        GenerateIndividualModuleInitializer(sourceBuilder, classInfo, sourceClassName);
+        var uniqueSourceClassName = $"{sourceClassName}_{locationHash}";
+        GenerateIndividualModuleInitializer(sourceBuilder, classInfo, uniqueSourceClassName, locationHash);
         
         // Generate property source for this class
-        GeneratePropertySource(sourceBuilder, classInfo, sourceClassName);
+        GeneratePropertySource(sourceBuilder, classInfo, sourceClassName, locationHash);
 
         context.AddSource(fileName, sourceBuilder.ToString());
     }
@@ -168,11 +173,12 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             .Replace("+", "_");
     }
 
-    private static void GenerateIndividualModuleInitializer(StringBuilder sb, ClassWithDataSourceProperties classInfo, string sourceClassName)
+    private static void GenerateIndividualModuleInitializer(StringBuilder sb, ClassWithDataSourceProperties classInfo, string sourceClassName, string locationHash)
     {
         var safeName = GetSafeClassName(classInfo.ClassSymbol);
         
-        sb.AppendLine($"internal static class {safeName}_PropertyInjectionInitializer");
+        // Include location hash in initializer name to handle partial classes
+        sb.AppendLine($"internal static class {safeName}_PropertyInjectionInitializer_{locationHash}");
         sb.AppendLine("{");
         sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
         sb.AppendLine("    public static void Initialize()");
@@ -197,11 +203,13 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     }
 
 
-    private static void GeneratePropertySource(StringBuilder sb, ClassWithDataSourceProperties classInfo, string sourceClassName)
+    private static void GeneratePropertySource(StringBuilder sb, ClassWithDataSourceProperties classInfo, string sourceClassName, string locationHash)
     {
         var classTypeName = classInfo.ClassSymbol.GloballyQualified();
 
-        sb.AppendLine($"internal sealed class {sourceClassName} : IPropertySource");
+        // Include location hash in the source class name to ensure uniqueness for partial classes  
+        var uniqueSourceClassName = $"{sourceClassName}_{locationHash}";
+        sb.AppendLine($"internal sealed class {uniqueSourceClassName} : IPropertySource");
         sb.AppendLine("{");
         sb.AppendLine($"    public Type Type => typeof({classTypeName});");
         sb.AppendLine("    public bool ShouldInitialize => true;");
@@ -435,6 +443,7 @@ internal sealed class ClassWithDataSourceProperties
 {
     public required INamedTypeSymbol ClassSymbol { get; init; }
     public required ImmutableArray<PropertyWithDataSourceAttribute> Properties { get; init; }
+    public Location? SyntaxLocation { get; init; }
 }
 
 internal sealed class PropertyWithDataSourceAttribute

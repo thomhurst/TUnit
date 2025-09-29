@@ -54,7 +54,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         return new TypeWithDataSourceProperties
         {
             TypeSymbol = typeSymbol,
-            Properties = propertiesWithDataSource
+            Properties = propertiesWithDataSource,
+            SyntaxLocation = classDeclaration.GetLocation()
         };
     }
 
@@ -68,7 +69,10 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
 
         var fullyQualifiedType = type.Value.TypeSymbol.GloballyQualified();
         var safeName = GetSafeTypeName(type.Value.TypeSymbol);
-        var fileName = $"{safeName}_DataSourceHelper.g.cs";
+        
+        // Create a deterministic unique identifier based on syntax location to handle partial classes
+        var locationHash = type.Value.SyntaxLocation?.GetHashCode().ToString("x") ?? "0";
+        var fileName = $"{safeName}_DataSourceHelper_{locationHash}.g.cs";
 
         var sb = new StringBuilder();
         
@@ -82,8 +86,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         sb.AppendLine("namespace TUnit.Core.Generated;");
         sb.AppendLine();
         
-        // Generate individual module initializer for this type
-        sb.AppendLine($"internal static class {safeName}_DataSourceInitializer");
+        // Generate individual module initializer for this type with location-based name
+        var initializerName = $"{safeName}_DataSourceInitializer_{locationHash}";
+        sb.AppendLine($"internal static class {initializerName}");
         sb.AppendLine("{");
         sb.AppendLine("    [ModuleInitializer]");
         sb.AppendLine("    public static void Initialize()");
