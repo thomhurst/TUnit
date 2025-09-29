@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading.Tasks;
+using TUnit.Core.Interfaces;
 using TUnit.Core.Tracking;
 
 namespace TUnit.Core.PropertyInjection.Initialization;
@@ -20,10 +22,10 @@ internal static class PropertyTrackingService
             return;
         }
 
-        // Track the object for disposal
+        // Track the object for disposal - pure reference counting
         ObjectTracker.TrackObject(context.Events, propertyValue);
 
-        // Track ownership relationship
+        // Track ownership relationship (this is separate from reference counting)
         if (context.ParentInstance != null)
         {
             ObjectTracker.TrackOwnership(context.ParentInstance, propertyValue);

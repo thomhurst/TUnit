@@ -88,6 +88,7 @@ internal sealed class PropertyInjectionService
             return;
         }
 
+
         // Prevent cycles - if we're already processing this object, skip it
         // TryAdd returns false if the key already exists (thread-safe)
         if (!visitedObjects.TryAdd(instance, 0))

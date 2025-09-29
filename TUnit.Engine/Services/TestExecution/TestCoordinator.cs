@@ -103,6 +103,23 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
+            // Fire OnDispose for cleanup that might happen between retries
+            if (test.Context.Events.OnDispose?.InvocationList != null)
+            {
+                try
+                {
+                    foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                    {
+                        await invocation.InvokeAsync(test.Context, test.Context);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await _logger.LogErrorAsync($"Error during test disposal for {test.TestId}: {ex}");
+                }
+            }
+
+            // Fire OnTestFinalized after all retry attempts are complete
             if (test.Context.Events.OnTestFinalized?.InvocationList != null)
             {
                 try
