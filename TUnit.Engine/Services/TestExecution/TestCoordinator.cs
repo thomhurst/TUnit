@@ -72,23 +72,55 @@ internal sealed class TestCoordinator : ITestCoordinator
             // Ensure TestSession hooks run before creating test instances
             await _testExecutor.EnsureTestSessionHooksExecutedAsync();
 
-            test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
-
-            // Check if this test should be skipped (after creating instance)
-            if (test.Context.TestDetails.ClassInstance is SkippedTestInstance ||
-                !string.IsNullOrEmpty(test.Context.SkipReason))
-            {
-                await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped");
-                return;
-            }
-
-            await _testInitializer.InitializeTest(test, cancellationToken);
-
-            test.Context.RestoreExecutionContext();
-
+            // Execute test with retry logic - each retry gets a fresh instance
             await RetryHelper.ExecuteWithRetry(test.Context, async () =>
-                await _testExecutor.ExecuteAsync(test, cancellationToken)
-            );
+            {
+                // Create test instance for this attempt
+                test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
+
+                // Check if this test should be skipped (after creating instance)
+                if (test.Context.TestDetails.ClassInstance is SkippedTestInstance ||
+                    !string.IsNullOrEmpty(test.Context.SkipReason))
+                {
+                    await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped");
+                    return;
+                }
+
+                try
+                {
+                    await _testInitializer.InitializeTest(test, cancellationToken);
+                    test.Context.RestoreExecutionContext();
+                    await _testExecutor.ExecuteAsync(test, cancellationToken);
+                }
+                finally
+                {
+                    // Dispose test instance and fire OnDispose after each attempt
+                    // This ensures each retry gets a fresh instance
+                    if (test.Context.Events.OnDispose?.InvocationList != null)
+                    {
+                        foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                        {
+                            try
+                            {
+                                await invocation.InvokeAsync(test.Context, test.Context);
+                            }
+                            catch (Exception disposeEx)
+                            {
+                                await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}");
+                            }
+                        }
+                    }
+
+                    try
+                    {
+                        await TestExecutor.DisposeTestInstance(test);
+                    }
+                    catch (Exception disposeEx)
+                    {
+                        await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}");
+                    }
+                }
+            });
 
             await _stateManager.MarkCompletedAsync(test);
 
@@ -105,35 +137,21 @@ internal sealed class TestCoordinator : ITestCoordinator
         {
             var cleanupExceptions = new List<Exception>();
 
-            // Fire OnDispose for cleanup after all retries are complete
-            if (test.Context.Events.OnDispose?.InvocationList != null)
+            // Run After(Class/Assembly/Session) hooks after all retries complete
+            var testClass = test.Metadata.TestClassType;
+            var testAssembly = testClass.Assembly;
+            var hookExceptions = await _testExecutor.ExecuteAfterClassAssemblySessionHooks(test, testClass, testAssembly, CancellationToken.None);
+
+            if (hookExceptions.Count > 0)
             {
-                try
+                foreach (var ex in hookExceptions)
                 {
-                    foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
-                    {
-                        await invocation.InvokeAsync(test.Context, test.Context);
-                    }
+                    await _logger.LogErrorAsync($"Error executing After hooks for {test.TestId}: {ex}");
                 }
-                catch (Exception ex)
-                {
-                    await _logger.LogErrorAsync($"Error during test disposal for {test.TestId}: {ex}");
-                    cleanupExceptions.Add(ex);
-                }
+                cleanupExceptions.AddRange(hookExceptions);
             }
 
-            // Dispose test instance after OnDispose events, before OnTestFinalized
-            try
-            {
-                await TestExecutor.DisposeTestInstance(test);
-            }
-            catch (Exception ex)
-            {
-                await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {ex}");
-                cleanupExceptions.Add(ex);
-            }
-
-            // Fire OnTestFinalized after all retry attempts are complete
+            // Fire OnTestFinalized after After hooks and all retries complete, to dispose tracked objects
             if (test.Context.Events.OnTestFinalized?.InvocationList != null)
             {
                 try
@@ -148,20 +166,6 @@ internal sealed class TestCoordinator : ITestCoordinator
                     await _logger.LogErrorAsync($"Error during test finalization for {test.TestId}: {ex}");
                     cleanupExceptions.Add(ex);
                 }
-            }
-
-            // Run After(Class/Assembly/Session) hooks after OnTestFinalized
-            var testClass = test.Metadata.TestClassType;
-            var testAssembly = testClass.Assembly;
-            var hookExceptions = await _testExecutor.ExecuteAfterClassAssemblySessionHooks(test, testClass, testAssembly, CancellationToken.None);
-
-            if (hookExceptions.Count > 0)
-            {
-                foreach (var ex in hookExceptions)
-                {
-                    await _logger.LogErrorAsync($"Error executing After hooks for {test.TestId}: {ex}");
-                }
-                cleanupExceptions.AddRange(hookExceptions);
             }
 
             // If any cleanup exceptions occurred, mark the test as failed
