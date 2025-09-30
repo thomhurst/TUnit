@@ -196,7 +196,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             testStateManager,
             testRunner,
             circularDependencyDetector,
-            constraintKeyScheduler));
+            constraintKeyScheduler,
+            hookExecutor));
 
         TestSessionCoordinator = Register(new TestSessionCoordinator(EventReceiverOrchestrator,
             Logger,

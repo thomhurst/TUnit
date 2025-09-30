@@ -137,10 +137,9 @@ internal sealed class TestCoordinator : ITestCoordinator
         {
             var cleanupExceptions = new List<Exception>();
 
-            // Run After(Class/Assembly/Session) hooks after all retries complete
             var testClass = test.Metadata.TestClassType;
             var testAssembly = testClass.Assembly;
-            var hookExceptions = await _testExecutor.ExecuteAfterClassAssemblySessionHooks(test, testClass, testAssembly, CancellationToken.None);
+            var hookExceptions = await _testExecutor.ExecuteAfterClassAssemblyHooks(test, testClass, testAssembly, CancellationToken.None);
 
             if (hookExceptions.Count > 0)
             {
@@ -151,7 +150,6 @@ internal sealed class TestCoordinator : ITestCoordinator
                 cleanupExceptions.AddRange(hookExceptions);
             }
 
-            // Fire OnTestFinalized after After hooks and all retries complete, to dispose tracked objects
             if (test.Context.Events.OnTestFinalized?.InvocationList != null)
             {
                 try

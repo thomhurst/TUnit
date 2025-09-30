@@ -187,7 +187,7 @@ internal class TestExecutor
         }
     }
 
-    internal async Task<List<Exception>> ExecuteAfterClassAssemblySessionHooks(AbstractExecutableTest executableTest,
+    internal async Task<List<Exception>> ExecuteAfterClassAssemblyHooks(AbstractExecutableTest executableTest,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties
             | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, Assembly testAssembly, CancellationToken cancellationToken)
@@ -205,12 +205,6 @@ internal class TestExecutor
         {
             var assemblyExceptions = await _hookExecutor.ExecuteAfterAssemblyHooksAsync(testAssembly, cancellationToken).ConfigureAwait(false);
             exceptions.AddRange(assemblyExceptions);
-        }
-
-        if (flags.ShouldExecuteAfterTestSession)
-        {
-            var sessionExceptions = await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
-            exceptions.AddRange(sessionExceptions);
         }
 
         return exceptions;

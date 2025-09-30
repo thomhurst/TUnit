@@ -21,6 +21,7 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly TestRunner _testRunner;
     private readonly CircularDependencyDetector _circularDependencyDetector;
     private readonly IConstraintKeyScheduler _constraintKeyScheduler;
+    private readonly HookExecutor _hookExecutor;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
@@ -31,7 +32,8 @@ internal sealed class TestScheduler : ITestScheduler
         TestStateManager testStateManager,
         TestRunner testRunner,
         CircularDependencyDetector circularDependencyDetector,
-        IConstraintKeyScheduler constraintKeyScheduler)
+        IConstraintKeyScheduler constraintKeyScheduler,
+        HookExecutor hookExecutor)
     {
         _logger = logger;
         _groupingService = groupingService;
@@ -42,6 +44,7 @@ internal sealed class TestScheduler : ITestScheduler
         _testRunner = testRunner;
         _circularDependencyDetector = circularDependencyDetector;
         _constraintKeyScheduler = constraintKeyScheduler;
+        _hookExecutor = hookExecutor;
     }
 
     public async Task ScheduleAndExecuteAsync(
@@ -101,6 +104,21 @@ internal sealed class TestScheduler : ITestScheduler
 
         // Execute tests according to their grouping
         await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
+
+        var sessionHookExceptions = await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
+        if (sessionHookExceptions.Count > 0)
+        {
+            foreach (var ex in sessionHookExceptions)
+            {
+                await _logger.LogErrorAsync($"Error executing After(TestSession) hook: {ex}").ConfigureAwait(false);
+            }
+
+            // Throw aggregate exception if hooks failed
+            var aggregatedException = sessionHookExceptions.Count == 1
+                ? sessionHookExceptions[0]
+                : new AggregateException("One or more After(TestSession) hooks failed", sessionHookExceptions);
+            throw aggregatedException;
+        }
     }
 
     private async Task ExecuteGroupedTestsAsync(
