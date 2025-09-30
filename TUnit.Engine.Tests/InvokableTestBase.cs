@@ -72,9 +72,7 @@ public abstract class InvokableTestBase(TestMode testMode)
             .WithWorkingDirectory(testProject.DirectoryName!)
             .WithValidation(CommandResultValidation.None);
 
-        var result = await command.ExecuteBufferedAsync();
-
-        await TrxAsserter.AssertTrx(testMode, command, result, assertions, trxFilename, assertionExpression);
+        await RunWithFailureLogging(command, trxFilename, assertions, assertionExpression);
     }
 
     private async Task RunWithAot(string filter, List<Action<TestRun>> assertions,
@@ -108,9 +106,7 @@ public abstract class InvokableTestBase(TestMode testMode)
             )
             .WithValidation(CommandResultValidation.None);
 
-        var result = await command.ExecuteBufferedAsync();
-
-        await TrxAsserter.AssertTrx(testMode, command, result, assertions, trxFilename, assertionExpression: assertionExpression);
+        await RunWithFailureLogging(command, trxFilename, assertions, assertionExpression);
     }
 
     private async Task RunWithSingleFile(string filter,
@@ -144,9 +140,7 @@ public abstract class InvokableTestBase(TestMode testMode)
             )
             .WithValidation(CommandResultValidation.None);
 
-        var result = await command.ExecuteBufferedAsync();
-
-        await TrxAsserter.AssertTrx(testMode, command, result, assertions, trxFilename, assertionExpression: assertionExpression);
+        await RunWithFailureLogging(command, trxFilename, assertions, assertionExpression);
     }
 
     protected static FileInfo? FindFile(Func<FileInfo, bool> predicate)
@@ -157,6 +151,33 @@ public abstract class InvokableTestBase(TestMode testMode)
     protected static DirectoryInfo? FindFolder(Func<DirectoryInfo, bool> predicate)
     {
         return FileSystemHelpers.FindFolder(predicate);
+    }
+
+    private async Task RunWithFailureLogging(Command command, string trxFilename, List<Action<TestRun>> assertions, string assertionExpression)
+    {
+        BufferedCommandResult? commandResult = null;
+
+        try
+        {
+            commandResult = await command.ExecuteBufferedAsync();
+
+            await TrxAsserter.AssertTrx(testMode, command, commandResult, assertions, trxFilename, assertionExpression: assertionExpression);
+        }
+        catch (Exception e)
+        {
+            ThreadSafeOutput.WriteMultipleLines(
+                $@"Mode: {testMode}",
+                @$"Command Input: {command}",
+                @$"Error: {commandResult?.StandardError}",
+                @$"Output: {commandResult?.StandardOutput}"
+            );
+
+            throw new Exception($"""
+                                 Error asserting results for {TestContext.Current!.TestDetails.MethodMetadata.Class.Name}: {e.Message}
+
+                                 Expression: {assertionExpression}
+                                 """, e);
+        }
     }
 }
 
