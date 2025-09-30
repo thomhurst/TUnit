@@ -116,13 +116,26 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         ConcurrentQueue<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)> waitingTests,
         CancellationToken cancellationToken)
     {
+        SemaphoreSlim? parallelLimiterSemaphore = null;
+
         try
         {
-            // Execute the test with parallel limit support
-            await ExecuteTestWithParallelLimitAsync(test, cancellationToken).ConfigureAwait(false);
+            // Two-phase acquisition: Acquire ParallelLimiter BEFORE executing
+            // This ensures constrained resources are acquired before holding constraint keys
+            if (test.Context.ParallelLimiter != null)
+            {
+                parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
+                await parallelLimiterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            // Execute the test (constraint keys are already held by caller)
+            await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
+            // Release ParallelLimiter if we acquired it
+            parallelLimiterSemaphore?.Release();
+
             // Release the constraint keys and check if any waiting tests can now run
             var testsToStart = new List<(AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, TaskCompletionSource<bool> StartSignal)>();
             
@@ -175,30 +188,6 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
                 await _logger.LogDebugAsync($"Unblocking waiting test {testToStart.Test.TestId} with constraint keys: {string.Join(", ", testToStart.ConstraintKeys)}").ConfigureAwait(false);
                 testToStart.StartSignal.SetResult(true);
             }
-        }
-    }
-
-    private async Task ExecuteTestWithParallelLimitAsync(
-        AbstractExecutableTest test,
-        CancellationToken cancellationToken)
-    {
-        // Check if test has parallel limit constraint
-        if (test.Context.ParallelLimiter != null)
-        {
-            var semaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
-            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
-            {
-                await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
-            }
-            finally
-            {
-                semaphore.Release();
-            }
-        }
-        else
-        {
-            await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
         }
     }
 }

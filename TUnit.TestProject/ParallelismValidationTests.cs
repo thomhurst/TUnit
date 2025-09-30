@@ -5,19 +5,10 @@ using TUnit.Core.Interfaces;
 namespace TUnit.TestProject;
 
 /// <summary>
-/// Comprehensive tests to validate parallelism works correctly and doesn't regress.
-/// These tests verify that:
-/// 1. Tests without constraints run in parallel
-/// 2. ParallelLimiter correctly limits concurrency
-/// 3. Multiple parallel limiters work independently
+/// Tests that validate basic parallel execution without any limiters
 /// </summary>
-public class ParallelismValidationTests
+public class UnconstrainedParallelTests
 {
-    /// <summary>
-    /// Tests that validate basic parallel execution without any limiters
-    /// </summary>
-    public class UnconstrainedParallelTests
-    {
         private static readonly ConcurrentBag<(string TestName, DateTimeOffset Start, DateTimeOffset End)> _executionTimes = [];
         private static int _concurrentCount = 0;
         private static int _maxConcurrent = 0;
@@ -40,8 +31,8 @@ public class ParallelismValidationTests
 
             var times = _executionTimes.ToArray();
 
-            // Check we have all 12 tests (4 methods × 3 repeats)
-            await Assert.That(times.Length).IsEqualTo(12);
+            // Check we have all 16 tests (4 methods × 4 runs each with Repeat(3))
+            await Assert.That(times.Length).IsEqualTo(16);
 
             // Check that tests overlapped (ran in parallel)
             var hadOverlap = false;
@@ -103,22 +94,22 @@ public class ParallelismValidationTests
             Thread.Sleep(50);
             Interlocked.Decrement(ref _concurrentCount);
         }
-    }
+}
 
-    /// <summary>
-    /// Limit for LimitedParallelTests - allows 3 concurrent tests
-    /// </summary>
-    public class Limit3 : IParallelLimit
-    {
-        public int Limit => 3;
-    }
+/// <summary>
+/// Limit for LimitedParallelTests - allows 3 concurrent tests
+/// </summary>
+public class Limit3 : IParallelLimit
+{
+    public int Limit => 3;
+}
 
-    /// <summary>
-    /// Tests that validate ParallelLimiter correctly limits concurrency to 3
-    /// </summary>
-    [ParallelLimiter<Limit3>]
-    public class LimitedParallelTests
-    {
+/// <summary>
+/// Tests that validate ParallelLimiter correctly limits concurrency to 3
+/// </summary>
+[ParallelLimiter<Limit3>]
+public class LimitedParallelTests
+{
         private static readonly ConcurrentBag<(string TestName, DateTimeOffset Start, DateTimeOffset End)> _executionTimes = [];
         private static int _concurrentCount = 0;
         private static int _maxConcurrent = 0;
@@ -142,8 +133,8 @@ public class ParallelismValidationTests
 
             var times = _executionTimes.ToArray();
 
-            // Check we have all 12 tests (4 methods × 3 repeats)
-            await Assert.That(times.Length).IsEqualTo(12);
+            // Check we have all 16 tests (4 methods × 4 runs each with Repeat(3))
+            await Assert.That(times.Length).IsEqualTo(16);
 
             // Check that tests overlapped (ran in parallel)
             var hadOverlap = false;
@@ -214,22 +205,22 @@ public class ParallelismValidationTests
             Thread.Sleep(50);
             Interlocked.Decrement(ref _concurrentCount);
         }
-    }
+}
 
-    /// <summary>
-    /// Limit for StrictlySerialTests - allows only 1 test at a time
-    /// </summary>
-    public class Limit1 : IParallelLimit
-    {
-        public int Limit => 1;
-    }
+/// <summary>
+/// Limit for StrictlySerialTests - allows only 1 test at a time
+/// </summary>
+public class Limit1 : IParallelLimit
+{
+    public int Limit => 1;
+}
 
-    /// <summary>
-    /// Tests that validate ParallelLimiter with limit=1 forces serial execution
-    /// </summary>
-    [ParallelLimiter<Limit1>]
-    public class StrictlySerialTests
-    {
+/// <summary>
+/// Tests that validate ParallelLimiter with limit=1 forces serial execution
+/// </summary>
+[ParallelLimiter<Limit1>]
+public class StrictlySerialTests
+{
         private static readonly ConcurrentBag<(string TestName, DateTimeOffset Start, DateTimeOffset End)> _executionTimes = [];
         private static int _concurrentCount = 0;
         private static int _maxConcurrent = 0;
@@ -253,8 +244,8 @@ public class ParallelismValidationTests
 
             var times = _executionTimes.ToArray();
 
-            // Check we have all 8 tests (4 methods × 2 repeats)
-            await Assert.That(times.Length).IsEqualTo(8);
+            // Check we have all 12 tests (4 methods × 3 runs each with Repeat(2))
+            await Assert.That(times.Length).IsEqualTo(12);
 
             // With limit=1, no tests should overlap
             var hadOverlap = false;
@@ -323,22 +314,22 @@ public class ParallelismValidationTests
             Thread.Sleep(50);
             Interlocked.Decrement(ref _concurrentCount);
         }
-    }
+}
 
-    /// <summary>
-    /// Limit for HighParallelismTests - allows 10 concurrent tests
-    /// </summary>
-    public class Limit10 : IParallelLimit
-    {
-        public int Limit => 10;
-    }
+/// <summary>
+/// Limit for HighParallelismTests - allows 10 concurrent tests
+/// </summary>
+public class Limit10 : IParallelLimit
+{
+    public int Limit => 10;
+}
 
-    /// <summary>
-    /// Tests that validate ParallelLimiter with higher limit (10) allows high concurrency
-    /// </summary>
-    [ParallelLimiter<Limit10>]
-    public class HighParallelismTests
-    {
+/// <summary>
+/// Tests that validate ParallelLimiter with higher limit (10) allows high concurrency
+/// </summary>
+[ParallelLimiter<Limit10>]
+public class HighParallelismTests
+{
         private static readonly ConcurrentBag<(string TestName, DateTimeOffset Start, DateTimeOffset End)> _executionTimes = [];
         private static int _concurrentCount = 0;
         private static int _maxConcurrent = 0;
@@ -361,8 +352,8 @@ public class ParallelismValidationTests
 
             var times = _executionTimes.ToArray();
 
-            // Check we have all 12 tests (4 methods × 3 repeats)
-            await Assert.That(times.Length).IsEqualTo(12);
+            // Check we have all 16 tests (4 methods × 4 runs each with Repeat(3))
+            await Assert.That(times.Length).IsEqualTo(16);
 
             // Check that tests overlapped significantly
             var hadOverlap = false;
@@ -425,5 +416,4 @@ public class ParallelismValidationTests
             Thread.Sleep(50);
             Interlocked.Decrement(ref _concurrentCount);
         }
-    }
 }
