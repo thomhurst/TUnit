@@ -13,12 +13,12 @@ namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
 internal sealed class SourceGeneratedPropertyStrategy : IPropertyInitializationStrategy
 {
     private readonly DataSourceInitializer _dataSourceInitializer;
-    private readonly TestObjectInitializer _testObjectInitializer;
+    private readonly ObjectRegistrationService _objectRegistrationService;
 
-    public SourceGeneratedPropertyStrategy(DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
+    public SourceGeneratedPropertyStrategy(DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
     {
         _dataSourceInitializer = dataSourceInitializer ?? throw new System.ArgumentNullException(nameof(dataSourceInitializer));
-        _testObjectInitializer = testObjectInitializer ?? throw new System.ArgumentNullException(nameof(testObjectInitializer));
+        _objectRegistrationService = objectRegistrationService ?? throw new System.ArgumentNullException(nameof(objectRegistrationService));
     }
     /// <summary>
     /// Determines if this strategy can handle source-generated properties.
@@ -61,7 +61,7 @@ internal sealed class SourceGeneratedPropertyStrategy : IPropertyInitializationS
         else
         {
             // Step 1: Resolve data from the data source (execution-time resolution)
-            resolvedValue = await PropertyDataResolver.ResolvePropertyDataAsync(context, _dataSourceInitializer, _testObjectInitializer);
+            resolvedValue = await PropertyDataResolver.ResolvePropertyDataAsync(context, _dataSourceInitializer, _objectRegistrationService);
             if (resolvedValue == null)
             {
                 return;
@@ -70,7 +70,7 @@ internal sealed class SourceGeneratedPropertyStrategy : IPropertyInitializationS
             context.ResolvedValue = resolvedValue;
 
             // Step 2: Track the property value (only for non-pre-resolved properties)
-            PropertyTrackingService.TrackPropertyValue(context, resolvedValue);
+            PropertyLifecycleTracker.TrackPropertyValue(context, resolvedValue);
         }
 
         // Step 3: Set the property value
@@ -80,7 +80,7 @@ internal sealed class SourceGeneratedPropertyStrategy : IPropertyInitializationS
         // Step 4: Add to test context tracking (if not already there)
         if (context.TestContext != null && !context.TestContext.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(context.PropertyName))
         {
-            PropertyTrackingService.AddToTestContext(context, resolvedValue);
+            PropertyLifecycleTracker.AddToTestContext(context, resolvedValue);
         }
     }
 

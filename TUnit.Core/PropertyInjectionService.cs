@@ -17,7 +17,7 @@ namespace TUnit.Core;
 
 /// <summary>
 /// Internal service for property injection.
-/// Should only be called through TestObjectInitializer for centralized initialization.
+/// Used by ObjectRegistrationService during registration phase.
 /// </summary>
 internal sealed class PropertyInjectionService
 {
@@ -25,13 +25,13 @@ internal sealed class PropertyInjectionService
 
     public PropertyInjectionService(DataSourceInitializer dataSourceInitializer)
     {
-        // We'll set TestObjectInitializer later to break the circular dependency
+        // We'll set ObjectRegistrationService later to break the circular dependency
         _orchestrator = new PropertyInitializationOrchestrator(dataSourceInitializer, null!);
     }
     
-    public void Initialize(TestObjectInitializer testObjectInitializer)
+    public void Initialize(ObjectRegistrationService objectRegistrationService)
     {
-        _orchestrator.Initialize(testObjectInitializer);
+        _orchestrator.Initialize(objectRegistrationService);
     }
 
     /// <summary>
@@ -130,7 +130,6 @@ internal sealed class PropertyInjectionService
                                 var propertyValue = property.GetValue(instance);
                                 if (propertyValue != null)
                                 {
-                                    ObjectTracker.TrackObject(events, propertyValue);
                                     ObjectTracker.TrackOwnership(instance, propertyValue);
 
                                     if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
@@ -148,9 +147,8 @@ internal sealed class PropertyInjectionService
                             var propertyValue = property.GetValue(instance);
                             if (propertyValue != null)
                             {
-                                ObjectTracker.TrackObject(events, propertyValue);
                                 ObjectTracker.TrackOwnership(instance, propertyValue);
-                                
+
                                 if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
                                 {
                                     await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
@@ -171,7 +169,7 @@ internal sealed class PropertyInjectionService
                         instance, plan, objectBag, methodMetadata, events, visitedObjects);
                 });
 
-                // After orchestrator completes, track and recursively inject nested properties
+                // After orchestrator completes, recursively inject nested properties
                 var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
                 if (plan.HasProperties)
                 {
@@ -190,7 +188,6 @@ internal sealed class PropertyInjectionService
                                 var propertyValue = property.GetValue(instance);
                                 if (propertyValue != null)
                                 {
-                                    ObjectTracker.TrackObject(events, propertyValue);
                                     ObjectTracker.TrackOwnership(instance, propertyValue);
 
                                     if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
@@ -208,7 +205,6 @@ internal sealed class PropertyInjectionService
                             var propertyValue = property.GetValue(instance);
                             if (propertyValue != null)
                             {
-                                ObjectTracker.TrackObject(events, propertyValue);
                                 ObjectTracker.TrackOwnership(instance, propertyValue);
 
                                 if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))

@@ -19,7 +19,7 @@ internal static class PropertyDataResolver
     /// Resolves data from a property's data source.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Property types handled dynamically")]
-    public static async Task<object?> ResolvePropertyDataAsync(PropertyInitializationContext context, DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
+    public static async Task<object?> ResolvePropertyDataAsync(PropertyInitializationContext context, DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
     {
         var dataSource = await GetInitializedDataSourceAsync(context, dataSourceInitializer);
         if (dataSource == null)
@@ -51,13 +51,17 @@ internal static class PropertyDataResolver
                         context.MethodMetadata,
                         context.Events);
                 }
-                // Otherwise, initialize if it has injectable properties or implements IAsyncInitializer
-                else if (PropertyInjectionCache.HasInjectableProperties(value.GetType()) || 
-                         value is IAsyncInitializer)
+                // Otherwise, register if it has injectable properties
+                else if (PropertyInjectionCache.HasInjectableProperties(value.GetType()))
                 {
-                    // Use TestObjectInitializer for complete initialization
-                    value = await testObjectInitializer.InitializeAsync(value, context.TestContext);
+                    // Use ObjectRegistrationService for registration (property injection + tracking, NO IAsyncInitializer)
+                    await objectRegistrationService.RegisterObjectAsync(
+                        value,
+                        context.ObjectBag,
+                        context.MethodMetadata,
+                        context.Events);
                 }
+                // Note: IAsyncInitializer will be called during execution phase by ObjectInitializationService
                 
                 return value;
             }

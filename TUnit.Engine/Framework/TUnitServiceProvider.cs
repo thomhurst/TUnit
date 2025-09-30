@@ -51,7 +51,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public ParallelLimitLockProvider ParallelLimitLockProvider { get; }
     public PropertyInjectionService PropertyInjectionService { get; }
     public DataSourceInitializer DataSourceInitializer { get; }
-    public TestObjectInitializer TestObjectInitializer { get; }
+    public ObjectRegistrationService ObjectRegistrationService { get; }
+    public ObjectInitializationService ObjectInitializationService { get; }
 
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
@@ -84,16 +85,19 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create initialization services early as they're needed by other services
         DataSourceInitializer = Register(new DataSourceInitializer());
         PropertyInjectionService = Register(new PropertyInjectionService(DataSourceInitializer));
-        TestObjectInitializer = Register(new TestObjectInitializer(PropertyInjectionService));
-        
+
+        // NEW: Separate registration and execution services (replaces TestObjectInitializer)
+        ObjectRegistrationService = Register(new ObjectRegistrationService(PropertyInjectionService, DataSourceInitializer));
+        ObjectInitializationService = Register(new ObjectInitializationService());
+
         // Initialize the circular dependencies
-        PropertyInjectionService.Initialize(TestObjectInitializer);
+        PropertyInjectionService.Initialize(ObjectRegistrationService);
         DataSourceInitializer.Initialize(PropertyInjectionService);
 
-        // Register the test argument tracking service to handle object disposal for shared instances
-        var testArgumentTrackingService = Register(new TestArgumentTrackingService(TestObjectInitializer));
+        // Register the test argument registration service to handle object registration for shared instances
+        var testArgumentRegistrationService = Register(new TestArgumentRegistrationService(ObjectRegistrationService));
 
-        TestFilterService = Register(new TestFilterService(Logger, testArgumentTrackingService));
+        TestFilterService = Register(new TestFilterService(Logger, testArgumentRegistrationService));
 
         MessageBus = Register(new TUnitMessageBus(
             extension,
@@ -146,7 +150,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
 
-        var testInitializer = new TestInitializer(EventReceiverOrchestrator, TestObjectInitializer);
+        var testInitializer = new TestInitializer(EventReceiverOrchestrator, ObjectInitializationService, PropertyInjectionService);
 
         // Create the new TestCoordinator that orchestrates the granular services
         var testCoordinator = Register<ITestCoordinator>(

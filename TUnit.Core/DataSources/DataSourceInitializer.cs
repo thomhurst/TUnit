@@ -84,12 +84,8 @@ internal sealed class DataSourceInitializer
             {
                 await asyncInitializer.InitializeAsync();
             }
-            
-            // Step 3: Track for disposal
-            if (events != null)
-            {
-                ObjectTracker.TrackObject(events, dataSource);
-            }
+
+            // Note: Tracking is now handled by ObjectRegistrationService during registration phase
         }
         catch (Exception ex)
         {

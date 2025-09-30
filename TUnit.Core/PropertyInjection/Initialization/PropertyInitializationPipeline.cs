@@ -18,14 +18,14 @@ internal sealed class PropertyInitializationPipeline
     private readonly List<Func<PropertyInitializationContext, Task>> _afterSteps;
     private readonly DataSourceInitializer _dataSourceInitializer;
 
-    public PropertyInitializationPipeline(DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
+    public PropertyInitializationPipeline(DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
     {
         _dataSourceInitializer = dataSourceInitializer ?? throw new ArgumentNullException(nameof(dataSourceInitializer));
         _strategies = new List<IPropertyInitializationStrategy>
         {
-            new SourceGeneratedPropertyStrategy(dataSourceInitializer, testObjectInitializer),
-            new ReflectionPropertyStrategy(dataSourceInitializer, testObjectInitializer),
-            new NestedPropertyStrategy(dataSourceInitializer, testObjectInitializer)
+            new SourceGeneratedPropertyStrategy(dataSourceInitializer, objectRegistrationService),
+            new ReflectionPropertyStrategy(dataSourceInitializer, objectRegistrationService),
+            new NestedPropertyStrategy(dataSourceInitializer, objectRegistrationService)
         };
 
         _beforeSteps = new List<Func<PropertyInitializationContext, Task>>();
@@ -117,9 +117,9 @@ internal sealed class PropertyInitializationPipeline
     /// <summary>
     /// Creates a default pipeline with standard steps.
     /// </summary>
-    public static PropertyInitializationPipeline CreateDefault(DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
+    public static PropertyInitializationPipeline CreateDefault(DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
     {
-        return new PropertyInitializationPipeline(dataSourceInitializer, testObjectInitializer)
+        return new PropertyInitializationPipeline(dataSourceInitializer, objectRegistrationService)
             .AddBeforeStep(ValidateContext)
             .AddAfterStep(FinalizeInitialization);
     }

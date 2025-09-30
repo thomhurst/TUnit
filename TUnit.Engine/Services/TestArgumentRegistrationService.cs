@@ -15,73 +15,55 @@ using TUnit.Core.Tracking;
 namespace TUnit.Engine.Services;
 
 /// <summary>
-/// Service that handles tracking of test arguments (constructor args, method args) for disposal.
-/// Implements ITestRegisteredEventReceiver to track objects when tests are registered.
+/// Service that handles registration of test arguments (constructor args, method args) during test discovery.
+/// Implements ITestRegisteredEventReceiver to register objects when tests are registered.
+/// Renamed from TestArgumentTrackingService to clarify it's for the registration phase.
 /// </summary>
-internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
+internal sealed class TestArgumentRegistrationService : ITestRegisteredEventReceiver
 {
-    private readonly TestObjectInitializer _testObjectInitializer;
+    private readonly ObjectRegistrationService _objectRegistrationService;
 
-    public TestArgumentTrackingService(TestObjectInitializer testObjectInitializer)
+    public TestArgumentRegistrationService(ObjectRegistrationService objectRegistrationService)
     {
-        _testObjectInitializer = testObjectInitializer;
+        _objectRegistrationService = objectRegistrationService;
     }
 
-    public int Order => int.MinValue; // Run first to ensure tracking happens before other event receivers
+    public int Order => int.MinValue; // Run first to ensure registration happens before other event receivers
 
     /// <summary>
-    /// Called when a test is registered. This is the correct time to track constructor and method arguments
-    /// for shared instances, as per the ObjectTracker reference counting approach.
+    /// Called when a test is registered. This is the correct time to register constructor and method arguments
+    /// for proper reference counting and disposal tracking.
     /// </summary>
     public async ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         var testContext = context.TestContext;
         var classArguments = testContext.TestDetails.TestClassArguments;
         var methodArguments = testContext.TestDetails.TestMethodArguments;
-        
-        // Initialize class arguments (registration phase)
-        await _testObjectInitializer.InitializeArgumentsAsync(
+
+        // Register class arguments (registration phase - property injection + tracking, NO IAsyncInitializer)
+        await _objectRegistrationService.RegisterArgumentsAsync(
             classArguments,
             testContext.ObjectBag,
             testContext.TestDetails.MethodMetadata,
-            testContext.Events,
-            isRegistrationPhase: true);
+            testContext.Events);
 
-        // Initialize method arguments (registration phase)
-        await _testObjectInitializer.InitializeArgumentsAsync(
+        // Register method arguments (registration phase)
+        await _objectRegistrationService.RegisterArgumentsAsync(
             methodArguments,
             testContext.ObjectBag,
             testContext.TestDetails.MethodMetadata,
-            testContext.Events,
-            isRegistrationPhase: true);
-        
-        // Track all constructor and method arguments
-        // Note: TestObjectInitializer already handles tracking, but we ensure it here for clarity
-        var allArguments = classArguments.Concat(methodArguments);
-        
-        foreach (var obj in allArguments)
-        {
-            if (obj != null)
-            {
-                // Track each argument - for shared instances, this increments the reference count
-                // When the test ends, the count will be decremented via the test's Events.OnTestFinalized
-                ObjectTracker.TrackObject(testContext.Events, obj);
-            }
-        }
+            testContext.Events);
 
-        // Track properties that will be injected into the test class
-        await TrackPropertiesAsync(testContext);
+        // Register properties that will be injected into the test class
+        await RegisterPropertiesAsync(testContext);
     }
 
     /// <summary>
-    /// Tracks properties that will be injected into the test class instance.
-    /// This ensures proper reference counting for all property-injected instances.
+    /// Registers properties that will be injected into the test class instance.
+    /// This ensures proper reference counting for all property-injected instances during discovery.
     /// </summary>
-    private async ValueTask TrackPropertiesAsync(TestContext testContext)
+    private async ValueTask RegisterPropertiesAsync(TestContext testContext)
     {
-        // Track properties during registration for proper reference counting
-        // This is critical for SharedType.PerTestSession properties to have the right count
-
         var classType = testContext.TestDetails.ClassType;
         if (classType == null)
         {
@@ -113,7 +95,7 @@ internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
                 continue;
             }
 
-            // For ClassDataSource properties, we need to resolve and track them
+            // For ClassDataSource properties, we need to resolve and register them
             if (dataSourceType.Name.Contains("ClassDataSource"))
             {
                 try
@@ -151,15 +133,16 @@ internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
 
                             if (data != null)
                             {
-                                // Store for later injection (before initialization)
+                                // Store for later injection
                                 testContext.TestDetails.TestClassInjectedPropertyArguments[metadata.PropertyName] = data;
 
-                                // Track the object - this increments the reference count
-                                ObjectTracker.TrackObject(testContext.Events, data);
-
-                                // Initialize the ClassDataSource instance (including property injection and IAsyncInitializer)
-                                // This must be done AFTER storing to avoid recursive lookups failing
-                                await _testObjectInitializer.InitializeAsync(data, testContext);
+                                // Register the ClassDataSource instance during registration phase
+                                // This does: property injection + tracking (NO IAsyncInitializer - deferred to execution)
+                                await _objectRegistrationService.RegisterObjectAsync(
+                                    data,
+                                    testContext.ObjectBag,
+                                    testContext.TestDetails.MethodMetadata,
+                                    testContext.Events);
                             }
                         }
                         break; // Only take the first result for property injection

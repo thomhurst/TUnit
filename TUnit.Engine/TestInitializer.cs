@@ -8,22 +8,45 @@ namespace TUnit.Engine;
 internal class TestInitializer
 {
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
-    private readonly TestObjectInitializer _testObjectInitializer;
+    private readonly ObjectInitializationService _objectInitializationService;
+    private readonly PropertyInjectionService _propertyInjectionService;
 
-    public TestInitializer(EventReceiverOrchestrator eventReceiverOrchestrator, TestObjectInitializer testObjectInitializer)
+    public TestInitializer(EventReceiverOrchestrator eventReceiverOrchestrator, ObjectInitializationService objectInitializationService, PropertyInjectionService propertyInjectionService)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
-        _testObjectInitializer = testObjectInitializer;
+        _objectInitializationService = objectInitializationService;
+        _propertyInjectionService = propertyInjectionService;
     }
 
     public async Task InitializeTest(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        // Use centralized TestObjectInitializer for all initialization
-        await _testObjectInitializer.InitializeTestClassAsync(
-            test.Context.TestDetails.ClassInstance,
-            test.Context);
+        var testClassInstance = test.Context.TestDetails.ClassInstance;
 
-        // Initialize and register all eligible objects including event receivers
+        // Step 1: Inject properties into test class instance
+        // This sets pre-resolved properties that were created during registration phase
+        await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
+            testClassInstance,
+            test.Context.ObjectBag,
+            test.Context.TestDetails.MethodMetadata,
+            test.Context.Events);
+
+        // Step 2: Initialize test method arguments
+        // Method arguments were already registered (property injection + tracking) during test discovery
+        // Now we need to call IAsyncInitializer on them before test execution
+        var methodArguments = test.Context.TestDetails.TestMethodArguments;
+        if (methodArguments != null && methodArguments.Length > 0)
+        {
+            var argumentTasks = methodArguments
+                .Where(arg => arg != null)
+                .Select(arg => _objectInitializationService.InitializeAsync(arg!))
+                .ToArray();
+            await Task.WhenAll(argumentTasks);
+        }
+
+        // Step 3: Call IAsyncInitializer on test class (execution-phase initialization)
+        await _objectInitializationService.InitializeAsync(testClassInstance);
+
+        // Step 4: Initialize and register all eligible objects including event receivers
         await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken).ConfigureAwait(false);
     }
 }

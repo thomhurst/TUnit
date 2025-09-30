@@ -2072,14 +2072,6 @@ namespace .Hooks
         public abstract . ExecuteAsync(T context, .CancellationToken cancellationToken);
     }
 }
-namespace .Initialization
-{
-    public class TestObjectInitializationException : 
-    {
-        public TestObjectInitializationException(string message) { }
-        public TestObjectInitializationException(string message,  innerException) { }
-    }
-}
 namespace .Interfaces
 {
     public sealed class CompileTimeResolvedData

@@ -7,10 +7,11 @@ using TUnit.Core.Tracking;
 namespace TUnit.Core.PropertyInjection.Initialization;
 
 /// <summary>
-/// Centralizes all property tracking operations during initialization.
+/// Centralizes all property lifecycle tracking operations during initialization.
 /// Follows Single Responsibility Principle by handling only tracking concerns.
+/// Renamed from PropertyTrackingService to clarify focus on lifecycle/disposal tracking.
 /// </summary>
-internal static class PropertyTrackingService
+internal static class PropertyLifecycleTracker
 {
     /// <summary>
     /// Tracks a property value for disposal and ownership.
