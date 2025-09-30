@@ -151,15 +151,15 @@ internal sealed class TestArgumentTrackingService : ITestRegisteredEventReceiver
 
                             if (data != null)
                             {
-                                // Store for later injection
+                                // Store for later injection (before initialization)
                                 testContext.TestDetails.TestClassInjectedPropertyArguments[metadata.PropertyName] = data;
 
                                 // Track the object - this increments the reference count
                                 ObjectTracker.TrackObject(testContext.Events, data);
 
-
-                                // Initialize if it implements IAsyncInitializer but defer to execution time
-                                // We don't initialize here as the test hasn't started yet
+                                // Initialize the ClassDataSource instance (including property injection and IAsyncInitializer)
+                                // This must be done AFTER storing to avoid recursive lookups failing
+                                await _testObjectInitializer.InitializeAsync(data, testContext);
                             }
                         }
                         break; // Only take the first result for property injection

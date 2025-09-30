@@ -15,14 +15,36 @@ internal static class PropertyInjectionPlanBuilder
 {
     /// <summary>
     /// Creates an injection plan for source-generated mode.
+    /// Walks the inheritance chain to include all injectable properties from base classes.
     /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "BaseType reflection is required for inheritance support")]
     public static PropertyInjectionPlan BuildSourceGeneratedPlan(Type type)
     {
-        var propertySource = PropertySourceRegistry.GetSource(type);
-        var sourceGenProps = propertySource?.ShouldInitialize == true 
-            ? propertySource.GetPropertyMetadata().ToArray() 
-            : Array.Empty<PropertyInjectionMetadata>();
-            
+        var allProperties = new List<PropertyInjectionMetadata>();
+        var processedProperties = new HashSet<string>();
+
+        // Walk up the inheritance chain to find all properties with data sources
+        var currentType = type;
+        while (currentType != null && currentType != typeof(object))
+        {
+            var propertySource = PropertySourceRegistry.GetSource(currentType);
+            if (propertySource?.ShouldInitialize == true)
+            {
+                foreach (var metadata in propertySource.GetPropertyMetadata())
+                {
+                    // Skip if we've already processed a property with this name (overridden in derived class)
+                    if (processedProperties.Add(metadata.PropertyName))
+                    {
+                        allProperties.Add(metadata);
+                    }
+                }
+            }
+
+            currentType = currentType.BaseType;
+        }
+
+        var sourceGenProps = allProperties.ToArray();
+
         return new PropertyInjectionPlan
         {
             Type = type,

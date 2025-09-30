@@ -109,6 +109,13 @@ internal static class PropertyDataResolver
         if (context.SourceGeneratedMetadata != null)
         {
             // Source-generated mode
+            if (context.SourceGeneratedMetadata.ContainingType == null)
+            {
+                throw new InvalidOperationException(
+                    $"ContainingType is null for property '{context.PropertyName}'. " +
+                    $"This may indicate an issue with source generator for type '{context.PropertyType.Name}'.");
+            }
+
             var propertyMetadata = new PropertyMetadata
             {
                 IsStatic = false,

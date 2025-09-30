@@ -34,7 +34,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var typeDecl = (TypeDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;
 
-        if (semanticModel.GetDeclaredSymbol(typeDecl) is not INamedTypeSymbol typeSymbol || typeSymbol.IsAbstract)
+        if (semanticModel.GetDeclaredSymbol(typeDecl) is not INamedTypeSymbol typeSymbol)
         {
             return null;
         }
@@ -106,7 +106,14 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static bool CanSetProperty(IPropertySymbol property)
     {
-        return property.SetMethod != null || property.SetMethod?.IsInitOnly == true;
+        // Check if property has a setter (including init-only setters)
+        if (property.SetMethod == null)
+        {
+            return false;
+        }
+
+        // Property has a setter (either set or init)
+        return true;
     }
 
     private static bool IsPubliclyAccessible(INamedTypeSymbol typeSymbol)

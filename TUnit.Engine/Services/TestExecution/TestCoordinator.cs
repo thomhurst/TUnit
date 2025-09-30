@@ -103,7 +103,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
-            // Fire OnDispose for cleanup that might happen between retries
+            // Fire OnDispose for cleanup after all retries are complete
             if (test.Context.Events.OnDispose?.InvocationList != null)
             {
                 try
@@ -117,6 +117,16 @@ internal sealed class TestCoordinator : ITestCoordinator
                 {
                     await _logger.LogErrorAsync($"Error during test disposal for {test.TestId}: {ex}");
                 }
+            }
+
+            // Dispose test instance after OnDispose events, before OnTestFinalized
+            try
+            {
+                await TestExecutor.DisposeTestInstance(test);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {ex}");
             }
 
             // Fire OnTestFinalized after all retry attempts are complete
@@ -133,6 +143,18 @@ internal sealed class TestCoordinator : ITestCoordinator
                 {
                     await _logger.LogErrorAsync($"Error during test finalization for {test.TestId}: {ex}");
                 }
+            }
+
+            // Run After(Class/Assembly/Session) hooks after OnTestFinalized
+            try
+            {
+                var testClass = test.Metadata.TestClassType;
+                var testAssembly = testClass.Assembly;
+                await _testExecutor.ExecuteAfterClassAssemblySessionHooks(test, testClass, testAssembly, CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error executing After hooks for {test.TestId}: {ex}");
             }
 
             switch (test.State)

@@ -1,121 +1,115 @@
-# TUnit Development Guide
+# TUnit Development Guide for LLM Agents
 
-## Critical Rules
-1. **Behavioral parity** between source-generated and reflection modes is mandatory
-2. **Run snapshot tests** when changing:
-   - Source generator output: `dotnet test TUnit.Core.SourceGenerator.Tests`  
-   - Public APIs: `dotnet test TUnit.PublicAPI`
-3. **Accept snapshots**: Rename `.received.txt` → `.verified.txt` and commit
-4. **Use Microsoft.Testing.Platform**, never VSTest
-5. **Performance is paramount** - this framework may be used by millions
+## MANDATORY RULES - ALWAYS FOLLOW
+1. **Dual-mode implementation required**: ALL changes must work identically in both source-generated and reflection modes
+2. **Snapshot tests are critical**: After ANY change to source generator or public APIs, you MUST run and accept snapshots
+3. **Never use VSTest**: This project uses Microsoft.Testing.Platform exclusively
+4. **Performance first**: Optimize for speed - this framework is used by millions
 
-## Architecture
+## When You Make Changes
 
-### Dual Execution Modes
-- **Source Generated**: Compile-time generation for performance
-- **Reflection**: Runtime for dynamic scenarios
-- Both must produce identical behavior
+### If you modify source generator code:
+1. Run: `dotnet test TUnit.Core.SourceGenerator.Tests`
+2. If snapshots differ, rename ALL `*.received.txt` files to `*.verified.txt`
+3. Commit the updated `.verified.txt` files
 
-### Core Components
-- **TUnit.Core**: Abstractions and interfaces
-- **TUnit.Engine**: Test discovery and execution
-- **TUnit.Core.SourceGenerator**: Compile-time generation
-- **TUnit.Assertions**: Fluent assertions
-- **TUnit.Analyzers**: Compile-time validation
+### If you modify public APIs:
+1. Run: `dotnet test TUnit.PublicAPI`
+2. If snapshots differ, rename ALL `*.received.txt` files to `*.verified.txt`
+3. Commit the updated `.verified.txt` files
 
-## Coding Standards
+### If you add a feature:
+1. Implement in BOTH `TUnit.Core.SourceGenerator` AND `TUnit.Engine` (reflection path)
+2. Verify identical behavior in both modes
+3. Add tests covering both execution paths
+4. Consider if an analyzer rule would help prevent misuse
+5. Test performance impact
 
-### Modern C#
-- Collection initializers: `List<string> list = []`
-- Pattern matching, records, file-scoped namespaces
-- `var` for obvious types
-- `ValueTask` for potentially synchronous operations
-
-### Formatting
-```csharp
-if (condition)
-{
-    DoSomething();  // Always use braces
-}
-```
-- PascalCase public, _camelCase private fields
-- Expression-bodied members for simple logic
-- Meaningful names over comments
-
-### Performance
-- Minimize allocations in hot paths
-- Object pooling for frequent allocations
-- Cache reflection results
-- Profile discovery and execution paths
-
-## Development Workflow
-
-### Adding Features
-1. Implement in both execution modes
-2. Add analyzer rules if applicable
-3. Write comprehensive tests
-4. Verify performance impact
-5. Update documentation
-
-### Fixing Bugs
-1. Write failing test
-2. Fix in all affected modes
+### If you fix a bug:
+1. Write a failing test first
+2. Fix in BOTH execution modes (source-gen and reflection)
 3. Verify no performance regression
 
-### Before Submitting
-- [ ] Both modes tested
-- [ ] Source generator snapshots accepted (if changed)
-- [ ] Public API snapshots accepted (if changed)
-- [ ] Performance considered
-- [ ] No breaking changes
+## Project Structure
+- `TUnit.Core`: Abstractions, interfaces, attributes
+- `TUnit.Engine`: Test discovery and execution (reflection mode)
+- `TUnit.Core.SourceGenerator`: Compile-time code generation (source-gen mode)
+- `TUnit.Assertions`: Fluent assertion library
+- `TUnit.Analyzers`: Roslyn analyzers for compile-time validation
 
-## Quick Commands
+## Code Style (REQUIRED)
+```csharp
+// Modern C# syntax - always use
+List<string> list = [];  // Collection expressions
+var result = GetValue();  // var for obvious types
+
+// Always use braces
+if (condition)
+{
+    DoSomething();
+}
+
+// Naming
+public string PublicField;      // PascalCase
+private string _privateField;   // _camelCase
+
+// Async
+async ValueTask DoWorkAsync(CancellationToken cancellationToken)  // ValueTask when possibly sync
+```
+
+## Performance Guidelines
+- Minimize allocations in hot paths (discovery/execution)
+- Use object pooling for frequent allocations
+- Cache reflection results
+- Benchmark critical paths before/after changes
+
+## Common Commands
 ```bash
-# Run all tests
+# Test everything
 dotnet test
 
-# Source generator tests
+# Test source generator specifically
 dotnet test TUnit.Core.SourceGenerator.Tests
 
-# Public API tests
+# Test public API surface
 dotnet test TUnit.PublicAPI
 
-# Accept snapshots (Windows)
+# Accept snapshots (Windows - use this after verifying diffs are correct)
 for %f in (*.received.txt) do move /Y "%f" "%~nf.verified.txt"
 
-# Accept snapshots (Linux/macOS)
-for file in *.received.txt; do mv "$file" "${file%.received.txt}.verified.txt"; done
-
-# Run specific test
+# Run specific test by filter
 dotnet test -- --treenode-filter "/Assembly/Namespace/ClassName/TestName"
 ```
 
-## Key Patterns
-- **Error Handling**: Specific exceptions with context
-- **Async**: `CancellationToken` support throughout
-- **Reflection**: AOT-friendly with `[UnconditionalSuppressMessage]`
-- **Threading**: Ensure concurrent test safety
-- **Disposal**: Proper resource cleanup
+## AOT/Trimming Compatibility
+- Use `[UnconditionalSuppressMessage]` for known-safe reflection
+- Test with trimming/AOT enabled projects
+- Avoid dynamic code generation at runtime (use source generators instead)
 
-## Testing Categories
-- Unit tests for components
-- Integration for cross-component
-- Performance benchmarks for critical paths
-- Analyzer tests for compile-time rules
-- Snapshot tests for generator and API surface
+## Threading and Safety
+- All test execution must be thread-safe
+- Use proper synchronization for shared state
+- Dispose resources correctly (implement IDisposable/IAsyncDisposable)
 
-## Compatibility
-- .NET Standard 2.0, .NET 6, 8, 9+
-- AOT and trimming support
-- Various project configurations
+## Critical Mistakes to Avoid
+1. ❌ Implementing a feature only in source-gen mode (must do BOTH)
+2. ❌ Breaking change to public API without major version bump
+3. ❌ Forgetting to accept snapshots after intentional generator changes
+4. ❌ Performance regression in discovery or execution
+5. ❌ Using reflection in ways incompatible with AOT/trimming
 
-## Common Pitfalls
-1. Mode inconsistency between source-gen and reflection
-2. Performance regressions in discovery/execution
-3. AOT/trimming issues with reflection
-4. Thread safety in concurrent execution
-5. Resource leaks from improper disposal
-6. Forgetting to accept intentional snapshot changes
+## Verification Checklist
+Before completing any task, verify:
+- [ ] Works in both source-generated and reflection modes
+- [ ] Snapshots accepted if generator/API changed
+- [ ] Tests added and passing
+- [ ] No performance regression
+- [ ] AOT/trimming compatible
+- [ ] Thread-safe if touching concurrent code
 
-## Remember
-Every change must maintain TUnit's goals: **fast, modern, reliable, and enjoyable to use**.
+## Target Frameworks
+- .NET Standard 2.0 (library compatibility)
+- .NET 6, 8, 9+ (current support)
+
+## Philosophy
+TUnit aims to be: **fast, modern, reliable, and enjoyable to use**. Every change should advance these goals.

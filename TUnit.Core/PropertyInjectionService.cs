@@ -111,7 +111,7 @@ internal sealed class PropertyInjectionService
             if (alreadyProcessed && existingTask != null)
             {
                 await existingTask;
-                
+
                 var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
                 if (plan.HasProperties)
                 {
@@ -119,6 +119,11 @@ internal sealed class PropertyInjectionService
                     {
                         foreach (var metadata in plan.SourceGeneratedProperties)
                         {
+                            if (metadata.ContainingType == null)
+                            {
+                                continue;
+                            }
+
                             var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
                             if (property != null && property.CanRead)
                             {
@@ -127,7 +132,7 @@ internal sealed class PropertyInjectionService
                                 {
                                     ObjectTracker.TrackObject(events, propertyValue);
                                     ObjectTracker.TrackOwnership(instance, propertyValue);
-                                    
+
                                     if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
                                     {
                                         await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
@@ -160,16 +165,70 @@ internal sealed class PropertyInjectionService
                 await PropertyInjectionCache.GetOrAddInjectionTask(instance, async _ =>
                 {
                     var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
-                    
+
                     // Use the new orchestrator for property initialization
                     await _orchestrator.InitializeObjectWithPropertiesAsync(
                         instance, plan, objectBag, methodMetadata, events, visitedObjects);
                 });
+
+                // After orchestrator completes, track and recursively inject nested properties
+                var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
+                if (plan.HasProperties)
+                {
+                    if (SourceRegistrar.IsEnabled)
+                    {
+                        foreach (var metadata in plan.SourceGeneratedProperties)
+                        {
+                            if (metadata.ContainingType == null)
+                            {
+                                continue;
+                            }
+
+                            var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
+                            if (property != null && property.CanRead)
+                            {
+                                var propertyValue = property.GetValue(instance);
+                                if (propertyValue != null)
+                                {
+                                    ObjectTracker.TrackObject(events, propertyValue);
+                                    ObjectTracker.TrackOwnership(instance, propertyValue);
+
+                                    if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
+                                    {
+                                        await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var (property, _) in plan.ReflectionProperties)
+                        {
+                            var propertyValue = property.GetValue(instance);
+                            if (propertyValue != null)
+                            {
+                                ObjectTracker.TrackObject(events, propertyValue);
+                                ObjectTracker.TrackOwnership(instance, propertyValue);
+
+                                if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
+                                {
+                                    await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to inject properties for type '{instance.GetType().Name}': {ex.Message}", ex);
+            var detailedMessage = $"Failed to inject properties for type '{instance.GetType().Name}': {ex.Message}";
+            if (ex.StackTrace != null)
+            {
+                detailedMessage += $"\nStack trace: {ex.StackTrace}";
+            }
+            throw new InvalidOperationException(detailedMessage, ex);
         }
     }
 
