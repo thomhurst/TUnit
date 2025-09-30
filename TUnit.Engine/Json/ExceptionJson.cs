@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Engine.Json;
 
-public record ExceptionJson
+internal record ExceptionJson
 {
     public required string? Type { get; init; }
     public required string Message { get; init; }

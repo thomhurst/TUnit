@@ -2,7 +2,7 @@
 
 namespace TUnit.Engine.Json;
 
-public record TestResultJson
+internal record TestResultJson
 {
     public required TestState Status { get; init; }
     public required DateTimeOffset? Start { get; init; }
