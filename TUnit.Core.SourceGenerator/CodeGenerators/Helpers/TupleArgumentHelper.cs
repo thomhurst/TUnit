@@ -66,10 +66,10 @@ public static class TupleArgumentHelper
     public static List<string> GenerateArgumentAccessWithParams(IList<IParameterSymbol> parameters, string argumentsArrayName, object argumentCount)
     {
         var argumentExpressions = new List<string>();
-        
+
         // Parse argument count - can be an int or a string expression
         int argCount;
-        string argCountExpression = null;
+        string? argCountExpression = null;
         if (argumentCount is int count)
         {
             argCount = count;

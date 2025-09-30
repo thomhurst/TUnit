@@ -685,7 +685,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Find the data source method
-        var dataSourceMethod = targetType.GetMembers(methodName)
+        var dataSourceMethod = targetType.GetMembers(methodName!)
             .OfType<IMethodSymbol>()
             .FirstOrDefault();
 
@@ -2204,7 +2204,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         if (!string.IsNullOrEmpty(filePath))
         {
             var lineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
-            return (filePath, lineNumber);
+            return (filePath!, lineNumber);
         }
 
         var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
@@ -2212,7 +2212,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         {
             var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
                                  methodLocation.GetLineSpan().StartLinePosition.Line + 1;
-            return (attrFilePath, attrLineNumber);
+            return (attrFilePath!, attrLineNumber);
         }
 
         filePath = methodSyntax.SyntaxTree.FilePath ?? "";
@@ -2232,7 +2232,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
             if (!string.IsNullOrEmpty(filePath))
             {
                 var lineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
-                return (filePath, lineNumber);
+                return (filePath!, lineNumber);
             }
         }
 
@@ -2241,7 +2241,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         {
             var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
                                  classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-            return (attrFilePath, attrLineNumber);
+            return (attrFilePath!, attrLineNumber);
         }
 
         var classLocation = classInfo.ClassSyntax.GetLocation();
