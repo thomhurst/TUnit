@@ -646,6 +646,8 @@ namespace
         public string FilePath { get; }
         public int LineNumber { get; }
         public .<.AbstractDynamicTest> Tests { get; }
+        [.("Adding dynamic tests requires reflection which is not supported in native AOT sce" +
+            "narios.")]
         public void AddTest(.AbstractDynamicTest test) { }
     }
     public static class DynamicTestHelper
@@ -1925,6 +1927,8 @@ namespace .Extensions
     }
     public static class TestContextExtensions
     {
+        [.("Adding dynamic tests requires reflection which is not supported in native AOT sce" +
+            "narios.")]
         public static . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T>(this .TestContext context, .DynamicTest<T> dynamicTest)
             where T :  class { }
         public static string GetClassTypeName(this .TestContext context) { }
@@ -2355,6 +2359,8 @@ namespace .Interfaces
     }
     public interface ITestRegistry
     {
+        [.("Adding dynamic tests requires runtime compilation and reflection which are not su" +
+            "pported in native AOT scenarios.")]
         . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T>(.TestContext context, .DynamicTest<T> dynamicTest)
             where T :  class;
     }

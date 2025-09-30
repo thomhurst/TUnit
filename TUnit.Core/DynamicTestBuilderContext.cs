@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace TUnit.Core;
 
 /// <summary>
@@ -20,6 +22,7 @@ public class DynamicTestBuilderContext
 
     public IReadOnlyList<AbstractDynamicTest> Tests => _tests.AsReadOnly();
 
+    [RequiresDynamicCode("Adding dynamic tests requires reflection which is not supported in native AOT scenarios.")]
     public void AddTest(AbstractDynamicTest test)
     {
         // Set creator location if the test implements IDynamicTestCreatorLocation
@@ -28,7 +31,7 @@ public class DynamicTestBuilderContext
             testWithLocation.CreatorFilePath = FilePath;
             testWithLocation.CreatorLineNumber = LineNumber;
         }
-        
+
         _tests.Add(test);
     }
 }

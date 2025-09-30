@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TUnit.Core.DataSources;
 using TUnit.Core.Initialization;
@@ -35,6 +36,13 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Reflection mode support")]
     public async Task InitializePropertyAsync(PropertyInitializationContext context)
     {
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            throw new Exception("Using TUnit Reflection mechanisms isn't supported in AOT mode");
+        }
+#endif
+
         if (context.PropertyInfo == null || context.DataSource == null)
         {
             return;

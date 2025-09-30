@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core;
 
 namespace TUnit.Engine.Discovery;
@@ -59,8 +60,15 @@ internal static class ReflectionAttributeExtractor
     /// </summary>
     public static T? GetAttribute<T>(Type testClass, MethodInfo? testMethod = null) where T : Attribute
     {
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            throw new Exception("Using TUnit Reflection mechanisms isn't supported in AOT mode");
+        }
+#endif
+
         var cacheKey = new AttributeCacheKey(testClass, testMethod, typeof(T));
-        
+
         return (T?)_attributeCache.GetOrAdd(cacheKey, key =>
         {
             // Original lookup logic preserved
@@ -88,6 +96,13 @@ internal static class ReflectionAttributeExtractor
     /// </summary>
     public static IEnumerable<T> GetAttributes<T>(Type testClass, MethodInfo? testMethod = null) where T : Attribute
     {
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            throw new Exception("Using TUnit Reflection mechanisms isn't supported in AOT mode");
+        }
+#endif
+
         var attributes = new List<T>();
 
         attributes.AddRange(testClass.Assembly.GetCustomAttributes<T>());
@@ -104,7 +119,7 @@ internal static class ReflectionAttributeExtractor
     public static string[] ExtractCategories(Type testClass, MethodInfo testMethod)
     {
         var categories = new HashSet<string>();
-        
+
         foreach (var attr in GetAttributes<CategoryAttribute>(testClass, testMethod))
         {
             categories.Add(attr.Category);
@@ -128,7 +143,7 @@ internal static class ReflectionAttributeExtractor
     public static TestDependency[] ExtractDependencies(Type testClass, MethodInfo testMethod)
     {
         var dependencies = new List<TestDependency>();
-        
+
         foreach (var attr in GetAttributes<DependsOnAttribute>(testClass, testMethod))
         {
             dependencies.Add(attr.ToTestDependency());
@@ -155,13 +170,13 @@ internal static class ReflectionAttributeExtractor
     public static Attribute[] GetAllAttributes(Type testClass, MethodInfo testMethod)
     {
         var attributes = new List<Attribute>();
-        
+
         // Add in reverse order of precedence so method attributes come first
         // This ensures ScopedAttributeFilter will keep method-level attributes over class/assembly
         attributes.AddRange(testMethod.GetCustomAttributes());
         attributes.AddRange(testClass.GetCustomAttributes());
         attributes.AddRange(testClass.Assembly.GetCustomAttributes());
-        
+
         return attributes.ToArray();
     }
 
