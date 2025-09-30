@@ -310,6 +310,8 @@ internal sealed class TestScheduler : ITestScheduler
 
     private async Task ProcessTestQueueAsync(
         System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest> testQueue,
+        SemaphoreSlim workerLimitSemaphore,
+        List<Task> allTasks,
         CancellationToken cancellationToken)
     {
         while (testQueue.TryDequeue(out var test))
@@ -319,9 +321,29 @@ internal sealed class TestScheduler : ITestScheduler
                 break;
             }
 
-            var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
+            // Acquire worker semaphore slot before starting test
+            await workerLimitSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            var task = Task.Run(async () =>
+            {
+                try
+                {
+                    await ExecuteTestWithParallelLimitAsync(test, cancellationToken).ConfigureAwait(false);
+                }
+                finally
+                {
+                    // Release worker semaphore slot when test completes
+                    workerLimitSemaphore.Release();
+                }
+            }, cancellationToken);
+
             test.ExecutionTask = task;
-            await task.ConfigureAwait(false);
+
+            // Add to shared list so we can await all of them at the end
+            lock (allTasks)
+            {
+                allTasks.Add(task);
+            }
         }
     }
 
@@ -330,16 +352,32 @@ internal sealed class TestScheduler : ITestScheduler
         int maxParallelism,
         CancellationToken cancellationToken)
     {
-        // Use worker pool pattern to avoid creating too many concurrent test executions
+        // Use semaphore to limit concurrent test execution
         var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
-        var workers = new Task[maxParallelism];
+        var allTestTasks = new List<Task>();
+        var workerLimitSemaphore = new SemaphoreSlim(maxParallelism, maxParallelism);
 
-        for (var i = 0; i < maxParallelism; i++)
+        // Start workers that will dequeue and execute tests
+        var workers = new Task[Math.Min(maxParallelism, tests.Length)];
+        for (var i = 0; i < workers.Length; i++)
         {
-            workers[i] = ProcessTestQueueAsync(testQueue, cancellationToken);
+            workers[i] = ProcessTestQueueAsync(testQueue, workerLimitSemaphore, allTestTasks, cancellationToken);
         }
 
-        await WaitForTasksWithFailFastHandling(workers, cancellationToken).ConfigureAwait(false);
+        // Wait for all workers to finish dequeuing tests
+        await Task.WhenAll(workers).ConfigureAwait(false);
+
+        // Now await all test tasks to complete
+        Task[] testTasksArray;
+        lock (allTestTasks)
+        {
+            testTasksArray = allTestTasks.ToArray();
+        }
+
+        if (testTasksArray.Length > 0)
+        {
+            await WaitForTasksWithFailFastHandling(testTasksArray, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     /// <summary>
