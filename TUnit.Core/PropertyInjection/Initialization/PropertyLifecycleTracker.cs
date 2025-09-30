@@ -15,6 +15,7 @@ internal static class PropertyLifecycleTracker
 {
     /// <summary>
     /// Tracks a property value for disposal and ownership.
+    /// Uses idempotent tracker to ensure exactly-once disposal tracking.
     /// </summary>
     public static void TrackPropertyValue(PropertyInitializationContext context, object? propertyValue)
     {
@@ -23,8 +24,9 @@ internal static class PropertyLifecycleTracker
             return;
         }
 
-        // Track the object for disposal - pure reference counting
-        ObjectTracker.TrackObject(context.Events, propertyValue);
+        // Track the object for disposal using idempotent tracker
+        // This is safe even if already tracked by ObjectRegistrationService
+        ObjectLifecycleTracker.TrackObjectForDisposal(context.Events, propertyValue);
 
         // Track ownership relationship (this is separate from reference counting)
         if (context.ParentInstance != null)
@@ -103,14 +105,14 @@ internal static class PropertyLifecycleTracker
     }
 
     /// <summary>
-    /// Tracks a nested property value.
+    /// Tracks a nested property value using idempotent tracker.
     /// </summary>
     private static void TrackNestedPropertyValue(
         PropertyInitializationContext context,
         object parentInstance,
         object nestedValue)
     {
-        ObjectTracker.TrackObject(context.Events, nestedValue);
+        ObjectLifecycleTracker.TrackObjectForDisposal(context.Events, nestedValue);
         ObjectTracker.TrackOwnership(parentInstance, nestedValue);
     }
 

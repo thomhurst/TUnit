@@ -122,14 +122,14 @@ internal sealed class ObjectRegistrationService
     }
 
     /// <summary>
-    /// Tracks an object for disposal.
-    /// This is the SINGLE place where tracking happens during registration.
+    /// Tracks an object for disposal using idempotent tracker.
+    /// Multiple calls with the same object are safe - first succeeds, subsequent are no-ops.
     /// </summary>
     private void TrackObject(object instance, TestContextEvents events)
     {
         if (events != null)
         {
-            ObjectTracker.TrackObject(events, instance);
+            ObjectLifecycleTracker.TrackObjectForDisposal(events, instance);
         }
     }
 }
