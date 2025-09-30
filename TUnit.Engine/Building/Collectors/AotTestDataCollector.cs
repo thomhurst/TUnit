@@ -76,6 +76,8 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
     }
 
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.",
+        Justification = "Dynamic tests are opt-in and users are warned via RequiresDynamicCode on the method they call")]
     private async IAsyncEnumerable<TestMetadata> ConvertDynamicTestToMetadataStreaming(
         AbstractDynamicTest abstractDynamicTest,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -92,6 +94,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic tests require runtime compilation of lambda expressions and are not supported in native AOT scenarios.")]
     private Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
     {
         if (result.TestClassType == null || result.TestMethod == null)
@@ -144,6 +147,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         });
     }
 
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic test instance creation requires Activator.CreateInstance and MakeGenericType which are not supported in native AOT scenarios.")]
     [UnconditionalSuppressMessage("Trimming",
         "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicConstructors' in call to 'System.Type.GetConstructors()'",
         Justification = "AOT mode uses source-generated factories")]
@@ -187,6 +191,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic test invocation requires LambdaExpression.Compile() which is not supported in native AOT scenarios.")]
     private static Func<object, object?[], Task> CreateAotDynamicTestInvoker(DynamicDiscoveryResult result)
     {
         return async (instance, args) =>

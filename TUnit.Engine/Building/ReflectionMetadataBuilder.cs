@@ -21,13 +21,6 @@ internal static class ReflectionMetadataBuilder
             | DynamicallyAccessedMemberTypes.PublicProperties)] Type type,
         System.Reflection.MethodInfo method)
     {
-#if NET
-        if (!RuntimeFeature.IsDynamicCodeSupported)
-        {
-            throw new Exception("Using TUnit Reflection mechanisms isn't supported in AOT mode");
-        }
-#endif
-
         return new MethodMetadata
         {
             Name = method.Name,
