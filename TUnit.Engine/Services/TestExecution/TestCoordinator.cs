@@ -103,6 +103,8 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
+            var cleanupExceptions = new List<Exception>();
+
             // Fire OnDispose for cleanup after all retries are complete
             if (test.Context.Events.OnDispose?.InvocationList != null)
             {
@@ -116,6 +118,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                 catch (Exception ex)
                 {
                     await _logger.LogErrorAsync($"Error during test disposal for {test.TestId}: {ex}");
+                    cleanupExceptions.Add(ex);
                 }
             }
 
@@ -127,6 +130,7 @@ internal sealed class TestCoordinator : ITestCoordinator
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {ex}");
+                cleanupExceptions.Add(ex);
             }
 
             // Fire OnTestFinalized after all retry attempts are complete
@@ -142,19 +146,32 @@ internal sealed class TestCoordinator : ITestCoordinator
                 catch (Exception ex)
                 {
                     await _logger.LogErrorAsync($"Error during test finalization for {test.TestId}: {ex}");
+                    cleanupExceptions.Add(ex);
                 }
             }
 
             // Run After(Class/Assembly/Session) hooks after OnTestFinalized
-            try
+            var testClass = test.Metadata.TestClassType;
+            var testAssembly = testClass.Assembly;
+            var hookExceptions = await _testExecutor.ExecuteAfterClassAssemblySessionHooks(test, testClass, testAssembly, CancellationToken.None);
+
+            if (hookExceptions.Count > 0)
             {
-                var testClass = test.Metadata.TestClassType;
-                var testAssembly = testClass.Assembly;
-                await _testExecutor.ExecuteAfterClassAssemblySessionHooks(test, testClass, testAssembly, CancellationToken.None);
+                foreach (var ex in hookExceptions)
+                {
+                    await _logger.LogErrorAsync($"Error executing After hooks for {test.TestId}: {ex}");
+                }
+                cleanupExceptions.AddRange(hookExceptions);
             }
-            catch (Exception ex)
+
+            // If any cleanup exceptions occurred, mark the test as failed
+            if (cleanupExceptions.Count > 0)
             {
-                await _logger.LogErrorAsync($"Error executing After hooks for {test.TestId}: {ex}");
+                var aggregatedException = cleanupExceptions.Count == 1
+                    ? cleanupExceptions[0]
+                    : new AggregateException("One or more errors occurred during test cleanup", cleanupExceptions);
+
+                await _stateManager.MarkFailedAsync(test, aggregatedException);
             }
 
             switch (test.State)

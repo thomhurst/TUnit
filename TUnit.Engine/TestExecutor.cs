@@ -187,35 +187,42 @@ internal class TestExecutor
         }
     }
 
-    internal async Task ExecuteAfterClassAssemblySessionHooks(AbstractExecutableTest executableTest,
+    internal async Task<List<Exception>> ExecuteAfterClassAssemblySessionHooks(AbstractExecutableTest executableTest,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties
             | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, Assembly testAssembly, CancellationToken cancellationToken)
     {
+        var exceptions = new List<Exception>();
         var flags = _lifecycleCoordinator.DecrementAndCheckAfterHooks(testClass, testAssembly);
 
         if (flags.ShouldExecuteAfterClass)
         {
-            await _hookExecutor.ExecuteAfterClassHooksAsync(testClass, cancellationToken).ConfigureAwait(false);
+            var classExceptions = await _hookExecutor.ExecuteAfterClassHooksAsync(testClass, cancellationToken).ConfigureAwait(false);
+            exceptions.AddRange(classExceptions);
         }
 
         if (flags.ShouldExecuteAfterAssembly)
         {
-            await _hookExecutor.ExecuteAfterAssemblyHooksAsync(testAssembly, cancellationToken).ConfigureAwait(false);
+            var assemblyExceptions = await _hookExecutor.ExecuteAfterAssemblyHooksAsync(testAssembly, cancellationToken).ConfigureAwait(false);
+            exceptions.AddRange(assemblyExceptions);
         }
 
         if (flags.ShouldExecuteAfterTestSession)
         {
-            await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
+            var sessionExceptions = await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
+            exceptions.AddRange(sessionExceptions);
         }
+
+        return exceptions;
     }
 
     /// <summary>
     /// Execute session-level after hooks once at the end of test execution.
+    /// Returns any exceptions that occurred during hook execution.
     /// </summary>
-    public async Task ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
+    public async Task<List<Exception>> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
-        await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
+        return await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
