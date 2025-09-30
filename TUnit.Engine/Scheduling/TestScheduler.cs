@@ -308,38 +308,65 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    private async Task ProcessTestQueueAsync(
-        System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest> testQueue,
-        CancellationToken cancellationToken)
-    {
-        while (testQueue.TryDequeue(out var test))
-        {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                break;
-            }
-
-            var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
-            test.ExecutionTask = task;
-            await task.ConfigureAwait(false);
-        }
-    }
-
     private async Task ExecuteParallelTestsWithLimitAsync(
         AbstractExecutableTest[] tests,
         int maxParallelism,
         CancellationToken cancellationToken)
     {
-        // Use worker pool pattern to avoid creating too many concurrent test executions
-        var testQueue = new System.Collections.Concurrent.ConcurrentQueue<AbstractExecutableTest>(tests);
-        var workers = new Task[maxParallelism];
+        // Global semaphore limits total concurrent test execution
+        var globalSemaphore = new SemaphoreSlim(maxParallelism, maxParallelism);
 
-        for (var i = 0; i < maxParallelism; i++)
+        // Start all tests concurrently using two-phase acquisition pattern:
+        // Phase 1: Acquire ParallelLimiter (if test has one) - wait for constrained resource
+        // Phase 2: Acquire global semaphore - claim execution slot
+        //
+        // This ordering prevents resource underutilization: tests wait for constrained
+        // resources BEFORE claiming global slots, so global slots are only held during
+        // actual test execution, not during waiting for constrained resources.
+        //
+        // This is deadlock-free because:
+        // - All tests acquire ParallelLimiter BEFORE global semaphore
+        // - No test ever holds global while waiting for ParallelLimiter
+        // - Therefore, no circular wait can occur
+        var tasks = tests.Select(async test =>
         {
-            workers[i] = ProcessTestQueueAsync(testQueue, cancellationToken);
-        }
+            SemaphoreSlim? parallelLimiterSemaphore = null;
 
-        await WaitForTasksWithFailFastHandling(workers, cancellationToken).ConfigureAwait(false);
+            // Phase 1: Acquire ParallelLimiter first (if test has one)
+            if (test.Context.ParallelLimiter != null)
+            {
+                parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
+                await parallelLimiterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            try
+            {
+                // Phase 2: Acquire global semaphore
+                // At this point, we have the constrained resource (if needed),
+                // so we can immediately use the global slot for execution
+                await globalSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    // Execute the test
+                    var task = _testRunner.ExecuteTestAsync(test, cancellationToken);
+                    test.ExecutionTask = task;
+                    await task.ConfigureAwait(false);
+                }
+                finally
+                {
+                    // Always release global semaphore after execution
+                    globalSemaphore.Release();
+                }
+            }
+            finally
+            {
+                // Always release ParallelLimiter semaphore (if we acquired one)
+                parallelLimiterSemaphore?.Release();
+            }
+        }).ToArray();
+
+        // Wait for all tests to complete, handling fail-fast correctly
+        await WaitForTasksWithFailFastHandling(tasks, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
