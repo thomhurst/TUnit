@@ -15,9 +15,6 @@ namespace TUnit.Core.Tracking;
 public static class ObjectTracker
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
-    private static readonly ConcurrentDictionary<object, HashSet<object>> _ownedObjects = new();
-    private static readonly ConcurrentDictionary<object, bool> _disposalCallbackRegistered = new();
-    private static readonly ConcurrentDictionary<object, bool> _disposalInProgress = new();
 
     /// <summary>
     /// Tracks multiple objects for a test context and registers a single disposal handler.
@@ -47,8 +44,7 @@ public static class ObjectTracker
         }
 
         var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
-
-        var newCount = counter.Increment();
+        counter.Increment();
 
         events.OnTestFinalized += async (_, _) =>
         {
@@ -90,7 +86,7 @@ public static class ObjectTracker
             }
         };
     }
-    
+
     public static void OnDisposedAsync(object? o, Func<Task> asyncAction)
     {
         if(o is not IDisposable and not IAsyncDisposable)
@@ -106,158 +102,5 @@ public static class ObjectTracker
                 await asyncAction().ConfigureAwait(false);
             }
         };
-    }
-    
-    /// <summary>
-    /// Tracks that an owner object owns another object.
-    /// This increments the owned object's reference count.
-    /// When the owner is disposed, it will decrement the owned object's reference count.
-    /// </summary>
-    public static void TrackOwnership(object owner, object owned)
-    {
-        if (owner == null || owned == null || ShouldSkipTracking(owned))
-        {
-            return;
-        }
-        
-        // Prevent circular ownership - owner cannot own itself
-        if (ReferenceEquals(owner, owned))
-        {
-            return;
-        }
-        
-        // Check if this would create a circular ownership chain
-        if (IsOwnedBy(owned, owner))
-        {
-            // owned already owns owner, so we can't make owner own owned
-            return;
-        }
-        
-        var ownedSet = _ownedObjects.GetOrAdd(owner, _ => new HashSet<object>());
-        var shouldRegisterCallback = false;
-        
-        lock (ownedSet)
-        {
-            if (ownedSet.Add(owned))
-            {
-                var counter = _trackedObjects.GetOrAdd(owned, _ => new Counter());
-                counter.Increment();
-                
-                // Check if we need to register disposal callback (but do it outside the lock)
-                if (!_disposalCallbackRegistered.ContainsKey(owner))
-                {
-                    shouldRegisterCallback = _disposalCallbackRegistered.TryAdd(owner, true);
-                }
-            }
-        }
-        
-        // Register disposal callback OUTSIDE the lock to prevent deadlocks
-        if (shouldRegisterCallback)
-        {
-            OnDisposedAsync(owner, async () =>
-            {
-                await ReleaseOwnedObjectsAsync(owner).ConfigureAwait(false);
-            });
-        }
-    }
-    
-    private static bool IsOwnedBy(object potentialOwner, object potentialOwned)
-    {
-        // Check if potentialOwner owns potentialOwned (directly or indirectly)
-        var visited = new HashSet<object>();
-        var stack = new Stack<object>();
-        stack.Push(potentialOwner);
-        
-        while (stack.Count > 0)
-        {
-            var current = stack.Pop();
-            if (!visited.Add(current))
-            {
-                continue; // Already visited
-            }
-            
-            if (ReferenceEquals(current, potentialOwned))
-            {
-                return true; // Found circular ownership
-            }
-            
-            if (_ownedObjects.TryGetValue(current, out var ownedSet))
-            {
-                lock (ownedSet)
-                {
-                    foreach (var owned in ownedSet)
-                    {
-                        stack.Push(owned);
-                    }
-                }
-            }
-        }
-        
-        return false;
-    }
-    
-    private static async Task ReleaseOwnedObjectsAsync(object owner)
-    {
-        // Prevent multiple concurrent disposal attempts for the same owner
-        if (!_disposalInProgress.TryAdd(owner, true))
-        {
-            return; // Already being disposed
-        }
-        
-        try
-        {
-            if (_ownedObjects.TryRemove(owner, out var ownedSet))
-            {
-                List<Task> disposalTasks = new();
-                List<object> objectsToDispose = new();
-                
-                // CRITICAL FIX: Collect objects to dispose OUTSIDE the lock to prevent deadlocks
-                lock (ownedSet)
-                {
-                    foreach (var owned in ownedSet)
-                    {
-                        if (_trackedObjects.TryGetValue(owned, out var counter))
-                        {
-                            var count = counter.Decrement();
-                            if (count == 0)
-                            {
-                                // Mark as being disposed to prevent multiple disposal attempts
-                                if (_disposalInProgress.TryAdd(owned, true))
-                                {
-                                    objectsToDispose.Add(owned);
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Now create disposal tasks OUTSIDE the lock
-                foreach (var obj in objectsToDispose)
-                {
-                    disposalTasks.Add(GlobalContext.Current.Disposer.DisposeAsync(obj).AsTask());
-                }
-                
-                // Dispose all owned objects in parallel with timeout protection
-                if (disposalTasks.Count > 0)
-                {
-                    using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(30));
-                    try
-                    {
-                        await Task.WhenAll(disposalTasks).WaitAsync(cts.Token).ConfigureAwait(false);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        // Disposal timed out - log and continue
-                        System.Diagnostics.Debug.WriteLine($"Disposal of objects owned by {owner.GetType().Name} timed out after 30 seconds");
-                    }
-                }
-            }
-        }
-        finally
-        {
-            // Clean up tracking dictionaries for disposed objects
-            _disposalCallbackRegistered.TryRemove(owner, out _);
-            _disposalInProgress.TryRemove(owner, out _);
-        }
     }
 }

@@ -130,8 +130,6 @@ internal sealed class PropertyInjectionService
                                 var propertyValue = property.GetValue(instance);
                                 if (propertyValue != null)
                                 {
-                                    ObjectTracker.TrackOwnership(instance, propertyValue);
-
                                     if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
                                     {
                                         await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
@@ -147,8 +145,6 @@ internal sealed class PropertyInjectionService
                             var propertyValue = property.GetValue(instance);
                             if (propertyValue != null)
                             {
-                                ObjectTracker.TrackOwnership(instance, propertyValue);
-
                                 if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
                                 {
                                     await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
@@ -188,8 +184,6 @@ internal sealed class PropertyInjectionService
                                 var propertyValue = property.GetValue(instance);
                                 if (propertyValue != null)
                                 {
-                                    ObjectTracker.TrackOwnership(instance, propertyValue);
-
                                     if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
                                     {
                                         await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
@@ -205,8 +199,6 @@ internal sealed class PropertyInjectionService
                             var propertyValue = property.GetValue(instance);
                             if (propertyValue != null)
                             {
-                                ObjectTracker.TrackOwnership(instance, propertyValue);
-
                                 if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
                                 {
                                     await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);

@@ -51,12 +51,6 @@ internal sealed class SourceGeneratedPropertyStrategy : IPropertyInitializationS
             {
                 await asyncInitializer.InitializeAsync();
             }
-
-            // Set up ownership relationship
-            if (resolvedValue != null)
-            {
-                ObjectTracker.TrackOwnership(context.Instance, resolvedValue);
-            }
         }
         else
         {

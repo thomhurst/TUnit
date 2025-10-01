@@ -24,19 +24,7 @@ internal static class PropertyLifecycleTracker
             return;
         }
 
-        // Track the object for disposal using idempotent tracker
-        // This is safe even if already tracked by ObjectRegistrationService
         ObjectLifecycleTracker.TrackObjectForDisposal(context.Events, propertyValue);
-
-        // Track ownership relationship (this is separate from reference counting)
-        if (context.ParentInstance != null)
-        {
-            ObjectTracker.TrackOwnership(context.ParentInstance, propertyValue);
-        }
-        else
-        {
-            ObjectTracker.TrackOwnership(context.Instance, propertyValue);
-        }
     }
 
     /// <summary>
@@ -113,7 +101,6 @@ internal static class PropertyLifecycleTracker
         object nestedValue)
     {
         ObjectLifecycleTracker.TrackObjectForDisposal(context.Events, nestedValue);
-        ObjectTracker.TrackOwnership(parentInstance, nestedValue);
     }
 
     /// <summary>

@@ -14,11 +14,11 @@ public class Counter
     public int Increment()
     {
         var newCount = Interlocked.Increment(ref _count);
-        
+
         // Get a snapshot of the event handler to avoid race conditions
         var handler = _onCountChanged;
         handler?.Invoke(this, newCount);
-        
+
         return newCount;
     }
 

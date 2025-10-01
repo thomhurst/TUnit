@@ -75,7 +75,6 @@ internal sealed class TestCoordinator : ITestCoordinator
             // Execute test with retry logic - each retry gets a fresh instance
             await RetryHelper.ExecuteWithRetry(test.Context, async () =>
             {
-                // Create test instance for this attempt
                 test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
 
                 // Check if this test should be skipped (after creating instance)
