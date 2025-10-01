@@ -24,7 +24,7 @@ function Get-RuntimeIdentifier {
     } elseif ($IsLinux) {
         return "linux-x64"
     } elseif ($IsMacOS) {
-        return "osx-x64"
+        return "osx-arm64"
     } else {
         # Default to Windows if platform detection fails
         return "win-x64"
@@ -45,29 +45,29 @@ if (-not (Test-Path $testProjectDir)) {
 Push-Location $testProjectDir
 try {
     Write-Host "Building AOT version..." -ForegroundColor Yellow
-    
+
     # First restore with runtime identifier
     Write-Host "Restoring with runtime identifier $rid..." -ForegroundColor Cyan
     dotnet restore TUnit.TestProject.csproj `
         -r $rid 2>&1 | Out-String | Write-Host
-        
+
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Restore failed with exit code $LASTEXITCODE" -ForegroundColor Yellow
         exit $LASTEXITCODE
     }
-    
+
     # Build the test project
     Write-Host "Building TUnit.TestProject..." -ForegroundColor Cyan
     dotnet build TUnit.TestProject.csproj `
         -f $Framework `
         -c $Configuration `
         --no-restore 2>&1 | Out-String | Write-Host
-        
+
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Build failed with exit code $LASTEXITCODE" -ForegroundColor Yellow
         exit $LASTEXITCODE
     }
-    
+
     # Now publish with AOT - use the Aot property that's already in the project
     Write-Host "Publishing with AOT..." -ForegroundColor Cyan
     dotnet publish TUnit.TestProject.csproj `
@@ -79,27 +79,27 @@ try {
         -p:IlcGenerateStackTraceData=false `
         -p:IlcOptimizationPreference=Size `
         -o "TESTPROJECT_AOT" 2>&1 | Out-String | Write-Host
-    
+
     if ($LASTEXITCODE -ne 0) {
         Write-Host "AOT build completed with exit code $LASTEXITCODE" -ForegroundColor Yellow
         exit $LASTEXITCODE
     }
-    
+
     Write-Host "Running AOT tests..." -ForegroundColor Yellow
     $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-    
+
     $aotExecutable = Join-Path "TESTPROJECT_AOT" $executableName
     & $aotExecutable --treenode-filter $Filter 2>&1 | Out-String | Write-Host
-    
+
     $success = $LASTEXITCODE -eq 0
     $stopwatch.Stop()
-    
+
     if ($success) {
         Write-Host "AOT tests PASSED in $($stopwatch.Elapsed)" -ForegroundColor Green
     } else {
         Write-Host "AOT tests completed with exit code $LASTEXITCODE in $($stopwatch.Elapsed)" -ForegroundColor Yellow
     }
-    
+
     exit $LASTEXITCODE
 } catch {
     Write-Host "AOT tests FAILED with error: $_" -ForegroundColor Red

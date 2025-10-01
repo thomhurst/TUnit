@@ -24,7 +24,7 @@ function Get-RuntimeIdentifier {
     } elseif ($IsLinux) {
         return "linux-x64"
     } elseif ($IsMacOS) {
-        return "osx-x64"
+        return "osx-arm64"
     } else {
         # Default to Windows if platform detection fails
         return "win-x64"
@@ -45,34 +45,34 @@ if (-not (Test-Path $testProjectDir)) {
 Push-Location $testProjectDir
 try {
     Write-Host "Building SingleFile version..." -ForegroundColor Yellow
-    
+
     dotnet publish `
         -f $Framework `
         -c $Configuration `
         -r $rid `
         -p:SingleFile=true `
         -o "TESTPROJECT_SINGLEFILE" 2>&1 | Out-String | Write-Host
-    
+
     if ($LASTEXITCODE -ne 0) {
         Write-Host "SingleFile build completed with exit code $LASTEXITCODE" -ForegroundColor Yellow
         exit $LASTEXITCODE
     }
-    
+
     Write-Host "Running SingleFile tests..." -ForegroundColor Yellow
     $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-    
+
     $singleFileExecutable = Join-Path "TESTPROJECT_SINGLEFILE" $executableName
     & $singleFileExecutable --treenode-filter $Filter 2>&1 | Out-String | Write-Host
-    
+
     $success = $LASTEXITCODE -eq 0
     $stopwatch.Stop()
-    
+
     if ($success) {
         Write-Host "SingleFile tests PASSED in $($stopwatch.Elapsed)" -ForegroundColor Green
     } else {
         Write-Host "SingleFile tests completed with exit code $LASTEXITCODE in $($stopwatch.Elapsed)" -ForegroundColor Yellow
     }
-    
+
     exit $LASTEXITCODE
 } catch {
     Write-Host "SingleFile tests FAILED with error: $_" -ForegroundColor Red
