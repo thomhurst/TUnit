@@ -12,7 +12,7 @@ internal class TrackableObjectGraphProvider
 
         foreach (var classArgument in testDetails.TestClassArguments)
         {
-            if (classArgument != null)
+            if (classArgument != null && visitedObjects.Add(classArgument))
             {
                 yield return classArgument;
 
@@ -25,7 +25,7 @@ internal class TrackableObjectGraphProvider
 
         foreach (var methodArgument in testDetails.TestMethodArguments)
         {
-            if (methodArgument != null)
+            if (methodArgument != null && visitedObjects.Add(methodArgument))
             {
                 yield return methodArgument;
 
@@ -38,7 +38,7 @@ internal class TrackableObjectGraphProvider
 
         foreach (var property in testDetails.TestClassInjectedPropertyArguments.Values)
         {
-            if (property != null)
+            if (property != null && visitedObjects.Add(property))
             {
                 yield return property;
 
@@ -85,6 +85,12 @@ internal class TrackableObjectGraphProvider
                     continue;
                 }
 
+                // Check if already visited before yielding to prevent duplicates
+                if (!visitedObjects.Add(value))
+                {
+                    continue;
+                }
+
                 yield return value;
 
                 if (!PropertyInjectionCache.HasInjectableProperties(value.GetType()))
@@ -112,6 +118,12 @@ internal class TrackableObjectGraphProvider
                 var value = property.GetValue(obj);
 
                 if (value == null)
+                {
+                    continue;
+                }
+
+                // Check if already visited before yielding to prevent duplicates
+                if (!visitedObjects.Add(value))
                 {
                     continue;
                 }

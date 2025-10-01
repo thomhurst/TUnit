@@ -98,7 +98,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var trackableObjectGraphProvider = new TrackableObjectGraphProvider();
 
         var disposer = new Disposer(Logger);
-        
+
         var objectTracker = new ObjectTracker(trackableObjectGraphProvider, disposer);
 
         // Register the test argument registration service to handle object registration for shared instances
