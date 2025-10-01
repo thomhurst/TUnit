@@ -155,22 +155,6 @@ internal sealed class TestCoordinator : ITestCoordinator
                 cleanupExceptions.AddRange(hookExceptions);
             }
 
-            if (test.Context.Events.OnTestFinalized?.InvocationList != null)
-            {
-                try
-                {
-                    foreach (var invocation in test.Context.Events.OnTestFinalized.InvocationList.OrderBy(x => x.Order))
-                    {
-                        await invocation.InvokeAsync(test.Context, test.Context);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await _logger.LogErrorAsync($"Error during test finalization for {test.TestId}: {ex}");
-                    cleanupExceptions.Add(ex);
-                }
-            }
-
             // If any cleanup exceptions occurred, mark the test as failed
             if (cleanupExceptions.Count > 0)
             {

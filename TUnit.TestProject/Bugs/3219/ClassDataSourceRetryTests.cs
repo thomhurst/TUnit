@@ -30,13 +30,18 @@ public class DataClass : IAsyncInitializer, IAsyncDisposable
     {
         _disposeCount++;
         Value = -1;
+        IsDisposed = true;
         return default;
     }
+
+    public bool IsDisposed { get; private set; }
 }
 
 [EngineTest(ExpectedResult.Pass)]
+[NotInParallel]
 public class ClassDataSourceRetryTests
 {
+    private static bool _wasExecuted;
     private static int _attemptCount;
 
     [ClassDataSource<DataClass>(Shared = SharedType.PerTestSession)]
@@ -53,6 +58,7 @@ public class ClassDataSourceRetryTests
     [Retry(2)]
     public async Task TestThatFailsAndRetries()
     {
+        _wasExecuted = true;
         _attemptCount++;
 
         await Assert.That(DataClass.Value).IsEqualTo(42);
@@ -74,11 +80,13 @@ public class ClassDataSourceRetryTests
     }
 
     [After(TestSession)]
-    public static async Task VerifyDisposalAfterTestSession()
+    public static async Task VerifyDisposalAfterTestSession(TestSessionContext context)
     {
-        if(_attemptCount > 0)
+        var classInstance = context.TestClasses.FirstOrDefault(x => x.ClassType  == typeof(ClassDataSourceRetryTests))?.Tests.FirstOrDefault()?.TestDetails.ClassInstance as ClassDataSourceRetryTests;
+        var dataClass = classInstance?.DataClass;
+        if (dataClass != null)
         {
-            await Assert.That(DataClass.DisposeCount).IsEqualTo(1);
+            await Assert.That(dataClass.IsDisposed).IsTrue();
         }
     }
 }

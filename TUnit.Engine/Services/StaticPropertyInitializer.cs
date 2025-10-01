@@ -69,9 +69,8 @@ internal sealed class StaticPropertyInitializer
     /// <summary>
     /// Dispose all tracked static properties at session end
     /// </summary>
-    public async Task DisposeStaticPropertiesAsync()
+    public async Task DisposeStaticPropertiesAsync(List<Exception> cleanupExceptions)
     {
-        var cleanupExceptions = new List<Exception>();
         await _objectTracker.UntrackStaticPropertiesAsync(cleanupExceptions);
 
         if (cleanupExceptions.Count > 0)

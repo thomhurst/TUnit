@@ -114,10 +114,10 @@ internal sealed class TestScheduler : ITestScheduler
         // Execute tests according to their grouping
         await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
 
-        // Dispose static properties before After(TestSession) hooks
-        await _staticPropertyInitializer.DisposeStaticPropertiesAsync().ConfigureAwait(false);
+        var sessionHookExceptions = await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false) ?? [];
 
-        var sessionHookExceptions = await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
+        await _staticPropertyInitializer.DisposeStaticPropertiesAsync(sessionHookExceptions).ConfigureAwait(false);
+
         if (sessionHookExceptions.Count > 0)
         {
             foreach (var ex in sessionHookExceptions)
@@ -186,15 +186,15 @@ internal sealed class TestScheduler : ITestScheduler
 
             await ExecuteParallelGroupAsync(groupName, orderedTests, maxParallelism, cancellationToken).ConfigureAwait(false);
         }
-        
+
         // 2b. Execute constrained parallel groups (groups with both ParallelGroup and NotInParallel)
         foreach (var kvp in groupedTests.ConstrainedParallelGroups)
         {
             var groupName = kvp.Key;
             var constrainedTests = kvp.Value;
-            
+
             await _logger.LogDebugAsync($"Starting constrained parallel group '{groupName}' with {constrainedTests.UnconstrainedTests.Length} unconstrained and {constrainedTests.KeyedTests.Length} keyed tests").ConfigureAwait(false);
-            
+
             await ExecuteConstrainedParallelGroupAsync(groupName, constrainedTests, maxParallelism, cancellationToken).ConfigureAwait(false);
         }
 
@@ -264,7 +264,7 @@ internal sealed class TestScheduler : ITestScheduler
             await WaitForTasksWithFailFastHandling(orderTasks, cancellationToken).ConfigureAwait(false);
         }
     }
-    
+
     private async Task ExecuteConstrainedParallelGroupAsync(
         string groupName,
         GroupedConstrainedTests constrainedTests,
@@ -272,7 +272,7 @@ internal sealed class TestScheduler : ITestScheduler
         CancellationToken cancellationToken)
     {
         await _logger.LogDebugAsync($"Executing constrained parallel group '{groupName}'").ConfigureAwait(false);
-        
+
         // Start unconstrained tests (can run in parallel)
         var unconstrainedTasks = new List<Task>();
         if (constrainedTests.UnconstrainedTests.Length > 0)
@@ -281,8 +281,8 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 // Respect maximum parallel tests limit for unconstrained tests
                 var unconstrainedTask = ExecuteParallelTestsWithLimitAsync(
-                    constrainedTests.UnconstrainedTests, 
-                    maxParallelism.Value, 
+                    constrainedTests.UnconstrainedTests,
+                    maxParallelism.Value,
                     cancellationToken);
                 unconstrainedTasks.Add(unconstrainedTask);
             }
@@ -297,7 +297,7 @@ internal sealed class TestScheduler : ITestScheduler
                 }
             }
         }
-        
+
         // Execute keyed tests using the constraint key scheduler
         Task? keyedTask = null;
         if (constrainedTests.KeyedTests.Length > 0)
@@ -306,14 +306,14 @@ internal sealed class TestScheduler : ITestScheduler
                 constrainedTests.KeyedTests,
                 cancellationToken).AsTask();
         }
-        
+
         // Wait for both unconstrained and keyed tests to complete
         var allTasks = unconstrainedTasks.ToList();
         if (keyedTask != null)
         {
             allTasks.Add(keyedTask);
         }
-        
+
         if (allTasks.Count > 0)
         {
             await WaitForTasksWithFailFastHandling(allTasks.ToArray(), cancellationToken).ConfigureAwait(false);
