@@ -83,7 +83,9 @@ public class ClassDataSourceRetryTests
     public static async Task VerifyDisposalAfterTestSession(TestSessionContext context)
     {
         var classInstance = context.TestClasses.FirstOrDefault(x => x.ClassType  == typeof(ClassDataSourceRetryTests))?.Tests.FirstOrDefault()?.TestDetails.ClassInstance as ClassDataSourceRetryTests;
+
         var dataClass = classInstance?.DataClass;
+
         if (dataClass != null)
         {
             await Assert.That(dataClass.IsDisposed).IsTrue();
