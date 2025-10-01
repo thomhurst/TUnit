@@ -843,12 +843,33 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var inheritanceDepth = CalculateInheritanceDepth(testClass, testMethod);
 
+        // Determine the actual class type for generic type resolution
+        // If the method is declared in a generic base class, use the constructed version from the inheritance hierarchy
+        var typeForGenericResolution = testClass;
+        if (testMethod.DeclaringType != null &&
+            testMethod.DeclaringType != testClass &&
+            testMethod.DeclaringType.IsGenericTypeDefinition)
+        {
+            // Find the constructed generic type in the inheritance chain
+            var baseType = testClass.BaseType;
+            while (baseType != null)
+            {
+                if (baseType.IsGenericType &&
+                    baseType.GetGenericTypeDefinition() == testMethod.DeclaringType)
+                {
+                    typeForGenericResolution = baseType;
+                    break;
+                }
+                baseType = baseType.BaseType;
+            }
+        }
+
         try
         {
             return Task.FromResult<TestMetadata>(new ReflectionTestMetadata(testClass, testMethod)
             {
                 TestName = testName,
-                TestClassType = testClass,
+                TestClassType = typeForGenericResolution, // Use resolved type for generic resolution (may be constructed generic base)
                 TestMethodName = testMethod.Name,
                 Dependencies = ReflectionAttributeExtractor.ExtractDependencies(testClass, testMethod),
                 DataSources = ReflectionAttributeExtractor.ExtractDataSources(testMethod),
@@ -861,7 +882,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 FilePath = ExtractFilePath(testMethod) ?? "Unknown",
                 LineNumber = ExtractLineNumber(testMethod) ?? 0,
                 MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(testClass, testMethod),
-                GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(testClass),
+                GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(typeForGenericResolution),
                 GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(testMethod),
                 GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
                 AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(testClass, testMethod),
