@@ -165,15 +165,13 @@ public abstract class InvokableTestBase(TestMode testMode)
         }
         catch (Exception e)
         {
-            ThreadSafeOutput.WriteMultipleLines(
-                $@"Mode: {testMode}",
-                @$"Command Input: {command}",
-                @$"Error: {commandResult?.StandardError}",
-                @$"Output: {commandResult?.StandardOutput}"
-            );
-
             throw new Exception($"""
                                  Error asserting results for {TestContext.Current!.TestDetails.MethodMetadata.Class.Name}: {e.Message}
+
+                                 $@"Mode: {testMode}",
+                                 @$"Command Input: {command}",
+                                 @$"Error: {commandResult?.StandardError}",
+                                 @$"Output: {commandResult?.StandardOutput}"
 
                                  Expression: {assertionExpression}
                                  """, e);
