@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core;

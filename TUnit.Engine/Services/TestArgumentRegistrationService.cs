@@ -22,10 +22,12 @@ namespace TUnit.Engine.Services;
 internal sealed class TestArgumentRegistrationService : ITestRegisteredEventReceiver
 {
     private readonly ObjectRegistrationService _objectRegistrationService;
+    private readonly TrackableObjectGraphProvider _trackableObjectGraphProvider;
 
-    public TestArgumentRegistrationService(ObjectRegistrationService objectRegistrationService)
+    public TestArgumentRegistrationService(ObjectRegistrationService objectRegistrationService, TrackableObjectGraphProvider trackableObjectGraphProvider)
     {
         _objectRegistrationService = objectRegistrationService;
+        _trackableObjectGraphProvider = trackableObjectGraphProvider;
     }
 
     public int Order => int.MinValue; // Run first to ensure registration happens before other event receivers
@@ -56,50 +58,44 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
 
         // Register properties that will be injected into the test class
         await RegisterPropertiesAsync(testContext);
+
+        var objectGraph = _trackableObjectGraphProvider.GetTrackableObjects(testContext);
+
+        foreach (var trackableObject in objectGraph)
+        {
+            ObjectTracker.TrackObject(testContext.Events, trackableObject);
+        }
     }
 
     /// <summary>
     /// Registers properties that will be injected into the test class instance.
     /// This ensures proper reference counting for all property-injected instances during discovery.
+    /// Exceptions during data generation will be caught and associated with the test for reporting.
     /// </summary>
     private async ValueTask RegisterPropertiesAsync(TestContext testContext)
     {
-        var classType = testContext.TestDetails.ClassType;
-        if (classType == null)
+        try
         {
-            return;
-        }
+            var classType = testContext.TestDetails.ClassType;
 
-        // Get the property source for the class
-        var propertySource = PropertySourceRegistry.GetSource(classType);
-        if (propertySource?.ShouldInitialize != true)
-        {
-            // No properties to inject for this class
-            return;
-        }
-
-        // Get all properties that need injection
-        var propertyMetadata = propertySource.GetPropertyMetadata();
-
-        foreach (var metadata in propertyMetadata)
-        {
-            // Create the data source for this property
-            var dataSource = metadata.CreateDataSource();
-
-            // Check if this is a ClassDataSource (generic or untyped)
-            var dataSourceType = dataSource.GetType();
-
-            // Skip MethodDataSource and other dynamic sources - they'll be handled during execution
-            if (dataSourceType.Name.Contains("MethodDataSource"))
+            // Get the property source for the class
+            var propertySource = PropertySourceRegistry.GetSource(classType);
+            if (propertySource?.ShouldInitialize != true)
             {
-                continue;
+                // No properties to inject for this class
+                return;
             }
 
-            // For ClassDataSource properties, we need to resolve and register them
-            if (dataSourceType.Name.Contains("ClassDataSource"))
+            // Get all properties that need injection
+            var propertyMetadata = propertySource.GetPropertyMetadata();
+
+            foreach (var metadata in propertyMetadata)
             {
                 try
                 {
+                    // Create the data source for this property
+                    var dataSource = metadata.CreateDataSource();
+
                     // Create minimal DataGeneratorMetadata for property resolution during registration
                     var testBuilderContext = new TestBuilderContext
                     {
@@ -127,7 +123,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
                     await foreach (var dataRowFunc in dataRows)
                     {
                         var dataRow = await dataRowFunc();
-                        if (dataRow != null && dataRow.Length > 0)
+                        if (dataRow is { Length: > 0 })
                         {
                             var data = dataRow[0];
 
@@ -148,12 +144,26 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
                         break; // Only take the first result for property injection
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // If we can't resolve during registration, it will be resolved during execution
-                    // This is OK for dynamic data sources
+                    // Capture the exception for this property - mark the test as failed
+                    var exceptionMessage = $"Failed to generate data for property '{metadata.PropertyName}': {ex.Message}";
+                    var propertyException = new InvalidOperationException(exceptionMessage, ex);
+
+                    // Mark the test as failed immediately during registration
+                    testContext.InternalExecutableTest.SetResult(TestState.Failed, propertyException);
+                    return; // Stop processing further properties for this test
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            // Capture any top-level exceptions (e.g., getting property source)
+            var exceptionMessage = $"Failed to register properties for test '{testContext.TestDetails.TestName}': {ex.Message}";
+            var registrationException = new InvalidOperationException(exceptionMessage, ex);
+
+            // Mark the test as failed immediately during registration
+            testContext.InternalExecutableTest.SetResult(TestState.Failed, registrationException);
         }
     }
 }

@@ -1,11 +1,6 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
 using TUnit.Core.DataSources;
 using TUnit.Core.Initialization;
-using TUnit.Core.Interfaces;
-using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core.PropertyInjection.Initialization;
 

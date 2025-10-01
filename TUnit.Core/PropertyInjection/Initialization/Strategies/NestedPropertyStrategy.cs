@@ -1,9 +1,5 @@
-using System.Linq;
-using System.Threading.Tasks;
 using TUnit.Core.DataSources;
 using TUnit.Core.Initialization;
-using TUnit.Core.Interfaces;
-using TUnit.Core.Tracking;
 
 namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
 
@@ -64,9 +60,6 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
             await ObjectInitializer.InitializeAsync(propertyValue);
             return;
         }
-
-        // Track the property value and its nested properties
-        await PropertyLifecycleTracker.TrackNestedPropertiesAsync(context, propertyValue, plan);
 
         // Recursively inject properties into the nested object
         if (SourceRegistrar.IsEnabled)

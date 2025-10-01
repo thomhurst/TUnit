@@ -10,6 +10,7 @@ using TUnit.Core;
 using TUnit.Core.DataSources;
 using TUnit.Core.Initialization;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Collectors;
 using TUnit.Engine.Building.Interfaces;
@@ -88,15 +89,17 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         PropertyInjectionService = Register(new PropertyInjectionService(DataSourceInitializer));
 
         // NEW: Separate registration and execution services (replaces TestObjectInitializer)
-        ObjectRegistrationService = Register(new ObjectRegistrationService(PropertyInjectionService, DataSourceInitializer));
+        ObjectRegistrationService = Register(new ObjectRegistrationService(PropertyInjectionService));
         ObjectInitializationService = Register(new ObjectInitializationService());
 
         // Initialize the circular dependencies
         PropertyInjectionService.Initialize(ObjectRegistrationService);
         DataSourceInitializer.Initialize(PropertyInjectionService);
 
+        var trackableObjectGraphProvider = new TrackableObjectGraphProvider();
+
         // Register the test argument registration service to handle object registration for shared instances
-        var testArgumentRegistrationService = Register(new TestArgumentRegistrationService(ObjectRegistrationService));
+        var testArgumentRegistrationService = Register(new TestArgumentRegistrationService(ObjectRegistrationService, trackableObjectGraphProvider));
 
         TestFilterService = Register(new TestFilterService(Logger, testArgumentRegistrationService));
 
@@ -182,7 +185,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create scheduler configuration from command line options
         var testGroupingService = Register<ITestGroupingService>(new TestGroupingService());
         var circularDependencyDetector = Register(new CircularDependencyDetector());
-        
+
         var constraintKeyScheduler = Register<IConstraintKeyScheduler>(new ConstraintKeyScheduler(
             testRunner,
             Logger,

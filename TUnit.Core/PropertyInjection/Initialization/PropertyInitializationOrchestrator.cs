@@ -1,10 +1,6 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using TUnit.Core.DataSources;
 using TUnit.Core.Initialization;
 using TUnit.Core.Interfaces.SourceGenerator;

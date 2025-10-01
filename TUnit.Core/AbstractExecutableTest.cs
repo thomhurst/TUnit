@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Models;
 
 namespace TUnit.Core;

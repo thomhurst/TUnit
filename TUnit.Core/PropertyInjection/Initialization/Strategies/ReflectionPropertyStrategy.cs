@@ -1,10 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using TUnit.Core.DataSources;
 using TUnit.Core.Initialization;
-using TUnit.Core.Interfaces;
-using TUnit.Core.Tracking;
 
 namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
 
@@ -46,7 +43,7 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
         if (context.PropertyInfo == null || context.DataSource == null)
         {
             return;
-        }
+        };
 
         object? resolvedValue = null;
 
@@ -55,16 +52,6 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
         {
             // Use pre-resolved value - it was already initialized during first resolution
             context.ResolvedValue = resolvedValue;
-
-            // Track the property and its nested objects in THIS test's context
-            PropertyLifecycleTracker.TrackPropertyValue(context, resolvedValue);
-
-            // Track nested properties recursively in THIS test's context
-            if (resolvedValue != null && PropertyInjectionCache.HasInjectableProperties(resolvedValue.GetType()))
-            {
-                var plan = PropertyInjectionCache.GetOrCreatePlan(resolvedValue.GetType());
-                await PropertyLifecycleTracker.TrackNestedPropertiesAsync(context, resolvedValue, plan);
-            }
         }
         else
         {
@@ -76,9 +63,6 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
             }
 
             context.ResolvedValue = resolvedValue;
-
-            // Step 2: Track the property value
-            PropertyLifecycleTracker.TrackPropertyValue(context, resolvedValue);
         }
 
         // Step 3: Set the property value
@@ -88,7 +72,7 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
         // Step 4: Add to test context tracking (if not already there)
         if (context.TestContext != null && !context.TestContext.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(context.PropertyName))
         {
-            PropertyLifecycleTracker.AddToTestContext(context, resolvedValue);
+            context.TestContext.TestDetails.TestClassInjectedPropertyArguments[context.PropertyName] = resolvedValue;
         }
     }
 

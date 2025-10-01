@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
 
 /// <summary>
