@@ -22,7 +22,7 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly CircularDependencyDetector _circularDependencyDetector;
     private readonly IConstraintKeyScheduler _constraintKeyScheduler;
     private readonly HookExecutor _hookExecutor;
-    private readonly StaticPropertyInitializer _staticPropertyInitializer;
+    private readonly StaticPropertyHandler _staticPropertyHandler;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
@@ -35,7 +35,7 @@ internal sealed class TestScheduler : ITestScheduler
         CircularDependencyDetector circularDependencyDetector,
         IConstraintKeyScheduler constraintKeyScheduler,
         HookExecutor hookExecutor,
-        StaticPropertyInitializer staticPropertyInitializer)
+        StaticPropertyHandler staticPropertyHandler)
     {
         _logger = logger;
         _groupingService = groupingService;
@@ -47,7 +47,7 @@ internal sealed class TestScheduler : ITestScheduler
         _circularDependencyDetector = circularDependencyDetector;
         _constraintKeyScheduler = constraintKeyScheduler;
         _hookExecutor = hookExecutor;
-        _staticPropertyInitializer = staticPropertyInitializer;
+        _staticPropertyHandler = staticPropertyHandler;
     }
 
     public async Task<bool> ScheduleAndExecuteAsync(
@@ -103,10 +103,10 @@ internal sealed class TestScheduler : ITestScheduler
         }
 
         // Initialize static properties before tests run
-        await _staticPropertyInitializer.InitializeStaticPropertiesAsync(cancellationToken).ConfigureAwait(false);
+        await _staticPropertyHandler.InitializeStaticPropertiesAsync(cancellationToken).ConfigureAwait(false);
 
         // Track static properties for disposal at session end
-        _staticPropertyInitializer.TrackStaticProperties();
+        _staticPropertyHandler.TrackStaticProperties();
 
         // Group tests by their parallel constraints
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
@@ -116,7 +116,7 @@ internal sealed class TestScheduler : ITestScheduler
 
         var sessionHookExceptions = await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false) ?? [];
 
-        await _staticPropertyInitializer.DisposeStaticPropertiesAsync(sessionHookExceptions).ConfigureAwait(false);
+        await _staticPropertyHandler.DisposeStaticPropertiesAsync(sessionHookExceptions).ConfigureAwait(false);
 
         if (sessionHookExceptions.Count > 0)
         {

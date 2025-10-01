@@ -1,4 +1,5 @@
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.StaticProperties;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Logging;
@@ -8,16 +9,23 @@ namespace TUnit.Engine.Services;
 /// <summary>
 /// Service responsible for initializing static properties registered via source generation
 /// </summary>
-internal sealed class StaticPropertyInitializer
+internal sealed class StaticPropertyHandler
 {
     private readonly TUnitFrameworkLogger _logger;
     private readonly ObjectTracker _objectTracker;
+    private readonly TrackableObjectGraphProvider _trackableObjectGraphProvider;
+    private readonly Disposer _disposer;
     private bool _initialized;
 
-    public StaticPropertyInitializer(TUnitFrameworkLogger logger, ObjectTracker objectTracker)
+    public StaticPropertyHandler(TUnitFrameworkLogger logger,
+        ObjectTracker objectTracker,
+        TrackableObjectGraphProvider trackableObjectGraphProvider,
+        Disposer disposer)
     {
         _logger = logger;
         _objectTracker = objectTracker;
+        _trackableObjectGraphProvider = trackableObjectGraphProvider;
+        _disposer = disposer;
     }
 
     /// <summary>
@@ -71,7 +79,19 @@ internal sealed class StaticPropertyInitializer
     /// </summary>
     public async Task DisposeStaticPropertiesAsync(List<Exception> cleanupExceptions)
     {
-        await _objectTracker.UntrackStaticPropertiesAsync(cleanupExceptions);
+        var staticProperties = _trackableObjectGraphProvider.GetStaticPropertyTrackableObjects();
+
+        foreach (var staticProperty in staticProperties)
+        {
+            try
+            {
+                await _disposer.DisposeAsync(staticProperty).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                cleanupExceptions.Add(e);
+            }
+        }
 
         if (cleanupExceptions.Count > 0)
         {

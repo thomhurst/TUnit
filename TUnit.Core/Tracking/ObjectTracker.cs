@@ -43,31 +43,12 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// </summary>
     public void TrackStaticProperties()
     {
+        // Incrementing them by 1 if they're static ensures they don't get disposed until the end of the session
         var objects = trackableObjectGraphProvider.GetStaticPropertyTrackableObjects();
 
         foreach (var obj in objects)
         {
             TrackObject(obj);
-        }
-    }
-
-    /// <summary>
-    /// Untrack static property objects (session-level)
-    /// </summary>
-    public async ValueTask UntrackStaticPropertiesAsync(List<Exception> cleanupExceptions)
-    {
-        var objects = trackableObjectGraphProvider.GetStaticPropertyTrackableObjects();
-
-        foreach (var obj in objects)
-        {
-            try
-            {
-                await UntrackObject(obj);
-            }
-            catch (Exception e)
-            {
-                cleanupExceptions.Add(e);
-            }
         }
     }
 

@@ -97,7 +97,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var trackableObjectGraphProvider = new TrackableObjectGraphProvider();
 
-        var objectTracker = new ObjectTracker(trackableObjectGraphProvider, new Disposer(Logger));
+        var disposer = new Disposer(Logger);
+        
+        var objectTracker = new ObjectTracker(trackableObjectGraphProvider, disposer);
 
         // Register the test argument registration service to handle object registration for shared instances
         var testArgumentRegistrationService = Register(new TestArgumentRegistrationService(ObjectRegistrationService, objectTracker));
@@ -193,7 +195,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             Logger,
             ParallelLimitLockProvider));
 
-        var staticPropertyInitializer = Register(new Services.StaticPropertyInitializer(Logger, objectTracker));
+        var staticPropertyInitializer = Register(new Services.StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, disposer));
 
         var testScheduler = Register<ITestScheduler>(new TestScheduler(
             Logger,
