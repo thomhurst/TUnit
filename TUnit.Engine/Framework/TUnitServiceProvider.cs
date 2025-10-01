@@ -193,6 +193,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             Logger,
             ParallelLimitLockProvider));
 
+        var staticPropertyInitializer = Register(new Services.StaticPropertyInitializer(Logger, objectTracker));
+
         var testScheduler = Register<ITestScheduler>(new TestScheduler(
             Logger,
             testGroupingService,
@@ -203,7 +205,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             testRunner,
             circularDependencyDetector,
             constraintKeyScheduler,
-            hookExecutor));
+            hookExecutor,
+            staticPropertyInitializer));
 
         TestSessionCoordinator = Register(new TestSessionCoordinator(EventReceiverOrchestrator,
             Logger,

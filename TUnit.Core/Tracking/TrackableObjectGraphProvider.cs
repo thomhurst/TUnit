@@ -1,4 +1,5 @@
 using TUnit.Core.PropertyInjection;
+using TUnit.Core.StaticProperties;
 
 namespace TUnit.Core.Tracking;
 
@@ -45,6 +46,20 @@ internal class TrackableObjectGraphProvider
                 {
                     yield return nested;
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Get trackable objects for static properties (session-level)
+    /// </summary>
+    public IEnumerable<object> GetStaticPropertyTrackableObjects()
+    {
+        foreach (var value in StaticPropertyRegistry.GetAllInitializedValues())
+        {
+            if (value != null)
+            {
+                yield return value;
             }
         }
     }

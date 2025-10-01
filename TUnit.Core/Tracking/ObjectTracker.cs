@@ -39,6 +39,39 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     }
 
     /// <summary>
+    /// Track static property objects (session-level)
+    /// </summary>
+    public void TrackStaticProperties()
+    {
+        var objects = trackableObjectGraphProvider.GetStaticPropertyTrackableObjects();
+
+        foreach (var obj in objects)
+        {
+            TrackObject(obj);
+        }
+    }
+
+    /// <summary>
+    /// Untrack static property objects (session-level)
+    /// </summary>
+    public async ValueTask UntrackStaticPropertiesAsync(List<Exception> cleanupExceptions)
+    {
+        var objects = trackableObjectGraphProvider.GetStaticPropertyTrackableObjects();
+
+        foreach (var obj in objects)
+        {
+            try
+            {
+                await UntrackObject(obj);
+            }
+            catch (Exception e)
+            {
+                cleanupExceptions.Add(e);
+            }
+        }
+    }
+
+    /// <summary>
     /// Tracks a single object for a test context.
     /// For backward compatibility - adds to existing tracked objects for the context.
     /// </summary>

@@ -22,6 +22,7 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly CircularDependencyDetector _circularDependencyDetector;
     private readonly IConstraintKeyScheduler _constraintKeyScheduler;
     private readonly HookExecutor _hookExecutor;
+    private readonly StaticPropertyInitializer _staticPropertyInitializer;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
@@ -33,7 +34,8 @@ internal sealed class TestScheduler : ITestScheduler
         TestRunner testRunner,
         CircularDependencyDetector circularDependencyDetector,
         IConstraintKeyScheduler constraintKeyScheduler,
-        HookExecutor hookExecutor)
+        HookExecutor hookExecutor,
+        StaticPropertyInitializer staticPropertyInitializer)
     {
         _logger = logger;
         _groupingService = groupingService;
@@ -45,6 +47,7 @@ internal sealed class TestScheduler : ITestScheduler
         _circularDependencyDetector = circularDependencyDetector;
         _constraintKeyScheduler = constraintKeyScheduler;
         _hookExecutor = hookExecutor;
+        _staticPropertyInitializer = staticPropertyInitializer;
     }
 
     public async Task<bool> ScheduleAndExecuteAsync(
@@ -99,22 +102,20 @@ internal sealed class TestScheduler : ITestScheduler
             return true;
         }
 
+        // Initialize static properties before tests run
+        await _staticPropertyInitializer.InitializeStaticPropertiesAsync(cancellationToken).ConfigureAwait(false);
+
+        // Track static properties for disposal at session end
+        _staticPropertyInitializer.TrackStaticProperties();
+
         // Group tests by their parallel constraints
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
 
         // Execute tests according to their grouping
         await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
 
-        // Fire OnTestFinalized for global session context to trigger reference-counted disposal
-        // Use the first test's context as a reference (the context parameter doesn't affect disposal logic)
-        if (executableTests.Count > 0 && TestSessionContext.GlobalStaticPropertyContext.Events.OnTestFinalized?.InvocationList != null)
-        {
-            var contextForDisposal = executableTests[0].Context;
-            foreach (var invocation in TestSessionContext.GlobalStaticPropertyContext.Events.OnTestFinalized.InvocationList.OrderBy(x => x.Order))
-            {
-                await invocation.InvokeAsync(TestSessionContext.GlobalStaticPropertyContext, contextForDisposal).ConfigureAwait(false);
-            }
-        }
+        // Dispose static properties before After(TestSession) hooks
+        await _staticPropertyInitializer.DisposeStaticPropertiesAsync().ConfigureAwait(false);
 
         var sessionHookExceptions = await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
         if (sessionHookExceptions.Count > 0)

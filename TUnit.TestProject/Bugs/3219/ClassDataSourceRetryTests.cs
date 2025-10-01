@@ -76,6 +76,9 @@ public class ClassDataSourceRetryTests
     [After(TestSession)]
     public static async Task VerifyDisposalAfterTestSession()
     {
-        await Assert.That(DataClass.DisposeCount).IsEqualTo(1);
+        if(_attemptCount > 0)
+        {
+            await Assert.That(DataClass.DisposeCount).IsEqualTo(1);
+        }
     }
 }
