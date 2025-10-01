@@ -17,20 +17,6 @@ public static class ObjectTracker
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
 
     /// <summary>
-    /// Tracks multiple objects for a test context and registers a single disposal handler.
-    /// Each object's reference count is incremented once.
-    /// </summary>
-    /// <param name="events">Events for the test instance</param>
-    /// <param name="objects">The objects to track (constructor args, method args, injected properties)</param>
-    internal static void TrackObjectsForContext(TestContextEvents events, IEnumerable<object?> objects)
-    {
-        foreach (var obj in objects)
-        {
-            TrackObject(events, obj);
-        }
-    }
-
-    /// <summary>
     /// Tracks a single object for a test context.
     /// For backward compatibility - adds to existing tracked objects for the context.
     /// </summary>
