@@ -3,19 +3,18 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core.Tracking;
 
 /// <summary>
-/// Ensures exactly-once tracking of objects for disposal through idempotency.
-/// Prevents duplicate tracking that causes premature disposal due to incorrect reference counting.
-/// Tracking is scoped per TestContextEvents to ensure proper isolation between test contexts.
+/// Tracks objects for disposal with per-context idempotency.
+/// Each test context tracks objects independently, but only once per context.
 /// </summary>
 internal static class ObjectLifecycleTracker
 {
     /// <summary>
     /// Tracks an object for disposal exactly once per test context.
-    /// Subsequent calls with the same object reference in the same test context are no-ops.
+    /// The same object can be tracked in multiple test contexts for proper reference counting.
     /// </summary>
     /// <param name="events">Test context events for OnTestFinalized registration</param>
     /// <param name="obj">Object to track for disposal</param>
-    /// <returns>True if this is the first tracking call for this object in this context, false if already tracked</returns>
+    /// <returns>True if this is the first tracking call for this object in this context</returns>
     public static bool TrackObjectForDisposal(TestContextEvents events, object? obj)
     {
         if (obj == null || events == null)
@@ -23,7 +22,7 @@ internal static class ObjectLifecycleTracker
             return false;
         }
 
-        // Use the per-context tracking set to ensure idempotency within this test context
+        // Use per-context tracking set to ensure idempotency within this test context
         lock (events.TrackedObjects)
         {
             // Attempt to add - returns false if already tracked in this context

@@ -43,13 +43,17 @@ internal sealed class SourceGeneratedPropertyStrategy : IPropertyInitializationS
         // Check if property was pre-resolved during registration
         if (context.TestContext?.TestDetails.TestClassInjectedPropertyArguments.TryGetValue(context.PropertyName, out resolvedValue) == true)
         {
-            // Use pre-resolved value - it was already tracked during registration
+            // Use pre-resolved value - it was already initialized during first resolution
             context.ResolvedValue = resolvedValue;
 
-            // Initialize if needed (was skipped during registration)
-            if (resolvedValue is IAsyncInitializer asyncInitializer)
+            // Track the property and its nested objects in THIS test's context
+            PropertyLifecycleTracker.TrackPropertyValue(context, resolvedValue);
+
+            // Track nested properties recursively in THIS test's context
+            if (resolvedValue != null && PropertyInjectionCache.HasInjectableProperties(resolvedValue.GetType()))
             {
-                await asyncInitializer.InitializeAsync();
+                var plan = PropertyInjectionCache.GetOrCreatePlan(resolvedValue.GetType());
+                await PropertyLifecycleTracker.TrackNestedPropertiesAsync(context, resolvedValue, plan);
             }
         }
         else
@@ -63,7 +67,7 @@ internal sealed class SourceGeneratedPropertyStrategy : IPropertyInitializationS
 
             context.ResolvedValue = resolvedValue;
 
-            // Step 2: Track the property value (only for non-pre-resolved properties)
+            // Step 2: Track the property value
             PropertyLifecycleTracker.TrackPropertyValue(context, resolvedValue);
         }
 

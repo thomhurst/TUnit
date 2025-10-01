@@ -112,6 +112,9 @@ internal sealed class PropertyInjectionService
             {
                 await existingTask;
 
+                // Track the instance in THIS test's context (already processed in a previous test)
+                ObjectLifecycleTracker.TrackObjectForDisposal(events, instance);
+
                 var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
                 if (plan.HasProperties)
                 {
@@ -130,6 +133,9 @@ internal sealed class PropertyInjectionService
                                 var propertyValue = property.GetValue(instance);
                                 if (propertyValue != null)
                                 {
+                                    // Track nested property value in THIS test's context
+                                    ObjectLifecycleTracker.TrackObjectForDisposal(events, propertyValue);
+
                                     if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
                                     {
                                         await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
@@ -145,6 +151,9 @@ internal sealed class PropertyInjectionService
                             var propertyValue = property.GetValue(instance);
                             if (propertyValue != null)
                             {
+                                // Track nested property value in THIS test's context
+                                ObjectLifecycleTracker.TrackObjectForDisposal(events, propertyValue);
+
                                 if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
                                 {
                                     await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
