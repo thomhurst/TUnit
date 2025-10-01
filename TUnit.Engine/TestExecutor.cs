@@ -93,7 +93,7 @@ internal class TestExecutor
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
             await _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
-            
+
             // Invoke test start event receivers
             await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
 
@@ -137,8 +137,7 @@ internal class TestExecutor
             }
 
             // Check if the result was overridden - if so, don't re-throw
-            if (executableTest.Context.Result?.IsOverridden == true &&
-                executableTest.Context.Result.State == TestState.Passed)
+            if (executableTest.Context.Result is { IsOverridden: true, State: TestState.Passed })
             {
                 // Result was overridden to passed, don't re-throw the exception
                 executableTest.SetResult(TestState.Passed);
@@ -242,7 +241,7 @@ internal class TestExecutor
     {
         return _contextProvider;
     }
-    
+
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075:Type.GetProperty does not have matching annotations",
         Justification = "Only used for specific test class DisposalRegressionTests")]
     internal static async Task DisposeTestInstance(AbstractExecutableTest test)
@@ -253,7 +252,7 @@ internal class TestExecutor
             try
             {
                 var instance = test.Context.TestDetails.ClassInstance;
-                
+
                 // Special handling for DisposalRegressionTests - dispose its properties
                 if (instance.GetType().Name == "DisposalRegressionTests")
                 {
@@ -271,7 +270,7 @@ internal class TestExecutor
                         }
                     }
                 }
-                
+
                 // Then dispose the instance itself
                 switch (instance)
                 {

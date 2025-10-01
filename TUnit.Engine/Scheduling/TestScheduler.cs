@@ -105,6 +105,17 @@ internal sealed class TestScheduler : ITestScheduler
         // Execute tests according to their grouping
         await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
 
+        // Fire OnTestFinalized for global session context to trigger reference-counted disposal
+        // Use the first test's context as a reference (the context parameter doesn't affect disposal logic)
+        if (executableTests.Count > 0 && TestSessionContext.GlobalStaticPropertyContext.Events.OnTestFinalized?.InvocationList != null)
+        {
+            var contextForDisposal = executableTests[0].Context;
+            foreach (var invocation in TestSessionContext.GlobalStaticPropertyContext.Events.OnTestFinalized.InvocationList.OrderBy(x => x.Order))
+            {
+                await invocation.InvokeAsync(TestSessionContext.GlobalStaticPropertyContext, contextForDisposal).ConfigureAwait(false);
+            }
+        }
+
         var sessionHookExceptions = await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
         if (sessionHookExceptions.Count > 0)
         {

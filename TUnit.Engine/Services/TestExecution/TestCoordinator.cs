@@ -2,6 +2,7 @@ using System.Linq;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 
@@ -19,6 +20,7 @@ internal sealed class TestCoordinator : ITestCoordinator
     private readonly TestContextRestorer _contextRestorer;
     private readonly TestExecutor _testExecutor;
     private readonly TestInitializer _testInitializer;
+    private readonly ObjectTracker _objectTracker;
     private readonly TUnitFrameworkLogger _logger;
 
     public TestCoordinator(
@@ -28,6 +30,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         TestContextRestorer contextRestorer,
         TestExecutor testExecutor,
         TestInitializer testInitializer,
+        ObjectTracker objectTracker,
         TUnitFrameworkLogger logger)
     {
         _executionGuard = executionGuard;
@@ -36,6 +39,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         _contextRestorer = contextRestorer;
         _testExecutor = testExecutor;
         _testInitializer = testInitializer;
+        _objectTracker = objectTracker;
         _logger = logger;
     }
 
@@ -135,6 +139,8 @@ internal sealed class TestCoordinator : ITestCoordinator
         finally
         {
             var cleanupExceptions = new List<Exception>();
+
+            await _objectTracker.UntrackObjects(test.Context, cleanupExceptions);
 
             var testClass = test.Metadata.TestClassType;
             var testAssembly = testClass.Assembly;

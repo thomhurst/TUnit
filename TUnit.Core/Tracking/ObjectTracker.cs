@@ -7,17 +7,43 @@ namespace TUnit.Core.Tracking;
 /// Pure reference counting object tracker for disposable objects.
 /// Objects are disposed when their reference count reaches zero, regardless of sharing type.
 /// </summary>
-public static class ObjectTracker
+internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphProvider, Disposer disposer)
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
+
+    public void TrackObjects(TestContext testContext)
+    {
+        var objects = trackableObjectGraphProvider.GetTrackableObjects(testContext);
+
+        foreach (var obj in objects)
+        {
+            TrackObject(obj);
+        }
+    }
+
+    public async ValueTask UntrackObjects(TestContext testContext, List<Exception> cleanupExceptions)
+    {
+        var objects = trackableObjectGraphProvider.GetTrackableObjects(testContext);
+
+        foreach (var obj in objects)
+        {
+            try
+            {
+                await UntrackObject(obj);
+            }
+            catch (Exception e)
+            {
+                cleanupExceptions.Add(e);
+            }
+        }
+    }
 
     /// <summary>
     /// Tracks a single object for a test context.
     /// For backward compatibility - adds to existing tracked objects for the context.
     /// </summary>
-    /// <param name="events">Events for the test instance</param>
     /// <param name="obj">The object to track</param>
-    public static void TrackObject(TestContextEvents events, object? obj)
+    private void TrackObject(object? obj)
     {
         if (obj == null || ShouldSkipTracking(obj))
         {
@@ -26,21 +52,29 @@ public static class ObjectTracker
 
         var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
         counter.Increment();
+    }
 
-        events.OnTestFinalized += async (_, _) =>
+    private async ValueTask UntrackObject(object? obj)
+    {
+        if (obj == null || ShouldSkipTracking(obj))
+        {
+            return;
+        }
+
+        if (_trackedObjects.TryGetValue(obj, out var counter))
         {
             var count = counter.Decrement();
 
             if (count < 0)
             {
-                throw new InvalidOperationException($"Reference count for object went below zero. This indicates a bug in the reference counting logic.");
+                throw new InvalidOperationException("Reference count for object went below zero. This indicates a bug in the reference counting logic.");
             }
 
             if (count == 0)
             {
-                await GlobalContext.Current.Disposer.DisposeAsync(obj).ConfigureAwait(false);
+                await disposer.DisposeAsync(obj).ConfigureAwait(false);
             }
-        };
+        }
     }
 
     /// <summary>

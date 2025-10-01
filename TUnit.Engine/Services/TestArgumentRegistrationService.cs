@@ -20,12 +20,12 @@ namespace TUnit.Engine.Services;
 internal sealed class TestArgumentRegistrationService : ITestRegisteredEventReceiver
 {
     private readonly ObjectRegistrationService _objectRegistrationService;
-    private readonly TrackableObjectGraphProvider _trackableObjectGraphProvider;
+    private readonly ObjectTracker _objectTracker;
 
-    public TestArgumentRegistrationService(ObjectRegistrationService objectRegistrationService, TrackableObjectGraphProvider trackableObjectGraphProvider)
+    public TestArgumentRegistrationService(ObjectRegistrationService objectRegistrationService, ObjectTracker objectTracker)
     {
         _objectRegistrationService = objectRegistrationService;
-        _trackableObjectGraphProvider = trackableObjectGraphProvider;
+        _objectTracker = objectTracker;
     }
 
     public int Order => int.MinValue; // Run first to ensure registration happens before other event receivers
@@ -57,12 +57,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
         // Register properties that will be injected into the test class
         await RegisterPropertiesAsync(testContext);
 
-        var objectGraph = _trackableObjectGraphProvider.GetTrackableObjects(testContext);
-
-        foreach (var trackableObject in objectGraph)
-        {
-            ObjectTracker.TrackObject(testContext.Events, trackableObject);
-        }
+        _objectTracker.TrackObjects(testContext);
     }
 
     /// <summary>

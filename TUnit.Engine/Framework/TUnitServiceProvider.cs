@@ -7,6 +7,7 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Tracking;
 using TUnit.Engine.Building;
@@ -96,8 +97,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var trackableObjectGraphProvider = new TrackableObjectGraphProvider();
 
+        var objectTracker = new ObjectTracker(trackableObjectGraphProvider, new Disposer(Logger));
+
         // Register the test argument registration service to handle object registration for shared instances
-        var testArgumentRegistrationService = Register(new TestArgumentRegistrationService(ObjectRegistrationService, trackableObjectGraphProvider));
+        var testArgumentRegistrationService = Register(new TestArgumentRegistrationService(ObjectRegistrationService, objectTracker));
 
         TestFilterService = Register(new TestFilterService(Logger, testArgumentRegistrationService));
 
@@ -163,6 +166,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 testContextRestorer,
                 TestExecutor,
                 testInitializer,
+                objectTracker,
                 Logger));
 
         // Create the HookOrchestratingTestExecutorAdapter
