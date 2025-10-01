@@ -48,7 +48,7 @@ public class PublishSingleFileModule : Module<CommandResult>
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            return "osx-x64";
+            return "osx-arm64";
         }
 
         throw new ArgumentException("Unknown platform");
