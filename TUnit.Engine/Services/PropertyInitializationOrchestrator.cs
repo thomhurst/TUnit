@@ -1,11 +1,12 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using TUnit.Core.DataSources;
-using TUnit.Core.Initialization;
+using TUnit.Core;
 using TUnit.Core.Interfaces.SourceGenerator;
+using TUnit.Core.PropertyInjection;
+using TUnit.Core.PropertyInjection.Initialization;
 
-namespace TUnit.Core.PropertyInjection.Initialization;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Orchestrates the entire property initialization process.

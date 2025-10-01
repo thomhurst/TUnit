@@ -1,5 +1,4 @@
 ﻿using TUnit.Core;
-using TUnit.Core.Initialization;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Services;
 

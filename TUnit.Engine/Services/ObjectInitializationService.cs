@@ -1,7 +1,8 @@
+using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
 
-namespace TUnit.Core.Initialization;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Handles object initialization during the test execution phase.

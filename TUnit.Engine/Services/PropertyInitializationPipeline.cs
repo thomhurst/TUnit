@@ -1,8 +1,7 @@
-using TUnit.Core.DataSources;
-using TUnit.Core.Initialization;
-using TUnit.Core.PropertyInjection.Initialization.Strategies;
+using TUnit.Core.PropertyInjection.Initialization;
+using TUnit.Engine.Services.PropertyInitialization;
 
-namespace TUnit.Core.PropertyInjection.Initialization;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Defines and executes the property initialization pipeline.

@@ -1,49 +1,39 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-using TUnit.Core.DataSources;
-using TUnit.Core.Initialization;
+using TUnit.Core;
+using TUnit.Core.PropertyInjection.Initialization;
 
-namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
+namespace TUnit.Engine.Services.PropertyInitialization;
 
 /// <summary>
-/// Strategy for initializing properties using reflection.
-/// Used when source generation is not available.
+/// Strategy for initializing properties using source-generated metadata.
+/// Optimized for AOT and performance.
 /// </summary>
-internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrategy
+internal sealed class SourceGeneratedPropertyStrategy : IPropertyInitializationStrategy
 {
     private readonly DataSourceInitializer _dataSourceInitializer;
     private readonly ObjectRegistrationService _objectRegistrationService;
 
-    public ReflectionPropertyStrategy(DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
+    public SourceGeneratedPropertyStrategy(DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
     {
         _dataSourceInitializer = dataSourceInitializer ?? throw new System.ArgumentNullException(nameof(dataSourceInitializer));
         _objectRegistrationService = objectRegistrationService ?? throw new System.ArgumentNullException(nameof(objectRegistrationService));
     }
     /// <summary>
-    /// Determines if this strategy can handle reflection-based properties.
+    /// Determines if this strategy can handle source-generated properties.
     /// </summary>
     public bool CanHandle(PropertyInitializationContext context)
     {
-        return context.PropertyInfo != null && context.DataSource != null && !SourceRegistrar.IsEnabled;
+        return context.SourceGeneratedMetadata != null && SourceRegistrar.IsEnabled;
     }
 
     /// <summary>
-    /// Initializes a property using reflection.
+    /// Initializes a property using source-generated metadata.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Reflection mode support")]
     public async Task InitializePropertyAsync(PropertyInitializationContext context)
     {
-#if NET
-        if (!RuntimeFeature.IsDynamicCodeSupported)
-        {
-            throw new Exception("Using TUnit Reflection mechanisms isn't supported in AOT mode");
-        }
-#endif
-
-        if (context.PropertyInfo == null || context.DataSource == null)
+        if (context.SourceGeneratedMetadata == null)
         {
             return;
-        };
+        }
 
         object? resolvedValue = null;
 
@@ -55,7 +45,6 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
         }
         else
         {
-            // Step 1: Resolve data from the data source (execution-time resolution)
             resolvedValue = await PropertyDataResolver.ResolvePropertyDataAsync(context, _dataSourceInitializer, _objectRegistrationService);
             if (resolvedValue == null)
             {
@@ -65,11 +54,8 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
             context.ResolvedValue = resolvedValue;
         }
 
-        // Step 3: Set the property value
-        // The value has already been initialized by PropertyDataResolver if needed
-        context.PropertySetter(context.Instance, resolvedValue);
+        context.SourceGeneratedMetadata.SetProperty(context.Instance, resolvedValue);
 
-        // Step 4: Add to test context tracking (if not already there)
         if (context.TestContext != null && !context.TestContext.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(context.PropertyName))
         {
             context.TestContext.TestDetails.TestClassInjectedPropertyArguments[context.PropertyName] = resolvedValue;

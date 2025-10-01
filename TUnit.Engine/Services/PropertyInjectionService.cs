@@ -1,10 +1,8 @@
-using TUnit.Core.DataSources;
-using TUnit.Core.Initialization;
-using TUnit.Core.PropertyInjection;
-using TUnit.Core.PropertyInjection.Initialization;
 using System.Collections.Concurrent;
+using TUnit.Core;
+using TUnit.Core.PropertyInjection;
 
-namespace TUnit.Core;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Internal service for property injection.

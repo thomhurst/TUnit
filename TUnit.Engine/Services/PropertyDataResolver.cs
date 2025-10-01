@@ -1,8 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
-using TUnit.Core.DataSources;
-using TUnit.Core.Initialization;
+using TUnit.Core;
+using TUnit.Core.Helpers;
+using TUnit.Core.Interfaces;
+using TUnit.Core.PropertyInjection;
+using TUnit.Core.PropertyInjection.Initialization;
 
-namespace TUnit.Core.PropertyInjection.Initialization;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Handles all data source resolution logic for property initialization.

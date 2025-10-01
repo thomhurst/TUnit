@@ -1,7 +1,8 @@
+using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
 
-namespace TUnit.Core.DataSources;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Centralized service responsible for initializing data source instances.

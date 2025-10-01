@@ -1,4 +1,6 @@
-namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
+using TUnit.Core.PropertyInjection.Initialization;
+
+namespace TUnit.Engine.Services.PropertyInitialization;
 
 /// <summary>
 /// Defines the contract for property initialization strategies.

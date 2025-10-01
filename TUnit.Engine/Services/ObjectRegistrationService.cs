@@ -1,4 +1,8 @@
-namespace TUnit.Core.Initialization;
+using TUnit.Core;
+using TUnit.Core.PropertyInjection;
+using TUnit.Core.Tracking;
+
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Handles object registration during the test discovery/registration phase.
@@ -87,6 +91,6 @@ internal sealed class ObjectRegistrationService
     /// </summary>
     private bool RequiresPropertyInjection(object instance)
     {
-        return PropertyInjection.PropertyInjectionCache.HasInjectableProperties(instance.GetType());
+        return PropertyInjectionCache.HasInjectableProperties(instance.GetType());
     }
 }

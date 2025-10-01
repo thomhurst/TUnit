@@ -1,7 +1,8 @@
-using TUnit.Core.DataSources;
-using TUnit.Core.Initialization;
+using TUnit.Core;
+using TUnit.Core.PropertyInjection;
+using TUnit.Core.PropertyInjection.Initialization;
 
-namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
+namespace TUnit.Engine.Services.PropertyInitialization;
 
 /// <summary>
 /// Strategy for handling nested property initialization.
@@ -125,7 +126,7 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
     private PropertyInitializationContext CreateNestedContext(
         PropertyInitializationContext parentContext,
         object instance,
-        Interfaces.SourceGenerator.PropertyInjectionMetadata metadata)
+        TUnit.Core.Interfaces.SourceGenerator.PropertyInjectionMetadata metadata)
     {
         // Build hierarchical property name for nested properties
         var propertyName = parentContext.IsNestedProperty
