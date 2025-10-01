@@ -92,6 +92,12 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
 
         if (_serviceProvidersPerSession.TryRemove(context.SessionUid.Value, out var serviceProvider))
         {
+            // Check if After(TestSession) hooks failed
+            if (serviceProvider.AfterSessionHooksFailed)
+            {
+                isSuccess = false;
+            }
+
             await serviceProvider.DisposeAsync().ConfigureAwait(false);
         }
 

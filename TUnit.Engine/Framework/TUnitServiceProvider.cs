@@ -53,6 +53,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public DataSourceInitializer DataSourceInitializer { get; }
     public ObjectRegistrationService ObjectRegistrationService { get; }
     public ObjectInitializationService ObjectInitializationService { get; }
+    public bool AfterSessionHooksFailed { get; set; }
 
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,

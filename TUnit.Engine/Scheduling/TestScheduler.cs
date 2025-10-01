@@ -47,7 +47,7 @@ internal sealed class TestScheduler : ITestScheduler
         _hookExecutor = hookExecutor;
     }
 
-    public async Task ScheduleAndExecuteAsync(
+    public async Task<bool> ScheduleAndExecuteAsync(
         List<AbstractExecutableTest> testList,
         CancellationToken cancellationToken)
     {
@@ -59,7 +59,7 @@ internal sealed class TestScheduler : ITestScheduler
         if (testList.Count == 0)
         {
             await _logger.LogDebugAsync("No executable tests found").ConfigureAwait(false);
-            return;
+            return true;
         }
 
         await _logger.LogDebugAsync($"Scheduling execution of {testList.Count} tests").ConfigureAwait(false);
@@ -67,20 +67,20 @@ internal sealed class TestScheduler : ITestScheduler
         var circularDependencies = _circularDependencyDetector.DetectCircularDependencies(testList);
 
         var testsInCircularDependencies = new HashSet<AbstractExecutableTest>();
-        
+
         foreach (var (test, dependencyChain) in circularDependencies)
         {
             // Format the error message to match the expected format
-            var simpleNames = dependencyChain.Select(t => 
+            var simpleNames = dependencyChain.Select(t =>
             {
                 var className = t.Metadata.TestClassType.Name;
                 var testName = t.Metadata.TestMethodName;
                 return $"{className}.{testName}";
             }).ToList();
-            
+
             var errorMessage = $"DependsOn Conflict: {string.Join(" > ", simpleNames)}";
             var exception = new CircularDependencyException(errorMessage);
-            
+
             // Mark all tests in the dependency chain as failed
             foreach (var chainTest in dependencyChain)
             {
@@ -96,7 +96,7 @@ internal sealed class TestScheduler : ITestScheduler
         if (executableTests.Count == 0)
         {
             await _logger.LogDebugAsync("No executable tests found after removing circular dependencies").ConfigureAwait(false);
-            return;
+            return true;
         }
 
         // Group tests by their parallel constraints
@@ -112,13 +112,10 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 await _logger.LogErrorAsync($"Error executing After(TestSession) hook: {ex}").ConfigureAwait(false);
             }
-
-            // Throw aggregate exception if hooks failed
-            var aggregatedException = sessionHookExceptions.Count == 1
-                ? sessionHookExceptions[0]
-                : new AggregateException("One or more After(TestSession) hooks failed", sessionHookExceptions);
-            throw aggregatedException;
+            return false;
         }
+
+        return true;
     }
 
     private async Task ExecuteGroupedTestsAsync(
