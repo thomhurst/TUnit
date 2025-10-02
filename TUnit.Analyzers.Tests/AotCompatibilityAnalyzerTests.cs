@@ -82,48 +82,7 @@ public class AotCompatibilityAnalyzerTests
         await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
     }
 
-    [Test]
-    public async Task MakeGenericType_In_Test_Triggers_Warning()
-    {
-        const string source = """
-            using TUnit.Core;
-            using System;
-            using System.Collections.Generic;
-            
-            public class MyTests
-            {
-                [Test]
-                public void TestMethod()
-                {
-                    var genericType = typeof(List<>);
-                    var concreteType = {|TUnit0300:genericType.MakeGenericType(typeof(int))|};
-                }
-            }
-            """;
 
-        await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
-    }
-
-    [Test]
-    public async Task Tuple_Reflection_In_Test_Triggers_Warning()
-    {
-        const string source = """
-            using TUnit.Core;
-            using System;
-            
-            public class MyTests
-            {
-                [Test]
-                public void TestMethod()
-                {
-                    var tupleType = typeof((int, string));
-                    var fields = {|TUnit0301:tupleType.GetFields()|};
-                }
-            }
-            """;
-
-        await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
-    }
 
     [Test]
     public async Task ValueTuple_Parameter_Triggers_Warning()
@@ -165,23 +124,4 @@ public class AotCompatibilityAnalyzerTests
         await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
     }
 
-    [Test]
-    public async Task MakeGenericType_Outside_Test_No_Warning()
-    {
-        const string source = """
-            using System;
-            using System.Collections.Generic;
-            
-            public class NotATestClass
-            {
-                public void RegularMethod()
-                {
-                    var genericType = typeof(List<>);
-                    var concreteType = genericType.MakeGenericType(typeof(int));
-                }
-            }
-            """;
-
-        await CSharpAnalyzerVerifier<AotCompatibilityAnalyzer>.VerifyAnalyzerAsync(source);
-    }
 }

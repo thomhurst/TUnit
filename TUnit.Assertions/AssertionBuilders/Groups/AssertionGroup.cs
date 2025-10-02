@@ -3,8 +3,10 @@ using System.Runtime.CompilerServices;
 
 namespace TUnit.Assertions.AssertionBuilders.Groups;
 
-[UnconditionalSuppressMessage("Usage", "TUnitAssertions0002:Assert statements must be awaited")]
-[UnconditionalSuppressMessage("Usage", "TUnitAssertions0008:ValueTasks should be awaited when used within Assert.That(...)")]
+[UnconditionalSuppressMessage("Usage", "TUnitAssertions0002:Assert statements must be awaited",
+    Justification = "This is a factory class for creating assertion groups. The factory methods return builders that create awaitable assertion groups; the factory methods themselves are not awaitable.")]
+[UnconditionalSuppressMessage("Usage", "TUnitAssertions0008:ValueTasks should be awaited when used within Assert.That(...)",
+    Justification = "The Assert.That() calls within this factory class return assertion builders that will be composed into groups and awaited by the consumer. The factory methods themselves do not need to await these builders.")]
 public static class AssertionGroup
 {
     public static OrAssertionGroupInvoker<TActual, TAssertionBuilder> Or<TActual, TAssertionBuilder>(AssertionGroup<TActual, TAssertionBuilder> group1, AssertionGroup<TActual, TAssertionBuilder> group2)

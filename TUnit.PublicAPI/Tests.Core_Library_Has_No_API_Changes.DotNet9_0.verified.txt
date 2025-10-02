@@ -243,37 +243,54 @@ namespace
     public sealed class ClassDataSourceAttribute : .UntypedDataSourceGeneratorAttribute
     {
         [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
-            "nctionality when AOT compiling.")]
+            "nctionality when AOT compiling.", Justification="These constructors are AOT-compatible when types are specified using typeof() at " +
+            "compile time. Only the params constructor requires dynamic code.")]
         [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
-            " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
+            " access otherwise can break functionality when trimming application code", Justification="These constructors delegate to the params constructor but are AOT-safe when used " +
+            "with typeof() expressions at compile time. The DynamicallyAccessedMembers annota" +
+            "tions ensure required members are preserved.")]
         public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type) { }
         [.("Reflection")]
         [.("Reflection")]
         public ClassDataSourceAttribute(params [] types) { }
         [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
-            "nctionality when AOT compiling.")]
+            "nctionality when AOT compiling.", Justification="These constructors are AOT-compatible when types are specified using typeof() at " +
+            "compile time. Only the params constructor requires dynamic code.")]
         [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
-            " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
+            " access otherwise can break functionality when trimming application code", Justification="These constructors delegate to the params constructor but are AOT-safe when used " +
+            "with typeof() expressions at compile time. The DynamicallyAccessedMembers annota" +
+            "tions ensure required members are preserved.")]
         public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type2) { }
         [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
-            "nctionality when AOT compiling.")]
+            "nctionality when AOT compiling.", Justification="These constructors are AOT-compatible when types are specified using typeof() at " +
+            "compile time. Only the params constructor requires dynamic code.")]
         [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
-            " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
+            " access otherwise can break functionality when trimming application code", Justification="These constructors delegate to the params constructor but are AOT-safe when used " +
+            "with typeof() expressions at compile time. The DynamicallyAccessedMembers annota" +
+            "tions ensure required members are preserved.")]
         public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type3) { }
         [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
-            "nctionality when AOT compiling.")]
+            "nctionality when AOT compiling.", Justification="These constructors are AOT-compatible when types are specified using typeof() at " +
+            "compile time. Only the params constructor requires dynamic code.")]
         [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
-            " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
+            " access otherwise can break functionality when trimming application code", Justification="These constructors delegate to the params constructor but are AOT-safe when used " +
+            "with typeof() expressions at compile time. The DynamicallyAccessedMembers annota" +
+            "tions ensure required members are preserved.")]
         public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type4) { }
         [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
-            "nctionality when AOT compiling.")]
+            "nctionality when AOT compiling.", Justification="These constructors are AOT-compatible when types are specified using typeof() at " +
+            "compile time. Only the params constructor requires dynamic code.")]
         [.("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic" +
-            " access otherwise can break functionality when trimming application code", Justification="<Pending>")]
+            " access otherwise can break functionality when trimming application code", Justification="These constructors delegate to the params constructor but are AOT-safe when used " +
+            "with typeof() expressions at compile time. The DynamicallyAccessedMembers annota" +
+            "tions ensure required members are preserved.")]
         public ClassDataSourceAttribute([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type2, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type3, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type4, [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  type5) { }
         public string[] Keys { get; set; }
         public .SharedType[] Shared { get; set; }
         [.("Trimming", "IL2062:The parameter of method has a DynamicallyAccessedMembersAttribute, but the" +
-            " value passed to it can not be statically analyzed.")]
+            " value passed to it can not be statically analyzed.", Justification="The _types array is populated from constructor parameters that have DynamicallyAc" +
+            "cessedMembers attributes, ensuring the required members are preserved at the cal" +
+            "l site.")]
         protected override .<<object?[]?>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public .<string> GetKeys() { }
         public .<.SharedType> GetSharedTypes() { }
@@ -361,10 +378,16 @@ namespace
     {
         public ClassMetadata() { }
         public required .AssemblyMetadata Assembly { get; init; }
+        public <object?[], object>? ConstructorFactory { get; init; }
+        public bool HasRequiredProperties { get; init; }
+        public []? ImplementedInterfaces { get; init; }
+        public <object>? InitializeRequiredProperties { get; init; }
         public required string? Namespace { get; init; }
+        public <object>? ParameterlessFactory { get; init; }
         public required .ParameterMetadata[] Parameters { get; init; }
         public required .ClassMetadata? Parent { get; init; }
         public required .PropertyMetadata[] Properties { get; init; }
+        public int TestConstructorIndex { get; init; }
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]
         public override required  Type { get; init; }
         public required .TypeReference TypeReference { get; init; }
@@ -623,6 +646,8 @@ namespace
         public string FilePath { get; }
         public int LineNumber { get; }
         public .<.AbstractDynamicTest> Tests { get; }
+        [.("Adding dynamic tests requires reflection which is not supported in native AOT sce" +
+            "narios.")]
         public void AddTest(.AbstractDynamicTest test) { }
     }
     public static class DynamicTestHelper
@@ -925,8 +950,12 @@ namespace
         public ? ClassProvidingDataSource { get; }
         public <.DataGeneratorMetadata, .<<.<object?[]?>>>>? Factory { get; set; }
         public string MethodNameProvidingDataSource { get; }
-        [.("AOT", "IL2072:UnrecognizedReflectionPattern", Justification="Data source methods use dynamic patterns")]
-        [.("AOT", "IL2075:UnrecognizedReflectionPattern", Justification="Data source methods use dynamic patterns")]
+        [.("AOT", "IL2072:UnrecognizedReflectionPattern", Justification="Method data sources require runtime discovery and invocation of methods. The targ" +
+            "et type is determined dynamically from test metadata. For AOT scenarios, source " +
+            "generation should be used to pre-compile method references.")]
+        [.("AOT", "IL2075:UnrecognizedReflectionPattern", Justification="GetType() is called on runtime objects from test class instances. The actual type" +
+            "s cannot be statically determined. For AOT scenarios, source generation captures" +
+            " these types at compile time.")]
         [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__17))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
@@ -1004,10 +1033,14 @@ namespace
     public class ParameterMetadata : .MemberMetadata, <.ParameterMetadata>
     {
         public ParameterMetadata([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  Type) { }
+        public object? CachedDefaultValue { get; init; }
+        public bool? CachedIsOptional { get; init; }
+        public bool? CachedIsParams { get; init; }
         public object? DefaultValue { get; }
         public bool IsNullable { get; init; }
         public bool IsOptional { get; }
         public bool IsParams { get; }
+        public int Position { get; init; }
         public required .ParameterInfo ReflectionInfo { get; set; }
         public override  Type { get; init; }
         public required .TypeReference TypeReference { get; init; }
@@ -1055,16 +1088,22 @@ namespace
         public PropertyMetadata() { }
         public required .ClassMetadata ClassMetadata { get; set; }
         public required .ClassMetadata ContainingTypeMetadata { get; set; }
+        public <.IDataSourceAttribute>? CreateDataSource { get; init; }
         public required <object?, object?> Getter { get; init; }
+        public bool IsInitOnly { get; init; }
         public bool IsNullable { get; init; }
+        public bool IsRequired { get; init; }
         public required bool IsStatic { get; init; }
         public required .PropertyInfo ReflectionInfo { get; init; }
+        public <object, object?>? Setter { get; init; }
         [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]
         public override required  Type { get; init; }
     }
     public static class PropertySourceRegistry
     {
-        [.("Trimming", "IL2070", Justification="Legacy reflection fallback")]
+        [.("Trimming", "IL2070", Justification="Reflection discovery is used when source-generated metadata is not available. Thi" +
+            "s supports dynamically loaded assemblies and runtime property injection. For AOT" +
+            " scenarios, the source generator pre-discovers all injectable properties.")]
         public static .PropertyInjectionData[] DiscoverInjectableProperties([.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  type) { }
         [return: .(new string[] {
                 "Type",
@@ -1563,6 +1602,36 @@ namespace
         protected override sealed .<<.<object?[]?>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
 }
+namespace .AotCompatibility
+{
+    public enum AotCompatibilityMode
+    {
+        SourceGenerated = 0,
+        ManuallyRegistered = 1,
+        ConcreteTypesOnly = 2,
+        TupleInterfaceBased = 3,
+    }
+    [(.Method)]
+    public class AotCompatibleAttribute : 
+    {
+        public AotCompatibleAttribute() { }
+        public string? Details { get; init; }
+        public . Mode { get; init; }
+    }
+    public static class GenericTestRegistry
+    {
+        public static .MethodInfo? GetCompiledMethod( declaringType, string methodName, [] typeArguments) { }
+        public static TDelegate? GetDirectDelegate<TDelegate>( declaringType, string methodName, [] typeArguments)
+            where TDelegate :  { }
+        public static .<[]> GetRegisteredCombinations( declaringType) { }
+        public static bool IsMarkedAotCompatible(.MethodInfo method) { }
+        public static bool IsRegistered( declaringType, string methodName, [] typeArguments) { }
+        public static void MarkAsAotCompatible(.MethodInfo method) { }
+        public static void RegisterDirectDelegate<T>( declaringType, string methodName, [] typeArguments, T delegateInstance)
+            where T :  { }
+        public static void RegisterGenericMethod( declaringType, string methodName, [] typeArguments, .MethodInfo compiledMethod) { }
+    }
+}
 namespace .Attributes
 {
     [(.Class | .Constructor | .Method | .Property)]
@@ -1858,6 +1927,8 @@ namespace .Extensions
     }
     public static class TestContextExtensions
     {
+        [.("Adding dynamic tests requires reflection which is not supported in native AOT sce" +
+            "narios.")]
         public static . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T>(this .TestContext context, .DynamicTest<T> dynamicTest)
             where T :  class { }
         public static string GetClassTypeName(this .TestContext context) { }
@@ -2006,9 +2077,11 @@ namespace .Helpers
         [.("ReflectionAnalysis", "IL2075:UnrecognizedReflectionPattern", Justification="Reflection is used as a fallback. AOT analyzer warns at compile time.")]
         public static .<object?[]> ExpandTupleArray(object? value) { }
         public static bool IsTupleArrayType( type) { }
-        public static bool IsTupleType( type) { }
+        public static bool IsTupleType(. tuple) { }
+        public static bool IsTupleType(? type) { }
+        public static bool IsTupleType(object? obj) { }
         public static bool ShouldUnwrapForMethodArguments(object? value, int expectedParameterCount) { }
-        [.("ReflectionAnalysis", "IL2075:UnrecognizedReflectionPattern", Justification="Reflection is used as a fallback. AOT analyzer warns at compile time.")]
+        public static object?[] UnwrapTuple(.? value) { }
         public static object?[] UnwrapTuple(object? value) { }
     }
 }
@@ -2135,14 +2208,6 @@ namespace .Hooks
         protected StaticHookMethod() { }
         public <T, .CancellationToken, .>? Body { get; init; }
         public abstract . ExecuteAsync(T context, .CancellationToken cancellationToken);
-    }
-}
-namespace .Initialization
-{
-    public class TestObjectInitializationException : 
-    {
-        public TestObjectInitializationException(string message) { }
-        public TestObjectInitializationException(string message,  innerException) { }
     }
 }
 namespace .Interfaces
@@ -2294,6 +2359,8 @@ namespace .Interfaces
     }
     public interface ITestRegistry
     {
+        [.("Adding dynamic tests requires runtime compilation and reflection which are not su" +
+            "pported in native AOT scenarios.")]
         . AddDynamicTest<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicFields | ..NonPublicFields | ..PublicProperties)]  T>(.TestContext context, .DynamicTest<T> dynamicTest)
             where T :  class;
     }
@@ -2516,13 +2583,20 @@ namespace .Services
         public object? GetService( serviceType) { }
     }
 }
-namespace .Tracking
+namespace .StaticProperties
 {
-    public static class ObjectTracker
+    public sealed class StaticPropertyMetadata
     {
-        public static void OnDisposed(object? o,  action) { }
-        public static void OnDisposedAsync(object? o, <.> asyncAction) { }
-        public static void TrackObject(.TestContextEvents events, object? obj) { }
-        public static void TrackOwnership(object owner, object owned) { }
+        public StaticPropertyMetadata() { }
+        public required  DeclaringType { get; init; }
+        public required <.<object?>> InitializerAsync { get; init; }
+        public required string PropertyName { get; init; }
+        public required  PropertyType { get; init; }
+    }
+    public static class StaticPropertyRegistry
+    {
+        public static .<.> GetRegisteredProperties() { }
+        public static void Register(. metadata) { }
+        public static bool TryGetInitializedValue( declaringType, string propertyName, out object? value) { }
     }
 }

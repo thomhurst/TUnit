@@ -8,13 +8,13 @@ on:
 jobs:
   run-time-benchmarks:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
-    strategy: 
+    strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         class: [BasicTests, DataDrivenTests, SetupTeardownTests, AsyncTests, FixtureTests, ParallelTests, AssertionTests, RepeatTests]
       fail-fast: false
     runs-on: ${{ matrix.os }}
-    concurrency: 
+    concurrency:
       group: "speed-comparison-run-time-${{matrix.os}}-${{matrix.class}}"
       cancel-in-progress: true
 
@@ -22,26 +22,26 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 9.0.x
 
       - name: Build TUnit AOT .NET 8.0
-        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net8.0 --output aot-publish-net8 -p:PublishAot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
+        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net8.0 --output aot-publish-net8 -p:PublishAot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }}
         working-directory: "tools/speed-comparison/UnifiedTests"
-          
+
       - name: Build TUnit AOT .NET 9.0
-        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net9.0 --output aot-publish-net9 -p:PublishAot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
+        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net9.0 --output aot-publish-net9 -p:PublishAot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }}
         working-directory: "tools/speed-comparison/UnifiedTests"
 
       - name: Build TUnit Single File .NET 8.0
-        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net8.0 --output singlefile-publish-net8 -p:PublishSingleFile=true -p:SelfContained=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
+        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net8.0 --output singlefile-publish-net8 -p:PublishSingleFile=true -p:SelfContained=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }}
         working-directory: "tools/speed-comparison/UnifiedTests"
-          
+
       - name: Build TUnit Single File .NET 9.0
-        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net9.0 --output singlefile-publish-net9 -p:PublishSingleFile=true -p:SelfContained=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-x64' }}
+        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net9.0 --output singlefile-publish-net9 -p:PublishSingleFile=true -p:SelfContained=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }}
         working-directory: "tools/speed-comparison/UnifiedTests"
 
       - name: Build All Frameworks
@@ -51,7 +51,7 @@ jobs:
           dotnet build -c Release -p:TestFramework=NUNIT
           dotnet build -c Release -p:TestFramework=MSTEST
         working-directory: "tools/speed-comparison/UnifiedTests"
-      
+
       - name: Run Benchmark
         run: dotnet run -c Release --framework net9.0 --allCategories=Runtime
         working-directory: "tools/speed-comparison/Tests.Benchmark"
@@ -69,13 +69,13 @@ jobs:
 
   build-time-benchmarks:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
-    strategy: 
+    strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         # framework: [net8.0, net9.0]
       fail-fast: false
     runs-on: ${{ matrix.os }}
-    concurrency: 
+    concurrency:
       group: "speed-comparison-build-time-${{matrix.os}}"
       cancel-in-progress: true
 
@@ -83,7 +83,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:

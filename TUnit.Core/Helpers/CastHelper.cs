@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Converters;
-using TUnit.Core.Interfaces.SourceGenerator;
 
 namespace TUnit.Core.Helpers;
 

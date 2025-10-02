@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using TUnit.Core.Enums;
+﻿using TUnit.Core.Enums;
 
 namespace TUnit.Core;
 

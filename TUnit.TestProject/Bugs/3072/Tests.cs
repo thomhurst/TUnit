@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System;
+using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._3072;

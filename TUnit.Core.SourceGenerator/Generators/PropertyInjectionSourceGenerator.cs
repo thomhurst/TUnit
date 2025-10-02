@@ -16,9 +16,11 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 predicate: (node, _) => IsClassWithDataSourceProperties(node),
                 transform: (ctx, _) => GetClassWithDataSourceProperties(ctx))
             .Where(x => x != null)
-            .Select((x, _) => x!);
+            .Select((x, _) => x!)
+            .Collect()
+            .SelectMany((classes, _) => classes.DistinctBy(c => c.ClassSymbol, SymbolEqualityComparer.Default));
 
-        // Generate individual files for each class instead of collecting them all
+        // Generate individual files for each unique class
         context.RegisterSourceOutput(classesWithPropertyInjection, GenerateIndividualPropertyInjectionSource);
     }
 
@@ -32,7 +34,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var typeDecl = (TypeDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;
 
-        if (semanticModel.GetDeclaredSymbol(typeDecl) is not INamedTypeSymbol typeSymbol || typeSymbol.IsAbstract)
+        if (semanticModel.GetDeclaredSymbol(typeDecl) is not INamedTypeSymbol typeSymbol)
         {
             return null;
         }
@@ -89,6 +91,12 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             }
         }
 
+        // Only return if there are actually properties with data sources
+        if (propertiesWithDataSources.Count == 0)
+        {
+            return null;
+        }
+
         return new ClassWithDataSourceProperties
         {
             ClassSymbol = typeSymbol,
@@ -98,7 +106,14 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static bool CanSetProperty(IPropertySymbol property)
     {
-        return property.SetMethod != null || property.SetMethod?.IsInitOnly == true;
+        // Check if property has a setter (including init-only setters)
+        if (property.SetMethod == null)
+        {
+            return false;
+        }
+
+        // Property has a setter (either set or init)
+        return true;
     }
 
     private static bool IsPubliclyAccessible(INamedTypeSymbol typeSymbol)

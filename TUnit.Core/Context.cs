@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using System.Threading;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 

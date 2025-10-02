@@ -93,7 +93,7 @@ internal class TestExecutor
             executableTest.Context.ClassContext.RestoreExecutionContext();
 
             await _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
-            
+
             // Invoke test start event receivers
             await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
 
@@ -121,30 +121,23 @@ internal class TestExecutor
         catch (Exception ex)
         {
             executableTest.SetResult(TestState.Failed, ex);
-            
-            // Run after hooks and event receivers in finally before re-throwing
+
+            // Run per-retry cleanup hooks before re-throwing
             try
             {
-                // Run After(Test) hooks first (before disposal)
+                // Run After(Test) hooks
                 await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
-                
+
                 // Invoke test end event receivers
                 await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
-                
-                // Then dispose test instance
-                await DisposeTestInstance(executableTest).ConfigureAwait(false);
-                
-                // Finally run After(Class/Assembly/Session) hooks if we're the last test
-                await ExecuteAfterClassAssemblySessionHooks(executableTest, testClass, testAssembly, cancellationToken).ConfigureAwait(false);
             }
             catch
             {
-                // Swallow any exceptions from disposal/hooks when we already have a test failure
+                // Swallow any exceptions from hooks when we already have a test failure
             }
-            
+
             // Check if the result was overridden - if so, don't re-throw
-            if (executableTest.Context.Result?.IsOverridden == true && 
-                executableTest.Context.Result.State == TestState.Passed)
+            if (executableTest.Context.Result is { IsOverridden: true, State: TestState.Passed })
             {
                 // Result was overridden to passed, don't re-throw the exception
                 executableTest.SetResult(TestState.Passed);
@@ -156,21 +149,17 @@ internal class TestExecutor
         }
         finally
         {
-            // This finally block now only runs for the success path
+            // Per-retry cleanup - runs for success path only
             if (executableTest.State != TestState.Failed)
             {
-                // Run After(Test) hooks first (before disposal)
+                // Run After(Test) hooks
                 await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
-                
+
                 // Invoke test end event receivers
                 await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
-                
-                // Then dispose test instance
-                await DisposeTestInstance(executableTest).ConfigureAwait(false);
-                
-                // Finally run After(Class/Assembly/Session) hooks if we're the last test
-                await ExecuteAfterClassAssemblySessionHooks(executableTest, testClass, testAssembly, cancellationToken).ConfigureAwait(false);
             }
+            // Note: Test instance disposal and After(Class/Assembly/Session) hooks
+            // are now handled in TestCoordinator after the retry loop completes
         }
     }
 
@@ -197,50 +186,36 @@ internal class TestExecutor
         }
     }
 
-    private async Task ExecuteAfterClassAssemblySessionHooks(AbstractExecutableTest executableTest,
+    internal async Task<List<Exception>> ExecuteAfterClassAssemblyHooks(AbstractExecutableTest executableTest,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties
             | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, Assembly testAssembly, CancellationToken cancellationToken)
     {
+        var exceptions = new List<Exception>();
         var flags = _lifecycleCoordinator.DecrementAndCheckAfterHooks(testClass, testAssembly);
-
-        if (executableTest.Context.Events.OnDispose != null)
-        {
-            try
-            {
-                foreach (var invocation in executableTest.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
-                {
-                    await invocation.InvokeAsync(executableTest.Context, executableTest.Context);
-                }
-            }
-            catch
-            {
-                // Swallow disposal exceptions
-            }
-        }
 
         if (flags.ShouldExecuteAfterClass)
         {
-            await _hookExecutor.ExecuteAfterClassHooksAsync(testClass, cancellationToken).ConfigureAwait(false);
+            var classExceptions = await _hookExecutor.ExecuteAfterClassHooksAsync(testClass, cancellationToken).ConfigureAwait(false);
+            exceptions.AddRange(classExceptions);
         }
 
         if (flags.ShouldExecuteAfterAssembly)
         {
-            await _hookExecutor.ExecuteAfterAssemblyHooksAsync(testAssembly, cancellationToken).ConfigureAwait(false);
+            var assemblyExceptions = await _hookExecutor.ExecuteAfterAssemblyHooksAsync(testAssembly, cancellationToken).ConfigureAwait(false);
+            exceptions.AddRange(assemblyExceptions);
         }
 
-        if (flags.ShouldExecuteAfterTestSession)
-        {
-            await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
-        }
+        return exceptions;
     }
 
     /// <summary>
     /// Execute session-level after hooks once at the end of test execution.
+    /// Returns any exceptions that occurred during hook execution.
     /// </summary>
-    public async Task ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
+    public async Task<List<Exception>> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
-        await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
+        return await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -266,10 +241,10 @@ internal class TestExecutor
     {
         return _contextProvider;
     }
-    
+
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075:Type.GetProperty does not have matching annotations",
         Justification = "Only used for specific test class DisposalRegressionTests")]
-    private static async Task DisposeTestInstance(AbstractExecutableTest test)
+    internal static async Task DisposeTestInstance(AbstractExecutableTest test)
     {
         // Dispose the test instance if it's disposable
         if (test.Context.TestDetails.ClassInstance != null && test.Context.TestDetails.ClassInstance is not SkippedTestInstance)
@@ -277,7 +252,7 @@ internal class TestExecutor
             try
             {
                 var instance = test.Context.TestDetails.ClassInstance;
-                
+
                 // Special handling for DisposalRegressionTests - dispose its properties
                 if (instance.GetType().Name == "DisposalRegressionTests")
                 {
@@ -295,7 +270,7 @@ internal class TestExecutor
                         }
                     }
                 }
-                
+
                 // Then dispose the instance itself
                 switch (instance)
                 {

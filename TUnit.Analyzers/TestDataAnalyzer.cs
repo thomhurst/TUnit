@@ -429,6 +429,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                         .ToArray()
                     : Array.Empty<ITypeSymbol>();
 
+            // Look for methods first
             var methodSymbols = (type as INamedTypeSymbol)?.GetSelfAndBaseTypes()
                 .SelectMany(x => x.GetMembers())
                 .OfType<IMethodSymbol>()
@@ -440,13 +441,27 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                                                    MatchesParameters(context, argumentForMethodCallTypes, methodSymbol))
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
 
+            // If no method found, check for properties
             if (dataSourceMethod is null)
             {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(
-                        Rules.NoMethodFound,
-                        attribute.GetLocation())
-                );
+                var propertySymbols = (type as INamedTypeSymbol)?.GetSelfAndBaseTypes()
+                    .SelectMany(x => x.GetMembers())
+                    .OfType<IPropertySymbol>()
+                    .ToArray() ?? Array.Empty<IPropertySymbol>();
+
+                var dataSourceProperty = propertySymbols.FirstOrDefault(x => x.Name == methodName);
+
+                if (dataSourceProperty is null)
+                {
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(
+                            Rules.NoMethodFound,
+                            attribute.GetLocation())
+                    );
+                    return;
+                }
+
+                // Properties are valid data sources, no need to check return type for void
                 return;
             }
 

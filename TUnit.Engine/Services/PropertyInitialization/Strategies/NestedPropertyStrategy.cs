@@ -1,8 +1,8 @@
-using System.Threading.Tasks;
-using TUnit.Core.DataSources;
-using TUnit.Core.Initialization;
+using TUnit.Core;
+using TUnit.Core.PropertyInjection;
+using TUnit.Core.PropertyInjection.Initialization;
 
-namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
+namespace TUnit.Engine.Services.PropertyInitialization;
 
 /// <summary>
 /// Strategy for handling nested property initialization.
@@ -11,19 +11,19 @@ namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
 internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
 {
     private readonly DataSourceInitializer _dataSourceInitializer;
-    private readonly TestObjectInitializer _testObjectInitializer;
+    private readonly ObjectRegistrationService _objectRegistrationService;
 
-    public NestedPropertyStrategy(DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
+    public NestedPropertyStrategy(DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
     {
         _dataSourceInitializer = dataSourceInitializer ?? throw new System.ArgumentNullException(nameof(dataSourceInitializer));
-        _testObjectInitializer = testObjectInitializer ?? throw new System.ArgumentNullException(nameof(testObjectInitializer));
+        _objectRegistrationService = objectRegistrationService ?? throw new System.ArgumentNullException(nameof(objectRegistrationService));
     }
 
     public NestedPropertyStrategy()
     {
         // Default constructor for backward compatibility if needed
         _dataSourceInitializer = null!;
-        _testObjectInitializer = null!;
+        _objectRegistrationService = null!;
     }
     /// <summary>
     /// Determines if this strategy can handle nested properties.
@@ -62,9 +62,6 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
             return;
         }
 
-        // Track the property value and its nested properties
-        await PropertyTrackingService.TrackNestedPropertiesAsync(context, propertyValue, plan);
-
         // Recursively inject properties into the nested object
         if (SourceRegistrar.IsEnabled)
         {
@@ -90,8 +87,8 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
         var tasks = plan.SourceGeneratedProperties.Select(async metadata =>
         {
             var nestedContext = CreateNestedContext(parentContext, instance, metadata);
-            var strategy = new SourceGeneratedPropertyStrategy(_dataSourceInitializer, _testObjectInitializer);
-            
+            var strategy = new SourceGeneratedPropertyStrategy(_dataSourceInitializer, _objectRegistrationService);
+
             if (strategy.CanHandle(nestedContext))
             {
                 await strategy.InitializePropertyAsync(nestedContext);
@@ -112,8 +109,8 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
         var tasks = plan.ReflectionProperties.Select(async pair =>
         {
             var nestedContext = CreateNestedContext(parentContext, instance, pair.Property, pair.DataSource);
-            var strategy = new ReflectionPropertyStrategy(_dataSourceInitializer, _testObjectInitializer);
-            
+            var strategy = new ReflectionPropertyStrategy(_dataSourceInitializer, _objectRegistrationService);
+
             if (strategy.CanHandle(nestedContext))
             {
                 await strategy.InitializePropertyAsync(nestedContext);
@@ -129,13 +126,18 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
     private PropertyInitializationContext CreateNestedContext(
         PropertyInitializationContext parentContext,
         object instance,
-        Interfaces.SourceGenerator.PropertyInjectionMetadata metadata)
+        TUnit.Core.Interfaces.SourceGenerator.PropertyInjectionMetadata metadata)
     {
+        // Build hierarchical property name for nested properties
+        var propertyName = parentContext.IsNestedProperty
+            ? $"{parentContext.PropertyName}.{metadata.PropertyName}"
+            : metadata.PropertyName;
+
         return new PropertyInitializationContext
         {
             Instance = instance,
             SourceGeneratedMetadata = metadata,
-            PropertyName = metadata.PropertyName,
+            PropertyName = propertyName,
             PropertyType = metadata.PropertyType,
             PropertySetter = metadata.SetProperty,
             ObjectBag = parentContext.ObjectBag,
@@ -157,12 +159,17 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
         System.Reflection.PropertyInfo property,
         IDataSourceAttribute dataSource)
     {
+        // Build hierarchical property name for nested properties
+        var propertyName = parentContext.IsNestedProperty
+            ? $"{parentContext.PropertyName}.{property.Name}"
+            : property.Name;
+
         return new PropertyInitializationContext
         {
             Instance = instance,
             PropertyInfo = property,
             DataSource = dataSource,
-            PropertyName = property.Name,
+            PropertyName = propertyName,
             PropertyType = property.PropertyType,
             PropertySetter = PropertySetterFactory.CreateSetter(property),
             ObjectBag = parentContext.ObjectBag,

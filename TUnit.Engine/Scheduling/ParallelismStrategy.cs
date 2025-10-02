@@ -3,7 +3,7 @@
 /// <summary>
 /// Available parallelism strategies
 /// </summary>
-public enum ParallelismStrategy
+internal enum ParallelismStrategy
 {
     /// <summary>
     /// Fixed parallelism based on processor count

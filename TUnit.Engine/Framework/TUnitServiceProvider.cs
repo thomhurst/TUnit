@@ -7,9 +7,9 @@ using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using Microsoft.Testing.Platform.Services;
 using TUnit.Core;
-using TUnit.Core.DataSources;
-using TUnit.Core.Initialization;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Collectors;
 using TUnit.Engine.Building.Interfaces;
@@ -51,7 +51,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public ParallelLimitLockProvider ParallelLimitLockProvider { get; }
     public PropertyInjectionService PropertyInjectionService { get; }
     public DataSourceInitializer DataSourceInitializer { get; }
-    public TestObjectInitializer TestObjectInitializer { get; }
+    public ObjectRegistrationService ObjectRegistrationService { get; }
+    public ObjectInitializationService ObjectInitializationService { get; }
+    public bool AfterSessionHooksFailed { get; set; }
 
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
@@ -84,16 +86,25 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create initialization services early as they're needed by other services
         DataSourceInitializer = Register(new DataSourceInitializer());
         PropertyInjectionService = Register(new PropertyInjectionService(DataSourceInitializer));
-        TestObjectInitializer = Register(new TestObjectInitializer(PropertyInjectionService));
-        
+
+        // NEW: Separate registration and execution services (replaces TestObjectInitializer)
+        ObjectRegistrationService = Register(new ObjectRegistrationService(PropertyInjectionService));
+        ObjectInitializationService = Register(new ObjectInitializationService());
+
         // Initialize the circular dependencies
-        PropertyInjectionService.Initialize(TestObjectInitializer);
+        PropertyInjectionService.Initialize(ObjectRegistrationService);
         DataSourceInitializer.Initialize(PropertyInjectionService);
 
-        // Register the test argument tracking service to handle object disposal for shared instances
-        var testArgumentTrackingService = Register(new TestArgumentTrackingService(TestObjectInitializer));
+        var trackableObjectGraphProvider = new TrackableObjectGraphProvider();
 
-        TestFilterService = Register(new TestFilterService(Logger, testArgumentTrackingService));
+        var disposer = new Disposer(Logger);
+
+        var objectTracker = new ObjectTracker(trackableObjectGraphProvider, disposer);
+
+        // Register the test argument registration service to handle object registration for shared instances
+        var testArgumentRegistrationService = Register(new TestArgumentRegistrationService(ObjectRegistrationService, objectTracker));
+
+        TestFilterService = Register(new TestFilterService(Logger, testArgumentRegistrationService));
 
         MessageBus = Register(new TUnitMessageBus(
             extension,
@@ -146,7 +157,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
 
-        var testInitializer = new TestInitializer(EventReceiverOrchestrator, TestObjectInitializer);
+        var testInitializer = new TestInitializer(EventReceiverOrchestrator, ObjectInitializationService, PropertyInjectionService, objectTracker);
 
         // Create the new TestCoordinator that orchestrates the granular services
         var testCoordinator = Register<ITestCoordinator>(
@@ -157,6 +168,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 testContextRestorer,
                 TestExecutor,
                 testInitializer,
+                objectTracker,
                 Logger));
 
         // Create the HookOrchestratingTestExecutorAdapter
@@ -177,11 +189,13 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create scheduler configuration from command line options
         var testGroupingService = Register<ITestGroupingService>(new TestGroupingService());
         var circularDependencyDetector = Register(new CircularDependencyDetector());
-        
+
         var constraintKeyScheduler = Register<IConstraintKeyScheduler>(new ConstraintKeyScheduler(
             testRunner,
             Logger,
             ParallelLimitLockProvider));
+
+        var staticPropertyInitializer = Register(new Services.StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, disposer));
 
         var testScheduler = Register<ITestScheduler>(new TestScheduler(
             Logger,
@@ -192,7 +206,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             testStateManager,
             testRunner,
             circularDependencyDetector,
-            constraintKeyScheduler));
+            constraintKeyScheduler,
+            hookExecutor,
+            staticPropertyInitializer));
 
         TestSessionCoordinator = Register(new TestSessionCoordinator(EventReceiverOrchestrator,
             Logger,

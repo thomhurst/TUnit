@@ -2,6 +2,7 @@ using System.Linq;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 
@@ -19,6 +20,7 @@ internal sealed class TestCoordinator : ITestCoordinator
     private readonly TestContextRestorer _contextRestorer;
     private readonly TestExecutor _testExecutor;
     private readonly TestInitializer _testInitializer;
+    private readonly ObjectTracker _objectTracker;
     private readonly TUnitFrameworkLogger _logger;
 
     public TestCoordinator(
@@ -28,6 +30,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         TestContextRestorer contextRestorer,
         TestExecutor testExecutor,
         TestInitializer testInitializer,
+        ObjectTracker objectTracker,
         TUnitFrameworkLogger logger)
     {
         _executionGuard = executionGuard;
@@ -36,6 +39,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         _contextRestorer = contextRestorer;
         _testExecutor = testExecutor;
         _testInitializer = testInitializer;
+        _objectTracker = objectTracker;
         _logger = logger;
     }
 
@@ -60,35 +64,66 @@ internal sealed class TestCoordinator : ITestCoordinator
             test.Context.TestEnd = null;
 
             TestContext.Current = test.Context;
-            
+
             var allDependencies = new HashSet<TestDetails>();
             CollectAllDependencies(test, allDependencies, new HashSet<AbstractExecutableTest>());
-            
+
             foreach (var dependency in allDependencies)
             {
                 test.Context.Dependencies.Add(dependency);
             }
-            
+
             // Ensure TestSession hooks run before creating test instances
             await _testExecutor.EnsureTestSessionHooksExecutedAsync();
 
-            test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
-
-            // Check if this test should be skipped (after creating instance)
-            if (test.Context.TestDetails.ClassInstance is SkippedTestInstance ||
-                !string.IsNullOrEmpty(test.Context.SkipReason))
-            {
-                await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped");
-                return;
-            }
-
-            await _testInitializer.InitializeTest(test, cancellationToken);
-
-            test.Context.RestoreExecutionContext();
-
+            // Execute test with retry logic - each retry gets a fresh instance
             await RetryHelper.ExecuteWithRetry(test.Context, async () =>
-                await _testExecutor.ExecuteAsync(test, cancellationToken)
-            );
+            {
+                test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
+
+                // Check if this test should be skipped (after creating instance)
+                if (test.Context.TestDetails.ClassInstance is SkippedTestInstance ||
+                    !string.IsNullOrEmpty(test.Context.SkipReason))
+                {
+                    await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped");
+                    return;
+                }
+
+                try
+                {
+                    await _testInitializer.InitializeTest(test, cancellationToken);
+                    test.Context.RestoreExecutionContext();
+                    await _testExecutor.ExecuteAsync(test, cancellationToken);
+                }
+                finally
+                {
+                    // Dispose test instance and fire OnDispose after each attempt
+                    // This ensures each retry gets a fresh instance
+                    if (test.Context.Events.OnDispose?.InvocationList != null)
+                    {
+                        foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                        {
+                            try
+                            {
+                                await invocation.InvokeAsync(test.Context, test.Context);
+                            }
+                            catch (Exception disposeEx)
+                            {
+                                await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}");
+                            }
+                        }
+                    }
+
+                    try
+                    {
+                        await TestExecutor.DisposeTestInstance(test);
+                    }
+                    catch (Exception disposeEx)
+                    {
+                        await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}");
+                    }
+                }
+            });
 
             await _stateManager.MarkCompletedAsync(test);
 
@@ -103,6 +138,33 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         finally
         {
+            var cleanupExceptions = new List<Exception>();
+
+            await _objectTracker.UntrackObjects(test.Context, cleanupExceptions);
+
+            var testClass = test.Metadata.TestClassType;
+            var testAssembly = testClass.Assembly;
+            var hookExceptions = await _testExecutor.ExecuteAfterClassAssemblyHooks(test, testClass, testAssembly, CancellationToken.None);
+
+            if (hookExceptions.Count > 0)
+            {
+                foreach (var ex in hookExceptions)
+                {
+                    await _logger.LogErrorAsync($"Error executing After hooks for {test.TestId}: {ex}");
+                }
+                cleanupExceptions.AddRange(hookExceptions);
+            }
+
+            // If any cleanup exceptions occurred, mark the test as failed
+            if (cleanupExceptions.Count > 0)
+            {
+                var aggregatedException = cleanupExceptions.Count == 1
+                    ? cleanupExceptions[0]
+                    : new AggregateException("One or more errors occurred during test cleanup", cleanupExceptions);
+
+                await _stateManager.MarkFailedAsync(test, aggregatedException);
+            }
+
             switch (test.State)
             {
                 case TestState.NotStarted:
@@ -128,7 +190,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
+
         }
     }
 
