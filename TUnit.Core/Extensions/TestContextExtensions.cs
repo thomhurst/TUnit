@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
@@ -24,6 +23,7 @@ public static class TestContextExtensions
         return $"{context.TestDetails.ClassType.Name}({string.Join(", ", context.TestDetails.TestClassArguments.Select(a => ArgumentFormatter.Format(a, context.ArgumentDisplayFormatters)))})";
     }
 
+    [RequiresDynamicCode("Adding dynamic tests requires reflection which is not supported in native AOT scenarios.")]
     public static async Task AddDynamicTest<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors

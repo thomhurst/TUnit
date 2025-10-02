@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Engine.Enums;
 
-public enum EngineMode
+internal enum EngineMode
 {
     SourceGenerated,
     Reflection

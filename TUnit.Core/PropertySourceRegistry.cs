@@ -78,7 +78,7 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Discovers injectable properties using reflection (legacy compatibility)
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Legacy reflection fallback")]
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection discovery is used when source-generated metadata is not available. This supports dynamically loaded assemblies and runtime property injection. For AOT scenarios, the source generator pre-discovers all injectable properties.")]
     public static PropertyInjectionData[] DiscoverInjectableProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type)
     {
         // First try source-generated data
@@ -195,8 +195,8 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Gets backing field for property (legacy compatibility)
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Legacy reflection fallback")]
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Legacy reflection fallback")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Backing field discovery is needed for init-only and required properties in reflection mode. The field naming convention (<property>k__BackingField) is stable in the .NET runtime. For AOT, source generation captures these relationships at compile time.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "DeclaringType from PropertyInfo may not have field annotations, but we only access compiler-generated backing fields which follow predictable patterns. For AOT, use source-generated property setters.")]
     private static System.Reflection.FieldInfo? GetBackingField(System.Reflection.PropertyInfo property)
     {
         var declaringType = property.DeclaringType;
@@ -236,7 +236,7 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Helper method to get field with proper trimming suppression
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Legacy reflection fallback")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Field access is constrained to backing fields of properties with data source attributes. The DynamicallyAccessedMembers annotation ensures fields are preserved when this method is called. For AOT, source generation provides direct field access.")]
     private static System.Reflection.FieldInfo? GetFieldSafe([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type, string name, System.Reflection.BindingFlags bindingFlags)
     {
         return type.GetField(name, bindingFlags);
@@ -245,7 +245,7 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Checks if method is init-only (legacy compatibility)
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Legacy reflection fallback")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Checking for IsExternalInit modreq is required to identify init-only setters in reflection mode. This uses stable .NET runtime conventions. For AOT, the source generator identifies init-only properties at compile time.")]
     private static bool IsInitOnlyMethod(System.Reflection.MethodInfo setMethod)
     {
         var methodType = setMethod.GetType();

@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using TUnit.Core.DataSources;
-using TUnit.Core.Initialization;
-using TUnit.Core.PropertyInjection.Initialization.Strategies;
+using TUnit.Core.PropertyInjection.Initialization;
+using TUnit.Engine.Services.PropertyInitialization;
 
-namespace TUnit.Core.PropertyInjection.Initialization;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Defines and executes the property initialization pipeline.
@@ -18,14 +14,14 @@ internal sealed class PropertyInitializationPipeline
     private readonly List<Func<PropertyInitializationContext, Task>> _afterSteps;
     private readonly DataSourceInitializer _dataSourceInitializer;
 
-    public PropertyInitializationPipeline(DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
+    public PropertyInitializationPipeline(DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
     {
         _dataSourceInitializer = dataSourceInitializer ?? throw new ArgumentNullException(nameof(dataSourceInitializer));
         _strategies = new List<IPropertyInitializationStrategy>
         {
-            new SourceGeneratedPropertyStrategy(dataSourceInitializer, testObjectInitializer),
-            new ReflectionPropertyStrategy(dataSourceInitializer, testObjectInitializer),
-            new NestedPropertyStrategy(dataSourceInitializer, testObjectInitializer)
+            new SourceGeneratedPropertyStrategy(dataSourceInitializer, objectRegistrationService),
+            new ReflectionPropertyStrategy(dataSourceInitializer, objectRegistrationService),
+            new NestedPropertyStrategy(dataSourceInitializer, objectRegistrationService)
         };
 
         _beforeSteps = new List<Func<PropertyInitializationContext, Task>>();
@@ -117,9 +113,9 @@ internal sealed class PropertyInitializationPipeline
     /// <summary>
     /// Creates a default pipeline with standard steps.
     /// </summary>
-    public static PropertyInitializationPipeline CreateDefault(DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
+    public static PropertyInitializationPipeline CreateDefault(DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
     {
-        return new PropertyInitializationPipeline(dataSourceInitializer, testObjectInitializer)
+        return new PropertyInitializationPipeline(dataSourceInitializer, objectRegistrationService)
             .AddBeforeStep(ValidateContext)
             .AddAfterStep(FinalizeInitialization);
     }

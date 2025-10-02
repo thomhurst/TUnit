@@ -1,0 +1,978 @@
+  Run tests: 'C:\git\TUnit\TUnit.Engine.Tests\bin\Release\net9.0\TUnit.Engine.Tests.dll' [net9.0|x64]
+  
+  ████████╗██╗   ██╗███╗   ██╗██╗████████╗
+  ╚══██╔══╝██║   ██║████╗  ██║██║╚══██╔══╝
+     ██║   ██║   ██║██╔██╗ ██║██║   ██║
+     ██║   ██║   ██║██║╚██╗██║██║   ██║
+     ██║   ╚██████╔╝██║ ╚████║██║   ██║
+     ╚═╝    ╚═════╝ ╚═╝  ╚═══╝╚═╝   ╚═╝
+  
+     TUnit v1.0.0.0 | 64-bit | Microsoft Windows 10.0.26100 | win-x64 | .NET 9.0.9 | Microsoft Testing Platform v1.8.4
+  
+     Engine Mode: SourceGenerated
+  
+  [+2/x0/?0] TUnit.Engine.Tests.dll (net9.0|x64) - 2 tests running (3s)
+  
+  Mode: Reflection
+  Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename 04ed165ab3d54811ac1376c1889c6045.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-04ed165ab3d54811ac1376c1889c6045.dmp --hangdump-timeout 5m --reflection
+  Error: 
+  Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185328211.diag
+  Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185328565.diag
+  Constructing SharedTypePerPerTestSessionFixture
+  Constructing SharedTypePerAssemblyFixture
+  Constructing SharedTypeKeyedFixture
+  Constructing SharedTypePerClassFixture
+  Constructing SharedTypeNoneFixture
+  Constructing SharedTypeNoneFixture
+  [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 6715097
+  Scheduling execution of 1 tests
+  Starting 1 parallel tests
+  Initializing Static Property
+  Before Assembly = 1
+  Writing file inside WriteFileAfterTestAttribute!
+  [AfterTestSession] Checking disposal...
+  failed Test (552ms)
+    TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+    --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+    
+    but found 0
+    
+    at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+      at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+      at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+      at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+      at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+      at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+      at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+    Standard output
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+    Error output
+  
+    In process file artifacts produced:
+      - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\04ed165ab3d54811ac1376c1889c6045.trx
+  
+  Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+    total: 1
+    failed: 1
+    succeeded: 0
+    skipped: 0
+    duration: 1s 983ms
+  
+  [+2/x0/?0] TUnit.Engine.Tests.dll (net9.0|x64) - 2 tests running (6s)
+  
+  Mode: SourceGenerated
+  Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename 77c45819eee64aa2bc69081fbea2e71f.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-77c45819eee64aa2bc69081fbea2e71f.dmp --hangdump-timeout 5m
+  Error: 
+  Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185328200.diag
+  Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185328555.diag
+  Constructing SharedTypeKeyedFixture
+  Constructing SharedTypePerPerTestSessionFixture
+  Constructing SharedTypeNoneFixture
+  Constructing SharedTypeNoneFixture
+  Constructing SharedTypePerClassFixture
+  Constructing SharedTypePerAssemblyFixture
+  [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 30637870
+  Scheduling execution of 1 tests
+  Starting 1 parallel tests
+  Initializing Static Property
+  Before Assembly = 1
+  Writing file inside WriteFileAfterTestAttribute!
+  [AfterTestSession] Checking disposal...
+  failed Test (569ms)
+    TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+    --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+    
+    but found 0
+    
+    at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+      at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+      at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+      at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+      at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+      at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+      at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+    Standard output
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+    Error output
+  
+    In process file artifacts produced:
+      - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\77c45819eee64aa2bc69081fbea2e71f.trx
+  
+  Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+    total: 1
+    failed: 1
+    succeeded: 0
+    skipped: 0
+    duration: 2s 957ms
+  
+  Mode: Reflection
+  Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename 6b107f07b838444d874954f4136145d4.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-6b107f07b838444d874954f4136145d4.dmp --hangdump-timeout 5m --reflection
+  Error: 
+  Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185331603.diag
+  Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185331919.diag
+  Constructing SharedTypePerPerTestSessionFixture
+  Constructing SharedTypePerAssemblyFixture
+  Constructing SharedTypeKeyedFixture
+  Constructing SharedTypePerClassFixture
+  Constructing SharedTypeNoneFixture
+  Constructing SharedTypeNoneFixture
+  [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 40633064
+  Scheduling execution of 1 tests
+  Starting 1 parallel tests
+  Initializing Static Property
+  Before Assembly = 1
+  Writing file inside WriteFileAfterTestAttribute!
+  [AfterTestSession] Checking disposal...
+  failed Test (552ms)
+    TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+    --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+    
+    but found 0
+    
+    at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+      at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+      at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+      at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+      at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+      at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+      at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+    Standard output
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+    Error output
+  
+    In process file artifacts produced:
+      - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\6b107f07b838444d874954f4136145d4.trx
+  
+  Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+    total: 1
+    failed: 1
+    succeeded: 0
+    skipped: 0
+    duration: 1s 872ms
+  
+  [+2/x0/?0] TUnit.Engine.Tests.dll (net9.0|x64) - 2 tests running (9s)
+  
+  Mode: SourceGenerated
+  Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename 1d639ca0440a4da1b532f1c5c6957682.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-1d639ca0440a4da1b532f1c5c6957682.dmp --hangdump-timeout 5m
+  Error: 
+  Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185332527.diag
+  Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185332842.diag
+  Constructing SharedTypeKeyedFixture
+  Constructing SharedTypePerPerTestSessionFixture
+  Constructing SharedTypeNoneFixture
+  Constructing SharedTypeNoneFixture
+  Constructing SharedTypePerClassFixture
+  Constructing SharedTypePerAssemblyFixture
+  [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 32790483
+  Scheduling execution of 1 tests
+  Starting 1 parallel tests
+  Initializing Static Property
+  Before Assembly = 1
+  Writing file inside WriteFileAfterTestAttribute!
+  [AfterTestSession] Checking disposal...
+  failed Test (558ms)
+    TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+    --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+    
+    but found 0
+    
+    at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+      at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+      at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+      at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+      at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+      at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+      at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+    Standard output
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+    Error output
+  
+    In process file artifacts produced:
+      - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\1d639ca0440a4da1b532f1c5c6957682.trx
+  
+  Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+    total: 1
+    failed: 1
+    succeeded: 0
+    skipped: 0
+    duration: 2s 816ms
+  
+  Mode: Reflection
+  Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename 69cfe3e2a70645b08f4f67b306387803.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-69cfe3e2a70645b08f4f67b306387803.dmp --hangdump-timeout 5m --reflection
+  Error: 
+  Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185334762.diag
+  Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185335071.diag
+  Constructing SharedTypePerPerTestSessionFixture
+  Constructing SharedTypePerAssemblyFixture
+  Constructing SharedTypeKeyedFixture
+  Constructing SharedTypePerClassFixture
+  Constructing SharedTypeNoneFixture
+  Constructing SharedTypeNoneFixture
+  [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 27237168
+  Scheduling execution of 1 tests
+  Starting 1 parallel tests
+  Initializing Static Property
+  Before Assembly = 1
+  Writing file inside WriteFileAfterTestAttribute!
+  [AfterTestSession] Checking disposal...
+  failed Test (540ms)
+    TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+    --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+    
+    but found 0
+    
+    at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+      at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+      at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+      at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+      at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+      at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+      at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+    Standard output
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+    Error output
+  
+    In process file artifacts produced:
+      - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\69cfe3e2a70645b08f4f67b306387803.trx
+  
+  Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+    total: 1
+    failed: 1
+    succeeded: 0
+    skipped: 0
+    duration: 1s 802ms
+  
+  [+2/x0/?0] TUnit.Engine.Tests.dll (net9.0|x64) - 2 tests running (12s)
+  
+  Mode: SourceGenerated
+  Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename b139cabfc6c740f48b71ef1539180fe1.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-b139cabfc6c740f48b71ef1539180fe1.dmp --hangdump-timeout 5m
+  Error: 
+  Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185336618.diag
+  Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185336941.diag
+  Constructing SharedTypeKeyedFixture
+  Constructing SharedTypePerPerTestSessionFixture
+  Constructing SharedTypeNoneFixture
+  Constructing SharedTypeNoneFixture
+  Constructing SharedTypePerClassFixture
+  Constructing SharedTypePerAssemblyFixture
+  [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 32790483
+  Scheduling execution of 1 tests
+  Starting 1 parallel tests
+  Initializing Static Property
+  Before Assembly = 1
+  Writing file inside WriteFileAfterTestAttribute!
+  [AfterTestSession] Checking disposal...
+  failed Test (555ms)
+    TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+    --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+    
+    but found 0
+    
+    at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+      at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+      at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+      at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+      at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+      at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+      at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+    Standard output
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+    Error output
+  
+    In process file artifacts produced:
+      - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\b139cabfc6c740f48b71ef1539180fe1.trx
+  
+  Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+    total: 1
+    failed: 1
+    succeeded: 0
+    skipped: 0
+    duration: 2s 987ms
+  
+  [+2/x0/?0] TUnit.Engine.Tests.dll (net9.0|x64) - 2 tests running (15s)
+  
+  failed AfterTestAttributeTests.Test (3s 239ms)
+    TUnit.Engine.Exceptions.TestFailedException: Exception: Error asserting results for AfterTestAttributeTests: result => result.ResultSummary.Outcome
+        should be
+    "Completed"
+        but was
+    "Failed"
+        difference
+    Difference     |  |    |    |    |    |    |    |    |    |   
+                   | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+    Index          | 0    1    2    3    4    5    6    7    8    
+    Expected Value | C    o    m    p    l    e    t    e    d    
+    Actual Value   | F    a    i    l    e    d                   
+    Expected Code  | 67   111  109  112  108  101  116  101  100  
+    Actual Code    | 70   97   105  108  101  100                 
+    
+    Expression: [
+                    result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                    result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                    result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                    result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                    result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0),
+                    _ => FindFile(x => x.Name.EndsWith("AfterTestAttributeTests.txt")).AssertExists()
+                ]
+    --->  Shouldly.ShouldAssertException: result => result.ResultSummary.Outcome
+        should be
+    "Completed"
+        but was
+    "Failed"
+        difference
+    Difference     |  |    |    |    |    |    |    |    |    |   
+                   | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+    Index          | 0    1    2    3    4    5    6    7    8    
+    Expected Value | C    o    m    p    l    e    t    e    d    
+    Actual Value   | F    a    i    l    e    d                   
+    Expected Code  | 67   111  109  112  108  101  116  101  100  
+    Actual Code    | 70   97   105  108  101  100                 
+      at TUnit.Engine.Tests.AfterTestAttributeTests.<>c.<Test>b__1_0(TestRun result) in C:\git\TUnit\TUnit.Engine.Tests\AfterTestAttributeTests.cs:15
+      at TUnit.Engine.Tests.TrxAsserter.<>c__DisplayClass0_1.<AssertTrx>b__1(Action`1 x) in C:\git\TUnit\TUnit.Engine.Tests\TrxAsserter.cs:23
+      at System.Collections.Generic.List`1.ForEach(Action`1 action)
+      at TUnit.Engine.Tests.TrxAsserter.AssertTrx(TestMode testMode, Command command, BufferedCommandResult commandResult, List`1 assertions, String trxFilename, String assertionExpression) in C:\git\TUnit\TUnit.Engine.Tests\TrxAsserter.cs:23
+    Standard output
+      Mode: Reflection
+      Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename 04ed165ab3d54811ac1376c1889c6045.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-04ed165ab3d54811ac1376c1889c6045.dmp --hangdump-timeout 5m --reflection
+      Error: 
+      Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185328211.diag
+      Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185328565.diag
+      Constructing SharedTypePerPerTestSessionFixture
+      Constructing SharedTypePerAssemblyFixture
+      Constructing SharedTypeKeyedFixture
+      Constructing SharedTypePerClassFixture
+      Constructing SharedTypeNoneFixture
+      Constructing SharedTypeNoneFixture
+      [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 6715097
+      Scheduling execution of 1 tests
+      Starting 1 parallel tests
+      Initializing Static Property
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+      failed Test (552ms)
+        TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+        --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+        
+        but found 0
+        
+        at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+          at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+          at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+          at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+          at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+          at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+          at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+        Standard output
+          Before Assembly = 1
+          Writing file inside WriteFileAfterTestAttribute!
+          [AfterTestSession] Checking disposal...
+        Error output
+      
+        In process file artifacts produced:
+          - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\04ed165ab3d54811ac1376c1889c6045.trx
+      
+      Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+        total: 1
+        failed: 1
+        succeeded: 0
+        skipped: 0
+        duration: 1s 983ms
+      
+      Mode: Reflection
+      Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename 6b107f07b838444d874954f4136145d4.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-6b107f07b838444d874954f4136145d4.dmp --hangdump-timeout 5m --reflection
+      Error: 
+      Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185331603.diag
+      Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185331919.diag
+      Constructing SharedTypePerPerTestSessionFixture
+      Constructing SharedTypePerAssemblyFixture
+      Constructing SharedTypeKeyedFixture
+      Constructing SharedTypePerClassFixture
+      Constructing SharedTypeNoneFixture
+      Constructing SharedTypeNoneFixture
+      [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 40633064
+      Scheduling execution of 1 tests
+      Starting 1 parallel tests
+      Initializing Static Property
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+      failed Test (552ms)
+        TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+        --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+        
+        but found 0
+        
+        at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+          at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+          at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+          at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+          at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+          at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+          at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+        Standard output
+          Before Assembly = 1
+          Writing file inside WriteFileAfterTestAttribute!
+          [AfterTestSession] Checking disposal...
+        Error output
+      
+        In process file artifacts produced:
+          - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\6b107f07b838444d874954f4136145d4.trx
+      
+      Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+        total: 1
+        failed: 1
+        succeeded: 0
+        skipped: 0
+        duration: 1s 872ms
+      
+      Mode: Reflection
+      Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename 69cfe3e2a70645b08f4f67b306387803.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-69cfe3e2a70645b08f4f67b306387803.dmp --hangdump-timeout 5m --reflection
+      Error: 
+      Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185334762.diag
+      Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185335071.diag
+      Constructing SharedTypePerPerTestSessionFixture
+      Constructing SharedTypePerAssemblyFixture
+      Constructing SharedTypeKeyedFixture
+      Constructing SharedTypePerClassFixture
+      Constructing SharedTypeNoneFixture
+      Constructing SharedTypeNoneFixture
+      [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 27237168
+      Scheduling execution of 1 tests
+      Starting 1 parallel tests
+      Initializing Static Property
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+      failed Test (540ms)
+        TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+        --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+        
+        but found 0
+        
+        at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+          at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+          at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+          at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+          at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+          at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+          at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+        Standard output
+          Before Assembly = 1
+          Writing file inside WriteFileAfterTestAttribute!
+          [AfterTestSession] Checking disposal...
+        Error output
+      
+        In process file artifacts produced:
+          - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\69cfe3e2a70645b08f4f67b306387803.trx
+      
+      Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+        total: 1
+        failed: 1
+        succeeded: 0
+        skipped: 0
+        duration: 1s 802ms
+      
+      Mode: Reflection
+      Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename 2c8d9ea725204156a1ecec260dd45a80.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-2c8d9ea725204156a1ecec260dd45a80.dmp --hangdump-timeout 5m --reflection
+      Error: 
+      Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185337916.diag
+      Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185338242.diag
+      Constructing SharedTypePerPerTestSessionFixture
+      Constructing SharedTypePerAssemblyFixture
+      Constructing SharedTypeKeyedFixture
+      Constructing SharedTypePerClassFixture
+      Constructing SharedTypeNoneFixture
+      Constructing SharedTypeNoneFixture
+      [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 62225447
+      Scheduling execution of 1 tests
+      Starting 1 parallel tests
+      Initializing Static Property
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+      failed Test (554ms)
+        TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+        --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+        
+        but found 0
+        
+        at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+          at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+          at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+          at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+          at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+          at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+          at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+        Standard output
+          Before Assembly = 1
+          Writing file inside WriteFileAfterTestAttribute!
+          [AfterTestSession] Checking disposal...
+        Error output
+      
+        In process file artifacts produced:
+          - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\2c8d9ea725204156a1ecec260dd45a80.trx
+      
+      Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+        total: 1
+        failed: 1
+        succeeded: 0
+        skipped: 0
+        duration: 1s 879ms
+    Error output
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: AfterTestAttributeTests.Test (3s 239ms): Exception: Error asserting results for AfterTestAttributeTests: result => result.ResultSummary.Outcome [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:     should be [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: "Completed" [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:     but was [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: "Failed" [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:     difference [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Difference     |  |    |    |    |    |    |    |    |    |    [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/   [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Index          | 0    1    2    3    4    5    6    7    8     [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Expected Value | C    o    m    p    l    e    t    e    d     [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Actual Value   | F    a    i    l    e    d                    [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Expected Code  | 67   111  109  112  108  101  116  101  100   [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Actual Code    | 70   97   105  108  101  100                  [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:  [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Expression: [ [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                 result => result.ResultSummary.Outcome.ShouldBe("Completed"), [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                 result => result.ResultSummary.Counters.Total.ShouldBe(1), [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                 result => result.ResultSummary.Counters.Passed.ShouldBe(1), [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                 result => result.ResultSummary.Counters.Failed.ShouldBe(0), [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0), [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                 _ => FindFile(x => x.Name.EndsWith("AfterTestAttributeTests.txt")).AssertExists() [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:             ] [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:  [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+  Mode: Reflection
+  Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename 2c8d9ea725204156a1ecec260dd45a80.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-2c8d9ea725204156a1ecec260dd45a80.dmp --hangdump-timeout 5m --reflection
+  Error: 
+  Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185337916.diag
+  Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185338242.diag
+  Constructing SharedTypePerPerTestSessionFixture
+  Constructing SharedTypePerAssemblyFixture
+  Constructing SharedTypeKeyedFixture
+  Constructing SharedTypePerClassFixture
+  Constructing SharedTypeNoneFixture
+  Constructing SharedTypeNoneFixture
+  [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 62225447
+  Scheduling execution of 1 tests
+  Starting 1 parallel tests
+  Initializing Static Property
+  Before Assembly = 1
+  Writing file inside WriteFileAfterTestAttribute!
+  [AfterTestSession] Checking disposal...
+  failed Test (554ms)
+    TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+    --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+    
+    but found 0
+    
+    at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+      at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+      at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+      at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+      at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+      at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+      at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+    Standard output
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+    Error output
+  
+    In process file artifacts produced:
+      - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\2c8d9ea725204156a1ecec260dd45a80.trx
+  
+  Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+    total: 1
+    failed: 1
+    succeeded: 0
+    skipped: 0
+    duration: 1s 879ms
+  
+  [+2/x1/?0] TUnit.Engine.Tests.dll (net9.0|x64) - AfterTestAttributeTests.Test (18s)
+  
+  failed AfterTestAttributeTests.Test (4s 056ms)
+    TUnit.Engine.Exceptions.TestFailedException: Exception: Error asserting results for AfterTestAttributeTests: result => result.ResultSummary.Outcome
+        should be
+    "Completed"
+        but was
+    "Failed"
+        difference
+    Difference     |  |    |    |    |    |    |    |    |    |   
+                   | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+    Index          | 0    1    2    3    4    5    6    7    8    
+    Expected Value | C    o    m    p    l    e    t    e    d    
+    Actual Value   | F    a    i    l    e    d                   
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: AfterTestAttributeTests.Test (4s 056ms): Exception: Error asserting results for AfterTestAttributeTests: result => result.ResultSummary.Outcome [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:     should be [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: "Completed" [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:     but was [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: "Failed" [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:     difference [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Difference     |  |    |    |    |    |    |    |    |    |    [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/   [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Index          | 0    1    2    3    4    5    6    7    8     [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Expected Value | C    o    m    p    l    e    t    e    d     [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Actual Value   | F    a    i    l    e    d                    [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Expected Code  | 67   111  109  112  108  101  116  101  100   [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Actual Code    | 70   97   105  108  101  100                  [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:  [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed: Expression: [ [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                 result => result.ResultSummary.Outcome.ShouldBe("Completed"), [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                 result => result.ResultSummary.Counters.Total.ShouldBe(1), [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                 result => result.ResultSummary.Counters.Passed.ShouldBe(1), [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                 result => result.ResultSummary.Counters.Failed.ShouldBe(0), [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0), [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:                 _ => FindFile(x => x.Name.EndsWith("AfterTestAttributeTests.txt")).AssertExists() [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:             ] [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+C:\\git\\TUnit\\TUnit.Engine.Tests\\AfterTestAttributeTests.cs(9): error test failed:  [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]
+    Expected Code  | 67   111  109  112  108  101  116  101  100  
+    Actual Code    | 70   97   105  108  101  100                 
+    
+    Expression: [
+                    result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                    result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                    result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                    result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                    result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0),
+                    _ => FindFile(x => x.Name.EndsWith("AfterTestAttributeTests.txt")).AssertExists()
+                ]
+    --->  Shouldly.ShouldAssertException: result => result.ResultSummary.Outcome
+        should be
+    "Completed"
+        but was
+    "Failed"
+        difference
+    Difference     |  |    |    |    |    |    |    |    |    |   
+                   | \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  \|/  
+    Index          | 0    1    2    3    4    5    6    7    8    
+    Expected Value | C    o    m    p    l    e    t    e    d    
+    Actual Value   | F    a    i    l    e    d                   
+    Expected Code  | 67   111  109  112  108  101  116  101  100  
+    Actual Code    | 70   97   105  108  101  100                 
+      at TUnit.Engine.Tests.AfterTestAttributeTests.<>c.<Test>b__1_0(TestRun result) in C:\git\TUnit\TUnit.Engine.Tests\AfterTestAttributeTests.cs:15
+      at TUnit.Engine.Tests.TrxAsserter.<>c__DisplayClass0_1.<AssertTrx>b__1(Action`1 x) in C:\git\TUnit\TUnit.Engine.Tests\TrxAsserter.cs:23
+      at System.Collections.Generic.List`1.ForEach(Action`1 action)
+      at TUnit.Engine.Tests.TrxAsserter.AssertTrx(TestMode testMode, Command command, BufferedCommandResult commandResult, List`1 assertions, String trxFilename, String assertionExpression) in C:\git\TUnit\TUnit.Engine.Tests\TrxAsserter.cs:23
+    Standard output
+      Mode: SourceGenerated
+      Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename 77c45819eee64aa2bc69081fbea2e71f.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-77c45819eee64aa2bc69081fbea2e71f.dmp --hangdump-timeout 5m
+      Error: 
+      Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185328200.diag
+      Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185328555.diag
+      Constructing SharedTypeKeyedFixture
+      Constructing SharedTypePerPerTestSessionFixture
+      Constructing SharedTypeNoneFixture
+      Constructing SharedTypeNoneFixture
+      Constructing SharedTypePerClassFixture
+      Constructing SharedTypePerAssemblyFixture
+      [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 30637870
+      Scheduling execution of 1 tests
+      Starting 1 parallel tests
+      Initializing Static Property
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+      failed Test (569ms)
+        TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+        --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+        
+        but found 0
+        
+        at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+          at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+          at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+          at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+          at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+          at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+          at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+        Standard output
+          Before Assembly = 1
+          Writing file inside WriteFileAfterTestAttribute!
+          [AfterTestSession] Checking disposal...
+        Error output
+      
+        In process file artifacts produced:
+          - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\77c45819eee64aa2bc69081fbea2e71f.trx
+      
+      Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+        total: 1
+        failed: 1
+        succeeded: 0
+        skipped: 0
+        duration: 2s 957ms
+      
+      Mode: SourceGenerated
+      Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename 1d639ca0440a4da1b532f1c5c6957682.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-1d639ca0440a4da1b532f1c5c6957682.dmp --hangdump-timeout 5m
+      Error: 
+      Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185332527.diag
+      Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185332842.diag
+      Constructing SharedTypeKeyedFixture
+      Constructing SharedTypePerPerTestSessionFixture
+      Constructing SharedTypeNoneFixture
+      Constructing SharedTypeNoneFixture
+      Constructing SharedTypePerClassFixture
+      Constructing SharedTypePerAssemblyFixture
+      [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 32790483
+      Scheduling execution of 1 tests
+      Starting 1 parallel tests
+      Initializing Static Property
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+      failed Test (558ms)
+        TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+        --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+        
+        but found 0
+        
+        at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+          at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+          at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+          at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+          at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+          at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+          at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+        Standard output
+          Before Assembly = 1
+          Writing file inside WriteFileAfterTestAttribute!
+          [AfterTestSession] Checking disposal...
+        Error output
+      
+        In process file artifacts produced:
+          - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\1d639ca0440a4da1b532f1c5c6957682.trx
+      
+      Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+        total: 1
+        failed: 1
+        succeeded: 0
+        skipped: 0
+        duration: 2s 816ms
+      
+      Mode: SourceGenerated
+      Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename b139cabfc6c740f48b71ef1539180fe1.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-b139cabfc6c740f48b71ef1539180fe1.dmp --hangdump-timeout 5m
+      Error: 
+      Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185336618.diag
+      Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185336941.diag
+      Constructing SharedTypeKeyedFixture
+      Constructing SharedTypePerPerTestSessionFixture
+      Constructing SharedTypeNoneFixture
+      Constructing SharedTypeNoneFixture
+      Constructing SharedTypePerClassFixture
+      Constructing SharedTypePerAssemblyFixture
+      [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 32790483
+      Scheduling execution of 1 tests
+      Starting 1 parallel tests
+      Initializing Static Property
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+      failed Test (555ms)
+        TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+        --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+        
+        but found 0
+        
+        at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+          at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+          at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+          at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+          at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+          at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+          at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+        Standard output
+          Before Assembly = 1
+          Writing file inside WriteFileAfterTestAttribute!
+          [AfterTestSession] Checking disposal...
+        Error output
+      
+        In process file artifacts produced:
+          - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\b139cabfc6c740f48b71ef1539180fe1.trx
+      
+      Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+        total: 1
+        failed: 1
+        succeeded: 0
+        skipped: 0
+        duration: 2s 987ms
+      
+      Mode: SourceGenerated
+      Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename f2cdfe4d79134456b5f6c5c836067484.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-f2cdfe4d79134456b5f6c5c836067484.dmp --hangdump-timeout 5m
+      Error: 
+      Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185340918.diag
+      Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185341240.diag
+      Constructing SharedTypeKeyedFixture
+      Constructing SharedTypePerPerTestSessionFixture
+      Constructing SharedTypeNoneFixture
+      Constructing SharedTypeNoneFixture
+      Constructing SharedTypePerClassFixture
+      Constructing SharedTypePerAssemblyFixture
+      [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 62103957
+      Scheduling execution of 1 tests
+      Starting 1 parallel tests
+      Initializing Static Property
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+      failed Test (558ms)
+        TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+        --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+        
+        but found 0
+        
+        at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+          at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+          at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+          at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+          at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+          at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+          at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+          --- End of stack trace from previous location ---
+          at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+        Standard output
+          Before Assembly = 1
+          Writing file inside WriteFileAfterTestAttribute!
+          [AfterTestSession] Checking disposal...
+        Error output
+      
+        In process file artifacts produced:
+          - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\f2cdfe4d79134456b5f6c5c836067484.trx
+      
+      Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+        total: 1
+        failed: 1
+        succeeded: 0
+        skipped: 0
+        duration: 2s 737ms
+    Error output
+  Mode: SourceGenerated
+  Command Input: dotnet run --no-build -f net9.0 --configuration Release --treenode-filter /*/*/AfterTestAttributeTests/* --report-trx --report-trx-filename f2cdfe4d79134456b5f6c5c836067484.trx --diagnostic-verbosity Debug --diagnostic --diagnostic-output-fileprefix log_AfterTestAttributeTests_ --hangdump --hangdump-filename hangdump.Win32NT.tests-f2cdfe4d79134456b5f6c5c836067484.dmp --hangdump-timeout 5m
+  Error: 
+  Output: Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185340918.diag
+  Diagnostic file (level 'Debug' with async flush): C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\log_AfterTestAttributeTests__250929185341240.diag
+  Constructing SharedTypeKeyedFixture
+  Constructing SharedTypePerPerTestSessionFixture
+  Constructing SharedTypeNoneFixture
+  Constructing SharedTypeNoneFixture
+  Constructing SharedTypePerClassFixture
+  Constructing SharedTypePerAssemblyFixture
+  [DisposableSharedInstance] Created instance 1 (total: 1) - Hash: 62103957
+  Scheduling execution of 1 tests
+  Starting 1 parallel tests
+  Initializing Static Property
+  Before Assembly = 1
+  Writing file inside WriteFileAfterTestAttribute!
+  [AfterTestSession] Checking disposal...
+  failed Test (558ms)
+    TUnit.Engine.Exceptions.TestFailedException: AfterTestSessionException: AfterTestSession hook failed
+    --->  TUnit.Assertions.Exceptions.AssertionException: Expected DataClass.DisposeCount to be equal to 1
+    
+    but found 0
+    
+    at Assert.That(DataClass.DisposeCount).IsEqualTo(1)
+      at TUnit.Assertions.AssertionBuilders.AssertionBuilder.ProcessAssertionsAsync() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\AssertionBuilder.cs:173
+      at TUnit.Assertions.AssertionBuilders.InvokableValueAssertionBuilder`1.AssertAndGet() in C:\git\TUnit\TUnit.Assertions\AssertionBuilders\InvokableValueAssertionBuilder.cs:34
+      at TUnit.TestProject.Bugs.Bug3219.ClassDataSourceRetryTests.VerifyDisposalAfterTestSession() in C:\git\TUnit\TUnit.TestProject\Bugs\3219\ClassDataSourceRetryTests.cs:79
+      at TUnit.Core.AsyncConvert.Convert(Func`1 action) in C:\git\TUnit\TUnit.Core\AsyncConvert.cs:50
+      at TUnit.Generated.Hooks.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555Initializer.global_TUnit_TestProject_Bugs_Bug3219_ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_0Params_Body(TestSessionContext context, CancellationToken cancellationToken) in C:\git\TUnit\TUnit.TestProject\SourceGeneratedViewer\TUnit.Core.SourceGenerator\TUnit.Core.SourceGenerator.Generators.HookMetadataGenerator\ClassDataSourceRetryTests_VerifyDisposalAfterTestSession_After_TestSession_fb6cf92151404dc094f309c6811a1555.Hook.g.cs:81
+      at TUnit.Engine.Helpers.HookTimeoutHelper.<>c__DisplayClass0_0`1.<<CreateTimeoutHookAction>b__1>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Helpers\HookTimeoutHelper.cs:33
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookCollectionService.<>c__DisplayClass34_0.<<CreateTestSessionHookDelegate>b__0>d.MoveNext() in C:\git\TUnit\TUnit.Engine\Services\HookCollectionService.cs:623
+      --- End of stack trace from previous location ---
+      at TUnit.Engine.Services.HookExecutor.ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken) in C:\git\TUnit\TUnit.Engine\Services\HookExecutor.cs:59
+    Standard output
+      Before Assembly = 1
+      Writing file inside WriteFileAfterTestAttribute!
+      [AfterTestSession] Checking disposal...
+    Error output
+  
+    In process file artifacts produced:
+      - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TestResults\f2cdfe4d79134456b5f6c5c836067484.trx
+  
+  Test run summary: Failed! - C:\git\TUnit\TUnit.TestProject\bin\Release\net9.0\TUnit.TestProject.dll (net9.0|x64)
+    total: 1
+    failed: 1
+    succeeded: 0
+    skipped: 0
+    duration: 2s 737ms
+  
+  Failed! - Failed: 2, Passed: 2, Skipped: 0, Total: 4, Duration: 18s 933ms
+  
+  Test run summary: Failed! - C:\git\TUnit\TUnit.Engine.Tests\bin\Release\net9.0\TUnit.Engine.Tests.dll (net9.0|x64)
+    total: 4
+    failed: 2
+    succeeded: 2
+    skipped: 0
+    duration: 18s 973ms
+C:\git\TUnit\TUnit.Engine.Tests\bin\Release\net9.0\TUnit.Engine.Tests.dll : error run failed: Tests failed: 'C:\git\TUnit\TUnit.Engine.Tests\bin\Release\net9.0\TestResults\TUnit.Engine.Tests_net9.0_x64.log' [net9.0|x64] [C:\git\TUnit\TUnit.Engine.Tests\TUnit.Engine.Tests.csproj::TargetFramework=net9.0]

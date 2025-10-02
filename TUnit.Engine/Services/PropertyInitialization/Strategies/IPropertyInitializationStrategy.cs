@@ -1,6 +1,6 @@
-using System.Threading.Tasks;
+using TUnit.Core.PropertyInjection.Initialization;
 
-namespace TUnit.Core.PropertyInjection.Initialization.Strategies;
+namespace TUnit.Engine.Services.PropertyInitialization;
 
 /// <summary>
 /// Defines the contract for property initialization strategies.

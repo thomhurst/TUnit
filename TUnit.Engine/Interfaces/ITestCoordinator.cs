@@ -6,7 +6,7 @@ namespace TUnit.Engine.Interfaces;
 /// <summary>
 /// Interface for executing a single test
 /// </summary>
-public interface ITestCoordinator
+internal interface ITestCoordinator
 {
     Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken);
 }

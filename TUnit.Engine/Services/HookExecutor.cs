@@ -48,8 +48,9 @@ internal sealed class HookExecutor
         }
     }
 
-    public async Task ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
+    public async Task<List<Exception>> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
+        var exceptions = new List<Exception>();
         var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync().ConfigureAwait(false);
         foreach (var hook in hooks)
         {
@@ -60,10 +61,13 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                // Wrap hook exceptions in specific exception types
-                throw new AfterTestSessionException("AfterTestSession hook failed", ex);
+                // Collect hook exceptions instead of throwing immediately
+                // This allows all hooks to run even if some fail
+                exceptions.Add(new AfterTestSessionException("AfterTestSession hook failed", ex));
             }
         }
+
+        return exceptions;
     }
 
     public async Task ExecuteBeforeAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
@@ -84,8 +88,9 @@ internal sealed class HookExecutor
         }
     }
 
-    public async Task ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
+    public async Task<List<Exception>> ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
+        var exceptions = new List<Exception>();
         var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assembly).ConfigureAwait(false);
         foreach (var hook in hooks)
         {
@@ -97,9 +102,13 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new AfterAssemblyException("AfterAssembly hook failed", ex);
+                // Collect hook exceptions instead of throwing immediately
+                // This allows all hooks to run even if some fail
+                exceptions.Add(new AfterAssemblyException("AfterAssembly hook failed", ex));
             }
         }
+
+        return exceptions;
     }
 
     public async Task ExecuteBeforeClassHooksAsync(
@@ -122,10 +131,11 @@ internal sealed class HookExecutor
         }
     }
 
-    public async Task ExecuteAfterClassHooksAsync(
+    public async Task<List<Exception>> ExecuteAfterClassHooksAsync(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, CancellationToken cancellationToken)
     {
+        var exceptions = new List<Exception>();
         var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClass).ConfigureAwait(false);
         foreach (var hook in hooks)
         {
@@ -137,9 +147,13 @@ internal sealed class HookExecutor
             }
             catch (Exception ex)
             {
-                throw new AfterClassException("AfterClass hook failed", ex);
+                // Collect hook exceptions instead of throwing immediately
+                // This allows all hooks to run even if some fail
+                exceptions.Add(new AfterClassException("AfterClass hook failed", ex));
             }
         }
+
+        return exceptions;
     }
 
     public async Task ExecuteBeforeTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)

@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Engine.Json;
 
-public record TestJson
+internal record TestJson
 {
     public required string TestId { get; init; }
 

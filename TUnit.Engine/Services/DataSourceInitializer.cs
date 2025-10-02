@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Threading.Tasks;
-using TUnit.Core.Initialization;
+using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
-using TUnit.Core.Tracking;
 
-namespace TUnit.Core.DataSources;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Centralized service responsible for initializing data source instances.
@@ -71,6 +66,10 @@ internal sealed class DataSourceInitializer
     {
         try
         {
+            // Ensure we have required context
+            objectBag ??= new Dictionary<string, object?>();
+            events ??= new TestContextEvents();
+
             // Initialize the data source directly here
             // Step 1: Property injection - use PropertyInjectionService if available
             if (_propertyInjectionService != null && PropertyInjectionCache.HasInjectableProperties(dataSource.GetType()))
@@ -84,12 +83,8 @@ internal sealed class DataSourceInitializer
             {
                 await asyncInitializer.InitializeAsync();
             }
-            
-            // Step 3: Track for disposal
-            if (events != null)
-            {
-                ObjectTracker.TrackObject(events, dataSource);
-            }
+
+            // Note: Tracking is now handled by ObjectRegistrationService during registration phase
         }
         catch (Exception ex)
         {

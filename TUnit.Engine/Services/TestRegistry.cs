@@ -31,6 +31,7 @@ internal sealed class TestRegistry : ITestRegistry
         _sessionId = sessionId;
         _sessionCancellationToken = sessionCancellationToken;
     }
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Adding dynamic tests requires runtime compilation and reflection which are not supported in native AOT scenarios.")]
     public async Task AddDynamicTest<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
@@ -64,6 +65,8 @@ internal sealed class TestRegistry : ITestRegistry
         await ProcessPendingDynamicTests();
     }
 
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.",
+        Justification = "Dynamic tests are opt-in and users are warned via RequiresDynamicCode on AddDynamicTest method")]
     private async Task ProcessPendingDynamicTests()
     {
         var testsToProcess = new List<PendingDynamicTest>();
@@ -100,6 +103,7 @@ internal sealed class TestRegistry : ITestRegistry
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic tests require runtime compilation of lambda expressions and are not supported in native AOT scenarios.")]
     private async Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
     {
         if (result.TestClassType == null || result.TestMethod == null)
@@ -148,6 +152,7 @@ internal sealed class TestRegistry : ITestRegistry
         });
     }
 
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic test instance creation requires Activator.CreateInstance which is not supported in native AOT scenarios.")]
     [UnconditionalSuppressMessage("Trimming",
         "IL2067:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call",
         Justification = "Dynamic tests require reflection")]
@@ -168,6 +173,7 @@ internal sealed class TestRegistry : ITestRegistry
         };
     }
 
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic test invocation requires LambdaExpression.Compile() which is not supported in native AOT scenarios.")]
     private static Func<object, object?[], Task> CreateRuntimeTestInvoker(DynamicDiscoveryResult result)
     {
         return async (instance, args) =>

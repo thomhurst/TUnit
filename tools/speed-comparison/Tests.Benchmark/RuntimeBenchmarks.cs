@@ -25,6 +25,11 @@ public class RuntimeBenchmarks : BenchmarkBase
         await Cli.Wrap("dotnet")
             .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=MSTEST", "--framework", Framework])
             .ExecuteAsync();
+
+        // Publish AOT configuration
+        await Cli.Wrap("dotnet")
+            .WithArguments(["publish", UnifiedPath, "-c", "Release", "-p:TestFramework=TUNIT", "-p:Aot=true", "--framework", Framework])
+            .ExecuteAsync();
     }
     
     [Benchmark]

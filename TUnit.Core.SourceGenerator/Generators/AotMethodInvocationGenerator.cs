@@ -165,7 +165,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         }
 
         var classSymbol = semanticModel.GetDeclaredSymbol(containingClass) as INamedTypeSymbol;
-        var targetMethod = classSymbol?.GetMembers(methodName)
+        var targetMethod = classSymbol?.GetMembers(methodName!)
             .OfType<IMethodSymbol>()
             .FirstOrDefault();
 

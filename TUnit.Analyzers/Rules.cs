@@ -153,8 +153,6 @@ public static class Rules
     public static readonly DiagnosticDescriptor TupleNotAotCompatible =
         CreateDescriptor("TUnit0301", UsageCategory, DiagnosticSeverity.Warning);
 
-    public static readonly DiagnosticDescriptor CustomConversionNotAotCompatible =
-        CreateDescriptor("TUnit0302", UsageCategory, DiagnosticSeverity.Warning);
 
     private static DiagnosticDescriptor CreateDescriptor(string diagnosticId, string category, DiagnosticSeverity severity)
     {

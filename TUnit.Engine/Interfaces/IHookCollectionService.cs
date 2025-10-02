@@ -3,7 +3,7 @@ using TUnit.Core;
 
 namespace TUnit.Engine.Interfaces;
 
-public interface IHookCollectionService
+internal interface IHookCollectionService
 {
     ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeTestHooksAsync(Type testClassType);
     ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectAfterTestHooksAsync(Type testClassType);

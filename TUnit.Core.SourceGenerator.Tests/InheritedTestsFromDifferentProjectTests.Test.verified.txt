@@ -446,7 +446,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTest_TestSourc
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 6,
+            LineNumber = 5,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.BaseTests),
@@ -537,7 +537,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTestWithMultip
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 1,
             FilePath = @"",
-            LineNumber = 12,
+            LineNumber = 5,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.BaseTests),
@@ -626,7 +626,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 9,
+            LineNumber = 5,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -719,7 +719,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 14,
+            LineNumber = 5,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -846,7 +846,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 20,
+            LineNumber = 5,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
@@ -958,7 +958,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
             PropertyInjections = global::System.Array.Empty<global::TUnit.Core.PropertyInjectionData>(),
             InheritanceDepth = 0,
             FilePath = @"",
-            LineNumber = 26,
+            LineNumber = 5,
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests),
