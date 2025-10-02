@@ -5,13 +5,16 @@ using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class InvokableValueAssertionBuilder<TActual>(ISource source) : InvokableAssertionBuilder<TActual>(source), IValueSource<TActual>
+/// <summary>
+/// Invokable value assertion - supports awaiting and provides value-specific And/Or chaining
+/// </summary>
+public class InvokableValueAssertion<TActual>(ISource source) : InvokableAssertion<TActual>(source), IValueSource<TActual>
 {
     /// <summary>
     /// Provide a reason explaining why the assertion is needed.<br />
     /// If the phrase does not start with the word <i>because</i>, it is prepended automatically.
     /// </summary>
-    public InvokableValueAssertionBuilder<TActual> Because(string reason)
+    public InvokableValueAssertion<TActual> Because(string reason)
     {
         var becauseReason = new BecauseReason(reason);
         var assertion = Source.Assertions.Peek();
@@ -19,10 +22,10 @@ public class InvokableValueAssertionBuilder<TActual>(ISource source) : Invokable
         return this;
     }
 
-    internal AssertionBuilder AssertionBuilder => this;
+    internal AssertionCore AssertionCore => this;
 
-    public ValueAnd<TActual> And => new(new AndAssertionBuilder(AssertionBuilder.AppendConnector(ChainType.And)));
-    public ValueOr<TActual> Or => new(new OrAssertionBuilder(AssertionBuilder.AppendConnector(ChainType.Or)));
+    public ValueAnd<TActual> And => new(new AndAssertion(AssertionCore.AppendConnector(ChainType.And)));
+    public ValueOr<TActual> Or => new(new OrAssertion(AssertionCore.AppendConnector(ChainType.Or)));
 
     public new TaskAwaiter<TActual?> GetAwaiter()
     {

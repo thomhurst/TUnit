@@ -5,9 +5,9 @@ using TUnit.Assertions.AssertConditions.Chronology;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class DateOnlyEqualToAssertionBuilderWrapper : InvokableValueAssertionBuilder<DateOnly>
+public class DateOnlyEqualToAssertionBuilderWrapper : InvokableValueAssertion<DateOnly>
 {
-    internal DateOnlyEqualToAssertionBuilderWrapper(InvokableAssertionBuilder<DateOnly> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal DateOnlyEqualToAssertionBuilderWrapper(InvokableAssertion<DateOnly> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

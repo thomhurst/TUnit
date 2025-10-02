@@ -2,9 +2,9 @@
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class SingleItemAssertionBuilderWrapper<TActual, TInner> : InvokableValueAssertionBuilder<TActual> where TActual : IEnumerable<TInner>
+public class SingleItemAssertionBuilderWrapper<TActual, TInner> : InvokableValueAssertion<TActual> where TActual : IEnumerable<TInner>
 {
-    internal SingleItemAssertionBuilderWrapper(InvokableAssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal SingleItemAssertionBuilderWrapper(InvokableAssertion<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

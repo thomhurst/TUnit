@@ -4,14 +4,17 @@ using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class InvokableDelegateAssertionBuilder : InvokableAssertionBuilder<object?>, IDelegateSource
+/// <summary>
+/// Invokable delegate assertion - supports awaiting and provides delegate-specific And/Or chaining
+/// </summary>
+public class InvokableDelegateAssertion : InvokableAssertion<object?>, IDelegateSource
 {
-    internal InvokableDelegateAssertionBuilder(InvokableAssertionBuilder<object?> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal InvokableDelegateAssertion(InvokableAssertion<object?> invokableAssertion) : base(invokableAssertion)
     {
     }
 
-    public AssertionBuilder AssertionBuilder => this;
+    public AssertionCore AssertionCore => this;
 
-    public DelegateAnd<object?> And => new(new AndAssertionBuilder(AssertionBuilder.AppendConnector(ChainType.And)));
-    public DelegateOr<object?> Or => new(new OrAssertionBuilder(AssertionBuilder.AppendConnector(ChainType.Or)));
+    public DelegateAnd<object?> And => new(new AndAssertion(AssertionCore.AppendConnector(ChainType.And)));
+    public DelegateOr<object?> Or => new(new OrAssertion(AssertionCore.AppendConnector(ChainType.Or)));
 }

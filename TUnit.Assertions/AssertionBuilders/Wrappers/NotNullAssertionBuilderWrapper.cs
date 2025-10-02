@@ -2,9 +2,9 @@
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class NotNullAssertionBuilderWrapper<TActual> : InvokableValueAssertionBuilder<TActual> where TActual : class
+public class NotNullAssertionBuilderWrapper<TActual> : InvokableValueAssertion<TActual> where TActual : class
 {
-    internal NotNullAssertionBuilderWrapper(InvokableAssertionBuilder<TActual?> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal NotNullAssertionBuilderWrapper(InvokableAssertion<TActual?> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 
@@ -23,9 +23,9 @@ public class NotNullAssertionBuilderWrapper<TActual> : InvokableValueAssertionBu
     }
 }
 
-public class NotNullStructAssertionBuilderWrapper<TActual> : InvokableValueAssertionBuilder<TActual> where TActual : struct
+public class NotNullStructAssertionBuilderWrapper<TActual> : InvokableValueAssertion<TActual> where TActual : struct
 {
-    internal NotNullStructAssertionBuilderWrapper(InvokableAssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal NotNullStructAssertionBuilderWrapper(InvokableAssertion<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

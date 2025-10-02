@@ -12,7 +12,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static class CollectionsIsNotExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> IsNotEquivalentTo<TActual,
+    public static InvokableValueAssertion<TActual> IsNotEquivalentTo<TActual,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
     TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : IEnumerable<TInner>
@@ -20,7 +20,7 @@ public static class CollectionsIsNotExtensions
         return IsNotEquivalentTo(valueSource, expected, new CollectionEquivalentToEqualityComparer<TInner>(), doNotPopulateThisValue, null);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsNotEquivalentTo<
+    public static InvokableValueAssertion<TActual> IsNotEquivalentTo<
         TActual,
         TInner>(this IValueSource<TActual> valueSource,
         IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer,
@@ -31,7 +31,7 @@ public static class CollectionsIsNotExtensions
         return IsNotEquivalentTo(valueSource, expected, comparer, CollectionOrdering.Matching, doNotPopulateThisValue, doNotPopulateThisValue2);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsNotEquivalentTo<TActual,
+    public static InvokableValueAssertion<TActual> IsNotEquivalentTo<TActual,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
     TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null, [CallerArgumentExpression(nameof(collectionOrdering))] string doNotPopulateThisValue2 = null)
         where TActual : IEnumerable<TInner>
@@ -39,7 +39,7 @@ public static class CollectionsIsNotExtensions
         return IsNotEquivalentTo(valueSource, expected, new CollectionEquivalentToEqualityComparer<TInner>(), collectionOrdering, doNotPopulateThisValue, doNotPopulateThisValue2);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsNotEquivalentTo<TActual, TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null, [CallerArgumentExpression(nameof(collectionOrdering))] string doNotPopulateThisValue2 = null)
+    public static InvokableValueAssertion<TActual> IsNotEquivalentTo<TActual, TInner>(this IValueSource<TActual> valueSource, IEnumerable<TInner> expected, IEqualityComparer<TInner> comparer, CollectionOrdering collectionOrdering, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null, [CallerArgumentExpression(nameof(collectionOrdering))] string doNotPopulateThisValue2 = null)
         where TActual : IEnumerable<TInner>
     {
         return valueSource.RegisterAssertion(
@@ -47,7 +47,7 @@ public static class CollectionsIsNotExtensions
                 comparer, collectionOrdering), [doNotPopulateThisValue, doNotPopulateThisValue2]);
     }
 
-    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> IsNotEmpty<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)
+    public static InvokableValueAssertion<IEnumerable<TInner>> IsNotEmpty<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)
     {
         return valueSource.RegisterAssertion(new EnumerableCountNotEqualToExpectedValueAssertCondition<IEnumerable<TInner>, TInner>(0)
             , []);

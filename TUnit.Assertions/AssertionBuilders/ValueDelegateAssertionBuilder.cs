@@ -3,10 +3,13 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class ValueDelegateAssertionBuilder<TActual>
-    : AssertionBuilder, IValueDelegateSource<TActual>
+/// <summary>
+/// Assertion for Func&lt;T&gt; delegates - provides both value and delegate assertion methods via IValueDelegateSource marker
+/// </summary>
+public sealed class ValueDelegateAssertion<TActual> : AssertionCore, IValueDelegateSource<TActual>
 {
-    internal ValueDelegateAssertionBuilder(Func<TActual> function, string? expressionBuilder) : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
+    internal ValueDelegateAssertion(Func<TActual> function, string? expressionBuilder)
+        : base(function.AsAssertionData(expressionBuilder), expressionBuilder)
     {
     }
 }

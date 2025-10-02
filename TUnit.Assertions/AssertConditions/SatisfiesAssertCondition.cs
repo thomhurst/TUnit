@@ -6,11 +6,11 @@ namespace TUnit.Assertions.AssertConditions;
 public class SatisfiesAssertCondition<TActual, TExpected> : BaseAssertCondition<TActual>
 {
     private readonly Func<TActual, Task<TExpected>?> _mapper;
-    private readonly Func<IValueSource<TExpected?>, InvokableAssertionBuilder<TExpected?>> _assertionBuilder;
+    private readonly Func<IValueSource<TExpected?>, InvokableAssertion<TExpected?>> _assertionBuilder;
     private readonly string _assertionBuilderExpression;
 
     public SatisfiesAssertCondition(Func<TActual, Task<TExpected>?> mapper,
-        Func<IValueSource<TExpected?>, InvokableAssertionBuilder<TExpected?>> assertionBuilder, string mapperExpression, string assertionBuilderExpression)
+        Func<IValueSource<TExpected?>, InvokableAssertion<TExpected?>> assertionBuilder, string mapperExpression, string assertionBuilderExpression)
     {
         _mapper = mapper;
         _assertionBuilder = assertionBuilder;
@@ -36,7 +36,7 @@ public class SatisfiesAssertCondition<TActual, TExpected> : BaseAssertCondition<
 
         var innerItem = innerItemTask == null ? default(TExpected?) : await innerItemTask;
 
-        var innerAssertionBuilder = new ValueAssertionBuilder<TExpected?>(innerItem, "");
+        var innerAssertionBuilder = new ValueAssertion<TExpected?>(innerItem, "");
 
         var assertion = _assertionBuilder(innerAssertionBuilder);
 

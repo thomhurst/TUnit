@@ -4,9 +4,9 @@ using TUnit.Assertions.Enums;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> : InvokableValueAssertionBuilder<TActual>
+public class NotEquivalentToAssertionBuilderWrapper<TActual, TExpected> : InvokableValueAssertion<TActual>
 {
-    internal NotEquivalentToAssertionBuilderWrapper(InvokableAssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal NotEquivalentToAssertionBuilderWrapper(InvokableAssertion<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

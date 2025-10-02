@@ -3,9 +3,9 @@ using TUnit.Assertions.AssertConditions.Chronology;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class DateTimeOffsetEqualToAssertionBuilderWrapper : InvokableValueAssertionBuilder<DateTimeOffset>
+public class DateTimeOffsetEqualToAssertionBuilderWrapper : InvokableValueAssertion<DateTimeOffset>
 {
-    internal DateTimeOffsetEqualToAssertionBuilderWrapper(InvokableAssertionBuilder<DateTimeOffset> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal DateTimeOffsetEqualToAssertionBuilderWrapper(InvokableAssertion<DateTimeOffset> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

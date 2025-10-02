@@ -9,11 +9,11 @@ namespace TUnit.Assertions.Extensions;
 
 public class ThrowsException<TActual, TException> where TException : Exception
 {
-    private readonly InvokableDelegateAssertionBuilder _delegateAssertionBuilder;
+    private readonly InvokableDelegateAssertion _delegateAssertionBuilder;
     private readonly IDelegateSource _source;
     private readonly Func<Exception?, Exception?> _selector;
 
-    public ThrowsException(InvokableDelegateAssertionBuilder delegateAssertionBuilder,
+    public ThrowsException(InvokableDelegateAssertion delegateAssertionBuilder,
         IDelegateSource source,
         Func<Exception?, Exception?> selector)
     {
@@ -78,7 +78,7 @@ public class ThrowsException<TActual, TException> where TException : Exception
 
     public ValueAnd<TException> And =>
         new(
-            new AndAssertionBuilder(
+            new AndAssertion(
                 _delegateAssertionBuilder.RegisterConversionAssertion<TException>()
                     .AppendConnector(ChainType.And)
             )

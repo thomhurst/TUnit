@@ -3,11 +3,11 @@ using TUnit.Assertions.AssertConditions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class MappableResultAssertionBuilder<TActual, TExpected> : InvokableValueAssertionBuilder<TActual>
+public class MappableResultAssertionBuilder<TActual, TExpected> : InvokableValueAssertion<TActual>
 {
     private readonly Func<TActual?, TExpected?> _mapper;
 
-    public MappableResultAssertionBuilder(InvokableAssertionBuilder<TActual> assertionBuilder, Func<TActual?, TExpected?> mapper) : base(assertionBuilder)
+    public MappableResultAssertionBuilder(InvokableAssertion<TActual> assertion, Func<TActual?, TExpected?> mapper) : base(assertion)
     {
         _mapper = mapper;
     }
@@ -27,13 +27,13 @@ public class MappableResultAssertionBuilder<TActual, TExpected> : InvokableValue
     }
 }
 
-public class MappableResultAssertionBuilder<TActual, TAssertCondition, TExpected> : InvokableValueAssertionBuilder<TActual>
+public class MappableResultAssertionBuilder<TActual, TAssertCondition, TExpected> : InvokableValueAssertion<TActual>
     where TAssertCondition : BaseAssertCondition<TActual>
 {
     private readonly TAssertCondition _assertCondition;
     private readonly Func<TActual?, TAssertCondition, TExpected?> _mapper;
 
-    public MappableResultAssertionBuilder(InvokableAssertionBuilder<TActual> assertionBuilder, TAssertCondition assertCondition, Func<TActual?, TAssertCondition, TExpected?> mapper) : base(assertionBuilder)
+    public MappableResultAssertionBuilder(InvokableAssertion<TActual> assertion, TAssertCondition assertCondition, Func<TActual?, TAssertCondition, TExpected?> mapper) : base(assertion)
     {
         _assertCondition = assertCondition;
         _mapper = mapper;

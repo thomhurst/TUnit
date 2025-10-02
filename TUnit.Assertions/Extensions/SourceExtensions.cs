@@ -8,7 +8,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static class SourceExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> RegisterAssertion<TActual>(this IValueSource<TActual> source,
+    public static InvokableValueAssertion<TActual> RegisterAssertion<TActual>(this IValueSource<TActual> source,
         BaseAssertCondition<TActual> assertCondition, string?[] argumentExpressions, [CallerMemberName] string? caller = null)
     {
         if (!string.IsNullOrEmpty(caller))
@@ -16,28 +16,28 @@ public static class SourceExtensions
             source.AppendExpression(BuildExpression(caller, argumentExpressions));
         }
 
-        var invokeableAssertionBuilder = source.WithAssertion(assertCondition);
+        var invokeableAssertion = source.WithAssertion(assertCondition);
 
-        if (invokeableAssertionBuilder is InvokableValueAssertionBuilder<TActual> invokableValueAssertionBuilder)
+        if (invokeableAssertion is InvokableValueAssertion<TActual> invokableValueAssertion)
         {
-            return invokableValueAssertionBuilder;
+            return invokableValueAssertion;
         }
 
-        if (invokeableAssertionBuilder is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
+        if (invokeableAssertion is InvokableAssertion<TActual> invokableAssertion)
         {
-            return new InvokableValueAssertionBuilder<TActual>(invokableAssertionBuilder);
+            return new InvokableValueAssertion<TActual>(invokableAssertion);
         }
 
-        return new InvokableValueAssertionBuilder<TActual>(new InvokableAssertionBuilder<TActual>(invokeableAssertionBuilder));
+        return new InvokableValueAssertion<TActual>(new InvokableAssertion<TActual>(invokeableAssertion));
     }
 
-    public static InvokableValueAssertionBuilder<TToType> RegisterConversionAssertion<TFromType, TToType>(this IValueSource<TFromType> source,
+    public static InvokableValueAssertion<TToType> RegisterConversionAssertion<TFromType, TToType>(this IValueSource<TFromType> source,
         ConvertToAssertCondition<TFromType, TToType> assertCondition, string?[] argumentExpressions, [CallerMemberName] string? caller = null)
     {
         return new ConvertedValueAssertionBuilder<TFromType, TToType>(source, assertCondition);
     }
 
-    public static InvokableDelegateAssertionBuilder RegisterAssertion<TActual>(this IDelegateSource delegateSource,
+    public static InvokableDelegateAssertion RegisterAssertion<TActual>(this IDelegateSource delegateSource,
         BaseAssertCondition<TActual> assertCondition, string?[] argumentExpressions, [CallerMemberName] string? caller = null)
     {
         if (!string.IsNullOrEmpty(caller))
@@ -47,20 +47,20 @@ public static class SourceExtensions
 
         var source = delegateSource.WithAssertion(assertCondition);
 
-        if (source is InvokableDelegateAssertionBuilder unTypedInvokableDelegateAssertionBuilder)
+        if (source is InvokableDelegateAssertion unTypedInvokableDelegateAssertion)
         {
-            return unTypedInvokableDelegateAssertionBuilder;
+            return unTypedInvokableDelegateAssertion;
         }
 
-        if (source is InvokableAssertionBuilder<object?> unTypedInvokableAssertionBuilder)
+        if (source is InvokableAssertion<object?> unTypedInvokableAssertion)
         {
-            return new InvokableDelegateAssertionBuilder(unTypedInvokableAssertionBuilder);
+            return new InvokableDelegateAssertion(unTypedInvokableAssertion);
         }
 
-        return new InvokableDelegateAssertionBuilder(new InvokableAssertionBuilder<object?>(source));
+        return new InvokableDelegateAssertion(new InvokableAssertion<object?>(source));
     }
 
-    public static InvokableValueAssertionBuilder<TToType> RegisterConversionAssertion<TToType>(this IDelegateSource source) where TToType : Exception
+    public static InvokableValueAssertion<TToType> RegisterConversionAssertion<TToType>(this IDelegateSource source) where TToType : Exception
     {
         return new ConvertedDelegateAssertionBuilder<TToType>(source);
     }

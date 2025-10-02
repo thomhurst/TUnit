@@ -3,9 +3,9 @@ using TUnit.Assertions.AssertConditions.Chronology;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class TimeSpanEqualToAssertionBuilderWrapper : InvokableValueAssertionBuilder<TimeSpan>
+public class TimeSpanEqualToAssertionBuilderWrapper : InvokableValueAssertion<TimeSpan>
 {
-    internal TimeSpanEqualToAssertionBuilderWrapper(InvokableAssertionBuilder<TimeSpan> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal TimeSpanEqualToAssertionBuilderWrapper(InvokableAssertion<TimeSpan> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

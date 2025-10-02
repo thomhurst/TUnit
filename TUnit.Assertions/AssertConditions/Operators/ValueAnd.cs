@@ -4,27 +4,27 @@ using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.AssertConditions.Operators;
 
-public class ValueAnd<TActual>(AssertionBuilder assertionBuilder) : IValueSource<TActual>
+public class ValueAnd<TActual>(AssertionCore assertionCore) : IValueSource<TActual>
 {
-    public static ValueAnd<TActual> Create(AssertionBuilder assertionBuilder)
+    public static ValueAnd<TActual> Create(AssertionCore assertionCore)
     {
-        return new ValueAnd<TActual>(assertionBuilder);
+        return new ValueAnd<TActual>(assertionCore);
     }
 
-    Stack<BaseAssertCondition> ISource.Assertions => ((ISource) assertionBuilder).Assertions;
-    ValueTask<AssertionData> ISource.AssertionDataTask => ((ISource) assertionBuilder).AssertionDataTask;
-    StringBuilder ISource.ExpressionBuilder => ((ISource) assertionBuilder).ExpressionBuilder;
-    string? ISource.ActualExpression => ((ISource) assertionBuilder).ActualExpression;
+    Stack<BaseAssertCondition> ISource.Assertions => ((ISource) assertionCore).Assertions;
+    ValueTask<AssertionData> ISource.AssertionDataTask => ((ISource) assertionCore).AssertionDataTask;
+    StringBuilder ISource.ExpressionBuilder => ((ISource) assertionCore).ExpressionBuilder;
+    string? ISource.ActualExpression => ((ISource) assertionCore).ActualExpression;
 
     ISource ISource.AppendExpression(string expression)
     {
-        ((ISource) assertionBuilder).AppendExpression(expression);
+        ((ISource) assertionCore).AppendExpression(expression);
         return this;
     }
 
     ISource ISource.WithAssertion(BaseAssertCondition assertCondition)
     {
-        ((ISource) assertionBuilder).WithAssertion(assertCondition);
+        ((ISource) assertionCore).WithAssertion(assertCondition);
         return this;
     }
 }

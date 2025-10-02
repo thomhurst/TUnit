@@ -3,11 +3,13 @@ using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class DelegateAssertionBuilder
-    : AssertionBuilder,
-        IDelegateSource
+/// <summary>
+/// Assertion for Action delegates - provides delegate-specific assertion methods via IDelegateSource marker
+/// </summary>
+public sealed class DelegateAssertion : Assertion<object?>, IDelegateSource
 {
-    internal DelegateAssertionBuilder(Action action, string? expressionBuilder) : base(action.AsAssertionData(expressionBuilder), expressionBuilder)
+    internal DelegateAssertion(Action action, string? expressionBuilder)
+        : base(action.AsAssertionData(expressionBuilder), expressionBuilder)
     {
     }
 }

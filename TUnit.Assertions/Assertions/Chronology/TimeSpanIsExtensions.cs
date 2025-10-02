@@ -19,7 +19,7 @@ public static class TimeSpanIsExtensions
         );
     }
 
-    public static InvokableValueAssertionBuilder<TimeSpan> IsZero(this IValueSource<TimeSpan> valueSource)
+    public static InvokableValueAssertion<TimeSpan> IsZero(this IValueSource<TimeSpan> valueSource)
     {
         return valueSource.RegisterAssertion(new EqualsExpectedValueAssertCondition<TimeSpan>(TimeSpan.Zero)
             , []);

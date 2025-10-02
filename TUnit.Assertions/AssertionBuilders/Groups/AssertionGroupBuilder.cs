@@ -1,6 +1,6 @@
 ﻿namespace TUnit.Assertions.AssertionBuilders.Groups;
 
-public class AssertionGroupBuilder<TActual, TAssertionBuilder> where TAssertionBuilder : AssertionBuilder
+public class AssertionGroupBuilder<TActual, TAssertionBuilder> where TAssertionBuilder : AssertionCore
 {
     private readonly TAssertionBuilder _assertionBuilder;
 
@@ -9,7 +9,7 @@ public class AssertionGroupBuilder<TActual, TAssertionBuilder> where TAssertionB
         _assertionBuilder = assertionBuilder;
     }
 
-    public UnknownAssertionGroup<TActual, TAssertionBuilder> WithAssertion(Func<TAssertionBuilder, InvokableAssertionBuilder<TActual>> assert)
+    public UnknownAssertionGroup<TActual, TAssertionBuilder> WithAssertion(Func<TAssertionBuilder, InvokableAssertion<TActual>> assert)
     {
         return new UnknownAssertionGroup<TActual, TAssertionBuilder>(_assertionBuilder, assert);
     }

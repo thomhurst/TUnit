@@ -31,3 +31,17 @@ public class TransactionTest
     }
 }
 #endif
+
+public class Class123
+{
+    [Before(Test)]
+    public void Before()
+    {
+        throw new ArgumentException("Bad Bad Leroy Brown");
+    }
+
+    [Test]
+    public void TestMethod()
+    {
+    }
+}

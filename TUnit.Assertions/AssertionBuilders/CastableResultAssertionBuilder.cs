@@ -2,7 +2,7 @@
 
 public class CastableResultAssertionBuilder<TActual, TExpected> : MappableResultAssertionBuilder<TActual, TExpected>
 {
-    internal CastableResultAssertionBuilder(InvokableAssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder, DefaultMapper)
+    internal CastableResultAssertionBuilder(InvokableAssertion<TActual> assertionBuilder) : base(assertionBuilder, DefaultMapper)
     {
     }
 
@@ -19,9 +19,9 @@ public class CastableResultAssertionBuilder<TActual, TExpected> : MappableResult
     }
 }
 
-public class CastedAssertionBuilder<TActual, TExpected> : InvokableValueAssertionBuilder<TExpected>
+public class CastedAssertionBuilder<TActual, TExpected> : InvokableValueAssertion<TExpected>
 {
-    internal CastedAssertionBuilder(InvokableAssertionBuilder<TActual> assertionBuilder) : base(assertionBuilder)
+    internal CastedAssertionBuilder(InvokableAssertion<TActual> assertionBuilder) : base(assertionBuilder)
     {
     }
 

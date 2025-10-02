@@ -4,7 +4,7 @@ using TUnit.Assertions.Exceptions;
 namespace TUnit.Assertions.AssertionBuilders.Groups;
 
 public class OrAssertionGroupInvoker<TActual, TAssertionBuilder>
-    where TAssertionBuilder : AssertionBuilder
+    where TAssertionBuilder : AssertionCore
 {
     private readonly List<AssertionGroup<TActual, TAssertionBuilder>> _assertionGroups = [];
 

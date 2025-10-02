@@ -27,12 +27,12 @@ public static partial class DoesExtensions
         return new StringContainsAssertionBuilderWrapper(assertionBuilder);
     }
 
-    public static InvokableValueAssertionBuilder<string> Matches(this IValueSource<string> valueSource, string regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
+    public static InvokableValueAssertion<string> Matches(this IValueSource<string> valueSource, string regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
     {
         return Matches(valueSource, new Regex(regex), expression);
     }
 
-    public static InvokableValueAssertionBuilder<string> Matches(this IValueSource<string> valueSource, Regex regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
+    public static InvokableValueAssertion<string> Matches(this IValueSource<string> valueSource, Regex regex, [CallerArgumentExpression(nameof(regex))] string expression = "")
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, Regex>(regex,
             (actual, _, _) =>

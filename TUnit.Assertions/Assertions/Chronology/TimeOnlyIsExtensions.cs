@@ -22,7 +22,7 @@ public static class TimeOnlyIsExtensions
         );
     }
     
-    public static InvokableValueAssertionBuilder<TimeOnly> IsAfter(this IValueSource<TimeOnly> valueSource,
+    public static InvokableValueAssertion<TimeOnly> IsAfter(this IValueSource<TimeOnly> valueSource,
         TimeOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default(TimeOnly),
@@ -33,7 +33,7 @@ public static class TimeOnlyIsExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<TimeOnly> IsAfterOrEqualTo(this IValueSource<TimeOnly> valueSource,
+    public static InvokableValueAssertion<TimeOnly> IsAfterOrEqualTo(this IValueSource<TimeOnly> valueSource,
         TimeOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default(TimeOnly),
@@ -44,7 +44,7 @@ public static class TimeOnlyIsExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<TimeOnly> IsBefore(this IValueSource<TimeOnly> valueSource,
+    public static InvokableValueAssertion<TimeOnly> IsBefore(this IValueSource<TimeOnly> valueSource,
         TimeOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default(TimeOnly),
@@ -55,7 +55,7 @@ public static class TimeOnlyIsExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<TimeOnly> IsBeforeOrEqualTo(this IValueSource<TimeOnly> valueSource,
+    public static InvokableValueAssertion<TimeOnly> IsBeforeOrEqualTo(this IValueSource<TimeOnly> valueSource,
         TimeOnly expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TimeOnly, TimeOnly>(default(TimeOnly),

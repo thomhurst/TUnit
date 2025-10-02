@@ -1,16 +1,18 @@
 ﻿using TUnit.Assertions.AssertConditions.Interfaces;
-using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-
-public class ValueAssertionBuilder<TActual> : AssertionBuilder, IValueSource<TActual>
+/// <summary>
+/// Assertion for value types - provides value-specific assertion methods via IValueSource marker
+/// </summary>
+public sealed class ValueAssertion<TActual> : Assertion<TActual>, IValueSource<TActual>
 {
-    internal ValueAssertionBuilder(TActual value, string? expressionBuilder) : base(value.AsAssertionData(expressionBuilder), expressionBuilder)
+    internal ValueAssertion(TActual value, string? expressionBuilder)
+        : base(value, expressionBuilder)
     {
     }
 
-    public ValueAssertionBuilder(ISource source) : base(source)
+    internal ValueAssertion(ISource source) : base(source)
     {
     }
 }

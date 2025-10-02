@@ -10,13 +10,16 @@ using TUnit.Assertions.Helpers;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public abstract class AssertionBuilder : ISource
+/// <summary>
+/// Core assertion orchestration base class - manages assertion execution, expression building, and result processing
+/// </summary>
+public abstract class AssertionCore : ISource
 {
-    protected IInvokableAssertionBuilder? OtherTypeAssertionBuilder;
+    protected IInvokableAssertion? OtherTypeAssertionBuilder;
 
     protected AssertionData? AwaitedAssertionData;
 
-    public AssertionBuilder(ISource source)
+    public AssertionCore(ISource source)
     {
         _assertionDataTask = source.AssertionDataTask;
         _actualExpression = source.ActualExpression;
@@ -24,7 +27,7 @@ public abstract class AssertionBuilder : ISource
         _assertions = source.Assertions;
     }
 
-    public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string actualExpression, StringBuilder expressionBuilder, Stack<BaseAssertCondition> assertions)
+    public AssertionCore(ValueTask<AssertionData> assertionDataTask, string actualExpression, StringBuilder expressionBuilder, Stack<BaseAssertCondition> assertions)
     {
         _assertionDataTask = assertionDataTask;
         _actualExpression = actualExpression;
@@ -32,7 +35,7 @@ public abstract class AssertionBuilder : ISource
         _assertions = assertions;
     }
 
-    public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string? actualExpression)
+    public AssertionCore(ValueTask<AssertionData> assertionDataTask, string? actualExpression)
     {
         _assertionDataTask = assertionDataTask;
         _actualExpression = actualExpression;
@@ -76,14 +79,14 @@ public abstract class AssertionBuilder : ISource
         return this;
     }
 
-    internal AssertionBuilder AppendConnector(ChainType chainType)
+    internal AssertionCore AppendConnector(ChainType chainType)
     {
         if (chainType == ChainType.None)
         {
             return this;
         }
 
-        return (AssertionBuilder) ((ISource) this).AppendExpression(chainType.ToString());
+        return (AssertionCore) ((ISource) this).AppendExpression(chainType.ToString());
     }
 
     internal protected void AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
@@ -116,8 +119,8 @@ public abstract class AssertionBuilder : ISource
     {
         assertCondition = this switch
         {
-            IOrAssertionBuilder => new OrAssertCondition(_assertions.Pop(), assertCondition),
-            IAndAssertionBuilder => new AndAssertCondition(_assertions.Pop(), assertCondition),
+            IOrAssertion => new OrAssertCondition(_assertions.Pop(), assertCondition),
+            IAndAssertion => new AndAssertCondition(_assertions.Pop(), assertCondition),
             _ => assertCondition
         };
 
@@ -160,7 +163,7 @@ public abstract class AssertionBuilder : ISource
                      
                      but {result.Message}
                      
-                     at {((IInvokableAssertionBuilder) this).GetExpression()}
+                     at {((IInvokableAssertion) this).GetExpression()}
                      """
                 );
 

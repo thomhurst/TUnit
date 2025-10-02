@@ -16,12 +16,12 @@ public static partial class HasExtensions
         return new SingleItemAssertionBuilderWrapper<IEnumerable<TInner>, TInner>(invokableValueAssertionBuilder);
     }
 
-    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> HasDistinctItems<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)
+    public static InvokableValueAssertion<IEnumerable<TInner>> HasDistinctItems<TInner>(this IValueSource<IEnumerable<TInner>> valueSource)
     {
         return HasDistinctItems(valueSource, EqualityComparer<TInner>.Default);
     }
 
-    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> HasDistinctItems<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, IEqualityComparer<TInner> equalityComparer)
+    public static InvokableValueAssertion<IEnumerable<TInner>> HasDistinctItems<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, IEqualityComparer<TInner> equalityComparer)
     {
         return valueSource.RegisterAssertion(new EnumerableDistinctItemsExpectedValueAssertCondition<IEnumerable<TInner>, TInner>(equalityComparer), []);
     }
@@ -32,7 +32,7 @@ public static partial class HasExtensions
         return new EnumerableCount<IEnumerable<TInner>, TInner>(valueSource);
     }
 
-    public static InvokableValueAssertionBuilder<IEnumerable<TInner>> HasCount<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, int count)
+    public static InvokableValueAssertion<IEnumerable<TInner>> HasCount<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, int count)
     {
         return HasCount(valueSource).EqualTo(count);
     }

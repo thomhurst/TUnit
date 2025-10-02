@@ -3,9 +3,9 @@ using TUnit.Assertions.Assertions.Strings.Conditions;
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class StringContainsAssertionBuilderWrapper : InvokableValueAssertionBuilder<string>
+public class StringContainsAssertionBuilderWrapper : InvokableValueAssertion<string>
 {
-    internal StringContainsAssertionBuilderWrapper(InvokableAssertionBuilder<string> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal StringContainsAssertionBuilderWrapper(InvokableAssertion<string> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

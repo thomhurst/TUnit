@@ -4,19 +4,21 @@ using TUnit.Assertions.AssertConditions.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class InvokableAssertionBuilder<TActual> :
-    AssertionBuilder, IInvokableAssertionBuilder
+/// <summary>
+/// Base invokable assertion - supports awaiting and provides assertion result access
+/// </summary>
+public class InvokableAssertion<TActual> : Assertion<TActual>, IInvokableAssertion
 {
     protected readonly ISource Source;
 
-    internal InvokableAssertionBuilder(ISource source) : base(source.AssertionDataTask, source.ActualExpression!,
-        source.ExpressionBuilder, source.Assertions)
+    internal InvokableAssertion(ISource source)
+        : base(source.AssertionDataTask, source.ActualExpression!, source.ExpressionBuilder, source.Assertions)
     {
         Source = source;
 
-        if (source is InvokableAssertionBuilder<TActual> invokableAssertionBuilder)
+        if (source is InvokableAssertion<TActual> invokableAssertion)
         {
-            AwaitedAssertionData = invokableAssertionBuilder.AwaitedAssertionData;
+            AwaitedAssertionData = invokableAssertion.AwaitedAssertionData;
         }
     }
 
@@ -34,7 +36,7 @@ public class InvokableAssertionBuilder<TActual> :
         return Results;
     }
 
-    string IInvokableAssertionBuilder.GetExpression()
+    string IInvokableAssertion.GetExpression()
     {
         var expression = Source.ExpressionBuilder.ToString();
 

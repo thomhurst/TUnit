@@ -8,9 +8,9 @@ namespace TUnit.Assertions;
 
 public class CollectionWrapper<TInner>(IValueSource<IEnumerable<TInner>> valueSource)
 {
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> Satisfy<TExpected>(
+    public InvokableValueAssertion<IEnumerable<TInner>> Satisfy<TExpected>(
         Func<TInner?, TExpected> mapper,
-        Func<IValueSource<TExpected?>, IInvokableAssertionBuilder> assert,
+        Func<IValueSource<TExpected?>, IInvokableAssertion> assert,
         [CallerArgumentExpression(nameof(mapper))] string mapperExpression = "",
         [CallerArgumentExpression(nameof(assert))] string assertionBuilderExpression = "")
     {
@@ -20,9 +20,9 @@ public class CollectionWrapper<TInner>(IValueSource<IEnumerable<TInner>> valueSo
     }
 
 
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> Satisfy<TExpected>(
+    public InvokableValueAssertion<IEnumerable<TInner>> Satisfy<TExpected>(
         Func<TInner?, Task<TExpected>?> asyncMapper,
-        Func<IValueSource<TExpected?>, IInvokableAssertionBuilder> assert,
+        Func<IValueSource<TExpected?>, IInvokableAssertion> assert,
         [CallerArgumentExpression(nameof(asyncMapper))] string mapperExpression = "",
         [CallerArgumentExpression(nameof(assert))] string assertionBuilderExpression = "")
     {
@@ -31,8 +31,8 @@ public class CollectionWrapper<TInner>(IValueSource<IEnumerable<TInner>> valueSo
             [mapperExpression, assertionBuilderExpression]);
     }
 
-    public InvokableValueAssertionBuilder<IEnumerable<TInner>> Satisfy(
-        Func<IValueSource<TInner?>, IInvokableAssertionBuilder> assert,
+    public InvokableValueAssertion<IEnumerable<TInner>> Satisfy(
+        Func<IValueSource<TInner?>, IInvokableAssertion> assert,
         [CallerArgumentExpression(nameof(assert))] string assertionBuilderExpression = "")
     {
         return valueSource.RegisterAssertion(new EnumerableSatisfiesAssertCondition<IEnumerable<TInner>, TInner, TInner>(

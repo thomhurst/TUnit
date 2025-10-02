@@ -2,9 +2,9 @@
 
 namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class StringEqualToAssertionBuilderWrapper : InvokableValueAssertionBuilder<string>
+public class StringEqualToAssertionBuilderWrapper : InvokableValueAssertion<string>
 {
-    internal StringEqualToAssertionBuilderWrapper(InvokableAssertionBuilder<string> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal StringEqualToAssertionBuilderWrapper(InvokableAssertion<string> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 

@@ -3,7 +3,7 @@ using TUnit.Assertions.AssertConditions.Interfaces;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public interface IInvokableAssertionBuilder : ISource
+public interface IInvokableAssertion : ISource
 {
     TaskAwaiter GetAwaiter();
     string? GetExpression();

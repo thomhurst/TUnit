@@ -10,18 +10,18 @@ namespace TUnit.Assertions.Extensions;
 
 public static class StringIsNotExtensions
 {
-    public static InvokableValueAssertionBuilder<string> IsNotEqualTo(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static InvokableValueAssertion<string> IsNotEqualTo(this IValueSource<string> valueSource, string expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
     {
         return IsNotEqualTo(valueSource, expected, StringComparison.Ordinal, doNotPopulateThisValue);
     }
 
-    public static InvokableValueAssertionBuilder<string> IsNotEqualTo(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
+    public static InvokableValueAssertion<string> IsNotEqualTo(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = null, [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = null)
     {
         return valueSource.RegisterAssertion(new StringNotEqualsExpectedValueAssertCondition(expected, stringComparison)
             , [doNotPopulateThisValue1, doNotPopulateThisValue2]);
     }
 
-    public static InvokableValueAssertionBuilder<string> IsNotEmpty(this IValueSource<string> valueSource)
+    public static InvokableValueAssertion<string> IsNotEmpty(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, _) => value != string.Empty,
@@ -30,7 +30,7 @@ public static class StringIsNotExtensions
             , []);
     }
 
-    public static InvokableValueAssertionBuilder<string> IsNotNullOrEmpty(this IValueSource<string> valueSource)
+    public static InvokableValueAssertion<string> IsNotNullOrEmpty(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, _) => !string.IsNullOrEmpty(value),
@@ -38,7 +38,7 @@ public static class StringIsNotExtensions
             $"to not be null or empty"), []);
     }
 
-    public static InvokableValueAssertionBuilder<string> IsNotNullOrWhitespace(this IValueSource<string> valueSource)
+    public static InvokableValueAssertion<string> IsNotNullOrWhitespace(this IValueSource<string> valueSource)
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<string, int>(0,
             (value, _, _) => !string.IsNullOrWhiteSpace(value),

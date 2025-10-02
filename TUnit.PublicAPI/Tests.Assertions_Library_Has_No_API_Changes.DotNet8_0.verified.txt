@@ -518,32 +518,32 @@ namespace .
     }
     public class DelegateAnd<TActual> : ..IDelegateSource, ..ISource
     {
-        public DelegateAnd(. assertionBuilder) { }
-        public static ..DelegateAnd<TActual> Create(. assertionBuilder) { }
+        public DelegateAnd(. assertionCore) { }
+        public static ..DelegateAnd<TActual> Create(. assertionCore) { }
     }
     public class DelegateOr<TActual> : ..IDelegateSource, ..ISource
     {
-        public DelegateOr(. assertionBuilder) { }
-        public static ..DelegateOr<TActual> Create(. assertionBuilder) { }
+        public DelegateOr(. assertionCore) { }
+        public static ..DelegateOr<TActual> Create(. assertionCore) { }
     }
     public class ValueAnd<TActual> : ..ISource, ..IValueSource<TActual>
     {
-        public ValueAnd(. assertionBuilder) { }
-        public static ..ValueAnd<TActual> Create(. assertionBuilder) { }
+        public ValueAnd(. assertionCore) { }
+        public static ..ValueAnd<TActual> Create(. assertionCore) { }
     }
     public class ValueDelegateAnd<TActual> : ..IDelegateSource, ..ISource, ..IValueDelegateSource<TActual>, ..IValueSource<TActual>
     {
-        public ValueDelegateAnd(. assertionBuilder) { }
-        public static ..ValueDelegateAnd<TActual> Create(. assertionBuilder) { }
+        public ValueDelegateAnd(. assertionCore) { }
+        public static ..ValueDelegateAnd<TActual> Create(. assertionCore) { }
     }
     public class ValueDelegateOr<TActual> : ..IDelegateSource, ..ISource, ..IValueDelegateSource<TActual>, ..IValueSource<TActual>
     {
-        public ValueDelegateOr(. assertionBuilder) { }
-        public static ..ValueDelegateOr<TActual> Create(. assertionBuilder) { }
+        public ValueDelegateOr(. assertionCore) { }
+        public static ..ValueDelegateOr<TActual> Create(. assertionCore) { }
     }
     public class ValueOr<TActual> : ..ISource, ..IValueSource<TActual>
     {
-        public ValueOr(. assertionBuilder) { }
+        public ValueOr(. assertionCore) { }
     }
 }
 namespace .
@@ -650,15 +650,15 @@ namespace .
 }
 namespace .AssertionBuilders
 {
-    public class AndAssertionBuilder : ., . { }
-    public abstract class AssertionBuilder : ..ISource
+    public class AndAssertion : ., . { }
+    public abstract class AssertionCore : ..ISource
     {
         protected .AssertionData? AwaitedAssertionData;
         protected .? OtherTypeAssertionBuilder;
         protected readonly .<.> Results;
-        public AssertionBuilder(..ISource source) { }
-        public AssertionBuilder(.<.AssertionData> assertionDataTask, string? actualExpression) { }
-        public AssertionBuilder(.<.AssertionData> assertionDataTask, string actualExpression, .StringBuilder expressionBuilder, .<.> assertions) { }
+        public AssertionCore(..ISource source) { }
+        public AssertionCore(.<.AssertionData> assertionDataTask, string? actualExpression) { }
+        public AssertionCore(.<.AssertionData> assertionDataTask, string actualExpression, .StringBuilder expressionBuilder, .<.> assertions) { }
         protected void AppendCallerMethod(string?[] expressions, [.] string methodName = "") { }
         [.DebuggerHidden]
         [("This is a base `object` method that should not be called.", true)]
@@ -667,8 +667,14 @@ namespace .AssertionBuilders
         [("This is a base `object` method that should not be called.", true)]
         public void ReferenceEquals(object a, object b) { }
     }
-    public class AsyncDelegateAssertionBuilder : ., ..IDelegateSource, ..ISource { }
-    public class AsyncValueDelegateAssertionBuilder<TActual> : ., ..IDelegateSource, ..ISource, ..IValueDelegateSource<TActual>, ..IValueSource<TActual> { }
+    public abstract class Assertion<TActual> : .
+    {
+        protected Assertion(..ISource source) { }
+        protected Assertion(TActual value, string? expressionBuilder) { }
+        protected Assertion(.<.AssertionData> assertionDataTask, string actualExpression, .StringBuilder expressionBuilder, .<.> assertions) { }
+    }
+    public sealed class AsyncDelegateAssertion : .<object?>, ..IDelegateSource, ..ISource { }
+    public sealed class AsyncValueDelegateAssertion<TActual> : ., ..IDelegateSource, ..ISource, ..IValueDelegateSource<TActual>, ..IValueSource<TActual> { }
     public class CastableResultAssertionBuilder<TActual, TExpected> : .<TActual, TExpected> { }
     public class CastedAssertionBuilder<TActual, TExpected> : .<TExpected> { }
     public class ConvertedDelegateAssertionBuilder<TException> : .<TException>
@@ -680,30 +686,30 @@ namespace .AssertionBuilders
     {
         public ConvertedValueAssertionBuilder(..IValueSource<TFromType> source, .<TFromType, TToType> convertToAssertCondition) { }
     }
-    public class DelegateAssertionBuilder : ., ..IDelegateSource, ..ISource { }
-    public interface IAndAssertionBuilder { }
-    public interface IInvokableAssertionBuilder : ..ISource
+    public sealed class DelegateAssertion : .<object?>, ..IDelegateSource, ..ISource { }
+    public interface IAndAssertion { }
+    public interface IInvokableAssertion : ..ISource
     {
         . GetAwaiter();
         string? GetExpression();
     }
-    public interface IOrAssertionBuilder { }
-    public class InvokableAssertionBuilder<TActual> : ., ..ISource, .
+    public interface IOrAssertion { }
+    public class InvokableAssertion<TActual> : .<TActual>, ..ISource, .
     {
         protected readonly ..ISource Source;
         protected .<.> Assertions { get; }
         public .<.<.>> GetAssertionResults() { }
         public . GetAwaiter() { }
     }
-    public class InvokableDelegateAssertionBuilder : .<object?>, ..IDelegateSource, ..ISource
+    public class InvokableDelegateAssertion : .<object?>, ..IDelegateSource, ..ISource
     {
         public ..DelegateAnd<object?> And { get; }
-        public . AssertionBuilder { get; }
+        public . AssertionCore { get; }
         public ..DelegateOr<object?> Or { get; }
     }
-    public class InvokableValueAssertionBuilder<TActual> : .<TActual>, ..ISource, ..IValueSource<TActual>
+    public class InvokableValueAssertion<TActual> : .<TActual>, ..ISource, ..IValueSource<TActual>
     {
-        public InvokableValueAssertionBuilder(..ISource source) { }
+        public InvokableValueAssertion(..ISource source) { }
         public ..ValueAnd<TActual> And { get; }
         public ..ValueOr<TActual> Or { get; }
         public .<TActual> Because(string reason) { }
@@ -712,26 +718,23 @@ namespace .AssertionBuilders
     public class InvokableValueDelegateAssertionBuilder<TActual> : .<TActual>
     {
         public ..ValueDelegateAnd<TActual> And { get; }
-        public . AssertionBuilder { get; }
+        public . AssertionCore { get; }
         public ..ValueDelegateOr<TActual> Or { get; }
     }
     public class MappableResultAssertionBuilder<TActual, TExpected> : .<TActual>
     {
-        public MappableResultAssertionBuilder(.<TActual> assertionBuilder, <TActual?, TExpected?> mapper) { }
+        public MappableResultAssertionBuilder(.<TActual> assertion, <TActual?, TExpected?> mapper) { }
         public new .<TExpected?> GetAwaiter() { }
     }
     public class MappableResultAssertionBuilder<TActual, TAssertCondition, TExpected> : .<TActual>
         where TAssertCondition : .<TActual>
     {
-        public MappableResultAssertionBuilder(.<TActual> assertionBuilder, TAssertCondition assertCondition, <TActual?, TAssertCondition, TExpected?> mapper) { }
+        public MappableResultAssertionBuilder(.<TActual> assertion, TAssertCondition assertCondition, <TActual?, TAssertCondition, TExpected?> mapper) { }
         public new .<TExpected?> GetAwaiter() { }
     }
-    public class OrAssertionBuilder : ., . { }
-    public class ValueAssertionBuilder<TActual> : ., ..ISource, ..IValueSource<TActual>
-    {
-        public ValueAssertionBuilder(..ISource source) { }
-    }
-    public class ValueDelegateAssertionBuilder<TActual> : ., ..IDelegateSource, ..ISource, ..IValueDelegateSource<TActual>, ..IValueSource<TActual> { }
+    public class OrAssertion : ., . { }
+    public sealed class ValueAssertion<TActual> : .<TActual>, ..ISource, ..IValueSource<TActual> { }
+    public sealed class ValueDelegateAssertion<TActual> : ., ..IDelegateSource, ..ISource, ..IValueDelegateSource<TActual>, ..IValueSource<TActual> { }
 }
 namespace .
 {

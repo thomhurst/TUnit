@@ -11,7 +11,7 @@ namespace TUnit.Assertions.Extensions;
 
 public static class ComparableIsExtensions
 {
-    public static InvokableValueAssertionBuilder<TActual> IsGreaterThan<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static InvokableValueAssertion<TActual> IsGreaterThan<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : IComparable<TActual>
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, _) =>
@@ -23,7 +23,7 @@ public static class ComparableIsExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsGreaterThanOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static InvokableValueAssertion<TActual> IsGreaterThanOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : IComparable<TActual>
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, _) =>
@@ -35,7 +35,7 @@ public static class ComparableIsExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsLessThan<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static InvokableValueAssertion<TActual> IsLessThan<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : IComparable<TActual>
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, _) =>
@@ -47,7 +47,7 @@ public static class ComparableIsExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsLessThanOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
+    public static InvokableValueAssertion<TActual> IsLessThanOrEqualTo<TActual>(this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : IComparable<TActual>
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, _) =>

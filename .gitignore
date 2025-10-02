@@ -425,3 +425,5 @@ nul
 
 # Claude Code settings
 .claude/settings.local.json
+.idea/.idea.TUnit/.idea/workspace.xml
+.idea/.idea.TUnit/.idea/workspace.xml

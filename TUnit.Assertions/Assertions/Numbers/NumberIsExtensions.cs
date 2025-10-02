@@ -35,7 +35,7 @@ public static class NumberIsExtensions
         return assertionBuilder;
     } 
 
-    public static InvokableValueAssertionBuilder<TActual> IsZero<TActual>(
+    public static InvokableValueAssertion<TActual> IsZero<TActual>(
         this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>
     {
@@ -43,7 +43,7 @@ public static class NumberIsExtensions
             , []);
     }
     
-    public static InvokableValueAssertionBuilder<TActual> IsDivisibleBy<TActual>(
+    public static InvokableValueAssertion<TActual> IsDivisibleBy<TActual>(
         this IValueSource<TActual> valueSource, TActual expected, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue = null)
         where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
     {
@@ -62,7 +62,7 @@ public static class NumberIsExtensions
             , [doNotPopulateThisValue]);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsEven<TActual>(
+    public static InvokableValueAssertion<TActual> IsEven<TActual>(
         this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
     {
@@ -81,7 +81,7 @@ public static class NumberIsExtensions
             , []);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsOdd<TActual>(this IValueSource<TActual> valueSource)
+    public static InvokableValueAssertion<TActual> IsOdd<TActual>(this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>, IModulusOperators<TActual, TActual, TActual>
     {
         return valueSource.RegisterAssertion(new FuncValueAssertCondition<TActual, TActual>(default(TActual), (value, _, self) =>
@@ -99,7 +99,7 @@ public static class NumberIsExtensions
             , []);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsNegative<TActual>(
+    public static InvokableValueAssertion<TActual> IsNegative<TActual>(
         this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>
     {
@@ -118,7 +118,7 @@ public static class NumberIsExtensions
             , []);
     }
 
-    public static InvokableValueAssertionBuilder<TActual> IsPositive<TActual>(
+    public static InvokableValueAssertion<TActual> IsPositive<TActual>(
         this IValueSource<TActual> valueSource)
         where TActual : INumber<TActual>
     {

@@ -1,8 +1,8 @@
 ﻿namespace TUnit.Assertions.AssertionBuilders.Wrappers;
 
-public class GenericNotEqualToAssertionBuilderWrapper<TActual> : InvokableValueAssertionBuilder<TActual>
+public class GenericNotEqualToAssertionBuilderWrapper<TActual> : InvokableValueAssertion<TActual>
 {
-    internal GenericNotEqualToAssertionBuilderWrapper(InvokableAssertionBuilder<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
+    internal GenericNotEqualToAssertionBuilderWrapper(InvokableAssertion<TActual> invokableAssertionBuilder) : base(invokableAssertionBuilder)
     {
     }
 }

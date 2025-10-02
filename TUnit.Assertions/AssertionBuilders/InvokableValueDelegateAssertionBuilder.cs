@@ -3,14 +3,14 @@ using TUnit.Assertions.AssertConditions.Operators;
 
 namespace TUnit.Assertions.AssertionBuilders;
 
-public class InvokableValueDelegateAssertionBuilder<TActual> : InvokableAssertionBuilder<TActual>
+public class InvokableValueDelegateAssertionBuilder<TActual> : InvokableAssertion<TActual>
 {
-    internal InvokableValueDelegateAssertionBuilder(ValueTask<AssertionData> assertionDataDelegate, AssertionBuilder assertionBuilder) : base(assertionBuilder)
+    internal InvokableValueDelegateAssertionBuilder(ValueTask<AssertionData> assertionDataDelegate, AssertionCore assertionCore) : base(assertionCore)
     {
     }
 
-    public AssertionBuilder AssertionBuilder => this;
+    public AssertionCore AssertionCore => this;
 
-    public ValueDelegateAnd<TActual> And => new(AssertionBuilder.AppendConnector(ChainType.And));
-    public ValueDelegateOr<TActual> Or => new(AssertionBuilder.AppendConnector(ChainType.Or));
+    public ValueDelegateAnd<TActual> And => new(AssertionCore.AppendConnector(ChainType.And));
+    public ValueDelegateOr<TActual> Or => new(AssertionCore.AppendConnector(ChainType.Or));
 }

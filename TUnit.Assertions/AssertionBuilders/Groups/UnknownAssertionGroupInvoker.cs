@@ -1,7 +1,7 @@
 ﻿namespace TUnit.Assertions.AssertionBuilders.Groups;
 
 public class UnknownAssertionGroupInvoker<TActual, TAssertionBuilder>(AssertionGroup<TActual, TAssertionBuilder> group)
-    where TAssertionBuilder : AssertionBuilder
+    where TAssertionBuilder : AssertionCore
 {
     public AndAssertionGroupInvoker<TActual, TAssertionBuilder> And(AssertionGroup<TActual, TAssertionBuilder> otherGroup)
     {
