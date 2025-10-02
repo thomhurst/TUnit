@@ -57,13 +57,13 @@ internal class TestInitializer
         // Shouldn't retrack already tracked objects, but will track any new ones created during retries / initialization
         _objectTracker.TrackObjects(test.Context);
 
-        // Initialize in reverse order (most nested first)
-        await Initialize(test.Context.TrackedObjects);
+        await InitializeTrackedObjects(test.Context);
     }
 
-    private async Task Initialize(HashSet<object> objects)
+    private async Task InitializeTrackedObjects(TestContext testContext)
     {
-        foreach (var obj in objects.Reverse())
+        // Initialize in reverse order (most nested first)
+        foreach (var obj in testContext.TrackedObjects.Reverse())
         {
             await ObjectInitializer.InitializeAsync(obj);
         }
