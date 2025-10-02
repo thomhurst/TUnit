@@ -94,13 +94,6 @@ internal sealed class PropertyInitializationOrchestrator
         TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects)
     {
-        if (!plan.HasProperties)
-        {
-            // No properties to inject, just initialize the object
-            await ObjectInitializer.InitializeAsync(instance);
-            return;
-        }
-
         // Initialize properties based on the mode
         // Properties will be fully initialized (including nested initialization) by the strategies
         if (SourceRegistrar.IsEnabled)
@@ -113,10 +106,6 @@ internal sealed class PropertyInitializationOrchestrator
             await InitializePropertiesAsync(
                 instance, plan.ReflectionProperties, objectBag, methodMetadata, events, visitedObjects);
         }
-
-        // Initialize the object itself after all its properties are fully initialized
-        // This ensures properties are available when IAsyncInitializer.InitializeAsync() is called
-        await ObjectInitializer.InitializeAsync(instance);
     }
 
     /// <summary>

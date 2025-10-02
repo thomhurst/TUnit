@@ -55,13 +55,6 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
         // Get the injection plan for this type
         var plan = PropertyInjectionCache.GetOrCreatePlan(propertyType);
 
-        if (!plan.HasProperties)
-        {
-            // No nested properties to inject, just initialize the object
-            await ObjectInitializer.InitializeAsync(propertyValue);
-            return;
-        }
-
         // Recursively inject properties into the nested object
         if (SourceRegistrar.IsEnabled)
         {
@@ -71,9 +64,6 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
         {
             await ProcessReflectionNestedProperties(context, propertyValue, plan);
         }
-
-        // Initialize the object after all properties are set
-        await ObjectInitializer.InitializeAsync(propertyValue);
     }
 
     /// <summary>
