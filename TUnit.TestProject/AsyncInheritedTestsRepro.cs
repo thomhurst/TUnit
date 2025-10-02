@@ -21,3 +21,11 @@ public class AsyncInheritedTestsRepro : AsyncBaseTests
         Console.WriteLine("Derived sync test executed");
     }
 }
+
+public class MyGenerator<T>(string tag) : DataSourceGeneratorAttribute<T>
+{
+    protected override IEnumerable<Func<T>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return () => Activator.CreateInstance<T>()
+    }
+}

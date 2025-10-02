@@ -39,6 +39,7 @@ public abstract class AssertionCore : ISource
     {
         _assertionDataTask = assertionDataTask;
         _actualExpression = actualExpression;
+        _assertions = new Stack<BaseAssertCondition>();
 
         if (string.IsNullOrEmpty(actualExpression))
         {
@@ -65,7 +66,7 @@ public abstract class AssertionCore : ISource
     protected readonly List<AssertionResult> Results = [];
     private readonly StringBuilder _expressionBuilder;
     private readonly ValueTask<AssertionData> _assertionDataTask;
-    private readonly Stack<BaseAssertCondition> _assertions = new();
+    private readonly Stack<BaseAssertCondition> _assertions;
     private readonly string? _actualExpression;
 
     ISource ISource.AppendExpression(string expression)
