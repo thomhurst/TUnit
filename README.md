@@ -440,10 +440,10 @@ Runtime=.NET 9.0
 ```
 | Method       | Version | Mean    | Error    | StdDev   | Median  |
 |------------- |-------- |--------:|---------:|---------:|--------:|
-| Build_TUnit  | 0.61.58 | 1.594 s | 0.1146 s | 0.3252 s | 1.521 s |
-| Build_NUnit  | 4.4.0   | 1.571 s | 0.1978 s | 0.5831 s | 1.496 s |
-| Build_xUnit  | 2.9.3   | 1.474 s | 0.1368 s | 0.4011 s | 1.455 s |
-| Build_MSTest | 3.10.5  | 1.727 s | 0.1303 s | 0.3802 s | 1.675 s |
+| Build_TUnit  | 0.61.58 | 1.740 s | 0.1459 s | 0.4302 s | 1.716 s |
+| Build_NUnit  | 4.4.0   | 1.982 s | 0.1231 s | 0.3609 s | 2.003 s |
+| Build_xUnit  | 2.9.3   | 1.573 s | 0.1605 s | 0.4732 s | 1.491 s |
+| Build_MSTest | 3.11.0  | 1.425 s | 0.0672 s | 0.1895 s | 1.402 s |
 
 
 
@@ -462,10 +462,10 @@ Runtime=.NET 9.0
 ```
 | Method       | Version | Mean    | Error    | StdDev   | Median  |
 |------------- |-------- |--------:|---------:|---------:|--------:|
-| Build_TUnit  | 0.61.58 | 1.709 s | 0.0270 s | 0.0252 s | 1.698 s |
-| Build_NUnit  | 4.4.0   | 1.510 s | 0.0186 s | 0.0174 s | 1.506 s |
-| Build_xUnit  | 2.9.3   | 1.531 s | 0.0176 s | 0.0164 s | 1.531 s |
-| Build_MSTest | 3.10.5  | 1.542 s | 0.0100 s | 0.0089 s | 1.542 s |
+| Build_TUnit  | 0.61.58 | 1.703 s | 0.0329 s | 0.0379 s | 1.695 s |
+| Build_NUnit  | 4.4.0   | 1.510 s | 0.0214 s | 0.0189 s | 1.510 s |
+| Build_xUnit  | 2.9.3   | 1.547 s | 0.0158 s | 0.0148 s | 1.548 s |
+| Build_MSTest | 3.11.0  | 1.554 s | 0.0233 s | 0.0218 s | 1.558 s |
 
 
 
@@ -484,10 +484,10 @@ Runtime=.NET 9.0
 ```
 | Method       | Version | Mean    | Error    | StdDev   | Median  |
 |------------- |-------- |--------:|---------:|---------:|--------:|
-| Build_TUnit  | 0.61.58 | 2.151 s | 0.0487 s | 0.1412 s | 2.132 s |
-| Build_NUnit  | 4.4.0   | 1.994 s | 0.0396 s | 0.0616 s | 1.993 s |
-| Build_xUnit  | 2.9.3   | 1.995 s | 0.0320 s | 0.0507 s | 1.997 s |
-| Build_MSTest | 3.10.5  | 2.059 s | 0.0322 s | 0.0302 s | 2.057 s |
+| Build_TUnit  | 0.61.58 | 1.898 s | 0.0378 s | 0.0478 s | 1.889 s |
+| Build_NUnit  | 4.4.0   | 1.690 s | 0.0321 s | 0.0330 s | 1.696 s |
+| Build_xUnit  | 2.9.3   | 1.666 s | 0.0175 s | 0.0163 s | 1.664 s |
+| Build_MSTest | 3.11.0  | 1.731 s | 0.0331 s | 0.0310 s | 1.734 s |
 
 
 ### Scenario: Tests focused on assertion performance and validation
@@ -510,7 +510,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -527,7 +527,7 @@ Benchmarks with issues:
 ```
 
 BenchmarkDotNet v0.15.4, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
-AMD EPYC 7763 2.62GHz, 1 CPU, 4 logical and 2 physical cores
+AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.305
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
@@ -540,7 +540,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -557,10 +557,10 @@ Benchmarks with issues:
 ```
 
 BenchmarkDotNet v0.15.4, Windows 11 (10.0.26100.6584/24H2/2024Update/HudsonValley) (Hyper-V)
-AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
+Intel Xeon Platinum 8370C CPU 2.80GHz (Max: 2.79GHz), 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.305
-  [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
-  Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+  [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v4
+  Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v4
 
 Runtime=.NET 9.0  
 
@@ -570,7 +570,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -601,7 +601,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -618,7 +618,7 @@ Benchmarks with issues:
 ```
 
 BenchmarkDotNet v0.15.4, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
-AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
+AMD EPYC 7763 2.74GHz, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.305
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
@@ -631,7 +631,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -661,7 +661,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -692,7 +692,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -709,7 +709,7 @@ Benchmarks with issues:
 ```
 
 BenchmarkDotNet v0.15.4, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
-AMD EPYC 7763 3.00GHz, 1 CPU, 4 logical and 2 physical cores
+AMD EPYC 7763 2.63GHz, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.305
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
@@ -722,7 +722,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -752,7 +752,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -783,7 +783,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -800,7 +800,7 @@ Benchmarks with issues:
 ```
 
 BenchmarkDotNet v0.15.4, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
-AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
+AMD EPYC 7763 2.61GHz, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.305
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
@@ -813,7 +813,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -843,7 +843,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -874,7 +874,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -904,7 +904,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -934,7 +934,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -965,7 +965,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -982,7 +982,7 @@ Benchmarks with issues:
 ```
 
 BenchmarkDotNet v0.15.4, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
-AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
+AMD EPYC 7763 3.04GHz, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.305
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
@@ -995,7 +995,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -1025,7 +1025,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -1056,7 +1056,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -1073,7 +1073,7 @@ Benchmarks with issues:
 ```
 
 BenchmarkDotNet v0.15.4, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
-AMD EPYC 7763 2.87GHz, 1 CPU, 4 logical and 2 physical cores
+AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.305
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
@@ -1086,7 +1086,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -1116,7 +1116,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -1147,7 +1147,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -1164,7 +1164,7 @@ Benchmarks with issues:
 ```
 
 BenchmarkDotNet v0.15.4, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
-AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
+AMD EPYC 7763 3.22GHz, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 9.0.305
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
@@ -1177,7 +1177,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
@@ -1207,7 +1207,7 @@ Runtime=.NET 9.0
 | TUnit     | 0.61.58 |   NA |    NA |     NA |     NA |
 | NUnit     | 4.4.0   |   NA |    NA |     NA |     NA |
 | xUnit     | 2.9.3   |   NA |    NA |     NA |     NA |
-| MSTest    | 3.10.5  |   NA |    NA |     NA |     NA |
+| MSTest    | 3.11.0  |   NA |    NA |     NA |     NA |
 | TUnit_AOT | 0.61.58 |   NA |    NA |     NA |     NA |
 
 Benchmarks with issues:
