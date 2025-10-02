@@ -13,7 +13,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public void TrackObjects(TestContext testContext)
     {
-        var objects = trackableObjectGraphProvider.GetTrackableObjects(testContext, testContext.TrackedObjects);
+        var objects = trackableObjectGraphProvider.GetTrackableObjects(testContext);
 
         foreach (var obj in objects)
         {

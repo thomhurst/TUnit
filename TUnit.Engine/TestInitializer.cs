@@ -1,4 +1,5 @@
 ﻿using TUnit.Core;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Services;
 
@@ -9,12 +10,17 @@ internal class TestInitializer
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
     private readonly ObjectInitializationService _objectInitializationService;
     private readonly PropertyInjectionService _propertyInjectionService;
+    private readonly ObjectTracker _objectTracker;
 
-    public TestInitializer(EventReceiverOrchestrator eventReceiverOrchestrator, ObjectInitializationService objectInitializationService, PropertyInjectionService propertyInjectionService)
+    public TestInitializer(EventReceiverOrchestrator eventReceiverOrchestrator,
+        ObjectInitializationService objectInitializationService,
+        PropertyInjectionService propertyInjectionService,
+        ObjectTracker objectTracker)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _objectInitializationService = objectInitializationService;
         _propertyInjectionService = propertyInjectionService;
+        _objectTracker = objectTracker;
     }
 
     public async Task InitializeTest(AbstractExecutableTest test, CancellationToken cancellationToken)
@@ -47,5 +53,8 @@ internal class TestInitializer
 
         // Step 4: Initialize and register all eligible objects including event receivers
         await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken).ConfigureAwait(false);
+
+        // Shouldn't retrack already tracked objects, but will track any new ones created during retries / initialization
+        _objectTracker.TrackObjects(test.Context);
     }
 }

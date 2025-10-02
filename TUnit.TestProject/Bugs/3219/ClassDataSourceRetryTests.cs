@@ -7,17 +7,11 @@ namespace TUnit.TestProject.Bugs.Bug3219;
 public class DataClass : IAsyncInitializer, IAsyncDisposable
 {
     public int Value { get; private set; }
-    private static int _initCount;
-    private static int _disposeCount;
+    private int _initCount;
+    private int _disposeCount;
 
-    public static int InitCount => _initCount;
-    public static int DisposeCount => _disposeCount;
-
-    public static void ResetCounters()
-    {
-        _initCount = 0;
-        _disposeCount = 0;
-    }
+    public int InitCount => _initCount;
+    public int DisposeCount => _disposeCount;
 
     public Task InitializeAsync()
     {
@@ -50,7 +44,6 @@ public class ClassDataSourceRetryTests
     [Before(TestSession)]
     public static void ResetCountersForSession()
     {
-        DataClass.ResetCounters();
         _attemptCount = 0;
     }
 
