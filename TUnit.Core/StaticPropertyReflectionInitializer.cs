@@ -124,12 +124,6 @@ public static class StaticPropertyReflectionInitializer
                 // Set the property value
                 property.SetValue(null, value);
 
-                // Initialize the value if it's an object
-                if (value != null)
-                {
-                    await ObjectInitializer.InitializeAsync(value);
-                }
-
                 // Only use the first value for static properties
                 break;
             }

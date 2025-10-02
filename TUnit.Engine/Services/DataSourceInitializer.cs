@@ -14,7 +14,7 @@ internal sealed class DataSourceInitializer
     private readonly Dictionary<object, Task> _initializationTasks = new();
     private readonly object _lock = new();
     private PropertyInjectionService? _propertyInjectionService;
-    
+
     public void Initialize(PropertyInjectionService propertyInjectionService)
     {
         _propertyInjectionService = propertyInjectionService;
@@ -77,14 +77,12 @@ internal sealed class DataSourceInitializer
                 await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
                     dataSource, objectBag, methodMetadata, events);
             }
-            
+
             // Step 2: IAsyncInitializer
             if (dataSource is IAsyncInitializer asyncInitializer)
             {
-                await asyncInitializer.InitializeAsync();
+                await ObjectInitializer.InitializeAsync(asyncInitializer);
             }
-
-            // Note: Tracking is now handled by ObjectRegistrationService during registration phase
         }
         catch (Exception ex)
         {

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.StaticProperties;
 
@@ -5,7 +6,7 @@ namespace TUnit.Core.Tracking;
 
 internal class TrackableObjectGraphProvider
 {
-    public IEnumerable<object> GetTrackableObjects(TestContext testContext)
+    public ConcurrentDictionary<int, HashSet<object>> GetTrackableObjects(TestContext testContext)
     {
         var visitedObjects = testContext.TrackedObjects;
 
@@ -13,42 +14,39 @@ internal class TrackableObjectGraphProvider
 
         foreach (var classArgument in testDetails.TestClassArguments)
         {
-            if (classArgument != null && visitedObjects.Add(classArgument))
+            if (classArgument != null && visitedObjects.GetOrAdd(0, []).Add(classArgument))
             {
-                yield return classArgument;
-
-                foreach (var nested in GetNestedTrackableObjects(classArgument, visitedObjects))
-                {
-                    yield return nested;
-                }
+                AddNestedTrackableObjects(classArgument, visitedObjects, 1);
             }
         }
 
         foreach (var methodArgument in testDetails.TestMethodArguments)
         {
-            if (methodArgument != null && visitedObjects.Add(methodArgument))
+            if (methodArgument != null && visitedObjects.GetOrAdd(0, []).Add(methodArgument))
             {
-                yield return methodArgument;
-
-                foreach (var nested in GetNestedTrackableObjects(methodArgument, visitedObjects))
-                {
-                    yield return nested;
-                }
+                AddNestedTrackableObjects(methodArgument, visitedObjects, 1);
             }
         }
 
         foreach (var property in testDetails.TestClassInjectedPropertyArguments.Values)
         {
-            if (property != null && visitedObjects.Add(property))
+            if (property != null && visitedObjects.GetOrAdd(0, []).Add(property))
             {
-                yield return property;
-
-                foreach (var nested in GetNestedTrackableObjects(property, visitedObjects))
-                {
-                    yield return nested;
-                }
+                AddNestedTrackableObjects(property, visitedObjects, 1);
             }
         }
+
+        return visitedObjects;
+    }
+
+    private static void AddToLevel(Dictionary<int, List<object>> objectsByLevel, int level, object obj)
+    {
+        if (!objectsByLevel.TryGetValue(level, out var list))
+        {
+            list = [];
+            objectsByLevel[level] = list;
+        }
+        list.Add(obj);
     }
 
     /// <summary>
@@ -65,14 +63,8 @@ internal class TrackableObjectGraphProvider
         }
     }
 
-    private IEnumerable<object> GetNestedTrackableObjects(object obj, HashSet<object> visitedObjects)
+    private void AddNestedTrackableObjects(object obj, ConcurrentDictionary<int, HashSet<object>> visitedObjects, int currentDepth)
     {
-        // Prevent infinite recursion on circular references
-        if (!visitedObjects.Add(obj))
-        {
-            yield break;
-        }
-
         var plan = PropertyInjectionCache.GetOrCreatePlan(obj.GetType());
 
         if(!SourceRegistrar.IsEnabled)
@@ -87,22 +79,17 @@ internal class TrackableObjectGraphProvider
                 }
 
                 // Check if already visited before yielding to prevent duplicates
-                if (!visitedObjects.Add(value))
+                if (!visitedObjects.GetOrAdd(currentDepth, []).Add(value))
                 {
                     continue;
                 }
-
-                yield return value;
 
                 if (!PropertyInjectionCache.HasInjectableProperties(value.GetType()))
                 {
                     continue;
                 }
 
-                foreach (var nested in GetNestedTrackableObjects(value, visitedObjects))
-                {
-                    yield return nested;
-                }
+                AddNestedTrackableObjects(value, visitedObjects, currentDepth + 1);
             }
         }
         else
@@ -124,22 +111,17 @@ internal class TrackableObjectGraphProvider
                 }
 
                 // Check if already visited before yielding to prevent duplicates
-                if (!visitedObjects.Add(value))
+                if (!visitedObjects.GetOrAdd(currentDepth, []).Add(value))
                 {
                     continue;
                 }
-
-                yield return value;
 
                 if (!PropertyInjectionCache.HasInjectableProperties(value.GetType()))
                 {
                     continue;
                 }
 
-                foreach (var nested in GetNestedTrackableObjects(value, visitedObjects))
-                {
-                    yield return nested;
-                }
+                AddNestedTrackableObjects(value, visitedObjects, currentDepth + 1);
             }
         }
     }

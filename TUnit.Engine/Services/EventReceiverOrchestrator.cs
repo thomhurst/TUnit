@@ -4,6 +4,7 @@ using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Events;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
@@ -16,6 +17,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 {
     private readonly EventReceiverRegistry _registry = new();
     private readonly TUnitFrameworkLogger _logger;
+    private readonly TrackableObjectGraphProvider _trackableObjectGraphProvider;
 
     // Track which assemblies/classes/sessions have had their "first" event invoked
     private ThreadSafeDictionary<string, Task> _firstTestInAssemblyTasks = new();
@@ -33,25 +35,22 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     // Track registered First event receiver types to avoid duplicate registrations
     private readonly ConcurrentHashSet<Type> _registeredFirstEventReceiverTypes = new();
 
-    public EventReceiverOrchestrator(TUnitFrameworkLogger logger)
+    public EventReceiverOrchestrator(TUnitFrameworkLogger logger, TrackableObjectGraphProvider trackableObjectGraphProvider)
     {
         _logger = logger;
+        _trackableObjectGraphProvider = trackableObjectGraphProvider;
     }
 
-    public async ValueTask InitializeAllEligibleObjectsAsync(TestContext context, CancellationToken cancellationToken)
+    public void RegisterReceivers(TestContext context, CancellationToken cancellationToken)
     {
         var eligibleObjects = context.GetEligibleEventObjects().ToArray();
 
-        // Only initialize and register objects that haven't been processed yet
-        var newObjects = new List<object>();
         var objectsToRegister = new List<object>();
 
         foreach (var obj in eligibleObjects)
         {
             if (_initializedObjects.Add(obj)) // Add returns false if already present
             {
-                newObjects.Add(obj);
-
                 // For First event receivers, only register one instance per type
                 var objType = obj.GetType();
                 bool isFirstEventReceiver = obj is IFirstTestInTestSessionEventReceiver ||
@@ -79,15 +78,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         {
             // Register only the objects that should be registered
             _registry.RegisterReceivers(objectsToRegister);
-        }
-
-        if (newObjects.Count > 0)
-        {
-            // Initialize all new objects (even if not registered)
-            foreach (var obj in newObjects)
-            {
-                await ObjectInitializer.InitializeAsync(obj, cancellationToken);
-            }
         }
     }
 
