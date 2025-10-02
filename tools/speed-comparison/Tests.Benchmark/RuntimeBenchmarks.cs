@@ -28,8 +28,23 @@ public class RuntimeBenchmarks : BenchmarkBase
 
         // Publish AOT configuration
         await Cli.Wrap("dotnet")
-            .WithArguments(["publish", UnifiedPath, "-c", "Release", "-p:TestFramework=TUNIT", "-p:Aot=true", "--framework", Framework])
+            .WithArguments(["publish", UnifiedPath, "-c", "Release", "-p:TestFramework=TUNIT", "-p:Aot=true", "--framework", Framework, "--runtime", GetRuntimeIdentifier()])
             .ExecuteAsync();
+    }
+
+    private static string GetRuntimeIdentifier()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return "win-x64";
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return "linux-x64";
+        }
+
+        return "osx-arm64";
     }
     
     [Benchmark]
