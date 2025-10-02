@@ -315,6 +315,9 @@ public class TestContext : Context
     ];
 
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
+
+    internal HashSet<object> TrackedObjects { get; } = [];
+
     public DateTimeOffset? TestEnd { get; set; }
 
 

@@ -13,7 +13,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public void TrackObjects(TestContext testContext)
     {
-        var objects = trackableObjectGraphProvider.GetTrackableObjects(testContext);
+        var objects = trackableObjectGraphProvider.GetTrackableObjects(testContext, testContext.TrackedObjects);
 
         foreach (var obj in objects)
         {
@@ -23,9 +23,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public async ValueTask UntrackObjects(TestContext testContext, List<Exception> cleanupExceptions)
     {
-        var objects = trackableObjectGraphProvider.GetTrackableObjects(testContext);
-
-        foreach (var obj in objects)
+        foreach (var obj in testContext.TrackedObjects)
         {
             try
             {

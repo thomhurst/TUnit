@@ -5,10 +5,9 @@ namespace TUnit.Core.Tracking;
 
 internal class TrackableObjectGraphProvider
 {
-    public IEnumerable<object> GetTrackableObjects(TestContext testContext)
+    public IEnumerable<object> GetTrackableObjects(TestContext testContext, HashSet<object> visitedObjects)
     {
         var testDetails = testContext.TestDetails;
-        var visitedObjects = new HashSet<object>();
 
         foreach (var classArgument in testDetails.TestClassArguments)
         {
