@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using TUnit.Core.Enums;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
@@ -91,25 +89,58 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             throw new InvalidOperationException($"Could not determine target type for method '{MethodNameProvidingDataSource}'. This may occur during static property initialization without a test context.");
         }
 
+        // Try to find a method first
         var methodInfo = targetType.GetMethods(BindingFlags).SingleOrDefault(x => x.Name == MethodNameProvidingDataSource
                 && x.GetParameters().Select(p => p.ParameterType).SequenceEqual(Arguments.Select(a => a?.GetType())))
-            ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags)
-            ?? throw new InvalidOperationException(
-                $"Method '{MethodNameProvidingDataSource}' not found in class '{targetType.Name}' with the specified arguments.");
+            ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
 
-        if (methodInfo is null)
+        object? methodResult;
+
+        if (methodInfo != null)
         {
-            throw new InvalidOperationException($"Method '{MethodNameProvidingDataSource}' not found in class '{targetType.Name}'.");
-        }
+            // Determine if it's an instance method
+            object? instance = null;
+            if (!methodInfo.IsStatic)
+            {
+                instance = dataGeneratorMetadata.TestClassInstance ?? Activator.CreateInstance(targetType);
+            }
 
-        // Determine if it's an instance method
-        object? instance = null;
-        if (!methodInfo.IsStatic)
+            methodResult = methodInfo.Invoke(instance, Arguments);
+        }
+        else
         {
-            instance = dataGeneratorMetadata.TestClassInstance ?? Activator.CreateInstance(targetType);
-        }
+            // Try to find a property or field
+            var propertyInfo = targetType.GetProperty(MethodNameProvidingDataSource, BindingFlags);
+            var fieldInfo = targetType.GetField(MethodNameProvidingDataSource, BindingFlags);
 
-        var methodResult = methodInfo.Invoke(instance, Arguments);
+            if (propertyInfo != null)
+            {
+                // Determine if it's an instance property
+                object? instance = null;
+                if (propertyInfo.GetMethod?.IsStatic != true)
+                {
+                    instance = dataGeneratorMetadata.TestClassInstance ?? Activator.CreateInstance(targetType);
+                }
+
+                methodResult = propertyInfo.GetValue(instance);
+            }
+            else if (fieldInfo != null)
+            {
+                // Determine if it's an instance field
+                object? instance = null;
+                if (!fieldInfo.IsStatic)
+                {
+                    instance = dataGeneratorMetadata.TestClassInstance ?? Activator.CreateInstance(targetType);
+                }
+
+                methodResult = fieldInfo.GetValue(instance);
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    $"Method, property, or field '{MethodNameProvidingDataSource}' not found in class '{targetType.Name}' with the specified arguments.");
+            }
+        }
 
         // Handle different return types
         if (methodResult == null)

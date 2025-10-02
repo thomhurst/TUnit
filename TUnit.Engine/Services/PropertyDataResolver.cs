@@ -1,13 +1,11 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
-using TUnit.Core.DataSources;
-using TUnit.Core.Initialization;
+using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
-using TUnit.Core.Interfaces.SourceGenerator;
+using TUnit.Core.PropertyInjection;
+using TUnit.Core.PropertyInjection.Initialization;
 
-namespace TUnit.Core.PropertyInjection.Initialization;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Handles all data source resolution logic for property initialization.
@@ -19,7 +17,7 @@ internal static class PropertyDataResolver
     /// Resolves data from a property's data source.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Property types handled dynamically")]
-    public static async Task<object?> ResolvePropertyDataAsync(PropertyInitializationContext context, DataSourceInitializer dataSourceInitializer, TestObjectInitializer testObjectInitializer)
+    public static async Task<object?> ResolvePropertyDataAsync(PropertyInitializationContext context, DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
     {
         var dataSource = await GetInitializedDataSourceAsync(context, dataSourceInitializer);
         if (dataSource == null)
@@ -51,13 +49,17 @@ internal static class PropertyDataResolver
                         context.MethodMetadata,
                         context.Events);
                 }
-                // Otherwise, initialize if it has injectable properties or implements IAsyncInitializer
-                else if (PropertyInjectionCache.HasInjectableProperties(value.GetType()) || 
-                         value is IAsyncInitializer)
+                // Otherwise, register if it has injectable properties
+                else if (PropertyInjectionCache.HasInjectableProperties(value.GetType()))
                 {
-                    // Use TestObjectInitializer for complete initialization
-                    value = await testObjectInitializer.InitializeAsync(value, context.TestContext);
+                    // Use ObjectRegistrationService for registration (property injection + tracking, NO IAsyncInitializer)
+                    await objectRegistrationService.RegisterObjectAsync(
+                        value,
+                        context.ObjectBag,
+                        context.MethodMetadata,
+                        context.Events);
                 }
+                // Note: IAsyncInitializer will be called during execution phase by ObjectInitializationService
                 
                 return value;
             }
@@ -109,6 +111,13 @@ internal static class PropertyDataResolver
         if (context.SourceGeneratedMetadata != null)
         {
             // Source-generated mode
+            if (context.SourceGeneratedMetadata.ContainingType == null)
+            {
+                throw new InvalidOperationException(
+                    $"ContainingType is null for property '{context.PropertyName}'. " +
+                    $"This may indicate an issue with source generator for type '{context.PropertyType.Name}'.");
+            }
+
             var propertyMetadata = new PropertyMetadata
             {
                 IsStatic = false,

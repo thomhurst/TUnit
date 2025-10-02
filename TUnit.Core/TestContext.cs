@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core.Enums;
@@ -316,6 +315,9 @@ public class TestContext : Context
     ];
 
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
+
+    internal HashSet<object> TrackedObjects { get; } = [];
+
     public DateTimeOffset? TestEnd { get; set; }
 
 

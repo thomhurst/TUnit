@@ -1,15 +1,12 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
-using TUnit.Core.DataSources;
-using TUnit.Core.Initialization;
+using TUnit.Core;
 using TUnit.Core.Interfaces.SourceGenerator;
+using TUnit.Core.PropertyInjection;
+using TUnit.Core.PropertyInjection.Initialization;
 
-namespace TUnit.Core.PropertyInjection.Initialization;
+namespace TUnit.Engine.Services;
 
 /// <summary>
 /// Orchestrates the entire property initialization process.
@@ -19,26 +16,26 @@ internal sealed class PropertyInitializationOrchestrator
 {
     private PropertyInitializationPipeline _pipeline;
     internal DataSourceInitializer DataSourceInitializer { get; }
-    internal TestObjectInitializer TestObjectInitializer { get; private set; }
+    internal ObjectRegistrationService ObjectRegistrationService { get; private set; }
 
-    public PropertyInitializationOrchestrator(DataSourceInitializer dataSourceInitializer, TestObjectInitializer? testObjectInitializer)
+    public PropertyInitializationOrchestrator(DataSourceInitializer dataSourceInitializer, ObjectRegistrationService? objectRegistrationService)
     {
         DataSourceInitializer = dataSourceInitializer ?? throw new ArgumentNullException(nameof(dataSourceInitializer));
-        TestObjectInitializer = testObjectInitializer!; // Will be set via Initialize()
-        if (testObjectInitializer != null)
+        ObjectRegistrationService = objectRegistrationService!; // Will be set via Initialize()
+        if (objectRegistrationService != null)
         {
-            _pipeline = PropertyInitializationPipeline.CreateDefault(dataSourceInitializer, testObjectInitializer);
+            _pipeline = PropertyInitializationPipeline.CreateDefault(dataSourceInitializer, objectRegistrationService);
         }
         else
         {
             _pipeline = null!; // Will be set via Initialize()
         }
     }
-    
-    public void Initialize(TestObjectInitializer testObjectInitializer)
+
+    public void Initialize(ObjectRegistrationService objectRegistrationService)
     {
-        TestObjectInitializer = testObjectInitializer ?? throw new ArgumentNullException(nameof(testObjectInitializer));
-        _pipeline = PropertyInitializationPipeline.CreateDefault(DataSourceInitializer, testObjectInitializer);
+        ObjectRegistrationService = objectRegistrationService ?? throw new ArgumentNullException(nameof(objectRegistrationService));
+        _pipeline = PropertyInitializationPipeline.CreateDefault(DataSourceInitializer, objectRegistrationService);
     }
 
     /// <summary>

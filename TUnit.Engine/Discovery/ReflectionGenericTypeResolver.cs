@@ -84,12 +84,24 @@ internal static class ReflectionGenericTypeResolver
     /// </summary>
     public static GenericTypeInfo? ExtractGenericTypeInfo(Type testClass)
     {
-        if (!testClass.IsGenericTypeDefinition)
+        // Handle both generic type definitions and constructed generic types
+        Type typeToAnalyze;
+        if (testClass.IsGenericTypeDefinition)
+        {
+            typeToAnalyze = testClass;
+        }
+        else if (testClass.IsConstructedGenericType)
+        {
+            // For constructed generic types (like Issue2952GenericBase<int>),
+            // use the generic type definition to extract parameter names and constraints
+            typeToAnalyze = testClass.GetGenericTypeDefinition();
+        }
+        else
         {
             return null;
         }
 
-        var genericParams = testClass.GetGenericArguments();
+        var genericParams = typeToAnalyze.GetGenericArguments();
         var constraints = new GenericParameterConstraints[genericParams.Length];
 
         for (var i = 0; i < genericParams.Length; i++)

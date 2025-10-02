@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]

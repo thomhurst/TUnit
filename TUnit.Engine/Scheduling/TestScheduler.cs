@@ -21,6 +21,8 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly TestRunner _testRunner;
     private readonly CircularDependencyDetector _circularDependencyDetector;
     private readonly IConstraintKeyScheduler _constraintKeyScheduler;
+    private readonly HookExecutor _hookExecutor;
+    private readonly StaticPropertyHandler _staticPropertyHandler;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
@@ -31,7 +33,9 @@ internal sealed class TestScheduler : ITestScheduler
         TestStateManager testStateManager,
         TestRunner testRunner,
         CircularDependencyDetector circularDependencyDetector,
-        IConstraintKeyScheduler constraintKeyScheduler)
+        IConstraintKeyScheduler constraintKeyScheduler,
+        HookExecutor hookExecutor,
+        StaticPropertyHandler staticPropertyHandler)
     {
         _logger = logger;
         _groupingService = groupingService;
@@ -42,9 +46,11 @@ internal sealed class TestScheduler : ITestScheduler
         _testRunner = testRunner;
         _circularDependencyDetector = circularDependencyDetector;
         _constraintKeyScheduler = constraintKeyScheduler;
+        _hookExecutor = hookExecutor;
+        _staticPropertyHandler = staticPropertyHandler;
     }
 
-    public async Task ScheduleAndExecuteAsync(
+    public async Task<bool> ScheduleAndExecuteAsync(
         List<AbstractExecutableTest> testList,
         CancellationToken cancellationToken)
     {
@@ -56,7 +62,7 @@ internal sealed class TestScheduler : ITestScheduler
         if (testList.Count == 0)
         {
             await _logger.LogDebugAsync("No executable tests found").ConfigureAwait(false);
-            return;
+            return true;
         }
 
         await _logger.LogDebugAsync($"Scheduling execution of {testList.Count} tests").ConfigureAwait(false);
@@ -64,20 +70,20 @@ internal sealed class TestScheduler : ITestScheduler
         var circularDependencies = _circularDependencyDetector.DetectCircularDependencies(testList);
 
         var testsInCircularDependencies = new HashSet<AbstractExecutableTest>();
-        
+
         foreach (var (test, dependencyChain) in circularDependencies)
         {
             // Format the error message to match the expected format
-            var simpleNames = dependencyChain.Select(t => 
+            var simpleNames = dependencyChain.Select(t =>
             {
                 var className = t.Metadata.TestClassType.Name;
                 var testName = t.Metadata.TestMethodName;
                 return $"{className}.{testName}";
             }).ToList();
-            
+
             var errorMessage = $"DependsOn Conflict: {string.Join(" > ", simpleNames)}";
             var exception = new CircularDependencyException(errorMessage);
-            
+
             // Mark all tests in the dependency chain as failed
             foreach (var chainTest in dependencyChain)
             {
@@ -93,14 +99,35 @@ internal sealed class TestScheduler : ITestScheduler
         if (executableTests.Count == 0)
         {
             await _logger.LogDebugAsync("No executable tests found after removing circular dependencies").ConfigureAwait(false);
-            return;
+            return true;
         }
+
+        // Initialize static properties before tests run
+        await _staticPropertyHandler.InitializeStaticPropertiesAsync(cancellationToken).ConfigureAwait(false);
+
+        // Track static properties for disposal at session end
+        _staticPropertyHandler.TrackStaticProperties();
 
         // Group tests by their parallel constraints
         var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
 
         // Execute tests according to their grouping
         await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
+
+        var sessionHookExceptions = await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false) ?? [];
+
+        await _staticPropertyHandler.DisposeStaticPropertiesAsync(sessionHookExceptions).ConfigureAwait(false);
+
+        if (sessionHookExceptions.Count > 0)
+        {
+            foreach (var ex in sessionHookExceptions)
+            {
+                await _logger.LogErrorAsync($"Error executing After(TestSession) hook: {ex}").ConfigureAwait(false);
+            }
+            return false;
+        }
+
+        return true;
     }
 
     private async Task ExecuteGroupedTestsAsync(
@@ -159,15 +186,15 @@ internal sealed class TestScheduler : ITestScheduler
 
             await ExecuteParallelGroupAsync(groupName, orderedTests, maxParallelism, cancellationToken).ConfigureAwait(false);
         }
-        
+
         // 2b. Execute constrained parallel groups (groups with both ParallelGroup and NotInParallel)
         foreach (var kvp in groupedTests.ConstrainedParallelGroups)
         {
             var groupName = kvp.Key;
             var constrainedTests = kvp.Value;
-            
+
             await _logger.LogDebugAsync($"Starting constrained parallel group '{groupName}' with {constrainedTests.UnconstrainedTests.Length} unconstrained and {constrainedTests.KeyedTests.Length} keyed tests").ConfigureAwait(false);
-            
+
             await ExecuteConstrainedParallelGroupAsync(groupName, constrainedTests, maxParallelism, cancellationToken).ConfigureAwait(false);
         }
 
@@ -237,7 +264,7 @@ internal sealed class TestScheduler : ITestScheduler
             await WaitForTasksWithFailFastHandling(orderTasks, cancellationToken).ConfigureAwait(false);
         }
     }
-    
+
     private async Task ExecuteConstrainedParallelGroupAsync(
         string groupName,
         GroupedConstrainedTests constrainedTests,
@@ -245,7 +272,7 @@ internal sealed class TestScheduler : ITestScheduler
         CancellationToken cancellationToken)
     {
         await _logger.LogDebugAsync($"Executing constrained parallel group '{groupName}'").ConfigureAwait(false);
-        
+
         // Start unconstrained tests (can run in parallel)
         var unconstrainedTasks = new List<Task>();
         if (constrainedTests.UnconstrainedTests.Length > 0)
@@ -254,8 +281,8 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 // Respect maximum parallel tests limit for unconstrained tests
                 var unconstrainedTask = ExecuteParallelTestsWithLimitAsync(
-                    constrainedTests.UnconstrainedTests, 
-                    maxParallelism.Value, 
+                    constrainedTests.UnconstrainedTests,
+                    maxParallelism.Value,
                     cancellationToken);
                 unconstrainedTasks.Add(unconstrainedTask);
             }
@@ -270,7 +297,7 @@ internal sealed class TestScheduler : ITestScheduler
                 }
             }
         }
-        
+
         // Execute keyed tests using the constraint key scheduler
         Task? keyedTask = null;
         if (constrainedTests.KeyedTests.Length > 0)
@@ -279,14 +306,14 @@ internal sealed class TestScheduler : ITestScheduler
                 constrainedTests.KeyedTests,
                 cancellationToken).AsTask();
         }
-        
+
         // Wait for both unconstrained and keyed tests to complete
         var allTasks = unconstrainedTasks.ToList();
         if (keyedTask != null)
         {
             allTasks.Add(keyedTask);
         }
-        
+
         if (allTasks.Count > 0)
         {
             await WaitForTasksWithFailFastHandling(allTasks.ToArray(), cancellationToken).ConfigureAwait(false);

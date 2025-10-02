@@ -95,49 +95,35 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.Indent();
         
         writer.AppendLine("/// <summary>");
-        writer.AppendLine("/// Module initializer that registers the initialization function");
+        writer.AppendLine("/// Module initializer that registers static property metadata");
         writer.AppendLine("/// </summary>");
         writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
         writer.AppendLine("public static void Initialize()");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("global::TUnit.Core.SourceRegistrar.RegisterGlobalInitializer(InitializeAsync);");
+
+        // Register each property with metadata
+        foreach (var propertyData in staticProperties)
+        {
+            var typeName = propertyData.Property.ContainingType.GloballyQualified();
+            var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyData.Property.Name}";
+
+            writer.AppendLine("global::TUnit.Core.StaticProperties.StaticPropertyRegistry.Register(new global::TUnit.Core.StaticProperties.StaticPropertyMetadata");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine($"PropertyName = \"{propertyData.Property.Name}\",");
+            writer.AppendLine($"PropertyType = typeof({propertyData.Property.Type.GloballyQualified()}),");
+            writer.AppendLine($"DeclaringType = typeof({typeName}),");
+            writer.AppendLine($"InitializerAsync = {methodName}");
+            writer.Unindent();
+            writer.AppendLine("});");
+        }
+
         writer.Unindent();
         writer.AppendLine("}");
         writer.AppendLine();
-        
-        writer.AppendLine("/// <summary>");
-        writer.AppendLine("/// Initializes all static properties with data source attributes");
-        writer.AppendLine("/// </summary>");
-        writer.AppendLine("public static async global::System.Threading.Tasks.Task InitializeAsync()");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        // Group properties by containing type for organized initialization
-        var propertiesByType = staticProperties.GroupBy(p => p.Property.ContainingType, SymbolEqualityComparer.Default);
-        
-        foreach (var typeGroup in propertiesByType)
-        {
-            if (typeGroup.Key == null)
-            {
-                continue;
-            }
-            
-            var typeName = typeGroup.Key.GloballyQualified();
-            writer.AppendLine($"// Initialize static properties for {typeName}");
-            
-            foreach (var propertyData in typeGroup)
-            {
-                GeneratePropertyInitialization(writer, propertyData, typeName);
-            }
-            
-            writer.AppendLine();
-        }
-        
-        writer.Unindent();
-        writer.AppendLine("}");
-        
-        // Generate individual property initialization methods for AOT compatibility
+
+        // Generate individual property initializer methods that return the value and set the property
         var generatedMethods = new HashSet<string>();
         foreach (var propertyData in staticProperties)
         {
@@ -147,49 +133,14 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
                 GenerateIndividualPropertyInitializer(writer, propertyData);
             }
         }
-        
-        writer.Unindent();
-        writer.AppendLine("}");
-        
-        writer.Unindent();
-        writer.AppendLine("}");
-        
-        return writer.ToString();
-    }
 
-    private static void GeneratePropertyInitialization(CodeWriter writer, PropertyWithDataSource propertyData, string typeName)
-    {
-        var propertyName = propertyData.Property.Name;
-        var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyName}";
-        
-        writer.AppendLine("try");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        writer.AppendLine($"var value = await {methodName}();");
-        writer.AppendLine("if (value != null)");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        writer.AppendLine($"{typeName}.{propertyName} = ({propertyData.Property.Type.GloballyQualified()})value;");
-        
-        writer.AppendLine("// Initialize the injected value");
-        writer.AppendLine("await global::TUnit.Core.ObjectInitializer.InitializeAsync(value);");
-        
-        writer.AppendLine("// Track the static property for disposal");
-        writer.AppendLine("global::TUnit.Core.Tracking.ObjectTracker.TrackObject(global::TUnit.Core.TestSessionContext.GlobalStaticPropertyContext.Events, value);");
-        
         writer.Unindent();
         writer.AppendLine("}");
-        
+
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine("catch (global::System.Exception ex)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"throw new global::System.InvalidOperationException($\"Failed to initialize static property {typeName}.{propertyName}: {{ex.Message}}\", ex);");
-        writer.Unindent();
-        writer.AppendLine("}");
+
+        return writer.ToString();
     }
 
     private static void GenerateIndividualPropertyInitializer(CodeWriter writer, PropertyWithDataSource propertyData)
@@ -197,8 +148,11 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         var propertyName = propertyData.Property.Name;
         var typeName = propertyData.Property.ContainingType.GloballyQualified();
         var methodName = $"Initialize_{propertyData.Property.ContainingType.Name}_{propertyName}";
-        
+
         writer.AppendLine();
+        writer.AppendLine("/// <summary>");
+        writer.AppendLine($"/// Initializer for {typeName}.{propertyName}");
+        writer.AppendLine("/// </summary>");
         writer.AppendLine($"private static async global::System.Threading.Tasks.Task<object?> {methodName}()");
         writer.AppendLine("{");
         writer.Indent();
@@ -236,68 +190,74 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         
         var attr = propertyData.DataSourceAttribute;
         var attributeClassName = attr.AttributeClass?.Name;
-        
+
+        // Generate data source logic and capture the value
+        writer.AppendLine("object? value = null;");
+        writer.AppendLine();
+
         // Generate data source logic based on attribute type
         if (attributeClassName == "ArgumentsAttribute")
         {
-            GenerateArgumentsDataSource(writer, attr);
+            GenerateArgumentsDataSourceWithAssignment(writer, attr);
         }
         else if (attributeClassName == "MethodDataSourceAttribute")
         {
-            GenerateMethodDataSource(writer, attr, propertyData.Property.ContainingType);
+            GenerateMethodDataSourceWithAssignment(writer, attr, propertyData.Property.ContainingType);
         }
         else if (attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") == true ||
                  attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute") == true)
         {
-            GenerateAsyncDataSourceGeneratorWithProperty(writer, attr, propertyData.Property.ContainingType);
+            GenerateAsyncDataSourceGeneratorWithPropertyWithAssignment(writer, attr, propertyData.Property.ContainingType);
         }
         else
         {
-            writer.AppendLine("return null; // Unsupported data source attribute");
+            writer.AppendLine("// Unsupported data source attribute");
         }
-        
+
+        writer.AppendLine();
+        writer.AppendLine("// Set the property value if we got one");
+        writer.AppendLine("if (value != null)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"{typeName}.{propertyName} = ({propertyData.Property.Type.GloballyQualified()})value;");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        writer.AppendLine("return value;");
+
         writer.Unindent();
         writer.AppendLine("}");
     }
 
     private static readonly TypedConstantFormatter _formatter = new();
-    
-    private static void GenerateArgumentsDataSource(CodeWriter writer, AttributeData attr)
+
+    private static void GenerateArgumentsDataSourceWithAssignment(CodeWriter writer, AttributeData attr)
     {
         if (attr.ConstructorArguments.Length > 0)
         {
-            var value = attr.ConstructorArguments[0];
-            
+            var argValue = attr.ConstructorArguments[0];
+
             // ArgumentsAttribute constructor takes params object?[], so the argument is always an array
-            if (value is { Kind: TypedConstantKind.Array, Values.Length: > 0 })
+            if (argValue is { Kind: TypedConstantKind.Array, Values.Length: > 0 })
             {
                 // For static property injection, we only use the first value from the array
-                var firstValue = value.Values[0];
+                var firstValue = argValue.Values[0];
                 var formattedValue = _formatter.FormatForCode(firstValue);
-                writer.AppendLine($"return {formattedValue};");
+                writer.AppendLine($"value = {formattedValue};");
             }
-            else
-            {
-                writer.AppendLine("return null;");
-            }
-        }
-        else
-        {
-            writer.AppendLine("return null;");
         }
     }
 
-    private static void GenerateMethodDataSource(CodeWriter writer, AttributeData attr, INamedTypeSymbol containingType)
+    private static void GenerateMethodDataSourceWithAssignment(CodeWriter writer, AttributeData attr, INamedTypeSymbol containingType)
     {
         if (attr.ConstructorArguments.Length < 1)
         {
-            writer.AppendLine("return null;");
             return;
         }
 
         string? methodName = null;
         ITypeSymbol? targetType = null;
-        
+
         if (attr.ConstructorArguments is
             [
                 { Value: ITypeSymbol type } _, _
@@ -314,17 +274,16 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 
         if (string.IsNullOrEmpty(methodName) || targetType == null)
         {
-            writer.AppendLine("return null;");
             return;
         }
 
         var fullyQualifiedType = targetType.GloballyQualified();
         writer.AppendLine($"var data = {fullyQualifiedType}.{methodName}();");
-        writer.AppendLine("return await global::TUnit.Core.Helpers.DataSourceHelpers.ProcessDataSourceResultGeneric(data);");
+        writer.AppendLine("value = await global::TUnit.Core.Helpers.DataSourceHelpers.ProcessDataSourceResultGeneric(data);");
     }
 
 
-    private static void GenerateAsyncDataSourceGeneratorWithProperty(CodeWriter writer, AttributeData attr, INamedTypeSymbol containingType)
+    private static void GenerateAsyncDataSourceGeneratorWithPropertyWithAssignment(CodeWriter writer, AttributeData attr, INamedTypeSymbol containingType)
     {
         var generatorCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr);
         writer.AppendLine($"var generator = {generatorCode};");
@@ -342,7 +301,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("ClassInstanceArguments = null");
         writer.Unindent();
         writer.AppendLine("};");
-        
+
         writer.AppendLine("await foreach (var dataSourceFunc in ((global::TUnit.Core.IDataSourceAttribute)generator).GetDataRowsAsync(metadata))");
         writer.AppendLine("{");
         writer.Indent();
@@ -350,12 +309,12 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.AppendLine("if (data?.Length > 0)");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine("return data[0];");
+        writer.AppendLine("value = data[0];");
+        writer.AppendLine("break;");
         writer.Unindent();
         writer.AppendLine("}");
         writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine("return null;");
     }
 
     private static ImmutableArray<PropertyWithDataSource> GetStaticPropertyDataSources(INamedTypeSymbol typeSymbol)

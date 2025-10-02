@@ -2072,14 +2072,6 @@ namespace .Hooks
         public abstract . ExecuteAsync(T context, .CancellationToken cancellationToken);
     }
 }
-namespace .Initialization
-{
-    public class TestObjectInitializationException : 
-    {
-        public TestObjectInitializationException(string message) { }
-        public TestObjectInitializationException(string message,  innerException) { }
-    }
-}
 namespace .Interfaces
 {
     public sealed class CompileTimeResolvedData
@@ -2446,13 +2438,20 @@ namespace .Services
         public object? GetService( serviceType) { }
     }
 }
-namespace .Tracking
+namespace .StaticProperties
 {
-    public static class ObjectTracker
+    public sealed class StaticPropertyMetadata
     {
-        public static void OnDisposed(object? o,  action) { }
-        public static void OnDisposedAsync(object? o, <.> asyncAction) { }
-        public static void TrackObject(.TestContextEvents events, object? obj) { }
-        public static void TrackOwnership(object owner, object owned) { }
+        public StaticPropertyMetadata() { }
+        public required  DeclaringType { get; init; }
+        public required <.<object?>> InitializerAsync { get; init; }
+        public required string PropertyName { get; init; }
+        public required  PropertyType { get; init; }
+    }
+    public static class StaticPropertyRegistry
+    {
+        public static .<.> GetRegisteredProperties() { }
+        public static void Register(. metadata) { }
+        public static bool TryGetInitializedValue( declaringType, string propertyName, out object? value) { }
     }
 }

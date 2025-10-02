@@ -123,16 +123,34 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
             var (filePath, lineNumber) = GetTestMethodSourceLocation(method, testAttribute, classInfo);
 
+            // If the method is from a generic base class, use the constructed version from the inheritance hierarchy
+            INamedTypeSymbol typeForMetadata = classInfo.TypeSymbol;
+            if (method.ContainingType.IsGenericType && method.ContainingType.IsDefinition)
+            {
+                // Find the constructed generic type in the inheritance chain
+                var baseType = classInfo.TypeSymbol.BaseType;
+                while (baseType != null)
+                {
+                    if (baseType.IsGenericType &&
+                        SymbolEqualityComparer.Default.Equals(baseType.OriginalDefinition, method.ContainingType))
+                    {
+                        typeForMetadata = baseType;
+                        break;
+                    }
+                    baseType = baseType.BaseType;
+                }
+            }
+
             var testMethodMetadata = new TestMethodMetadata
             {
                 MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
-                TypeSymbol = classInfo.TypeSymbol,
+                TypeSymbol = typeForMetadata, // Use constructed generic base if applicable
                 FilePath = filePath,
                 LineNumber = lineNumber,
                 TestAttribute = testAttribute,
                 Context = null, // No context for inherited tests
                 MethodSyntax = null, // No syntax for inherited methods
-                IsGenericType = classInfo.TypeSymbol.IsGenericType,
+                IsGenericType = typeForMetadata.IsGenericType,
                 IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
                 MethodAttributes = (concreteMethod ?? method).GetAttributes(), // Use concrete method attributes
                 InheritanceDepth = inheritanceDepth
@@ -684,12 +702,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return;
         }
 
-        // Find the data source method
-        var dataSourceMethod = targetType.GetMembers(methodName)
-            .OfType<IMethodSymbol>()
-            .FirstOrDefault();
+        // Find the data source method, property, or field
+        var dataSourceMember = targetType.GetMembers(methodName!).FirstOrDefault();
+        var dataSourceMethod = dataSourceMember as IMethodSymbol;
+        var dataSourceProperty = dataSourceMember as IPropertySymbol;
 
-        if (dataSourceMethod == null)
+        if (dataSourceMember == null || (dataSourceMethod == null && dataSourceProperty == null))
         {
             // Still generate the attribute even if method not found - it will fail at runtime with proper error
             // Use CodeGenerationHelpers to properly handle any generics on the attribute
@@ -747,7 +765,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Generate the factory implementation
-        GenerateMethodDataSourceFactory(writer, dataSourceMethod, targetType, methodSymbol, attr, hasArguments);
+        if (dataSourceMethod != null)
+        {
+            GenerateMethodDataSourceFactory(writer, dataSourceMethod, targetType, methodSymbol, attr, hasArguments);
+        }
+        else if (dataSourceProperty != null)
+        {
+            GeneratePropertyDataSourceFactory(writer, dataSourceProperty, targetType, methodSymbol, attr);
+        }
 
         writer.Unindent();
         writer.AppendLine("}");
@@ -927,6 +952,175 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.Unindent();
                 writer.AppendLine("}");
                 writer.AppendLine($"var result = (({fullyQualifiedType})instance).{methodCall};");
+            }
+            writer.AppendLine();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
+        }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+
+
+        writer.AppendLine("return Factory();");
+    }
+
+    private static void GeneratePropertyDataSourceFactory(CodeWriter writer, IPropertySymbol dataSourceProperty, ITypeSymbol targetType, IMethodSymbol testMethod, AttributeData attr)
+    {
+        var isStatic = dataSourceProperty.IsStatic;
+        var returnType = dataSourceProperty.Type;
+        var fullyQualifiedType = targetType.GloballyQualified();
+
+        // Generate async enumerable that yields Func<Task<object?[]?>>
+        writer.AppendLine("async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        // Properties don't have arguments, just access them
+        var propertyAccess = dataSourceProperty.Name;
+
+        if (IsAsyncEnumerable(returnType))
+        {
+            // IAsyncEnumerable<T> - must evaluate once to iterate
+            if (isStatic)
+            {
+                writer.AppendLine($"var result = {fullyQualifiedType}.{propertyAccess};");
+            }
+            else
+            {
+                writer.AppendLine("object? instance;");
+                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
+            }
+            writer.AppendLine();
+            writer.AppendLine("await foreach (var item in result)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else if (IsTask(returnType))
+        {
+            // Task<T> - must evaluate and await once
+            if (isStatic)
+            {
+                writer.AppendLine($"var result = {fullyQualifiedType}.{propertyAccess};");
+            }
+            else
+            {
+                writer.AppendLine("object? instance;");
+                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
+            }
+            writer.AppendLine();
+            writer.AppendLine("var taskResult = await result;");
+            writer.AppendLine("if (taskResult is global::System.Collections.IEnumerable enumerable && !(taskResult is string))");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("foreach (var item in enumerable)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(taskResult));");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else if (IsEnumerable(returnType))
+        {
+            // IEnumerable<T>
+            if (isStatic)
+            {
+                writer.AppendLine($"var result = {fullyQualifiedType}.{propertyAccess};");
+            }
+            else
+            {
+                writer.AppendLine("object? instance;");
+                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
+            }
+            writer.AppendLine();
+            writer.AppendLine("if (result is global::System.Collections.IEnumerable enumerable && !(result is string))");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("foreach (var item in enumerable)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else
+        {
+            // Single value
+            if (isStatic)
+            {
+                writer.AppendLine($"var result = {fullyQualifiedType}.{propertyAccess};");
+            }
+            else
+            {
+                writer.AppendLine("object? instance;");
+                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
             }
             writer.AppendLine();
             writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
@@ -2204,7 +2398,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         if (!string.IsNullOrEmpty(filePath))
         {
             var lineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
-            return (filePath, lineNumber);
+            return (filePath!, lineNumber);
         }
 
         var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
@@ -2212,7 +2406,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         {
             var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
                                  methodLocation.GetLineSpan().StartLinePosition.Line + 1;
-            return (attrFilePath, attrLineNumber);
+            return (attrFilePath!, attrLineNumber);
         }
 
         filePath = methodSyntax.SyntaxTree.FilePath ?? "";
@@ -2232,7 +2426,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
             if (!string.IsNullOrEmpty(filePath))
             {
                 var lineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
-                return (filePath, lineNumber);
+                return (filePath!, lineNumber);
             }
         }
 
@@ -2241,7 +2435,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         {
             var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
                                  classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-            return (attrFilePath, attrLineNumber);
+            return (attrFilePath!, attrLineNumber);
         }
 
         var classLocation = classInfo.ClassSyntax.GetLocation();

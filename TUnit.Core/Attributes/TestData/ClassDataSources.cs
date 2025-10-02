@@ -2,7 +2,6 @@
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using TUnit.Core.Data;
-using TUnit.Core.Tracking;
 
 namespace TUnit.Core;
 

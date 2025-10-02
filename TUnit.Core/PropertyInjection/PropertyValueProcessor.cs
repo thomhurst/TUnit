@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using TUnit.Core.Services;
-using TUnit.Core.Tracking;
-
 namespace TUnit.Core.PropertyInjection;
 
 /// <summary>
