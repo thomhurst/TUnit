@@ -57,7 +57,7 @@ public sealed class DiscoveryCircuitBreaker
     /// <summary>
     /// Gets the current resource usage statistics
     /// </summary>
-    public DiscoveryResourceUsage GetResourceUsage()
+    internal DiscoveryResourceUsage GetResourceUsage()
     {
         var currentMemoryUsage = GC.GetTotalMemory(false);
         var memoryGrowth = currentMemoryUsage - _initialMemoryUsage;
@@ -116,7 +116,7 @@ public sealed class DiscoveryCircuitBreaker
 /// <summary>
 /// Resource usage statistics for discovery operations
 /// </summary>
-public record DiscoveryResourceUsage
+internal record DiscoveryResourceUsage
 {
     public TimeSpan ElapsedTime { get; init; }
     public TimeSpan MaxTime { get; init; }

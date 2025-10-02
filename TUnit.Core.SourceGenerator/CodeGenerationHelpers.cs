@@ -96,16 +96,28 @@ internal static class CodeGenerationHelpers
                             var elementIndex = 0;
                             var elements = arg.Values.Select(v =>
                             {
-                                var paramType = parameterTypes != null && elementIndex < parameterTypes.Length 
-                                    ? parameterTypes[elementIndex] 
+                                var paramType = parameterTypes != null && elementIndex < parameterTypes.Length
+                                    ? parameterTypes[elementIndex]
                                     : null;
-                                
+
+                                // Check if the parameter type is decimal or nullable decimal
+                                var underlyingType = paramType?.GetNullableUnderlyingType() ?? paramType;
+                                var isDecimalType = underlyingType?.SpecialType == SpecialType.System_Decimal;
+
                                 // For decimal parameters with syntax available, use the original text
-                                if (paramType?.SpecialType == SpecialType.System_Decimal && 
+                                if (isDecimalType &&
                                     syntaxArguments != null && syntaxIndex < syntaxArguments.Count)
                                 {
                                     var originalText = syntaxArguments[syntaxIndex].Expression.ToString();
                                     syntaxIndex++;
+
+                                    // Skip special handling for null values
+                                    if (originalText == "null")
+                                    {
+                                        elementIndex++;
+                                        return "null";
+                                    }
+
                                     // Check if it's a string literal (starts and ends with quotes)
                                     if (originalText.StartsWith("\"") && originalText.EndsWith("\""))
                                     {
@@ -114,14 +126,12 @@ internal static class CodeGenerationHelpers
                                         elementIndex++;
                                         return TypedConstantParser.GetRawTypedConstantValue(v, paramType);
                                     }
-                                    else
-                                    {
-                                        // For numeric literals, remove any suffix and add 'm' for decimal
-                                        originalText = originalText.TrimEnd('d', 'D', 'f', 'F', 'l', 'L', 'u', 'U', 'm', 'M');
-                                        return $"{originalText}m";
-                                    }
+
+                                    // For numeric literals, remove any suffix and add 'm' for decimal
+                                    originalText = originalText.TrimEnd('d', 'D', 'f', 'F', 'l', 'L', 'u', 'U', 'm', 'M');
+                                    return $"{originalText}m";
                                 }
-                                
+
                                 syntaxIndex++;
                                 elementIndex++;
                                 return TypedConstantParser.GetRawTypedConstantValue(v, paramType);
@@ -132,15 +142,25 @@ internal static class CodeGenerationHelpers
                     else
                     {
                         var paramType = parameterTypes != null && i < parameterTypes.Length ? parameterTypes[i] : null;
-                        
+
+                        // Check if the parameter type is decimal or nullable decimal
+                        var underlyingType = paramType?.GetNullableUnderlyingType() ?? paramType;
+                        var isDecimalType = underlyingType?.SpecialType == SpecialType.System_Decimal;
+
                         // For decimal parameters with syntax available, use the original text
-                        if (paramType?.SpecialType == SpecialType.System_Decimal && 
+                        if (isDecimalType &&
                             syntaxArguments != null && syntaxIndex < syntaxArguments.Count)
                         {
                             var originalText = syntaxArguments[syntaxIndex].Expression.ToString();
                             syntaxIndex++;
+
+                            // Skip special handling for null values
+                            if (originalText == "null")
+                            {
+                                argStrings.Add("null");
+                            }
                             // Check if it's a string literal (starts and ends with quotes)
-                            if (originalText.StartsWith("\"") && originalText.EndsWith("\""))
+                            else if (originalText.StartsWith("\"") && originalText.EndsWith("\""))
                             {
                                 // For string literals, let the normal processing handle it (will use decimal.Parse)
                                 syntaxIndex--; // Back up so normal processing can handle it
@@ -163,9 +183,9 @@ internal static class CodeGenerationHelpers
                 else
                 {
                     var paramType = parameterTypes != null && i < parameterTypes.Length ? parameterTypes[i] : null;
-                    
+
                     // For decimal parameters with syntax available, use the original text
-                    if (paramType?.SpecialType == SpecialType.System_Decimal && 
+                    if (paramType?.SpecialType == SpecialType.System_Decimal &&
                         syntaxArguments != null && syntaxIndex < syntaxArguments.Count)
                     {
                         var originalText = syntaxArguments[syntaxIndex].Expression.ToString();

@@ -829,7 +829,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
     private static string GetHookIndexMethodName(HookMethodMetadata hook)
     {
-        var prefix = hook.HookKind == "Before" || hook.HookKind == "BeforeEvery" ? "Before" : "After";
+        var prefix = hook.HookKind is "Before" or "BeforeEvery" ? "Before" : "After";
         var suffix = hook.HookKind.Contains("Every") && hook.HookType != "TestSession" && hook.HookType != "TestDiscovery" ? "Every" : "";
         var hookType = hook.HookType;
 

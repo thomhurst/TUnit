@@ -110,7 +110,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 var createAssertionAttributeData = new CreateAssertionAttributeData(
                     targetType,
                     containingType,
-                    methodName,
+                    methodName!,
                     customName,
                     negateLogic,
                     requiresGenericTypeParameter,
@@ -217,7 +217,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 var createAssertionAttributeData = new CreateAssertionAttributeData(
                     targetType,
                     containingType,
-                    methodName,
+                    methodName!,
                     customName,
                     negateLogic,
                     requiresGenericTypeParameter,

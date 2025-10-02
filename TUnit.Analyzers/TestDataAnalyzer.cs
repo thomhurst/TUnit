@@ -429,6 +429,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                         .ToArray()
                     : Array.Empty<ITypeSymbol>();
 
+            // Look for methods first
             var methodSymbols = (type as INamedTypeSymbol)?.GetSelfAndBaseTypes()
                 .SelectMany(x => x.GetMembers())
                 .OfType<IMethodSymbol>()
@@ -440,13 +441,27 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                                                    MatchesParameters(context, argumentForMethodCallTypes, methodSymbol))
                                            ?? methodSymbols.FirstOrDefault(x => x.Name == methodName);
 
+            // If no method found, check for properties
             if (dataSourceMethod is null)
             {
-                context.ReportDiagnostic(
-                    Diagnostic.Create(
-                        Rules.NoMethodFound,
-                        attribute.GetLocation())
-                );
+                var propertySymbols = (type as INamedTypeSymbol)?.GetSelfAndBaseTypes()
+                    .SelectMany(x => x.GetMembers())
+                    .OfType<IPropertySymbol>()
+                    .ToArray() ?? Array.Empty<IPropertySymbol>();
+
+                var dataSourceProperty = propertySymbols.FirstOrDefault(x => x.Name == methodName);
+
+                if (dataSourceProperty is null)
+                {
+                    context.ReportDiagnostic(
+                        Diagnostic.Create(
+                            Rules.NoMethodFound,
+                            attribute.GetLocation())
+                    );
+                    return;
+                }
+
+                // Properties are valid data sources, no need to check return type for void
                 return;
             }
 
@@ -952,12 +967,19 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (methodParameterType?.SpecialType == SpecialType.System_Decimal &&
             argument.Type?.SpecialType == SpecialType.System_String &&
-            argument.Value is string strValue &&
-            decimal.TryParse(strValue, out _))
+            argument.Value is string strValue)
         {
-            // Allow string literals for decimal parameters for values that can't be expressed as C# numeric literals
-            // e.g. [Arguments("79228162514264337593543950335")] for decimal.MaxValue
-            return true;
+            // For string-to-decimal conversions in attributes, be permissive at compile time
+            // The runtime will handle culture-specific parsing with proper fallback
+            // Try both dot and comma as decimal separators since these are the most common
+            var normalizedValue = strValue.Replace(',', '.');
+            if (decimal.TryParse(normalizedValue, System.Globalization.NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out _))
+            {
+                // Allow string literals for decimal parameters
+                // e.g. [Arguments("123.456")] or [Arguments("123,456")]
+                return true;
+            }
         }
 
         return CanConvert(context, argument.Type, methodParameterType);

@@ -7,7 +7,7 @@ namespace TUnit.Engine.Interfaces;
 /// <summary>
 /// Interface for test execution
 /// </summary>
-public interface ITestExecutor
+internal interface ITestExecutor
 {
     Task ExecuteTests(
         IEnumerable<AbstractExecutableTest> tests,

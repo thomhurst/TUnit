@@ -10,37 +10,24 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 internal static class SpecialFloatingPointValuesHelper
 {
     /// <summary>
-    /// Formats a floating-point value as a string for code generation, 
+    /// Formats a floating-point value as a string for code generation,
     /// handling special values like NaN and Infinity.
     /// </summary>
     public static string? TryFormatSpecialFloatingPointValue(object? value)
     {
-        if (value == null)
-            return null;
-
-        // Handle float values
-        if (value is float floatValue)
+        return value switch
         {
-            if (float.IsNaN(floatValue))
-                return "float.NaN";
-            if (float.IsPositiveInfinity(floatValue))
-                return "float.PositiveInfinity";
-            if (float.IsNegativeInfinity(floatValue))
-                return "float.NegativeInfinity";
-        }
-        
-        // Handle double values
-        if (value is double doubleValue)
-        {
-            if (double.IsNaN(doubleValue))
-                return "double.NaN";
-            if (double.IsPositiveInfinity(doubleValue))
-                return "double.PositiveInfinity";
-            if (double.IsNegativeInfinity(doubleValue))
-                return "double.NegativeInfinity";
-        }
-
-        return null;
+            null => null,
+            // Handle float values
+            float.NaN => "float.NaN",
+            float floatValue when float.IsPositiveInfinity(floatValue) => "float.PositiveInfinity",
+            float floatValue when float.IsNegativeInfinity(floatValue) => "float.NegativeInfinity",
+            // Handle double values
+            double.NaN => "double.NaN",
+            double doubleValue when double.IsPositiveInfinity(doubleValue) => "double.PositiveInfinity",
+            double doubleValue when double.IsNegativeInfinity(doubleValue) => "double.NegativeInfinity",
+            _ => null
+        };
     }
 
     /// <summary>
@@ -51,10 +38,10 @@ internal static class SpecialFloatingPointValuesHelper
     {
         return value switch
         {
-            float f when float.IsNaN(f) => CreateFloatMemberAccess("NaN"),
+            float.NaN => CreateFloatMemberAccess("NaN"),
             float f when float.IsPositiveInfinity(f) => CreateFloatMemberAccess("PositiveInfinity"),
             float f when float.IsNegativeInfinity(f) => CreateFloatMemberAccess("NegativeInfinity"),
-            double d when double.IsNaN(d) => CreateDoubleMemberAccess("NaN"),
+            double.NaN => CreateDoubleMemberAccess("NaN"),
             double d when double.IsPositiveInfinity(d) => CreateDoubleMemberAccess("PositiveInfinity"),
             double d when double.IsNegativeInfinity(d) => CreateDoubleMemberAccess("NegativeInfinity"),
             _ => null

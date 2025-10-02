@@ -50,7 +50,7 @@ public static class AotConversionHelper
     {
         var members = type.GetMembers();
         return members.Any(m => m is IMethodSymbol method && 
-            (method.Name == "op_Implicit" || method.Name == "op_Explicit") &&
+            method.Name is "op_Implicit" or "op_Explicit" &&
             method.IsStatic);
     }
 
@@ -63,7 +63,7 @@ public static class AotConversionHelper
         foreach (var member in members)
         {
             if (member is IMethodSymbol method && 
-                (method.Name == "op_Implicit" || method.Name == "op_Explicit") &&
+                method.Name is "op_Implicit" or "op_Explicit" &&
                 method is { IsStatic: true, Parameters.Length: 1 })
             {
                 yield return (method, method.ReturnType);

@@ -1,14 +1,13 @@
 using System.Collections.Immutable;
-using System.Linq;
+using System.Globalization;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using TUnit.Core.SourceGenerator.CodeGenerators;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
-using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Generators;
@@ -20,7 +19,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // Find all test methods using the more performant ForAttributeWithMetadataName
         var testMethodsProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.TestAttribute",
@@ -28,7 +26,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetTestMethodMetadata(ctx))
             .Where(static m => m is not null);
 
-        // Find classes with [InheritsTests] attribute
         var inheritsTestsClassesProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.InheritsTestsAttribute",
@@ -36,11 +33,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetInheritsTestsClassMetadata(ctx))
             .Where(static m => m is not null);
 
-        // Generate one source file per test method
         context.RegisterSourceOutput(testMethodsProvider.Combine(context.CompilationProvider),
             static (context, tuple) => GenerateTestMethodSource(context, tuple.Right, tuple.Left));
 
-        // Generate test methods for inherited tests
         context.RegisterSourceOutput(inheritsTestsClassesProvider.Combine(context.CompilationProvider),
             static (context, tuple) => GenerateInheritedTestSources(context, tuple.Right, tuple.Left));
     }
@@ -54,7 +49,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        // Skip abstract classes
         if (classSymbol.IsAbstract)
         {
             return null;
@@ -81,22 +75,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var testAttribute = methodSymbol!.GetRequiredTestAttribute();
 
-        // Skip abstract classes (cannot be instantiated)
         if (containingType.IsAbstract)
         {
             return null;
         }
 
-        // For generic types and methods, we now emit metadata that will be resolved at runtime
         var isGenericType = containingType is { IsGenericType: true, TypeParameters.Length: > 0 };
         var isGenericMethod = methodSymbol is { IsGenericMethod: true };
+
+        var (filePath, lineNumber) = GetTestMethodSourceLocation(methodSyntax, testAttribute);
 
         return new TestMethodMetadata
         {
             MethodSymbol = methodSymbol ?? throw new InvalidOperationException("Symbol is not a method"),
             TypeSymbol = containingType,
-            FilePath = methodSyntax.GetLocation().SourceTree?.FilePath ?? testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? methodSyntax.SyntaxTree.FilePath,
-            LineNumber = methodSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1,
+            FilePath = filePath,
+            LineNumber = lineNumber,
             TestAttribute = context.Attributes.First(),
             Context = context,
             MethodSyntax = methodSyntax,
@@ -113,43 +107,50 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return;
         }
 
-        // Find all test methods in base classes
         var inheritedTestMethods = CollectInheritedTestMethods(classInfo.TypeSymbol);
 
-        // Generate test metadata for each inherited test method
         foreach (var method in inheritedTestMethods)
         {
             var testAttribute = method.GetAttributes().FirstOrDefault(a => a.IsTestAttribute());
 
-            // Skip if no test attribute found
             if (testAttribute == null)
             {
                 continue;
             }
 
-            // Find the concrete implementation of this method in the derived class
             var concreteMethod = FindConcreteMethodImplementation(classInfo.TypeSymbol, method);
 
-            // Calculate inheritance depth for this test
             var inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
+            var (filePath, lineNumber) = GetTestMethodSourceLocation(method, testAttribute, classInfo);
 
-            var filePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString() ?? 
-                          classInfo.ClassSyntax.GetLocation().SourceTree?.FilePath ?? 
-                          classInfo.ClassSyntax.SyntaxTree.FilePath;
-            
-            var lineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 
-                            classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+            // If the method is from a generic base class, use the constructed version from the inheritance hierarchy
+            INamedTypeSymbol typeForMetadata = classInfo.TypeSymbol;
+            if (method.ContainingType.IsGenericType && method.ContainingType.IsDefinition)
+            {
+                // Find the constructed generic type in the inheritance chain
+                var baseType = classInfo.TypeSymbol.BaseType;
+                while (baseType != null)
+                {
+                    if (baseType.IsGenericType &&
+                        SymbolEqualityComparer.Default.Equals(baseType.OriginalDefinition, method.ContainingType))
+                    {
+                        typeForMetadata = baseType;
+                        break;
+                    }
+                    baseType = baseType.BaseType;
+                }
+            }
 
             var testMethodMetadata = new TestMethodMetadata
             {
                 MethodSymbol = concreteMethod ?? method, // Use concrete method if found, otherwise base method
-                TypeSymbol = classInfo.TypeSymbol,
+                TypeSymbol = typeForMetadata, // Use constructed generic base if applicable
                 FilePath = filePath,
                 LineNumber = lineNumber,
                 TestAttribute = testAttribute,
                 Context = null, // No context for inherited tests
                 MethodSyntax = null, // No syntax for inherited methods
-                IsGenericType = classInfo.TypeSymbol.IsGenericType,
+                IsGenericType = typeForMetadata.IsGenericType,
                 IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
                 MethodAttributes = (concreteMethod ?? method).GetAttributes(), // Use concrete method attributes
                 InheritanceDepth = inheritanceDepth
@@ -161,13 +162,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static int CalculateInheritanceDepth(INamedTypeSymbol testClass, IMethodSymbol testMethod)
     {
-        // If the method is declared directly in the test class, depth is 0
         if (testMethod.ContainingType.Equals(testClass, SymbolEqualityComparer.Default))
         {
             return 0;
         }
 
-        // Count how many levels up the inheritance chain the method is declared
         var depth = 0;
         var currentType = testClass.BaseType;
 
@@ -181,7 +180,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             currentType = currentType.BaseType;
         }
 
-        // This shouldn't happen in normal cases, but return the depth anyway
         return depth;
     }
 
@@ -223,11 +221,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateFileHeader(CodeWriter writer)
     {
-        writer.AppendLine("// <auto-generated/>");
-        writer.AppendLine("#pragma warning disable");
         writer.AppendLine("#nullable enable");
         writer.AppendLine();
-        // No using statements - use globally qualified types
         writer.AppendLine();
         writer.AppendLine($"namespace {GeneratedNamespace};");
         writer.AppendLine();
@@ -244,7 +239,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        // Generate reflection-based field accessors for init-only properties with data source attributes
         GenerateReflectionFieldAccessors(writer, testMethod.TypeSymbol, className);
 
         writer.AppendLine("public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)");
@@ -253,55 +247,43 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.AppendLine();
 
-        // Check if we have generic types or methods
         if (testMethod.IsGenericType || testMethod is { IsGenericMethod: true, MethodSymbol.TypeParameters.Length: > 0 })
         {
-            // Check if we can use the concrete types approach (AOT-compatible)
-            // This is possible when we have typed data sources that can inform the generic type arguments
             var hasTypedDataSource = testMethod.MethodAttributes
                 .Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass) &&
                          InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, a) != null);
 
-            // Check if we have GenerateGenericTest attributes on methods or classes
             var hasGenerateGenericTest = (testMethod.IsGenericMethod && testMethod.MethodAttributes
                 .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)) ||
                 (testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributes()
                 .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true));
 
-            // Check if class has class-level Arguments attributes (for both generic and non-generic classes)
             var hasClassArguments = testMethod.TypeSymbol.GetAttributes()
                 .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") is true);
 
-            // Check if generic class has method-level typed data source attributes that can provide type information
             var hasTypedDataSourceForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
                 .Any(a => a.AttributeClass != null &&
                     a.AttributeClass.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") &&
                     InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol) != null);
 
-            // Check if generic class has method-level Arguments attributes that can provide type information
             var hasMethodArgumentsForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
                 .Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") is true);
 
-            // Check if generic class has MethodDataSource that can provide type information
             var hasMethodDataSourceForGenericType = testMethod is { IsGenericType: true, IsGenericMethod: false } && testMethod.MethodAttributes
                 .Any(a => a.AttributeClass?.Name == "MethodDataSourceAttribute" &&
                           InferClassTypesFromMethodDataSource(compilation, testMethod, a) != null);
 
             if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArguments || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType || hasMethodDataSourceForGenericType)
             {
-                // Use concrete types approach for AOT compatibility
-                // For generic methods and classes with Arguments attributes, we always use this approach
                 GenerateGenericTestWithConcreteTypes(writer, compilation, testMethod, className, combinationGuid);
             }
             else
             {
-                // Fall back to runtime resolution for other cases
                 GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
             }
         }
         else
         {
-            // Non-generic method in non-generic class
             GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
         }
 
@@ -312,7 +294,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
 
-        // Generate module initializer
         GenerateModuleInitializer(writer, testMethod, guid);
     }
 
@@ -328,7 +309,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var typeArgsString = string.Join(", ", typeArguments.Select(t => t.GloballyQualified()));
         var instantiatedMethodName = $"{methodName}<{typeArgsString}>";
 
-        // Create a modified test method metadata with concrete types
         var concreteTestMethod = new TestMethodMetadata
         {
             MethodSymbol = testMethod.MethodSymbol,
@@ -347,7 +327,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        // Generate metadata for this specific instantiation
         writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{className}>");
         writer.AppendLine("{");
         writer.Indent();
@@ -357,20 +336,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
         writer.AppendLine($"GenericMethodTypeArguments = new global::System.Type[] {{ {string.Join(", ", typeArguments.Select(t => $"typeof({t.GloballyQualified()})"))}}},");
 
-        // Add basic metadata
         GenerateMetadata(writer, compilation, concreteTestMethod);
 
-        // Generate generic type info if needed
         if (testMethod.IsGenericType)
         {
             GenerateGenericTypeInfo(writer, testMethod.TypeSymbol);
         }
 
-        // Generate AOT-friendly invokers that use the specific types
         GenerateAotFriendlyInvokers(writer, testMethod, className, typeArguments);
 
-        // Add file location metadata
-        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         writer.Unindent();
@@ -396,7 +371,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             p.Type.Name == "CancellationToken" &&
             p.Type.ContainingNamespace?.ToString() == "System.Threading");
 
-        // Generate the instance factory
         writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
@@ -406,7 +380,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("},");
 
-        // Generate InvokeTypedTest for the specific generic instantiation
         writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
@@ -414,7 +387,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate direct method call with specific types (no MakeGenericMethod)
         writer.AppendLine($"var typedInstance = ({className})instance;");
 
-        // Prepare method arguments
         writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationToken ? " + 1" : "") + "];");
         writer.AppendLine("global::System.Array.Copy(args, methodArgs, args.Length);");
 
@@ -423,7 +395,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("methodArgs[args.Length] = cancellationToken;");
         }
 
-        // Direct method invocation with known types
         var parameterCasts = new List<string>();
         for (var i = 0; i < testMethod.MethodSymbol.Parameters.Length; i++)
         {
@@ -504,10 +475,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestClassType = {GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)},");
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
 
-        // Add basic metadata
         GenerateMetadata(writer, compilation, testMethod);
 
-        // Generate generic type info if needed
         if (testMethod.IsGenericType)
         {
             GenerateGenericTypeInfo(writer, testMethod.TypeSymbol);
@@ -525,7 +494,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("};");
 
-        // Set the test to use runtime data generation
         if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
             writer.AppendLine("metadata.UseRuntimeDataGeneration(testSessionId);");
@@ -544,7 +512,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodSymbol = testMethod.MethodSymbol;
 
 
-        // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
 
         writer.AppendLine("AttributeFactory = () =>");
@@ -561,17 +528,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("],");
 
-        // Generate data sources with factory methods
         GenerateDataSources(writer, compilation, testMethod);
 
-        // Generate property injections
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
         // Inheritance depth
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
 
         // File location metadata
-        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         // Method metadata
@@ -584,7 +549,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodSymbol = testMethod.MethodSymbol;
 
 
-        // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
 
         writer.AppendLine("AttributeFactory = () =>");
@@ -608,14 +572,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
         writer.AppendLine("PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),");
 
-        // Generate property injections
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
         // Inheritance depth
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
 
         // File location metadata
-        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         // Method metadata
@@ -653,7 +616,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var attr in methodDataSources)
             {
-                GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol, isClassDataSource: false);
+                GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, typeSymbol);
             }
 
             writer.Unindent();
@@ -673,7 +636,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var attr in classDataSources)
             {
-                GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol, isClassDataSource: true);
+                GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, typeSymbol);
             }
 
             writer.Unindent();
@@ -684,7 +647,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GeneratePropertyDataSources(writer, compilation, testMethod);
     }
 
-    private static void GenerateDataSourceAttribute(CodeWriter writer, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol, bool isClassDataSource = false)
+    private static void GenerateDataSourceAttribute(CodeWriter writer, Compilation compilation, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
     {
         var attrClass = attr.AttributeClass;
         if (attrClass == null)
@@ -700,34 +663,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // Use the generic attribute instantiation method for all other attributes
-            // This properly handles generics on the attribute type
-            // For class-level ArgumentsAttribute, pass constructor parameters
-            // For method-level ArgumentsAttribute, pass method parameters
-            ImmutableArray<IParameterSymbol> parameters = default;
-            if (attr.AttributeClass?.Name == "ArgumentsAttribute")
-            {
-                if (isClassDataSource)
-                {
-                    // Get the constructor parameters for class-level Arguments
-                    var constructor = typeSymbol.Constructors
-                        .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
-                        .OrderByDescending(c => c.Parameters.Length)
-                        .FirstOrDefault();
-                    if (constructor != null)
-                    {
-                        parameters = constructor.Parameters;
-                    }
-                }
-                else
-                {
-                    // Use method parameters for method-level Arguments
-                    parameters = methodSymbol.Parameters;
-                }
-            }
-            
-            var generatedCode = CodeGenerationHelpers.GenerateAttributeInstantiation(attr, parameters);
-            writer.AppendLine($"{generatedCode},");
+            AttributeWriter.WriteAttribute(writer, compilation, attr);
+            writer.AppendLine(",");
         }
     }
 
@@ -765,12 +702,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return;
         }
 
-        // Find the data source method
-        var dataSourceMethod = targetType.GetMembers(methodName)
-            .OfType<IMethodSymbol>()
-            .FirstOrDefault();
+        // Find the data source method, property, or field
+        var dataSourceMember = targetType.GetMembers(methodName!).FirstOrDefault();
+        var dataSourceMethod = dataSourceMember as IMethodSymbol;
+        var dataSourceProperty = dataSourceMember as IPropertySymbol;
 
-        if (dataSourceMethod == null)
+        if (dataSourceMember == null || (dataSourceMethod == null && dataSourceProperty == null))
         {
             // Still generate the attribute even if method not found - it will fail at runtime with proper error
             // Use CodeGenerationHelpers to properly handle any generics on the attribute
@@ -828,7 +765,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Generate the factory implementation
-        GenerateMethodDataSourceFactory(writer, dataSourceMethod, targetType, methodSymbol, attr, hasArguments);
+        if (dataSourceMethod != null)
+        {
+            GenerateMethodDataSourceFactory(writer, dataSourceMethod, targetType, methodSymbol, attr, hasArguments);
+        }
+        else if (dataSourceProperty != null)
+        {
+            GeneratePropertyDataSourceFactory(writer, dataSourceProperty, targetType, methodSymbol, attr);
+        }
 
         writer.Unindent();
         writer.AppendLine("}");
@@ -864,7 +808,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // For collections (IEnumerable, IAsyncEnumerable), we need to evaluate once to iterate
         // For single values, we'll generate a lambda that invokes the method each time
-        var returnTypeName = returnType.ToDisplayString();
+        returnType.ToDisplayString();
 
         if (IsAsyncEnumerable(returnType))
         {
@@ -1021,10 +965,179 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("return Factory();");
     }
 
+    private static void GeneratePropertyDataSourceFactory(CodeWriter writer, IPropertySymbol dataSourceProperty, ITypeSymbol targetType, IMethodSymbol testMethod, AttributeData attr)
+    {
+        var isStatic = dataSourceProperty.IsStatic;
+        var returnType = dataSourceProperty.Type;
+        var fullyQualifiedType = targetType.GloballyQualified();
+
+        // Generate async enumerable that yields Func<Task<object?[]?>>
+        writer.AppendLine("async global::System.Collections.Generic.IAsyncEnumerable<global::System.Func<global::System.Threading.Tasks.Task<object?[]?>>> Factory()");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        // Properties don't have arguments, just access them
+        var propertyAccess = dataSourceProperty.Name;
+
+        if (IsAsyncEnumerable(returnType))
+        {
+            // IAsyncEnumerable<T> - must evaluate once to iterate
+            if (isStatic)
+            {
+                writer.AppendLine($"var result = {fullyQualifiedType}.{propertyAccess};");
+            }
+            else
+            {
+                writer.AppendLine("object? instance;");
+                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
+            }
+            writer.AppendLine();
+            writer.AppendLine("await foreach (var item in result)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else if (IsTask(returnType))
+        {
+            // Task<T> - must evaluate and await once
+            if (isStatic)
+            {
+                writer.AppendLine($"var result = {fullyQualifiedType}.{propertyAccess};");
+            }
+            else
+            {
+                writer.AppendLine("object? instance;");
+                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
+            }
+            writer.AppendLine();
+            writer.AppendLine("var taskResult = await result;");
+            writer.AppendLine("if (taskResult is global::System.Collections.IEnumerable enumerable && !(taskResult is string))");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("foreach (var item in enumerable)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(taskResult));");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else if (IsEnumerable(returnType))
+        {
+            // IEnumerable<T>
+            if (isStatic)
+            {
+                writer.AppendLine($"var result = {fullyQualifiedType}.{propertyAccess};");
+            }
+            else
+            {
+                writer.AppendLine("object? instance;");
+                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
+            }
+            writer.AppendLine();
+            writer.AppendLine("if (result is global::System.Collections.IEnumerable enumerable && !(result is string))");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("foreach (var item in enumerable)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(item));");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.Unindent();
+            writer.AppendLine("}");
+            writer.AppendLine("else");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else
+        {
+            // Single value
+            if (isStatic)
+            {
+                writer.AppendLine($"var result = {fullyQualifiedType}.{propertyAccess};");
+            }
+            else
+            {
+                writer.AppendLine("object? instance;");
+                writer.AppendLine("if (dataGeneratorMetadata.TestClassInstance != null)");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine("instance = dataGeneratorMetadata.TestClassInstance;");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine("else");
+                writer.AppendLine("{");
+                writer.Indent();
+                writer.AppendLine($"instance = new {fullyQualifiedType}();");
+                writer.Unindent();
+                writer.AppendLine("}");
+                writer.AppendLine($"var result = (({fullyQualifiedType})instance).{propertyAccess};");
+            }
+            writer.AppendLine();
+            writer.AppendLine("yield return () => global::System.Threading.Tasks.Task.FromResult(global::TUnit.Core.Helpers.DataSourceHelpers.ToObjectArray(result));");
+        }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+
+
+        writer.AppendLine("return Factory();");
+    }
+
     private static bool IsAsyncEnumerable(ITypeSymbol type)
     {
         // Check if the type itself is an IAsyncEnumerable<T>
-        if (type is INamedTypeSymbol { IsGenericType: true } namedType && 
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType &&
             namedType.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>")
         {
             return true;
@@ -1094,7 +1207,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
                 else
                 {
-                    writer.Append(constant.Value?.ToString() ?? "null");
+                    // Handle numeric types with InvariantCulture to ensure consistent formatting
+                    if (constant.Value is IFormattable formattable)
+                    {
+                        writer.Append(formattable.ToString(null, CultureInfo.InvariantCulture));
+                    }
+                    else
+                    {
+                        writer.Append(constant.Value?.ToString() ?? "null");
+                    }
                 }
                 break;
 
@@ -1301,7 +1422,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             writer.AppendLine($"PropertyName = \"{property.Name}\",");
                             writer.AppendLine($"PropertyType = typeof({property.Type.GloballyQualified()}),");
                             writer.Append("DataSource = ");
-                            GenerateDataSourceAttribute(writer, dataSourceAttr, testMethod.MethodSymbol, typeSymbol, isClassDataSource: false);
+                            GenerateDataSourceAttribute(writer, compilation, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
                             writer.Unindent();
                             writer.AppendLine("},");
                         }
@@ -1617,8 +1738,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine();
         }
 
-        writer.AppendLine("// Prepare method arguments");
-        writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationToken ? " + 1" : "") + "];");
+writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationToken ? " + 1" : "") + "];");
         writer.AppendLine("args.CopyTo(methodArgs, 0);");
 
         if (hasCancellationToken)
@@ -1650,13 +1770,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine($"var typedInstance = ({className})instance;");
-        
+
         // Only declare context if it's needed (when hasCancellationToken is true)
         if (hasCancellationToken)
         {
             writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
         }
-        
+
         // Special case: Single tuple parameter
         // If we have exactly one parameter that's a tuple type, we need to handle it specially
         // In source-generated mode, tuples are always unwrapped into their elements
@@ -1667,10 +1787,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("// Arguments are unwrapped tuple elements, reconstruct the tuple");
-            
+
             // Build tuple reconstruction
             var tupleConstruction = $"({string.Join(", ", tupleType.TupleElements.Select((_, i) => $"({tupleType.TupleElements[i].Type.GloballyQualified()})args[{i}]"))})";
-            
+
             var methodCallReconstructed = hasCancellationToken
                 ? $"typedInstance.{methodName}({tupleConstruction}, context?.CancellationToken ?? System.Threading.CancellationToken.None)"
                 : $"typedInstance.{methodName}({tupleConstruction})";
@@ -1798,13 +1918,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
-        
+
         // Only declare context if it's needed (when hasCancellationToken is true and there are parameters)
         if (hasCancellationToken && parametersFromArgs.Length > 0)
         {
             writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
         }
-        
+
         // Special case: Single tuple parameter (same as in TestInvoker)
         // If we have exactly one parameter that's a tuple type, we need to handle it specially
         // In source-generated mode, tuples are always unwrapped into their elements
@@ -1815,12 +1935,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
             writer.AppendLine("// Arguments are unwrapped tuple elements, reconstruct the tuple");
-            
+
             // Build tuple reconstruction with proper casting
-            var tupleElements = singleTupleParam.TupleElements.Select((elem, i) => 
+            var tupleElements = singleTupleParam.TupleElements.Select((elem, i) =>
                 $"TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i}])").ToList();
             var tupleConstruction = $"({string.Join(", ", tupleElements)})";
-            
+
             var methodCallReconstructed = hasCancellationToken
                 ? $"instance.{methodName}({tupleConstruction}, cancellationToken)"
                 : $"instance.{methodName}({tupleConstruction})";
@@ -2267,6 +2387,61 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return false;
+    }
+
+    private static (string filePath, int lineNumber) GetTestMethodSourceLocation(
+        MethodDeclarationSyntax methodSyntax,
+        AttributeData testAttribute)
+    {
+        var methodLocation = methodSyntax.GetLocation();
+        var filePath = methodLocation.SourceTree?.FilePath;
+        if (!string.IsNullOrEmpty(filePath))
+        {
+            var lineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
+            return (filePath!, lineNumber);
+        }
+
+        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+        if (!string.IsNullOrEmpty(attrFilePath))
+        {
+            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
+                                 methodLocation.GetLineSpan().StartLinePosition.Line + 1;
+            return (attrFilePath!, attrLineNumber);
+        }
+
+        filePath = methodSyntax.SyntaxTree.FilePath ?? "";
+        var fallbackLineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
+        return (filePath, fallbackLineNumber);
+    }
+
+    private static (string filePath, int lineNumber) GetTestMethodSourceLocation(
+        IMethodSymbol method,
+        AttributeData testAttribute,
+        InheritsTestsClassMetadata classInfo)
+    {
+        var methodLocation = method.Locations.FirstOrDefault();
+        if (methodLocation != null && methodLocation.IsInSource)
+        {
+            var filePath = methodLocation.SourceTree?.FilePath;
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                var lineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
+                return (filePath!, lineNumber);
+            }
+        }
+
+        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+        if (!string.IsNullOrEmpty(attrFilePath))
+        {
+            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
+                                 classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+            return (attrFilePath!, attrLineNumber);
+        }
+
+        var classLocation = classInfo.ClassSyntax.GetLocation();
+        var derivedFilePath = classLocation.SourceTree?.FilePath ?? classInfo.ClassSyntax.SyntaxTree.FilePath ?? "";
+        var derivedLineNumber = classLocation.GetLineSpan().StartLinePosition.Line + 1;
+        return (derivedFilePath, derivedLineNumber);
     }
 
     private static void GenerateReflectionFieldAccessors(CodeWriter writer, INamedTypeSymbol typeSymbol, string className)
@@ -3274,46 +3449,53 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             return compilation?.GetSpecialType(SpecialType.System_Int32);
         }
-        else if (value is string)
+
+        if (value is string)
         {
             return compilation?.GetSpecialType(SpecialType.System_String);
         }
-        else if (value is bool)
+
+        if (value is bool)
         {
             return compilation?.GetSpecialType(SpecialType.System_Boolean);
         }
-        else if (value is double)
+
+        if (value is double)
         {
             return compilation?.GetSpecialType(SpecialType.System_Double);
         }
-        else if (value is float)
+
+        if (value is float)
         {
             return compilation?.GetSpecialType(SpecialType.System_Single);
         }
-        else if (value is long)
+
+        if (value is long)
         {
             return compilation?.GetSpecialType(SpecialType.System_Int64);
         }
-        else if (value is byte)
+
+        if (value is byte)
         {
             return compilation?.GetSpecialType(SpecialType.System_Byte);
         }
-        else if (value is char)
+
+        if (value is char)
         {
             return compilation?.GetSpecialType(SpecialType.System_Char);
         }
-        else if (value is decimal)
+
+        if (value is decimal)
         {
             return compilation?.GetSpecialType(SpecialType.System_Decimal);
         }
-        else if (value is ITypeSymbol typeSymbol)
+
+        if (value is ITypeSymbol)
         {
             return compilation?.GetTypeByMetadataName("System.Type");
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
     private static ITypeSymbol[]? InferTypesFromClassArgumentsAttribute(INamedTypeSymbol classSymbol, AttributeData argAttr, Compilation compilation)
@@ -3337,8 +3519,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Find the primary constructor
         var primaryConstructor = classSymbol.Constructors
             .FirstOrDefault(c => c.DeclaringSyntaxReferences.Any(sr =>
-                sr.GetSyntax() is Microsoft.CodeAnalysis.CSharp.Syntax.ConstructorDeclarationSyntax cds &&
-                cds.Modifiers.Any(m => m.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.PublicKeyword))))
+                sr.GetSyntax() is ConstructorDeclarationSyntax cds &&
+                cds.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword))))
             ?? classSymbol.Constructors.FirstOrDefault();
 
         if (primaryConstructor == null)
@@ -4051,29 +4233,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 specificArgumentsAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
             {
                 var argumentValues = specificArgumentsAttribute.ConstructorArguments[0].Values;
-                var constructorArgs = string.Join(", ", argumentValues.Select(arg =>
-                {
-                    if (arg.Value is string str)
-                    {
-                        return $"\"{str}\"";
-                    }
-                    else if (arg.Value is char chr)
-                    {
-                        return $"'{chr}'";
-                    }
-                    else if (arg.Value is bool b)
-                    {
-                        return b.ToString().ToLower();
-                    }
-                    else if (arg.Value is null)
-                    {
-                        return "null";
-                    }
-                    else
-                    {
-                        return arg.Value.ToString();
-                    }
-                }));
+                var constructorArgs = string.Join(", ", argumentValues.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg)));
 
                 writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), new object[] {{ {constructorArgs} }})!;");
             }
@@ -4096,7 +4256,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        var hasCancellationToken = testMethod.MethodSymbol.Parameters.Any(p =>
+        testMethod.MethodSymbol.Parameters.Any(p =>
             p.Type.Name == "CancellationToken" &&
             p.Type.ContainingNamespace?.ToString() == "System.Threading");
 
@@ -4199,7 +4359,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var typeSymbol = testMethod.TypeSymbol;
 
 
-        // Generate dependencies
         GenerateDependencies(writer, compilation, methodSymbol);
 
         // Generate attribute factory with filtered attributes
@@ -4285,7 +4444,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var attr in methodDataSources)
             {
-                GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol, isClassDataSource: false);
+                GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, typeSymbol);
             }
 
             writer.Unindent();
@@ -4305,7 +4464,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var attr in classDataSources)
             {
-                GenerateDataSourceAttribute(writer, attr, methodSymbol, typeSymbol, isClassDataSource: true);
+                GenerateDataSourceAttribute(writer, compilation, attr, methodSymbol, typeSymbol);
             }
 
             writer.Unindent();
@@ -4315,14 +4474,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Empty property data sources for concrete instantiations
         writer.AppendLine("PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),");
 
-        // Generate property injections
         GeneratePropertyInjections(writer, typeSymbol, typeSymbol.GloballyQualified());
 
         // Other metadata
-        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
         writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth},");
-        writer.AppendLine($"TestSessionId = testSessionId,");
+        writer.AppendLine("TestSessionId = testSessionId,");
 
         // Method metadata
         writer.Append("MethodMetadata = ");
@@ -4370,7 +4528,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     {
                         // Look for IInfersType<T> in the attribute's interfaces
                         var infersTypeInterface = attr.AttributeClass.AllInterfaces
-                            .FirstOrDefault(i => ((ISymbol)i).GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" &&
+                            .FirstOrDefault(i => i.GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" &&
                                                  i.IsGenericType &&
                                                  i.TypeArguments.Length == 1);
 
@@ -4429,7 +4587,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         {
                             // Look for IInfersType<T> in the attribute's interfaces
                             var infersTypeInterface = attr.AttributeClass.AllInterfaces
-                                .FirstOrDefault(i => ((ISymbol)i).GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" &&
+                                .FirstOrDefault(i => i.GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" &&
                                                      i.IsGenericType &&
                                                      i.TypeArguments.Length == 1);
 
@@ -4541,7 +4699,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate metadata
 
-        // Generate dependencies
         GenerateDependencies(writer, compilation, testMethod.MethodSymbol);
 
         // Generate attribute factory
@@ -4559,7 +4716,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("],");
 
-        // Generate data sources
         if (methodDataSourceAttribute == null)
         {
             writer.AppendLine("DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
@@ -4569,7 +4725,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
             writer.AppendLine("{");
             writer.Indent();
-            GenerateDataSourceAttribute(writer, methodDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol, isClassDataSource: false);
+            GenerateDataSourceAttribute(writer, compilation, methodDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
             writer.Unindent();
             writer.AppendLine("},");
         }
@@ -4584,7 +4740,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
             writer.AppendLine("{");
             writer.Indent();
-            GenerateDataSourceAttribute(writer, classDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol, isClassDataSource: true);
+            GenerateDataSourceAttribute(writer, compilation, classDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
             writer.Unindent();
             writer.AppendLine("},");
         }
@@ -4628,29 +4784,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 classDataSourceAttribute.ConstructorArguments[0].Kind == TypedConstantKind.Array)
             {
                 var argumentValues = classDataSourceAttribute.ConstructorArguments[0].Values;
-                var constructorArgs = string.Join(", ", argumentValues.Select(arg =>
-                {
-                    if (arg.Value is string str)
-                    {
-                        return $"\"{str}\"";
-                    }
-                    else if (arg.Value is char chr)
-                    {
-                        return $"'{chr}'";
-                    }
-                    else if (arg.Value is bool b)
-                    {
-                        return b.ToString().ToLower();
-                    }
-                    else if (arg.Value == null)
-                    {
-                        return "null";
-                    }
-                    else
-                    {
-                        return arg.Value.ToString();
-                    }
-                }));
+                var constructorArgs = string.Join(", ", argumentValues.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg)));
 
                 writer.AppendLine($"return new {className}({constructorArgs});");
             }
@@ -4663,7 +4797,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"return new {className}({string.Join(", ", Enumerable.Range(0, constructorParamCount).Select(i => $"args[{i}]"))});");
                 writer.Unindent();
                 writer.AppendLine("}");
-                writer.AppendLine($"throw new global::System.InvalidOperationException(\"Not enough arguments provided for class constructor\");");
+                writer.AppendLine("throw new global::System.InvalidOperationException(\"Not enough arguments provided for class constructor\");");
             }
         }
         else
@@ -4678,8 +4812,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Generate typed invoker
         GenerateTypedInvokers(writer, testMethod, className);
 
-        // Add file location metadata
-        writer.AppendLine($"FilePath = @\"{testMethod.FilePath.Replace("\\", "\\\\")}\",");
+        writer.AppendLine($"FilePath = @\"{(testMethod.FilePath ?? "").Replace("\\", "\\\\")}\",");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber},");
 
         writer.Unindent();

@@ -5,7 +5,7 @@ namespace TUnit.Engine.Interfaces;
 /// <summary>
 /// Factory for creating strongly-typed executable tests
 /// </summary>
-public interface IExecutableTestFactory
+internal interface IExecutableTestFactory
 {
     /// <summary>
     /// Creates an executable test with all required parameters

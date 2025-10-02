@@ -12,9 +12,16 @@ using TUnit.Engine.Building.Interfaces;
 namespace TUnit.Engine.Discovery;
 
 /// Discovers tests at runtime using reflection with assembly scanning and caching
-[RequiresUnreferencedCode("Reflection-based test discovery requires unreferenced code")]
-[RequiresDynamicCode("Expression compilation requires dynamic code generation")]
-[SuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The source field does not have matching annotations.")]
+[UnconditionalSuppressMessage("SingleFile", "IL3000:Avoid accessing Assembly file path when publishing as a single file", Justification = "Reflection mode is not supported in single-file deployments")]
+[UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Reflection mode cannot support trimming")]
+[UnconditionalSuppressMessage("Trimming", "IL2055:Call to 'System.Type.MakeGenericType' can not be statically analyzed", Justification = "Reflection mode requires dynamic access")]
+[UnconditionalSuppressMessage("Trimming", "IL2060:Call to method can not be statically analyzed", Justification = "Reflection mode requires dynamic access")]
+[UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+[UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+[UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' requirements", Justification = "Reflection mode requires dynamic access")]
+[UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
+[UnconditionalSuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The source field does not have matching annotations.", Justification = "Reflection mode requires dynamic access")]
+[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Reflection mode cannot support AOT")]
 internal sealed class ReflectionTestDataCollector : ITestDataCollector
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
@@ -22,10 +29,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static readonly Lock _resultsLock = new(); // Only for final results aggregation
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
     private static readonly ConcurrentDictionary<Type, MethodInfo[]> _typeMethodsCache = new();
-    
+
     private static Assembly[]? _cachedAssemblies;
     private static readonly Lock _assemblyCacheLock = new();
-    
+
     private static Assembly[] GetCachedAssemblies()
     {
         lock (_assemblyCacheLock)
@@ -33,7 +40,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return _cachedAssemblies ??= AppDomain.CurrentDomain.GetAssemblies();
         }
     }
-    
+
     public static void ClearCaches()
     {
         _scannedAssemblies.Clear();
@@ -75,6 +82,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            throw new Exception("Using TUnit Reflection mechanisms isn't supported in AOT mode");
+        }
+#endif
+
         var allAssemblies = GetCachedAssemblies();
         var assembliesList = new List<Assembly>(allAssemblies.Length);
         foreach (var assembly in allAssemblies)
@@ -277,9 +291,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         try
         {
-#pragma warning disable IL3000 // Avoid accessing Assembly file path when publishing as a single file
             var location = assembly.Location;
-#pragma warning restore IL3000 // Avoid accessing Assembly file path when publishing as a single file
             if (!string.IsNullOrEmpty(location) &&
                 (location.Contains("ref") ||
                     location.Contains("runtimes") ||
@@ -306,7 +318,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 break;
             }
         }
-        
+
         if (!hasTUnitReference)
         {
             return false;
@@ -315,12 +327,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return true;
     }
 
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
-        Justification = "Reflection mode cannot support trimming")]
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'",
-        Justification = "Reflection mode requires dynamic access")]
     private static async Task<List<TestMetadata>> DiscoverTestsInAssembly(Assembly assembly)
     {
         var discoveredTests = new List<TestMetadata>(100);
@@ -419,12 +425,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return discoveredTests;
     }
 
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
-        Justification = "Reflection mode cannot support trimming")]
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'",
-        Justification = "Reflection mode requires dynamic access")]
     private static async IAsyncEnumerable<TestMetadata> DiscoverTestsInAssemblyStreamingAsync(
         Assembly assembly,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -564,11 +564,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2055:Call to 'System.Type.MakeGenericType' can not be statically analyzed",
-        Justification = "Reflection mode requires dynamic access")]
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2067:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicParameterlessConstructor' in call to 'System.Activator.CreateInstance(Type)'",
-        Justification = "Reflection mode requires dynamic access")]  
     private static async Task<List<TestMetadata>> DiscoverGenericTests(Type genericTypeDefinition)
     {
         var discoveredTests = new List<TestMetadata>(100);
@@ -658,11 +653,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return discoveredTests;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2055:Call to 'System.Type.MakeGenericType' can not be statically analyzed",
-        Justification = "Reflection mode requires dynamic access")]
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2067:'type' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicParameterlessConstructor' in call to 'System.Activator.CreateInstance(Type)'",
-        Justification = "Reflection mode requires dynamic access")]
     private static async IAsyncEnumerable<TestMetadata> DiscoverGenericTestsStreamingAsync(
         Type genericTypeDefinition,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -853,12 +843,33 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var inheritanceDepth = CalculateInheritanceDepth(testClass, testMethod);
 
+        // Determine the actual class type for generic type resolution
+        // If the method is declared in a generic base class, use the constructed version from the inheritance hierarchy
+        var typeForGenericResolution = testClass;
+        if (testMethod.DeclaringType != null &&
+            testMethod.DeclaringType != testClass &&
+            testMethod.DeclaringType.IsGenericTypeDefinition)
+        {
+            // Find the constructed generic type in the inheritance chain
+            var baseType = testClass.BaseType;
+            while (baseType != null)
+            {
+                if (baseType.IsGenericType &&
+                    baseType.GetGenericTypeDefinition() == testMethod.DeclaringType)
+                {
+                    typeForGenericResolution = baseType;
+                    break;
+                }
+                baseType = baseType.BaseType;
+            }
+        }
+
         try
         {
             return Task.FromResult<TestMetadata>(new ReflectionTestMetadata(testClass, testMethod)
             {
                 TestName = testName,
-                TestClassType = testClass,
+                TestClassType = typeForGenericResolution, // Use resolved type for generic resolution (may be constructed generic base)
                 TestMethodName = testMethod.Name,
                 Dependencies = ReflectionAttributeExtractor.ExtractDependencies(testClass, testMethod),
                 DataSources = ReflectionAttributeExtractor.ExtractDataSources(testMethod),
@@ -871,7 +882,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 FilePath = ExtractFilePath(testMethod) ?? "Unknown",
                 LineNumber = ExtractLineNumber(testMethod) ?? 0,
                 MethodMetadata = ReflectionMetadataBuilder.CreateMethodMetadata(testClass, testMethod),
-                GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(testClass),
+                GenericTypeInfo = ReflectionGenericTypeResolver.ExtractGenericTypeInfo(typeForGenericResolution),
                 GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(testMethod),
                 GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
                 AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(testClass, testMethod),
@@ -914,12 +925,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
 
 
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicConstructors' in call to 'System.Type.GetConstructors()'",
-        Justification = "Reflection mode requires dynamic access")]
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2067:Target parameter does not satisfy annotation requirements",
-        Justification = "Reflection mode requires dynamic access")]
     private static Func<Type[], object?[], object> CreateInstanceFactory([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClass)
     {
         // For generic types, we need to handle MakeGenericType
@@ -1177,7 +1182,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Creates a reflection-based instance factory with proper AOT attribution
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
     private static Func<object?[], object> CreateReflectionInstanceFactory(ConstructorInfo ctor)
     {
         var isPrepared = false;
@@ -1378,8 +1382,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Creates a reflection-based test invoker with proper AOT attribution
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Reflection mode cannot support AOT")]
     private static Func<object, object?[], Task> CreateReflectionTestInvoker(Type testClass, MethodInfo testMethod)
     {
         var isPrepared = false;
@@ -1433,10 +1435,21 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         }
                     }
 
-                    methodToInvoke = testMethod.MakeGenericMethod(typeArguments);
+                    // Check if we have a pre-compiled method for these type arguments (AOT-friendly)
+                    var compiledMethod = TUnit.Core.AotCompatibility.GenericTestRegistry.GetCompiledMethod(
+                        testClass, testMethod.Name, typeArguments);
 
-                    // Pre-JIT the constructed generic method on first invocation
-                    RuntimeHelpers.PrepareMethod(methodToInvoke.MethodHandle);
+                    if (compiledMethod != null)
+                    {
+                        methodToInvoke = compiledMethod;
+                    }
+                    else
+                    {
+                        methodToInvoke = testMethod.MakeGenericMethod(typeArguments);
+
+                        // Pre-JIT the constructed generic method on first invocation
+                        RuntimeHelpers.PrepareMethod(methodToInvoke.MethodHandle);
+                    }
                 }
 
                 // Cast arguments to the expected parameter types
@@ -1446,13 +1459,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // Check if the last parameter is a params array
                 var lastParam = parameters.Length > 0 ? parameters[^1] : null;
                 var isParamsArray = lastParam != null && lastParam.IsDefined(typeof(ParamArrayAttribute), false);
-                
+
                 if (isParamsArray && lastParam != null)
                 {
                     // Handle params array parameter
                     var paramsElementType = lastParam.ParameterType.GetElementType();
                     var regularParamsCount = parameters.Length - 1;
-                    
+
                     // Process regular parameters first
                     for (var i = 0; i < regularParamsCount && i < args.Length; i++)
                     {
@@ -1484,11 +1497,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             castedArgs[i] = CastHelper.Cast(paramType, arg);
                         }
                     }
-                    
+
                     // Collect remaining arguments into params array
                     var paramsStartIndex = regularParamsCount;
                     var paramsCount = Math.Max(0, args.Length - paramsStartIndex);
-                    
+
                     if (paramsElementType != null)
                     {
                         var paramsArray = Array.CreateInstance(paramsElementType, paramsCount);

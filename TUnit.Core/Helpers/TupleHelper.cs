@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using TUnit.Core.Interfaces.SourceGenerator;
+using System.Runtime.CompilerServices;
 
 namespace TUnit.Core.Helpers;
 
@@ -9,29 +9,79 @@ namespace TUnit.Core.Helpers;
 /// </summary>
 public static class TupleHelper
 {
+
+#if NET
     /// <summary>
     /// Checks if a type is a tuple type (ValueTuple or Tuple)
     /// </summary>
-    public static bool IsTupleType(Type type)
+    public static bool IsTupleType(ITuple tuple)
+    {
+        return true;
+    }
+#endif
+
+    /// <summary>
+    /// Checks if a type is a tuple type (ValueTuple or Tuple)
+    /// </summary>
+    public static bool IsTupleType(object? obj)
+    {
+#if NET
+        return obj is ITuple;
+#else
+        return obj != null && IsTupleType(obj.GetType());
+#endif
+    }
+
+    /// <summary>
+    /// Checks if a type is a tuple type (ValueTuple or Tuple)
+    /// </summary>
+    public static bool IsTupleType(Type? type)
     {
         if (type == null)
         {
             return false;
         }
 
+#if NET
+        return type.IsAssignableTo(typeof(ITuple));
+#else
         return type.IsGenericType && (
             type.FullName?.StartsWith("System.ValueTuple`") == true ||
             type.FullName?.StartsWith("System.Tuple`") == true
         );
+#endif
     }
-    
+
+#if NET
     /// <summary>
     /// Unwraps a tuple into an array of its elements
     /// </summary>
-    [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2075:UnrecognizedReflectionPattern",
-        Justification = "Reflection is used as a fallback. AOT analyzer warns at compile time.")]
+    public static object?[] UnwrapTuple(ITuple? value)
+    {
+        if (value == null)
+        {
+            return [null];
+        }
+
+        var elements = new object?[value.Length];
+
+        for (var i = 0; i < value.Length; i++)
+        {
+            elements[i] = value[i];
+        }
+
+        return elements;
+    }
+#endif
+
+    /// <summary>
+    /// Unwraps a tuple into an array of its elements
+    /// </summary>
     public static object?[] UnwrapTuple(object? value)
     {
+#if NET
+        return UnwrapTuple(value as ITuple);
+#else
         if (value == null)
         {
             return [null];
@@ -43,11 +93,11 @@ public static class TupleHelper
             // Not a tuple, return as single-element array
             return [value];
         }
-        
+
         // Even in source generation mode, we use reflection as a fallback
         // The AOT analyzer will warn about incompatibility at compile time
         var elements = new List<object?>();
-        
+
         if (type.FullName?.StartsWith("System.ValueTuple`") == true)
         {
             // Handle ValueTuple - access via fields
@@ -63,16 +113,17 @@ public static class TupleHelper
             var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(p => p.Name.StartsWith("Item"))
                 .OrderBy(p => p.Name);
-            
+
             foreach (var property in properties)
             {
                 elements.Add(property.GetValue(value));
             }
         }
-        
+
         return elements.ToArray();
+#endif
     }
-    
+
     /// <summary>
     /// Checks if a value should be unwrapped as a tuple for method arguments
     /// </summary>
@@ -93,7 +144,7 @@ public static class TupleHelper
         // and the value is a single tuple (not already an array)
         return expectedParameterCount > 1 && !type.IsArray;
     }
-    
+
     /// <summary>
     /// Checks if a type is an array of tuples
     /// </summary>
@@ -107,7 +158,7 @@ public static class TupleHelper
         var elementType = type.GetElementType();
         return elementType != null && IsTupleType(elementType);
     }
-    
+
     /// <summary>
     /// Expands an array of tuples into individual tuple elements for data source generation
     /// For example: [(1, "a"), (2, "b")] becomes individual items that each unwrap to [1, "a"] and [2, "b"]

@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -44,8 +43,8 @@ internal static class PropertySetterFactory
     /// <summary>
     /// Gets the backing field for a property.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Reflection fallback")]
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection fallback")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Accessing backing fields for init-only and required properties in reflection mode. The compiler-generated field naming pattern (<property>k__BackingField) is stable. For AOT, source generation creates direct setters.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "PropertyInfo.DeclaringType may not carry field annotations, but we only access compiler-generated backing fields which are preserved when the property is preserved. For AOT, use source-generated setters.")]
     private static FieldInfo? GetBackingField(PropertyInfo property)
     {
         var declaringType = property.DeclaringType;
@@ -85,7 +84,7 @@ internal static class PropertySetterFactory
     /// <summary>
     /// Helper method to get field with proper trimming suppression.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection fallback")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Safe field access when DynamicallyAccessedMembers annotations are present. The caller ensures the type has the required field preservation. This is only used for setting property backing fields in reflection mode.")]
     private static FieldInfo? GetFieldSafe(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] 
         Type type, 
@@ -98,7 +97,7 @@ internal static class PropertySetterFactory
     /// <summary>
     /// Checks if a method is init-only.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection check")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Checking for System.Runtime.CompilerServices.IsExternalInit modreq to identify init-only setters. This is a stable .NET runtime convention. For AOT, the source generator identifies init-only properties at compile time and generates appropriate setters.")]
     private static bool IsInitOnlyMethod(MethodInfo setMethod)
     {
         var methodType = setMethod.GetType();
