@@ -30,7 +30,7 @@ internal class TestInitializer
             test.Context.TestDetails.MethodMetadata,
             test.Context.Events);
 
-        await _eventReceiverOrchestrator.InitializeAllEligibleObjectsAsync(test.Context, cancellationToken).ConfigureAwait(false);
+        _eventReceiverOrchestrator.RegisterReceivers(test.Context, cancellationToken);
 
         // Shouldn't retrack already tracked objects, but will track any new ones created during retries / initialization
         _objectTracker.TrackObjects(test.Context);
@@ -40,10 +40,13 @@ internal class TestInitializer
 
     private async Task InitializeTrackedObjects(TestContext testContext)
     {
-        // Initialize in reverse order (most nested first)
-        foreach (var obj in testContext.TrackedObjects.Reverse())
+        // Initialize by level (deepest first), with objects at the same level in parallel
+        var levels = testContext.TrackedObjects.Keys.OrderByDescending(level => level);
+
+        foreach (var level in levels)
         {
-            await ObjectInitializer.InitializeAsync(obj);
+            var objectsAtLevel = testContext.TrackedObjects[level];
+            await Task.WhenAll(objectsAtLevel.Select(obj => ObjectInitializer.InitializeAsync(obj).AsTask()));
         }
 
         // Finally, ensure the test class itself is initialized
