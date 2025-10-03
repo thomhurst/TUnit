@@ -214,8 +214,6 @@ internal sealed class CustomDisplayNameTests_Test3_TestSource_GUID : global::TUn
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("foo", 1, true),
-                new global::TUnit.Core.ArgumentsAttribute("bar", 2, false),
                 new global::TUnit.Core.DisplayNameAttribute("Test with: $value1 $value2 $value3!"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
@@ -356,7 +354,6 @@ internal sealed class CustomDisplayNameTests_MethodDataSourceTest_TestSource_GUI
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("Method"),
                 new global::TUnit.Core.DisplayNameAttribute("Test using MethodDataSource"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
@@ -494,9 +491,6 @@ internal sealed class CustomDisplayNameTests_TestParameterNamePrefixBug_TestSour
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute("Test this($someValue, $someValueType)"),
-                new global::TUnit.Core.ArgumentsAttribute(100, "Type1"),
-                new global::TUnit.Core.ArgumentsAttribute(200, "Type2"),
-                new global::TUnit.Core.ArgumentsAttribute(300, "Type1"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -630,7 +624,6 @@ internal sealed class CustomDisplayNameTests_PasswordTest_TestSource_GUID : glob
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.TestProject.CustomDisplayNameTests.MyGenerator(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

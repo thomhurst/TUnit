@@ -16,8 +16,6 @@ internal sealed class NullableByteArgumentTests_Test_TestSource_GUID : global::T
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute((byte) 1),
-                new global::TUnit.Core.ArgumentsAttribute(null),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -132,8 +130,6 @@ internal sealed class NullableByteArgumentTests_Test2_TestSource_GUID : global::
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute((byte) 1, (byte) 1),
-                new global::TUnit.Core.ArgumentsAttribute((byte) 1, null),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

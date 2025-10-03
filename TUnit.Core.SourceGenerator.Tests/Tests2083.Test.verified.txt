@@ -16,12 +16,6 @@ internal sealed class Tests_MyTest_TestSource_GUID : global::TUnit.Core.Interfac
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(0),
-                new global::TUnit.Core.ArgumentsAttribute((byte)255),
-                new global::TUnit.Core.ArgumentsAttribute((short)32767),
-                new global::TUnit.Core.ArgumentsAttribute('\uffff'),
-                new global::TUnit.Core.ArgumentsAttribute(2147483647),
-                new global::TUnit.Core.ArgumentsAttribute(9223372036854775807L),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

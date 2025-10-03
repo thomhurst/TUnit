@@ -16,11 +16,6 @@ internal sealed class Tests_TryParse_InvalidString_ReturnsFailure_TestSource_GUI
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("\"2c48c152-7cb7-4f51-8f01-704454f36e60\""),
-                new global::TUnit.Core.ArgumentsAttribute("invalidNotAGui"),
-                new global::TUnit.Core.ArgumentsAttribute(""),
-                new global::TUnit.Core.ArgumentsAttribute(" "),
-                new global::TUnit.Core.ArgumentsAttribute(null),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -145,11 +140,6 @@ internal sealed class Tests_Parse_InvalidString_ThrowsException_TestSource_GUID 
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("\"2c48c152-7cb7-4f51-8f01-704454f36e60\""),
-                new global::TUnit.Core.ArgumentsAttribute("invalidNotAGui"),
-                new global::TUnit.Core.ArgumentsAttribute(""),
-                new global::TUnit.Core.ArgumentsAttribute(" "),
-                new global::TUnit.Core.ArgumentsAttribute(null),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -265,8 +255,6 @@ internal sealed class Tests_TryParse_ValidString_ReturnsAccountId_TestSource_GUI
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("2c48c152-7cb7-4f51-8f01-704454f36e60"),
-                new global::TUnit.Core.ArgumentsAttribute("00000000-0000-0000-0000-000000000000"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

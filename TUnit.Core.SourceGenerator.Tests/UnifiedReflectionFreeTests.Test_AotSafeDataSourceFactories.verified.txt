@@ -15,9 +15,7 @@ internal sealed class AotDataSourceTest_TestWithDataSource_TestSource_GUID : glo
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1, 2, 3),
-                new global::TUnit.Core.ArgumentsAttribute(4, 5, 6)
+                new global::TUnit.Core.TestAttribute()
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {

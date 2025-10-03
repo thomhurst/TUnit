@@ -15,8 +15,7 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
+                new global::TUnit.Core.TestAttribute()
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -164,8 +163,7 @@ internal sealed class ArgsAsArrayTests_NonParams_TestSource_GUID : global::TUnit
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
+                new global::TUnit.Core.TestAttribute()
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -277,8 +275,7 @@ internal sealed class ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID : global
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
+                new global::TUnit.Core.TestAttribute()
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -426,8 +423,7 @@ internal sealed class ArgsAsArrayTests_Enumerable_TestSource_GUID : global::TUni
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("arg1", "arg2", "arg3")
+                new global::TUnit.Core.TestAttribute()
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
@@ -539,8 +535,7 @@ internal sealed class ArgsAsArrayTests_Following_Non_Params_TestSource_GUID : gl
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
-                new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1, "arg1", "arg2", "arg3")
+                new global::TUnit.Core.TestAttribute()
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
             {
