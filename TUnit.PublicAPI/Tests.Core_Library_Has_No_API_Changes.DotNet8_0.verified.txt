@@ -1269,6 +1269,7 @@ namespace
         public .<.Artifact> Artifacts { get; }
         public .CancellationToken CancellationToken { get; set; }
         public .ClassHookContext ClassContext { get; }
+        public int CurrentRetryAttempt { get; }
         public .<.TestDetails> Dependencies { get; }
         public ? DisplayNameFormatter { get; set; }
         public .TestContextEvents Events { get; }
