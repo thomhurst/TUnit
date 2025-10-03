@@ -320,6 +320,8 @@ public class TestContext : Context
 
     public DateTimeOffset? TestEnd { get; set; }
 
+    public int CurrentRetryAttempt { get; internal set; }
+
 
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
     {
