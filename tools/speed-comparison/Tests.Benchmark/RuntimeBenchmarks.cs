@@ -65,9 +65,11 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task TUnit()
     {
-        await Cli.Wrap("dotnet")
-            .WithArguments(["run", "--no-build", "-c", "Release", "-p:TestFramework=TUNIT", "--treenode-filter",  $"/*/*/{ClassName}/*", "--framework", Framework])
-            .WithWorkingDirectory(UnifiedPath)
+        var binPath = Path.Combine(UnifiedPath, "bin", "Release", Framework);
+        var exeName = GetExecutableFileName();
+
+        await Cli.Wrap(Path.Combine(binPath, exeName))
+            .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
