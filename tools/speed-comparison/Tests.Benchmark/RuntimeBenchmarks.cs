@@ -53,7 +53,7 @@ public class RuntimeBenchmarks : BenchmarkBase
     public async Task TUnit_AOT()
     {
         // Note: AOT build must be done separately with: dotnet publish -c Release -p:TestFramework=TUNIT -p:PublishAot=true
-        var aotPath = Path.Combine(UnifiedPath, "bin", "Release", Framework, "publish");
+        var aotPath = Path.Combine(UnifiedPath, "bin", "Release-TUNIT", Framework, "publish");
         var exeName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "UnifiedTests.exe" : "UnifiedTests";
 
         await Cli.Wrap(Path.Combine(aotPath, exeName))
@@ -65,7 +65,7 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task TUnit()
     {
-        var binPath = Path.Combine(UnifiedPath, "bin", "Release", Framework);
+        var binPath = Path.Combine(UnifiedPath, "bin", "Release-TUNIT", Framework);
         var exeName = GetExecutableFileName();
 
         await Cli.Wrap(Path.Combine(binPath, exeName))
