@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
 using CliWrap;
+using CliWrap.Buffered;
 
 namespace Tests.Benchmark;
 
@@ -9,80 +10,61 @@ public class RuntimeBenchmarks : BenchmarkBase
 {
     private static readonly string? ClassName = Environment.GetEnvironmentVariable("CLASS_NAME");
 
-    [GlobalSetup]
-    public async Task Setup()
-    {
-        // Build all framework configurations
-        await Cli.Wrap("dotnet")
-            .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=TUNIT", "--framework", Framework])
-            .ExecuteAsync();
-        await Cli.Wrap("dotnet")
-            .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=XUNIT", "--framework", Framework])
-            .ExecuteAsync();
-        await Cli.Wrap("dotnet")
-            .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=NUNIT", "--framework", Framework])
-            .ExecuteAsync();
-        await Cli.Wrap("dotnet")
-            .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=MSTEST", "--framework", Framework])
-            .ExecuteAsync();
-
-        // Publish AOT configuration
-        await Cli.Wrap("dotnet")
-            .WithArguments(["publish", UnifiedPath, "-c", "Release", "-p:TestFramework=TUNIT", "-p:Aot=true", "--framework", Framework])
-            .ExecuteAsync();
-    }
-    
     [Benchmark]
     [BenchmarkCategory("Runtime", "AOT")]
     public async Task TUnit_AOT()
     {
-        // Note: AOT build must be done separately with: dotnet publish -c Release -p:TestFramework=TUNIT -p:PublishAot=true
-        var aotPath = Path.Combine(UnifiedPath, "bin", "Release", Framework, "publish");
+        var aotPath = Path.Combine(UnifiedPath, "bin", "Release-TUNIT-AOT", Framework);
         var exeName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "UnifiedTests.exe" : "UnifiedTests";
-        
+
         await Cli.Wrap(Path.Combine(aotPath, exeName))
             .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
     }
 
     [Benchmark]
     public async Task TUnit()
     {
-        await Cli.Wrap("dotnet")
-            .WithArguments(["run", "--no-build", "-c", "Release", "-p:TestFramework=TUNIT", "--treenode-filter",  $"/*/*/{ClassName}/*", "--framework", Framework])
-            .WithWorkingDirectory(UnifiedPath)
+        var binPath = Path.Combine(UnifiedPath, "bin", "Release-TUNIT", Framework);
+        var exeName = GetExecutableFileName();
+
+        await Cli.Wrap(Path.Combine(binPath, exeName))
+            .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
     }
 
     [Benchmark]
     public async Task NUnit()
     {
+        var dllPath = Path.Combine(UnifiedPath, "bin", "Release-NUNIT", Framework, "UnifiedTests.dll");
+
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "--no-build", "-c", "Release", "-p:TestFramework=NUNIT", "--filter", $"FullyQualifiedName~{ClassName}", "--framework", Framework])
-            .WithWorkingDirectory(UnifiedPath)
+            .WithArguments(["test", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
     }
 
     [Benchmark]
     public async Task xUnit()
     {
+        var dllPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT", Framework, "UnifiedTests.dll");
+
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "--no-build", "-c", "Release", "-p:TestFramework=XUNIT", "--filter", $"FullyQualifiedName~{ClassName}", "--framework", Framework])
-            .WithWorkingDirectory(UnifiedPath)
+            .WithArguments(["test", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
     }
 
     [Benchmark]
     public async Task MSTest()
     {
+        var dllPath = Path.Combine(UnifiedPath, "bin", "Release-MSTEST", Framework, "UnifiedTests.dll");
+
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "--no-build", "-c", "Release", "-p:TestFramework=MSTEST", "--filter", $"FullyQualifiedName~{ClassName}", "--framework", Framework])
-            .WithWorkingDirectory(UnifiedPath)
+            .WithArguments(["test", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
     }
 }

@@ -53,7 +53,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public PropertyInjectionService PropertyInjectionService { get; }
     public DataSourceInitializer DataSourceInitializer { get; }
     public ObjectRegistrationService ObjectRegistrationService { get; }
-    public ObjectInitializationService ObjectInitializationService { get; }
     public bool AfterSessionHooksFailed { get; set; }
 
     public TUnitServiceProvider(IExtension extension,
@@ -90,7 +89,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // NEW: Separate registration and execution services (replaces TestObjectInitializer)
         ObjectRegistrationService = Register(new ObjectRegistrationService(PropertyInjectionService));
-        ObjectInitializationService = Register(new ObjectInitializationService());
 
         // Initialize the circular dependencies
         PropertyInjectionService.Initialize(ObjectRegistrationService);
@@ -117,7 +115,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         CancellationToken = Register(new EngineCancellationToken());
 
-        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
+        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger, trackableObjectGraphProvider));
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService(EventReceiverOrchestrator));
 
         ParallelLimitLockProvider = Register(new ParallelLimitLockProvider());
@@ -159,7 +157,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
 
-        var testInitializer = new TestInitializer(EventReceiverOrchestrator, ObjectInitializationService, PropertyInjectionService, objectTracker);
+        var testInitializer = new TestInitializer(EventReceiverOrchestrator, PropertyInjectionService, objectTracker);
 
         // Create the new TestCoordinator that orchestrates the granular services
         var testCoordinator = Register<ITestCoordinator>(

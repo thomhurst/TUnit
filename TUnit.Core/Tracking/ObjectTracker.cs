@@ -13,9 +13,14 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public void TrackObjects(TestContext testContext)
     {
-        var objects = trackableObjectGraphProvider.GetTrackableObjects(testContext);
+        var alreadyTracked = testContext.TrackedObjects.SelectMany(x => x.Value).ToHashSet();
 
-        foreach (var obj in objects)
+        var newTrackableObjects = trackableObjectGraphProvider.GetTrackableObjects(testContext)
+            .SelectMany(x => x.Value)
+            .Except(alreadyTracked)
+            .ToHashSet();
+
+        foreach (var obj in newTrackableObjects)
         {
             TrackObject(obj);
         }
@@ -23,7 +28,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public async ValueTask UntrackObjects(TestContext testContext, List<Exception> cleanupExceptions)
     {
-        foreach (var obj in testContext.TrackedObjects)
+        foreach (var obj in testContext.TrackedObjects
+                     .SelectMany(x => x.Value)
+                     .ToHashSet())
         {
             try
             {

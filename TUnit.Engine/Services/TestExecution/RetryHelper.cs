@@ -10,6 +10,8 @@ internal static class RetryHelper
 
         for (var attempt = 0; attempt < maxRetries + 1; attempt++)
         {
+            testContext.CurrentRetryAttempt = attempt;
+
             try
             {
                 await action();
@@ -42,13 +44,13 @@ internal static class RetryHelper
         {
             return false;
         }
-        
+
         if (testContext.RetryFunc == null)
         {
             // Default behavior: retry on any exception if within retry limit
             return true;
         }
-        
+
         return await testContext.RetryFunc(testContext, ex, attempt + 1).ConfigureAwait(false);
     }
 }

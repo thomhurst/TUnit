@@ -315,9 +315,11 @@ public class TestContext : Context
 
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
 
-    internal HashSet<object> TrackedObjects { get; } = [];
+    internal ConcurrentDictionary<int, HashSet<object>> TrackedObjects { get; } = [];
 
     public DateTimeOffset? TestEnd { get; set; }
+
+    public int CurrentRetryAttempt { get; internal set; }
 
 
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)

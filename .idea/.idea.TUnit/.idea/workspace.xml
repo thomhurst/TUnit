@@ -54,15 +54,21 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock://C:/git/TUnit/TUnit.Engine/Scheduling/TestScheduler.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/TUnit.Engine/TrackableObjectGraphProvider.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Temp/SourceGeneratedDocuments/0CC7810EAB1F5E3E2B7BD713/TUnit.Assertions.SourceGenerator/TUnit.Assertions.SourceGenerator.Generators.AssertionMethodGenerator/CancellationTokenAssertionExtensions.g.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/9a53c2c7156f4e7193f32fcc340ad65e6710/72/87d31d7d/Transaction.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/2854ce6d56c18d0d837d3a3ef9c4f2c7c77691fa3528c8394986ac7ce7719/StackFrameIterator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/5d96a7a86ada1efba5ead3923ad2191c35df280a4dfc916a6b33294ff83a/Transaction.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/d5561f79efcdcb327a3e980623699d6a9c240ed13dc902d741aaae1447bf852/Transaction.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://C:/git/TUnit/TUnit.Engine/Services/TestExecution/TestCoordinator.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/git/TUnit/TUnit.TestProject/Bugs/3219/ClassDataSourceRetryTests.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TUnit.TestProject/TransactionTest.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="false" />
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "node.js.selected.package.tslint": "(autodetect)"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;
   }
-}]]></component>
+}</component>
   <component name="TaskManager">
     <servers />
   </component>
