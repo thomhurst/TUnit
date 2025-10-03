@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -661,11 +662,113 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             GenerateMethodDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
         }
+        else if (attrName == "global::TUnit.Core.ArgumentsAttribute")
+        {
+            try
+            {
+                GenerateArgumentsAttributeWithParameterTypes(writer, compilation, attr, methodSymbol);
+            }
+            catch
+            {
+                // Fall back to default behavior if parameter type matching fails
+                AttributeWriter.WriteAttribute(writer, compilation, attr);
+                writer.AppendLine(",");
+            }
+        }
         else
         {
             AttributeWriter.WriteAttribute(writer, compilation, attr);
             writer.AppendLine(",");
         }
+    }
+
+    private static void GenerateArgumentsAttributeWithParameterTypes(CodeWriter writer, Compilation compilation, AttributeData attr, IMethodSymbol methodSymbol)
+    {
+        if (attr.AttributeClass == null)
+        {
+            return;
+        }
+
+        var attrTypeName = attr.AttributeClass.GloballyQualified();
+        var testMethodParameters = methodSymbol.Parameters;
+
+        // Get the attribute syntax to access source text (preserves precision for decimals)
+        var attributeSyntax = attr.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
+        if (attributeSyntax == null)
+        {
+            // No syntax available - fall back to TypedConstant-based formatting
+            var formatter = new TypedConstantFormatter();
+            writer.Append($"new {attrTypeName}(");
+
+            if (attr.ConstructorArguments.Length == 1 && attr.ConstructorArguments[0].Kind == TypedConstantKind.Array)
+            {
+                var arrayValues = attr.ConstructorArguments[0].Values;
+                for (int i = 0; i < arrayValues.Length; i++)
+                {
+                    var targetType = i < testMethodParameters.Length ? testMethodParameters[i].Type : null;
+                    writer.Append(formatter.FormatForCode(arrayValues[i], targetType));
+                    if (i < arrayValues.Length - 1) writer.Append(", ");
+                }
+            }
+            else
+            {
+                for (int i = 0; i < attr.ConstructorArguments.Length; i++)
+                {
+                    var targetType = i < testMethodParameters.Length ? testMethodParameters[i].Type : null;
+                    writer.Append(formatter.FormatForCode(attr.ConstructorArguments[i], targetType));
+                    if (i < attr.ConstructorArguments.Length - 1) writer.Append(", ");
+                }
+            }
+
+            writer.AppendLine("),");
+            return;
+        }
+
+        // Get the argument expressions from syntax
+        var argumentList = attributeSyntax.ArgumentList;
+        if (argumentList == null || argumentList.Arguments.Count == 0)
+        {
+            writer.AppendLine($"new {attrTypeName}(),");
+            return;
+        }
+
+        // Get semantic model for rewriting expressions with fully qualified names
+        var semanticModel = compilation.GetSemanticModel(attributeSyntax.SyntaxTree);
+
+        writer.Append($"new {attrTypeName}(");
+
+        for (int i = 0; i < argumentList.Arguments.Count; i++)
+        {
+            var argumentSyntax = argumentList.Arguments[i];
+            var expression = argumentSyntax.Expression;
+
+            // Get target parameter type
+            ITypeSymbol? targetParameterType = i < testMethodParameters.Length
+                ? testMethodParameters[i].Type
+                : null;
+
+            // For decimal parameters, preserve source text and add 'm' suffix (only for numeric literals)
+            if (targetParameterType?.SpecialType == SpecialType.System_Decimal
+                && expression.Kind() != SyntaxKind.StringLiteralExpression
+                && expression.Kind() != SyntaxKind.NullLiteralExpression)
+            {
+                var sourceText = expression.ToString().TrimEnd('d', 'D', 'f', 'F', 'm', 'M').Trim();
+                writer.Append($"{sourceText}m");
+            }
+            else
+            {
+                // For other types (including strings and nulls), rewrite with fully qualified names
+                var fullyQualifiedExpression = expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
+                writer.Append(fullyQualifiedExpression.ToFullString());
+            }
+
+            if (i < argumentList.Arguments.Count - 1)
+            {
+                writer.Append(", ");
+            }
+        }
+
+        writer.AppendLine("),");
     }
 
     private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
