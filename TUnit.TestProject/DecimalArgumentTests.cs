@@ -109,6 +109,7 @@ public class DecimalArgumentTests
         if (!SourceRegistrar.IsEnabled)
         {
             // Skip this test if source generation is not enabled, as the precision can't be preserved without access to the original syntax
+            return;
         }
 
         await Assert.That(credit).IsEqualTo(2_000.00000000000000001m);
@@ -121,6 +122,7 @@ public class DecimalArgumentTests
         if (!SourceRegistrar.IsEnabled)
         {
             // Skip this test if source generation is not enabled, as the precision can't be preserved without access to the original syntax
+            return;
         }
 
         await Assert.That(credit).IsEqualTo(123_999.00000000000000001m);
