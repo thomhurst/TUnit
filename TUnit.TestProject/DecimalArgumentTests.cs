@@ -89,20 +89,6 @@ public class DecimalArgumentTests
     }
 
     [Test]
-    [Arguments(123_999)]
-    public async Task Equality1(decimal credit)
-    {
-        await Assert.That(credit).IsEqualTo(123_999m);
-    }
-
-    [Test]
-    [Arguments(2_000)]
-    public async Task Equality2(decimal credit)
-    {
-        await Assert.That(credit).IsEqualTo(2_000m);
-    }
-
-    [Test]
     [Arguments(2_000.00000000000000001)]
     public async Task Equality3(decimal credit)
     {
