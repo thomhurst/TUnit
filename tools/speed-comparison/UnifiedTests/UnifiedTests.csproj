@@ -21,11 +21,6 @@
     <DefineConstants Condition="'$(TestFramework)' == 'MSTEST'">$(DefineConstants);MSTEST</DefineConstants>
   </PropertyGroup>
 
-  <!-- Separate output directories per framework to prevent overwriting -->
-  <PropertyGroup>
-    <OutputPath>bin\$(Configuration)-$(TestFramework)\$(TargetFramework)\</OutputPath>
-  </PropertyGroup>
-
   <!-- TUnit packages -->
   <ItemGroup Condition="'$(TestFramework)' == 'TUNIT'">
     <PackageReference Include="TUnit" VersionOverride="*" />

@@ -10,45 +10,6 @@ public class RuntimeBenchmarks : BenchmarkBase
 {
     private static readonly string? ClassName = Environment.GetEnvironmentVariable("CLASS_NAME");
 
-    [GlobalSetup]
-    public async Task Setup()
-    {
-        // Build all framework configurations
-        await Cli.Wrap("dotnet")
-            .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=TUNIT", "--framework", Framework])
-            .ExecuteBufferedAsync();
-        await Cli.Wrap("dotnet")
-            .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=XUNIT", "--framework", Framework])
-            .ExecuteBufferedAsync();
-        await Cli.Wrap("dotnet")
-            .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=NUNIT", "--framework", Framework])
-            .ExecuteBufferedAsync();
-        await Cli.Wrap("dotnet")
-            .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=MSTEST", "--framework", Framework])
-            .ExecuteBufferedAsync();
-
-        // Publish AOT configuration
-        var aotOutputPath = Path.Combine(UnifiedPath, "bin", "Release-TUNIT-AOT", Framework);
-        await Cli.Wrap("dotnet")
-            .WithArguments(["publish", UnifiedPath, "-c", "Release", "-p:TestFramework=TUNIT", "-p:Aot=true", "--framework", Framework, "--runtime", GetRuntimeIdentifier(), "--output", aotOutputPath])
-            .ExecuteBufferedAsync();
-    }
-
-    private static string GetRuntimeIdentifier()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return "win-x64";
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            return "linux-x64";
-        }
-
-        return "osx-arm64";
-    }
-
     [Benchmark]
     [BenchmarkCategory("Runtime", "AOT")]
     public async Task TUnit_AOT()
@@ -77,9 +38,10 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task NUnit()
     {
+        var dllPath = Path.Combine(UnifiedPath, "bin", "Release-NUNIT", Framework, "UnifiedTests.dll");
+
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "--no-build", "-c", "Release", "-p:TestFramework=NUNIT", "--filter", $"FullyQualifiedName~{ClassName}", "--framework", Framework])
-            .WithWorkingDirectory(UnifiedPath)
+            .WithArguments(["test", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
@@ -87,9 +49,10 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task xUnit()
     {
+        var dllPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT", Framework, "UnifiedTests.dll");
+
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "--no-build", "-c", "Release", "-p:TestFramework=XUNIT", "--filter", $"FullyQualifiedName~{ClassName}", "--framework", Framework])
-            .WithWorkingDirectory(UnifiedPath)
+            .WithArguments(["test", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
@@ -97,9 +60,10 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task MSTest()
     {
+        var dllPath = Path.Combine(UnifiedPath, "bin", "Release-MSTEST", Framework, "UnifiedTests.dll");
+
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "--no-build", "-c", "Release", "-p:TestFramework=MSTEST", "--filter", $"FullyQualifiedName~{ClassName}", "--framework", Framework])
-            .WithWorkingDirectory(UnifiedPath)
+            .WithArguments(["test", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
