@@ -704,7 +704,7 @@ internal sealed class TestBuilder : ITestBuilder
         // Use attributes from context if available, or create new ones
         var attributes = testBuilderContext.InitializedAttributes ?? await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
 
-        if (testBuilderContext.DataSourceAttribute != null)
+        if (testBuilderContext.DataSourceAttribute != null && testBuilderContext.DataSourceAttribute is not NoDataSource)
         {
             attributes = [..attributes, (Attribute)testBuilderContext.DataSourceAttribute];
         }
