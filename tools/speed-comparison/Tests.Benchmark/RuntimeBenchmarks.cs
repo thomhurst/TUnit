@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
 using CliWrap;
+using CliWrap.Buffered;
 
 namespace Tests.Benchmark;
 
@@ -15,21 +16,21 @@ public class RuntimeBenchmarks : BenchmarkBase
         // Build all framework configurations
         await Cli.Wrap("dotnet")
             .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=TUNIT", "--framework", Framework])
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
         await Cli.Wrap("dotnet")
             .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=XUNIT", "--framework", Framework])
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
         await Cli.Wrap("dotnet")
             .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=NUNIT", "--framework", Framework])
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
         await Cli.Wrap("dotnet")
             .WithArguments(["build", UnifiedPath, "-c", "Release", "-p:TestFramework=MSTEST", "--framework", Framework])
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
 
         // Publish AOT configuration
         await Cli.Wrap("dotnet")
             .WithArguments(["publish", UnifiedPath, "-c", "Release", "-p:TestFramework=TUNIT", "-p:Aot=true", "--framework", Framework, "--runtime", GetRuntimeIdentifier()])
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
     }
 
     private static string GetRuntimeIdentifier()
@@ -46,7 +47,7 @@ public class RuntimeBenchmarks : BenchmarkBase
 
         return "osx-arm64";
     }
-    
+
     [Benchmark]
     [BenchmarkCategory("Runtime", "AOT")]
     public async Task TUnit_AOT()
@@ -54,11 +55,11 @@ public class RuntimeBenchmarks : BenchmarkBase
         // Note: AOT build must be done separately with: dotnet publish -c Release -p:TestFramework=TUNIT -p:PublishAot=true
         var aotPath = Path.Combine(UnifiedPath, "bin", "Release", Framework, "publish");
         var exeName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "UnifiedTests.exe" : "UnifiedTests";
-        
+
         await Cli.Wrap(Path.Combine(aotPath, exeName))
             .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
     }
 
     [Benchmark]
@@ -68,7 +69,7 @@ public class RuntimeBenchmarks : BenchmarkBase
             .WithArguments(["run", "--no-build", "-c", "Release", "-p:TestFramework=TUNIT", "--treenode-filter",  $"/*/*/{ClassName}/*", "--framework", Framework])
             .WithWorkingDirectory(UnifiedPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
     }
 
     [Benchmark]
@@ -78,7 +79,7 @@ public class RuntimeBenchmarks : BenchmarkBase
             .WithArguments(["test", "--no-build", "-c", "Release", "-p:TestFramework=NUNIT", "--filter", $"FullyQualifiedName~{ClassName}", "--framework", Framework])
             .WithWorkingDirectory(UnifiedPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
     }
 
     [Benchmark]
@@ -88,7 +89,7 @@ public class RuntimeBenchmarks : BenchmarkBase
             .WithArguments(["test", "--no-build", "-c", "Release", "-p:TestFramework=XUNIT", "--filter", $"FullyQualifiedName~{ClassName}", "--framework", Framework])
             .WithWorkingDirectory(UnifiedPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
     }
 
     [Benchmark]
@@ -98,6 +99,6 @@ public class RuntimeBenchmarks : BenchmarkBase
             .WithArguments(["test", "--no-build", "-c", "Release", "-p:TestFramework=MSTEST", "--filter", $"FullyQualifiedName~{ClassName}", "--framework", Framework])
             .WithWorkingDirectory(UnifiedPath)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
     }
 }

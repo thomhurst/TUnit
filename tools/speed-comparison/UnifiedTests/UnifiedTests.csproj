@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <PropertyGroup Condition="'$(TestFramework)' == ''">
+        <TestFramework>TUNIT</TestFramework>
+    </PropertyGroup>
+
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -11,7 +15,7 @@
 
   <!-- Define constants based on TestFramework property -->
   <PropertyGroup>
-    <DefineConstants Condition="'$(TestFramework)' == 'TUNIT'">$(DefineConstants);TUNIT</DefineConstants>
+      <DefineConstants Condition="'$(TestFramework)' == 'TUNIT'">$(DefineConstants);TUNIT</DefineConstants>
     <DefineConstants Condition="'$(TestFramework)' == 'XUNIT'">$(DefineConstants);XUNIT</DefineConstants>
     <DefineConstants Condition="'$(TestFramework)' == 'NUNIT'">$(DefineConstants);NUNIT</DefineConstants>
     <DefineConstants Condition="'$(TestFramework)' == 'MSTEST'">$(DefineConstants);MSTEST</DefineConstants>
