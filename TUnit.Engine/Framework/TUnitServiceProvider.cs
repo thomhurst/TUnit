@@ -131,7 +131,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testContextRestorer = Register(new TestContextRestorer());
         var testMethodInvoker = Register(new TestMethodInvoker());
 
-        var useSourceGeneration = GetUseSourceGeneration(CommandLineOptions);
+        var useSourceGeneration = SourceRegistrar.IsEnabled = GetUseSourceGeneration(CommandLineOptions);
 #pragma warning disable IL2026 // Using member which has 'RequiresUnreferencedCodeAttribute'
 #pragma warning disable IL3050 // Using member which has 'RequiresDynamicCodeAttribute'
         ITestDataCollector dataCollector = useSourceGeneration
