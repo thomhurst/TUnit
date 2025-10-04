@@ -1,4 +1,5 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.StaticProperties;
 
@@ -6,6 +7,9 @@ namespace TUnit.Core.Tracking;
 
 internal class TrackableObjectGraphProvider
 {
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Trackable object discovery uses reflection for property injection")]
+    #endif
     public ConcurrentDictionary<int, HashSet<object>> GetTrackableObjects(TestContext testContext)
     {
         var visitedObjects = testContext.TrackedObjects;
@@ -63,6 +67,9 @@ internal class TrackableObjectGraphProvider
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Nested object tracking uses reflection for property discovery")]
+    #endif
     private void AddNestedTrackableObjects(object obj, ConcurrentDictionary<int, HashSet<object>> visitedObjects, int currentDepth)
     {
         var plan = PropertyInjectionCache.GetOrCreatePlan(obj.GetType());

@@ -11,6 +11,10 @@ namespace TUnit.Engine;
 
 internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
 {
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Hook discovery uses reflection to scan assemblies and types")]
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Hook delegate creation requires dynamic code generation")]
+    #endif
     public void Initialize(ExecuteRequestContext context)
     {
         ConfigureGlobalExceptionHandlers(context);
@@ -34,8 +38,10 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
         return !SourceRegistrar.IsEnabled;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Hook discovery uses reflection to scan assemblies and types")]
+    [RequiresDynamicCode("Hook delegate creation requires dynamic code generation")]
+#endif
     private void DiscoverHooksViaReflection()
     {
         ReflectionHookDiscoveryService.DiscoverHooks();

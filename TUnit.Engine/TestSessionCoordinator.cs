@@ -38,6 +38,11 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _testScheduler = testScheduler;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Static property initialization uses reflection in reflection mode")]
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Data source initialization may require dynamic code generation")]
+#pragma warning disable IL2046, IL3051 // Interface implementation - cannot add attributes to match called method requirements
+    #endif
     public async Task ExecuteTests(
         IEnumerable<AbstractExecutableTest> tests,
         ITestExecutionFilter? filter,
@@ -61,6 +66,9 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             }
         }
     }
+    #if NET6_0_OR_GREATER
+#pragma warning restore IL2046, IL3051
+    #endif
 
     private void InitializeEventReceivers(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
@@ -68,6 +76,10 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _eventReceiverOrchestrator.InitializeTestCounts(testContexts);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Static property initialization uses reflection in reflection mode")]
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Data source initialization may require dynamic code generation")]
+    #endif
     private async Task PrepareTestOrchestrator(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
         // Register all tests upfront so orchestrator knows total counts per class/assembly for lifecycle management
@@ -76,6 +88,10 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         await InitializeStaticPropertiesAsync(cancellationToken);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Static property initialization uses reflection in reflection mode")]
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Data source initialization may require dynamic code generation")]
+    #endif
     private async Task InitializeStaticPropertiesAsync(CancellationToken cancellationToken)
     {
         try
@@ -101,6 +117,9 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     }
 
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     private async Task ExecuteTestsCore(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
         // Combine cancellation tokens

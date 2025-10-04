@@ -1,4 +1,4 @@
-using System.Buffers;
+﻿using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -12,16 +12,6 @@ using TUnit.Engine.Building.Interfaces;
 namespace TUnit.Engine.Discovery;
 
 /// Discovers tests at runtime using reflection with assembly scanning and caching
-[UnconditionalSuppressMessage("SingleFile", "IL3000:Avoid accessing Assembly file path when publishing as a single file", Justification = "Reflection mode is not supported in single-file deployments")]
-[UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Reflection mode cannot support trimming")]
-[UnconditionalSuppressMessage("Trimming", "IL2055:Call to 'System.Type.MakeGenericType' can not be statically analyzed", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2060:Call to method can not be statically analyzed", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' requirements", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The source field does not have matching annotations.", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Reflection mode cannot support AOT")]
 internal sealed class ReflectionTestDataCollector : ITestDataCollector
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
@@ -53,6 +43,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
+    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    #endif
     private async Task<List<TestMetadata>> ProcessAssemblyAsync(Assembly assembly, SemaphoreSlim semaphore)
     {
         await semaphore.WaitAsync().ConfigureAwait(false);
@@ -80,6 +74,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
+    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    #endif
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
 #if NET
@@ -140,6 +138,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Reflection-based test discovery requires dynamic access to types, methods, and attributes")]
+    [RequiresDynamicCode("Test discovery uses MakeGenericType and dynamic code generation")]
+    #endif
     public async IAsyncEnumerable<TestMetadata> CollectTestsStreamingAsync(
         string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -184,7 +186,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
-    private static IEnumerable<MethodInfo> GetAllTestMethods(Type type)
+    private static IEnumerable<MethodInfo> GetAllTestMethods([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type)
     {
         return _typeMethodsCache.GetOrAdd(type, static t =>
         {
@@ -193,8 +195,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             while (currentType != null && currentType != typeof(object))
             {
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2070 // Type parameter 't' inherits PublicMethods annotation from input
+#pragma warning disable IL2075 // BaseType doesn't preserve annotations, but GetMethods is safe
+#endif
                 methods.AddRange(currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly));
                 currentType = currentType.BaseType;
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2075
+#pragma warning restore IL2070
+#endif
             }
 
             return methods.ToArray();
@@ -291,7 +301,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         try
         {
+#if NET6_0_OR_GREATER
+#pragma warning disable IL3000 // Assembly.Location is handled for single-file scenarios with try-catch
+#endif
             var location = assembly.Location;
+#if NET6_0_OR_GREATER
+#pragma warning restore IL3000
+#endif
             if (!string.IsNullOrEmpty(location) &&
                 (location.Contains("ref") ||
                     location.Contains("runtimes") ||
@@ -308,7 +324,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // Don't return false here, continue with other checks
         }
 
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2026 // Assembly.GetReferencedAssemblies is acceptable for assembly filtering
+#endif
         var referencedAssemblies = assembly.GetReferencedAssemblies();
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2026
+#endif
         var hasTUnitReference = false;
         foreach (var reference in referencedAssemblies)
         {
@@ -327,6 +349,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return true;
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
+    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    #endif
     private static async Task<List<TestMetadata>> DiscoverTestsInAssembly(Assembly assembly)
     {
         var discoveredTests = new List<TestMetadata>(100);
@@ -425,6 +451,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return discoveredTests;
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
+    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    #endif
     private static async IAsyncEnumerable<TestMetadata> DiscoverTestsInAssemblyStreamingAsync(
         Assembly assembly,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -564,6 +594,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Generic type resolution requires reflection and dynamic type creation")]
+    [RequiresDynamicCode("Generic type instantiation uses MakeGenericType")]
+    #endif
     private static async Task<List<TestMetadata>> DiscoverGenericTests(Type genericTypeDefinition)
     {
         var discoveredTests = new List<TestMetadata>(100);
@@ -653,6 +687,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return discoveredTests;
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Generic type resolution requires reflection and dynamic type creation")]
+    [RequiresDynamicCode("Generic type instantiation uses MakeGenericType")]
+    #endif
     private static async IAsyncEnumerable<TestMetadata> DiscoverGenericTestsStreamingAsync(
         Type genericTypeDefinition,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -837,7 +875,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return depth;
     }
 
-    private static Task<TestMetadata> BuildTestMetadata(Type testClass, MethodInfo testMethod, object?[]? classData = null)
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "BuildTestMetadata calls other reflection methods that are already annotated")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "BuildTestMetadata calls CreateInstanceFactory and CreateTestInvoker which are properly annotated")]
+    #endif
+    private static Task<TestMetadata> BuildTestMetadata(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
+        Type testClass,
+        MethodInfo testMethod,
+        object?[]? classData = null)
     {
         var testName = GenerateTestName(testClass, testMethod);
 
@@ -851,6 +897,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             testMethod.DeclaringType.IsGenericTypeDefinition)
         {
             // Find the constructed generic type in the inheritance chain
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2072 // BaseType doesn't preserve DynamicallyAccessedMembers annotations
+#endif
             var baseType = testClass.BaseType;
             while (baseType != null)
             {
@@ -862,6 +911,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 baseType = baseType.BaseType;
             }
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2072
+#endif
         }
 
         try
@@ -869,7 +921,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return Task.FromResult<TestMetadata>(new ReflectionTestMetadata(testClass, testMethod)
             {
                 TestName = testName,
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2072 // typeForGenericResolution may come from BaseType which doesn't preserve annotations
+#endif
                 TestClassType = typeForGenericResolution, // Use resolved type for generic resolution (may be constructed generic base)
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2072
+#endif
                 TestMethodName = testMethod.Name,
                 Dependencies = ReflectionAttributeExtractor.ExtractDependencies(testClass, testMethod),
                 DataSources = ReflectionAttributeExtractor.ExtractDataSources(testMethod),
@@ -925,6 +983,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
 
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Instance creation uses reflection and Activator.CreateInstance")]
+    [RequiresDynamicCode("Generic type instantiation uses MakeGenericType and Activator")]
+    #endif
     private static Func<Type[], object?[], object> CreateInstanceFactory([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClass)
     {
         // For generic types, we need to handle MakeGenericType
@@ -984,6 +1046,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Test invocation uses reflection and MethodInfo.Invoke")]
+    [RequiresDynamicCode("Generic method instantiation uses MakeGenericMethod")]
+    #endif
     private static Func<object, object?[], Task> CreateTestInvoker(Type testClass, MethodInfo testMethod)
     {
         return CreateReflectionTestInvoker(testClass, testMethod);
@@ -1000,7 +1066,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 method.ReturnType.GetGenericTypeDefinition() == typeof(Task<>));
     }
 
-    private static bool IsCompilerGenerated(Type type)
+    private static bool IsCompilerGenerated([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type)
     {
         // If the type is not marked as compiler-generated, it's not compiler-generated
         if (!type.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false))
@@ -1013,7 +1079,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return !HasTestMethods(type);
     }
 
-    private static bool HasTestMethods(Type type)
+    private static bool HasTestMethods([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type)
     {
         try
         {
@@ -1060,6 +1126,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return method.GetCustomAttribute<TestAttribute>()?.Line;
     }
 
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "This is only called in error cases for assembly scanning failures")]
+    [UnconditionalSuppressMessage("Trimming", "IL2111", Justification = "Methods are called directly, not via reflection")]
+    #endif
     private static TestMetadata CreateFailedTestMetadataForAssembly(Assembly assembly, Exception ex)
     {
         var testName = $"[ASSEMBLY SCAN FAILED] {assembly.GetName().Name}";
@@ -1091,7 +1161,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         };
     }
 
-    private static TestMetadata CreateFailedTestMetadata(Type type, MethodInfo method, Exception ex)
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Failed test metadata creation uses ReflectionMetadataBuilder")]
+    #endif
+    private static TestMetadata CreateFailedTestMetadata(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type type,
+        MethodInfo method,
+        Exception ex)
     {
         var testName = $"[DISCOVERY FAILED] {type.FullName}.{method.Name}";
         var displayName = $"{testName} - {ex.Message}";
@@ -1120,7 +1197,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
 
-    private static MethodMetadata CreateDummyMethodMetadata(Type type, string methodName)
+    private static MethodMetadata CreateDummyMethodMetadata(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type type,
+        string methodName)
     {
         return new MethodMetadata
         {
@@ -1182,6 +1262,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Creates a reflection-based instance factory with proper AOT attribution
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Reflection-based factory uses ConstructorInfo.Invoke")]
+    [RequiresDynamicCode("Dynamic constructor invocation may require runtime code generation")]
+    #endif
     private static Func<object?[], object> CreateReflectionInstanceFactory(ConstructorInfo ctor)
     {
         var isPrepared = false;
@@ -1244,7 +1328,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Infers generic type mappings from parameter and argument types
     /// </summary>
-    private static void InferGenericTypeMapping(Type paramType, Type argType, Dictionary<Type, Type> typeMapping)
+    private static void InferGenericTypeMapping(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType, Dictionary<Type, Type> typeMapping)
     {
         // Direct generic parameter
         if (paramType.IsGenericParameter)
@@ -1279,7 +1363,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 for (var i = 0; i < paramGenArgs.Length && i < argGenArgs.Length; i++)
                 {
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2062 // Generic type arguments don't preserve DynamicallyAccessedMembers
+#endif
                     InferGenericTypeMapping(paramGenArgs[i], argGenArgs[i], typeMapping);
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2062
+#endif
                 }
             }
             else
@@ -1294,7 +1384,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                         for (var i = 0; i < paramGenArgs.Length && i < ifaceGenArgs.Length; i++)
                         {
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2062 // Generic type arguments don't preserve DynamicallyAccessedMembers
+#endif
                             InferGenericTypeMapping(paramGenArgs[i], ifaceGenArgs[i], typeMapping);
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2062
+#endif
                         }
                         break;
                     }
@@ -1315,7 +1411,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     for (var i = 0; i < paramGenArgs.Length && i < ifaceGenArgs.Length; i++)
                     {
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2062 // Generic type arguments don't preserve DynamicallyAccessedMembers
+#endif
                         InferGenericTypeMapping(paramGenArgs[i], ifaceGenArgs[i], typeMapping);
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2062
+#endif
                     }
                     break;
                 }
@@ -1325,14 +1427,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // Array types
         if (paramType.IsArray && argType.IsArray)
         {
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2072 // GetElementType doesn't preserve DynamicallyAccessedMembers
+#endif
             InferGenericTypeMapping(paramType.GetElementType()!, argType.GetElementType()!, typeMapping);
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2072
+#endif
         }
     }
 
     /// <summary>
     /// Checks if the argument type is compatible with the parameter type through covariance
     /// </summary>
-    private static bool IsCovariantCompatible(Type paramType, Type argType)
+    private static bool IsCovariantCompatible(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType)
     {
         // Only check for generic interface covariance
         if (!paramType.IsInterface || !paramType.IsGenericType)
@@ -1382,6 +1490,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Creates a reflection-based test invoker with proper AOT attribution
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Reflection-based invoker uses MethodInfo.Invoke and reflection")]
+    [RequiresDynamicCode("Generic method construction uses MakeGenericMethod")]
+    #endif
     private static Func<object, object?[], Task> CreateReflectionTestInvoker(Type testClass, MethodInfo testMethod)
     {
         var isPrepared = false;
@@ -1590,6 +1702,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         };
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Dynamic test discovery uses reflection to scan assemblies and types")]
+    [RequiresDynamicCode("Dynamic test builders may use expression compilation")]
+    #endif
     private async Task<List<TestMetadata>> DiscoverDynamicTests(string testSessionId)
     {
         var dynamicTests = new List<TestMetadata>(50);
@@ -1679,6 +1795,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return dynamicTests;
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Dynamic test discovery uses reflection to scan assemblies and types")]
+    [RequiresDynamicCode("Dynamic test builders may use expression compilation")]
+    #endif
     private async IAsyncEnumerable<TestMetadata> DiscoverDynamicTestsStreamingAsync(
         string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -1740,6 +1860,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Dynamic test builder execution uses Activator.CreateInstance and MethodInfo.Invoke")]
+    [RequiresDynamicCode("Expression compilation is used for dynamic tests")]
+    #endif
     private async Task<List<TestMetadata>> ExecuteDynamicTestBuilder(Type testClass, MethodInfo builderMethod, string testSessionId)
     {
         var dynamicTests = new List<TestMetadata>(50);
@@ -1771,6 +1895,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return dynamicTests;
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
+    [RequiresDynamicCode("Expression compilation is used for dynamic test invocation")]
+    #endif
     private async Task<List<TestMetadata>> ConvertDynamicTestToMetadata(AbstractDynamicTest abstractDynamicTest)
     {
         var testMetadataList = new List<TestMetadata>();
@@ -1787,6 +1915,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return testMetadataList;
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Dynamic test builder execution uses Activator.CreateInstance and MethodInfo.Invoke")]
+    [RequiresDynamicCode("Expression compilation is used for dynamic tests")]
+    #endif
     private async IAsyncEnumerable<TestMetadata> ExecuteDynamicTestBuilderStreamingAsync(
         Type testClass, MethodInfo builderMethod, string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -1868,6 +2000,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
+    [RequiresDynamicCode("Expression compilation is used for dynamic test invocation")]
+    #endif
     private Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
     {
         if (result.TestClassType == null || result.TestMethod == null)
@@ -1918,6 +2054,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return Task.FromResult<TestMetadata>(metadata);
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Dynamic instance factory uses Activator.CreateInstance")]
+    [RequiresDynamicCode("Generic type construction uses MakeGenericType")]
+    #endif
     private static Func<Type[], object?[], object> CreateDynamicInstanceFactory(Type testClass, object?[]? predefinedClassArgs)
     {
         // For dynamic tests, we always use the predefined args (or empty array if null)
@@ -1944,6 +2084,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         };
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Dynamic test invoker uses expression compilation and reflection")]
+    [RequiresDynamicCode("LambdaExpression.Compile requires dynamic code generation")]
+    #endif
     private static Func<object, object?[], Task> CreateDynamicTestInvoker(DynamicDiscoveryResult result)
     {
         return async (instance, args) =>
@@ -1987,6 +2131,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         };
     }
 
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2077", Justification = "This is only called in error cases for dynamic source failures")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Object.GetType() doesn't preserve annotations, but this is for error reporting only")]
+    #endif
     private static TestMetadata CreateFailedTestMetadataForDynamicSource(IDynamicTestSource source, Exception ex)
     {
         var testName = $"[DYNAMIC SOURCE FAILED] {source.GetType().Name}";
@@ -2007,7 +2155,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         };
     }
 
-    private static TestMetadata CreateFailedTestMetadataForDynamicBuilder(Type type, MethodInfo method, Exception ex)
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "This is only called in error cases for dynamic builder failures")]
+    #endif
+    private static TestMetadata CreateFailedTestMetadataForDynamicBuilder(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type type,
+        MethodInfo method,
+        Exception ex)
     {
         var testName = $"[DYNAMIC BUILDER FAILED] {type.FullName}.{method.Name}";
         var displayName = $"{testName} - {ex.Message}";
@@ -2050,10 +2205,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private sealed class DynamicReflectionTestMetadata : TestMetadata, IDynamicTestMetadata
     {
         private readonly DynamicDiscoveryResult _dynamicResult;
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         private readonly Type _testClass;
         private readonly MethodInfo _testMethod;
 
-        public DynamicReflectionTestMetadata(Type testClass, MethodInfo testMethod, DynamicDiscoveryResult dynamicResult)
+        public DynamicReflectionTestMetadata(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClass,
+            MethodInfo testMethod,
+            DynamicDiscoveryResult dynamicResult)
         {
             _testClass = testClass;
             _testMethod = testMethod;

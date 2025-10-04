@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 
 namespace TUnit.Engine.Building.Interfaces;
@@ -14,6 +15,10 @@ internal interface ITestBuilder
     /// <param name="testData">The test data</param>
     /// <param name="testBuilderContext"></param>
     /// <returns>An executable test ready for execution</returns>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
+    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
+    #endif
     Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestBuilder.TestData testData, TestBuilderContext testBuilderContext);
 
     /// <summary>
@@ -22,6 +27,10 @@ internal interface ITestBuilder
     /// </summary>
     /// <param name="metadata">The test metadata with DataCombinationGenerator</param>
     /// <returns>Collection of executable tests for all data combinations</returns>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
+    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
+    #endif
     Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata);
 
     /// <summary>
@@ -30,6 +39,10 @@ internal interface ITestBuilder
     /// <param name="metadata">The test metadata with DataCombinationGenerator</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Stream of executable tests for all data combinations</returns>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
+    #endif
     IAsyncEnumerable<AbstractExecutableTest> BuildTestsStreamingAsync(
         TestMetadata metadata,
         CancellationToken cancellationToken = default);

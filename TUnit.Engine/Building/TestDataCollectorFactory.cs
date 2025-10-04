@@ -41,6 +41,10 @@ internal static class TestDataCollectorFactory
     /// Attempts AOT mode first, falls back to reflection if no source-generated tests found.
     /// This provides automatic mode selection for optimal performance and compatibility.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
+    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    #endif
     public static async Task<ITestDataCollector> CreateAutoDetectAsync(string testSessionId, Assembly[]? assembliesToScan = null)
     {
         // Try AOT mode first (check if any tests were registered)

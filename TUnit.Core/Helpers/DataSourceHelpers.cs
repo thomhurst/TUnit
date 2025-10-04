@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
@@ -71,8 +71,6 @@ public static class DataSourceHelpers
     /// <summary>
     /// AOT-compatible tuple unwrapping that handles common tuple types without reflection
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2091:Target generic argument does not satisfy 'DynamicallyAccessedMembersAttribute' in target method or type.",
-        Justification = "We handle specific known tuple types without reflection")]
     public static object?[] UnwrapTupleAot(object? value)
     {
         if (value == null)
@@ -567,6 +565,10 @@ public static class DataSourceHelpers
     /// Resolves a data source property value at runtime.
     /// This method handles all IDataSourceAttribute implementations generically.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Property types are resolved through reflection")]
+    [RequiresDynamicCode("Data source resolution may require dynamic code generation")]
+    #endif
     public static async Task<object?> ResolveDataSourceForPropertyAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type containingType, string propertyName, MethodMetadata testInformation, string testSessionId)
     {
         // Use PropertyInjectionService to resolve the data source attribute
@@ -583,7 +585,7 @@ public static class DataSourceHelpers
         }
 
         var dataSourceAttribute = (IDataSourceAttribute)dataSourceAttributes[0];
-        
+
         // Create the data generator metadata with required fields
         var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateForPropertyInjection(
             propertyInfo,
@@ -598,7 +600,7 @@ public static class DataSourceHelpers
 
         // Generate the data source value using the attribute's GetDataRowsAsync method
         var dataRows = dataSourceAttribute.GetDataRowsAsync(dataGeneratorMetadata);
-        
+
         // Get the first value from the async enumerable
         await foreach (var factory in dataRows)
         {
@@ -606,10 +608,10 @@ public static class DataSourceHelpers
             if (args is { Length: > 0 })
             {
                 var value = args[0];
-                
+
                 // Initialize the value if it implements IAsyncInitializer
                 await ObjectInitializer.InitializeAsync(value);
-                
+
                 return value;
             }
         }

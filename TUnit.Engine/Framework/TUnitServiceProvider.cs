@@ -1,3 +1,4 @@
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
@@ -55,6 +56,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public ObjectRegistrationService ObjectRegistrationService { get; }
     public bool AfterSessionHooksFailed { get; set; }
 
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Test data collector selection may use reflection-based discovery")]
+    [RequiresDynamicCode("Reflection mode test discovery uses dynamic code generation")]
+#endif
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
         ITestExecutionFilter? filter,
@@ -133,13 +138,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testMethodInvoker = Register(new TestMethodInvoker());
 
         var useSourceGeneration = SourceRegistrar.IsEnabled = GetUseSourceGeneration(CommandLineOptions);
-#pragma warning disable IL2026 // Using member which has 'RequiresUnreferencedCodeAttribute'
-#pragma warning disable IL3050 // Using member which has 'RequiresDynamicCodeAttribute'
         ITestDataCollector dataCollector = useSourceGeneration
             ? new AotTestDataCollector()
             : new ReflectionTestDataCollector();
-#pragma warning restore IL3050
-#pragma warning restore IL2026
 
         var testBuilder = Register<ITestBuilder>(
             new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, PropertyInjectionService, DataSourceInitializer));

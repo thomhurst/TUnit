@@ -41,6 +41,11 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         return Task.FromResult(new CreateTestSessionResult { IsSuccess = true });
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test data collector selection may use reflection-based discovery")]
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Reflection mode test discovery uses dynamic code generation")]
+#pragma warning disable IL2046, IL3051 // Interface implementation - cannot add attributes to match called method requirements
+    #endif
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
         try
@@ -85,6 +90,9 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             context.Complete();
         }
     }
+    #if NET6_0_OR_GREATER
+#pragma warning restore IL2046, IL3051
+    #endif
 
     public async Task<CloseTestSessionResult> CloseTestSessionAsync(CloseTestSessionContext context)
     {
@@ -104,6 +112,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         return new CloseTestSessionResult { IsSuccess = isSuccess };
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test data collector selection may use reflection-based discovery")]
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Reflection mode test discovery uses dynamic code generation")]
+    #endif
     private TUnitServiceProvider GetOrCreateServiceProvider(ExecuteRequestContext context)
     {
         return _serviceProvidersPerSession.GetOrAdd(
