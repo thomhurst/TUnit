@@ -42,14 +42,20 @@ internal static class TestDataCollectorFactory
     /// This provides automatic mode selection for optimal performance and compatibility.
     /// </summary>
     #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
-    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    [RequiresUnreferencedCode("Falls back to reflection mode if no source-generated tests found")]
+    [RequiresDynamicCode("Falls back to reflection mode if no source-generated tests found")]
     #endif
     public static async Task<ITestDataCollector> CreateAutoDetectAsync(string testSessionId, Assembly[]? assembliesToScan = null)
     {
         // Try AOT mode first (check if any tests were registered)
         var aotCollector = new AotTestDataCollector();
+        #if NET6_0_OR_GREATER
+        #pragma warning disable IL2026, IL3050 // AOT collector handles dynamic tests conditionally
+        #endif
         var aotTests = await aotCollector.CollectTestsAsync(testSessionId);
+        #if NET6_0_OR_GREATER
+        #pragma warning restore IL2026, IL3050
+        #endif
 
         if (aotTests.Any())
         {

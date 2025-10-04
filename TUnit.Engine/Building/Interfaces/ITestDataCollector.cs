@@ -13,8 +13,8 @@ internal interface ITestDataCollector
     /// </summary>
     /// <returns>Collection of test metadata ready for processing</returns>
     #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
-    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    [RequiresUnreferencedCode("Reflection-based implementation uses assembly scanning")]
+    [RequiresDynamicCode("Reflection-based implementation uses MakeGenericType")]
     #endif
     Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId);
 }

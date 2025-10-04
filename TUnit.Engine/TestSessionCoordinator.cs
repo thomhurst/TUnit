@@ -76,22 +76,20 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _eventReceiverOrchestrator.InitializeTestCounts(testContexts);
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Static property initialization uses reflection in reflection mode")]
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Data source initialization may require dynamic code generation")]
-    #endif
     private async Task PrepareTestOrchestrator(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
         // Register all tests upfront so orchestrator knows total counts per class/assembly for lifecycle management
         _lifecycleCoordinator.RegisterTests(testList);
 
+        #if NET6_0_OR_GREATER
+        #pragma warning disable IL2026, IL3050 // Reflection only used when !SourceRegistrar.IsEnabled
+        #endif
         await InitializeStaticPropertiesAsync(cancellationToken);
+        #if NET6_0_OR_GREATER
+        #pragma warning restore IL2026, IL3050
+        #endif
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Static property initialization uses reflection in reflection mode")]
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Data source initialization may require dynamic code generation")]
-    #endif
     private async Task InitializeStaticPropertiesAsync(CancellationToken cancellationToken)
     {
         try
@@ -106,7 +104,13 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             // For reflection mode, also initialize static properties dynamically
             if (!SourceRegistrar.IsEnabled)
             {
+                #if NET6_0_OR_GREATER
+                #pragma warning disable IL2026, IL3050 // Reflection only used in reflection mode, not in AOT/source-gen mode
+                #endif
                 await StaticPropertyReflectionInitializer.InitializeAllStaticPropertiesAsync();
+                #if NET6_0_OR_GREATER
+                #pragma warning restore IL2026, IL3050
+                #endif
             }
         }
         catch (Exception ex)

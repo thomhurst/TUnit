@@ -11,10 +11,6 @@ namespace TUnit.Engine;
 
 internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
 {
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Hook discovery uses reflection to scan assemblies and types")]
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Hook delegate creation requires dynamic code generation")]
-    #endif
     public void Initialize(ExecuteRequestContext context)
     {
         ConfigureGlobalExceptionHandlers(context);
@@ -24,7 +20,13 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
         // Discover hooks via reflection if in reflection mode
         if (IsReflectionMode())
         {
+            #if NET6_0_OR_GREATER
+            #pragma warning disable IL2026, IL3050 // Reflection only used in reflection mode, not in AOT/source-gen mode
+            #endif
             DiscoverHooksViaReflection();
+            #if NET6_0_OR_GREATER
+            #pragma warning restore IL2026, IL3050
+            #endif
         }
 
         if (!string.IsNullOrEmpty(TestContext.OutputDirectory))

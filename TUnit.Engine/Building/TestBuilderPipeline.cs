@@ -55,13 +55,15 @@ internal sealed class TestBuilderPipeline
         return testBuilderContext;
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
-    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
-    #endif
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsAsync(string testSessionId)
     {
+        #if NET6_0_OR_GREATER
+        #pragma warning disable IL2026, IL3050 // Reflection is only used by ReflectionTestDataCollector, not AotTestDataCollector
+        #endif
         var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
+        #if NET6_0_OR_GREATER
+        #pragma warning restore IL2026, IL3050
+        #endif
 
         return await BuildTestsFromMetadataAsync(collectedMetadata).ConfigureAwait(false);
     }
@@ -69,21 +71,29 @@ internal sealed class TestBuilderPipeline
     /// <summary>
     /// Streaming version that yields tests as they're built without buffering
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
-    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
-    #endif
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsStreamingAsync(
         string testSessionId,
         CancellationToken cancellationToken = default)
     {
         // Get metadata streaming if supported
         // Fall back to non-streaming collection
+        #if NET6_0_OR_GREATER
+        #pragma warning disable IL2026, IL3050 // Reflection is only used by ReflectionTestDataCollector, not AotTestDataCollector
+        #endif
         var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
+        #if NET6_0_OR_GREATER
+        #pragma warning restore IL2026, IL3050
+        #endif
 
+        #if NET6_0_OR_GREATER
+        #pragma warning disable IL2026, IL3050 // Reflection usage in BuildTestsFromSingleMetadataAsync is handled appropriately
+        #endif
         return await collectedMetadata
             .SelectManyAsync(BuildTestsFromSingleMetadataAsync, cancellationToken: cancellationToken)
             .ProcessInParallel(cancellationToken: cancellationToken);
+        #if NET6_0_OR_GREATER
+        #pragma warning restore IL2026, IL3050
+        #endif
     }
 
     private async IAsyncEnumerable<TestMetadata> ToAsyncEnumerable(IEnumerable<TestMetadata> metadata)
@@ -95,10 +105,6 @@ internal sealed class TestBuilderPipeline
         }
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
-    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
-    #endif
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(IEnumerable<TestMetadata> testMetadata)
     {
         var testGroups = await testMetadata.SelectAsync(async metadata =>
@@ -108,10 +114,22 @@ internal sealed class TestBuilderPipeline
                     // Check if this is a dynamic test metadata that should bypass normal test building
                     if (metadata is IDynamicTestMetadata)
                     {
+                        #if NET6_0_OR_GREATER
+                        #pragma warning disable IL2026 // Dynamic tests use reflection for attribute filtering
+                        #endif
                         return await GenerateDynamicTests(metadata).ConfigureAwait(false);
+                        #if NET6_0_OR_GREATER
+                        #pragma warning restore IL2026
+                        #endif
                     }
 
+                    #if NET6_0_OR_GREATER
+                    #pragma warning disable IL2026, IL3050 // TestBuilder implementation handles reflection appropriately based on mode
+                    #endif
                     return await _testBuilder.BuildTestsFromMetadataAsync(metadata).ConfigureAwait(false);
+                    #if NET6_0_OR_GREATER
+                    #pragma warning restore IL2026, IL3050
+                    #endif
                 }
                 catch (Exception ex)
                 {

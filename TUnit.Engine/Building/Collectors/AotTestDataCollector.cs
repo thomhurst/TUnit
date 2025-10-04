@@ -16,8 +16,8 @@ namespace TUnit.Engine.Building.Collectors;
 internal sealed class AotTestDataCollector : ITestDataCollector
 {
     #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
-    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "AOT implementation uses source-generated metadata, not reflection")]
+    [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "AOT implementation uses source-generated metadata, not dynamic code")]
     #endif
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
@@ -29,8 +29,14 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             .SelectManyAsync(testSource => testSource.GetTestsAsync(testSessionId))
             .ProcessInParallel();
 
+        #if NET6_0_OR_GREATER
+        #pragma warning disable IL2026, IL3050 // Dynamic test collection is an optional feature that uses reflection
+        #endif
         var dynamicTestMetadatas = await CollectDynamicTestsStreaming(testSessionId)
             .ProcessInParallel();
+        #if NET6_0_OR_GREATER
+        #pragma warning restore IL2026, IL3050
+        #endif
 
         return [..standardTestMetadatas, ..dynamicTestMetadatas];
     }
