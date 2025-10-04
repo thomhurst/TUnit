@@ -97,6 +97,19 @@ namespace
         public static void Unless([.(false)] bool condition, string reason) { }
         public static void When([.(true)] bool condition, string reason) { }
     }
+    public abstract class LazyAssertionData
+    {
+        protected abstract .<.AssertionData> EvaluateAsync();
+        public .<.AssertionData> GetResultAsync() { }
+        public .LazyAssertionData WithConversion<TFromType, TToType>(..IValueSource<TFromType> valueSource, .<TFromType, TToType> convertToAssertCondition) { }
+        public .LazyAssertionData WithExceptionAsValue<TException>(..IDelegateSource delegateSource, ..<TException> convertToAssertCondition)
+            where TException :  { }
+        public static .LazyAssertionData Create( action, string? actualExpression) { }
+        public static .LazyAssertionData Create(<.> action, string? actualExpression) { }
+        public static .LazyAssertionData Create<T>(<.<T>> func, string? actualExpression) { }
+        public static .LazyAssertionData Create<T>(<T> func, string? actualExpression) { }
+        public static .LazyAssertionData Create<T>(T value, string? actualExpression) { }
+    }
     public enum MemberType
     {
         Property = 0,
@@ -482,9 +495,9 @@ namespace .
     {
         public ConvertedDelegateSource(..IDelegateSource source) { }
         public string? ActualExpression { get; }
-        public .<.AssertionData> AssertionDataTask { get; }
         public .<.> Assertions { get; }
         public .StringBuilder ExpressionBuilder { get; }
+        public .LazyAssertionData LazyAssertionData { get; }
         public ..ISource AppendExpression(string expression) { }
         public ..ISource WithAssertion(. assertCondition) { }
     }
@@ -492,9 +505,9 @@ namespace .
     {
         public ConvertedValueSource(..IValueSource<TFromType> source, .<TFromType, TToType> convertToAssertCondition) { }
         public string? ActualExpression { get; }
-        public .<.AssertionData> AssertionDataTask { get; }
         public .<.> Assertions { get; }
         public .StringBuilder ExpressionBuilder { get; }
+        public .LazyAssertionData LazyAssertionData { get; }
         public ..ISource AppendExpression(string expression) { }
         public ..ISource WithAssertion(. assertCondition) { }
     }
@@ -657,8 +670,8 @@ namespace .AssertionBuilders
         protected .? OtherTypeAssertionBuilder;
         protected readonly .<.> Results;
         public AssertionBuilder(..ISource source) { }
-        public AssertionBuilder(.<.AssertionData> assertionDataTask, string? actualExpression) { }
-        public AssertionBuilder(.<.AssertionData> assertionDataTask, string actualExpression, .StringBuilder expressionBuilder, .<.> assertions) { }
+        public AssertionBuilder(.LazyAssertionData lazyAssertionData, string? actualExpression) { }
+        public AssertionBuilder(.LazyAssertionData lazyAssertionData, string actualExpression, .StringBuilder expressionBuilder, .<.> assertions) { }
         protected void AppendCallerMethod(string?[] expressions, [.] string methodName = "") { }
         [.DebuggerHidden]
         [("This is a base `object` method that should not be called.", true)]
