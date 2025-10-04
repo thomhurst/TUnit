@@ -20,8 +20,8 @@ internal sealed class TestBuilder : ITestBuilder
     private readonly DataSourceInitializer _dataSourceInitializer;
 
     public TestBuilder(
-        string sessionId, 
-        EventReceiverOrchestrator eventReceiverOrchestrator, 
+        string sessionId,
+        EventReceiverOrchestrator eventReceiverOrchestrator,
         IContextProvider contextProvider,
         PropertyInjectionService propertyInjectionService,
         DataSourceInitializer dataSourceInitializer)
@@ -143,14 +143,14 @@ internal sealed class TestBuilder : ITestBuilder
                 ObjectBag = new Dictionary<string, object?>(),
                 InitializedAttributes = attributes  // Store the initialized attributes
             };
-            
+
             // Check for ClassConstructor attribute and set it early if present (reuse already created attributes)
             var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
             if (classConstructorAttribute != null)
             {
                 testBuilderContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
             }
-            
+
             var contextAccessor = new TestBuilderContextAccessor(testBuilderContext);
 
             var classDataAttributeIndex = 0;
@@ -367,7 +367,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     DataSourceAttribute = contextAccessor.Current.DataSourceAttribute, // Copy any data source attribute
                                     InitializedAttributes = attributes // Pass the initialized attributes
                                 };
-                                
+
                                 var test = await BuildTestAsync(metadata, testData, testSpecificContext);
 
                                 // If we have a basic skip reason, set it immediately
@@ -642,7 +642,7 @@ internal sealed class TestBuilder : ITestBuilder
     public async Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
         // Discover instance hooks for closed generic types in reflection mode
-        if (metadata.TestClassType.IsGenericType && !metadata.TestClassType.IsGenericTypeDefinition)
+        if (!SourceRegistrar.IsEnabled && metadata.TestClassType is { IsGenericType: true, IsGenericTypeDefinition: false })
         {
             Discovery.ReflectionHookDiscoveryService.DiscoverInstanceHooksForType(metadata.TestClassType);
         }
@@ -814,7 +814,7 @@ internal sealed class TestBuilder : ITestBuilder
                 await _dataSourceInitializer.EnsureInitializedAsync(dataSource);
             }
         }
-        
+
         return attributes;
     }
 
@@ -1119,7 +1119,7 @@ internal sealed class TestBuilder : ITestBuilder
             ObjectBag = new Dictionary<string, object?>(),
             InitializedAttributes = attributes  // Store the initialized attributes
         };
-        
+
         // Check for ClassConstructor attribute and set it early if present
         // Look for any attribute that inherits from ClassConstructorAttribute
         // This handles both ClassConstructorAttribute and ClassConstructorAttribute<T>
@@ -1127,12 +1127,12 @@ internal sealed class TestBuilder : ITestBuilder
             .Where(a => a is ClassConstructorAttribute)
             .Cast<ClassConstructorAttribute>()
             .FirstOrDefault();
-            
+
         if (classConstructorAttribute != null)
         {
             baseContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
         }
-        
+
         var contextAccessor = new TestBuilderContextAccessor(baseContext);
 
         // Check for circular dependency
@@ -1278,7 +1278,7 @@ internal sealed class TestBuilder : ITestBuilder
         try
         {
             var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
-            
+
             var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
             // Check data compatibility for generic methods

@@ -60,6 +60,11 @@ internal sealed class ReflectionHookDiscoveryService
     /// </summary>
     public static void DiscoverInstanceHooksForType(Type closedGenericType)
     {
+        if (SourceRegistrar.IsEnabled)
+        {
+            throw new InvalidOperationException("Cannot use reflection-based hook discovery when source generation is enabled");
+        }
+
         if (closedGenericType == null || !closedGenericType.IsGenericType || closedGenericType.ContainsGenericParameters)
         {
             return;
