@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace TUnit.Core.DataSources;
@@ -54,8 +54,10 @@ public static class DataSourceProcessor
     /// Processes a generator result item and extracts the data values
     /// This method uses reflection and is only suitable for reflection mode
     /// </summary>
+    #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("This method uses reflection to process data sources")]
     [RequiresDynamicCode("This method may create types at runtime")]
+    #endif
     public static async Task<List<object?[]>> ProcessGeneratorItemAsync(object? item)
     {
         var items = new List<object?[]>();
@@ -141,8 +143,10 @@ public static class DataSourceProcessor
     /// Resolves a value that might be wrapped in a Func or Task
     /// This method uses reflection and is only suitable for reflection mode
     /// </summary>
+    #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("This method uses reflection to resolve values")]
     [RequiresDynamicCode("This method may invoke methods dynamically")]
+    #endif
     public static async Task<object?> ResolveValueAsync(object? value)
     {
         if (value == null)
@@ -209,7 +213,9 @@ public static class DataSourceProcessor
     /// Processes method data source results into a consistent format
     /// This method uses reflection for tuple processing and is not AOT-compatible
     /// </summary>
+    #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("This method uses reflection for tuple processing")]
+    #endif
     public static IEnumerable<object?[]> ProcessMethodDataSourceResult(object? result)
     {
         if (result == null)
@@ -289,13 +295,17 @@ public static class DataSourceProcessor
 
     #region Tuple Processing Helpers (Reflection-based, not AOT-compatible)
 
+    #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Tuple processing requires reflection")]
+    #endif
     private static bool TryProcessTupleArray(object result, Type resultType)
     {
         return resultType.IsArray && resultType.GetElementType()?.Name.StartsWith("ValueTuple") == true;
     }
 
+    #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Tuple processing requires reflection")]
+    #endif
     private static IEnumerable<object?[]> ProcessTupleArray(object result, Type resultType)
     {
         var array = (Array)result;
@@ -316,13 +326,17 @@ public static class DataSourceProcessor
         }
     }
 
+    #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Tuple processing requires reflection")]
+    #endif
     private static bool TryProcessSingleTuple(object result, Type resultType)
     {
         return resultType.Name.StartsWith("ValueTuple");
     }
 
+    #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Tuple processing requires reflection")]
+    #endif
     private static object?[] ProcessSingleTuple(object result, Type resultType)
     {
         var fields = GetTupleFields(resultType);
@@ -342,7 +356,9 @@ public static class DataSourceProcessor
     /// <summary>
     /// Gets the Result property from a Task type with proper AOT attribution
     /// </summary>
+    #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Property access requires reflection")]
+    #endif
     private static PropertyInfo? GetTaskResultProperty([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type taskType)
     {
         return taskType.GetProperty("Result");
@@ -351,7 +367,9 @@ public static class DataSourceProcessor
     /// <summary>
     /// Gets the Invoke method from a delegate type with proper AOT attribution  
     /// </summary>
+    #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Method access requires reflection")]
+    #endif
     private static MethodInfo? GetDelegateInvokeMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type delegateType)
     {
         return delegateType.GetMethod("Invoke");
@@ -360,7 +378,9 @@ public static class DataSourceProcessor
     /// <summary>
     /// Gets fields from a tuple type with proper AOT attribution
     /// </summary>
+    #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Field access requires reflection")]
+    #endif
     private static FieldInfo[] GetTupleFields([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] Type tupleType)
     {
         return tupleType.GetFields();

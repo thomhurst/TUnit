@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
 
@@ -12,8 +12,9 @@ internal static class TestInstanceHelper
     /// <summary>
     /// Creates a test instance with data from class data sources
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
-    [UnconditionalSuppressMessage("Trimming", "IL2067:Target type's member does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Test instance creation uses reflection on constructors and properties")]
+    #endif
     public static object? CreateTestInstanceWithData(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass,
         IDataSourceAttribute[]? classDataSources)
@@ -133,7 +134,9 @@ internal static class TestInstanceHelper
     /// <summary>
     /// Creates test instance for inherited test classes
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Inherited test instance creation uses reflection on type hierarchy")]
+    #endif
     public static object? CreateInheritedTestInstance(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass)
     {
@@ -182,9 +185,9 @@ internal static class TestInstanceHelper
         public override string ToString() => "<discovery-placeholder>";
     }
     
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
-    [UnconditionalSuppressMessage("Trimming", "IL2067:Target type's member does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
-    [UnconditionalSuppressMessage("Trimming", "IL2072:Target method return value does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Property initialization traverses type hierarchy using reflection")]
+    #endif
     private static void InitializeInheritedRequiredProperties(object instance, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         var currentType = type;

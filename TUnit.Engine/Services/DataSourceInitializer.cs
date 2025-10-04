@@ -25,6 +25,9 @@ internal sealed class DataSourceInitializer
     /// Ensures a data source instance is fully initialized before use.
     /// This includes property injection and calling IAsyncInitializer if implemented.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     public async Task<T> EnsureInitializedAsync<T>(
         T dataSource,
         Dictionary<string, object?>? objectBag = null,
@@ -59,6 +62,9 @@ internal sealed class DataSourceInitializer
     /// <summary>
     /// Initializes a data source instance with the complete lifecycle.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     private async Task InitializeDataSourceAsync(
         object dataSource,
         Dictionary<string, object?>? objectBag,
@@ -100,6 +106,9 @@ internal sealed class DataSourceInitializer
     /// Initializes all nested property-injected objects in depth-first order.
     /// This ensures that when the parent's IAsyncInitializer runs, all nested dependencies are already initialized.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     private async Task InitializeNestedObjectsAsync(object rootObject)
     {
         var objectsByDepth = new Dictionary<int, HashSet<object>>();
@@ -123,6 +132,9 @@ internal sealed class DataSourceInitializer
     /// <summary>
     /// Recursively collects all nested property-injected objects grouped by depth.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     private void CollectNestedObjects(
         object obj,
         Dictionary<int, HashSet<object>> objectsByDepth,

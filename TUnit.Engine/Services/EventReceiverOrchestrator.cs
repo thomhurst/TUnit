@@ -84,6 +84,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     // Fast-path checks with inlining
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask InvokeTestStartEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         // Fast path - no allocation if no receivers
@@ -95,6 +98,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         await InvokeTestStartEventReceiversCore(context, cancellationToken);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
         var receivers = context.GetEligibleEventObjects()
@@ -121,6 +127,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask InvokeTestEndEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         if (!_registry.HasTestEndReceivers())
@@ -131,6 +140,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         await InvokeTestEndEventReceiversCore(context, cancellationToken);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async ValueTask InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
         var receivers = context.GetEligibleEventObjects()
@@ -155,6 +167,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask InvokeTestSkippedEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         if (!_registry.HasTestSkippedReceivers())
@@ -165,6 +180,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         await InvokeTestSkippedEventReceiversCore(context, cancellationToken);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async ValueTask InvokeTestSkippedEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
         var receivers = context.GetEligibleEventObjects()
@@ -181,6 +199,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask InvokeTestDiscoveryEventReceiversAsync(TestContext context, DiscoveredTestContext discoveredContext, CancellationToken cancellationToken)
     {
         var eventReceivers = context.GetEligibleEventObjects()
@@ -197,6 +218,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask InvokeHookRegistrationEventReceiversAsync(HookRegisteredContext hookContext, CancellationToken cancellationToken)
     {
         // Get event receivers from the hook method's attributes

@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Enums;
 
@@ -206,7 +206,9 @@ internal static class DataGeneratorMetadataCreator
     /// <summary>
     /// Creates DataGeneratorMetadata for property injection using PropertyInfo (reflection mode).
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2072:'value' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.PropertyMetadata.Type.init'", Justification = "Property types are resolved through reflection")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Property types are resolved through reflection")]
+    #endif
     public static DataGeneratorMetadata CreateForPropertyInjection(
         PropertyInfo property,
         Type containingType,
@@ -253,9 +255,9 @@ internal static class DataGeneratorMetadataCreator
         return parameters;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicConstructors' in call to 'System.Type.GetConstructors(BindingFlags)'", Justification = "Constructor discovery needed for metadata")]
-    [UnconditionalSuppressMessage("Trimming", "IL2067:'value' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ClassMetadata.Type.init'", Justification = "Type annotations are handled by reflection")]
-    [UnconditionalSuppressMessage("Trimming", "IL2072:'Type' argument does not satisfy 'DynamicallyAccessedMemberTypes' in call to 'TUnit.Core.ParameterMetadata.ParameterMetadata(Type)'", Justification = "Parameter types are known through reflection")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Class metadata creation requires reflection")]
+    #endif
     private static ClassMetadata GetClassMetadataForType(Type type)
     {
         return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () =>

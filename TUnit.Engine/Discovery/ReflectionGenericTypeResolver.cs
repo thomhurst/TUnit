@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
@@ -8,18 +8,14 @@ namespace TUnit.Engine.Discovery;
 /// <summary>
 /// Handles generic type resolution and instantiation for reflection-based test discovery
 /// </summary>
-[UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Reflection mode cannot support trimming")]
-[UnconditionalSuppressMessage("Trimming", "IL2055:Call to 'System.Type.MakeGenericType' can not be statically analyzed", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2065:Value passed to implicit 'this' parameter of method can not be statically determined and may not meet 'DynamicallyAccessedMembersAttribute' requirements", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Reflection mode cannot support AOT")]
 internal static class ReflectionGenericTypeResolver
 {
     /// <summary>
     /// Determines generic type arguments from data row values
     /// </summary>
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Generic type argument determination uses reflection")]
+#endif
     public static Type[]? DetermineGenericTypeArguments(Type genericTypeDefinition, object?[] dataRow)
     {
 #if NET
@@ -82,6 +78,9 @@ internal static class ReflectionGenericTypeResolver
     /// <summary>
     /// Extracts generic type information including constraints
     /// </summary>
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Generic type info extraction uses reflection on type parameters")]
+#endif
     public static GenericTypeInfo? ExtractGenericTypeInfo(Type testClass)
     {
         // Handle both generic type definitions and constructed generic types
@@ -129,6 +128,9 @@ internal static class ReflectionGenericTypeResolver
     /// <summary>
     /// Extracts generic method information including parameter positions
     /// </summary>
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Generic method info extraction uses reflection on method parameters")]
+#endif
     public static GenericMethodInfo? ExtractGenericMethodInfo(MethodInfo method)
     {
         if (!method.IsGenericMethodDefinition)
@@ -177,6 +179,10 @@ internal static class ReflectionGenericTypeResolver
     /// <summary>
     /// Creates a concrete type from a generic type definition and validates the type arguments
     /// </summary>
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Concrete type creation uses Type.GetGenericArguments and reflection")]
+    [RequiresDynamicCode("Type construction uses MakeGenericType")]
+#endif
     public static Type CreateConcreteType(Type genericTypeDefinition, Type[] typeArguments)
     {
         var genericParams = genericTypeDefinition.GetGenericArguments();

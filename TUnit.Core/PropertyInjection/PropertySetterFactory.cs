@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace TUnit.Core.PropertyInjection;
@@ -12,6 +12,9 @@ internal static class PropertySetterFactory
     /// <summary>
     /// Creates a setter delegate for the given property.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
+    #endif
     public static Action<object, object?> CreateSetter(PropertyInfo property)
     {
         if (property.CanWrite && property.SetMethod != null)
@@ -43,8 +46,9 @@ internal static class PropertySetterFactory
     /// <summary>
     /// Gets the backing field for a property.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Accessing backing fields for init-only and required properties in reflection mode. The compiler-generated field naming pattern (<property>k__BackingField) is stable. For AOT, source generation creates direct setters.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "PropertyInfo.DeclaringType may not carry field annotations, but we only access compiler-generated backing fields which are preserved when the property is preserved. For AOT, use source-generated setters.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
+    #endif
     private static FieldInfo? GetBackingField(PropertyInfo property)
     {
         var declaringType = property.DeclaringType;
@@ -84,11 +88,13 @@ internal static class PropertySetterFactory
     /// <summary>
     /// Helper method to get field with proper trimming suppression.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Safe field access when DynamicallyAccessedMembers annotations are present. The caller ensures the type has the required field preservation. This is only used for setting property backing fields in reflection mode.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Field access for property backing fields requires reflection")]
+    #endif
     private static FieldInfo? GetFieldSafe(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] 
-        Type type, 
-        string name, 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)]
+        Type type,
+        string name,
         BindingFlags bindingFlags)
     {
         return type.GetField(name, bindingFlags);
@@ -97,7 +103,9 @@ internal static class PropertySetterFactory
     /// <summary>
     /// Checks if a method is init-only.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Checking for System.Runtime.CompilerServices.IsExternalInit modreq to identify init-only setters. This is a stable .NET runtime convention. For AOT, the source generator identifies init-only properties at compile time and generates appropriate setters.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Checking for init-only setters requires reflection")]
+    #endif
     private static bool IsInitOnlyMethod(MethodInfo setMethod)
     {
         var methodType = setMethod.GetType();

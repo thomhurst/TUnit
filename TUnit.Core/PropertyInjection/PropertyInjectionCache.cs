@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Data;
 
 namespace TUnit.Core.PropertyInjection;
@@ -25,7 +25,9 @@ internal static class PropertyInjectionCache
     /// The plan builder will use source-generated metadata if available,
     /// otherwise falls back to reflection-based discovery.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Type comes from runtime objects that cannot be annotated")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     public static PropertyInjectionPlan GetOrCreatePlan(Type type)
     {
         return _injectionPlans.GetOrAdd(type, _ => PropertyInjectionPlanBuilder.Build(type));
@@ -34,7 +36,9 @@ internal static class PropertyInjectionCache
     /// <summary>
     /// Checks if a type has injectable properties using caching.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Type comes from runtime objects that cannot be annotated")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     public static bool HasInjectableProperties(Type type)
     {
         return _shouldInjectCache.GetOrAdd(type, t =>

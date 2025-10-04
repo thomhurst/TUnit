@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Interfaces.SourceGenerator;
 
@@ -14,7 +14,9 @@ internal static class PropertyInjectionPlanBuilder
     /// Creates an injection plan for source-generated mode.
     /// Walks the inheritance chain to include all injectable properties from base classes.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "BaseType reflection is required for inheritance support")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("BaseType reflection required for inheritance support")]
+    #endif
     public static PropertyInjectionPlan BuildSourceGeneratedPlan(Type type)
     {
         var allProperties = new List<PropertyInjectionMetadata>();
@@ -54,8 +56,9 @@ internal static class PropertyInjectionPlanBuilder
     /// <summary>
     /// Creates an injection plan for reflection mode.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode support")]
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "BaseType reflection is required for inheritance support")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Reflection mode requires runtime property discovery")]
+    #endif
     public static PropertyInjectionPlan BuildReflectionPlan(Type type)
     {
         var propertyDataSourcePairs = new List<(PropertyInfo property, IDataSourceAttribute dataSource)>();
@@ -103,7 +106,9 @@ internal static class PropertyInjectionPlanBuilder
     /// <summary>
     /// Builds an injection plan based on the current execution mode.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Handles both AOT and non-AOT scenarios")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Property injection plan building requires reflection")]
+    #endif
     public static PropertyInjectionPlan Build(Type type)
     {
         return SourceRegistrar.IsEnabled 

@@ -20,7 +20,13 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
         // Discover hooks via reflection if in reflection mode
         if (IsReflectionMode())
         {
+            #if NET6_0_OR_GREATER
+            #pragma warning disable IL2026, IL3050 // Reflection only used in reflection mode, not in AOT/source-gen mode
+            #endif
             DiscoverHooksViaReflection();
+            #if NET6_0_OR_GREATER
+            #pragma warning restore IL2026, IL3050
+            #endif
         }
 
         if (!string.IsNullOrEmpty(TestContext.OutputDirectory))
@@ -34,8 +40,10 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
         return !SourceRegistrar.IsEnabled;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Hook discovery uses reflection to scan assemblies and types")]
+    [RequiresDynamicCode("Hook delegate creation requires dynamic code generation")]
+#endif
     private void DiscoverHooksViaReflection()
     {
         ReflectionHookDiscoveryService.DiscoverHooks();

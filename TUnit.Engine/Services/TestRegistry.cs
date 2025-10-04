@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -32,6 +32,7 @@ internal sealed class TestRegistry : ITestRegistry
         _sessionCancellationToken = sessionCancellationToken;
     }
     [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Adding dynamic tests requires runtime compilation and reflection which are not supported in native AOT scenarios.")]
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
     public async Task AddDynamicTest<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
@@ -65,8 +66,10 @@ internal sealed class TestRegistry : ITestRegistry
         await ProcessPendingDynamicTests();
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.",
-        Justification = "Dynamic tests are opt-in and users are warned via RequiresDynamicCode on AddDynamicTest method")]
+#if NET6_0_OR_GREATER
+    [RequiresDynamicCode("Dynamic test processing uses expression compilation")]
+    [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
+#endif
     private async Task ProcessPendingDynamicTests()
     {
         var testsToProcess = new List<PendingDynamicTest>();
@@ -104,6 +107,7 @@ internal sealed class TestRegistry : ITestRegistry
     }
 
     [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic tests require runtime compilation of lambda expressions and are not supported in native AOT scenarios.")]
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Method metadata creation uses reflection on parameters and types")]
     private async Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
     {
         if (result.TestClassType == null || result.TestMethod == null)

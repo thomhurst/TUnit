@@ -109,6 +109,10 @@ public static class ReflectionExtensions
 #endif
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Attribute instantiation uses reflection for .NET Framework compatibility")]
+    [RequiresDynamicCode("Activator.CreateInstance required for attribute instantiation")]
+    #endif
     private static Attribute[] GetAttributesViaCustomAttributeData(ICustomAttributeProvider provider, Type attributeType, bool inherit)
     {
         var attributes = new List<Attribute>();
@@ -171,12 +175,10 @@ public static class ReflectionExtensions
         return attributes.ToArray();
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL2072:Target type's member does not satisfy requirements", 
-        Justification = "Attribute instantiation uses known constructor patterns. For AOT scenarios, use source-generated attribute discovery.")]
-    [UnconditionalSuppressMessage("AOT", "IL2075:Target parameter does not satisfy requirements", 
-        Justification = "Attribute types with known constructors are preserved. This is a fallback for non-source-generated scenarios.")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", 
-        Justification = "Required for .NET Framework compatibility. AOT scenarios should use source-generated test discovery.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Attribute instantiation uses reflection for .NET Framework compatibility")]
+    [RequiresDynamicCode("Activator.CreateInstance required for attribute instantiation")]
+    #endif
     private static Attribute? CreateAttributeInstance(CustomAttributeData attributeData)
     {
         var attributeType = attributeData.AttributeType;
@@ -241,10 +243,13 @@ public static class ReflectionExtensions
         return attribute;
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Runtime type property access for attribute argument extraction")]
+    #endif
     private static object? ExtractArgumentValue(CustomAttributeTypedArgument arg)
     {
         var value = arg.Value;
-        
+
         // In .NET Framework, params arrays come as ReadOnlyCollection<CustomAttributeTypedArgument>
         if (value != null && value.GetType().FullName?.Contains("CustomAttributeTypedArgument") == true)
         {
@@ -269,15 +274,16 @@ public static class ReflectionExtensions
                 return items.ToArray();
             }
         }
-        
+
         return value;
     }
     
     /// <summary>
     /// Gets the "Value" property from a type in an AOT-safer manner.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075:Target method return value does not satisfy annotation requirements",
-        Justification = "Value property access is used for unwrapping test data. For AOT scenarios, use strongly-typed data sources.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Property access used for unwrapping test data")]
+    #endif
     private static PropertyInfo? GetValuePropertySafe([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         return type.GetProperty("Value");
@@ -286,10 +292,9 @@ public static class ReflectionExtensions
     /// <summary>
     /// Gets the "Value" property from a runtime type.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter does not satisfy annotation requirements",
-        Justification = "Runtime type from GetType() cannot have static annotations. This is used for CustomAttributeTypedArgument unwrapping.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements",
-        Justification = "The type parameter comes from runtime GetType() which cannot be annotated. Used for attribute argument extraction.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Runtime type property access for attribute argument extraction")]
+    #endif
     private static PropertyInfo? GetValuePropertyForType(Type type)
     {
         return GetValuePropertySafe(type);

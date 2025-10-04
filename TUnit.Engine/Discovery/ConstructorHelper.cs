@@ -12,8 +12,9 @@ internal static class ConstructorHelper
     /// <summary>
     /// Finds a suitable constructor for a test class, preferring ones marked with [TestConstructor]
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements",
-        Justification = "Constructor discovery is required for test instantiation. AOT scenarios should use source-generated test metadata.")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Constructor discovery requires reflection on constructors and attributes")]
+#endif
     public static ConstructorInfo? FindSuitableConstructor(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type testClass,
         Attribute[] classAttributes)
@@ -35,12 +36,9 @@ internal static class ConstructorHelper
     /// <summary>
     /// Creates an instance of a test class with proper constructor parameter handling
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2067:Target type's member does not satisfy annotation requirements",
-        Justification = "Test class instantiation requires constructor access. AOT scenarios should use source-generated factories.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements",
-        Justification = "Dynamic property initialization is a fallback. AOT scenarios should use compile-time initialization.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2072:Target method return value does not satisfy annotation requirements",
-        Justification = "Type flow in reflection mode cannot be statically analyzed. Use source generation for AOT.")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Test instance creation uses ConstructorInfo.Invoke and Activator.CreateInstance")]
+#endif
     public static object? CreateTestClassInstanceWithConstructor(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type testClass,
         ConstructorInfo? constructor,
@@ -115,8 +113,9 @@ internal static class ConstructorHelper
     /// <summary>
     /// Checks if a type has required properties that need initialization
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements",
-        Justification = "Required property checking uses reflection. For AOT, ensure test classes don't use required properties or use source generation.")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Required property detection uses reflection on properties and attributes")]
+#endif
     public static bool HasRequiredProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         // Check if the type itself has RequiredMemberAttribute (indicates it has required properties)
@@ -133,10 +132,9 @@ internal static class ConstructorHelper
     /// <summary>
     /// Tries to initialize required properties on an instance
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements",
-        Justification = "Required property initialization needs reflection. AOT scenarios should initialize properties in constructors.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2072:Target method return value does not satisfy annotation requirements",
-        Justification = "Property type information flows through reflection. Use explicit property initialization for AOT.")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Property initialization uses reflection on properties and their types")]
+#endif
     public static void InitializeRequiredProperties(
         object instance,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
@@ -231,8 +229,9 @@ internal static class ConstructorHelper
     /// <summary>
     /// AOT-safe wrapper for Activator.CreateInstance with proper attribution
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements",
-        Justification = "Parameterless constructor invocation with preserved type. For full AOT support, use source-generated factories.")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Activator.CreateInstance requires reflection")]
+#endif
     private static object? CreateInstanceSafely([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type)
     {
         return Activator.CreateInstance(type);

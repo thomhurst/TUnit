@@ -27,6 +27,9 @@ internal sealed class ObjectRegistrationService
     /// <param name="objectBag">Shared object bag for the test context. Must not be null.</param>
     /// <param name="methodMetadata">Method metadata for the test. Can be null.</param>
     /// <param name="events">Test context events for tracking. Must not be null and must be unique per test permutation.</param>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     public async Task RegisterObjectAsync(
         object instance,
         Dictionary<string, object?> objectBag,
@@ -62,6 +65,9 @@ internal sealed class ObjectRegistrationService
     /// Registers multiple objects (e.g., constructor/method arguments) in parallel.
     /// Used during test registration to prepare arguments without executing expensive operations.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     public async Task RegisterArgumentsAsync(
         object?[] arguments,
         Dictionary<string, object?> objectBag,
@@ -91,6 +97,12 @@ internal sealed class ObjectRegistrationService
     /// </summary>
     private bool RequiresPropertyInjection(object instance)
     {
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2026 // Injectable property check uses reflection - acceptable during registration
+#endif
         return PropertyInjectionCache.HasInjectableProperties(instance.GetType());
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2026
+#endif
     }
 }

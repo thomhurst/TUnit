@@ -51,6 +51,9 @@ internal class TestExecutor
     /// Creates a test executor delegate that wraps the provided executor with hook orchestration.
     /// Uses focused services that follow SRP to manage lifecycle and execution.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async Task ExecuteAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {
 
@@ -242,8 +245,9 @@ internal class TestExecutor
         return _contextProvider;
     }
 
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075:Type.GetProperty does not have matching annotations",
-        Justification = "Only used for specific test class DisposalRegressionTests")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Test disposal may use reflection on properties")]
+#endif
     internal static async Task DisposeTestInstance(AbstractExecutableTest test)
     {
         // Dispose the test instance if it's disposable

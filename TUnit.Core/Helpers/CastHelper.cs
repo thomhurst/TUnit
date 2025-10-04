@@ -7,10 +7,10 @@ namespace TUnit.Core.Helpers;
 
 public static class CastHelper
 {
-    [UnconditionalSuppressMessage("Trimming", "IL2072",
-        Justification = "Type conversion uses DynamicallyAccessedMembers for known conversion patterns. For AOT scenarios, use explicit type conversions.")]
-    [UnconditionalSuppressMessage("AOT", "IL3050",
-        Justification = "Reflection-based conversion is a fallback for runtime scenarios. AOT applications should use explicit conversions.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Type conversion uses reflection for custom conversions")]
+    [RequiresDynamicCode("Dynamic type conversion may require runtime code generation")]
+    #endif
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(object? value)
     {
         if (value is null)
@@ -175,10 +175,10 @@ public static class CastHelper
         }
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2072",
-        Justification = "Type conversion uses DynamicallyAccessedMembers for known conversion patterns. For AOT scenarios, use explicit type conversions.")]
-    [UnconditionalSuppressMessage("AOT", "IL3050",
-        Justification = "Reflection-based conversion is a fallback for runtime scenarios. AOT applications should use explicit conversions.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Type conversion uses reflection for custom conversions")]
+    [RequiresDynamicCode("Dynamic type conversion may require runtime code generation")]
+    #endif
     public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, object? value)
     {
         if (value is null)
@@ -372,8 +372,9 @@ public static class CastHelper
     /// <summary>
     /// Gets the "Value" property from a type in an AOT-safer manner.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075:Target method return value does not satisfy annotation requirements",
-        Justification = "Value property access is used for unwrapping CustomAttributeTypedArgument. For AOT scenarios, use source-generated attribute discovery.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Property access for CustomAttributeTypedArgument unwrapping")]
+    #endif
     private static PropertyInfo? GetValuePropertySafe([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         return type.GetProperty("Value");

@@ -34,6 +34,9 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
     /// Called when a test is registered. This is the correct time to register constructor and method arguments
     /// for proper reference counting and disposal tracking.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     public async ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         var testContext = context.TestContext;
@@ -57,7 +60,13 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
         // Register properties that will be injected into the test class
         await RegisterPropertiesAsync(testContext);
 
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2026 // Trackable object discovery uses reflection - acceptable during test discovery
+#endif
         _objectTracker.TrackObjects(testContext);
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2026
+#endif
     }
 
     /// <summary>
@@ -65,6 +74,9 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
     /// This ensures proper reference counting for all property-injected instances during discovery.
     /// Exceptions during data generation will be caught and associated with the test for reporting.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     private async ValueTask RegisterPropertiesAsync(TestContext testContext)
     {
         try

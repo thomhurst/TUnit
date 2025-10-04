@@ -43,12 +43,18 @@ internal sealed class TestCoordinator : ITestCoordinator
         _logger = logger;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         await _executionGuard.TryStartExecutionAsync(test.TestId,
             () => ExecuteTestInternalAsync(test, cancellationToken));
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     private async Task ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         try
@@ -91,7 +97,13 @@ internal sealed class TestCoordinator : ITestCoordinator
 
                 try
                 {
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2026 // Test initialization may use reflection - acceptable during test execution
+#endif
                     await _testInitializer.InitializeTest(test, cancellationToken);
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2026
+#endif
                     test.Context.RestoreExecutionContext();
                     await _testExecutor.ExecuteAsync(test, cancellationToken);
                 }
@@ -116,7 +128,13 @@ internal sealed class TestCoordinator : ITestCoordinator
 
                     try
                     {
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2026 // Test disposal may use reflection - acceptable during test cleanup
+#endif
                         await TestExecutor.DisposeTestInstance(test);
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2026
+#endif
                     }
                     catch (Exception disposeEx)
                     {

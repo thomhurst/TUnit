@@ -20,6 +20,9 @@ internal class TestInitializer
         _objectTracker = objectTracker;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Object tracking may use reflection on properties")]
+    #endif
     public async Task InitializeTest(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassInstance = test.Context.TestDetails.ClassInstance;

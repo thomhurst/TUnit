@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace TUnit.Core.PropertyInjection;
@@ -12,14 +12,16 @@ internal static class ClassMetadataHelper
     /// <summary>
     /// Gets or creates ClassMetadata for the specified type.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Metadata creation")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Metadata creation requires reflection")]
+    #endif
     public static ClassMetadata GetOrCreateClassMetadata(
         [DynamicallyAccessedMembers(
-            DynamicallyAccessedMemberTypes.PublicConstructors | 
-            DynamicallyAccessedMemberTypes.NonPublicConstructors | 
-            DynamicallyAccessedMemberTypes.PublicMethods | 
-            DynamicallyAccessedMemberTypes.NonPublicMethods | 
-            DynamicallyAccessedMemberTypes.PublicProperties)] 
+            DynamicallyAccessedMemberTypes.PublicConstructors |
+            DynamicallyAccessedMemberTypes.NonPublicConstructors |
+            DynamicallyAccessedMemberTypes.PublicMethods |
+            DynamicallyAccessedMemberTypes.NonPublicMethods |
+            DynamicallyAccessedMemberTypes.PublicProperties)]
         Type type)
     {
         return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () =>

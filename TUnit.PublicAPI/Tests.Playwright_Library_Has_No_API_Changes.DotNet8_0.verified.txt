@@ -122,6 +122,7 @@ namespace
         public WorkerAwareTest() { }
         public virtual bool UseDefaultParallelLimiter { get; }
         public int WorkerIndex { get; }
+        [.("Type comes from runtime objects that cannot be annotated")]
         public . OnTestRegistered(.TestRegisteredContext context) { }
         public .<T> RegisterService<T>(string name, <.<T>> factory)
             where T :  class, .IWorkerService { }

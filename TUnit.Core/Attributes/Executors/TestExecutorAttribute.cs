@@ -8,6 +8,9 @@ public sealed class TestExecutorAttribute<T> : TUnitAttribute, ITestRegisteredEv
 {
     public int Order => 0;
 
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+#endif
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetTestExecutor(new T());
@@ -20,6 +23,9 @@ public sealed class TestExecutorAttribute([DynamicallyAccessedMembers(Dynamicall
 {
     public int Order => 0;
 
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+#endif
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetTestExecutor((ITestExecutor) Activator.CreateInstance(type)!);

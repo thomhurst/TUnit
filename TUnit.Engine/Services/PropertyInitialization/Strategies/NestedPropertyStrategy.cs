@@ -53,7 +53,13 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
         }
 
         // Get the injection plan for this type
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2026 // Injection plan creation uses reflection - acceptable during nested property handling
+#endif
         var plan = PropertyInjectionCache.GetOrCreatePlan(propertyType);
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2026
+#endif
 
         // Recursively inject properties into the nested object
         if (SourceRegistrar.IsEnabled)
@@ -161,7 +167,13 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
             DataSource = dataSource,
             PropertyName = propertyName,
             PropertyType = property.PropertyType,
+#if NET6_0_OR_GREATER
+#pragma warning disable IL2026 // Property setter creation may use reflection - acceptable for init-only properties
+#endif
             PropertySetter = PropertySetterFactory.CreateSetter(property),
+#if NET6_0_OR_GREATER
+#pragma warning restore IL2026
+#endif
             ObjectBag = parentContext.ObjectBag,
             MethodMetadata = parentContext.MethodMetadata,
             Events = parentContext.Events,

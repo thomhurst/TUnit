@@ -38,6 +38,11 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _testScheduler = testScheduler;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Static property initialization uses reflection in reflection mode")]
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Data source initialization may require dynamic code generation")]
+#pragma warning disable IL2046, IL3051 // Interface implementation - cannot add attributes to match called method requirements
+    #endif
     public async Task ExecuteTests(
         IEnumerable<AbstractExecutableTest> tests,
         ITestExecutionFilter? filter,
@@ -61,6 +66,9 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             }
         }
     }
+    #if NET6_0_OR_GREATER
+#pragma warning restore IL2046, IL3051
+    #endif
 
     private void InitializeEventReceivers(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
@@ -73,7 +81,13 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         // Register all tests upfront so orchestrator knows total counts per class/assembly for lifecycle management
         _lifecycleCoordinator.RegisterTests(testList);
 
+        #if NET6_0_OR_GREATER
+        #pragma warning disable IL2026, IL3050 // Reflection only used when !SourceRegistrar.IsEnabled
+        #endif
         await InitializeStaticPropertiesAsync(cancellationToken);
+        #if NET6_0_OR_GREATER
+        #pragma warning restore IL2026, IL3050
+        #endif
     }
 
     private async Task InitializeStaticPropertiesAsync(CancellationToken cancellationToken)
@@ -90,7 +104,13 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
             // For reflection mode, also initialize static properties dynamically
             if (!SourceRegistrar.IsEnabled)
             {
+                #if NET6_0_OR_GREATER
+                #pragma warning disable IL2026, IL3050 // Reflection only used in reflection mode, not in AOT/source-gen mode
+                #endif
                 await StaticPropertyReflectionInitializer.InitializeAllStaticPropertiesAsync();
+                #if NET6_0_OR_GREATER
+                #pragma warning restore IL2026, IL3050
+                #endif
             }
         }
         catch (Exception ex)
@@ -101,6 +121,9 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     }
 
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     private async Task ExecuteTestsCore(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
         // Combine cancellation tokens

@@ -22,6 +22,9 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         _parallelLimitLockProvider = parallelLimitLockProvider;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     public async ValueTask ExecuteTestsWithConstraintsAsync(
         (AbstractExecutableTest Test, IReadOnlyList<string> ConstraintKeys, int Priority)[] tests,
         CancellationToken cancellationToken)
@@ -91,6 +94,9 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         await Task.WhenAll(activeTasks).ConfigureAwait(false);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     private async Task WaitAndExecuteTestAsync(
         AbstractExecutableTest test,
         IReadOnlyList<string> constraintKeys,
@@ -108,6 +114,9 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         await ExecuteTestAndReleaseKeysAsync(test, constraintKeys, lockedKeys, lockObject, waitingTests, cancellationToken).ConfigureAwait(false);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     private async Task ExecuteTestAndReleaseKeysAsync(
         AbstractExecutableTest test,
         IReadOnlyList<string> constraintKeys,

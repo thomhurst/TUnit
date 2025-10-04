@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core.Helpers;
 
@@ -16,10 +16,9 @@ public static class GenericTypeHelper
     /// <returns>The constructed generic type</returns>
     /// <exception cref="ArgumentNullException">Thrown when genericTypeDefinition is null</exception>
     /// <exception cref="ArgumentException">Thrown when type arguments don't match the generic type definition</exception>
-    [UnconditionalSuppressMessage("AOT", "IL2055:UnrecognizedReflectionPattern", 
-        Justification = "MakeGenericType is used as a fallback. AOT analyzer warns at compile time.")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:RequiresDynamicCode", 
-        Justification = "MakeGenericType is used as a fallback. AOT analyzer warns at compile time.")]
+    #if NET6_0_OR_GREATER
+    [RequiresDynamicCode("MakeGenericType requires runtime code generation")]
+    #endif
     public static Type MakeGenericTypeSafe(Type genericTypeDefinition, params Type[] typeArguments)
     {
         if (genericTypeDefinition == null)
@@ -52,7 +51,11 @@ public static class GenericTypeHelper
         try
         {
             // Reflection mode - use MakeGenericType directly
-            return genericTypeDefinition.MakeGenericType(typeArguments);
+            // Method is already annotated with RequiresDynamicCode, suppressing IL2055
+            [UnconditionalSuppressMessage("Trimming", "IL2055:MakeGenericType", Justification = "Method is already properly annotated with RequiresDynamicCode to indicate AOT incompatibility")]
+            static Type MakeGenericTypeUnsafe(Type genericType, Type[] args) => genericType.MakeGenericType(args);
+
+            return MakeGenericTypeUnsafe(genericTypeDefinition, typeArguments);
         }
         catch (ArgumentException ex)
         {

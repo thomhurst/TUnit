@@ -16,7 +16,9 @@ internal static class PropertyDataResolver
     /// <summary>
     /// Resolves data from a property's data source.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Property types handled dynamically")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Property data resolution uses reflection on property types")]
+#endif
     public static async Task<object?> ResolvePropertyDataAsync(PropertyInitializationContext context, DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
     {
         var dataSource = await GetInitializedDataSourceAsync(context, dataSourceInitializer);
@@ -72,6 +74,9 @@ internal static class PropertyDataResolver
     /// Gets an initialized data source from the context.
     /// Ensures the data source is fully initialized (including property injection) before returning it.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     private static async Task<IDataSourceAttribute?> GetInitializedDataSourceAsync(PropertyInitializationContext context, DataSourceInitializer dataSourceInitializer)
     {
         IDataSourceAttribute? dataSource = null;
@@ -103,7 +108,9 @@ internal static class PropertyDataResolver
     /// <summary>
     /// Creates data generator metadata for the property.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Property injection metadata")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Data generator metadata creation uses reflection on property types")]
+#endif
     private static DataGeneratorMetadata CreateDataGeneratorMetadata(
         PropertyInitializationContext context,
         IDataSourceAttribute dataSource)
@@ -158,10 +165,12 @@ internal static class PropertyDataResolver
     /// <summary>
     /// Resolves value from data source arguments, handling tuples.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Tuple types are created dynamically")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Value resolution may create tuple types dynamically")]
+#endif
     private static object? ResolveValueFromArgs(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] 
-        Type propertyType, 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+        Type propertyType,
         object?[]? args)
     {
         return TupleValueResolver.ResolveTupleValue(propertyType, args);

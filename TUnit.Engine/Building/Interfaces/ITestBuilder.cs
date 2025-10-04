@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 
 namespace TUnit.Engine.Building.Interfaces;
@@ -22,6 +23,10 @@ internal interface ITestBuilder
     /// </summary>
     /// <param name="metadata">The test metadata with DataCombinationGenerator</param>
     /// <returns>Collection of executable tests for all data combinations</returns>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces")]
+    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
+    #endif
     Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata);
 
     /// <summary>
@@ -30,6 +35,10 @@ internal interface ITestBuilder
     /// <param name="metadata">The test metadata with DataCombinationGenerator</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Stream of executable tests for all data combinations</returns>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces")]
+    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
+    #endif
     IAsyncEnumerable<AbstractExecutableTest> BuildTestsStreamingAsync(
         TestMetadata metadata,
         CancellationToken cancellationToken = default);

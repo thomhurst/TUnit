@@ -14,8 +14,9 @@ internal static class ScopedAttributeFilter
     /// <typeparam name="T">The type of objects to filter</typeparam>
     /// <param name="items">The collection of items to filter</param>
     /// <returns>A filtered collection with only one instance per scoped attribute type</returns>
-    [UnconditionalSuppressMessage("Trimming", "IL2075:UnrecognizedReflectionPattern",
-        Justification = "IScopedAttribute types are preserved by the source generator")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+#endif
     public static List<T> FilterScopedAttributes<T>(IEnumerable<T> items) where T : class
     {
         var result = new List<T>();
@@ -63,10 +64,9 @@ internal static class ScopedAttributeFilter
     /// <summary>
     /// Checks if a type implements IScopedAttribute<T>
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070:UnrecognizedReflectionPattern",
-        Justification = "IScopedAttribute types are preserved by the source generator")]
-    [UnconditionalSuppressMessage("Trimming", "IL2075:UnrecognizedReflectionPattern",
-        Justification = "IScopedAttribute types are preserved by the source generator")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Interface checking uses Type.GetInterfaces")]
+#endif
     public static bool IsScopedAttribute(Type type)
     {
         return type.GetInterfaces()
@@ -76,8 +76,9 @@ internal static class ScopedAttributeFilter
     /// <summary>
     /// Gets the scoped attribute type from an object that implements IScopedAttribute<T>
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075:UnrecognizedReflectionPattern",
-        Justification = "IScopedAttribute types are preserved by the source generator")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Scoped attribute type extraction uses Type.GetInterfaces")]
+#endif
     public static Type? GetScopedAttributeType(object? obj)
     {
         if (obj == null)
