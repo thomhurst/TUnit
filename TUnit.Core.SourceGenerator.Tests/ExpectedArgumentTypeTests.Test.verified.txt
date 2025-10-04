@@ -16,19 +16,6 @@ internal sealed class ExpectedArgumentTypeTests_TypedArguments_TestSource_GUID :
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(0d, typeof(double)),
-                new global::TUnit.Core.ArgumentsAttribute(0f, typeof(float)),
-                new global::TUnit.Core.ArgumentsAttribute((sbyte)0, typeof(sbyte)),
-                new global::TUnit.Core.ArgumentsAttribute((byte)0, typeof(byte)),
-                new global::TUnit.Core.ArgumentsAttribute((short)0, typeof(short)),
-                new global::TUnit.Core.ArgumentsAttribute((ushort)0, typeof(ushort)),
-                new global::TUnit.Core.ArgumentsAttribute(0, typeof(int)),
-                new global::TUnit.Core.ArgumentsAttribute((uint)0, typeof(uint)),
-                new global::TUnit.Core.ArgumentsAttribute(0u, typeof(uint)),
-                new global::TUnit.Core.ArgumentsAttribute((long)0, typeof(long)),
-                new global::TUnit.Core.ArgumentsAttribute(0L, typeof(long)),
-                new global::TUnit.Core.ArgumentsAttribute((ulong)0, typeof(ulong)),
-                new global::TUnit.Core.ArgumentsAttribute(0UL, typeof(ulong)),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -159,14 +146,6 @@ internal sealed class ExpectedArgumentTypeTests_EnumTypes_TestSource_GUID : glob
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.ByteEnum.Default, typeof(global::TUnit.TestProject.ByteEnum), typeof(byte)),
-                new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.SByteEnum.Default, typeof(global::TUnit.TestProject.SByteEnum), typeof(sbyte)),
-                new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Int16Enum.Default, typeof(global::TUnit.TestProject.Int16Enum), typeof(short)),
-                new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.UInt16Enum.Default, typeof(global::TUnit.TestProject.UInt16Enum), typeof(ushort)),
-                new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Int32Enum.Default, typeof(global::TUnit.TestProject.Int32Enum), typeof(int)),
-                new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.UInt32Enum.Default, typeof(global::TUnit.TestProject.UInt32Enum), typeof(uint)),
-                new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Int64Enum.Default, typeof(global::TUnit.TestProject.Int64Enum), typeof(long)),
-                new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.UInt64Enum.Default, typeof(global::TUnit.TestProject.UInt64Enum), typeof(ulong)),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

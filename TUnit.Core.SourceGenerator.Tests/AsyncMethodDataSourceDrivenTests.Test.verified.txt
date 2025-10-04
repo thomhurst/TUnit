@@ -16,7 +16,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Sin
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("AsyncDataMethod"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -149,7 +148,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Tup
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("AsyncDataMethodWithTuples"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -289,7 +287,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Enu
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("AsyncEnumerableDataMethod"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -422,7 +419,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Fun
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("AsyncFuncDataMethod"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -555,8 +551,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Wit
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("AsyncDataMethodWithArgs")
-{Arguments = new object[]{5},},
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -689,7 +683,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Ext
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.AsyncExternalDataSource), "GetData"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -822,7 +815,6 @@ internal sealed class AsyncMethodDataSourceDrivenTests_ValueTaskMethodDataSource
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("ValueTaskDataMethod"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

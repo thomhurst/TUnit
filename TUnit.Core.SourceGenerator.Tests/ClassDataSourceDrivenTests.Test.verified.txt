@@ -16,7 +16,6 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_TestSource_GUI
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -130,7 +129,6 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_Generic_TestSo
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -244,7 +242,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<InitializableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -356,7 +353,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<InitializableClass, InitializableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -475,7 +471,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<InitializableClass, InitializableClass, InitializableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -601,7 +596,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<InitializableClass, InitializableClass, InitializableClass, InitializableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -734,7 +728,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<InitializableClass, InitializableClass, InitializableClass, InitializableClass, InitializableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

@@ -16,7 +16,6 @@ internal sealed class Tests_Double_SpecialConsts_TestSource_GUID : global::TUnit
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MatrixDataSourceAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -128,7 +127,6 @@ internal sealed class Tests_Float_SpecialConsts_TestSource_GUID : global::TUnit.
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MatrixDataSourceAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

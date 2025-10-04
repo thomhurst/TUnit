@@ -16,8 +16,6 @@ internal sealed class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Tes
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
-{Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -132,8 +130,6 @@ internal sealed class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Gen
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
-{Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

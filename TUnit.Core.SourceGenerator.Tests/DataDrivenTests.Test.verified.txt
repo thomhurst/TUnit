@@ -16,9 +16,6 @@ internal sealed class DataDrivenTests_DataSource_Method_TestSource_GUID : global
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1),
-                new global::TUnit.Core.ArgumentsAttribute(2),
-                new global::TUnit.Core.ArgumentsAttribute(3),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -134,9 +131,6 @@ internal sealed class DataDrivenTests_DataSource_Method_TestSource_GUID : global
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1, "String"),
-                new global::TUnit.Core.ArgumentsAttribute(2, "String2"),
-                new global::TUnit.Core.ArgumentsAttribute(3, "String3"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -259,9 +253,6 @@ internal sealed class DataDrivenTests_EnumValue_TestSource_GUID : global::TUnit.
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.TestEnum.One),
-                new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.TestEnum.Two),
-                new global::TUnit.Core.ArgumentsAttribute(-1),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -377,7 +368,6 @@ internal sealed class DataDrivenTests_NullValue_TestSource_GUID : global::TUnit.
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(null),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -491,7 +481,6 @@ internal sealed class DataDrivenTests_EmptyString_TestSource_GUID : global::TUni
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(""),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -605,7 +594,6 @@ internal sealed class DataDrivenTests_NonEmptyString_TestSource_GUID : global::T
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("Foo bar!"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -719,9 +707,6 @@ internal sealed class DataDrivenTests_BooleanString_TestSource_GUID : global::TU
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(null),
-                new global::TUnit.Core.ArgumentsAttribute(false),
-                new global::TUnit.Core.ArgumentsAttribute(true),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -837,7 +822,6 @@ internal sealed class DataDrivenTests_Type_TestSource_GUID : global::TUnit.Core.
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(typeof(object)),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -951,7 +935,6 @@ internal sealed class DataDrivenTests_IntegerArray_TestSource_GUID : global::TUn
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(new[] { 1, 2, 3 }),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -1065,7 +1048,6 @@ internal sealed class DataDrivenTests_IntMaxValue_TestSource_GUID : global::TUni
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(2147483647),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

@@ -519,6 +519,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
 
         var attributes = methodSymbol.GetAttributes()
+            .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
             .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
             .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
             .ToImmutableArray();

@@ -252,7 +252,8 @@ internal sealed class TestBuilder : ITestBuilder
                                 {
                                     TestMetadata = metadata.MethodMetadata,
                                     Events = new TestContextEvents(),
-                                    ObjectBag = new Dictionary<string, object?>()
+                                    ObjectBag = new Dictionary<string, object?>(),
+                                    DataSourceAttribute = methodDataSource
                                 };
 
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
@@ -702,6 +703,11 @@ internal sealed class TestBuilder : ITestBuilder
     {
         // Use attributes from context if available, or create new ones
         var attributes = testBuilderContext.InitializedAttributes ?? await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
+
+        if (testBuilderContext.DataSourceAttribute != null && testBuilderContext.DataSourceAttribute is not NoDataSource)
+        {
+            attributes = [..attributes, (Attribute)testBuilderContext.DataSourceAttribute];
+        }
 
         var testDetails = new TestDetails
         {

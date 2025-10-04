@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.PropertyInjection;
@@ -78,7 +79,11 @@ internal sealed class DataSourceInitializer
                     dataSource, objectBag, methodMetadata, events);
             }
 
-            // Step 2: IAsyncInitializer
+            // Step 2: Initialize nested property-injected objects (deepest first)
+            // This ensures that when the parent's IAsyncInitializer runs, all nested objects are already initialized
+            await InitializeNestedObjectsAsync(dataSource);
+
+            // Step 3: IAsyncInitializer on the data source itself
             if (dataSource is IAsyncInitializer asyncInitializer)
             {
                 await ObjectInitializer.InitializeAsync(asyncInitializer);
@@ -88,6 +93,110 @@ internal sealed class DataSourceInitializer
         {
             throw new InvalidOperationException(
                 $"Failed to initialize data source of type '{dataSource.GetType().Name}': {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Initializes all nested property-injected objects in depth-first order.
+    /// This ensures that when the parent's IAsyncInitializer runs, all nested dependencies are already initialized.
+    /// </summary>
+    private async Task InitializeNestedObjectsAsync(object rootObject)
+    {
+        var objectsByDepth = new Dictionary<int, HashSet<object>>();
+        var visitedObjects = new HashSet<object>();
+
+        // Collect all nested property-injected objects grouped by depth
+        CollectNestedObjects(rootObject, objectsByDepth, visitedObjects, currentDepth: 1);
+
+        // Initialize objects deepest-first (highest depth to lowest)
+        var depths = objectsByDepth.Keys.OrderByDescending(depth => depth);
+
+        foreach (var depth in depths)
+        {
+            var objectsAtDepth = objectsByDepth[depth];
+
+            // Initialize all objects at this depth in parallel
+            await Task.WhenAll(objectsAtDepth.Select(obj => ObjectInitializer.InitializeAsync(obj).AsTask()));
+        }
+    }
+
+    /// <summary>
+    /// Recursively collects all nested property-injected objects grouped by depth.
+    /// </summary>
+    private void CollectNestedObjects(
+        object obj,
+        Dictionary<int, HashSet<object>> objectsByDepth,
+        HashSet<object> visitedObjects,
+        int currentDepth)
+    {
+        var plan = PropertyInjectionCache.GetOrCreatePlan(obj.GetType());
+
+        if (!SourceRegistrar.IsEnabled)
+        {
+            // Reflection mode
+            foreach (var prop in plan.ReflectionProperties)
+            {
+                var value = prop.Property.GetValue(obj);
+
+                if (value == null || !visitedObjects.Add(value))
+                {
+                    continue;
+                }
+
+                // Add to the current depth level if it has injectable properties or implements IAsyncInitializer
+                if (PropertyInjectionCache.HasInjectableProperties(value.GetType()) || value is IAsyncInitializer)
+                {
+                    if (!objectsByDepth.ContainsKey(currentDepth))
+                    {
+                        objectsByDepth[currentDepth] = [];
+                    }
+
+                    objectsByDepth[currentDepth].Add(value);
+                }
+
+                // Recursively collect nested objects
+                if (PropertyInjectionCache.HasInjectableProperties(value.GetType()))
+                {
+                    CollectNestedObjects(value, objectsByDepth, visitedObjects, currentDepth + 1);
+                }
+            }
+        }
+        else
+        {
+            // Source-generated mode
+            foreach (var metadata in plan.SourceGeneratedProperties)
+            {
+                var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
+
+                if (property == null || !property.CanRead)
+                {
+                    continue;
+                }
+
+                var value = property.GetValue(obj);
+
+                if (value == null || !visitedObjects.Add(value))
+                {
+                    continue;
+                }
+
+                // Add to the current depth level if it has injectable properties or implements IAsyncInitializer
+                if (PropertyInjectionCache.HasInjectableProperties(value.GetType()) || value is IAsyncInitializer)
+                {
+                    if (!objectsByDepth.ContainsKey(currentDepth))
+                    {
+                        objectsByDepth[currentDepth] = [];
+                    }
+
+                    objectsByDepth[currentDepth].Add(value);
+                }
+
+                // Recursively collect nested objects
+                if (PropertyInjectionCache.HasInjectableProperties(value.GetType()))
+                {
+                    CollectNestedObjects(value, objectsByDepth, visitedObjects, currentDepth + 1);
+                }
+            }
         }
     }
 

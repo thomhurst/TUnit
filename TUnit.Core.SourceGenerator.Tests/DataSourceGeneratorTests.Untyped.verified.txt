@@ -15,7 +15,6 @@ internal sealed class AutoDataTests_Test1_TestSource_GUID : global::TUnit.Core.I
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
-                new global::TUnit.TestProject.Attributes.AutoDataAttribute(),
                 new global::TUnit.Core.TestAttribute()
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
