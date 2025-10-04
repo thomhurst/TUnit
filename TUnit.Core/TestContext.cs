@@ -185,7 +185,6 @@ public class TestContext : Context
     {
         TestContexts.Value = this;
     }
-
     internal bool RunOnTestDiscovery { get; set; }
 
     public object Lock { get; } = new();
