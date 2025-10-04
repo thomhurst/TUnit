@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
@@ -131,7 +132,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testContextRestorer = Register(new TestContextRestorer());
         var testMethodInvoker = Register(new TestMethodInvoker());
 
-        var useSourceGeneration = GetUseSourceGeneration(CommandLineOptions);
+        var useSourceGeneration = SourceRegistrar.IsEnabled = GetUseSourceGeneration(CommandLineOptions);
 #pragma warning disable IL2026 // Using member which has 'RequiresUnreferencedCodeAttribute'
 #pragma warning disable IL3050 // Using member which has 'RequiresDynamicCodeAttribute'
         ITestDataCollector dataCollector = useSourceGeneration
@@ -250,6 +251,13 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     private static bool GetUseSourceGeneration(ICommandLineOptions commandLineOptions)
     {
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            return true; // Force source generation on AOT platforms
+        }
+#endif
+
         if (commandLineOptions.TryGetOptionArgumentList(ReflectionModeCommandProvider.ReflectionMode, out _))
         {
             return false; // Reflection mode explicitly requested

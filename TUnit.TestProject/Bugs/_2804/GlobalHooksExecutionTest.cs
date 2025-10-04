@@ -135,29 +135,29 @@ public sealed class Issue2804TestHooks
         ExecutedHooks.Add("BeforeEvery(TestSession)");
         // BeforeEvery(TestSession) executed
     }
-    
+
     // TestDiscovery hooks
     [Before(TestDiscovery)]
-    public static void BeforeTestDiscovery(TestDiscoveryContext context)
+    public static void BeforeTestDiscovery(BeforeTestDiscoveryContext context)
     {
         ExecutedHooks.Add("Before(TestDiscovery)");
         // Before(TestDiscovery) executed
     }
-    
+
     [After(TestDiscovery)]
     public static void AfterTestDiscovery(TestDiscoveryContext context)
     {
         ExecutedHooks.Add("After(TestDiscovery)");
         // After(TestDiscovery) executed
     }
-    
+
     [BeforeEvery(TestDiscovery)]
-    public static void BeforeEveryTestDiscovery(TestDiscoveryContext context)
+    public static void BeforeEveryTestDiscovery(BeforeTestDiscoveryContext context)
     {
         ExecutedHooks.Add("BeforeEvery(TestDiscovery)");
         // BeforeEvery(TestDiscovery) executed
     }
-    
+
     [AfterEvery(TestDiscovery)]
     public static void AfterEveryTestDiscovery(TestDiscoveryContext context)
     {

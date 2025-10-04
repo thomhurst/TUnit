@@ -87,4 +87,30 @@ public class DecimalArgumentTests
         decimal invoiceBalanceDue, decimal discountAmount, decimal appliedDiscountAmount, bool discountAllowedForUser)
     {
     }
+
+    [Test]
+    [Arguments(2_000.00000000000000001)]
+    public async Task Equality3(decimal credit)
+    {
+        if (!SourceRegistrar.IsEnabled)
+        {
+            // Skip this test if source generation is not enabled, as the precision can't be preserved without access to the original syntax
+            return;
+        }
+
+        await Assert.That(credit).IsEqualTo(2_000.00000000000000001m);
+    }
+
+    [Test]
+    [Arguments(123_999.00000000000000001)]
+    public async Task Equality4(decimal credit)
+    {
+        if (!SourceRegistrar.IsEnabled)
+        {
+            // Skip this test if source generation is not enabled, as the precision can't be preserved without access to the original syntax
+            return;
+        }
+
+        await Assert.That(credit).IsEqualTo(123_999.00000000000000001m);
+    }
 }
