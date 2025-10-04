@@ -21,10 +21,127 @@ namespace TUnit.Engine.Discovery;
 internal sealed class ReflectionHookDiscoveryService
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
+    private static readonly ConcurrentDictionary<string, bool> _registeredMethods = new();
     private static int _registrationIndex = 0;
+    private static int _discoveryRunCount = 0;
+
+    private static string GetMethodKey(MethodInfo method)
+    {
+        // Create a unique key for the method based on its signature
+        return $"{method.DeclaringType?.FullName}.{method.Name}({string.Join(",", method.GetParameters().Select(p => p.ParameterType.FullName))})";
+    }
+
+    private static void ClearSourceGeneratedHooks()
+    {
+        // Clear all hook collections to avoid duplicates when both
+        // source generation and reflection discovery run
+        Sources.BeforeTestSessionHooks.Clear();
+        Sources.AfterTestSessionHooks.Clear();
+        Sources.BeforeTestDiscoveryHooks.Clear();
+        Sources.AfterTestDiscoveryHooks.Clear();
+        Sources.BeforeEveryTestHooks.Clear();
+        Sources.AfterEveryTestHooks.Clear();
+        Sources.BeforeEveryClassHooks.Clear();
+        Sources.AfterEveryClassHooks.Clear();
+        Sources.BeforeEveryAssemblyHooks.Clear();
+        Sources.AfterEveryAssemblyHooks.Clear();
+        Sources.BeforeTestHooks.Clear();
+        Sources.AfterTestHooks.Clear();
+        Sources.BeforeClassHooks.Clear();
+        Sources.AfterClassHooks.Clear();
+        Sources.BeforeAssemblyHooks.Clear();
+        Sources.AfterAssemblyHooks.Clear();
+    }
+
+    /// <summary>
+    /// Discovers and registers instance hooks for a specific closed generic type.
+    /// This is needed because closed generic types are created at runtime and don't appear in assembly.GetTypes().
+    /// </summary>
+    public static void DiscoverInstanceHooksForType(Type closedGenericType)
+    {
+        if (closedGenericType == null || !closedGenericType.IsGenericType || closedGenericType.ContainsGenericParameters)
+        {
+            return;
+        }
+
+        // Check if we've already discovered hooks for this exact closed type
+        var methodKey = $"InstanceHooks:{closedGenericType.FullName}";
+        if (!_registeredMethods.TryAdd(methodKey, true))
+        {
+            return; // Already discovered
+        }
+
+        // Build inheritance chain from base to derived to ensure hooks execute in correct order
+        var inheritanceChain = new List<Type>();
+        var current = closedGenericType;
+        while (current != null && current != typeof(object))
+        {
+            inheritanceChain.Insert(0, current); // Insert at front to get base-to-derived order
+            current = current.BaseType;
+        }
+
+        // Discover hooks in each type in the inheritance chain, from base to derived
+        foreach (var typeInChain in inheritanceChain)
+        {
+            var methods = typeInChain.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .OrderBy(m =>
+                {
+                    // Get the minimum order from all hook attributes on this method
+                    var beforeAttr = m.GetCustomAttribute<BeforeAttribute>();
+                    var afterAttr = m.GetCustomAttribute<AfterAttribute>();
+                    var beforeEveryAttr = m.GetCustomAttribute<BeforeEveryAttribute>();
+                    var afterEveryAttr = m.GetCustomAttribute<AfterEveryAttribute>();
+
+                    var orders = new List<int>();
+                    if (beforeAttr != null) orders.Add(beforeAttr.Order);
+                    if (afterAttr != null) orders.Add(afterAttr.Order);
+                    if (beforeEveryAttr != null) orders.Add(beforeEveryAttr.Order);
+                    if (afterEveryAttr != null) orders.Add(afterEveryAttr.Order);
+
+                    return orders.Any() ? orders.Min() : 0;
+                })
+                .ThenBy(m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
+                .ToArray();
+
+            foreach (var method in methods)
+            {
+                // Check for Before attributes
+                var beforeAttributes = method.GetCustomAttributes<BeforeAttribute>(false);
+                foreach (var attr in beforeAttributes)
+                {
+                    if (attr.HookType == HookType.Test && !method.IsStatic)
+                    {
+                        RegisterInstanceBeforeHook(typeInChain, method, attr.Order);
+                    }
+                }
+
+                // Check for After attributes
+                var afterAttributes = method.GetCustomAttributes<AfterAttribute>(false);
+                foreach (var attr in afterAttributes)
+                {
+                    if (attr.HookType == HookType.Test && !method.IsStatic)
+                    {
+                        RegisterInstanceAfterHook(typeInChain, method, attr.Order);
+                    }
+                }
+            }
+        }
+    }
 
     public static void DiscoverHooks()
     {
+        // Prevent running hook discovery multiple times in the same process
+        // This can happen when both discovery and execution run in the same process
+        if (Interlocked.Increment(ref _discoveryRunCount) > 1)
+        {
+            return;
+        }
+
+        // Clear source-generated hooks since we're discovering via reflection
+        // In reflection mode, source generation may have already populated Sources
+        // We need to clear them to avoid duplicates
+        ClearSourceGeneratedHooks();
+
 #if NET
         if (!RuntimeFeature.IsDynamicCodeSupported)
         {
@@ -119,42 +236,81 @@ internal sealed class ReflectionHookDiscoveryService
 
     private static void DiscoverHooksInType(Type type, Assembly assembly)
     {
-        var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
-
-        foreach (var method in methods)
+        // Build inheritance chain from base to derived to ensure hooks execute in correct order
+        var inheritanceChain = new List<Type>();
+        var current = type;
+        while (current != null && current != typeof(object))
         {
-            // Check for Before attributes
-            var beforeAttributes = method.GetCustomAttributes<BeforeAttribute>(false);
-            foreach (var attr in beforeAttributes)
-            {
-                RegisterBeforeHook(type, method, attr, assembly);
-            }
+            inheritanceChain.Insert(0, current); // Insert at front to get base-to-derived order
+            current = current.BaseType;
+        }
 
-            // Check for After attributes
-            var afterAttributes = method.GetCustomAttributes<AfterAttribute>(false);
-            foreach (var attr in afterAttributes)
-            {
-                RegisterAfterHook(type, method, attr, assembly);
-            }
+        // Discover hooks in each type in the inheritance chain, from base to derived
+        foreach (var typeInChain in inheritanceChain)
+        {
+            // Use DeclaredOnly to get methods defined in this specific type, not inherited ones
+            var methods = typeInChain.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                .OrderBy(m =>
+                {
+                    // Get the minimum order from all hook attributes on this method
+                    var beforeAttr = m.GetCustomAttribute<BeforeAttribute>();
+                    var afterAttr = m.GetCustomAttribute<AfterAttribute>();
+                    var beforeEveryAttr = m.GetCustomAttribute<BeforeEveryAttribute>();
+                    var afterEveryAttr = m.GetCustomAttribute<AfterEveryAttribute>();
 
-            // Check for BeforeEvery attributes
-            var beforeEveryAttributes = method.GetCustomAttributes<BeforeEveryAttribute>(false);
-            foreach (var attr in beforeEveryAttributes)
-            {
-                RegisterBeforeEveryHook(type, method, attr, assembly);
-            }
+                    var orders = new List<int>();
+                    if (beforeAttr != null) orders.Add(beforeAttr.Order);
+                    if (afterAttr != null) orders.Add(afterAttr.Order);
+                    if (beforeEveryAttr != null) orders.Add(beforeEveryAttr.Order);
+                    if (afterEveryAttr != null) orders.Add(afterEveryAttr.Order);
 
-            // Check for AfterEvery attributes
-            var afterEveryAttributes = method.GetCustomAttributes<AfterEveryAttribute>(false);
-            foreach (var attr in afterEveryAttributes)
+                    return orders.Any() ? orders.Min() : 0;
+                })
+                .ThenBy(m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
+                .ToArray();
+
+            foreach (var method in methods)
             {
-                RegisterAfterEveryHook(type, method, attr, assembly);
+                // Check for Before attributes
+                var beforeAttributes = method.GetCustomAttributes<BeforeAttribute>(false);
+                foreach (var attr in beforeAttributes)
+                {
+                    RegisterBeforeHook(typeInChain, method, attr, assembly);
+                }
+
+                // Check for After attributes
+                var afterAttributes = method.GetCustomAttributes<AfterAttribute>(false);
+                foreach (var attr in afterAttributes)
+                {
+                    RegisterAfterHook(typeInChain, method, attr, assembly);
+                }
+
+                // Check for BeforeEvery attributes
+                var beforeEveryAttributes = method.GetCustomAttributes<BeforeEveryAttribute>(false);
+                foreach (var attr in beforeEveryAttributes)
+                {
+                    RegisterBeforeEveryHook(typeInChain, method, attr, assembly);
+                }
+
+                // Check for AfterEvery attributes
+                var afterEveryAttributes = method.GetCustomAttributes<AfterEveryAttribute>(false);
+                foreach (var attr in afterEveryAttributes)
+                {
+                    RegisterAfterEveryHook(typeInChain, method, attr, assembly);
+                }
             }
         }
     }
 
     private static void RegisterBeforeHook(Type type, MethodInfo method, BeforeAttribute attr, Assembly assembly)
     {
+        // Prevent duplicate registrations of the same method
+        var methodKey = GetMethodKey(method);
+        if (!_registeredMethods.TryAdd(methodKey, true))
+        {
+            return;
+        }
+
         var hookType = attr.HookType;
         var order = attr.Order;
 
@@ -166,7 +322,7 @@ internal sealed class ReflectionHookDiscoveryService
                     var hook = new BeforeTestHookMethod
                     {
                         MethodInfo = CreateMethodMetadata(type, method),
-                        HookExecutor = new DefaultHookExecutor(),
+                        HookExecutor = GetHookExecutor(method),
                         Order = order,
                         RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                         FilePath = "Unknown",
@@ -190,7 +346,7 @@ internal sealed class ReflectionHookDiscoveryService
                 var sessionHook = new BeforeTestSessionHookMethod
                 {
                     MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
+                    HookExecutor = GetHookExecutor(method),
                     Order = order,
                     RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                     FilePath = "Unknown",
@@ -200,10 +356,13 @@ internal sealed class ReflectionHookDiscoveryService
                 Sources.BeforeTestSessionHooks.Add(sessionHook);
                 break;
             case HookType.TestDiscovery:
+                // BeforeEvery(TestDiscovery) is treated the same as Before(TestDiscovery)
+                // The source generator ignores the "Every" suffix for TestDiscovery hooks
+                // Register it as a regular Before hook to match source-gen behavior
                 var discoveryHook = new BeforeTestDiscoveryHookMethod
                 {
                     MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
+                    HookExecutor = GetHookExecutor(method),
                     Order = order,
                     RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                     FilePath = "Unknown",
@@ -217,6 +376,13 @@ internal sealed class ReflectionHookDiscoveryService
 
     private static void RegisterAfterHook(Type type, MethodInfo method, AfterAttribute attr, Assembly assembly)
     {
+        // Prevent duplicate registrations of the same method
+        var methodKey = GetMethodKey(method);
+        if (!_registeredMethods.TryAdd(methodKey, true))
+        {
+            return;
+        }
+
         var hookType = attr.HookType;
         var order = attr.Order;
 
@@ -228,7 +394,7 @@ internal sealed class ReflectionHookDiscoveryService
                     var hook = new AfterTestHookMethod
                     {
                         MethodInfo = CreateMethodMetadata(type, method),
-                        HookExecutor = new DefaultHookExecutor(),
+                        HookExecutor = GetHookExecutor(method),
                         Order = order,
                         RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                         FilePath = "Unknown",
@@ -252,7 +418,7 @@ internal sealed class ReflectionHookDiscoveryService
                 var sessionHook = new AfterTestSessionHookMethod
                 {
                     MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
+                    HookExecutor = GetHookExecutor(method),
                     Order = order,
                     RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                     FilePath = "Unknown",
@@ -262,23 +428,36 @@ internal sealed class ReflectionHookDiscoveryService
                 Sources.AfterTestSessionHooks.Add(sessionHook);
                 break;
             case HookType.TestDiscovery:
-                var discoveryHook = new AfterTestDiscoveryHookMethod
+                var discoveryMetadata = CreateMethodMetadata(type, method);
+                // Check if this hook is already registered (prevent duplicates)
+                if (!Sources.AfterTestDiscoveryHooks.Any(h => h.MethodInfo.Name == discoveryMetadata.Name &&
+                                                               h.MethodInfo.Type == discoveryMetadata.Type))
                 {
-                    MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
-                    Order = order,
-                    RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
-                    FilePath = "Unknown",
-                    LineNumber = 0,
-                    Body = CreateHookDelegate<TestDiscoveryContext>(type, method)
-                };
-                Sources.AfterTestDiscoveryHooks.Add(discoveryHook);
+                    var discoveryHook = new AfterTestDiscoveryHookMethod
+                    {
+                        MethodInfo = discoveryMetadata,
+                        HookExecutor = GetHookExecutor(method),
+                        Order = order,
+                        RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
+                        FilePath = "Unknown",
+                        LineNumber = 0,
+                        Body = CreateHookDelegate<TestDiscoveryContext>(type, method)
+                    };
+                    Sources.AfterTestDiscoveryHooks.Add(discoveryHook);
+                }
                 break;
         }
     }
 
     private static void RegisterBeforeEveryHook(Type type, MethodInfo method, BeforeEveryAttribute attr, Assembly assembly)
     {
+        // Prevent duplicate registrations of the same method
+        var methodKey = GetMethodKey(method);
+        if (!_registeredMethods.TryAdd(methodKey, true))
+        {
+            return;
+        }
+
         var hookType = attr.HookType;
         var order = attr.Order;
 
@@ -288,7 +467,7 @@ internal sealed class ReflectionHookDiscoveryService
                 var testHook = new BeforeTestHookMethod
                 {
                     MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
+                    HookExecutor = GetHookExecutor(method),
                     Order = order,
                     RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                     FilePath = "Unknown",
@@ -301,7 +480,7 @@ internal sealed class ReflectionHookDiscoveryService
                 var classHook = new BeforeClassHookMethod
                 {
                     MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
+                    HookExecutor = GetHookExecutor(method),
                     Order = order,
                     RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                     FilePath = "Unknown",
@@ -314,7 +493,7 @@ internal sealed class ReflectionHookDiscoveryService
                 var assemblyHook = new BeforeAssemblyHookMethod
                 {
                     MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
+                    HookExecutor = GetHookExecutor(method),
                     Order = order,
                     RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                     FilePath = "Unknown",
@@ -327,7 +506,7 @@ internal sealed class ReflectionHookDiscoveryService
                 var sessionHook = new BeforeTestSessionHookMethod
                 {
                     MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
+                    HookExecutor = GetHookExecutor(method),
                     Order = order,
                     RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                     FilePath = "Unknown",
@@ -340,7 +519,7 @@ internal sealed class ReflectionHookDiscoveryService
                 var discoveryHook = new BeforeTestDiscoveryHookMethod
                 {
                     MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
+                    HookExecutor = GetHookExecutor(method),
                     Order = order,
                     RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                     FilePath = "Unknown",
@@ -354,6 +533,13 @@ internal sealed class ReflectionHookDiscoveryService
 
     private static void RegisterAfterEveryHook(Type type, MethodInfo method, AfterEveryAttribute attr, Assembly assembly)
     {
+        // Prevent duplicate registrations of the same method
+        var methodKey = GetMethodKey(method);
+        if (!_registeredMethods.TryAdd(methodKey, true))
+        {
+            return;
+        }
+
         var hookType = attr.HookType;
         var order = attr.Order;
 
@@ -363,7 +549,7 @@ internal sealed class ReflectionHookDiscoveryService
                 var testHook = new AfterTestHookMethod
                 {
                     MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
+                    HookExecutor = GetHookExecutor(method),
                     Order = order,
                     RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                     FilePath = "Unknown",
@@ -376,7 +562,7 @@ internal sealed class ReflectionHookDiscoveryService
                 var classHook = new AfterClassHookMethod
                 {
                     MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
+                    HookExecutor = GetHookExecutor(method),
                     Order = order,
                     RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                     FilePath = "Unknown",
@@ -389,7 +575,7 @@ internal sealed class ReflectionHookDiscoveryService
                 var assemblyHook = new AfterAssemblyHookMethod
                 {
                     MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
+                    HookExecutor = GetHookExecutor(method),
                     Order = order,
                     RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                     FilePath = "Unknown",
@@ -402,7 +588,7 @@ internal sealed class ReflectionHookDiscoveryService
                 var sessionHook = new AfterTestSessionHookMethod
                 {
                     MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
+                    HookExecutor = GetHookExecutor(method),
                     Order = order,
                     RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
                     FilePath = "Unknown",
@@ -412,29 +598,44 @@ internal sealed class ReflectionHookDiscoveryService
                 Sources.AfterTestSessionHooks.Add(sessionHook);
                 break;
             case HookType.TestDiscovery:
-                var discoveryHook = new AfterTestDiscoveryHookMethod
+                // AfterEvery(TestDiscovery) is treated the same as After(TestDiscovery)
+                // The source generator ignores the "Every" suffix for TestDiscovery hooks
+                // Register it as a regular After hook to match source-gen behavior
+                var discoveryEveryMetadata = CreateMethodMetadata(type, method);
+                // Check if this hook is already registered (prevent duplicates)
+                if (!Sources.AfterTestDiscoveryHooks.Any(h => h.MethodInfo.Name == discoveryEveryMetadata.Name &&
+                                                               h.MethodInfo.Type == discoveryEveryMetadata.Type))
                 {
-                    MethodInfo = CreateMethodMetadata(type, method),
-                    HookExecutor = new DefaultHookExecutor(),
-                    Order = order,
-                    RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
-                    FilePath = "Unknown",
-                    LineNumber = 0,
-                    Body = CreateHookDelegate<TestDiscoveryContext>(type, method)
-                };
-                Sources.AfterTestDiscoveryHooks.Add(discoveryHook);
+                    var discoveryHook = new AfterTestDiscoveryHookMethod
+                    {
+                        MethodInfo = discoveryEveryMetadata,
+                        HookExecutor = GetHookExecutor(method),
+                        Order = order,
+                        RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
+                        FilePath = "Unknown",
+                        LineNumber = 0,
+                        Body = CreateHookDelegate<TestDiscoveryContext>(type, method)
+                    };
+                    Sources.AfterTestDiscoveryHooks.Add(discoveryHook);
+                }
                 break;
         }
     }
 
     private static void RegisterInstanceBeforeHook(Type type, MethodInfo method, int order)
     {
+        // Instance hooks on open generic types will be registered when closed types are discovered
+        if (type.ContainsGenericParameters)
+        {
+            return;
+        }
+
         var bag = Sources.BeforeTestHooks.GetOrAdd(type, _ => new ConcurrentBag<InstanceHookMethod>());
         var hook = new InstanceHookMethod
         {
             InitClassType = type,
             MethodInfo = CreateMethodMetadata(type, method),
-            HookExecutor = new DefaultHookExecutor(),
+            HookExecutor = GetHookExecutor(method),
             Order = order,
             RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
             Body = CreateInstanceHookDelegate(type, method)
@@ -444,12 +645,18 @@ internal sealed class ReflectionHookDiscoveryService
 
     private static void RegisterInstanceAfterHook(Type type, MethodInfo method, int order)
     {
+        // Instance hooks on open generic types will be registered when closed types are discovered
+        if (type.ContainsGenericParameters)
+        {
+            return;
+        }
+
         var bag = Sources.AfterTestHooks.GetOrAdd(type, _ => new ConcurrentBag<InstanceHookMethod>());
         var hook = new InstanceHookMethod
         {
             InitClassType = type,
             MethodInfo = CreateMethodMetadata(type, method),
-            HookExecutor = new DefaultHookExecutor(),
+            HookExecutor = GetHookExecutor(method),
             Order = order,
             RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
             Body = CreateInstanceHookDelegate(type, method)
@@ -463,7 +670,7 @@ internal sealed class ReflectionHookDiscoveryService
         var hook = new BeforeClassHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
-            HookExecutor = new DefaultHookExecutor(),
+            HookExecutor = GetHookExecutor(method),
             Order = order,
             RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
             FilePath = "Unknown",
@@ -479,7 +686,7 @@ internal sealed class ReflectionHookDiscoveryService
         var hook = new AfterClassHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
-            HookExecutor = new DefaultHookExecutor(),
+            HookExecutor = GetHookExecutor(method),
             Order = order,
             RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
             FilePath = "Unknown",
@@ -495,7 +702,7 @@ internal sealed class ReflectionHookDiscoveryService
         var hook = new BeforeAssemblyHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
-            HookExecutor = new DefaultHookExecutor(),
+            HookExecutor = GetHookExecutor(method),
             Order = order,
             RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
             FilePath = "Unknown",
@@ -511,7 +718,7 @@ internal sealed class ReflectionHookDiscoveryService
         var hook = new AfterAssemblyHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
-            HookExecutor = new DefaultHookExecutor(),
+            HookExecutor = GetHookExecutor(method),
             Order = order,
             RegistrationIndex = Interlocked.Increment(ref _registrationIndex),
             FilePath = "Unknown",
@@ -643,9 +850,47 @@ internal sealed class ReflectionHookDiscoveryService
             }
         };
     }
+
+    /// <summary>
+    /// Extracts the HookExecutor from method attributes, or returns DefaultHookExecutor if not found
+    /// </summary>
+    private static IHookExecutor GetHookExecutor(MethodInfo method)
+    {
+        // Look for HookExecutorAttribute on the method
+        var hookExecutorAttr = method.GetCustomAttributes(true)
+            .FirstOrDefault(a => a.GetType().Name == "HookExecutorAttribute" ||
+                                a.GetType().BaseType?.Name == "HookExecutorAttribute");
+
+        if (hookExecutorAttr != null)
+        {
+            // Get the HookExecutorType property
+            var hookExecutorTypeProperty = hookExecutorAttr.GetType().GetProperty("HookExecutorType");
+            if (hookExecutorTypeProperty != null)
+            {
+                var executorType = hookExecutorTypeProperty.GetValue(hookExecutorAttr) as Type;
+                if (executorType != null)
+                {
+                    try
+                    {
+                        // Instantiate the executor
+                        var executor = Activator.CreateInstance(executorType) as IHookExecutor;
+                        if (executor != null)
+                        {
+                            return executor;
+                        }
+                    }
+                    catch
+                    {
+                        // Fall back to default if instantiation fails
+                    }
+                }
+            }
+        }
+
+        return new DefaultHookExecutor();
+    }
 }
 
-// Default hook executor for reflection-discovered hooks
 internal class DefaultHookExecutor : IHookExecutor
 {
     public ValueTask ExecuteBeforeTestDiscoveryHook(MethodMetadata testMethod, BeforeTestDiscoveryContext context, Func<ValueTask> action)

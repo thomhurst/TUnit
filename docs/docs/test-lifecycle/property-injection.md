@@ -12,7 +12,7 @@ Supported attributes for properties in AOT mode:
 - **MethodDataSource** - Static method data sources  
 - **ClassDataSource** - Static class-based data sources
 - **DataSourceGeneratorAttribute** - Source-generated data (first item only)
-- **DataSourceForProperty** - Dependency injection with service provider
+- **ClassDataSource** - Dependency injection with service provider
 
 The AOT system generates strongly-typed property setters at compile time, eliminating reflection overhead and ensuring full Native AOT compatibility.
 
@@ -68,11 +68,11 @@ public class PropertySetterTests
     public required InnerModel Property3 { get; init; }
     
     // Globally shared data source
-    [ClassDataSource<InnerModel>(Shared = SharedType.Globally)]
+    [ClassDataSource<InnerModel>(Shared = SharedType.PerTestSession)]
     public required InnerModel Property4 { get; init; }
     
     // Class-scoped shared data source
-    [ClassDataSource<InnerModel>(Shared = SharedType.ForClass)]
+    [ClassDataSource<InnerModel>(Shared = SharedType.PerClass)]
     public required InnerModel Property5 { get; init; }
     
     // Keyed shared data source
@@ -84,7 +84,7 @@ public class PropertySetterTests
     public required string Property7 { get; init; }
 
     // Service provider dependency injection
-    [DataSourceForProperty<AsyncPropertyExample>]
+    [ClassDataSource<AsyncPropertyExample>]
     public required AsyncPropertyExample AsyncService { get; init; }
     
     [Test]

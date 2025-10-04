@@ -640,6 +640,12 @@ internal sealed class TestBuilder : ITestBuilder
 
     public async Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
+        // Discover instance hooks for closed generic types in reflection mode
+        if (metadata.TestClassType.IsGenericType && !metadata.TestClassType.IsGenericTypeDefinition)
+        {
+            Discovery.ReflectionHookDiscoveryService.DiscoverInstanceHooksForType(metadata.TestClassType);
+        }
+
         var testId = TestIdentifierService.GenerateTestId(metadata, testData);
 
         var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext);
