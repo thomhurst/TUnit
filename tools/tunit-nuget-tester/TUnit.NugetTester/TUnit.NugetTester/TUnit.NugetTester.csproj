@@ -15,6 +15,7 @@
         <IsAotCompatible>true</IsAotCompatible>
         <PublishAot>true</PublishAot>
         <PublishTrimmed>true</PublishTrimmed>
+        <IlcSingleWarn>false</IlcSingleWarn>
     </PropertyGroup>
 
     <ItemGroup>
