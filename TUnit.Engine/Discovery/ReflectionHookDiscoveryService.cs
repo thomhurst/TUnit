@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Core.Interfaces;
