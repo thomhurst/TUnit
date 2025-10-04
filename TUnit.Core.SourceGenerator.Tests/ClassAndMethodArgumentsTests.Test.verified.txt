@@ -118,8 +118,6 @@ internal sealed class ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GU
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("3"),
-                new global::TUnit.Core.ArgumentsAttribute("4"),
                 new global::TUnit.Core.ArgumentsAttribute("1"),
                 new global::TUnit.Core.ArgumentsAttribute("2")
             ],
@@ -249,8 +247,6 @@ internal sealed class ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_G
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("3"),
-                new global::TUnit.Core.ArgumentsAttribute("4"),
                 new global::TUnit.Core.ArgumentsAttribute("1"),
                 new global::TUnit.Core.ArgumentsAttribute("2")
             ],

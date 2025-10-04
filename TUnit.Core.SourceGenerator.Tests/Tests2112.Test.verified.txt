@@ -16,8 +16,6 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(0, 1L),
-                new global::TUnit.Core.ArgumentsAttribute(0, 1L),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -175,8 +173,6 @@ internal sealed class Tests_Test2_TestSource_GUID : global::TUnit.Core.Interface
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(0, 1L, 2L, 3L),
-                new global::TUnit.Core.ArgumentsAttribute(0, 1L, 2L, 3L),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

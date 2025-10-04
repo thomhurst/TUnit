@@ -26,8 +26,6 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod"),
-                new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.Core.MethodDataSourceAttribute("TupleMethod"),
                 new global::TUnit.Core.MethodDataSourceAttribute("NamedTupleMethod")

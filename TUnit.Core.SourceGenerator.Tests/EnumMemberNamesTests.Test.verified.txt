@@ -16,9 +16,6 @@ internal sealed class EnumMemberNamesTests_SomeTest_TestSource_GUID : global::TU
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("A"),
-                new global::TUnit.Core.ArgumentsAttribute("B"),
-                new global::TUnit.Core.ArgumentsAttribute("C"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
