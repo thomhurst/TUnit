@@ -397,18 +397,37 @@ internal sealed class TestScheduler : ITestScheduler
     }
 
     /// <summary>
-    /// Waits for multiple tasks to complete, handling exceptions gracefully.
-    /// Exceptions are already caught and reported to the message bus by TestCoordinator.
+    /// Waits for multiple tasks to complete, handling fail-fast cancellation properly.
+    /// When fail-fast is triggered, we only want to bubble up the first real failure,
+    /// not the cancellation exceptions from other tests that were cancelled as a result.
     /// </summary>
     private async Task WaitForTasksWithFailFastHandling(Task[] tasks, CancellationToken cancellationToken)
     {
         try
         {
+            // Wait for all tasks to complete, even if some fail
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            await _logger.LogDebugAsync($"Tasks completed with exceptions (already handled): {ex.Message}").ConfigureAwait(false);
+            // Check if this is a fail-fast scenario
+            if (cancellationToken.IsCancellationRequested)
+            {
+                // Get the first failure that triggered fail-fast
+                var firstFailure = _testRunner.GetFirstFailFastException();
+
+                // If we have a stored first failure, throw that instead of the aggregated exceptions
+                if (firstFailure != null)
+                {
+                    throw firstFailure;
+                }
+
+                // If no stored failure, this was a user-initiated cancellation
+                // Let the original exception bubble up
+            }
+
+            // Re-throw the original exception (either cancellation or non-fail-fast failure)
+            throw;
         }
     }
 }
