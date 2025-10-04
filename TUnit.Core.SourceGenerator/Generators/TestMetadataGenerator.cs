@@ -738,9 +738,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.Append($"new {attrTypeName}(");
 
-        for (int i = 0; i < argumentList.Arguments.Count; i++)
+        // Only process positional arguments (exclude named arguments)
+        var positionalArgs = argumentList.Arguments.Where(a => a.NameEquals == null).ToList();
+
+        for (int i = 0; i < positionalArgs.Count; i++)
         {
-            var argumentSyntax = argumentList.Arguments[i];
+            var argumentSyntax = positionalArgs[i];
             var expression = argumentSyntax.Expression;
 
             // Get target parameter type
@@ -763,13 +766,43 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.Append(fullyQualifiedExpression.ToFullString());
             }
 
-            if (i < argumentList.Arguments.Count - 1)
+            if (i < positionalArgs.Count - 1)
             {
                 writer.Append(", ");
             }
         }
 
-        writer.AppendLine("),");
+        writer.Append(")");
+
+        // Handle named arguments (like Skip property)
+        var namedArgs = argumentList.Arguments.Where(a => a.NameEquals != null).ToList();
+        if (namedArgs.Count > 0)
+        {
+            writer.AppendLine();
+            writer.AppendLine("{");
+            writer.Indent();
+
+            for (int i = 0; i < namedArgs.Count; i++)
+            {
+                var namedArg = namedArgs[i];
+                var propertyName = namedArg.NameEquals!.Name.ToString();
+                var fullyQualifiedExpression = namedArg.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
+                writer.Append($"{propertyName} = {fullyQualifiedExpression.ToFullString()}");
+
+                if (i < namedArgs.Count - 1)
+                {
+                    writer.AppendLine(",");
+                }
+            }
+
+            writer.AppendLine();
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
+        else
+        {
+            writer.AppendLine(",");
+        }
     }
 
     private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
