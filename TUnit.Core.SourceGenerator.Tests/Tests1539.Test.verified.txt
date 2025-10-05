@@ -60,12 +60,6 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1539.Tests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1539.Tests)instance;
-                typedInstance.Test();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Test();

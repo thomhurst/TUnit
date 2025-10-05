@@ -82,12 +82,6 @@ internal sealed class ClassConstructorTest_Test_TestSource_GUID : global::TUnit.
                 // ClassConstructor attribute is present - instance creation handled at runtime
                 throw new global::System.NotSupportedException("Instance creation for classes with ClassConstructor attribute is handled at runtime");
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassConstructorTest)instance;
-                typedInstance.Test();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Test();

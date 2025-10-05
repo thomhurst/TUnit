@@ -55,12 +55,6 @@ internal sealed class TypedDelegateTest_TestWithDelegate_TestSource_GUID : globa
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.TypedDelegateTest(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.TypedDelegateTest)instance;
-                typedInstance.TestWithDelegate();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.TestWithDelegate();

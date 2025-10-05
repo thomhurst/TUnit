@@ -69,18 +69,6 @@ internal sealed class Tests_NullTest_TestSource_GUID : global::TUnit.Core.Interf
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1692.Tests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1692.Tests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.NullTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

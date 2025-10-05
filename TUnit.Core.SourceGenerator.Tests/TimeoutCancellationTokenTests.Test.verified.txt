@@ -103,12 +103,6 @@ internal sealed class TimeoutCancellationTokenTests_DefaultTest_TestSource_GUID 
             {
                 return new global::TUnit.TestProject.TimeoutCancellationTokenTests(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.TimeoutCancellationTokenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                await typedInstance.DefaultTest(context?.CancellationToken ?? System.Threading.CancellationToken.None);
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.DefaultTest(cancellationToken);
@@ -238,12 +232,6 @@ internal sealed class TimeoutCancellationTokenTests_BasicTest_TestSource_GUID : 
             {
                 return new global::TUnit.TestProject.TimeoutCancellationTokenTests(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.TimeoutCancellationTokenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                await typedInstance.BasicTest(context?.CancellationToken ?? System.Threading.CancellationToken.None);
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.BasicTest(cancellationToken);
@@ -371,12 +359,6 @@ internal sealed class TimeoutCancellationTokenTests_InheritedTimeoutAttribute_Te
             InstanceFactory = (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.TimeoutCancellationTokenTests(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-            },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.TimeoutCancellationTokenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                await typedInstance.InheritedTimeoutAttribute(context?.CancellationToken ?? System.Threading.CancellationToken.None);
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -515,19 +497,6 @@ internal sealed class TimeoutCancellationTokenTests_DataTest_TestSource_GUID : g
             InstanceFactory = (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.TimeoutCancellationTokenTests(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-            },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.TimeoutCancellationTokenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.DataTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -696,19 +665,6 @@ internal sealed class TimeoutCancellationTokenTests_DataSourceTest_TestSource_GU
             {
                 return new global::TUnit.TestProject.TimeoutCancellationTokenTests(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.TimeoutCancellationTokenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.DataSourceTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 var context = global::TUnit.Core.TestContext.Current;
@@ -855,19 +811,6 @@ internal sealed class TimeoutCancellationTokenTests_MatrixTest_TestSource_GUID :
             InstanceFactory = (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.TimeoutCancellationTokenTests(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-            },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.TimeoutCancellationTokenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.MatrixTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {

@@ -55,12 +55,6 @@ internal sealed class ModuleInitializerTest_TestWithModuleInit_TestSource_GUID :
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ModuleInitializerTest(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ModuleInitializerTest)instance;
-                typedInstance.TestWithModuleInit();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.TestWithModuleInit();

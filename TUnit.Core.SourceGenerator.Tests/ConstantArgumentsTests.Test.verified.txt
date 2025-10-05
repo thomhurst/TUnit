@@ -68,18 +68,6 @@ internal sealed class ConstantArgumentsTests_String1_TestSource_GUID : global::T
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ConstantArgumentsTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.String1(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -179,18 +167,6 @@ internal sealed class ConstantArgumentsTests_Int_TestSource_GUID : global::TUnit
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ConstantArgumentsTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Int(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -290,18 +266,6 @@ internal sealed class ConstantArgumentsTests_Double_TestSource_GUID : global::TU
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ConstantArgumentsTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Double(TUnit.Core.Helpers.CastHelper.Cast<double>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -401,18 +365,6 @@ internal sealed class ConstantArgumentsTests_Float_TestSource_GUID : global::TUn
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ConstantArgumentsTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Float(TUnit.Core.Helpers.CastHelper.Cast<float>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -512,18 +464,6 @@ internal sealed class ConstantArgumentsTests_Long_TestSource_GUID : global::TUni
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ConstantArgumentsTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Long(TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -623,18 +563,6 @@ internal sealed class ConstantArgumentsTests_UInt_TestSource_GUID : global::TUni
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ConstantArgumentsTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.UInt(TUnit.Core.Helpers.CastHelper.Cast<uint>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -734,18 +662,6 @@ internal sealed class ConstantArgumentsTests_ULong_TestSource_GUID : global::TUn
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConstantArgumentsTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ConstantArgumentsTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.ULong(TUnit.Core.Helpers.CastHelper.Cast<ulong>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

@@ -67,37 +67,6 @@ internal sealed class ArgsAsArrayTests_Params_TestSource_GUID : global::TUnit.Co
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
-                switch (args.Length)
-                {
-                    case 0:
-                        typedInstance.Params(new string[0]);
-                        break;
-                    case 1:
-                        typedInstance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) });
-                        break;
-                    case 2:
-                        typedInstance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]) });
-                        break;
-                    case 3:
-                        typedInstance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]) });
-                        break;
-                    case 4:
-                        typedInstance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]) });
-                        break;
-                    case 5:
-                        typedInstance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]) });
-                        break;
-                    case 6:
-                        typedInstance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]) });
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected between 0 and 1 arguments, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -215,19 +184,6 @@ internal sealed class ArgsAsArrayTests_NonParams_TestSource_GUID : global::TUnit
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.NonParams(TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -327,37 +283,6 @@ internal sealed class ArgsAsArrayTests_ParamsEnumerable_TestSource_GUID : global
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
-                switch (args.Length)
-                {
-                    case 0:
-                        typedInstance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        break;
-                    case 1:
-                        typedInstance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        break;
-                    case 2:
-                        typedInstance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        break;
-                    case 3:
-                        typedInstance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        break;
-                    case 4:
-                        typedInstance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        break;
-                    case 5:
-                        typedInstance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        break;
-                    case 6:
-                        typedInstance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected between 0 and 1 arguments, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -475,19 +400,6 @@ internal sealed class ArgsAsArrayTests_Enumerable_TestSource_GUID : global::TUni
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.Enumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -594,19 +506,6 @@ internal sealed class ArgsAsArrayTests_Following_Non_Params_TestSource_GUID : gl
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ArgsAsArrayTests)instance;
-                switch (args.Length)
-                {
-                    case 2:
-                        typedInstance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

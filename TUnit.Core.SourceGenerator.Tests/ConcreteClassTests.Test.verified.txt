@@ -57,12 +57,6 @@ internal sealed class ConcreteClass2_SecondTest_TestSource_GUID : global::TUnit.
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AbstractTests.ConcreteClass2(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.AbstractTests.ConcreteClass2)instance;
-                typedInstance.SecondTest();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.SecondTest();
@@ -145,11 +139,6 @@ internal sealed class ConcreteClass2_AssertClassName_TestSource_GUID : global::T
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AbstractTests.ConcreteClass2(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.AbstractTests.ConcreteClass2)instance;
-                await typedInstance.AssertClassName();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.AssertClassName();
@@ -231,12 +220,6 @@ internal sealed class ConcreteClass2_SecondTest_TestSource_GUID : global::TUnit.
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AbstractTests.ConcreteClass2(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.AbstractTests.ConcreteClass2)instance;
-                typedInstance.SecondTest();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.SecondTest();
@@ -318,11 +301,6 @@ internal sealed class ConcreteClass1_AssertClassName_TestSource_GUID : global::T
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AbstractTests.ConcreteClass1(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.AbstractTests.ConcreteClass1)instance;
-                await typedInstance.AssertClassName();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.AssertClassName();

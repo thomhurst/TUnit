@@ -82,18 +82,6 @@ internal sealed class MatrixTests_MatrixTest_One_TestSource_GUID : global::TUnit
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
-                switch (args.Length)
-                {
-                    case 3:
-                        await typedInstance.MatrixTest_One(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -214,18 +202,6 @@ internal sealed class MatrixTests_MatrixTest_Two_TestSource_GUID : global::TUnit
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
-                switch (args.Length)
-                {
-                    case 4:
-                        await typedInstance.MatrixTest_Two(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[3]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 4 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -339,18 +315,6 @@ internal sealed class MatrixTests_MatrixTest_Enum_TestSource_GUID : global::TUni
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
-                switch (args.Length)
-                {
-                    case 3:
-                        await typedInstance.MatrixTest_Enum(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum?>(args[2]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -457,18 +421,6 @@ internal sealed class MatrixTests_AutoGenerateBools_TestSource_GUID : global::TU
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
-                switch (args.Length)
-                {
-                    case 2:
-                        await typedInstance.AutoGenerateBools(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[1]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -575,18 +527,6 @@ internal sealed class MatrixTests_AutoGenerateBools2_TestSource_GUID : global::T
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
-                switch (args.Length)
-                {
-                    case 2:
-                        await typedInstance.AutoGenerateBools2(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<bool?>(args[1]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -693,18 +633,6 @@ internal sealed class MatrixTests_ImplicitConversion_TestSource_GUID : global::T
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
-                switch (args.Length)
-                {
-                    case 2:
-                        await typedInstance.ImplicitConversion(TUnit.Core.Helpers.CastHelper.Cast<OneOf<global::TUnit.TestProject.TestEnum, TestEnum2>>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[1]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -811,18 +739,6 @@ internal sealed class MatrixTests_ExcludingAutoGeneratedMatrixValues_TestSource_
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
-                switch (args.Length)
-                {
-                    case 2:
-                        await typedInstance.ExcludingAutoGeneratedMatrixValues(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MatrixTests.CountToTenEnum>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[1]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -922,18 +838,6 @@ internal sealed class MatrixTests_Method1_TestSource_GUID : global::TUnit.Core.I
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Method1(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -1033,18 +937,6 @@ internal sealed class MatrixTests_Method2_TestSource_GUID : global::TUnit.Core.I
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Method2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -1144,18 +1036,6 @@ internal sealed class MatrixTests_Method3_TestSource_GUID : global::TUnit.Core.I
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Method3(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -1255,18 +1135,6 @@ internal sealed class MatrixTests_Method4_TestSource_GUID : global::TUnit.Core.I
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Method4(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -1376,18 +1244,6 @@ internal sealed class MatrixTests_Exclusion_TestSource_GUID : global::TUnit.Core
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MatrixTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MatrixTests)instance;
-                switch (args.Length)
-                {
-                    case 2:
-                        await typedInstance.Exclusion(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

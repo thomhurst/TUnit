@@ -55,12 +55,6 @@ internal sealed class SimpleTestClass_NonGenericTest_TestSource_GUID : global::T
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.SimpleTestClass(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.SimpleTestClass)instance;
-                typedInstance.NonGenericTest();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.NonGenericTest();
