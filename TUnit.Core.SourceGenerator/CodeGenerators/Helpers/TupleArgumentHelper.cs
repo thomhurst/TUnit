@@ -139,24 +139,19 @@ public static class TupleArgumentHelper
             // Handle params array parameter
             var paramsParam = parameters[parameters.Count - 1];
             var elementType = (paramsParam.Type as IArrayTypeSymbol)?.ElementType;
-            
+
             if (elementType != null)
             {
                 if (argCountExpression != null)
                 {
                     // Dynamic count - create array from remaining arguments
-                    var arrayInit = $@"
-                        ({argumentsArrayName}.Length > {regularParamCount} 
-                            ? global::System.Linq.Enumerable.Range({regularParamCount}, {argCountExpression} - {regularParamCount})
-                                .Select(i => TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[i]))
-                                .ToArray()
-                            : new {elementType.GloballyQualified()}[0])";
-                    argumentExpressions.Add(arrayInit.Replace("\r\n", " ").Replace("\n", " ").Trim());
+                    var arrayInit = $"({argumentsArrayName}.Length > {regularParamCount} ? global::System.Linq.Enumerable.Range({regularParamCount}, {argCountExpression} - {regularParamCount}).Select(i => TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[i])).ToArray() : new {elementType.GloballyQualified()}[0])";
+                    argumentExpressions.Add(arrayInit);
                 }
                 else
                 {
                     var remainingArgCount = Math.Max(0, argCount - regularParamCount);
-                    
+
                     if (remainingArgCount == 0)
                     {
                         // No arguments for params array - pass empty array
@@ -164,9 +159,14 @@ public static class TupleArgumentHelper
                     }
                     else if (remainingArgCount == 1)
                     {
-                        // Single argument for params - create array with single element
-                        var singleElementExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[{regularParamCount}])";
-                        argumentExpressions.Add($"new {elementType.GloballyQualified()}[] {{ {singleElementExpression} }}");
+                        // Single argument for params - check if it's null or already the correct array type
+                        // In C#, params T[] can receive:
+                        // - null (passed as null, not as array with null element)
+                        // - T[] (passed directly, not wrapped in another array)
+                        // - T (wrapped in array with single element)
+                        var singleArg = $"{argumentsArrayName}[{regularParamCount}]";
+                        var checkAndCast = $"({singleArg} is null ? null : {singleArg} is {paramsParam.Type.GloballyQualified()} arr ? arr : new {elementType.GloballyQualified()}[] {{ TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({singleArg}) }})";
+                        argumentExpressions.Add(checkAndCast);
                     }
                     else
                     {
