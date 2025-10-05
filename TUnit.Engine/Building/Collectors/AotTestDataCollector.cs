@@ -205,21 +205,32 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                     throw new InvalidOperationException("Dynamic test method expression is null");
                 }
 
-                // Since we're in AOT mode, we need to handle this differently
-                // The expression should already be compiled in source generation
+                // Extract method info from the expression
                 var lambdaExpression = result.TestMethod as LambdaExpression;
                 if (lambdaExpression == null)
                 {
                     throw new InvalidOperationException("Dynamic test method must be a lambda expression");
                 }
 
-                var compiledExpression = lambdaExpression.Compile();
+                MethodInfo? methodInfo = null;
+                if (lambdaExpression.Body is MethodCallExpression methodCall)
+                {
+                    methodInfo = methodCall.Method;
+                }
+                else if (lambdaExpression.Body is UnaryExpression { Operand: MethodCallExpression unaryMethodCall })
+                {
+                    methodInfo = unaryMethodCall.Method;
+                }
+
+                if (methodInfo == null)
+                {
+                    throw new InvalidOperationException("Could not extract method info from dynamic test expression");
+                }
+
                 var testInstance = instance ?? throw new InvalidOperationException("Test instance is null");
 
-                // The expression is already bound to the correct method with arguments
-                // so we just need to invoke it with the instance
-                var invokeMethod = compiledExpression.GetType().GetMethod("Invoke")!;
-                var invokeResult = invokeMethod.Invoke(compiledExpression, [testInstance]);
+                // Use the provided args from TestMethodArguments instead of the expression's placeholder values
+                var invokeResult = methodInfo.Invoke(testInstance, args);
 
                 if (invokeResult is Task task)
                 {
