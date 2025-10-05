@@ -12,6 +12,13 @@ using TUnit.Engine.Building.Interfaces;
 namespace TUnit.Engine.Discovery;
 
 /// Discovers tests at runtime using reflection with assembly scanning and caching
+[UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode isn't used in AOT scenarios")]
+[UnconditionalSuppressMessage("Trimming", "IL2062", Justification = "Reflection mode isn't used in AOT scenarios")]
+[UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode isn't used in AOT scenarios")]
+[UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Reflection mode isn't used in AOT scenarios")]
+[UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection mode isn't used in AOT scenarios")]
+[UnconditionalSuppressMessage("AOT", "IL3000", Justification = "Reflection mode isn't used in AOT scenarios")]
+[UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode isn't used in AOT scenarios")]
 internal sealed class ReflectionTestDataCollector : ITestDataCollector
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
@@ -195,16 +202,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             while (currentType != null && currentType != typeof(object))
             {
-#if NET6_0_OR_GREATER
-#pragma warning disable IL2070 // Type parameter 't' inherits PublicMethods annotation from input
-#pragma warning disable IL2075 // BaseType doesn't preserve annotations, but GetMethods is safe
-#endif
                 methods.AddRange(currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly));
                 currentType = currentType.BaseType;
-#if NET6_0_OR_GREATER
-#pragma warning restore IL2075
-#pragma warning restore IL2070
-#endif
             }
 
             return methods.ToArray();
@@ -301,13 +300,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         try
         {
-#if NET6_0_OR_GREATER
-#pragma warning disable IL3000 // Assembly.Location is handled for single-file scenarios with try-catch
-#endif
             var location = assembly.Location;
-#if NET6_0_OR_GREATER
-#pragma warning restore IL3000
-#endif
             if (!string.IsNullOrEmpty(location) &&
                 (location.Contains("ref") ||
                     location.Contains("runtimes") ||
@@ -324,13 +317,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // Don't return false here, continue with other checks
         }
 
-#if NET6_0_OR_GREATER
-#pragma warning disable IL2026 // Assembly.GetReferencedAssemblies is acceptable for assembly filtering
-#endif
         var referencedAssemblies = assembly.GetReferencedAssemblies();
-#if NET6_0_OR_GREATER
-#pragma warning restore IL2026
-#endif
         var hasTUnitReference = false;
         foreach (var reference in referencedAssemblies)
         {
@@ -897,9 +884,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             testMethod.DeclaringType.IsGenericTypeDefinition)
         {
             // Find the constructed generic type in the inheritance chain
-#if NET6_0_OR_GREATER
-#pragma warning disable IL2072 // BaseType doesn't preserve DynamicallyAccessedMembers annotations
-#endif
             var baseType = testClass.BaseType;
             while (baseType != null)
             {
@@ -911,9 +895,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
                 baseType = baseType.BaseType;
             }
-#if NET6_0_OR_GREATER
-#pragma warning restore IL2072
-#endif
         }
 
         try
@@ -921,13 +902,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return Task.FromResult<TestMetadata>(new ReflectionTestMetadata(testClass, testMethod)
             {
                 TestName = testName,
-#if NET6_0_OR_GREATER
-#pragma warning disable IL2072 // typeForGenericResolution may come from BaseType which doesn't preserve annotations
-#endif
                 TestClassType = typeForGenericResolution, // Use resolved type for generic resolution (may be constructed generic base)
-#if NET6_0_OR_GREATER
-#pragma warning restore IL2072
-#endif
                 TestMethodName = testMethod.Name,
                 Dependencies = ReflectionAttributeExtractor.ExtractDependencies(testClass, testMethod),
                 DataSources = ReflectionAttributeExtractor.ExtractDataSources(testMethod),
@@ -1363,13 +1338,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 for (var i = 0; i < paramGenArgs.Length && i < argGenArgs.Length; i++)
                 {
-#if NET6_0_OR_GREATER
-#pragma warning disable IL2062 // Generic type arguments don't preserve DynamicallyAccessedMembers
-#endif
                     InferGenericTypeMapping(paramGenArgs[i], argGenArgs[i], typeMapping);
-#if NET6_0_OR_GREATER
-#pragma warning restore IL2062
-#endif
                 }
             }
             else
@@ -1384,13 +1353,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                         for (var i = 0; i < paramGenArgs.Length && i < ifaceGenArgs.Length; i++)
                         {
-#if NET6_0_OR_GREATER
-#pragma warning disable IL2062 // Generic type arguments don't preserve DynamicallyAccessedMembers
-#endif
                             InferGenericTypeMapping(paramGenArgs[i], ifaceGenArgs[i], typeMapping);
-#if NET6_0_OR_GREATER
-#pragma warning restore IL2062
-#endif
                         }
                         break;
                     }
@@ -1411,13 +1374,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     for (var i = 0; i < paramGenArgs.Length && i < ifaceGenArgs.Length; i++)
                     {
-#if NET6_0_OR_GREATER
-#pragma warning disable IL2062 // Generic type arguments don't preserve DynamicallyAccessedMembers
-#endif
                         InferGenericTypeMapping(paramGenArgs[i], ifaceGenArgs[i], typeMapping);
-#if NET6_0_OR_GREATER
-#pragma warning restore IL2062
-#endif
                     }
                     break;
                 }
@@ -1427,13 +1384,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // Array types
         if (paramType.IsArray && argType.IsArray)
         {
-#if NET6_0_OR_GREATER
-#pragma warning disable IL2072 // GetElementType doesn't preserve DynamicallyAccessedMembers
-#endif
             InferGenericTypeMapping(paramType.GetElementType()!, argType.GetElementType()!, typeMapping);
-#if NET6_0_OR_GREATER
-#pragma warning restore IL2072
-#endif
         }
     }
 
@@ -1490,10 +1441,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Creates a reflection-based test invoker with proper AOT attribution
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Reflection-based invoker uses MethodInfo.Invoke and reflection")]
-    [RequiresDynamicCode("Generic method construction uses MakeGenericMethod")]
-    #endif
     private static Func<object, object?[], Task> CreateReflectionTestInvoker(Type testClass, MethodInfo testMethod)
     {
         var isPrepared = false;

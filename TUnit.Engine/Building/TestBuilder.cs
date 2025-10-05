@@ -19,15 +19,18 @@ internal sealed class TestBuilder : ITestBuilder
     private readonly IContextProvider _contextProvider;
     private readonly PropertyInjectionService _propertyInjectionService;
     private readonly DataSourceInitializer _dataSourceInitializer;
+    private readonly Discovery.IHookDiscoveryService _hookDiscoveryService;
 
     public TestBuilder(
         string sessionId,
         EventReceiverOrchestrator eventReceiverOrchestrator,
         IContextProvider contextProvider,
         PropertyInjectionService propertyInjectionService,
-        DataSourceInitializer dataSourceInitializer)
+        DataSourceInitializer dataSourceInitializer,
+        Discovery.IHookDiscoveryService hookDiscoveryService)
     {
         _sessionId = sessionId;
+        _hookDiscoveryService = hookDiscoveryService;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _contextProvider = contextProvider;
         _propertyInjectionService = propertyInjectionService;
@@ -651,14 +654,14 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Hook discovery service handles mode-specific logic; reflection calls suppressed in AOT mode")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Hook discovery service handles mode-specific logic; dynamic code suppressed in AOT mode")]
     public async Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
-        // Discover instance hooks for closed generic types in reflection mode
-        if (!SourceRegistrar.IsEnabled && metadata.TestClassType is { IsGenericType: true, IsGenericTypeDefinition: false })
+        // Discover instance hooks for closed generic types (no-op in source gen mode)
+        if (metadata.TestClassType is { IsGenericType: true, IsGenericTypeDefinition: false })
         {
-            Discovery.ReflectionHookDiscoveryService.DiscoverInstanceHooksForType(metadata.TestClassType);
+            _hookDiscoveryService.DiscoverInstanceHooksForType(metadata.TestClassType);
         }
 
         var testId = TestIdentifierService.GenerateTestId(metadata, testData);

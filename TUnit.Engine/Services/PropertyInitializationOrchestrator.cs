@@ -161,13 +161,7 @@ internal sealed class PropertyInitializationOrchestrator
             DataSource = dataSource,
             PropertyName = property.Name,
             PropertyType = property.PropertyType,
-#if NET6_0_OR_GREATER
-#pragma warning disable IL2026 // Property setter creation may use reflection - acceptable for init-only properties
-#endif
             PropertySetter = PropertySetterFactory.CreateSetter(property),
-#if NET6_0_OR_GREATER
-#pragma warning restore IL2026
-#endif
             ObjectBag = objectBag,
             MethodMetadata = methodMetadata,
             Events = events,

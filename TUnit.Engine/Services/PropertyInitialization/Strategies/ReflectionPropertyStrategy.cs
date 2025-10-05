@@ -55,13 +55,7 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
         else
         {
             // Step 1: Resolve data from the data source (execution-time resolution)
-#if NET6_0_OR_GREATER
-#pragma warning disable IL2026 // Property data resolution uses reflection - acceptable during property injection
-#endif
             resolvedValue = await PropertyDataResolver.ResolvePropertyDataAsync(context, _dataSourceInitializer, _objectRegistrationService);
-#if NET6_0_OR_GREATER
-#pragma warning restore IL2026
-#endif
             if (resolvedValue == null)
             {
                 return;

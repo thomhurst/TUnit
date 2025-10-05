@@ -60,13 +60,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
         // Register properties that will be injected into the test class
         await RegisterPropertiesAsync(testContext);
 
-#if NET6_0_OR_GREATER
-#pragma warning disable IL2026 // Trackable object discovery uses reflection - acceptable during test discovery
-#endif
         _objectTracker.TrackObjects(testContext);
-#if NET6_0_OR_GREATER
-#pragma warning restore IL2026
-#endif
     }
 
     /// <summary>

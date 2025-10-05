@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
@@ -9,40 +8,21 @@ using TUnit.Engine.Exceptions;
 
 namespace TUnit.Engine;
 
-internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
+internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookDiscoveryService hookDiscoveryService)
 {
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
     public void Initialize(ExecuteRequestContext context)
     {
         ConfigureGlobalExceptionHandlers(context);
         SetUpExceptionListeners();
         ParseParameters();
 
-        // Discover hooks via reflection if in reflection mode
-        if (IsReflectionMode())
-        {
-            DiscoverHooksViaReflection();
-        }
+        // Discover hooks using the mode-specific service
+        hookDiscoveryService.DiscoverHooks();
 
         if (!string.IsNullOrEmpty(TestContext.OutputDirectory))
         {
             TestContext.WorkingDirectory = TestContext.OutputDirectory!;
         }
-    }
-
-    private bool IsReflectionMode()
-    {
-        return !SourceRegistrar.IsEnabled;
-    }
-
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Hook discovery uses reflection to scan assemblies and types")]
-    [RequiresDynamicCode("Hook delegate creation requires dynamic code generation")]
-#endif
-    private void DiscoverHooksViaReflection()
-    {
-        ReflectionHookDiscoveryService.DiscoverHooks();
     }
 
     private void SetUpExceptionListeners()

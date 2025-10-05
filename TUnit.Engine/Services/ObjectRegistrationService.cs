@@ -97,12 +97,6 @@ internal sealed class ObjectRegistrationService
     /// </summary>
     private bool RequiresPropertyInjection(object instance)
     {
-#if NET6_0_OR_GREATER
-#pragma warning disable IL2026 // Injectable property check uses reflection - acceptable during registration
-#endif
         return PropertyInjectionCache.HasInjectableProperties(instance.GetType());
-#if NET6_0_OR_GREATER
-#pragma warning restore IL2026
-#endif
     }
 }

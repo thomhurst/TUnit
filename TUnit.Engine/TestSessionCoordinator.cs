@@ -21,6 +21,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     private readonly IContextProvider _contextProvider;
     private readonly TestLifecycleCoordinator _lifecycleCoordinator;
     private readonly ITUnitMessageBus _messageBus;
+    private readonly IStaticPropertyInitializer _staticPropertyInitializer;
 
     public TestSessionCoordinator(EventReceiverOrchestrator eventReceiverOrchestrator,
         TUnitFrameworkLogger logger,
@@ -28,7 +29,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         TUnitServiceProvider serviceProvider,
         IContextProvider contextProvider,
         TestLifecycleCoordinator lifecycleCoordinator,
-        ITUnitMessageBus messageBus)
+        ITUnitMessageBus messageBus,
+        IStaticPropertyInitializer staticPropertyInitializer)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _logger = logger;
@@ -37,14 +39,9 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _lifecycleCoordinator = lifecycleCoordinator;
         _messageBus = messageBus;
         _testScheduler = testScheduler;
+        _staticPropertyInitializer = staticPropertyInitializer;
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Static property initialization uses reflection in reflection mode")]
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Data source initialization may require dynamic code generation")]
-    [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
-    [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "Reflection mode is not used in AOT scenarios")]
-    #endif
     public async Task ExecuteTests(
         IEnumerable<AbstractExecutableTest> tests,
         ITestExecutionFilter? filter,
@@ -75,45 +72,18 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _eventReceiverOrchestrator.InitializeTestCounts(testContexts);
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
     private async Task PrepareTestOrchestrator(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
         // Register all tests upfront so orchestrator knows total counts per class/assembly for lifecycle management
         _lifecycleCoordinator.RegisterTests(testList);
 
-        await InitializeStaticPropertiesAsync(cancellationToken);
-    }
-
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
-    private async Task InitializeStaticPropertiesAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            // Execute all registered global initializers (including static property initialization from source generation)
-            while (Sources.GlobalInitializers.TryDequeue(out var initializer))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                await initializer();
-            }
-
-            // For reflection mode, also initialize static properties dynamically
-            if (!SourceRegistrar.IsEnabled)
-            {
-                await StaticPropertyReflectionInitializer.InitializeAllStaticPropertiesAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            await _logger.LogErrorAsync($"Error during static property initialization: {ex}");
-            throw;
-        }
+        await _staticPropertyInitializer.InitializeAsync(cancellationToken);
     }
 
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Test scheduler uses mode-specific services that handle reflection properly")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Test scheduler uses mode-specific services that handle dynamic code properly")]
     #endif
     private async Task ExecuteTestsCore(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
