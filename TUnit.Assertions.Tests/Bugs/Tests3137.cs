@@ -29,6 +29,11 @@ public class Tests3137
             return AssertionResult.FailIf(
                 actualIncrement != expectedIncrement,
                 $"Actual increment was {actualIncrement} but expected {expectedIncrement}.");
+
+            // silence Codacy
+            _ = actualValue;
+            _ = exception;
+            _ = assertionMetadata;
         }
     }
 }
