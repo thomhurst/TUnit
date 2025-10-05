@@ -43,6 +43,11 @@ Please note that for the coverage and trx report, you need to install [additiona
     --list-tests
         List available tests.
 
+    --log-level
+        Minimum log level for test output.
+        The available values are 'Trace', 'Debug', 'Information', 'Warning', 'Error', 'Critical', and 'None'.
+        Default is 'Information'.
+
     --minimum-expected-tests
         Specifies the minimum number of tests that are expected to run.
 
