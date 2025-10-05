@@ -27,7 +27,7 @@ internal sealed class TestBuilderPipeline
         _contextProvider = contextBuilder;
         _eventReceiverOrchestrator = eventReceiverOrchestrator ?? throw new ArgumentNullException(nameof(eventReceiverOrchestrator));
     }
-    
+
     private TestBuilderContext CreateTestBuilderContext(TestMetadata metadata)
     {
         var testBuilderContext = new TestBuilderContext
@@ -36,22 +36,22 @@ internal sealed class TestBuilderPipeline
             Events = new TestContextEvents(),
             ObjectBag = new Dictionary<string, object?>()
         };
-        
+
         // Check for ClassConstructor attribute and set it early if present
         var attributes = metadata.AttributeFactory();
-        
+
         // Look for any attribute that inherits from ClassConstructorAttribute
         // This handles both ClassConstructorAttribute and ClassConstructorAttribute<T>
         var classConstructorAttribute = attributes
             .Where(a => a is ClassConstructorAttribute)
             .Cast<ClassConstructorAttribute>()
             .FirstOrDefault();
-            
+
         if (classConstructorAttribute != null)
         {
             testBuilderContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
         }
-        
+
         return testBuilderContext;
     }
 
@@ -175,14 +175,14 @@ internal sealed class TestBuilderPipeline
             };
 
             var testId = TestIdentifierService.GenerateTestId(metadata, testData);
-            
+
             var displayName = repeatCount > 0
                 ? $"{metadata.TestName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
                 : metadata.TestName;
 
             // Get attributes first
             var attributes = metadata.AttributeFactory();
-            
+
             // Create TestDetails for dynamic tests
             var testDetails = new TestDetails
             {
@@ -203,7 +203,7 @@ internal sealed class TestBuilderPipeline
             };
 
             var testBuilderContext = CreateTestBuilderContext(metadata);
-            
+
             var context = _contextProvider.CreateTestContext(
                 metadata.TestName,
                 metadata.TestClassType,
