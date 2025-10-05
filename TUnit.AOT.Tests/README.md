@@ -119,9 +119,10 @@ This test project validates the following source-generated components:
 
 - **AotTypeResolverGenerator**: Replaces `TypeResolver.cs` with compile-time type mapping
 - **AotMethodInvocationGenerator**: Generates strongly-typed method delegates
-- **AotTupleProcessorGenerator**: Creates compile-time tuple unwrapping code  
 - **EnhancedPropertyInjectionGenerator**: Generates property setters with UnsafeAccessor
 - **AotModuleInitializerGenerator**: Wires all components together automatically
+
+Note: Tuple unwrapping is handled natively via the `ITuple` interface, requiring no source generation.
 
 ## Performance Benefits
 

@@ -152,24 +152,8 @@ public sealed class AotModuleInitializerGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
-        writer.AppendLine("// Register AOT-safe tuple processing replacements");
-        writer.AppendLine("try");
-        writer.AppendLine("{");
-        writer.Indent();
-        
-        writer.AppendLine("// Register tuple processing if available");
-        writer.AppendLine("// Note: AotTupleProcessor will be registered by its own generator when available");
-        writer.AppendLine("// This is a placeholder for future tuple processing registration");
+        writer.AppendLine("// Tuple processing uses ITuple interface (no registration needed)");
         writer.AppendLine("global::System.Diagnostics.Debug.WriteLine(\"AOT tuple processing setup complete\");");
-
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine("catch (global::System.Exception ex)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine("global::System.Diagnostics.Debug.WriteLine($\"Failed to initialize AOT tuple processing: {ex.Message}\");");
-        writer.Unindent();
-        writer.AppendLine("}");
 
         writer.Unindent();
         writer.AppendLine("}");
