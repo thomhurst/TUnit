@@ -32,6 +32,7 @@ TUnit0046 | Usage | Warning | Data source should return Func<T> for lazy evaluat
 TUnit0049 | Usage | Error | [Matrix] parameters require [MatrixDataSource] attribute on the test method
 TUnit0050 | Usage | Error | Too many test arguments provided
 TUnit0056 | Usage | Error | Instance data source methods must use [InstanceMethodDataSource] attribute
+TUnit0060 | Usage | Info | Data source may produce no tests - ensure it provides at least one test case
 
 #### Hook and Lifecycle Rules
 Rule ID | Category | Severity | Notes                                          
@@ -54,6 +55,7 @@ TUnit0028 | Usage | Error | Do not override TUnit's AttributeUsage settings
 TUnit0029 | Usage | Error | Duplicate attribute where only one is allowed
 TUnit0030 | Usage | Warning | Test class doesn't inherit base class tests - add [InheritsTests] to include them
 TUnit0032 | Usage | Error | [DependsOn] and [NotInParallel] attributes conflict - tests with dependencies must support parallel execution
+TUnit0059 | Usage | Warning | Abstract test class with data sources requires [InheritsTests] on concrete class to execute tests
 TUnit0033 | Usage | Error | Circular or conflicting test dependencies detected
 
 #### Async and Execution Rules
