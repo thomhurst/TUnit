@@ -50,8 +50,11 @@ internal static class DisplayNameBuilder
             return string.Empty;
         }
 
-        var formattedArgs = arguments.Select(arg => ArgumentFormatter.Format(arg, [
-        ])).ToArray();
+        var formattedArgs = new string[arguments.Length];
+        for (var i = 0; i < arguments.Length; i++)
+        {
+            formattedArgs[i] = ArgumentFormatter.Format(arguments[i], []);
+        }
         return string.Join(", ", formattedArgs);
     }
 
@@ -65,7 +68,11 @@ internal static class DisplayNameBuilder
             return string.Empty;
         }
 
-        var formattedArgs = arguments.Select(arg => ArgumentFormatter.Format(arg, formatters)).ToArray();
+        var formattedArgs = new string[arguments.Length];
+        for (var i = 0; i < arguments.Length; i++)
+        {
+            formattedArgs[i] = ArgumentFormatter.Format(arguments[i], formatters);
+        }
         return string.Join(", ", formattedArgs);
     }
 
@@ -75,10 +82,15 @@ internal static class DisplayNameBuilder
     public static string BuildGenericDisplayName(TestMetadata metadata, Type[] genericTypes, object?[] arguments)
     {
         var testName = metadata.TestName;
-        
+
         if (genericTypes.Length > 0)
         {
-            var genericPart = string.Join(", ", genericTypes.Select(t => GetSimpleTypeName(t)));
+            var genericTypeNames = new string[genericTypes.Length];
+            for (var i = 0; i < genericTypes.Length; i++)
+            {
+                genericTypeNames[i] = GetSimpleTypeName(genericTypes[i]);
+            }
+            var genericPart = string.Join(", ", genericTypeNames);
             testName = $"{testName}<{genericPart}>";
         }
 
@@ -106,8 +118,13 @@ internal static class DisplayNameBuilder
         }
 
         var genericArgs = type.GetGenericArguments();
-        var genericArgsText = string.Join(", ", genericArgs.Select(GetSimpleTypeName));
-        
+        var genericArgNames = new string[genericArgs.Length];
+        for (var i = 0; i < genericArgs.Length; i++)
+        {
+            genericArgNames[i] = GetSimpleTypeName(genericArgs[i]);
+        }
+        var genericArgsText = string.Join(", ", genericArgNames);
+
         return $"{genericTypeName}<{genericArgsText}>";
     }
 

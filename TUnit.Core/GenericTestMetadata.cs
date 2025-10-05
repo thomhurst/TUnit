@@ -31,10 +31,16 @@ public sealed class GenericTestMetadata : TestMetadata
                     // Determine the concrete types from the test arguments
                     var inferredTypes = InferTypesFromArguments(context.Arguments, metadata);
 
+                    string typeKey;
                     if (inferredTypes is { Length: > 0 })
                     {
                         // Create a key from the inferred types - must match source generator format
-                        var typeKey = string.Join(",", inferredTypes.Select(t => t.FullName ?? t.Name));
+                        var typeNames = new string[inferredTypes.Length];
+                        for (var i = 0; i < inferredTypes.Length; i++)
+                        {
+                            typeNames[i] = inferredTypes[i].FullName ?? inferredTypes[i].Name;
+                        }
+                        typeKey = string.Join(",", typeNames);
 
                         // Find the matching concrete instantiation
                         if (genericMetadata.ConcreteInstantiations.TryGetValue(typeKey, out var concreteMetadata))
@@ -43,12 +49,16 @@ public sealed class GenericTestMetadata : TestMetadata
                             return concreteMetadata.CreateExecutableTestFactory(context, concreteMetadata);
                         }
                     }
+                    else
+                    {
+                        typeKey = "unknown";
+                    }
 
                     // If we couldn't find a match but have instantiations, throw an error
                     var availableKeys = string.Join(", ", genericMetadata.ConcreteInstantiations.Keys);
                     throw new InvalidOperationException(
                         $"No concrete instantiation found for generic method {metadata.TestMethodName} " +
-                        $"with type arguments: {(inferredTypes?.Length > 0 ? string.Join(",", inferredTypes.Select(t => t.FullName ?? t.Name)) : "unknown")}. " +
+                        $"with type arguments: {typeKey}. " +
                         $"Available: {availableKeys}");
                 }
 
@@ -130,8 +140,17 @@ public sealed class GenericTestMetadata : TestMetadata
                     }
 
                     // Determine if the test method has a CancellationToken parameter
-                    var parameterTypes = metadata.MethodMetadata.Parameters.Select(p => p.Type).ToArray();
-                    var hasCancellationToken = parameterTypes.Any(t => t == typeof(CancellationToken));
+                    var parameters = metadata.MethodMetadata.Parameters;
+                    var parameterTypes = new Type[parameters.Length];
+                    var hasCancellationToken = false;
+                    for (var i = 0; i < parameters.Length; i++)
+                    {
+                        parameterTypes[i] = parameters[i].Type;
+                        if (parameters[i].Type == typeof(CancellationToken))
+                        {
+                            hasCancellationToken = true;
+                        }
+                    }
 
                     if (hasCancellationToken)
                     {

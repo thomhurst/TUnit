@@ -2421,6 +2421,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return $"typeof({fullyQualifiedName})";
     }
 
+    private static string BuildTypeKey(IEnumerable<ITypeSymbol> types)
+    {
+        var typesList = types as IList<ITypeSymbol> ?? types.ToArray();
+        if (typesList.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var formattedTypes = new string[typesList.Count];
+        for (var i = 0; i < typesList.Count; i++)
+        {
+            formattedTypes[i] = typesList[i].ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
+        }
+        return string.Join(",", formattedTypes);
+    }
+
     private static void GenerateGenericTypeInfo(CodeWriter writer, INamedTypeSymbol typeSymbol)
     {
         writer.AppendLine("GenericTypeInfo = new global::TUnit.Core.GenericTypeInfo");
@@ -2657,7 +2673,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     Array.Copy(classTypes, 0, combinedTypes, 0, classTypes.Length);
                     Array.Copy(methodTypes, 0, combinedTypes, classTypes.Length, methodTypes.Length);
 
-                    var typeKey = string.Join(",", combinedTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    var typeKey = BuildTypeKey(combinedTypes);
 
                     // Skip if we've already processed this type combination
                     if (!processedTypeCombinations.Add(typeKey))
@@ -2715,7 +2731,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 if (inferredTypes is { Length: > 0 })
                 {
-                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    var typeKey = BuildTypeKey(inferredTypes);
 
                     // Skip if we've already processed this type combination
                     if (!processedTypeCombinations.Add(typeKey))
@@ -2758,7 +2774,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation);
                 if (inferredTypes is { Length: > 0 })
                 {
-                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    var typeKey = BuildTypeKey(inferredTypes);
 
                     // Skip if we've already processed this type combination
                     if (!processedTypeCombinations.Add(typeKey))
@@ -2795,7 +2811,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var inferredTypes = InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr);
             if (inferredTypes is { Length: > 0 })
             {
-                var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                var typeKey = BuildTypeKey(inferredTypes);
 
                 // Skip if we've already processed this type combination
                 if (!processedTypeCombinations.Add(typeKey))
@@ -2834,7 +2850,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var inferredTypes = InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol);
             if (inferredTypes is { Length: > 0 })
             {
-                var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                var typeKey = BuildTypeKey(inferredTypes);
 
                 // Skip if we've already processed this type combination
                 if (processedTypeCombinations.Add(typeKey))
@@ -2864,7 +2880,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var inferredTypes = InferClassTypesFromMethodDataSource(compilation, testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
                 {
-                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    var typeKey = BuildTypeKey(inferredTypes);
 
                     // Skip if we've already processed this type combination
                     if (processedTypeCombinations.Add(typeKey))
@@ -2888,7 +2904,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var typedDataSourceInferredTypes = InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol);
             if (typedDataSourceInferredTypes is { Length: > 0 })
             {
-                var typeKey = string.Join(",", typedDataSourceInferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                var typeKey = BuildTypeKey(typedDataSourceInferredTypes);
 
                 // Skip if we've already processed this type combination
                 if (processedTypeCombinations.Add(typeKey))
@@ -2918,7 +2934,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var inferredTypes = InferTypesFromMethodDataSource(compilation, testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
                 {
-                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    var typeKey = BuildTypeKey(inferredTypes);
 
                     // Skip if we've already processed this type combination
                     if (processedTypeCombinations.Add(typeKey))
@@ -2965,7 +2981,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             {
                                 // Combine class types and method types
                                 var combinedTypes = classInferredTypes.Concat(methodInferredTypes).ToArray();
-                                var typeKey = string.Join(",", combinedTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                                var typeKey = BuildTypeKey(combinedTypes);
 
                                 // Skip if we've already processed this type combination
                                 if (processedTypeCombinations.Add(typeKey))
@@ -2986,7 +3002,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     else
                     {
                         // For non-generic methods, just use class types
-                        var typeKey = string.Join(",", classInferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                        var typeKey = BuildTypeKey(classInferredTypes);
 
                         // Skip if we've already processed this type combination
                         if (processedTypeCombinations.Add(typeKey))
@@ -3111,7 +3127,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 if (typeArgs.Count > 0)
                 {
                     var inferredTypes = typeArgs.ToArray();
-                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    var typeKey = BuildTypeKey(inferredTypes);
 
                     // Skip if we've already processed this type combination
                     if (processedTypeCombinations.Add(typeKey))

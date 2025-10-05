@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -386,10 +387,46 @@ public class TypedConstantFormatter : ITypedConstantFormatter
 
     private static string EscapeForTestId(string str)
     {
-        return str.Replace("\\", "\\\\")
-                  .Replace("\r", "\\r")
-                  .Replace("\n", "\\n")
-                  .Replace("\t", "\\t")
-                  .Replace("\"", "\\\"");
+        var needsEscape = false;
+        foreach (var c in str)
+        {
+            if (c == '\\' || c == '\r' || c == '\n' || c == '\t' || c == '"')
+            {
+                needsEscape = true;
+                break;
+            }
+        }
+
+        if (!needsEscape)
+        {
+            return str;
+        }
+
+        var builder = new StringBuilder(str.Length + 10);
+        foreach (var c in str)
+        {
+            switch (c)
+            {
+                case '\\':
+                    builder.Append("\\\\");
+                    break;
+                case '\r':
+                    builder.Append("\\r");
+                    break;
+                case '\n':
+                    builder.Append("\\n");
+                    break;
+                case '\t':
+                    builder.Append("\\t");
+                    break;
+                case '"':
+                    builder.Append("\\\"");
+                    break;
+                default:
+                    builder.Append(c);
+                    break;
+            }
+        }
+        return builder.ToString();
     }
 }
