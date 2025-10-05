@@ -49,7 +49,7 @@ public class FixtureTests : IDisposable
     private readonly ITestDatabase _database;
     private readonly List<string> _testKeys;
 
-#if XUNIT
+#if XUNIT || XUNIT3
     public FixtureTests(TestDatabase database)
     {
         _database = database;
@@ -80,7 +80,7 @@ public class FixtureTests : IDisposable
         _testKeys.Clear();
         for (var i = 0; i < 10; i++)
         {
-#if XUNIT
+#if XUNIT || XUNIT3
             var key = $"test_{Guid.NewGuid()}_{i}";
 #else
             var key = $"test_{i}";

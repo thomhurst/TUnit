@@ -134,7 +134,7 @@ public class SetupTeardownTests : IDisposable
     public void TestDataIsolation()
 #endif
     {
-#if XUNIT
+#if XUNIT || XUNIT3
         BeforeEachTest();
 #endif
 
