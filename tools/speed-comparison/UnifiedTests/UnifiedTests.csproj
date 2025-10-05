@@ -19,9 +19,6 @@
   <PropertyGroup Condition="'$(TestFramework)' != ''">
     <BaseOutputPath>bin\$(Configuration)-$(TestFramework)\</BaseOutputPath>
     <BaseIntermediateOutputPath>obj\$(Configuration)-$(TestFramework)\</BaseIntermediateOutputPath>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(BaseOutputPath)$(TargetFramework)\</OutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(TargetFramework)\</IntermediateOutputPath>
   </PropertyGroup>
 
   <!-- Define constants based on TestFramework property -->
