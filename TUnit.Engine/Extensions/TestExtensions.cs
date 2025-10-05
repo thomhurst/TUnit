@@ -26,17 +26,17 @@ internal static class TestExtensions
                     AssemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.GetName().FullName,
                     TypeName: testContext.GetClassTypeName(),
                     MethodName: testDetails.MethodName,
-                    ParameterTypeFullNames: CreateParameterTypeArray(testDetails.MethodMetadata.Parameters.Select(p => p.Type).ToArray()),
+                    ParameterTypeFullNames: CreateParameterTypeArray(testDetails.MethodMetadata.Parameters.Select(static p => p.Type).ToArray()),
                     ReturnTypeFullName: testDetails.ReturnType.FullName ?? typeof(void).FullName!,
                     MethodArity: testDetails.MethodMetadata.GenericTypeCount
                     ),
 
                 // Custom TUnit Properties
-                ..testDetails.Categories.Select(category => new TestMetadataProperty(category)),
+                ..testDetails.Categories.Select(static category => new TestMetadataProperty(category)),
                 ..ExtractProperties(testDetails),
 
                 // Artifacts
-                ..testContext.Artifacts.Select(x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)),
+                ..testContext.Artifacts.Select(static x => new FileArtifactProperty(x.File, x.DisplayName, x.Description)),
 
                 // TRX Report Properties
                 new TrxFullyQualifiedTypeNameProperty(testDetails.MethodMetadata.Class?.Type.FullName ?? testDetails.ClassType?.FullName ?? "UnknownType"),

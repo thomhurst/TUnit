@@ -380,7 +380,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
 
-        var assemblyCount = _assemblyTestCounts.GetOrAdd(assemblyName, _ => new Counter()).Decrement();
+        var assemblyCount = _assemblyTestCounts.GetOrAdd(assemblyName, static _ => new Counter()).Decrement();
 
         if (assemblyCount == 0)
         {
@@ -421,7 +421,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         var classType = classContext.ClassType;
 
-        var classCount = _classTestCounts.GetOrAdd(classType, _ => new Counter()).Decrement();
+        var classCount = _classTestCounts.GetOrAdd(classType, static _ => new Counter()).Decrement();
 
         if (classCount == 0)
         {
@@ -464,7 +464,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var group in contexts.GroupBy(c => c.ClassContext.AssemblyContext.Assembly.GetName().FullName))
         {
-            var counter = _assemblyTestCounts.GetOrAdd(group.Key, _ => new Counter());
+            var counter = _assemblyTestCounts.GetOrAdd(group.Key, static _ => new Counter());
 
             for (var i = 0; i < group.Count(); i++)
             {
@@ -474,7 +474,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var group in contexts.GroupBy(c => c.ClassContext.ClassType))
         {
-            var counter = _classTestCounts.GetOrAdd(group.Key, _ => new Counter());
+            var counter = _classTestCounts.GetOrAdd(group.Key, static _ => new Counter());
 
             for (var i = 0; i < group.Count(); i++)
             {

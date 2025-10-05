@@ -40,10 +40,10 @@ public class SourceRegistrar
     public static void Register(ITestSource testSource)
     {
         // For backward compatibility, add to all types queue if no type specified
-        var allTypesQueue = Sources.TestSources.GetOrAdd(typeof(object), _ => new ConcurrentQueue<ITestSource>());
+        var allTypesQueue = Sources.TestSources.GetOrAdd(typeof(object), static _ => new ConcurrentQueue<ITestSource>());
         allTypesQueue.Enqueue(testSource);
     }
-    
+
     /// <summary>
     /// Registers a test source for a specific test class type.
     /// </summary>
@@ -51,7 +51,7 @@ public class SourceRegistrar
     /// <param name="testSource">The test source to register.</param>
     public static void Register(Type testClassType, ITestSource testSource)
     {
-        var queue = Sources.TestSources.GetOrAdd(testClassType, _ => new ConcurrentQueue<ITestSource>());
+        var queue = Sources.TestSources.GetOrAdd(testClassType, static _ => new ConcurrentQueue<ITestSource>());
         queue.Enqueue(testSource);
     }
 

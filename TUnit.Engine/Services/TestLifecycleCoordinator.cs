@@ -35,14 +35,14 @@ internal sealed class TestLifecycleCoordinator
         // Initialize assembly counters
         foreach (var assemblyGroup in testList.GroupBy(t => t.Metadata.TestClassType.Assembly))
         {
-            var counter = _assemblyTestCounts.GetOrAdd(assemblyGroup.Key, _ => new Counter());
+            var counter = _assemblyTestCounts.GetOrAdd(assemblyGroup.Key, static _ => new Counter());
             counter.Add(assemblyGroup.Count());
         }
 
         // Initialize class counters
         foreach (var classGroup in testList.GroupBy(t => t.Metadata.TestClassType))
         {
-            var counter = _classTestCounts.GetOrAdd(classGroup.Key, _ => new Counter());
+            var counter = _classTestCounts.GetOrAdd(classGroup.Key, static _ => new Counter());
             counter.Add(classGroup.Count());
         }
     }
@@ -61,7 +61,7 @@ internal sealed class TestLifecycleCoordinator
         if (_classTestCounts.TryGetValue(testClass, out var classCounter))
         {
             var remainingClassTests = classCounter.Decrement();
-            if (remainingClassTests == 0 && _afterClassExecuted.GetOrAdd(testClass, _ => true))
+            if (remainingClassTests == 0 && _afterClassExecuted.GetOrAdd(testClass, static _ => true))
             {
                 flags.ShouldExecuteAfterClass = true;
             }
@@ -71,7 +71,7 @@ internal sealed class TestLifecycleCoordinator
         if (_assemblyTestCounts.TryGetValue(testAssembly, out var assemblyCounter))
         {
             var remainingAssemblyTests = assemblyCounter.Decrement();
-            if (remainingAssemblyTests == 0 && _afterAssemblyExecuted.GetOrAdd(testAssembly, _ => true))
+            if (remainingAssemblyTests == 0 && _afterAssemblyExecuted.GetOrAdd(testAssembly, static _ => true))
             {
                 flags.ShouldExecuteAfterAssembly = true;
             }

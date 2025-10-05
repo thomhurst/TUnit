@@ -23,7 +23,7 @@ public static class GenericTestRegistry
         _compiledMethods[key] = compiledMethod;
 
         // Track registered combinations
-        var combinations = _registeredCombinations.GetOrAdd(declaringType, _ => new HashSet<Type[]>(new TypeArrayComparer()));
+        var combinations = _registeredCombinations.GetOrAdd(declaringType, static _ => new HashSet<Type[]>(new TypeArrayComparer()));
         combinations.Add(typeArguments);
     }
 

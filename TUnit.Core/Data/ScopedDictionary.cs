@@ -9,7 +9,7 @@ public class ScopedDictionary<TScope>
 
     public object? GetOrCreate(TScope scope, Type type, Func<Type, object?> factory)
     {
-        var innerDictionary = _scopedContainers.GetOrAdd(scope, _ => new ThreadSafeDictionary<Type, object?>());
+        var innerDictionary = _scopedContainers.GetOrAdd(scope, static _ => new ThreadSafeDictionary<Type, object?>());
 
         var obj = innerDictionary.GetOrAdd(type, factory);
 

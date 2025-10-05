@@ -9,7 +9,7 @@ internal static class JsonExtensions
     {
         return new TestSessionJson
         {
-            Assemblies = context.Assemblies.Select(x => x.ToJsonModel()).ToArray()
+            Assemblies = context.Assemblies.Select(static x => x.ToJsonModel()).ToArray()
         };
     }
 
@@ -18,7 +18,7 @@ internal static class JsonExtensions
         return new TestAssemblyJson
         {
             AssemblyName = context.Assembly.GetName().FullName,
-            Classes = context.TestClasses.Select(x => x.ToJsonModel()).ToArray()
+            Classes = context.TestClasses.Select(static x => x.ToJsonModel()).ToArray()
         };
     }
 
@@ -27,7 +27,7 @@ internal static class JsonExtensions
         return new TestClassJson
         {
             Type = context.ClassType.FullName,
-            Tests = context.Tests.Select(x => x.ToJsonModel()).ToArray()
+            Tests = context.Tests.Select(static x => x.ToJsonModel()).ToArray()
         };
     }
 
@@ -58,8 +58,8 @@ internal static class JsonExtensions
             TestFilePath = testDetails.TestFilePath,
             TestLineNumber = testDetails.TestLineNumber,
             TestMethodArguments = testDetails.TestMethodArguments,
-            TestClassParameterTypes = testDetails.TestClassParameterTypes?.Select(x => x.FullName ?? "Unknown").ToArray() ?? [],
-            TestMethodParameterTypes = testDetails.MethodMetadata.Parameters.Select(p => p.Type.FullName ?? "Unknown").ToArray(),
+            TestClassParameterTypes = testDetails.TestClassParameterTypes?.Select(static x => x.FullName ?? "Unknown").ToArray() ?? [],
+            TestMethodParameterTypes = testDetails.MethodMetadata.Parameters.Select(static p => p.Type.FullName ?? "Unknown").ToArray(),
         };
     }
 
