@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.PropertyInjection.Initialization;
@@ -36,6 +37,9 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
     /// <summary>
     /// Initializes nested properties within an already resolved property value.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Property injection cache and setter factory handle both AOT and reflection modes appropriately")]
+    #endif
     public async Task InitializePropertyAsync(PropertyInitializationContext context)
     {
         if (context.ResolvedValue == null)
@@ -143,6 +147,9 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
     /// <summary>
     /// Creates a nested context for reflection-based properties.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection-based property setter creation is only used in reflection mode, not in AOT")]
+    #endif
     private PropertyInitializationContext CreateNestedContext(
         PropertyInitializationContext parentContext,
         object instance,

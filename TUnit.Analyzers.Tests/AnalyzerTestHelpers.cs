@@ -183,7 +183,7 @@ public static class AnalyzerTestHelpers
     }
 }
 
-file static class DiagnosticSeverityExtensions
+static file class DiagnosticSeverityExtensions
 {
     public static ReportDiagnostic ToReportDiagnostic(this DiagnosticSeverity severity)
         => severity switch

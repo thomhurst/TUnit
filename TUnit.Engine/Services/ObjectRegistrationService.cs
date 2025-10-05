@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.Tracking;
@@ -95,6 +96,9 @@ internal sealed class ObjectRegistrationService
     /// <summary>
     /// Determines if an object requires property injection.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Property injection cache handles both AOT and reflection modes appropriately")]
+    #endif
     private bool RequiresPropertyInjection(object instance)
     {
         return PropertyInjectionCache.HasInjectableProperties(instance.GetType());

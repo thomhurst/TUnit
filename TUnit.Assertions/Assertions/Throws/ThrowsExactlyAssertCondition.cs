@@ -5,7 +5,7 @@ namespace TUnit.Assertions.AssertConditions.Throws;
 public class ThrowsExactTypeOfDelegateAssertCondition<TActual, TExpectedException> : DelegateAssertCondition<TActual, TExpectedException>
     where TExpectedException : Exception
 {
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
         => $"to throw exactly {typeof(TExpectedException).Name.PrependAOrAn()}";
 
     protected override ValueTask<AssertionResult> GetResult(

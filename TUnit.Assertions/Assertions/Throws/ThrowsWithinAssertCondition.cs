@@ -8,7 +8,7 @@ namespace TUnit.Assertions.AssertConditions.Throws;
 public class ThrowsWithinAssertCondition<TActual, TExpectedException>(TimeSpan timeSpan) : DelegateAssertCondition<TActual, TExpectedException>
     where TExpectedException : Exception
 {
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
         => $"to throw {typeof(TExpectedException).Name.PrependAOrAn()} within {timeSpan.PrettyPrint()}";
 
     protected override ValueTask<AssertionResult> GetResult(

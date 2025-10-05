@@ -144,6 +144,9 @@ internal sealed class PropertyInitializationOrchestrator
     /// <summary>
     /// Creates initialization context for reflection-based properties.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection-based property setter creation is only used in reflection mode, not in AOT")]
+    #endif
     private PropertyInitializationContext CreateContext(
         object instance,
         PropertyInfo property,

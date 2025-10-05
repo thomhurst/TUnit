@@ -5,7 +5,7 @@ public class BetweenAssertCondition<TActual>(TActual minimum, TActual maximum) :
 {
     private bool _inclusiveBounds;
 
-    internal protected override string GetExpectation() => $"to be between {minimum} & {maximum} ({GetRange()} Range)";
+    protected internal override string GetExpectation() => $"to be between {minimum} & {maximum} ({GetRange()} Range)";
 
     protected override ValueTask<AssertionResult> GetResult(
         TActual? actualValue, Exception? exception,

@@ -19,7 +19,7 @@ TExpected>(TExpected expected, string? expectedExpression) : ExpectedValueAssert
 
     public EquivalencyKind EquivalencyKind { get; set; } = EquivalencyKind.Full;
 
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
     {
         var expectedMessage = typeof(TExpected).IsSimpleType() || typeof(IEnumerable).IsAssignableFrom(typeof(TExpected))
             ? Formatter.Format(ExpectedValue)

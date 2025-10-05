@@ -12,7 +12,7 @@ public class EnumerableEquivalentToExpectedValueAssertCondition<TActual, TInner>
     : ExpectedValueAssertCondition<TActual, IEnumerable<TInner>>(expected)
     where TActual : IEnumerable<TInner>?
 {
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
     {
         if (!typeof(TInner).IsSimpleType()
             && equalityComparer is EquivalentToEqualityComparer<TInner> { ComparisonFailures.Length: > 0 })

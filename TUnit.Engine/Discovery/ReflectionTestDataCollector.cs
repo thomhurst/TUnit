@@ -1441,6 +1441,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Creates a reflection-based test invoker with proper AOT attribution
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2060", Justification = "Reflection-based test invoker is only used in reflection mode, not in AOT")]
+    #endif
     private static Func<object, object?[], Task> CreateReflectionTestInvoker(Type testClass, MethodInfo testMethod)
     {
         var isPrepared = false;

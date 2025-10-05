@@ -9,7 +9,7 @@ public class ThrowsWithMessageNotContainingAssertCondition<TActual, TException>(
     : DelegateAssertCondition<TActual, Exception>
     where TException : Exception
 {
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
         => $"to throw {typeof(TException).Name.PrependAOrAn()} which message does not contain \"{expected?.ShowNewLines().TruncateWithEllipsis(100)}\"";
 
     protected override ValueTask<AssertionResult> GetResult(
