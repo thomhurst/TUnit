@@ -61,7 +61,8 @@ Here are TUnit's equivalent attributes to other test frameworks.
 
 ## Culture-sensitive Attributes
 
-| TUnit              | xUnit | NUnit                 | MSTest |
-|--------------------|-------|-----------------------|--------|
-| [Culture("en-US")] | -     | [SetCulture("en-US")] | -      |
-| -                  | -     | [Culture("en-US")]    | -      |
+| TUnit              | xUnit | NUnit                  | MSTest |
+|--------------------|-------|------------------------|--------|
+| [Culture("en-US")] | -     | [SetCulture("en-US")]  | -      |
+| -                  | -     | [Culture("en-US")]     | -      |
+| -                  | -     | [SetUICulture("en-US") | -      |
