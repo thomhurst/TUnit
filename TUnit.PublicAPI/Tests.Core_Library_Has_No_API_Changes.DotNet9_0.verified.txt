@@ -1046,6 +1046,7 @@ namespace
         public bool IsParams { get; }
         public int Position { get; init; }
         public required .ParameterInfo ReflectionInfo { get; set; }
+        [.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]
         public override  Type { get; init; }
         public required .TypeReference TypeReference { get; init; }
     }
