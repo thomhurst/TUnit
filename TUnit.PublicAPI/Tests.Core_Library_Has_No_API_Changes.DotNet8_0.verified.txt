@@ -1036,7 +1036,7 @@ namespace
     [.DebuggerDisplay("{Type} {Name}")]
     public class ParameterMetadata : .MemberMetadata, <.ParameterMetadata>
     {
-        public ParameterMetadata([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  Type) { }
+        public ParameterMetadata([.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]  Type) { }
         public object? CachedDefaultValue { get; init; }
         public bool? CachedIsOptional { get; init; }
         public bool? CachedIsParams { get; init; }
@@ -1050,7 +1050,7 @@ namespace
         public required .TypeReference TypeReference { get; init; }
     }
     [.DebuggerDisplay("{Type} {Name}")]
-    public class ParameterMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..PublicMethods | ..PublicProperties)]  T> : .ParameterMetadata, <.ParameterMetadata<T>>
+    public class ParameterMetadata<[.(..None | ..PublicParameterlessConstructor | ..PublicConstructors | ..NonPublicConstructors | ..PublicMethods | ..NonPublicMethods | ..PublicProperties)]  T> : .ParameterMetadata, <.ParameterMetadata<T>>
     {
         public ParameterMetadata() { }
     }

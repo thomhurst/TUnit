@@ -12,6 +12,10 @@ namespace TUnit.Engine.Discovery;
 /// <summary>
 /// Discovers hooks at runtime using reflection for VB.NET and other languages that don't support source generation.
 /// </summary>
+#if NET6_0_OR_GREATER
+[RequiresUnreferencedCode("Uses reflection to access nested members")]
+[RequiresDynamicCode("Uses reflection to access nested members")]
+#endif
 internal sealed class ReflectionHookDiscoveryService
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
@@ -236,8 +240,8 @@ internal sealed class ReflectionHookDiscoveryService
         {
             #if NET6_0_OR_GREATER
             [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Assembly.GetTypes is reflection-based but required for hook discovery")]
+            [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Types from Assembly.GetTypes() are passed to annotated parameters")]
             #endif
-            [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
             Type[] GetTypes() => assembly.GetTypes();
 
             var types = GetTypes();
