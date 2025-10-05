@@ -55,12 +55,6 @@ internal sealed class BasicTests_SynchronousTest_TestSource_GUID : global::TUnit
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.BasicTests)instance;
-                typedInstance.SynchronousTest();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.SynchronousTest();
@@ -141,11 +135,6 @@ internal sealed class BasicTests_AsynchronousTest_TestSource_GUID : global::TUni
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.BasicTests)instance;
-                await typedInstance.AsynchronousTest();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.AsynchronousTest();
@@ -225,11 +214,6 @@ internal sealed class BasicTests_ValueTaskAsynchronousTest_TestSource_GUID : glo
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.BasicTests)instance;
-                await typedInstance.ValueTaskAsynchronousTest();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.ValueTaskAsynchronousTest();

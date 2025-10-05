@@ -87,18 +87,6 @@ internal sealed class ExpectedArgumentTypeTests_TypedArguments_TestSource_GUID :
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ExpectedArgumentTypeTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ExpectedArgumentTypeTests)instance;
-                switch (args.Length)
-                {
-                    case 2:
-                        await typedInstance.TypedArguments(TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -219,18 +207,6 @@ internal sealed class ExpectedArgumentTypeTests_EnumTypes_TestSource_GUID : glob
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ExpectedArgumentTypeTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ExpectedArgumentTypeTests)instance;
-                switch (args.Length)
-                {
-                    case 3:
-                        await typedInstance.EnumTypes(TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[2]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

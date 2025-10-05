@@ -67,12 +67,6 @@ internal sealed class AttributeTests_MyTest_TestSource_GUID : global::TUnit.Core
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AttributeTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.AttributeTests)instance;
-                typedInstance.MyTest();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.MyTest();

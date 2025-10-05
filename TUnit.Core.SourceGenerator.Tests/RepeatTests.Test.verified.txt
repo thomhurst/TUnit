@@ -58,12 +58,6 @@ internal sealed class RepeatTests_One_TestSource_GUID : global::TUnit.Core.Inter
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.RepeatTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.RepeatTests)instance;
-                typedInstance.One();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.One();
@@ -147,12 +141,6 @@ internal sealed class RepeatTests_Two_TestSource_GUID : global::TUnit.Core.Inter
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.RepeatTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.RepeatTests)instance;
-                typedInstance.Two();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Two();
@@ -235,12 +223,6 @@ internal sealed class RepeatTests_Three_TestSource_GUID : global::TUnit.Core.Int
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.RepeatTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.RepeatTests)instance;
-                typedInstance.Three();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Three();

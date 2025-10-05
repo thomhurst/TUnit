@@ -56,11 +56,6 @@ internal sealed class ConcreteClass1_AssertClassName_TestSource_GUID : global::T
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AbstractTests.ConcreteClass1(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.AbstractTests.ConcreteClass1)instance;
-                await typedInstance.AssertClassName();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.AssertClassName();

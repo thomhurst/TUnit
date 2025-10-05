@@ -357,19 +357,6 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
                     Property4 = default(global::System.ValueTuple<int, string, bool>),
                 };
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 3:
-                        typedInstance.DataSource_TupleMethod(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

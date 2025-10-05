@@ -100,19 +100,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method_TestSource_G
             {
                 return new global::TUnit.TestProject.DataSourceGeneratorTests(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.DataSourceGeneratorTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.GeneratedData_Method(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -259,19 +246,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method2_TestSource_
             {
                 return new global::TUnit.TestProject.DataSourceGeneratorTests(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.DataSourceGeneratorTests)instance;
-                switch (args.Length)
-                {
-                    case 3:
-                        typedInstance.GeneratedData_Method2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -417,19 +391,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method3_TestSource_
             InstanceFactory = (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.DataSourceGeneratorTests(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
-            },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.DataSourceGeneratorTests)instance;
-                switch (args.Length)
-                {
-                    case 3:
-                        typedInstance.GeneratedData_Method3(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {

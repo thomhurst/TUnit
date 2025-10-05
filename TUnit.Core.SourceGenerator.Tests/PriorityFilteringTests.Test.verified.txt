@@ -56,11 +56,6 @@ internal sealed class PriorityFilteringTests_High_1_TestSource_GUID : global::TU
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.PriorityFilteringTests)instance;
-                await typedInstance.High_1();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.High_1();
@@ -141,11 +136,6 @@ internal sealed class PriorityFilteringTests_High_2_TestSource_GUID : global::TU
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.PriorityFilteringTests)instance;
-                await typedInstance.High_2();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.High_2();
@@ -226,11 +216,6 @@ internal sealed class PriorityFilteringTests_High_3_TestSource_GUID : global::TU
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.PriorityFilteringTests)instance;
-                await typedInstance.High_3();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.High_3();
@@ -311,11 +296,6 @@ internal sealed class PriorityFilteringTests_Medium_1_TestSource_GUID : global::
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.PriorityFilteringTests)instance;
-                await typedInstance.Medium_1();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.Medium_1();
@@ -396,11 +376,6 @@ internal sealed class PriorityFilteringTests_Medium_2_TestSource_GUID : global::
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.PriorityFilteringTests)instance;
-                await typedInstance.Medium_2();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.Medium_2();
@@ -481,11 +456,6 @@ internal sealed class PriorityFilteringTests_Low_1_TestSource_GUID : global::TUn
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.PriorityFilteringTests)instance;
-                await typedInstance.Low_1();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.Low_1();

@@ -79,19 +79,6 @@ internal sealed class Tests_TryParse_InvalidString_ReturnsFailure_TestSource_GUI
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1304.Tests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1304.Tests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.TryParse_InvalidString_ReturnsFailure(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 var context = global::TUnit.Core.TestContext.Current;
@@ -196,18 +183,6 @@ internal sealed class Tests_Parse_InvalidString_ThrowsException_TestSource_GUID 
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1304.Tests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1304.Tests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Parse_InvalidString_ThrowsException(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -308,18 +283,6 @@ internal sealed class Tests_TryParse_ValidString_ReturnsAccountId_TestSource_GUI
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1304.Tests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1304.Tests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.TryParse_ValidString_ReturnsAccountId(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

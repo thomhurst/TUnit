@@ -79,19 +79,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_TestSource_G
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.DataSource_Method(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -203,19 +190,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method2_TestSource_
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.DataSource_Method2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -327,19 +301,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_WithAction_T
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.DataSource_Method_WithAction(TUnit.Core.Helpers.CastHelper.Cast<global::System.Action>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -466,19 +427,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method3_TestSource_
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.DataSource_Method3(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -632,19 +580,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.DataSource_Method4(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -756,19 +691,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_WithBaseReturn_Test
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.DataSource_WithBaseReturn(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -890,18 +812,6 @@ internal sealed class MethodDataSourceDrivenTests_EnumerableFuncArrayTest_TestSo
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.EnumerableFuncArrayTest(TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

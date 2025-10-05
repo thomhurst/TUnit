@@ -57,12 +57,6 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1899.DerivedTest(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1899.DerivedTest)instance;
-                typedInstance.Test1();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Test1();

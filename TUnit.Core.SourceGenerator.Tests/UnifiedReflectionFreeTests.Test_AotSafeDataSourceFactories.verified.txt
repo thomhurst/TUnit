@@ -82,19 +82,6 @@ internal sealed class AotDataSourceTest_TestWithDataSource_TestSource_GUID : glo
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AotDataSourceTest(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.AotDataSourceTest)instance;
-                switch (args.Length)
-                {
-                    case 3:
-                        typedInstance.TestWithDataSource(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

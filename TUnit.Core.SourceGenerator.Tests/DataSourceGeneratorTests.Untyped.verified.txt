@@ -88,18 +88,6 @@ internal sealed class AutoDataTests_Test1_TestSource_GUID : global::TUnit.Core.I
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AutoDataTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.AutoDataTests)instance;
-                switch (args.Length)
-                {
-                    case 4:
-                        await typedInstance.Test1(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<double>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[3]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 4 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

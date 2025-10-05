@@ -156,19 +156,6 @@ internal sealed class DataSourceClassCombinedWithDataSourceMethod_DataSourceClas
             {
                 return new global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.DataSourceClassCombinedWithDataSourceMethodTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
