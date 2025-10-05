@@ -17,8 +17,12 @@
 
   <!--Custom output paths based on TestFramework -->
   <PropertyGroup Condition="'$(TestFramework)' != ''">
-    <BaseOutputPath>bin\$(Configuration)-$(TestFramework)\</BaseOutputPath>
-    <BaseIntermediateOutputPath>obj\$(Configuration)-$(TestFramework)\</BaseIntermediateOutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TestFramework)' != ''">
+    <OutputPath>bin\$(Configuration)-$(TestFramework)\$(TargetFramework)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)-$(TestFramework)\$(TargetFramework)\</IntermediateOutputPath>
   </PropertyGroup>
 
   <!-- Define constants based on TestFramework property -->

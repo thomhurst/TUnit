@@ -30,14 +30,16 @@ jobs:
 
       - name: Build All Frameworks
         run: |
-          dotnet build -c Release -p:TestFramework=TUNIT --framework net8.0 --output bin/Release-TUNIT/net8.0
-          dotnet build -c Release -p:TestFramework=TUNIT --framework net9.0 --output bin/Release-TUNIT/net9.0
-          dotnet build -c Release -p:TestFramework=XUNIT --framework net8.0 --output bin/Release-XUNIT/net8.0
-          dotnet build -c Release -p:TestFramework=XUNIT --framework net9.0 --output bin/Release-XUNIT/net9.0
-          dotnet build -c Release -p:TestFramework=NUNIT --framework net8.0 --output bin/Release-NUNIT/net8.0
-          dotnet build -c Release -p:TestFramework=NUNIT --framework net9.0 --output bin/Release-NUNIT/net9.0
-          dotnet build -c Release -p:TestFramework=MSTEST --framework net8.0 --output bin/Release-MSTEST/net8.0
-          dotnet build -c Release -p:TestFramework=MSTEST --framework net9.0 --output bin/Release-MSTEST/net9.0
+          dotnet build -c Release -p:TestFramework=TUNIT --framework net8.0
+          dotnet build -c Release -p:TestFramework=TUNIT --framework net9.0
+          dotnet build -c Release -p:TestFramework=XUNIT --framework net8.0
+          dotnet build -c Release -p:TestFramework=XUNIT --framework net9.0
+          dotnet build -c Release -p:TestFramework=XUNIT3 --framework net8.0
+          dotnet build -c Release -p:TestFramework=XUNIT3 --framework net9.0
+          dotnet build -c Release -p:TestFramework=NUNIT --framework net8.0
+          dotnet build -c Release -p:TestFramework=NUNIT --framework net9.0
+          dotnet build -c Release -p:TestFramework=MSTEST --framework net8.0
+          dotnet build -c Release -p:TestFramework=MSTEST --framework net9.0
         working-directory: "tools/speed-comparison/UnifiedTests"
 
       - name: Publish TUnit AOT
