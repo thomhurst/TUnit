@@ -255,7 +255,9 @@ public class TestContext : Context
         else
         {
             var existingToken = LinkedCancellationTokens.Token;
+            var oldCts = LinkedCancellationTokens;
             LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(existingToken, cancellationToken);
+            oldCts.Dispose();
         }
 
         CancellationToken = LinkedCancellationTokens.Token;

@@ -17,6 +17,11 @@ internal static class ReflectionAttributeExtractor
     private static readonly ConcurrentDictionary<AttributeCacheKey, Attribute?> _attributeCache = new();
 
     /// <summary>
+    /// Cache for multiple attributes lookups to avoid repeated reflection calls
+    /// </summary>
+    private static readonly ConcurrentDictionary<AttributeCacheKey, Attribute[]> _attributesCache = new();
+
+    /// <summary>
     /// Composite cache key combining type, method, and attribute type information
     /// </summary>
     private readonly struct AttributeCacheKey : IEquatable<AttributeCacheKey>
@@ -103,17 +108,24 @@ internal static class ReflectionAttributeExtractor
         }
 #endif
 
-        var attributes = new List<T>();
+        var cacheKey = new AttributeCacheKey(testClass, testMethod, typeof(T));
 
-        attributes.AddRange(testClass.Assembly.GetCustomAttributes<T>());
-        attributes.AddRange(testClass.GetCustomAttributes<T>());
-
-        if (testMethod != null)
+        var cachedAttributes = _attributesCache.GetOrAdd(cacheKey, key =>
         {
-            attributes.AddRange(testMethod.GetCustomAttributes<T>());
-        }
+            var attributes = new List<Attribute>();
 
-        return attributes;
+            attributes.AddRange(key.TestClass.Assembly.GetCustomAttributes(key.AttributeType));
+            attributes.AddRange(key.TestClass.GetCustomAttributes(key.AttributeType));
+
+            if (key.TestMethod != null)
+            {
+                attributes.AddRange(key.TestMethod.GetCustomAttributes(key.AttributeType));
+            }
+
+            return attributes.ToArray();
+        });
+
+        return cachedAttributes.Cast<T>();
     }
 
     public static string[] ExtractCategories(Type testClass, MethodInfo testMethod)

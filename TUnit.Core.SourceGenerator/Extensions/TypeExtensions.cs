@@ -35,32 +35,53 @@ public static class TypeExtensions
 
     public static IEnumerable<ISymbol> GetMembersIncludingBase(this ITypeSymbol namedTypeSymbol, bool reverse = true)
     {
-        var list = new List<ISymbol>();
-
-        var symbol = namedTypeSymbol;
-
-        while (symbol is not null)
+        if (!reverse)
         {
-            if (symbol is IErrorTypeSymbol)
+            // Forward traversal - yield directly without allocations
+            var symbol = namedTypeSymbol;
+            while (symbol is not null && symbol.SpecialType != SpecialType.System_Object)
             {
-                throw new Exception($"ErrorTypeSymbol for {symbol.Name} - Have you added any missing file sources to the compilation?");
+                if (symbol is IErrorTypeSymbol)
+                {
+                    throw new Exception($"ErrorTypeSymbol for {symbol.Name} - Have you added any missing file sources to the compilation?");
+                }
+
+                foreach (var member in symbol.GetMembers())
+                {
+                    yield return member;
+                }
+
+                symbol = symbol.BaseType;
             }
 
-            if (symbol.SpecialType == SpecialType.System_Object)
+            yield break;
+        }
+
+        // Reverse traversal - collect hierarchy, then yield from base to derived
+        // Use stack to collect types (base to derived), then iterate members in forward order
+        var typeStack = new Stack<ITypeSymbol>();
+        var current = namedTypeSymbol;
+
+        while (current is not null && current.SpecialType != SpecialType.System_Object)
+        {
+            if (current is IErrorTypeSymbol)
             {
-                break;
+                throw new Exception($"ErrorTypeSymbol for {current.Name} - Have you added any missing file sources to the compilation?");
             }
 
-            list.AddRange(reverse ? symbol.GetMembers().Reverse() : symbol.GetMembers());
-            symbol = symbol.BaseType;
+            typeStack.Push(current);
+            current = current.BaseType;
         }
 
-        if (reverse)
+        // Yield members from base to derived
+        while (typeStack.Count > 0)
         {
-            list.Reverse();
+            var type = typeStack.Pop();
+            foreach (var member in type.GetMembers())
+            {
+                yield return member;
+            }
         }
-
-        return list;
     }
 
     public static IEnumerable<INamedTypeSymbol> GetSelfAndBaseTypes(this INamedTypeSymbol namedTypeSymbol)
