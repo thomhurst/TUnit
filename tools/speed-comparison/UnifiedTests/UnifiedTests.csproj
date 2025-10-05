@@ -15,6 +15,15 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
+  <!--Custom output paths based on TestFramework -->
+  <PropertyGroup Condition="'$(TestFramework)' != ''">
+    <BaseOutputPath>bin\$(Configuration)-$(TestFramework)\</BaseOutputPath>
+    <BaseIntermediateOutputPath>obj\$(Configuration)-$(TestFramework)\</BaseIntermediateOutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(BaseOutputPath)$(TargetFramework)\</OutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(TargetFramework)\</IntermediateOutputPath>
+  </PropertyGroup>
+
   <!-- Define constants based on TestFramework property -->
   <PropertyGroup>
       <DefineConstants Condition="'$(TestFramework)' == 'TUNIT'">$(DefineConstants);TUNIT</DefineConstants>
