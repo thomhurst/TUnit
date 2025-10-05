@@ -9,6 +9,7 @@ using TUnit.Core;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Exceptions;
 using TUnit.Engine.Extensions;
+using TUnit.Engine.Logging;
 using TUnit.Engine.Services;
 
 #pragma warning disable TPEXP

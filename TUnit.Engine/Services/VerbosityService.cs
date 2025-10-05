@@ -1,98 +1,125 @@
 using Microsoft.Testing.Platform.CommandLine;
+using Microsoft.Testing.Platform.Services;
 using TUnit.Engine.CommandLineProviders;
 using TUnit.Engine.Helpers;
-using TUnit.Engine.Logging;
+using LogLevel = TUnit.Core.Logging.LogLevel;
+
+#pragma warning disable TPEXP
 
 namespace TUnit.Engine.Services;
 
 /// <summary>
-/// Centralized service for managing TUnit output verbosity and diagnostic settings
+/// Centralized service for managing TUnit output and diagnostic settings
 /// </summary>
 public sealed class VerbosityService
 {
-    private readonly TUnitVerbosity _verbosity;
+    private readonly bool _isDetailedOutput;
+    private readonly LogLevel _logLevel;
 
-    public VerbosityService(ICommandLineOptions commandLineOptions)
+    public VerbosityService(ICommandLineOptions commandLineOptions, IServiceProvider serviceProvider)
     {
-        _verbosity = GetVerbosityFromCommandLine(commandLineOptions);
+        _isDetailedOutput = GetOutputLevel(commandLineOptions, serviceProvider);
+        _logLevel = GetLogLevel(commandLineOptions);
     }
 
     /// <summary>
-    /// Current verbosity level
+    /// Whether to show detailed stack traces (enabled with Debug/Trace log level)
     /// </summary>
-    public TUnitVerbosity CurrentVerbosity => _verbosity;
+    public bool ShowDetailedStackTrace => _logLevel <= LogLevel.Debug;
 
     /// <summary>
-    /// Whether to show detailed stack traces (Verbose+ levels)
+    /// Whether to hide real-time test output (hidden with --output Normal)
     /// </summary>
-    public bool ShowDetailedStackTrace => _verbosity.Includes(TUnitVerbosity.Verbose);
+    public bool HideTestOutput => !_isDetailedOutput;
 
     /// <summary>
-    /// Whether to hide test output (Minimal level only)
+    /// Whether to show the TUnit logo
     /// </summary>
-    public bool HideTestOutput => _verbosity == TUnitVerbosity.Minimal;
+    public bool ShowLogo => true;
 
     /// <summary>
-    /// Whether to show the TUnit logo (Normal+ levels)
+    /// Whether to enable discovery diagnostics (enabled with Debug/Trace log level)
     /// </summary>
-    public bool ShowLogo => _verbosity.Includes(TUnitVerbosity.Normal);
+    public bool EnableDiscoveryDiagnostics => _logLevel <= LogLevel.Debug;
 
     /// <summary>
-    /// Whether to enable discovery diagnostics (Debug level only)
+    /// Whether to enable verbose source generator diagnostics (enabled with Debug/Trace log level)
     /// </summary>
-    public bool EnableDiscoveryDiagnostics => _verbosity.Includes(TUnitVerbosity.Debug);
+    public bool EnableVerboseSourceGeneratorDiagnostics => _logLevel <= LogLevel.Debug;
 
     /// <summary>
-    /// Whether to enable verbose source generator diagnostics (Debug level only)
+    /// Whether to show execution timing details (enabled with Debug/Trace log level)
     /// </summary>
-    public bool EnableVerboseSourceGeneratorDiagnostics => _verbosity.Includes(TUnitVerbosity.Debug);
+    public bool ShowExecutionTiming => _logLevel <= LogLevel.Debug;
 
     /// <summary>
-    /// Whether to show execution timing details (Verbose+ levels)
+    /// Whether to show parallel execution details (enabled with Debug/Trace log level)
     /// </summary>
-    public bool ShowExecutionTiming => _verbosity.Includes(TUnitVerbosity.Verbose);
+    public bool ShowParallelExecutionDetails => _logLevel <= LogLevel.Debug;
 
     /// <summary>
-    /// Whether to show parallel execution details (Debug level only)
+    /// Whether to show test discovery progress (enabled with Debug/Trace log level)
     /// </summary>
-    public bool ShowParallelExecutionDetails => _verbosity.Includes(TUnitVerbosity.Debug);
+    public bool ShowDiscoveryProgress => _logLevel <= LogLevel.Debug;
 
     /// <summary>
-    /// Whether to show test discovery progress (Verbose+ levels)
+    /// Whether to show memory and resource usage (enabled with Debug/Trace log level)
     /// </summary>
-    public bool ShowDiscoveryProgress => _verbosity.Includes(TUnitVerbosity.Verbose);
+    public bool ShowResourceUsage => _logLevel <= LogLevel.Debug;
 
     /// <summary>
-    /// Whether to show memory and resource usage (Debug level only)
-    /// </summary>
-    public bool ShowResourceUsage => _verbosity.Includes(TUnitVerbosity.Debug);
-
-    /// <summary>
-    /// Creates a summary of current verbosity settings
+    /// Creates a summary of current output and diagnostic settings
     /// </summary>
     public string CreateVerbositySummary()
     {
-        return $"Verbosity: {_verbosity.ToDisplayString()} " +
+        var outputMode = _isDetailedOutput ? "Detailed" : "Normal";
+        return $"Output: {outputMode}, Log Level: {_logLevel} " +
                $"(Stack traces: {ShowDetailedStackTrace}, " +
-               $"Logo: {ShowLogo}, " +
                $"Discovery diagnostics: {EnableDiscoveryDiagnostics})";
     }
 
     // Use centralized environment variable cache
-    
-    private static TUnitVerbosity GetVerbosityFromCommandLine(ICommandLineOptions commandLineOptions)
+
+    private static bool GetOutputLevel(ICommandLineOptions commandLineOptions, IServiceProvider serviceProvider)
     {
-        if (commandLineOptions.TryGetOptionArgumentList(VerbosityCommandProvider.Verbosity, out var args) && args.Length > 0)
+        // Check for --output flag (Microsoft.Testing.Platform extension)
+        if (commandLineOptions.TryGetOptionArgumentList("output", out var args) && args.Length > 0)
         {
-            return VerbosityCommandProvider.ParseVerbosity(args);
+            return args[0].Equals("Detailed", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Smart defaults: Normal for console (buffered output), Detailed for IDE (real-time output)
+        return !IsConsoleEnvironment(serviceProvider);
+    }
+
+    private static LogLevel GetLogLevel(ICommandLineOptions commandLineOptions)
+    {
+        // Check for --log-level flag
+        if (commandLineOptions.TryGetOptionArgumentList(LogLevelCommandProvider.LogLevelOption, out var args) && args.Length > 0)
+        {
+            return LogLevelCommandProvider.ParseLogLevel(args);
         }
 
         // Check cached legacy environment variable for backwards compatibility
         if (EnvironmentVariableCache.Get("TUNIT_DISCOVERY_DIAGNOSTICS") == "1")
         {
-            return TUnitVerbosity.Debug;
+            return LogLevel.Debug;
         }
 
-        return TUnitVerbosity.Normal;
+        return LogLevel.Information;
+    }
+
+    private static bool IsConsoleEnvironment(IServiceProvider serviceProvider)
+    {
+        try
+        {
+            var clientInfo = serviceProvider.GetClientInfo();
+            return clientInfo.Id.Contains("console", StringComparison.InvariantCultureIgnoreCase);
+        }
+        catch
+        {
+            // If we can't determine, default to console behavior
+            return true;
+        }
     }
 }

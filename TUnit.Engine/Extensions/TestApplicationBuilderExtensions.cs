@@ -40,10 +40,7 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new ParallelismStrategyCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new AdaptiveMetricsCommandProvider(extension));
 
-        // Unified verbosity control (replaces HideTestOutput, DisableLogo)
-        testApplicationBuilder.CommandLine.AddProvider(() => new VerbosityCommandProvider(extension));
-        
-        // Keep detailed stacktrace option for backward compatibility 
+        // Keep detailed stacktrace option for backward compatibility
         testApplicationBuilder.CommandLine.AddProvider(() => new DetailedStacktraceCommandProvider(extension));
 
         // GitHub reporter configuration
