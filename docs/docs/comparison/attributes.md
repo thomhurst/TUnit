@@ -59,3 +59,10 @@ Here are TUnit's equivalent attributes to other test frameworks.
 | [Category] | [Trait("Category","")] | [Category] | [TestCategory] |
 | [Property] | [Trait]                | [Property] | [TestProperty] |
 
+## Culture-sensitive Attributes
+
+| TUnit              | xUnit | NUnit                  | MSTest |
+|--------------------|-------|------------------------|--------|
+| [Culture("en-US")] | -     | [SetCulture("en-US")]  | -      |
+| -                  | -     | [Culture("en-US")]     | -      |
+| -                  | -     | [SetUICulture("en-US") | -      |
