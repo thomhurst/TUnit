@@ -44,9 +44,11 @@ Please note that for the coverage and trx report, you need to install [additiona
         List available tests.
 
     --log-level
-        Minimum log level for test output.
-        The available values are 'Trace', 'Debug', 'Information', 'Warning', 'Error', 'Critical', and 'None'.
-        Default is 'Information'.
+        Controls framework logging and diagnostic features.
+        The available values are:
+        - 'Trace' or 'Debug': Enable detailed stack traces, discovery diagnostics, timing details
+        - 'Information' (default): Normal framework behavior
+        - 'Warning', 'Error', 'Critical', or 'None': Minimal framework output
 
     --minimum-expected-tests
         Specifies the minimum number of tests that are expected to run.
@@ -78,9 +80,6 @@ Please note that for the coverage and trx report, you need to install [additiona
     --fail-fast
         Cancel the test run after the first test failure
 
-    --hide-test-output
-        Hide Test Output
-
     --maximum-parallel-tests
         Maximum Parallel Tests
 
@@ -91,8 +90,12 @@ Please note that for the coverage and trx report, you need to install [additiona
         Disable reporting progress to screen.
 
     --output
-        Output verbosity when reporting tests.
-        Valid values are 'Normal', 'Detailed'. Default is 'Normal'.
+        Controls test result detail level AND real-time console output buffering.
+        - 'Normal': Show failures only + buffer test output (no real-time spam)
+        - 'Detailed': Show all tests + real-time test output
+
+        Smart defaults: 'Normal' for console environments, 'Detailed' for IDE environments.
+        This prevents console spam while keeping IDEs responsive (each test has its own output window).
 
     --reflection
         Enable reflection mode for test discovery and execution (defaults to source generation mode)
