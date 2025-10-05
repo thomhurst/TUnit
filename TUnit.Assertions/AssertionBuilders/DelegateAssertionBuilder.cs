@@ -7,7 +7,7 @@ public class DelegateAssertionBuilder
     : AssertionBuilder,
         IDelegateSource
 {
-    internal DelegateAssertionBuilder(Action action, string? expressionBuilder) : base(action.AsAssertionData(expressionBuilder), expressionBuilder)
+    internal DelegateAssertionBuilder(Action action, string? expressionBuilder) : base(LazyAssertionData.Create(action, expressionBuilder), expressionBuilder)
     {
     }
 }

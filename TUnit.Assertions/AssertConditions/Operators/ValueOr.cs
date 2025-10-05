@@ -9,7 +9,7 @@ public class ValueOr<TActual>(AssertionBuilder assertionBuilder) : IValueSource<
     string? ISource.ActualExpression => ((ISource) assertionBuilder).ActualExpression;
 
     Stack<BaseAssertCondition> ISource.Assertions => ((ISource) assertionBuilder).Assertions;
-    ValueTask<AssertionData> ISource.AssertionDataTask => ((ISource) assertionBuilder).AssertionDataTask;
+    LazyAssertionData ISource.LazyAssertionData => ((ISource) assertionBuilder).LazyAssertionData;
     StringBuilder ISource.ExpressionBuilder => ((ISource) assertionBuilder).ExpressionBuilder;
 
     ISource ISource.AppendExpression(string expression)

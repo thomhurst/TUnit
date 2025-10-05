@@ -5,7 +5,7 @@ namespace TUnit.Assertions.AssertionBuilders;
 
 public class InvokableValueDelegateAssertionBuilder<TActual> : InvokableAssertionBuilder<TActual>
 {
-    internal InvokableValueDelegateAssertionBuilder(ValueTask<AssertionData> assertionDataDelegate, AssertionBuilder assertionBuilder) : base(assertionBuilder)
+    internal InvokableValueDelegateAssertionBuilder(LazyAssertionData assertionDataDelegate, AssertionBuilder assertionBuilder) : base(assertionBuilder)
     {
     }
 
