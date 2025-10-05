@@ -71,10 +71,11 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task xUnit3()
     {
-        var dllPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT3", Framework, "UnifiedTests.dll");
+        var binPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT3", Framework);
+        var exeName = GetExecutableFileName();
 
-        await Cli.Wrap("dotnet")
-            .WithArguments(["run", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
+        await Cli.Wrap(Path.Combine(binPath, exeName))
+            .WithArguments(["--filter-class", ClassName])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
