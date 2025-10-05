@@ -11,13 +11,24 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <OutputType Condition="'$(TestFramework)' == 'TUNIT'">Exe</OutputType>
+    <OutputType Condition="'$(TestFramework)' == 'XUNIT3'">Exe</OutputType>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <!--Custom output paths based on TestFramework -->
+  <PropertyGroup Condition="'$(TestFramework)' != ''">
+    <BaseOutputPath>bin\$(Configuration)-$(TestFramework)\</BaseOutputPath>
+    <BaseIntermediateOutputPath>obj\$(Configuration)-$(TestFramework)\</BaseIntermediateOutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(BaseOutputPath)$(TargetFramework)\</OutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(TargetFramework)\</IntermediateOutputPath>
   </PropertyGroup>
 
   <!-- Define constants based on TestFramework property -->
   <PropertyGroup>
       <DefineConstants Condition="'$(TestFramework)' == 'TUNIT'">$(DefineConstants);TUNIT</DefineConstants>
     <DefineConstants Condition="'$(TestFramework)' == 'XUNIT'">$(DefineConstants);XUNIT</DefineConstants>
+    <DefineConstants Condition="'$(TestFramework)' == 'XUNIT3'">$(DefineConstants);XUNIT3</DefineConstants>
     <DefineConstants Condition="'$(TestFramework)' == 'NUNIT'">$(DefineConstants);NUNIT</DefineConstants>
     <DefineConstants Condition="'$(TestFramework)' == 'MSTEST'">$(DefineConstants);MSTEST</DefineConstants>
   </PropertyGroup>
@@ -27,10 +38,19 @@
     <PackageReference Include="TUnit" VersionOverride="*" />
   </ItemGroup>
 
-  <!-- xUnit packages -->
+  <!-- xUnit v2 packages -->
   <ItemGroup Condition="'$(TestFramework)' == 'XUNIT'">
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- xUnit v3 packages -->
+  <ItemGroup Condition="'$(TestFramework)' == 'XUNIT3'">
+    <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

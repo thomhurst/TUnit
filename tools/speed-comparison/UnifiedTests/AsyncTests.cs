@@ -12,7 +12,7 @@ public class AsyncTests
 #if TUNIT
     [Test]
     public async Task SimpleAsyncTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public async Task SimpleAsyncTest()
 #elif NUNIT
@@ -26,7 +26,7 @@ public class AsyncTests
         var result = await ComputeAsync(10);
 #if TUNIT
         await Assert.That(result).IsEqualTo(100);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(100, result);
 #elif NUNIT
         Assert.That(result, Is.EqualTo(100));
@@ -37,7 +37,7 @@ public class AsyncTests
         var text = await ProcessTextAsync("hello");
 #if TUNIT
         await Assert.That(text).IsEqualTo("HELLO");
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal("HELLO", text);
 #elif NUNIT
         Assert.That(text, Is.EqualTo("HELLO"));
@@ -49,7 +49,7 @@ public class AsyncTests
 #if TUNIT
     [Test]
     public async Task ParallelAsyncOperationsTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public async Task ParallelAsyncOperationsTest()
 #elif NUNIT
@@ -70,7 +70,7 @@ public class AsyncTests
 #if TUNIT
         await Assert.That(results).HasCount(10);
         await Assert.That(sum).IsEqualTo(285);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(10, results.Length);
         Assert.Equal(285, sum);
 #elif NUNIT
