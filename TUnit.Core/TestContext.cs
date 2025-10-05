@@ -219,8 +219,12 @@ public class TestContext : Context
             return TestName;
         }
 
-        var arguments = string.Join(", ", TestDetails.TestMethodArguments
-            .Select(arg => ArgumentFormatter.Format(arg, ArgumentDisplayFormatters)));
+        var formattedArgs = new string[TestDetails.TestMethodArguments.Length];
+        for (var i = 0; i < TestDetails.TestMethodArguments.Length; i++)
+        {
+            formattedArgs[i] = ArgumentFormatter.Format(TestDetails.TestMethodArguments[i], ArgumentDisplayFormatters);
+        }
+        var arguments = string.Join(", ", formattedArgs);
 
         if (string.IsNullOrEmpty(arguments))
         {

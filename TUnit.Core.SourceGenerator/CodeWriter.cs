@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace TUnit.Core.SourceGenerator;
@@ -13,9 +14,17 @@ public class CodeWriter : ICodeWriter
     internal int _indentLevel; // Keep old name for compatibility
     private bool _isNewLine = true;
 
+    private static readonly ConcurrentDictionary<(string, int), string> _indentCache = new();
+
     public CodeWriter(string indentString = "    ", bool includeHeader = true)
     {
         _indentString = indentString;
+
+        for (var i = 0; i <= 10; i++)
+        {
+            var key = (_indentString, i);
+            _indentCache.TryAdd(key, string.Concat(Enumerable.Repeat(_indentString, i)));
+        }
 
         if (includeHeader)
         {
@@ -26,7 +35,7 @@ public class CodeWriter : ICodeWriter
         }
         else
         {
-            _isNewLine = true; // Fix: Always start at new line state for proper indentation
+            _isNewLine = true;
         }
     }
 
@@ -37,6 +46,15 @@ public class CodeWriter : ICodeWriter
     {
         _indentLevel = Math.Max(0, level);
         return this;
+    }
+
+    /// <summary>
+    /// Gets the cached indentation string for the specified level, building it if necessary.
+    /// </summary>
+    private string GetIndentation(int level)
+    {
+        var key = (_indentString, level);
+        return _indentCache.GetOrAdd(key, static k => string.Concat(Enumerable.Repeat(k.Item1, k.Item2)));
     }
 
     /// <summary>
@@ -51,7 +69,7 @@ public class CodeWriter : ICodeWriter
 
         if (_isNewLine)
         {
-            _builder.Append(string.Concat(Enumerable.Repeat(_indentString, _indentLevel)));
+            _builder.Append(GetIndentation(_indentLevel));
             _isNewLine = false;
         }
         _builder.Append(text);
