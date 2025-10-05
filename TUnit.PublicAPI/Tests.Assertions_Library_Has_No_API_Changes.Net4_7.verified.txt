@@ -2606,7 +2606,6 @@ namespace .Extensions
     {
         public static .<.> IsCanceled(this ..IValueSource<.> valueSource) { }
         public static .<.> IsCompleted(this ..IValueSource<.> valueSource) { }
-        public static .<.> IsCompletedSuccessfully(this ..IValueSource<.> valueSource) { }
         public static .<.> IsFaulted(this ..IValueSource<.> valueSource) { }
         public static .<.> IsNotCanceled(this ..IValueSource<.> valueSource) { }
         public static .<.> IsNotCompleted(this ..IValueSource<.> valueSource) { }
