@@ -74,7 +74,7 @@ public class RuntimeBenchmarks : BenchmarkBase
         var dllPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT3", Framework, "UnifiedTests.dll");
 
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithArguments(["run", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
