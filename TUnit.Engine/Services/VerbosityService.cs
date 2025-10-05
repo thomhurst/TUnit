@@ -33,49 +33,13 @@ public sealed class VerbosityService
     public bool HideTestOutput => !_isDetailedOutput;
 
     /// <summary>
-    /// Whether to show the TUnit logo
-    /// </summary>
-    public bool ShowLogo => true;
-
-    /// <summary>
-    /// Whether to enable discovery diagnostics (enabled with Debug/Trace log level)
-    /// </summary>
-    public bool EnableDiscoveryDiagnostics => _logLevel <= LogLevel.Debug;
-
-    /// <summary>
-    /// Whether to enable verbose source generator diagnostics (enabled with Debug/Trace log level)
-    /// </summary>
-    public bool EnableVerboseSourceGeneratorDiagnostics => _logLevel <= LogLevel.Debug;
-
-    /// <summary>
-    /// Whether to show execution timing details (enabled with Debug/Trace log level)
-    /// </summary>
-    public bool ShowExecutionTiming => _logLevel <= LogLevel.Debug;
-
-    /// <summary>
-    /// Whether to show parallel execution details (enabled with Debug/Trace log level)
-    /// </summary>
-    public bool ShowParallelExecutionDetails => _logLevel <= LogLevel.Debug;
-
-    /// <summary>
-    /// Whether to show test discovery progress (enabled with Debug/Trace log level)
-    /// </summary>
-    public bool ShowDiscoveryProgress => _logLevel <= LogLevel.Debug;
-
-    /// <summary>
-    /// Whether to show memory and resource usage (enabled with Debug/Trace log level)
-    /// </summary>
-    public bool ShowResourceUsage => _logLevel <= LogLevel.Debug;
-
-    /// <summary>
     /// Creates a summary of current output and diagnostic settings
     /// </summary>
     public string CreateVerbositySummary()
     {
         var outputMode = _isDetailedOutput ? "Detailed" : "Normal";
         return $"Output: {outputMode}, Log Level: {_logLevel} " +
-               $"(Stack traces: {ShowDetailedStackTrace}, " +
-               $"Discovery diagnostics: {EnableDiscoveryDiagnostics})";
+               $"(Stack traces: {ShowDetailedStackTrace}, ";
     }
 
     // Use centralized environment variable cache

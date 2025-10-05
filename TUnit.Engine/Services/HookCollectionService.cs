@@ -115,7 +115,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             foreach (var (_, typeHooks) in hooksByType)
             {
                 // Within each type level, sort by Order then by RegistrationIndex
-                finalHooks.AddRange(typeHooks.OrderBy(h => h.order).ThenBy(h => h.registrationIndex).Select(h => h.hook));
+                finalHooks.AddRange(typeHooks.OrderBy(static h => h.order).ThenBy(static h => h.registrationIndex).Select(static h => h.hook));
             }
 
             return finalHooks;
@@ -187,7 +187,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             foreach (var (_, typeHooks) in hooksByType)
             {
                 // Within each type level, sort by Order then by RegistrationIndex
-                finalHooks.AddRange(typeHooks.OrderBy(h => h.order).ThenBy(h => h.registrationIndex).Select(h => h.hook));
+                finalHooks.AddRange(typeHooks.OrderBy(static h => h.order).ThenBy(static h => h.registrationIndex).Select(static h => h.hook));
             }
 
             return finalHooks;
@@ -223,9 +223,9 @@ internal sealed class HookCollectionService : IHookCollectionService
             }
 
             return allHooks
-                .OrderBy(h => h.order)
-                .ThenBy(h => h.registrationIndex)
-                .Select(h => h.hook)
+                .OrderBy(static h => h.order)
+                .ThenBy(static h => h.registrationIndex)
+                .Select(static h => h.hook)
                 .ToList();
     }
 
@@ -259,9 +259,9 @@ internal sealed class HookCollectionService : IHookCollectionService
             }
 
             return allHooks
-                .OrderBy(h => h.order)
-                .ThenBy(h => h.registrationIndex)
-                .Select(h => h.hook)
+                .OrderBy(static h => h.order)
+                .ThenBy(static h => h.registrationIndex)
+                .Select(static h => h.hook)
                 .ToList();
     }
 
@@ -316,7 +316,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             foreach (var (_, typeHooks) in hooksByType)
             {
                 // Within each type level, sort by Order then by RegistrationIndex
-                finalHooks.AddRange(typeHooks.OrderBy(h => h.order).ThenBy(h => h.registrationIndex).Select(h => h.hook));
+                finalHooks.AddRange(typeHooks.OrderBy(static h => h.order).ThenBy(static h => h.registrationIndex).Select(static h => h.hook));
             }
 
             return finalHooks;
@@ -375,7 +375,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             foreach (var (_, typeHooks) in hooksByType)
             {
                 // Within each type level, sort by Order then by RegistrationIndex
-                finalHooks.AddRange(typeHooks.OrderBy(h => h.order).ThenBy(h => h.registrationIndex).Select(h => h.hook));
+                finalHooks.AddRange(typeHooks.OrderBy(static h => h.order).ThenBy(static h => h.registrationIndex).Select(static h => h.hook));
             }
 
             return finalHooks;

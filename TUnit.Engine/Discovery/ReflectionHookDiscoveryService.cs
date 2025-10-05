@@ -123,7 +123,7 @@ internal sealed class ReflectionHookDiscoveryService
                     // Use Count instead of Any() to avoid double enumeration
                     return orders.Count > 0 ? orders.Min() : 0;
                 })
-                .ThenBy(m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
+                .ThenBy(static m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
                 .ToArray();
 
             foreach (var method in methods)
@@ -310,7 +310,7 @@ internal sealed class ReflectionHookDiscoveryService
                     // Use Count instead of Any() to avoid double enumeration
                     return orders.Count > 0 ? orders.Min() : 0;
                 })
-                .ThenBy(m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
+                .ThenBy(static m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
                 .ToArray();
 
             foreach (var method in methods)

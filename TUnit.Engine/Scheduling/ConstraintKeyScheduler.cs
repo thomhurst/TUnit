@@ -35,7 +35,7 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
         }
 
         // Sort tests by priority
-        var sortedTests = tests.OrderBy(t => t.Priority).ToArray();
+        var sortedTests = tests.OrderBy(static t => t.Priority).ToArray();
 
         // Track which constraint keys are currently in use
         var lockedKeys = new HashSet<string>();

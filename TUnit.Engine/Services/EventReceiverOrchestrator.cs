@@ -107,7 +107,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
             context.GetEligibleEventObjects()
                 .OfType<ITestStartEventReceiver>()
-                .OrderBy(r => r.Order));
+                .OrderBy(static r => r.Order));
 
         // Batch invocation for multiple receivers
         if (filteredReceivers.Count > 3)
@@ -147,7 +147,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
             context.GetEligibleEventObjects()
                 .OfType<ITestEndEventReceiver>()
-                .OrderBy(r => r.Order));
+                .OrderBy(static r => r.Order));
 
         foreach (var receiver in filteredReceivers)
         {
@@ -185,7 +185,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
             context.GetEligibleEventObjects()
                 .OfType<ITestSkippedEventReceiver>()
-                .OrderBy(r => r.Order));
+                .OrderBy(static r => r.Order));
 
         foreach (var receiver in filteredReceivers)
         {
@@ -200,13 +200,13 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     {
         var eventReceivers = context.GetEligibleEventObjects()
             .OfType<ITestDiscoveryEventReceiver>()
-            .OrderBy(r => r.Order)
+            .OrderBy(static r => r.Order)
             .ToList();
 
         // Filter scoped attributes to ensure only the highest priority one of each type is invoked
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
 
-        foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
+        foreach (var receiver in filteredReceivers.OrderBy(static r => r.Order))
         {
             await receiver.OnTestDiscovered(discoveredContext);
         }
@@ -221,9 +221,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
             hookContext.HookMethod.Attributes
                 .OfType<IHookRegisteredEventReceiver>()
-                .OrderBy(r => r.Order));
+                .OrderBy(static r => r.Order));
 
-        foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
+        foreach (var receiver in filteredReceivers.OrderBy(static r => r.Order))
         {
             await receiver.OnHookRegistered(hookContext);
         }
