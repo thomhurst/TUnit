@@ -11,6 +11,8 @@ namespace TUnit.Engine;
 
 internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
 {
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
     public void Initialize(ExecuteRequestContext context)
     {
         ConfigureGlobalExceptionHandlers(context);
@@ -20,13 +22,7 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
         // Discover hooks via reflection if in reflection mode
         if (IsReflectionMode())
         {
-            #if NET6_0_OR_GREATER
-            #pragma warning disable IL2026, IL3050 // Reflection only used in reflection mode, not in AOT/source-gen mode
-            #endif
             DiscoverHooksViaReflection();
-            #if NET6_0_OR_GREATER
-            #pragma warning restore IL2026, IL3050
-            #endif
         }
 
         if (!string.IsNullOrEmpty(TestContext.OutputDirectory))

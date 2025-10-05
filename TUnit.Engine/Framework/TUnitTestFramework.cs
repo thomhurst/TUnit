@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
@@ -44,7 +45,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     #if NET6_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test data collector selection may use reflection-based discovery")]
     [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Reflection mode test discovery uses dynamic code generation")]
-#pragma warning disable IL2046, IL3051 // Interface implementation - cannot add attributes to match called method requirements
+    [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "Reflection mode is not used in AOT scenarios")]
     #endif
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
@@ -90,9 +92,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             context.Complete();
         }
     }
-    #if NET6_0_OR_GREATER
-#pragma warning restore IL2046, IL3051
-    #endif
 
     public async Task<CloseTestSessionResult> CloseTestSessionAsync(CloseTestSessionContext context)
     {

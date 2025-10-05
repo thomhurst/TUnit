@@ -651,42 +651,26 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
     public async Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
         // Discover instance hooks for closed generic types in reflection mode
         if (!SourceRegistrar.IsEnabled && metadata.TestClassType is { IsGenericType: true, IsGenericTypeDefinition: false })
         {
-            #if NET6_0_OR_GREATER
-            #pragma warning disable IL2026, IL3050 // Reflection only used in reflection mode
-            #endif
             Discovery.ReflectionHookDiscoveryService.DiscoverInstanceHooksForType(metadata.TestClassType);
-            #if NET6_0_OR_GREATER
-            #pragma warning restore IL2026, IL3050
-            #endif
         }
 
         var testId = TestIdentifierService.GenerateTestId(metadata, testData);
 
-        #if NET6_0_OR_GREATER
-        #pragma warning disable IL2026 // CreateTestContextAsync uses reflection for runtime type handling
-        #endif
         var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext);
-        #if NET6_0_OR_GREATER
-        #pragma warning restore IL2026
-        #endif
 
         context.TestDetails.ClassInstance = PlaceholderInstance.Instance;
 
         // Arguments will be tracked by TestArgumentTrackingService during TestRegistered event
         // This ensures proper reference counting for shared instances
 
-        #if NET6_0_OR_GREATER
-        #pragma warning disable IL2026 // InvokeDiscoveryEventReceiversAsync uses ScopedAttributeFilter
-        #endif
         await InvokeDiscoveryEventReceiversAsync(context);
-        #if NET6_0_OR_GREATER
-        #pragma warning restore IL2026
-        #endif
 
         var creationContext = new ExecutableTestCreationContext
         {

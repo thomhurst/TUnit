@@ -49,13 +49,7 @@ internal static class TestDataCollectorFactory
     {
         // Try AOT mode first (check if any tests were registered)
         var aotCollector = new AotTestDataCollector();
-        #if NET6_0_OR_GREATER
-        #pragma warning disable IL2026, IL3050 // AOT collector handles dynamic tests conditionally
-        #endif
         var aotTests = await aotCollector.CollectTestsAsync(testSessionId);
-        #if NET6_0_OR_GREATER
-        #pragma warning restore IL2026, IL3050
-        #endif
 
         if (aotTests.Any())
         {

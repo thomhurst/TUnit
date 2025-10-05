@@ -56,6 +56,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public ObjectRegistrationService ObjectRegistrationService { get; }
     public bool AfterSessionHooksFailed { get; set; }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
         ITestExecutionFilter? filter,
@@ -141,13 +143,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
         else
         {
-            #if NET6_0_OR_GREATER
-            #pragma warning disable IL2026, IL3050 // Reflection mode explicitly selected by user or detected
-            #endif
             dataCollector = new ReflectionTestDataCollector();
-            #if NET6_0_OR_GREATER
-            #pragma warning restore IL2026, IL3050
-            #endif
         }
 
         var testBuilder = Register<ITestBuilder>(
