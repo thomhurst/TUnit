@@ -12,7 +12,7 @@ public class AssertionTests
 #if TUNIT
     [Test]
     public async Task NumericAssertionsTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void NumericAssertionsTest()
 #elif NUNIT
@@ -39,7 +39,7 @@ public class AssertionTests
 
         await Assert.That(negative).IsNegative();
         await Assert.That(negative).IsLessThan(0);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(42, value);
         Assert.True(value > 40);
         Assert.True(value < 50);
@@ -79,7 +79,7 @@ public class AssertionTests
 #if TUNIT
     [Test]
     public async Task StringAssertionsTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void StringAssertionsTest()
 #elif NUNIT
@@ -92,7 +92,7 @@ public class AssertionTests
     {
 #if TUNIT
         var text = "Hello, TUnit Framework!";
-#elif XUNIT
+#elif XUNIT || XUNIT3
         var text = "Hello, xUnit Framework!";
 #elif NUNIT
         var text = "Hello, NUnit Framework!";
@@ -113,7 +113,7 @@ public class AssertionTests
         await Assert.That(empty).IsEmpty();
         await Assert.That(whitespace).IsNotEmpty();
         await Assert.That(text).DoesNotContain("XUnit");
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.NotNull(text);
         Assert.NotEmpty(text);
         Assert.Contains("xUnit", text);
@@ -152,7 +152,7 @@ public class AssertionTests
 #if TUNIT
     [Test]
     public async Task CollectionAssertionsTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void CollectionAssertionsTest()
 #elif NUNIT
@@ -179,7 +179,7 @@ public class AssertionTests
 
         await Assert.That(duplicates).HasCount(6);
         await Assert.That(duplicates).Contains(2);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.NotNull(numbers);
         Assert.NotEmpty(numbers);
         Assert.Equal(5, numbers.Count);
@@ -220,7 +220,7 @@ public class AssertionTests
 #if TUNIT
     [Test]
     public async Task BooleanAssertionsTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void BooleanAssertionsTest()
 #elif NUNIT
@@ -240,7 +240,7 @@ public class AssertionTests
         await Assert.That(isFalse).IsFalse();
         await Assert.That(condition).IsTrue();
         await Assert.That(!condition).IsFalse();
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.True(isTrue);
         Assert.False(isFalse);
         Assert.True(condition);
@@ -261,7 +261,7 @@ public class AssertionTests
 #if TUNIT
     [Test]
     public async Task ExceptionAssertionsTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void ExceptionAssertionsTest()
 #elif NUNIT
@@ -280,7 +280,7 @@ public class AssertionTests
         // TUnit doesn't have DoesNotThrow, just call the function
         var result = nonThrowingFunc();
         await Assert.That(result).IsEqualTo(42);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Throws<InvalidOperationException>(() => throwingFunc());
         var result = Record.Exception(() => nonThrowingFunc());
         Assert.Null(result);

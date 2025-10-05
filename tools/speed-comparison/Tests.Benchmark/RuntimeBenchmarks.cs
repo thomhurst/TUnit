@@ -67,4 +67,15 @@ public class RuntimeBenchmarks : BenchmarkBase
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
+
+    [Benchmark]
+    public async Task xUnit3()
+    {
+        var dllPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT3", Framework, "UnifiedTests.dll");
+
+        await Cli.Wrap("dotnet")
+            .WithArguments(["test", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
+            .ExecuteBufferedAsync();
+    }
 }

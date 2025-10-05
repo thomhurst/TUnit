@@ -12,7 +12,7 @@ public class BasicTests
 #if TUNIT
     [Test]
     public async Task SimpleTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void SimpleTest()
 #elif NUNIT
@@ -26,7 +26,7 @@ public class BasicTests
         var result = CalculateSum(5, 10);
 #if TUNIT
         await Assert.That(result).IsEqualTo(15);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(15, result);
 #elif NUNIT
         Assert.That(result, Is.EqualTo(15));
@@ -38,7 +38,7 @@ public class BasicTests
 #if TUNIT
     [Test]
     public async Task MultipleAssertionsTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void MultipleAssertionsTest()
 #elif NUNIT
@@ -60,7 +60,7 @@ public class BasicTests
         await Assert.That(numbers).HasCount(5);
         await Assert.That(numbers.Sum()).IsEqualTo(15);
         await Assert.That(numbers).Contains(3);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.NotNull(text);
         Assert.Equal(13, text.Length);
         Assert.Contains("World", text);
@@ -90,7 +90,7 @@ public class BasicTests
 #if TUNIT
     [Test]
     public async Task CollectionOperationsTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void CollectionOperationsTest()
 #elif NUNIT
@@ -110,7 +110,7 @@ public class BasicTests
         await Assert.That(sum).IsEqualTo(2550);
         await Assert.That(filtered.First()).IsEqualTo(2);
         await Assert.That(filtered.Last()).IsEqualTo(100);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(50, filtered.Count);
         Assert.Equal(2550, sum);
         Assert.Equal(2, filtered.First());
@@ -131,7 +131,7 @@ public class BasicTests
 #if TUNIT
     [Test]
     public async Task StringManipulationTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void StringManipulationTest()
 #elif NUNIT
@@ -144,7 +144,7 @@ public class BasicTests
     {
 #if TUNIT
         var input = "  Hello, TUnit Testing Framework!  ";
-#elif XUNIT
+#elif XUNIT || XUNIT3
         var input = "  Hello, xUnit Testing Framework!  ";
 #elif NUNIT
         var input = "  Hello, NUnit Testing Framework!  ";
@@ -160,7 +160,7 @@ public class BasicTests
         await Assert.That(upper).IsEqualTo("HELLO, TUNIT TESTING FRAMEWORK!");
         await Assert.That(words).HasCount(4);
         await Assert.That(words[1]).IsEqualTo("TUnit");
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal("Hello, xUnit Testing Framework!", trimmed);
         Assert.Equal("HELLO, XUNIT TESTING FRAMEWORK!", upper);
         Assert.Equal(4, words.Length);
@@ -181,7 +181,7 @@ public class BasicTests
 #if TUNIT
     [Test]
     public async Task DictionaryOperationsTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void DictionaryOperationsTest()
 #elif NUNIT
@@ -203,7 +203,7 @@ public class BasicTests
         await Assert.That(dictionary["key10"]).IsEqualTo(100);
         await Assert.That(dictionary.ContainsKey("key25")).IsTrue();
         await Assert.That(dictionary.Values.Sum()).IsEqualTo(40425);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(50, dictionary.Count);
         Assert.Equal(100, dictionary["key10"]);
         Assert.True(dictionary.ContainsKey("key25"));

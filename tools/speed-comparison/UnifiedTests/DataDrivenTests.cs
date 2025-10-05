@@ -17,7 +17,7 @@ public class DataDrivenTests
     [Arguments(-5, 5, 0)]
     [Arguments(100, 200, 300)]
     public async Task ParameterizedAdditionTest(int a, int b, int expected)
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Theory]
     [InlineData(1, 2, 3)]
     [InlineData(10, 20, 30)]
@@ -42,7 +42,7 @@ public class DataDrivenTests
         var result = a + b;
 #if TUNIT
         await Assert.That(result).IsEqualTo(expected);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(expected, result);
 #elif NUNIT
         Assert.That(result, Is.EqualTo(expected));
@@ -59,7 +59,7 @@ public class DataDrivenTests
     [Arguments("Testing", "TESTING")]
     [Arguments("Framework", "FRAMEWORK")]
     public async Task ParameterizedStringTest(string input, string expected)
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Theory]
     [InlineData("hello", "HELLO")]
     [InlineData("world", "WORLD")]
@@ -88,7 +88,7 @@ public class DataDrivenTests
 #if TUNIT
         await Assert.That(result).IsEqualTo(expected);
         await Assert.That(result.Length).IsEqualTo(input.Length);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(expected, result);
         Assert.Equal(input.Length, result.Length);
 #elif NUNIT
@@ -104,7 +104,7 @@ public class DataDrivenTests
     [Test]
     [MethodDataSource(nameof(ComplexTestData))]
     public async Task DataSourceTest(TestData data)
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Theory]
     [MemberData(nameof(ComplexTestData))]
     public void DataSourceTest(TestData data)
@@ -124,7 +124,7 @@ public class DataDrivenTests
         await Assert.That(result.Id).IsEqualTo(data.Id);
         await Assert.That(result.ProcessedValue).IsEqualTo(data.Value * 2);
         await Assert.That(result.IsValid).IsTrue();
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(data.Id, result.Id);
         Assert.Equal(data.Value * 2, result.ProcessedValue);
         Assert.True(result.IsValid);
@@ -146,7 +146,7 @@ public class DataDrivenTests
     [Arguments(new int[] { -5, 0, 5 }, 0)]
     [Arguments(new int[] { 100 }, 100)]
     public async Task ArrayParameterTest(int[] numbers, int expectedSum)
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Theory]
     [InlineData(new int[] { 1, 2, 3, 4, 5 }, 15)]
     [InlineData(new int[] { 10, 20, 30 }, 60)]
@@ -175,7 +175,7 @@ public class DataDrivenTests
         await Assert.That(sum).IsEqualTo(expectedSum);
         await Assert.That(average).IsEqualTo((double)expectedSum / numbers.Length);
         await Assert.That(numbers).IsNotEmpty();
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(expectedSum, sum);
         Assert.Equal((double)expectedSum / numbers.Length, average);
         Assert.NotEmpty(numbers);
@@ -199,7 +199,7 @@ public class DataDrivenTests
         yield return () => new TestData { Id = 4, Value = 40, Name = "Test4" };
         yield return () => new TestData { Id = 5, Value = 50, Name = "Test5" };
     }
-#elif XUNIT
+#elif XUNIT || XUNIT3
     public static IEnumerable<object[]> ComplexTestData()
     {
         yield return new object[] { new TestData { Id = 1, Value = 10, Name = "Test1" } };

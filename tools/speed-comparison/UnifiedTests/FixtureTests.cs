@@ -40,7 +40,7 @@ public class FixtureTests : IDisposable
 #elif NUNIT
 [TestFixture]
 public class FixtureTests : IDisposable
-#elif XUNIT
+#elif XUNIT || XUNIT3
 public class FixtureTests : IDisposable, IClassFixture<TestDatabase>
 #else
 public class FixtureTests : IDisposable
@@ -73,7 +73,7 @@ public class FixtureTests : IDisposable
 #elif NUNIT
     [SetUp]
     public void SetupTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     private void SetupTest()
 #endif
     {
@@ -99,7 +99,7 @@ public class FixtureTests : IDisposable
 #elif NUNIT
     [TearDown]
     public void CleanupTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     private void CleanupTest()
 #endif
     {
@@ -113,7 +113,7 @@ public class FixtureTests : IDisposable
 #if TUNIT
     [Test]
     public async Task TestDatabaseOperations()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void TestDatabaseOperations()
 #elif NUNIT
@@ -128,7 +128,7 @@ public class FixtureTests : IDisposable
         await Assert.That(_database.Count).IsGreaterThanOrEqualTo(110);
         var value = _database.Get("test_5");
         await Assert.That(value).IsEqualTo("test_value_5");
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.True(_database.Count >= 110);
         var value = _database.Get(_testKeys[5]);
         Assert.Equal("test_value_5", value);
@@ -145,7 +145,7 @@ public class FixtureTests : IDisposable
         _database.Add("custom_key", "custom_value");
 #if TUNIT
         await Assert.That(_database.Get("custom_key")).IsEqualTo("custom_value");
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal("custom_value", _database.Get("custom_key"));
         CleanupTest();
 #elif NUNIT
