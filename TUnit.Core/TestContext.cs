@@ -59,7 +59,6 @@ public class TestContext : Context
 
     public static string? OutputDirectory
     {
-        [UnconditionalSuppressMessage("SingleFile", "IL3000:Avoid accessing Assembly file path when publishing as a single file", Justification = "Dynamic code check implemented")]
         get
         {
 #if NET
@@ -68,8 +67,14 @@ public class TestContext : Context
                 return AppContext.BaseDirectory;
             }
 #endif
-            return Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
-                   ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            [UnconditionalSuppressMessage("SingleFile", "IL3000:Avoid accessing Assembly file path when publishing as a single file", Justification = "Dynamic code check implemented")]
+            string GetOutputDirectory()
+            {
+                return Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
+                       ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+            }
+
+            return GetOutputDirectory();
         }
     }
 
@@ -316,9 +321,11 @@ public class TestContext : Context
 
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
 
-    internal HashSet<object> TrackedObjects { get; } = [];
+    internal ConcurrentDictionary<int, HashSet<object>> TrackedObjects { get; } = [];
 
     public DateTimeOffset? TestEnd { get; set; }
+
+    public int CurrentRetryAttempt { get; internal set; }
 
 
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)

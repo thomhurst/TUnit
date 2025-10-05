@@ -114,8 +114,9 @@ internal static class DisplayNameBuilder
     /// <summary>
     /// Resolves the actual value from a data source factory result
     /// </summary>
-    [UnconditionalSuppressMessage("AOT", "IL2075:Target method return value does not satisfy annotation requirements.",
-        Justification = "This is for reflection mode which doesn't support AOT")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Data source value resolution may use reflection")]
+#endif
     public static async Task<object?> ResolveDataSourceValue(object? value)
     {
         if (value == null)

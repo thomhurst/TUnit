@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
@@ -20,6 +21,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     private readonly IContextProvider _contextProvider;
     private readonly TestLifecycleCoordinator _lifecycleCoordinator;
     private readonly ITUnitMessageBus _messageBus;
+    private readonly IStaticPropertyInitializer _staticPropertyInitializer;
 
     public TestSessionCoordinator(EventReceiverOrchestrator eventReceiverOrchestrator,
         TUnitFrameworkLogger logger,
@@ -27,7 +29,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         TUnitServiceProvider serviceProvider,
         IContextProvider contextProvider,
         TestLifecycleCoordinator lifecycleCoordinator,
-        ITUnitMessageBus messageBus)
+        ITUnitMessageBus messageBus,
+        IStaticPropertyInitializer staticPropertyInitializer)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _logger = logger;
@@ -36,6 +39,7 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         _lifecycleCoordinator = lifecycleCoordinator;
         _messageBus = messageBus;
         _testScheduler = testScheduler;
+        _staticPropertyInitializer = staticPropertyInitializer;
     }
 
     public async Task ExecuteTests(
@@ -73,34 +77,14 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
         // Register all tests upfront so orchestrator knows total counts per class/assembly for lifecycle management
         _lifecycleCoordinator.RegisterTests(testList);
 
-        await InitializeStaticPropertiesAsync(cancellationToken);
-    }
-
-    private async Task InitializeStaticPropertiesAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            // Execute all registered global initializers (including static property initialization from source generation)
-            while (Sources.GlobalInitializers.TryDequeue(out var initializer))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                await initializer();
-            }
-
-            // For reflection mode, also initialize static properties dynamically
-            if (!SourceRegistrar.IsEnabled)
-            {
-                await StaticPropertyReflectionInitializer.InitializeAllStaticPropertiesAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            await _logger.LogErrorAsync($"Error during static property initialization: {ex}");
-            throw;
-        }
+        await _staticPropertyInitializer.InitializeAsync(cancellationToken);
     }
 
 
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Test scheduler uses mode-specific services that handle reflection properly")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Test scheduler uses mode-specific services that handle dynamic code properly")]
+    #endif
     private async Task ExecuteTestsCore(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
         // Combine cancellation tokens

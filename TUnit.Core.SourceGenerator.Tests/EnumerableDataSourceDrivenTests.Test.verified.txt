@@ -16,7 +16,6 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method_TestSour
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -149,7 +148,6 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method2_TestSou
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -282,7 +280,6 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("MethodWithBaseReturn"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

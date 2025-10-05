@@ -6,7 +6,7 @@ public class EnumDoesNotHaveSameValueAsCondition<TEnum, TExpected>(TExpected exp
     where TEnum : Enum
     where TExpected : Enum
 {
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
     {
         return $"to not have the same value as {Enum.GetName(typeof(TExpected), expected)}";
     }

@@ -9,10 +9,9 @@ internal static class ReflectionMetadataBuilder
     /// <summary>
     /// Creates method metadata from reflection info with proper ReflectionInfo populated
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method",
-        Justification = "Parameter types discovered from MethodInfo.GetParameters() cannot be statically analyzed. Used for reflection-based and dynamic test discovery.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.",
-        Justification = "ParameterInfo.ParameterType cannot be annotated. For AOT scenarios, source-generated metadata is preferred.")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Method metadata creation uses reflection on parameters and types")]
+#endif
     public static MethodMetadata CreateMethodMetadata(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.NonPublicConstructors
@@ -41,8 +40,9 @@ internal static class ReflectionMetadataBuilder
         return TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name);
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method",
-        Justification = "ParameterMetadata constructor requires annotated types. Callers ensure types have required members preserved.")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Parameter metadata creation uses reflection")]
+#endif
     private static ParameterMetadata CreateParameterMetadata(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.PublicMethods
@@ -59,8 +59,9 @@ internal static class ReflectionMetadataBuilder
         };
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method. The return value of the source method does not have matching annotations.",
-        Justification = "Constructor parameter types from ParameterInfo cannot be annotated. Used for test class metadata creation.")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Class metadata creation uses reflection on constructors")]
+#endif
     private static ClassMetadata CreateClassMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods

@@ -8,7 +8,7 @@ public class SetupTeardownTests : IDisposable
 #elif NUNIT
 [TestFixture]
 public class SetupTeardownTests : IDisposable
-#elif XUNIT
+#elif XUNIT || XUNIT3
 public class SetupTeardownTests : IDisposable
 #else
 public class SetupTeardownTests : IDisposable
@@ -35,7 +35,7 @@ public class SetupTeardownTests : IDisposable
 #elif NUNIT
     [SetUp]
     public void BeforeEachTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     private void BeforeEachTest()
 #endif
     {
@@ -59,7 +59,7 @@ public class SetupTeardownTests : IDisposable
 #elif NUNIT
     [TearDown]
     public void AfterEachTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     private void AfterEachTest()
 #endif
     {
@@ -70,7 +70,7 @@ public class SetupTeardownTests : IDisposable
 #if TUNIT
     [Test]
     public async Task TestWithSetupData()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void TestWithSetupData()
 #elif NUNIT
@@ -81,7 +81,7 @@ public class SetupTeardownTests : IDisposable
     public void TestWithSetupData()
 #endif
     {
-#if XUNIT
+#if XUNIT || XUNIT3
         BeforeEachTest();
 #endif
 
@@ -90,7 +90,7 @@ public class SetupTeardownTests : IDisposable
         await Assert.That(_testData[0]).IsEqualTo("Apple");
         await Assert.That(_cache).HasCount(10);
         await Assert.That(_cache[5]).IsEqualTo("Value_5");
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(5, _testData.Count);
         Assert.Equal("Apple", _testData[0]);
         Assert.Equal(10, _cache.Count);
@@ -110,7 +110,7 @@ public class SetupTeardownTests : IDisposable
         _testData.Add("Fig");
 #if TUNIT
         await Assert.That(_testData).HasCount(6);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(6, _testData.Count);
         AfterEachTest();
 #elif NUNIT
@@ -123,7 +123,7 @@ public class SetupTeardownTests : IDisposable
 #if TUNIT
     [Test]
     public async Task TestDataIsolation()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void TestDataIsolation()
 #elif NUNIT
@@ -134,14 +134,14 @@ public class SetupTeardownTests : IDisposable
     public void TestDataIsolation()
 #endif
     {
-#if XUNIT
+#if XUNIT || XUNIT3
         BeforeEachTest();
 #endif
 
 #if TUNIT
         await Assert.That(_testData).HasCount(5);
         await Assert.That(_cache).HasCount(10);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(5, _testData.Count);
         Assert.Equal(10, _cache.Count);
 #elif NUNIT
@@ -158,7 +158,7 @@ public class SetupTeardownTests : IDisposable
 #if TUNIT
         await Assert.That(_testData).HasCount(4);
         await Assert.That(_cache).HasCount(9);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(4, _testData.Count);
         Assert.Equal(9, _cache.Count);
         AfterEachTest();

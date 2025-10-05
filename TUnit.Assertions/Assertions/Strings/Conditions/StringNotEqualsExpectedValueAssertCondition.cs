@@ -6,7 +6,7 @@ namespace TUnit.Assertions.AssertConditions.String;
 public class StringNotEqualsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
     : ExpectedValueAssertCondition<string, string>(expected)
 {
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
         => $"to not be equal to {Formatter.Format(ExpectedValue).TruncateWithEllipsis(100)}";
 
     protected override ValueTask<AssertionResult> GetResult(string? actualValue, string? expectedValue)

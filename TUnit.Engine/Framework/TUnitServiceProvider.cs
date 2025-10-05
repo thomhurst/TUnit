@@ -1,3 +1,5 @@
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions;
@@ -52,9 +54,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     public PropertyInjectionService PropertyInjectionService { get; }
     public DataSourceInitializer DataSourceInitializer { get; }
     public ObjectRegistrationService ObjectRegistrationService { get; }
-    public ObjectInitializationService ObjectInitializationService { get; }
     public bool AfterSessionHooksFailed { get; set; }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
     public TUnitServiceProvider(IExtension extension,
         ExecuteRequestContext context,
         ITestExecutionFilter? filter,
@@ -75,7 +78,21 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         VerbosityService = Register(new VerbosityService(CommandLineOptions));
         DiscoveryDiagnostics.Initialize(VerbosityService);
 
-        Initializer = new TUnitInitializer(CommandLineOptions);
+        // Determine execution mode early to create appropriate services
+        var useSourceGeneration = SourceRegistrar.IsEnabled = GetUseSourceGeneration(CommandLineOptions);
+
+        // Create and register mode-specific hook discovery service
+        IHookDiscoveryService hookDiscoveryService;
+        if (useSourceGeneration)
+        {
+            hookDiscoveryService = Register<IHookDiscoveryService>(new SourceGenHookDiscoveryService());
+        }
+        else
+        {
+            hookDiscoveryService = Register<IHookDiscoveryService>(new ReflectionBasedHookDiscoveryService());
+        }
+
+        Initializer = new TUnitInitializer(CommandLineOptions, hookDiscoveryService);
 
         Logger = Register(new TUnitFrameworkLogger(
             extension,
@@ -89,7 +106,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // NEW: Separate registration and execution services (replaces TestObjectInitializer)
         ObjectRegistrationService = Register(new ObjectRegistrationService(PropertyInjectionService));
-        ObjectInitializationService = Register(new ObjectInitializationService());
 
         // Initialize the circular dependencies
         PropertyInjectionService.Initialize(ObjectRegistrationService);
@@ -115,7 +131,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         CancellationToken = Register(new EngineCancellationToken());
 
-        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger));
+        EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger, trackableObjectGraphProvider));
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService(EventReceiverOrchestrator));
 
         ParallelLimitLockProvider = Register(new ParallelLimitLockProvider());
@@ -133,17 +149,23 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testContextRestorer = Register(new TestContextRestorer());
         var testMethodInvoker = Register(new TestMethodInvoker());
 
-        var useSourceGeneration = GetUseSourceGeneration(CommandLineOptions);
-#pragma warning disable IL2026 // Using member which has 'RequiresUnreferencedCodeAttribute'
-#pragma warning disable IL3050 // Using member which has 'RequiresDynamicCodeAttribute'
-        ITestDataCollector dataCollector = useSourceGeneration
-            ? new AotTestDataCollector()
-            : new ReflectionTestDataCollector();
-#pragma warning restore IL3050
-#pragma warning restore IL2026
+        // Use the mode already determined earlier
+        ITestDataCollector dataCollector;
+        IStaticPropertyInitializer staticPropertyInitializer;
+
+        if (useSourceGeneration)
+        {
+            dataCollector = new AotTestDataCollector();
+            staticPropertyInitializer = new SourceGenStaticPropertyInitializer(Logger);
+        }
+        else
+        {
+            dataCollector = new ReflectionTestDataCollector();
+            staticPropertyInitializer = new ReflectionStaticPropertyInitializer(Logger);
+        }
 
         var testBuilder = Register<ITestBuilder>(
-            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, PropertyInjectionService, DataSourceInitializer));
+            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, PropertyInjectionService, DataSourceInitializer, hookDiscoveryService));
 
         TestBuilderPipeline = Register(
             new TestBuilderPipeline(
@@ -157,7 +179,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));
 
-        var testInitializer = new TestInitializer(EventReceiverOrchestrator, ObjectInitializationService, PropertyInjectionService, objectTracker);
+        var testInitializer = new TestInitializer(EventReceiverOrchestrator, PropertyInjectionService, objectTracker);
 
         // Create the new TestCoordinator that orchestrates the granular services
         var testCoordinator = Register<ITestCoordinator>(
@@ -195,7 +217,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             Logger,
             ParallelLimitLockProvider));
 
-        var staticPropertyInitializer = Register(new Services.StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, disposer));
+        var staticPropertyHandler = Register(new Services.StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, disposer));
 
         var testScheduler = Register<ITestScheduler>(new TestScheduler(
             Logger,
@@ -208,7 +230,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             circularDependencyDetector,
             constraintKeyScheduler,
             hookExecutor,
-            staticPropertyInitializer));
+            staticPropertyHandler));
 
         TestSessionCoordinator = Register(new TestSessionCoordinator(EventReceiverOrchestrator,
             Logger,
@@ -216,7 +238,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             serviceProvider: this,
             ContextProvider,
             lifecycleCoordinator,
-            MessageBus));
+            MessageBus,
+            staticPropertyInitializer));
 
         Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, TestSessionId, CancellationToken.Token));
 
@@ -252,6 +275,13 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
     private static bool GetUseSourceGeneration(ICommandLineOptions commandLineOptions)
     {
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            return true; // Force source generation on AOT platforms
+        }
+#endif
+
         if (commandLineOptions.TryGetOptionArgumentList(ReflectionModeCommandProvider.ReflectionMode, out _))
         {
             return false; // Reflection mode explicitly requested

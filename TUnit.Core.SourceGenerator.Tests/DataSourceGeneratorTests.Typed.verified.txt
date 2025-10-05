@@ -16,7 +16,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method_TestSource_G
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
                 new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute()
@@ -162,7 +161,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method2_TestSource_
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
                 new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute()
@@ -322,7 +320,6 @@ internal sealed class DataSourceGeneratorTests_GeneratedData_Method3_TestSource_
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute<int, string, bool>(),
                 new global::TUnit.TestProject.Attributes.AutoFixtureGeneratorAttribute()

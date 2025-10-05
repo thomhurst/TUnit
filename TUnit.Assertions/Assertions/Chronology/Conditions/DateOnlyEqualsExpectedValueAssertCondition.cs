@@ -6,7 +6,7 @@ public class DateOnlyEqualsExpectedValueAssertCondition(DateOnly expected) : Exp
 {
     private int? _tolerance;
 
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
     {
         if (_tolerance is null or 0)
         {

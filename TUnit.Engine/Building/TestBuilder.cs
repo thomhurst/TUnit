@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
@@ -18,15 +19,18 @@ internal sealed class TestBuilder : ITestBuilder
     private readonly IContextProvider _contextProvider;
     private readonly PropertyInjectionService _propertyInjectionService;
     private readonly DataSourceInitializer _dataSourceInitializer;
+    private readonly Discovery.IHookDiscoveryService _hookDiscoveryService;
 
     public TestBuilder(
-        string sessionId, 
-        EventReceiverOrchestrator eventReceiverOrchestrator, 
+        string sessionId,
+        EventReceiverOrchestrator eventReceiverOrchestrator,
         IContextProvider contextProvider,
         PropertyInjectionService propertyInjectionService,
-        DataSourceInitializer dataSourceInitializer)
+        DataSourceInitializer dataSourceInitializer,
+        Discovery.IHookDiscoveryService hookDiscoveryService)
     {
         _sessionId = sessionId;
+        _hookDiscoveryService = hookDiscoveryService;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
         _contextProvider = contextProvider;
         _propertyInjectionService = propertyInjectionService;
@@ -103,6 +107,10 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
+    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
+    #endif
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
     {
         var tests = new List<AbstractExecutableTest>();
@@ -143,14 +151,14 @@ internal sealed class TestBuilder : ITestBuilder
                 ObjectBag = new Dictionary<string, object?>(),
                 InitializedAttributes = attributes  // Store the initialized attributes
             };
-            
+
             // Check for ClassConstructor attribute and set it early if present (reuse already created attributes)
             var classConstructorAttribute = attributes.OfType<ClassConstructorAttribute>().FirstOrDefault();
             if (classConstructorAttribute != null)
             {
                 testBuilderContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
             }
-            
+
             var contextAccessor = new TestBuilderContextAccessor(testBuilderContext);
 
             var classDataAttributeIndex = 0;
@@ -252,7 +260,8 @@ internal sealed class TestBuilder : ITestBuilder
                                 {
                                     TestMetadata = metadata.MethodMetadata,
                                     Events = new TestContextEvents(),
-                                    ObjectBag = new Dictionary<string, object?>()
+                                    ObjectBag = new Dictionary<string, object?>(),
+                                    DataSourceAttribute = methodDataSource
                                 };
 
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
@@ -366,7 +375,7 @@ internal sealed class TestBuilder : ITestBuilder
                                     DataSourceAttribute = contextAccessor.Current.DataSourceAttribute, // Copy any data source attribute
                                     InitializedAttributes = attributes // Pass the initialized attributes
                                 };
-                                
+
                                 var test = await BuildTestAsync(metadata, testData, testSpecificContext);
 
                                 // If we have a basic skip reason, set it immediately
@@ -447,8 +456,9 @@ internal sealed class TestBuilder : ITestBuilder
         return resolvedTypes;
     }
 
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern",
-        Justification = "Data sources require reflection to get method and parameter info")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Generic type inference uses reflection on data sources and parameters")]
+#endif
     private static Type[] TryInferClassGenericsFromDataSources(TestMetadata metadata)
     {
         var genericClassType = metadata.TestClassType;
@@ -599,6 +609,9 @@ internal sealed class TestBuilder : ITestBuilder
         return resolvedTypes;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     private async Task<IDataSourceAttribute[]> GetDataSourcesAsync(IDataSourceAttribute[] dataSources)
     {
         if (dataSources.Length == 0)
@@ -619,6 +632,9 @@ internal sealed class TestBuilder : ITestBuilder
     /// Ensures a data source is initialized before use and returns data rows.
     /// This centralizes the initialization logic for all data source usage.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     private async IAsyncEnumerable<Func<Task<object?[]?>>> GetInitializedDataRowsAsync(
         IDataSourceAttribute dataSource,
         DataGeneratorMetadata dataGeneratorMetadata)
@@ -638,8 +654,16 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Hook discovery service handles mode-specific logic; reflection calls suppressed in AOT mode")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Hook discovery service handles mode-specific logic; dynamic code suppressed in AOT mode")]
     public async Task<AbstractExecutableTest> BuildTestAsync(TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
+        // Discover instance hooks for closed generic types (no-op in source gen mode)
+        if (metadata.TestClassType is { IsGenericType: true, IsGenericTypeDefinition: false })
+        {
+            _hookDiscoveryService.DiscoverInstanceHooksForType(metadata.TestClassType);
+        }
+
         var testId = TestIdentifierService.GenerateTestId(metadata, testData);
 
         var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext);
@@ -698,10 +722,18 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     private async ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
         // Use attributes from context if available, or create new ones
         var attributes = testBuilderContext.InitializedAttributes ?? await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
+
+        if (testBuilderContext.DataSourceAttribute != null && testBuilderContext.DataSourceAttribute is not NoDataSource)
+        {
+            attributes = [..attributes, (Attribute)testBuilderContext.DataSourceAttribute];
+        }
 
         var testDetails = new TestDetails
         {
@@ -735,6 +767,9 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
     {
         var discoveredContext = new DiscoveredTestContext(
@@ -746,11 +781,17 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
         return await CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination());
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
@@ -770,6 +811,9 @@ internal sealed class TestBuilder : ITestBuilder
         };
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     private async Task<TestDetails> CreateFailedTestDetails(TestMetadata metadata, string testId)
     {
         return new TestDetails
@@ -790,6 +834,9 @@ internal sealed class TestBuilder : ITestBuilder
         };
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     private async Task<Attribute[]> InitializeAttributesAsync(Attribute[] attributes)
     {
         // Initialize any attributes that need property injection or implement IAsyncInitializer
@@ -802,7 +849,7 @@ internal sealed class TestBuilder : ITestBuilder
                 await _dataSourceInitializer.EnsureInitializedAsync(dataSource);
             }
         }
-        
+
         return attributes;
     }
 
@@ -824,12 +871,18 @@ internal sealed class TestBuilder : ITestBuilder
 
 
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task<AbstractExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
     {
         var message = $"Failed to create instance for method data source expansion: {exception.Message}";
         return await CreateFailedTestForDataGenerationError(metadata, exception);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task<AbstractExecutableTest> CreateFailedTestForClassDataSourceCircularDependency(TestMetadata metadata)
     {
         var instanceClassDataSources = metadata.ClassDataSources
@@ -996,8 +1049,9 @@ internal sealed class TestBuilder : ITestBuilder
         return null;
     }
 
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL2070:UnrecognizedReflectionPattern",
-        Justification = "Type checking at runtime is required for data source filtering")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Type compatibility checking uses reflection")]
+#endif
     private static bool IsTypeCompatible(Type actualType, Type expectedType)
     {
         // Direct match
@@ -1075,6 +1129,10 @@ internal sealed class TestBuilder : ITestBuilder
         public Type[] ResolvedMethodGenericArguments { get; set; } = Type.EmptyTypes;
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
+    #endif
     public async IAsyncEnumerable<AbstractExecutableTest> BuildTestsStreamingAsync(
         TestMetadata metadata,
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -1107,7 +1165,7 @@ internal sealed class TestBuilder : ITestBuilder
             ObjectBag = new Dictionary<string, object?>(),
             InitializedAttributes = attributes  // Store the initialized attributes
         };
-        
+
         // Check for ClassConstructor attribute and set it early if present
         // Look for any attribute that inherits from ClassConstructorAttribute
         // This handles both ClassConstructorAttribute and ClassConstructorAttribute<T>
@@ -1115,12 +1173,12 @@ internal sealed class TestBuilder : ITestBuilder
             .Where(a => a is ClassConstructorAttribute)
             .Cast<ClassConstructorAttribute>()
             .FirstOrDefault();
-            
+
         if (classConstructorAttribute != null)
         {
             baseContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
         }
-        
+
         var contextAccessor = new TestBuilderContextAccessor(baseContext);
 
         // Check for circular dependency
@@ -1210,6 +1268,9 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Generic type inference uses reflection on data sources and parameters")]
+    #endif
     private Task<object?> CreateInstanceForMethodDataSources(
         TestMetadata metadata, int classDataAttributeIndex, int classDataLoopIndex, object?[] classData)
     {
@@ -1252,6 +1313,10 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
+    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
+    #endif
     private async Task<AbstractExecutableTest?> BuildSingleTestAsync(
         TestMetadata metadata,
         Func<Task<object?[]?>> classDataFactory,
@@ -1266,7 +1331,7 @@ internal sealed class TestBuilder : ITestBuilder
         try
         {
             var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
-            
+
             var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
             // Check data compatibility for generic methods

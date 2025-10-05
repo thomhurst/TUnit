@@ -418,7 +418,6 @@ internal sealed class TimeoutCancellationTokenTests_DataTest_TestSource_GUID : g
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1),
                 new global::TUnit.Core.TimeoutAttribute(5_000),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Failure),
                 new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
@@ -577,7 +576,6 @@ internal sealed class TimeoutCancellationTokenTests_DataSourceTest_TestSource_GU
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
             AttributeFactory = () =>
             [
-                new global::TUnit.Core.MethodDataSourceAttribute("DataSource"),
                 new global::TUnit.Core.TimeoutAttribute(5_000),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Failure),
                 new global::TUnit.Core.TestAttribute(),
@@ -759,7 +757,6 @@ internal sealed class TimeoutCancellationTokenTests_MatrixTest_TestSource_GUID :
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MatrixDataSourceAttribute(),
                 new global::TUnit.Core.TimeoutAttribute(5_000),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Failure),
                 new global::TUnit.Core.CategoryAttribute("Blah"),

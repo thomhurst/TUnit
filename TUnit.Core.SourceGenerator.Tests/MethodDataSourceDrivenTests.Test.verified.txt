@@ -16,7 +16,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_TestSource_G
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -141,7 +140,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method2_TestSource_
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -266,7 +264,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_WithAction_T
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("SomeAction"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -391,10 +388,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method3_TestSource_
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
-{Arguments = new object[]{5},},
-                new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
-{Arguments = new object[] { 5 },},
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -534,14 +527,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
-{Arguments = new object[]{"Hello World!",5,true},},
-                new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
-{Arguments = new object[] { "Hello World!", 6, true },},
-                new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
-{Arguments = new object[]{"Hello World!",7,true},},
-                new global::TUnit.Core.MethodDataSourceAttribute("SomeMethod")
-{Arguments = new object[] { "Hello World!", 8, true },},
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -708,7 +693,6 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_WithBaseReturn_Test
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("MethodWithBaseReturn"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -833,7 +817,6 @@ internal sealed class MethodDataSourceDrivenTests_EnumerableFuncArrayTest_TestSo
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncArrayTestData"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

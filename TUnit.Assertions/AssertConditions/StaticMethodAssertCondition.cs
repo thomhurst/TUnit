@@ -31,7 +31,7 @@ public class StaticMethodAssertCondition<T> : BaseAssertCondition<T>
             $"'{actualValue}' was expected {expectationVerb} {_methodName}()");
     }
     
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
     {
         var expectationVerb = _negated ? "not to satisfy" : "to satisfy";
         return $"{expectationVerb} {_methodName}()";

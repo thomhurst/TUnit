@@ -16,7 +16,6 @@ internal sealed class Tests_MethodDataSource_TestSource_GUID : global::TUnit.Cor
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.InstanceMethodDataSourceAttribute("DataSource"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>()
             ],
@@ -144,7 +143,6 @@ internal sealed class Tests_MatrixDataSource_TestSource_GUID : global::TUnit.Cor
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MatrixDataSourceAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._1821.MyData>()
             ],

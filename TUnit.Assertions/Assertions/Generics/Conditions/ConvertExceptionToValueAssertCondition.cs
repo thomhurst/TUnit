@@ -5,14 +5,14 @@ namespace TUnit.Assertions.Assertions.Generics.Conditions;
 public class ConvertExceptionToValueAssertCondition<TException> : BaseAssertCondition<object?>
     where TException : Exception
 {
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
     {
         return $"to throw {typeof(TException).Name}";
     }
 
     public TException? ConvertedExceptionValue { get; private set; }
 
-    protected override sealed ValueTask<AssertionResult> GetResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
+    protected sealed override ValueTask<AssertionResult> GetResult(object? actualValue, Exception? exception, AssertionMetadata assertionMetadata)
     {
         if (exception is null)
         {

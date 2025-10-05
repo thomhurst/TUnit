@@ -7,13 +7,23 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <OutputType>exe</OutputType>
         <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <NoWarn>$(NoWarn);NU1504</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+        <IsAotCompatible>true</IsAotCompatible>
+        <PublishAot>true</PublishAot>
+        <PublishTrimmed>true</PublishTrimmed>
+        <IlcSingleWarn>false</IlcSingleWarn>
+        <TrimmerSingleWarn>false</TrimmerSingleWarn>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
         <PackageReference Include="TUnit">
             <VersionOverride Condition="'$(TUnitVersion)' != ''">$(TUnitVersion)</VersionOverride>
-        </PackageReference> 
+        </PackageReference>
         <PackageReference Include="Polyfill" />
     </ItemGroup>
 

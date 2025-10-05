@@ -5,7 +5,7 @@ public class EnumerableNotContainsExpectedFuncAssertCondition<TActual, TInner>(
     : BaseAssertCondition<TActual>
     where TActual : IEnumerable<TInner>
 {
-    internal protected override string GetExpectation() => $"to contain no entry matching {matcherString ?? "null"}";
+    protected internal override string GetExpectation() => $"to contain no entry matching {matcherString ?? "null"}";
 
     protected override ValueTask<AssertionResult> GetResult(
         TActual? actualValue, Exception? exception,

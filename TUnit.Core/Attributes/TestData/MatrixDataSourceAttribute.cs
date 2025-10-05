@@ -5,10 +5,16 @@ using TUnit.Core.Extensions;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-[UnconditionalSuppressMessage("AOT", "IL2109:Type 'MatrixDataSourceAttribute' derives from base class with RequiresUnreferencedCodeAttribute",
-    Justification = "Matrix data source implementation is AOT-compatible with proper enum field preservation")]
+#if NET6_0_OR_GREATER
+[RequiresUnreferencedCode("MatrixDataSource uses reflection to access parameter attributes and test metadata. For AOT compatibility, consider using explicit data sources.")]
+[RequiresDynamicCode("MatrixDataSource may process enum types dynamically")]
+#endif
 public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttribute, IAccessesInstanceData
 {
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Matrix generation requires reflection")]
+    [RequiresDynamicCode("Matrix generation may process enum types dynamically")]
+    #endif
     protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var parameterInformation = dataGeneratorMetadata
@@ -84,8 +90,9 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
             .ToArray();
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL2072:Target parameter argument does not satisfy DynamicallyAccessedMemberTypes requirements",
-        Justification = "Test parameter types are comprehensively preserved by the source generation system for matrix data scenarios")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Test parameter types accessed through reflection")]
+    #endif
     private IReadOnlyList<object?> GetAllArguments(DataGeneratorMetadata dataGeneratorMetadata,
         ParameterMetadata sourceGeneratedParameterInformation)
     {

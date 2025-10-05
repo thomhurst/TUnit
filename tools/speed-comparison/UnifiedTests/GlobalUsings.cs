@@ -2,6 +2,8 @@
 global using TUnit.Core;
 #elif XUNIT
 global using Xunit;
+#elif XUNIT3
+global using Xunit;
 #elif NUNIT
 global using NUnit.Framework;
 #elif MSTEST

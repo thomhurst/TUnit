@@ -1,4 +1,5 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core.Tracking;
@@ -11,11 +12,19 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Trackable object discovery uses reflection for property injection")]
+    #endif
     public void TrackObjects(TestContext testContext)
     {
-        var objects = trackableObjectGraphProvider.GetTrackableObjects(testContext);
+        var alreadyTracked = testContext.TrackedObjects.SelectMany(x => x.Value).ToHashSet();
 
-        foreach (var obj in objects)
+        var newTrackableObjects = trackableObjectGraphProvider.GetTrackableObjects(testContext)
+            .SelectMany(x => x.Value)
+            .Except(alreadyTracked)
+            .ToHashSet();
+
+        foreach (var obj in newTrackableObjects)
         {
             TrackObject(obj);
         }
@@ -23,7 +32,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public async ValueTask UntrackObjects(TestContext testContext, List<Exception> cleanupExceptions)
     {
-        foreach (var obj in testContext.TrackedObjects)
+        foreach (var obj in testContext.TrackedObjects
+                     .SelectMany(x => x.Value)
+                     .ToHashSet())
         {
             try
             {

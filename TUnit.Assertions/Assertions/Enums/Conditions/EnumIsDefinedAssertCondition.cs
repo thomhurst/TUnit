@@ -7,7 +7,7 @@ namespace TUnit.Assertions.Assertions.Enums.Conditions;
 public class EnumIsDefinedAssertCondition<TEnum> : BaseAssertCondition<TEnum>
     where TEnum : struct, Enum
 {
-    internal protected override string GetExpectation() => "to be defined";
+    protected internal override string GetExpectation() => "to be defined";
 
     protected override ValueTask<AssertionResult> GetResult(
         TEnum actualValue, Exception? exception,
@@ -22,7 +22,7 @@ public class EnumIsDefinedAssertCondition<TEnum> : BaseAssertCondition<TEnum>
 public class EnumIsNotDefinedAssertCondition<TEnum> : BaseAssertCondition<TEnum>
     where TEnum : struct, Enum
 {
-    internal protected override string GetExpectation() => "to not be defined";
+    protected internal override string GetExpectation() => "to not be defined";
 
     protected override ValueTask<AssertionResult> GetResult(
         TEnum actualValue, Exception? exception,

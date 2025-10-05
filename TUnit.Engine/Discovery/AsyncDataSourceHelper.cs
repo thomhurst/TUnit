@@ -7,6 +7,9 @@ namespace TUnit.Engine.Discovery;
 internal static class AsyncDataSourceHelper
 {
     /// Processes async generator items without evaluating them during discovery
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Typed placeholder creation uses reflection on generic types")]
+#endif
     public static List<object?[]> ProcessAsyncGeneratorItemsForDiscovery(object? item)
     {
         var items = new List<object?[]>();
@@ -109,7 +112,9 @@ internal static class AsyncDataSourceHelper
         return returnType;
     }
     
-    [UnconditionalSuppressMessage("Trimming", "IL2075:Target method return value does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Typed placeholder creation uses reflection on generic types")]
+#endif
     private static AsyncDataSourcePlaceholder CreateTypedPlaceholder(object item, Type? resultType)
     {
         // Create a wrapper that preserves the typed factory

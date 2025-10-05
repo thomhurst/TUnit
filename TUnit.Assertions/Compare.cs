@@ -1,15 +1,13 @@
-﻿#pragma warning disable IL2072 // Target type's member does not satisfy requirements
-#pragma warning disable IL2075 // Target method return value does not satisfy requirements
-// Note: Comparison logic uses reflection for deep object comparison. For AOT scenarios, use explicit comparison methods.
-
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Assertions.Enums;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions;
 
+[UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "AOT mode uses the attributed compiler type instead of the runtime GetType.")]
 public static class Compare
 {
     private static readonly BindingFlags BindingFlags =
@@ -65,7 +63,20 @@ public static class Compare
             yield break;
         }
 
-        if (actual.GetType().IsSimpleType())
+        var actualType =
+#if NET
+            RuntimeFeature.IsDynamicCodeSupported ? actual.GetType() : typeof(TActual);
+#else
+            actual.GetType();
+#endif
+        var expectedType =
+#if NET
+            RuntimeFeature.IsDynamicCodeSupported ? expected.GetType() : typeof(TExpected);
+#else
+            expected.GetType();
+#endif
+
+        if (actualType.IsSimpleType())
         {
             yield return new ComparisonFailure
             {
@@ -157,7 +168,7 @@ public static class Compare
             yield break;
         }
 
-        foreach (var fieldName in actual.GetType().GetFields().Concat(expected.GetType().GetFields())
+        foreach (var fieldName in actualType.GetFields().Concat(expectedType.GetFields())
                      .Where(x => !x.Name.StartsWith('<'))
                      .Select(x => x.Name)
                      .Distinct())
@@ -169,8 +180,8 @@ public static class Compare
                 continue;
             }
 
-            var actualFieldInfo = actual.GetType().GetField(fieldName, BindingFlags);
-            var expectedFieldInfo = expected.GetType().GetField(fieldName, BindingFlags);
+            var actualFieldInfo = actualType.GetField(fieldName, BindingFlags);
+            var expectedFieldInfo = expectedType.GetField(fieldName, BindingFlags);
 
             // Check if field type should be ignored
             if (actualFieldInfo != null && ShouldIgnoreType(actualFieldInfo.FieldType, options.TypesToIgnore))
@@ -217,7 +228,7 @@ public static class Compare
             }
         }
 
-        foreach (var propertyName in actual.GetType().GetProperties().Concat(expected.GetType().GetProperties())
+        foreach (var propertyName in actualType.GetProperties().Concat(expectedType.GetProperties())
                      .Where(p => p.GetIndexParameters().Length == 0)
                      .Select(x => x.Name)
                      .Distinct())
@@ -229,8 +240,8 @@ public static class Compare
                 continue;
             }
 
-            var actualPropertyInfo = actual.GetType().GetProperty(propertyName, BindingFlags);
-            var expectedPropertyInfo = expected.GetType().GetProperty(propertyName, BindingFlags);
+            var actualPropertyInfo = actualType.GetProperty(propertyName, BindingFlags);
+            var expectedPropertyInfo = expectedType.GetProperty(propertyName, BindingFlags);
 
             // Check if property type should be ignored
             if (actualPropertyInfo != null && ShouldIgnoreType(actualPropertyInfo.PropertyType, options.TypesToIgnore))
@@ -306,8 +317,8 @@ public static class Compare
         var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 
         // Check if the type or its underlying type (for nullable) should be ignored
-        return typesToIgnore.Any(ignoredType => 
-            type == ignoredType || 
+        return typesToIgnore.Any(ignoredType =>
+            type == ignoredType ||
             underlyingType == ignoredType ||
             type.IsAssignableFrom(ignoredType) ||
             underlyingType.IsAssignableFrom(ignoredType));

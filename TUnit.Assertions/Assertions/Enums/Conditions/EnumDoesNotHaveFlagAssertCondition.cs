@@ -4,7 +4,7 @@ namespace TUnit.Assertions.Assertions.Enums.Conditions;
 
 public class EnumDoesNotHaveFlagAssertCondition<TEnum>(TEnum expected) : BaseAssertCondition<TEnum> where TEnum : Enum
 {
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
     {
         return $"to not have the flag {expected.ToString()}";
     }

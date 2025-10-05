@@ -20,9 +20,6 @@ internal sealed class BaseClass_Test_TestSource_GUID : global::TUnit.Core.Interf
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1),
-                new global::TUnit.Core.ArgumentsAttribute(2),
-                new global::TUnit.Core.ArgumentsAttribute(3),
                 new global::TUnit.Core.RepeatAttribute(10),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
@@ -183,9 +180,6 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1),
-                new global::TUnit.Core.ArgumentsAttribute(2),
-                new global::TUnit.Core.ArgumentsAttribute(3),
                 new global::TUnit.Core.RepeatAttribute(10),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -334,9 +328,6 @@ internal sealed class Tests2_Test_TestSource_GUID : global::TUnit.Core.Interface
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1),
-                new global::TUnit.Core.ArgumentsAttribute(2),
-                new global::TUnit.Core.ArgumentsAttribute(3),
                 new global::TUnit.Core.RepeatAttribute(10),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -485,9 +476,6 @@ internal sealed class Tests3_Test_TestSource_GUID : global::TUnit.Core.Interface
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1),
-                new global::TUnit.Core.ArgumentsAttribute(2),
-                new global::TUnit.Core.ArgumentsAttribute(3),
                 new global::TUnit.Core.RepeatAttribute(10),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)

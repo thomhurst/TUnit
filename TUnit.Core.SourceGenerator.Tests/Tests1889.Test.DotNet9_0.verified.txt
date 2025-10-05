@@ -104,7 +104,6 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MatrixDataSourceAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.Core.InheritsTestsAttribute()
             ],
@@ -219,8 +218,6 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(false),
-                new global::TUnit.Core.ArgumentsAttribute(true),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.Core.InheritsTestsAttribute()
             ],

@@ -8,7 +8,7 @@ public class EnumerableOrderedByAssertCondition<TActual, TInner, TComparisonItem
     Order order)
     : BaseAssertCondition<TActual> where TActual : IEnumerable<TInner>
 {
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
     {
         return $"to be in {order} order";
     }

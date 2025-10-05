@@ -173,10 +173,10 @@ namespace MyTestProject;
 
 public class ServiceInjectionTests
 {
-    [DataSourceForProperty<DatabaseService>(Shared = SharedType.Globally)]
+    [ClassDataSource<DatabaseService>(Shared = SharedType.Globally)]
     public required DatabaseService Database { get; init; }
 
-    [DataSourceForProperty<LoggingService>]
+    [ClassDataSource<LoggingService>]
     public required LoggingService Logger { get; init; }
 
     [Test]
@@ -223,7 +223,7 @@ namespace MyTestProject;
 
 public class AsyncInitializationTests
 {
-    [DataSourceForProperty<AsyncContainer>]
+    [ClassDataSource<AsyncContainer>]
     public required AsyncContainer Container { get; init; }
 
     [Test]

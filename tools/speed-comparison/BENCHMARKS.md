@@ -1,6 +1,6 @@
 # TUnit Speed Comparison Benchmarks
 
-This directory contains realistic benchmarks comparing TUnit, xUnit, NUnit, and MSTest frameworks.
+This directory contains realistic benchmarks comparing TUnit, xUnit v2, xUnit v3, NUnit, and MSTest frameworks.
 
 ## Test Categories
 
@@ -50,6 +50,7 @@ dotnet run -c Release --project Tests.Benchmark
 ## Benchmark Details
 
 - TUnit runs in both AOT (Ahead-of-Time) and regular JIT modes
+- xUnit v2 and v3 are both tested (v3 uses the new `xunit.v3` package)
 - All frameworks implement equivalent test logic
 - Tests use realistic patterns without external dependencies
 - In-memory operations simulate I/O without file system artifacts

@@ -46,5 +46,5 @@ public class InvokableAssertionBuilder<TActual> :
         return $"{expression[..100]}...";
     }
 
-    internal protected Stack<BaseAssertCondition> Assertions => Source.Assertions;
+    protected internal Stack<BaseAssertCondition> Assertions => Source.Assertions;
 }

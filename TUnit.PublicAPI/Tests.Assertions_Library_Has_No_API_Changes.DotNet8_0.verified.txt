@@ -71,6 +71,7 @@ namespace
         public .<.<TInner>> Satisfy<TExpected>(<TInner?, .<TExpected>?> asyncMapper, <..IValueSource<TExpected?>, .> assert, [.("asyncMapper")] string mapperExpression = "", [.("assert")] string assertionBuilderExpression = "") { }
         public .<.<TInner>> Satisfy<TExpected>(<TInner?, TExpected> mapper, <..IValueSource<TExpected?>, .> assert, [.("mapper")] string mapperExpression = "", [.("assert")] string assertionBuilderExpression = "") { }
     }
+    [.("Trimming", "IL2075", Justification="AOT mode uses the attributed compiler type instead of the runtime GetType.")]
     public static class Compare
     {
         public static .<.ComparisonFailure> CheckEquivalent<[.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties | ..NonPublicProperties)]  TActual, [.(..None | ..PublicFields | ..NonPublicFields | ..PublicProperties | ..NonPublicProperties)]  TExpected>(TActual actual, TExpected expected, .CompareOptions options, int? index) { }
@@ -339,8 +340,6 @@ namespace .
     {
         public PropertyEqualsExpectedValueAssertCondition(.<<TRootObjectType, TPropertyType>> propertySelector, TPropertyType expected, bool isEqual) { }
         protected override string GetExpectation() { }
-        [.("Expression compilation requires dynamic code generation")]
-        [.("Expression compilation requires unreferenced code")]
         protected override .<.> GetResult(TRootObjectType? actualValue, TPropertyType? expectedValue) { }
     }
 }

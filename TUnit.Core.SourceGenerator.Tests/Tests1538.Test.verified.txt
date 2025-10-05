@@ -16,7 +16,6 @@ internal sealed class Tests_Eight_Args_TestSource_GUID : global::TUnit.Core.Inte
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("EightItems"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -200,7 +199,6 @@ internal sealed class Tests_SixteenArgs_TestSource_GUID : global::TUnit.Core.Int
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("SixteenItems"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]

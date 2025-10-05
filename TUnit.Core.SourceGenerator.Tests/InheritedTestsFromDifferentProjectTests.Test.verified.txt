@@ -105,7 +105,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>("Foo"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
@@ -221,7 +220,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.TestData), "Foo"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
@@ -705,7 +703,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>("Foo"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
@@ -821,7 +818,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.TestData), "Foo"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")

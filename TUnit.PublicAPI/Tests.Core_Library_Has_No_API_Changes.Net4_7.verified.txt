@@ -66,19 +66,25 @@ namespace
         public override .ArgumentDisplayFormatter Formatter { get; }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
-    public sealed class ArgumentsAttribute : , .IDataSourceAttribute
+    public sealed class ArgumentsAttribute : , .IDataSourceAttribute, ., .
     {
         public ArgumentsAttribute(params object?[]? values) { }
+        public int Order { get; }
+        public string? Skip { get; set; }
         public object?[] Values { get; }
-        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__4))]
+        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__8))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public . OnTestRegistered(.TestRegisteredContext context) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
-    public sealed class ArgumentsAttribute<T> : .TypedDataSourceAttribute<T>
+    public sealed class ArgumentsAttribute<T> : .TypedDataSourceAttribute<T>, ., .
     {
         public ArgumentsAttribute(T value) { }
-        [.(typeof(.ArgumentsAttribute<T>.<GetTypedDataRowsAsync>d__2))]
+        public int Order { get; }
+        public string? Skip { get; set; }
+        [.(typeof(.ArgumentsAttribute<T>.<GetTypedDataRowsAsync>d__6))]
         public override .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        public . OnTestRegistered(.TestRegisteredContext context) { }
     }
     public class Artifact
     {
@@ -1170,6 +1176,7 @@ namespace
         public .<.Artifact> Artifacts { get; }
         public .CancellationToken CancellationToken { get; set; }
         public .ClassHookContext ClassContext { get; }
+        public int CurrentRetryAttempt { get; }
         public .<.TestDetails> Dependencies { get; }
         public ? DisplayNameFormatter { get; set; }
         public .TestContextEvents Events { get; }

@@ -28,28 +28,22 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
-      - name: Build TUnit AOT .NET 8.0
-        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net8.0 --output aot-publish-net8 -p:PublishAot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }}
-        working-directory: "tools/speed-comparison/UnifiedTests"
-
-      - name: Build TUnit AOT .NET 9.0
-        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net9.0 --output aot-publish-net9 -p:PublishAot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }}
-        working-directory: "tools/speed-comparison/UnifiedTests"
-
-      - name: Build TUnit Single File .NET 8.0
-        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net8.0 --output singlefile-publish-net8 -p:PublishSingleFile=true -p:SelfContained=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }}
-        working-directory: "tools/speed-comparison/UnifiedTests"
-
-      - name: Build TUnit Single File .NET 9.0
-        run: dotnet publish UnifiedTests.csproj -c Release -p:TestFramework=TUNIT --framework net9.0 --output singlefile-publish-net9 -p:PublishSingleFile=true -p:SelfContained=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }}
-        working-directory: "tools/speed-comparison/UnifiedTests"
-
       - name: Build All Frameworks
         run: |
-          dotnet build -c Release -p:TestFramework=TUNIT
-          dotnet build -c Release -p:TestFramework=XUNIT
-          dotnet build -c Release -p:TestFramework=NUNIT
-          dotnet build -c Release -p:TestFramework=MSTEST
+          dotnet build -c Release -p:TestFramework=TUNIT --framework net8.0 --output bin/Release-TUNIT/net8.0
+          dotnet build -c Release -p:TestFramework=TUNIT --framework net9.0 --output bin/Release-TUNIT/net9.0
+          dotnet build -c Release -p:TestFramework=XUNIT --framework net8.0 --output bin/Release-XUNIT/net8.0
+          dotnet build -c Release -p:TestFramework=XUNIT --framework net9.0 --output bin/Release-XUNIT/net9.0
+          dotnet build -c Release -p:TestFramework=NUNIT --framework net8.0 --output bin/Release-NUNIT/net8.0
+          dotnet build -c Release -p:TestFramework=NUNIT --framework net9.0 --output bin/Release-NUNIT/net9.0
+          dotnet build -c Release -p:TestFramework=MSTEST --framework net8.0 --output bin/Release-MSTEST/net8.0
+          dotnet build -c Release -p:TestFramework=MSTEST --framework net9.0 --output bin/Release-MSTEST/net9.0
+        working-directory: "tools/speed-comparison/UnifiedTests"
+
+      - name: Publish TUnit AOT
+        run: |
+          dotnet publish -c Release -p:TestFramework=TUNIT -p:Aot=true --framework net8.0 --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }} --output bin/Release-TUNIT-AOT/net8.0
+          dotnet publish -c Release -p:TestFramework=TUNIT -p:Aot=true --framework net9.0 --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }} --output bin/Release-TUNIT-AOT/net9.0
         working-directory: "tools/speed-comparison/UnifiedTests"
 
       - name: Run Benchmark

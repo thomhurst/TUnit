@@ -24,7 +24,7 @@ public class RepeatTests
     [Test]
     [Repeat(100)]
     public void RepeatedCalculationTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     // xUnit doesn't have Repeat, so we use Theory with range data
     [Theory]
     [MemberData(nameof(RepeatData), 100)]
@@ -46,7 +46,7 @@ public class RepeatTests
 #if TUNIT
         await Assert.That(result).IsGreaterThan(0);
         await Assert.That(result).IsEqualTo(localCounter * (localCounter + 1) / 2);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.True(result > 0);
         Assert.Equal(localCounter * (localCounter + 1) / 2, result);
 #elif NUNIT
@@ -66,7 +66,7 @@ public class RepeatTests
     [Test]
     [Repeat(50)]
     public async Task RepeatedAsyncTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Theory]
     [MemberData(nameof(RepeatData), 50)]
     public async Task RepeatedAsyncTest(int _)
@@ -85,7 +85,7 @@ public class RepeatTests
         await Assert.That(result).IsNotNull();
         await Assert.That(result.Length).IsEqualTo(36); // GUID length
         await Assert.That(result).IsEqualTo(taskId.ToString());
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.NotNull(result);
         Assert.Equal(36, result.Length);
         Assert.Equal(taskId.ToString(), result);
@@ -108,7 +108,7 @@ public class RepeatTests
     [Test]
     [Repeat(25)]
     public void RepeatedStringOperationTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Theory]
     [MemberData(nameof(RepeatData), 25)]
     public void RepeatedStringOperationTest(int _)
@@ -127,7 +127,7 @@ public class RepeatTests
         await Assert.That(processed).Contains("PROCESSED");
         await Assert.That(processed).Contains(iteration.ToString());
         await Assert.That(processed.Length).IsGreaterThan(text.Length);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Contains("PROCESSED", processed);
         Assert.Contains(iteration.ToString(), processed);
         Assert.True(processed.Length > text.Length);
@@ -163,7 +163,7 @@ public class RepeatTests
         return $"PROCESSED_{input.ToUpper()}_{input.Length}";
     }
 
-#if XUNIT
+#if XUNIT || XUNIT3
     public static IEnumerable<object[]> RepeatData(int count)
     {
         for (int i = 0; i < count; i++)

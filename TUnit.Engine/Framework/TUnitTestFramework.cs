@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
@@ -41,6 +42,12 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         return Task.FromResult(new CreateTestSessionResult { IsSuccess = true });
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test data collector selection may use reflection-based discovery")]
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Reflection mode test discovery uses dynamic code generation")]
+    [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "Reflection mode is not used in AOT scenarios")]
+    #endif
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
         try
@@ -104,6 +111,10 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         return new CloseTestSessionResult { IsSuccess = isSuccess };
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test data collector selection may use reflection-based discovery")]
+    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Reflection mode test discovery uses dynamic code generation")]
+    #endif
     private TUnitServiceProvider GetOrCreateServiceProvider(ExecuteRequestContext context)
     {
         return _serviceProvidersPerSession.GetOrAdd(
