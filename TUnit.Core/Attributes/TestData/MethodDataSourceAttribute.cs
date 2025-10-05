@@ -157,11 +157,11 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 hasAnyItems = true;
                 yield return async () =>
                 {
-                    var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+                    var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
                     return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
                 };
             }
-            
+
             // If the async enumerable was empty, yield one empty result like NoDataSource does
             if (!hasAnyItems)
             {
@@ -182,11 +182,11 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                     hasAnyItems = true;
                     yield return async () =>
                     {
-                        var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+                        var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
                         return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
                     };
                 }
-                
+
                 // If the enumerable was empty, yield one empty result like NoDataSource does
                 if (!hasAnyItems)
                 {
@@ -197,7 +197,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             {
                 yield return async () =>
                 {
-                    var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+                    var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
                     return await Task.FromResult<object?[]?>(taskResult.ToObjectArrayWithTypes(paramTypes));
                 };
             }
@@ -210,10 +210,10 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             foreach (var item in enumerable)
             {
                 hasAnyItems = true;
-                var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+                var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
                 yield return () => Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
             }
-            
+
             // If the enumerable was empty, yield one empty result like NoDataSource does
             if (!hasAnyItems)
             {
@@ -222,7 +222,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
         else
         {
-            var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+            var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
             yield return async () =>
             {
                 return await Task.FromResult<object?[]?>(methodResult.ToObjectArrayWithTypes(paramTypes));

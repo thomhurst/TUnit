@@ -103,13 +103,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     #endif
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestStartEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
-        // Filter scoped attributes
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
+        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
+            context.GetEligibleEventObjects()
+                .OfType<ITestStartEventReceiver>()
+                .OrderBy(static r => r.Order));
 
         // Batch invocation for multiple receivers
         if (filteredReceivers.Count > 3)
@@ -145,13 +143,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     #endif
     private async ValueTask InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestEndEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
-        // Filter scoped attributes
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
+        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
+            context.GetEligibleEventObjects()
+                .OfType<ITestEndEventReceiver>()
+                .OrderBy(static r => r.Order));
 
         foreach (var receiver in filteredReceivers)
         {
@@ -185,13 +181,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     #endif
     private async ValueTask InvokeTestSkippedEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestSkippedEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
-        // Filter scoped attributes
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
+        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
+            context.GetEligibleEventObjects()
+                .OfType<ITestSkippedEventReceiver>()
+                .OrderBy(static r => r.Order));
 
         foreach (var receiver in filteredReceivers)
         {
@@ -206,13 +200,13 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     {
         var eventReceivers = context.GetEligibleEventObjects()
             .OfType<ITestDiscoveryEventReceiver>()
-            .OrderBy(r => r.Order)
+            .OrderBy(static r => r.Order)
             .ToList();
 
         // Filter scoped attributes to ensure only the highest priority one of each type is invoked
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
 
-        foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
+        foreach (var receiver in filteredReceivers.OrderBy(static r => r.Order))
         {
             await receiver.OnTestDiscovered(discoveredContext);
         }
@@ -223,16 +217,13 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     #endif
     public async ValueTask InvokeHookRegistrationEventReceiversAsync(HookRegisteredContext hookContext, CancellationToken cancellationToken)
     {
-        // Get event receivers from the hook method's attributes
-        var eventReceivers = hookContext.HookMethod.Attributes
-            .OfType<IHookRegisteredEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
         // Filter scoped attributes to ensure only the highest priority one of each type is invoked
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
+            hookContext.HookMethod.Attributes
+                .OfType<IHookRegisteredEventReceiver>()
+                .OrderBy(static r => r.Order));
 
-        foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
+        foreach (var receiver in filteredReceivers.OrderBy(static r => r.Order))
         {
             await receiver.OnHookRegistered(hookContext);
         }
@@ -389,7 +380,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
 
-        var assemblyCount = _assemblyTestCounts.GetOrAdd(assemblyName, _ => new Counter()).Decrement();
+        var assemblyCount = _assemblyTestCounts.GetOrAdd(assemblyName, static _ => new Counter()).Decrement();
 
         if (assemblyCount == 0)
         {
@@ -430,7 +421,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         var classType = classContext.ClassType;
 
-        var classCount = _classTestCounts.GetOrAdd(classType, _ => new Counter()).Decrement();
+        var classCount = _classTestCounts.GetOrAdd(classType, static _ => new Counter()).Decrement();
 
         if (classCount == 0)
         {
@@ -473,7 +464,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var group in contexts.GroupBy(c => c.ClassContext.AssemblyContext.Assembly.GetName().FullName))
         {
-            var counter = _assemblyTestCounts.GetOrAdd(group.Key, _ => new Counter());
+            var counter = _assemblyTestCounts.GetOrAdd(group.Key, static _ => new Counter());
 
             for (var i = 0; i < group.Count(); i++)
             {
@@ -483,7 +474,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var group in contexts.GroupBy(c => c.ClassContext.ClassType))
         {
-            var counter = _classTestCounts.GetOrAdd(group.Key, _ => new Counter());
+            var counter = _classTestCounts.GetOrAdd(group.Key, static _ => new Counter());
 
             for (var i = 0; i < group.Count(); i++)
             {

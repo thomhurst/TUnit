@@ -38,7 +38,7 @@ public class TestExecutionRegistry : ISourceGeneratedTestRegistry
     /// </summary>
     public TestExecutionData GetOrCreateTestData(string testId)
     {
-        return _testData.GetOrAdd(testId, _ => new TestExecutionData());
+        return _testData.GetOrAdd(testId, static _ => new TestExecutionData());
     }
 
     // ISourceGeneratedTestRegistry implementation for backward compatibility

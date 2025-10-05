@@ -119,7 +119,7 @@ internal sealed class TestDiscoveryService : IDataProducer
             filteredTests = testsToInclude.ToList();
         }
 
-        contextProvider.TestDiscoveryContext.AddTests(allTests.Select(t => t.Context));
+        contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
 
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
@@ -217,7 +217,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         }
 
         // Process dependent tests in dependency order
-        var yieldedTests = new HashSet<string>(independentTests.Select(t => t.TestId));
+        var yieldedTests = new HashSet<string>(independentTests.Select(static t => t.TestId));
         var remainingTests = new List<AbstractExecutableTest>(dependentTests);
 
         while (remainingTests.Count > 0)
@@ -278,6 +278,6 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public IEnumerable<TestContext> GetCachedTestContexts()
     {
-        return _cachedTests.Select(t => t.Context);
+        return _cachedTests.Select(static t => t.Context);
     }
 }

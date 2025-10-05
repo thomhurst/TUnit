@@ -15,7 +15,7 @@ internal class ClassDataSources
 
     public static ClassDataSources Get(string sessionId)
     {
-        return SourcesPerSession.GetOrAdd(sessionId, _ => new ClassDataSources());
+        return SourcesPerSession.GetOrAdd(sessionId, static _ => new ClassDataSources());
     }
 
     public (T, SharedType, string) GetItemForIndexAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)] T>(int index, Type testClassType, SharedType[] sharedTypes, string[] keys, DataGeneratorMetadata dataGeneratorMetadata) where T : new()

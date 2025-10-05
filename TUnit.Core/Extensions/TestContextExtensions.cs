@@ -20,7 +20,15 @@ public static class TestContextExtensions
             return context.TestDetails.ClassType.Name;
         }
 
-        return $"{context.TestDetails.ClassType.Name}({string.Join(", ", context.TestDetails.TestClassArguments.Select(a => ArgumentFormatter.Format(a, context.ArgumentDisplayFormatters)))})";
+        // Optimize: Use array instead of LINQ Select to reduce allocations
+        var args = context.TestDetails.TestClassArguments;
+        var formattedArgs = new string[args.Length];
+        for (int i = 0; i < args.Length; i++)
+        {
+            formattedArgs[i] = ArgumentFormatter.Format(args[i], context.ArgumentDisplayFormatters);
+        }
+
+        return $"{context.TestDetails.ClassType.Name}({string.Join(", ", formattedArgs)})";
     }
 
     #if NET6_0_OR_GREATER

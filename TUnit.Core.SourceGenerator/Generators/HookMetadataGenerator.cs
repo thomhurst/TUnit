@@ -272,7 +272,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
     private static void GenerateInstanceHookRegistration(CodeWriter writer, string dictionaryName, string typeDisplay, HookMethodMetadata hook)
     {
         var hookType = GetConcreteHookType(dictionaryName, true);
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd(typeof({typeDisplay}), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
+        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd(typeof({typeDisplay}), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
         writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}[typeof({typeDisplay})].Add(");
         writer.Indent();
         GenerateHookObject(writer, hook, true);
@@ -283,7 +283,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
     private static void GenerateTypeHookRegistration(CodeWriter writer, string dictionaryName, string typeDisplay, HookMethodMetadata hook)
     {
         var hookType = GetConcreteHookType(dictionaryName, false);
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd(typeof({typeDisplay}), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
+        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd(typeof({typeDisplay}), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
         writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}[typeof({typeDisplay})].Add(");
         writer.Indent();
         GenerateHookObject(writer, hook, false);
@@ -295,7 +295,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
     {
         var assemblyVar = assemblyVarName + "_assembly";
         var hookType = GetConcreteHookType(dictionaryName, false);
-        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd({assemblyVar}, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
+        writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}.GetOrAdd({assemblyVar}, static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.{hookType}>());");
         writer.AppendLine($"global::TUnit.Core.Sources.{dictionaryName}[{assemblyVar}].Add(");
         writer.Indent();
         GenerateHookObject(writer, hook, false);

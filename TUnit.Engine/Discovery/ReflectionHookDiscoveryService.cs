@@ -20,13 +20,28 @@ internal sealed class ReflectionHookDiscoveryService
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
     private static readonly ConcurrentDictionary<string, bool> _registeredMethods = new();
+    private static readonly ConcurrentDictionary<MethodInfo, string> _methodKeyCache = new();
     private static int _registrationIndex = 0;
     private static int _discoveryRunCount = 0;
 
     private static string GetMethodKey(MethodInfo method)
     {
-        // Create a unique key for the method based on its signature
-        return $"{method.DeclaringType?.FullName}.{method.Name}({string.Join(",", method.GetParameters().Select(p => p.ParameterType.FullName))})";
+        // Cache method keys to avoid repeated string allocations during discovery
+        return _methodKeyCache.GetOrAdd(method, m =>
+        {
+            var parameters = m.GetParameters();
+            if (parameters.Length == 0)
+            {
+                return $"{m.DeclaringType?.FullName}.{m.Name}()";
+            }
+
+            var paramTypes = new string[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                paramTypes[i] = parameters[i].ParameterType.FullName ?? "unknown";
+            }
+            return $"{m.DeclaringType?.FullName}.{m.Name}({string.Join(",", paramTypes)})";
+        });
     }
 
     private static void ClearSourceGeneratedHooks()
@@ -105,9 +120,10 @@ internal sealed class ReflectionHookDiscoveryService
                     if (beforeEveryAttr != null) orders.Add(beforeEveryAttr.Order);
                     if (afterEveryAttr != null) orders.Add(afterEveryAttr.Order);
 
-                    return orders.Any() ? orders.Min() : 0;
+                    // Use Count instead of Any() to avoid double enumeration
+                    return orders.Count > 0 ? orders.Min() : 0;
                 })
-                .ThenBy(m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
+                .ThenBy(static m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
                 .ToArray();
 
             foreach (var method in methods)
@@ -291,9 +307,10 @@ internal sealed class ReflectionHookDiscoveryService
                     if (beforeEveryAttr != null) orders.Add(beforeEveryAttr.Order);
                     if (afterEveryAttr != null) orders.Add(afterEveryAttr.Order);
 
-                    return orders.Any() ? orders.Min() : 0;
+                    // Use Count instead of Any() to avoid double enumeration
+                    return orders.Count > 0 ? orders.Min() : 0;
                 })
-                .ThenBy(m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
+                .ThenBy(static m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
                 .ToArray();
 
             foreach (var method in methods)
@@ -681,7 +698,7 @@ internal sealed class ReflectionHookDiscoveryService
             return;
         }
 
-        var bag = Sources.BeforeTestHooks.GetOrAdd(type, _ => new ConcurrentBag<InstanceHookMethod>());
+        var bag = Sources.BeforeTestHooks.GetOrAdd(type, static _ => new ConcurrentBag<InstanceHookMethod>());
         var hook = new InstanceHookMethod
         {
             InitClassType = type,
@@ -706,7 +723,7 @@ internal sealed class ReflectionHookDiscoveryService
             return;
         }
 
-        var bag = Sources.AfterTestHooks.GetOrAdd(type, _ => new ConcurrentBag<InstanceHookMethod>());
+        var bag = Sources.AfterTestHooks.GetOrAdd(type, static _ => new ConcurrentBag<InstanceHookMethod>());
         var hook = new InstanceHookMethod
         {
             InitClassType = type,
@@ -725,7 +742,7 @@ internal sealed class ReflectionHookDiscoveryService
         MethodInfo method,
         int order)
     {
-        var bag = Sources.BeforeClassHooks.GetOrAdd(type, _ => new ConcurrentBag<BeforeClassHookMethod>());
+        var bag = Sources.BeforeClassHooks.GetOrAdd(type, static _ => new ConcurrentBag<BeforeClassHookMethod>());
         var hook = new BeforeClassHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
@@ -745,7 +762,7 @@ internal sealed class ReflectionHookDiscoveryService
         MethodInfo method,
         int order)
     {
-        var bag = Sources.AfterClassHooks.GetOrAdd(type, _ => new ConcurrentBag<AfterClassHookMethod>());
+        var bag = Sources.AfterClassHooks.GetOrAdd(type, static _ => new ConcurrentBag<AfterClassHookMethod>());
         var hook = new AfterClassHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
@@ -766,7 +783,7 @@ internal sealed class ReflectionHookDiscoveryService
         MethodInfo method,
         int order)
     {
-        var bag = Sources.BeforeAssemblyHooks.GetOrAdd(assembly, _ => new ConcurrentBag<BeforeAssemblyHookMethod>());
+        var bag = Sources.BeforeAssemblyHooks.GetOrAdd(assembly, static _ => new ConcurrentBag<BeforeAssemblyHookMethod>());
         var hook = new BeforeAssemblyHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
@@ -787,7 +804,7 @@ internal sealed class ReflectionHookDiscoveryService
         MethodInfo method,
         int order)
     {
-        var bag = Sources.AfterAssemblyHooks.GetOrAdd(assembly, _ => new ConcurrentBag<AfterAssemblyHookMethod>());
+        var bag = Sources.AfterAssemblyHooks.GetOrAdd(assembly, static _ => new ConcurrentBag<AfterAssemblyHookMethod>());
         var hook = new AfterAssemblyHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),

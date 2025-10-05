@@ -73,7 +73,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return;
         }
 
-        var counter = _trackedObjects.GetOrAdd(obj, _ => new Counter());
+        var counter = _trackedObjects.GetOrAdd(obj, static _ => new Counter());
         counter.Increment();
     }
 
@@ -115,7 +115,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return;
         }
 
-        _trackedObjects.GetOrAdd(o, _ => new Counter())
+        _trackedObjects.GetOrAdd(o, static _ => new Counter())
             .OnCountChanged += (_, count) =>
         {
             if (count == 0)
@@ -132,7 +132,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return;
         }
 
-        _trackedObjects.GetOrAdd(o, _ => new Counter())
+        _trackedObjects.GetOrAdd(o, static _ => new Counter())
             .OnCountChanged += async (_, count) =>
         {
             if (count == 0)

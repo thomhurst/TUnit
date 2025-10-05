@@ -86,32 +86,32 @@ public static class InstanceFactoryGenerator
 
     private static IMethodSymbol? GetPrimaryConstructor(ITypeSymbol typeSymbol)
     {
+        // Materialize constructors once to avoid multiple enumerations
         var constructors = typeSymbol.GetMembers()
             .OfType<IMethodSymbol>()
             .Where(m => m.MethodKind == MethodKind.Constructor && !m.IsStatic)
-            .ToList();
+            .ToArray();
 
         // First, check for constructors marked with [TestConstructor]
-        var testConstructorMarked = constructors
-            .Where(c => c.GetAttributes().Any(a => 
-                a.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
-            .ToList();
-
-        if (testConstructorMarked.Count > 0)
+        foreach (var constructor in constructors)
         {
-            return testConstructorMarked[0];
+            if (constructor.GetAttributes().Any(a =>
+                a.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
+            {
+                return constructor;
+            }
         }
 
         // If no [TestConstructor] found, use existing logic
-        constructors = constructors.OrderByDescending(c => c.Parameters.Length).ToList();
+        var orderedConstructors = constructors.OrderByDescending(c => c.Parameters.Length).ToArray();
 
-        if (constructors.Count == 1)
+        if (orderedConstructors.Length == 1)
         {
-            return constructors[0];
+            return orderedConstructors[0];
         }
 
-        var publicConstructors = constructors.Where(c => c.DeclaredAccessibility == Accessibility.Public).ToList();
-        return publicConstructors.Count == 1 ? publicConstructors[0] : publicConstructors.FirstOrDefault();
+        var publicConstructors = orderedConstructors.Where(c => c.DeclaredAccessibility == Accessibility.Public).ToArray();
+        return publicConstructors.Length == 1 ? publicConstructors[0] : publicConstructors.FirstOrDefault();
     }
 
     private static void GenerateTypedConstructorCall(CodeWriter writer, string className, IMethodSymbol constructor, TestMethodMetadata? testMethod)
