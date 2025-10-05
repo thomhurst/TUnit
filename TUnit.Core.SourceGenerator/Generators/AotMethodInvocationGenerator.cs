@@ -5,7 +5,9 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -101,6 +103,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
     {
         var invocation = (InvocationExpressionSyntax)context.Node;
         var semanticModel = context.SemanticModel;
+        var externAliasContext = SourceGeneratorHelper.GetExternAliasContext(invocation, semanticModel);
 
         if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
         {
@@ -127,12 +130,15 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         {
             TargetMethod = targetMethod,
             Location = invocation.GetLocation(),
-            InvocationExpression = invocation
+            InvocationExpression = invocation,
+            ExternAliasContext = externAliasContext
         };
     }
 
     private static MethodDataSourceInfo? ExtractFromAttribute(AttributeSyntax attribute, SemanticModel semanticModel)
     {
+        var externAliasContext = SourceGeneratorHelper.GetExternAliasContext(attribute, semanticModel);
+
         var attributeSymbol = semanticModel.GetSymbolInfo(attribute).Symbol as IMethodSymbol;
         var attributeType = attributeSymbol?.ContainingType;
 
@@ -184,12 +190,15 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         {
             TargetMethod = targetMethod,
             Location = attribute.GetLocation(),
-            Usage = MethodUsage.DataSource
+            Usage = MethodUsage.DataSource,
+            ExternAliasContext = externAliasContext
         };
     }
 
     private static MethodDataSourceInfo? ExtractFromMethod(MethodDeclarationSyntax method, SemanticModel semanticModel)
     {
+        var externAliasContext = SourceGeneratorHelper.GetExternAliasContext(method, semanticModel);
+
         if (semanticModel.GetDeclaredSymbol(method) is not IMethodSymbol methodSymbol)
         {
             return null;
@@ -212,7 +221,8 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         {
             TargetMethod = methodSymbol,
             Location = method.GetLocation(),
-            Usage = MethodUsage.DataSource
+            Usage = MethodUsage.DataSource,
+            ExternAliasContext = externAliasContext
         };
     }
 
@@ -288,6 +298,23 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
             return;
         }
 
+        // Build a map of methods to their extern alias contexts
+        var methodContexts = new Dictionary<IMethodSymbol, ExternAliasContext>(SymbolEqualityComparer.Default);
+        foreach (var ds in dataSources)
+        {
+            if (!methodContexts.ContainsKey(ds.TargetMethod))
+            {
+                methodContexts[ds.TargetMethod] = ds.ExternAliasContext;
+            }
+        }
+        foreach (var inv in invocations)
+        {
+            if (!methodContexts.ContainsKey(inv.TargetMethod))
+            {
+                methodContexts[inv.TargetMethod] = inv.ExternAliasContext;
+            }
+        }
+
         var writer = new CodeWriter();
         writer.AppendLine("#nullable enable");
         writer.AppendLine();
@@ -299,14 +326,15 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         writer.AppendLine("namespace TUnit.Generated;");
         writer.AppendLine();
 
-        GenerateMethodInvokerClass(writer, dataSources, invocations);
+        GenerateMethodInvokerClass(writer, dataSources, invocations, methodContexts);
 
         context.AddSource("AotMethodInvokers.g.cs", writer.ToString());
     }
 
     private static void GenerateMethodInvokerClass(CodeWriter writer,
         ImmutableArray<MethodDataSourceInfo> dataSources,
-        ImmutableArray<MethodInvocationInfo> invocations)
+        ImmutableArray<MethodInvocationInfo> invocations,
+        Dictionary<IMethodSymbol, ExternAliasContext> methodContexts)
     {
         writer.AppendLine("/// <summary>");
         writer.AppendLine("/// AOT-compatible method invocation helpers to replace MethodInfo.Invoke");
@@ -316,7 +344,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         writer.Indent();
 
         // Generate registry
-        GenerateMethodRegistry(writer, dataSources, invocations);
+        GenerateMethodRegistry(writer, dataSources, invocations, methodContexts);
 
         // Generate invocation helper methods
         GenerateInvocationMethods(writer, dataSources, invocations);
@@ -344,7 +372,8 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
             var invokerName = GetInvokerMethodName(method);
             if (processedInvokerNames.Add(invokerName))
             {
-                GenerateStronglyTypedInvoker(writer, method);
+                var context = methodContexts.TryGetValue(method, out var ctx) ? ctx : ExternAliasContext.Empty;
+                GenerateStronglyTypedInvoker(writer, method, context);
             }
         }
 
@@ -354,7 +383,8 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
 
     private static void GenerateMethodRegistry(CodeWriter writer,
         ImmutableArray<MethodDataSourceInfo> dataSources,
-        ImmutableArray<MethodInvocationInfo> invocations)
+        ImmutableArray<MethodInvocationInfo> invocations,
+        Dictionary<IMethodSymbol, ExternAliasContext> methodContexts)
     {
         writer.AppendLine("private static readonly Dictionary<string, Func<object?, object?[]?, Task<object?>>> _methodInvokers = new()");
         writer.AppendLine("{");
@@ -367,7 +397,8 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
             // Only include methods that will have implementations generated
             if (!HasUnresolvedTypeParameters(ds.TargetMethod) && IsAccessibleMethod(ds.TargetMethod))
             {
-                var methodKey = GetMethodKey(ds.TargetMethod);
+                var context = methodContexts.TryGetValue(ds.TargetMethod, out var ctx) ? ctx : ExternAliasContext.Empty;
+                var methodKey = GetMethodKey(ds.TargetMethod, context);
                 if (processedMethods.Add(methodKey))
                 {
                     var invokerName = GetInvokerMethodName(ds.TargetMethod);
@@ -381,7 +412,8 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
             // Only include methods that will have implementations generated
             if (!HasUnresolvedTypeParameters(inv.TargetMethod) && IsAccessibleMethod(inv.TargetMethod))
             {
-                var methodKey = GetMethodKey(inv.TargetMethod);
+                var context = methodContexts.TryGetValue(inv.TargetMethod, out var ctx) ? ctx : ExternAliasContext.Empty;
+                var methodKey = GetMethodKey(inv.TargetMethod, context);
                 if (processedMethods.Add(methodKey))
                 {
                     var invokerName = GetInvokerMethodName(inv.TargetMethod);
@@ -431,10 +463,10 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static void GenerateStronglyTypedInvoker(CodeWriter writer, IMethodSymbol method)
+    private static void GenerateStronglyTypedInvoker(CodeWriter writer, IMethodSymbol method, ExternAliasContext externAliasContext)
     {
         // Note: Pre-filtered for accessibility and type parameters
-        
+
         var invokerName = GetInvokerMethodName(method);
         var returnType = method.ReturnType;
         var isAsync = IsAsyncMethod(method);
@@ -455,7 +487,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
             for (var i = 0; i < parameters.Length; i++)
             {
                 var param = parameters[i];
-                var paramType = param.Type.GloballyQualified();
+                var paramType = param.Type.GloballyQualified(externAliasContext);
                 
                 // Skip parameters with unresolved type parameters
                 if (ContainsTypeParameters(param.Type))
@@ -481,7 +513,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
                 writer.Append("await ");
             }
 
-            var containingType = method.ContainingType.GloballyQualified();
+            var containingType = method.ContainingType.GloballyQualified(externAliasContext);
             writer.Append($"{containingType}.{method.Name}(");
             
             if (parameters.Length > 0)
@@ -493,8 +525,8 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine($"if (instance is not {method.ContainingType.GloballyQualified()} typedInstance)");
-            writer.AppendLine($"    throw new global::System.InvalidOperationException($\"Expected instance of type {{typeof({method.ContainingType.GloballyQualified()}).FullName}}, got {{instance?.GetType().FullName ?? \"null\"}}\");");
+            writer.AppendLine($"if (instance is not {method.ContainingType.GloballyQualified(externAliasContext)} typedInstance)");
+            writer.AppendLine($"    throw new global::System.InvalidOperationException($\"Expected instance of type {{typeof({method.ContainingType.GloballyQualified(externAliasContext)}).FullName}}, got {{instance?.GetType().FullName ?? \"null\"}}\");");
             writer.AppendLine();
 
             writer.Append("var result = ");
@@ -541,9 +573,9 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static string GetMethodKey(IMethodSymbol method)
+    private static string GetMethodKey(IMethodSymbol method, ExternAliasContext? externAliasContext = null)
     {
-        var typeName = method.ContainingType.GloballyQualified();
+        var typeName = method.ContainingType.GloballyQualified(externAliasContext);
         var methodName = method.Name;
         var parameterCount = method.Parameters.Length;
         return $"{typeName}.{methodName}({parameterCount})";
@@ -700,6 +732,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         public required IMethodSymbol TargetMethod { get; init; }
         public required Location Location { get; init; }
         public required MethodUsage Usage { get; init; }
+        public ExternAliasContext ExternAliasContext { get; init; } = ExternAliasContext.Empty;
     }
 
     private sealed class MethodInvocationInfo
@@ -707,6 +740,7 @@ public sealed class AotMethodInvocationGenerator : IIncrementalGenerator
         public required IMethodSymbol TargetMethod { get; init; }
         public required Location Location { get; init; }
         public required InvocationExpressionSyntax InvocationExpression { get; init; }
+        public ExternAliasContext ExternAliasContext { get; init; } = ExternAliasContext.Empty;
     }
 
     private enum MethodUsage

@@ -7,7 +7,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -48,9 +50,11 @@ public class AotConverterGenerator : IIncrementalGenerator
 
     private ConversionInfo? GetConversionInfo(ConversionOperatorDeclarationSyntax operatorDeclaration, SemanticModel semanticModel)
     {
+        var externAliasContext = SourceGeneratorHelper.GetExternAliasContext(operatorDeclaration, semanticModel);
+
         var isImplicit = operatorDeclaration.ImplicitOrExplicitKeyword.IsKind(SyntaxKind.ImplicitKeyword);
         var isExplicit = operatorDeclaration.ImplicitOrExplicitKeyword.IsKind(SyntaxKind.ExplicitKeyword);
-        
+
         if (!isImplicit && !isExplicit)
         {
             return null;
@@ -95,7 +99,8 @@ public class AotConverterGenerator : IIncrementalGenerator
             SourceType = sourceType,
             TargetType = targetType,
             IsImplicit = isImplicit,
-            MethodSymbol = methodSymbol
+            MethodSymbol = methodSymbol,
+            ExternAliasContext = externAliasContext
         };
     }
 
@@ -130,8 +135,8 @@ public class AotConverterGenerator : IIncrementalGenerator
             }
 
             var converterClassName = $"AotConverter_{converterIndex++}";
-            var sourceTypeName = conversion.SourceType.GloballyQualified();
-            var targetTypeName = conversion.TargetType.GloballyQualified();
+            var sourceTypeName = conversion.SourceType.GloballyQualified(conversion.ExternAliasContext);
+            var targetTypeName = conversion.TargetType.GloballyQualified(conversion.ExternAliasContext);
             
             writer.AppendLine($"internal sealed class {converterClassName} : IAotConverter");
             writer.AppendLine("{");
@@ -196,5 +201,6 @@ public class AotConverterGenerator : IIncrementalGenerator
         public required ITypeSymbol TargetType { get; init; }
         public required bool IsImplicit { get; init; }
         public required IMethodSymbol MethodSymbol { get; init; }
+        public ExternAliasContext ExternAliasContext { get; init; } = ExternAliasContext.Empty;
     }
 }

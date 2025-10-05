@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -168,7 +169,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateHookRegistration(CodeWriter writer, HookMethodMetadata hook)
     {
-        var typeDisplay = hook.TypeSymbol.GloballyQualified();
+        var typeDisplay = hook.TypeSymbol.GloballyQualified(hook.ExternAliasContext);
         var isInstance = hook.HookKind is "Before" or "After" && hook.HookType == "Test";
 
         if (hook.HookType == "Test")
@@ -345,7 +346,8 @@ public class HookMetadataGenerator : IIncrementalGenerator
         var lineNumber = location.GetLineSpan().StartLinePosition.Line + 1;
 
         var order = GetHookOrder(hookAttribute);
-        var hookExecutor = GetHookExecutorType(methodSymbol);
+        var externAliasContext = SourceGeneratorHelper.GetExternAliasContext(context);
+        var hookExecutor = GetHookExecutorType(methodSymbol, externAliasContext);
 
         return new HookMethodMetadata
         {
@@ -357,6 +359,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
             HookType = hookType,
             Order = order,
             Context = context,
+            ExternAliasContext = externAliasContext,
             HookExecutor = hookExecutor
         };
     }
@@ -448,7 +451,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
         return 0;
     }
 
-    private static string? GetHookExecutorType(IMethodSymbol methodSymbol)
+    private static string? GetHookExecutorType(IMethodSymbol methodSymbol, ExternAliasContext externAliasContext)
     {
         var hookExecutorAttribute = methodSymbol.GetAttributes()
             .FirstOrDefault(a => a.AttributeClass?.Name == "HookExecutorAttribute" ||
@@ -463,14 +466,14 @@ public class HookMetadataGenerator : IIncrementalGenerator
         if (hookExecutorAttribute.AttributeClass?.IsGenericType == true)
         {
             var typeArg = hookExecutorAttribute.AttributeClass.TypeArguments.FirstOrDefault();
-            return typeArg?.GloballyQualified();
+            return typeArg?.GloballyQualified(externAliasContext);
         }
 
         // For non-generic HookExecutorAttribute(Type type), get the constructor argument
         var typeArgument = hookExecutorAttribute.ConstructorArguments.FirstOrDefault();
         if (typeArgument.Value is ITypeSymbol typeSymbol)
         {
-            return typeSymbol.GloballyQualified();
+            return typeSymbol.GloballyQualified(externAliasContext);
         }
 
         return null;
@@ -512,7 +515,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
     {
         var delegateKey = GetDelegateKey(hook);
 
-        var className = hook.TypeSymbol.GloballyQualified();
+        var className = hook.TypeSymbol.GloballyQualified(hook.ExternAliasContext);
         var methodName = hook.MethodSymbol.Name;
         var isStatic = hook.MethodSymbol.IsStatic;
 
@@ -631,7 +634,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
                 {
                     // For open generic types, we need to find the closed generic base type that matches
                     // the open generic definition where the hook was defined
-                    writer.AppendLine($"var openGenericType = typeof({hook.TypeSymbol.GloballyQualified()});");
+                    writer.AppendLine($"var openGenericType = typeof({hook.TypeSymbol.GloballyQualified(hook.ExternAliasContext)});");
                     writer.AppendLine("Type? targetType = context.ClassType;");
                     writer.AppendLine("MethodInfo? method = null;");
                     writer.AppendLine();
@@ -718,7 +721,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
         if (isInstance)
         {
-            writer.AppendLine($"InitClassType = typeof({hook.TypeSymbol.GloballyQualified()}),");
+            writer.AppendLine($"InitClassType = typeof({hook.TypeSymbol.GloballyQualified(hook.ExternAliasContext)}),");
         }
 
         writer.Append("MethodInfo = ");
@@ -847,5 +850,6 @@ public class HookMethodMetadata
     public required string HookType { get; init; }
     public required int Order { get; init; }
     public required GeneratorAttributeSyntaxContext Context { get; init; }
+    public required ExternAliasContext ExternAliasContext { get; init; }
     public string? HookExecutor { get; init; }
 }

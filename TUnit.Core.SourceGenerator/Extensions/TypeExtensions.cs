@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using TUnit.Analyzers.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Extensions;
 
@@ -208,6 +209,11 @@ public static class TypeExtensions
 
     public static string GloballyQualified(this ISymbol typeSymbol)
     {
+        return GloballyQualified(typeSymbol, null);
+    }
+
+    public static string GloballyQualified(this ISymbol typeSymbol, ExternAliasContext? aliasContext)
+    {
         // Handle open generic types where type arguments are type parameters
         // This prevents invalid C# like List<T>, Dictionary<TKey, TValue>, T? where type parameters are undefined
         if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeSymbol)
@@ -215,18 +221,19 @@ public static class TypeExtensions
             // Check if this is an unbound generic type or has type parameter arguments
             var hasTypeParameters = namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter);
             var isUnboundGeneric = namedTypeSymbol.IsUnboundGenericType;
-            
+
             if (hasTypeParameters || isUnboundGeneric)
             {
                 // Special case for System.Nullable<> - Roslyn displays it as "T?" even for open generic
                 if (namedTypeSymbol.SpecialType == SpecialType.System_Nullable_T ||
                     namedTypeSymbol.ConstructedFrom?.SpecialType == SpecialType.System_Nullable_T)
                 {
-                    return "global::System.Nullable<>";
+                    return GetQualifiedTypeName(typeSymbol, "System.Nullable<>", aliasContext);
                 }
-                
+
                 // General case for other open generic types
-                var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix));
+                var qualifier = GetQualifierPrefix(typeSymbol, aliasContext);
+                var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix).Replace("global::", qualifier));
                 typeBuilder.Append('<');
                 typeBuilder.Append(new string(',', namedTypeSymbol.TypeArguments.Length - 1));
                 typeBuilder.Append('>');
@@ -235,7 +242,29 @@ public static class TypeExtensions
             }
         }
 
+        // Use alias context if provided
+        if (aliasContext?.HasExternAliases == true && typeSymbol is ITypeSymbol typeSymbolCast)
+        {
+            var qualifier = aliasContext.GetQualifierForType(typeSymbolCast);
+            return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix).Replace("global::", qualifier);
+        }
+
         return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+    }
+
+    private static string GetQualifiedTypeName(ISymbol typeSymbol, string typeName, ExternAliasContext? aliasContext)
+    {
+        var qualifier = GetQualifierPrefix(typeSymbol, aliasContext);
+        return $"{qualifier}{typeName}";
+    }
+
+    private static string GetQualifierPrefix(ISymbol typeSymbol, ExternAliasContext? aliasContext)
+    {
+        if (aliasContext?.HasExternAliases == true && typeSymbol is ITypeSymbol typeSymbolCast)
+        {
+            return aliasContext.GetQualifierForType(typeSymbolCast);
+        }
+        return "global::";
     }
     
     /// <summary>
@@ -262,7 +291,18 @@ public static class TypeExtensions
     }
 
     public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol) =>
-        typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+        GloballyQualifiedNonGeneric(typeSymbol, null);
+
+    public static string GloballyQualifiedNonGeneric(this ISymbol typeSymbol, ExternAliasContext? aliasContext)
+    {
+        if (aliasContext?.HasExternAliases == true && typeSymbol is ITypeSymbol typeSymbolCast)
+        {
+            var qualifier = aliasContext.GetQualifierForType(typeSymbolCast);
+            return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix).Replace("global::", qualifier);
+        }
+
+        return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix);
+    }
 
     public static bool IsGenericDefinition(this ITypeSymbol typeSymbol)
     {

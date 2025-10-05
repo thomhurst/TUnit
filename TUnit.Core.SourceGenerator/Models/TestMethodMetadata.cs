@@ -32,6 +32,12 @@ public class TestMethodMetadata : IEquatable<TestMethodMetadata>
     /// </summary>
     public int InheritanceDepth { get; init; } = 0;
 
+    /// <summary>
+    /// Extern alias context for this test method's file.
+    /// Used to properly qualify types that require extern alias prefixes.
+    /// </summary>
+    public ExternAliasContext? ExternAliasContext { get; init; }
+
     public bool Equals(TestMethodMetadata? other)
     {
         if (ReferenceEquals(null, other))

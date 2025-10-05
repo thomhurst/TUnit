@@ -29,7 +29,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
     {
         var classDeclaration = (ClassDeclarationSyntax)context.Node;
         var semanticModel = context.SemanticModel;
-        
+        var externAliasContext = SourceGeneratorHelper.GetExternAliasContext(classDeclaration, semanticModel);
+
         if (semanticModel.GetDeclaredSymbol(classDeclaration) is not INamedTypeSymbol typeSymbol)
         {
             return null;
@@ -56,7 +57,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         return new TypeWithDataSourceProperties
         {
             TypeSymbol = typeSymbol,
-            Properties = propertiesWithDataSource
+            Properties = propertiesWithDataSource,
+            ExternAliasContext = externAliasContext
         };
     }
 
@@ -68,8 +70,8 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
             return;
         }
 
-        var fullyQualifiedType = type.Value.TypeSymbol.GloballyQualified();
-        var safeName = GetSafeTypeName(type.Value.TypeSymbol);
+        var fullyQualifiedType = type.Value.TypeSymbol.GloballyQualified(type.Value.ExternAliasContext);
+        var safeName = GetSafeTypeName(type.Value.TypeSymbol, type.Value.ExternAliasContext);
         var fileName = $"{safeName}_DataSourceHelper.g.cs";
 
         var sb = new StringBuilder();
@@ -101,9 +103,9 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         context.AddSource(fileName, sb.ToString());
     }
 
-    private static string GetSafeTypeName(INamedTypeSymbol typeSymbol)
+    private static string GetSafeTypeName(INamedTypeSymbol typeSymbol, ExternAliasContext? externAliasContext = null)
     {
-        var fullyQualifiedType = typeSymbol.GloballyQualified();
+        var fullyQualifiedType = typeSymbol.GloballyQualified(externAliasContext);
         return fullyQualifiedType
             .Replace("global::", "")
             .Replace(".", "_")
@@ -166,12 +168,12 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
                 sb.AppendLine("        {");
                 sb.AppendLine($"            var value = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
                 sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
-                sb.AppendLine($"            {fullyQualifiedType}.{propertyName} = ({property.Type.GloballyQualified()})value;");
+                sb.AppendLine($"            {fullyQualifiedType}.{propertyName} = ({property.Type.GloballyQualified(type.ExternAliasContext)})value;");
                 sb.AppendLine("        }");
             }
             else
             {
-                GeneratePropertyInitialization(sb, propInfo);
+                GeneratePropertyInitialization(sb, propInfo, type.ExternAliasContext);
             }
             sb.AppendLine();
         }
@@ -179,7 +181,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         sb.AppendLine("    }");
     }
 
-    private static void GeneratePropertyInitialization(StringBuilder sb, PropertyWithDataSource propInfo)
+    private static void GeneratePropertyInitialization(StringBuilder sb, PropertyWithDataSource propInfo, ExternAliasContext? externAliasContext = null)
     {
         var property = propInfo.Property;
         var attr = propInfo.DataSourceAttribute;
@@ -195,7 +197,7 @@ public class DataSourceHelpersGenerator : IIncrementalGenerator
         sb.AppendLine("        {");
         sb.AppendLine($"            var value = await global::TUnit.Core.Helpers.DataSourceHelpers.ResolveDataSourcePropertyAsync(");
         sb.AppendLine($"                instance, \"{propertyName}\", testInformation, testSessionId);");
-        sb.AppendLine($"            instance.{propertyName} = ({property.Type.GloballyQualified()})value;");
+        sb.AppendLine($"            instance.{propertyName} = ({property.Type.GloballyQualified(externAliasContext)})value;");
         sb.AppendLine("        }");
         sb.AppendLine();
     }

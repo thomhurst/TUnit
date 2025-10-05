@@ -2,7 +2,9 @@ using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -97,10 +99,15 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Early detection: Only extract alias context if the file uses extern aliases
+        var aliasContext = SourceGeneratorHelper.GetExternAliasContext(typeDecl, semanticModel);
+
         return new ClassWithDataSourceProperties
         {
             ClassSymbol = typeSymbol,
-            Properties = propertiesWithDataSources.ToImmutableArray()
+            Properties = propertiesWithDataSources.ToImmutableArray(),
+            TypeSyntax = typeDecl,
+            AliasContext = aliasContext
         };
     }
 
@@ -158,11 +165,11 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var fileName = $"{safeName}_PropertyInjection.g.cs";
 
         var sourceBuilder = new StringBuilder();
-        WriteFileHeader(sourceBuilder);
-        
+        WriteFileHeader(sourceBuilder, classInfo.AliasContext);
+
         // Generate individual module initializer for this class
         GenerateIndividualModuleInitializer(sourceBuilder, classInfo, sourceClassName);
-        
+
         // Generate property source for this class
         GeneratePropertySource(sourceBuilder, classInfo, sourceClassName);
 
@@ -186,20 +193,24 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static void GenerateIndividualModuleInitializer(StringBuilder sb, ClassWithDataSourceProperties classInfo, string sourceClassName)
     {
         var safeName = GetSafeClassName(classInfo.ClassSymbol);
-        
+        var classTypeName = classInfo.ClassSymbol.GloballyQualified(classInfo.AliasContext);
+
         sb.AppendLine($"internal static class {safeName}_PropertyInjectionInitializer");
         sb.AppendLine("{");
         sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
         sb.AppendLine("    public static void Initialize()");
         sb.AppendLine("    {");
-        sb.AppendLine($"        global::TUnit.Core.PropertySourceRegistry.Register(typeof({classInfo.ClassSymbol.GloballyQualified()}), new {sourceClassName}());");
+        sb.AppendLine($"        global::TUnit.Core.PropertySourceRegistry.Register(typeof({classTypeName}), new {sourceClassName}());");
         sb.AppendLine("    }");
         sb.AppendLine("}");
         sb.AppendLine();
     }
 
-    private static void WriteFileHeader(StringBuilder sb)
+    private static void WriteFileHeader(StringBuilder sb, ExternAliasContext? aliasContext)
     {
+        // Add extern alias directives at the very top if needed
+        SourceGeneratorHelper.AddExternAliasDirectives(sb, aliasContext);
+
         sb.AppendLine("using System;");
         sb.AppendLine("using System.Collections.Generic;");
         sb.AppendLine("using TUnit.Core;");
@@ -214,7 +225,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static void GeneratePropertySource(StringBuilder sb, ClassWithDataSourceProperties classInfo, string sourceClassName)
     {
-        var classTypeName = classInfo.ClassSymbol.GloballyQualified();
+        var classTypeName = classInfo.ClassSymbol.GloballyQualified(classInfo.AliasContext);
 
         sb.AppendLine($"internal sealed class {sourceClassName} : IPropertySource");
         sb.AppendLine("{");
@@ -236,11 +247,11 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         {
             if (propInfo.Property.SetMethod?.IsInitOnly == true)
             {
-                var propertyType = propInfo.Property.Type.ToDisplayString();
+                var propertyType = propInfo.Property.Type.GloballyQualified(classInfo.AliasContext);
                 var backingFieldName = $"<{propInfo.Property.Name}>k__BackingField";
 
                 // Use the property's containing type for the UnsafeAccessor, not the derived class
-                var containingType = propInfo.Property.ContainingType.ToDisplayString();
+                var containingType = propInfo.Property.ContainingType.GloballyQualified(classInfo.AliasContext);
 
                 sb.AppendLine("#if NET8_0_OR_GREATER");
                 sb.AppendLine($"    [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = \"{backingFieldName}\")]");
@@ -264,26 +275,26 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         {
             foreach (var propInfo in classInfo.Properties)
             {
-                GeneratePropertyMetadata(sb, propInfo, classInfo.ClassSymbol, classTypeName);
+                GeneratePropertyMetadata(sb, propInfo, classInfo.ClassSymbol, classTypeName, classInfo.AliasContext);
             }
         }
 
         sb.AppendLine("    }");
     }
 
-    private static void GeneratePropertyMetadata(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, INamedTypeSymbol classSymbol, string classTypeName)
+    private static void GeneratePropertyMetadata(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, INamedTypeSymbol classSymbol, string classTypeName, ExternAliasContext? aliasContext)
     {
         var propertyName = propInfo.Property.Name;
-        var propertyType = propInfo.Property.Type.ToDisplayString();
-        var propertyTypeForTypeof = GetNonNullableTypeString(propInfo.Property.Type);
-        var attributeTypeName = propInfo.DataSourceAttribute.AttributeClass!.ToDisplayString();
+        var propertyType = propInfo.Property.Type.GloballyQualified(aliasContext);
+        var propertyTypeForTypeof = GetNonNullableTypeString(propInfo.Property.Type, aliasContext);
+        var attributeTypeName = propInfo.DataSourceAttribute.AttributeClass!.GloballyQualified(aliasContext);
         var attributeClass = propInfo.DataSourceAttribute.AttributeClass!;
 
         sb.AppendLine("        yield return new PropertyInjectionMetadata");
         sb.AppendLine("        {");
         sb.AppendLine($"            PropertyName = \"{propertyName}\",");
         sb.AppendLine($"            PropertyType = typeof({propertyTypeForTypeof}),");
-        sb.AppendLine($"            ContainingType = typeof({propInfo.Property.ContainingType.ToDisplayString()}),");
+        sb.AppendLine($"            ContainingType = typeof({propInfo.Property.ContainingType.GloballyQualified(aliasContext)}),");
 
         // Generate CreateDataSource delegate
         sb.AppendLine("            CreateDataSource = () =>");
@@ -295,7 +306,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         sb.AppendLine("            SetProperty = (instance, value) =>");
         sb.AppendLine("            {");
         sb.AppendLine($"                var typedInstance = ({classTypeName})instance;");
-        GeneratePropertySetting(sb, propInfo, propertyType, "typedInstance", classTypeName);
+        GeneratePropertySetting(sb, propInfo, propertyType, "typedInstance", classTypeName, aliasContext);
         sb.AppendLine("            }");
 
         sb.AppendLine("        };");
@@ -329,7 +340,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         return attributeClass.AllInterfaces.Any(i => i.Name == "IDataSourceAttribute");
     }
 
-    private static void GeneratePropertySetting(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, string propertyType, string instanceVariableName, string classTypeName)
+    private static void GeneratePropertySetting(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, string propertyType, string instanceVariableName, string classTypeName, ExternAliasContext? aliasContext)
     {
         if (propInfo.Property.SetMethod?.IsInitOnly == true)
         {
@@ -337,7 +348,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
             sb.AppendLine("#if NET8_0_OR_GREATER");
             // Cast to the property's containing type if needed
-            var containingType = propInfo.Property.ContainingType.ToDisplayString();
+            var containingType = propInfo.Property.ContainingType.GloballyQualified(aliasContext);
             if (containingType != classTypeName)
             {
                 sb.AppendLine($"                Get{propInfo.Property.Name}BackingField(({containingType}){instanceVariableName}) = {castExpression};");
@@ -347,14 +358,14 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 sb.AppendLine($"                Get{propInfo.Property.Name}BackingField({instanceVariableName}) = {castExpression};");
             }
             sb.AppendLine("#else");
-            sb.AppendLine($"                var backingField = typeof({propInfo.Property.ContainingType.ToDisplayString()}).GetField(\"<{propInfo.Property.Name}>k__BackingField\",");
+            sb.AppendLine($"                var backingField = typeof({propInfo.Property.ContainingType.GloballyQualified(aliasContext)}).GetField(\"<{propInfo.Property.Name}>k__BackingField\",");
             sb.AppendLine("                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
             sb.AppendLine($"                backingField?.SetValue({instanceVariableName}, value);");
             sb.AppendLine("#endif");
         }
         else if (propInfo.Property.IsStatic)
         {
-            var className = propInfo.Property.ContainingType.ToDisplayString();
+            var className = propInfo.Property.ContainingType.GloballyQualified(aliasContext);
             var castExpression = GetPropertyCastExpression(propInfo.Property, propertyType);
             sb.AppendLine($"                {className}.{propInfo.Property.Name} = {castExpression};");
         }
@@ -420,22 +431,22 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         return $"typeof({constant.Value})";
     }
 
-    private static string GetNonNullableTypeString(ITypeSymbol typeSymbol)
+    private static string GetNonNullableTypeString(ITypeSymbol typeSymbol, ExternAliasContext? aliasContext = null)
     {
         if (typeSymbol.NullableAnnotation == NullableAnnotation.Annotated)
         {
             if (typeSymbol is INamedTypeSymbol { IsReferenceType: true })
             {
-                return typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
+                return typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).GloballyQualified(aliasContext);
             }
         }
 
         if (typeSymbol is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.SpecialType: SpecialType.System_Nullable_T } namedType)
         {
-            return namedType.TypeArguments[0].ToDisplayString();
+            return namedType.TypeArguments[0].GloballyQualified(aliasContext);
         }
 
-        var displayString = typeSymbol.ToDisplayString();
+        var displayString = typeSymbol.GloballyQualified(aliasContext);
 
         if (displayString.EndsWith("?"))
         {
@@ -450,6 +461,8 @@ internal sealed class ClassWithDataSourceProperties
 {
     public required INamedTypeSymbol ClassSymbol { get; init; }
     public required ImmutableArray<PropertyWithDataSourceAttribute> Properties { get; init; }
+    public required TypeDeclarationSyntax TypeSyntax { get; init; }
+    public ExternAliasContext? AliasContext { get; init; }
 }
 
 internal sealed class PropertyWithDataSourceAttribute
