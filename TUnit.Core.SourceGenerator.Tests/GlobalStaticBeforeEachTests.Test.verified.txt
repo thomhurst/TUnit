@@ -21,7 +21,7 @@ internal static class GlobalBase1_BeforeEach1_Before_Test_GUIDInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1)].Add(
             new InstanceHookMethod
             {
@@ -96,7 +96,7 @@ internal static class GlobalBase2_BeforeEach2_Before_Test_GUIDInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2)].Add(
             new InstanceHookMethod
             {
@@ -171,7 +171,7 @@ internal static class GlobalBase3_BeforeEach3_Before_Test_GUIDInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3)].Add(
             new InstanceHookMethod
             {
@@ -246,7 +246,7 @@ internal static class GlobalSetUpTests_SetUp_Before_Test_GUIDInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)].Add(
             new InstanceHookMethod
             {
@@ -321,7 +321,7 @@ internal static class GlobalSetUpTests_SetUp_Before_Test_GUIDInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)].Add(
             new InstanceHookMethod
             {
@@ -405,7 +405,7 @@ internal static class GlobalSetUpTests_SetUpWithContext_Before_Test_GUIDInitiali
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)].Add(
             new InstanceHookMethod
             {
@@ -489,7 +489,7 @@ internal static class GlobalSetUpTests_SetUpWithContext_Before_Test_GUIDInitiali
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)].Add(
             new InstanceHookMethod
             {

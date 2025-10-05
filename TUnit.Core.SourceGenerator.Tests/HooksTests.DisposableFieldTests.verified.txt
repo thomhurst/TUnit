@@ -21,7 +21,7 @@ internal static class DisposableFieldTests_Setup_Before_Test_GUIDInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.DisposableFieldTests), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.BeforeTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.DisposableFieldTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.BeforeTestHooks[typeof(global::TUnit.TestProject.DisposableFieldTests)].Add(
             new InstanceHookMethod
             {
@@ -96,7 +96,7 @@ internal static class DisposableFieldTests_Blah_After_Test_GUIDInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.DisposableFieldTests), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.DisposableFieldTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.AfterTestHooks[typeof(global::TUnit.TestProject.DisposableFieldTests)].Add(
             new InstanceHookMethod
             {
