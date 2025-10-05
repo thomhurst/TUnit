@@ -1,19 +1,19 @@
 ﻿using Microsoft.Testing.Platform.CommandLine;
-using TUnit.Core.Enums;
+using TUnit.Core.Logging;
+using TUnit.Engine.CommandLineProviders;
 
 namespace TUnit.Engine.Services;
 
-internal class LogLevelProvider(ICommandLineOptions commandLineOptions)
+public class LogLevelProvider(ICommandLineOptions commandLineOptions)
 {
     internal static LogLevel? _logLevel;
     public LogLevel LogLevel => _logLevel ??= GetLogLevel();
 
     private LogLevel GetLogLevel()
     {
-        if (commandLineOptions.TryGetOptionArgumentList("log-level", out var values)
-            && Enum.TryParse<LogLevel>(values.FirstOrDefault(), out var parsedResult))
+        if (commandLineOptions.TryGetOptionArgumentList(LogLevelCommandProvider.LogLevelOption, out var values))
         {
-            return parsedResult;
+            return LogLevelCommandProvider.ParseLogLevel(values);
         }
 
         return LogLevel.Information;

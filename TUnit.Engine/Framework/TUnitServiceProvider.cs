@@ -78,6 +78,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         VerbosityService = Register(new VerbosityService(CommandLineOptions));
         DiscoveryDiagnostics.Initialize(VerbosityService);
 
+        var logLevelProvider = Register(new LogLevelProvider(CommandLineOptions));
+
         // Determine execution mode early to create appropriate services
         var useSourceGeneration = SourceRegistrar.IsEnabled = GetUseSourceGeneration(CommandLineOptions);
 
@@ -98,7 +100,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             extension,
             outputDevice,
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
-            VerbosityService));
+            VerbosityService,
+            logLevelProvider));
 
         // Create initialization services early as they're needed by other services
         DataSourceInitializer = Register(new DataSourceInitializer());
