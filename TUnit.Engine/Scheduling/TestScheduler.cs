@@ -50,6 +50,9 @@ internal sealed class TestScheduler : ITestScheduler
         _staticPropertyHandler = staticPropertyHandler;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     public async Task<bool> ScheduleAndExecuteAsync(
         List<AbstractExecutableTest> testList,
         CancellationToken cancellationToken)
@@ -130,6 +133,9 @@ internal sealed class TestScheduler : ITestScheduler
         return true;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     private async Task ExecuteGroupedTestsAsync(
         GroupedTests groupedTests,
         CancellationToken cancellationToken)
@@ -214,6 +220,9 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     private async Task ExecuteTestWithParallelLimitAsync(
         AbstractExecutableTest test,
         CancellationToken cancellationToken)
@@ -238,6 +247,9 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     private async Task ExecuteParallelGroupAsync(
         string groupName,
         AbstractExecutableTest[] orderedTests,
@@ -265,6 +277,9 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     private async Task ExecuteConstrainedParallelGroupAsync(
         string groupName,
         GroupedConstrainedTests constrainedTests,
@@ -320,6 +335,9 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     private async Task ExecuteSequentiallyAsync(
         string groupName,
         AbstractExecutableTest[] tests,
@@ -335,6 +353,9 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
     private async Task ExecuteParallelTestsWithLimitAsync(
         AbstractExecutableTest[] tests,
         int maxParallelism,

@@ -6,15 +6,26 @@ namespace TUnit.Core;
 
 [DebuggerDisplay("{Type} {Name}")]
 public record ParameterMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties)]
 T>() : ParameterMetadata(typeof(T));
 
 [DebuggerDisplay("{Type} {Name}")]
 public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+    | DynamicallyAccessedMemberTypes.NonPublicConstructors
     | DynamicallyAccessedMemberTypes.PublicMethods
+    | DynamicallyAccessedMemberTypes.NonPublicMethods
     | DynamicallyAccessedMemberTypes.PublicProperties)] Type Type) : MemberMetadata
 {
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties)]
+    public override Type Type { get; init; } = Type;
+
     public required TypeReference TypeReference { get; init; }
     public required ParameterInfo ReflectionInfo { get; set; }
     public bool IsParams => CachedIsParams ?? ReflectionInfo.IsDefined(typeof(ParamArrayAttribute), false);

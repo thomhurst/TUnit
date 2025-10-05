@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Interfaces.SourceGenerator;
 
@@ -78,7 +78,9 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Discovers injectable properties using reflection (legacy compatibility)
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection discovery is used when source-generated metadata is not available. This supports dynamically loaded assemblies and runtime property injection. For AOT scenarios, the source generator pre-discovers all injectable properties.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Reflection discovery is used when source-generated metadata is not available")]
+    #endif
     public static PropertyInjectionData[] DiscoverInjectableProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type)
     {
         // First try source-generated data
@@ -147,6 +149,9 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Creates PropertyInjectionData from PropertyInfo (legacy compatibility)
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
+    #endif
     private static PropertyInjectionData CreatePropertyInjection(System.Reflection.PropertyInfo property)
     {
         var setter = CreatePropertySetter(property);
@@ -164,6 +169,9 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Creates property setter (legacy compatibility)
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
+    #endif
     private static Action<object, object?> CreatePropertySetter(System.Reflection.PropertyInfo property)
     {
         if (property.CanWrite && property.SetMethod != null)
@@ -195,8 +203,9 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Gets backing field for property (legacy compatibility)
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Backing field discovery is needed for init-only and required properties in reflection mode. The field naming convention (<property>k__BackingField) is stable in the .NET runtime. For AOT, source generation captures these relationships at compile time.")]
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "DeclaringType from PropertyInfo may not have field annotations, but we only access compiler-generated backing fields which follow predictable patterns. For AOT, use source-generated property setters.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Backing field discovery needed for init-only properties in reflection mode")]
+    #endif
     private static System.Reflection.FieldInfo? GetBackingField(System.Reflection.PropertyInfo property)
     {
         var declaringType = property.DeclaringType;
@@ -236,7 +245,9 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Helper method to get field with proper trimming suppression
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Field access is constrained to backing fields of properties with data source attributes. The DynamicallyAccessedMembers annotation ensures fields are preserved when this method is called. For AOT, source generation provides direct field access.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Field access for property backing fields requires reflection")]
+    #endif
     private static System.Reflection.FieldInfo? GetFieldSafe([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type, string name, System.Reflection.BindingFlags bindingFlags)
     {
         return type.GetField(name, bindingFlags);
@@ -245,7 +256,9 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Checks if method is init-only (legacy compatibility)
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Checking for IsExternalInit modreq is required to identify init-only setters in reflection mode. This uses stable .NET runtime conventions. For AOT, the source generator identifies init-only properties at compile time.")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Checking for init-only setters requires reflection")]
+    #endif
     private static bool IsInitOnlyMethod(System.Reflection.MethodInfo setMethod)
     {
         var methodType = setMethod.GetType();

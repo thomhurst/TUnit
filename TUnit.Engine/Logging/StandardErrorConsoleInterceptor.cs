@@ -33,12 +33,12 @@ internal class StandardErrorConsoleInterceptor : OptimizedConsoleInterceptor
         Console.SetError(this);
     }
 
-    protected private override TextWriter GetOriginalOut()
+    private protected override TextWriter GetOriginalOut()
     {
         return DefaultError;
     }
 
-    protected private override void ResetDefault()
+    private protected override void ResetDefault()
     {
         Console.SetError(DefaultError);
     }

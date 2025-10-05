@@ -86,7 +86,7 @@ public abstract class AssertionBuilder : ISource
         return (AssertionBuilder) ((ISource) this).AppendExpression(chainType.ToString());
     }
 
-    internal protected void AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
+    protected internal void AppendCallerMethod(string?[] expressions, [CallerMemberName] string methodName = "")
     {
         if (string.IsNullOrEmpty(methodName))
         {

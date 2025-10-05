@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core.PropertyInjection;
@@ -15,10 +15,12 @@ internal static class TupleValueResolver
     /// <param name="propertyType">The expected property type</param>
     /// <param name="args">The arguments from the data source</param>
     /// <returns>The resolved value, potentially a tuple</returns>
-    [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "Tuple types are created dynamically")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Tuple types are created dynamically")]
+    #endif
     public static object? ResolveTupleValue(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] 
-        Type propertyType, 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+        Type propertyType,
         object?[]? args)
     {
         if (args == null)

@@ -33,12 +33,12 @@ internal class StandardOutConsoleInterceptor : OptimizedConsoleInterceptor
         Console.SetOut(this);
     }
 
-    protected private override TextWriter GetOriginalOut()
+    private protected override TextWriter GetOriginalOut()
     {
         return DefaultOut;
     }
 
-    protected private override void ResetDefault()
+    private protected override void ResetDefault()
     {
         Console.SetOut(DefaultOut);
     }

@@ -20,7 +20,7 @@ public class EnumerableSatisfiesAssertCondition<TActual, TInner, TExpected> : Ba
         SetSubject(mapperExpression);
     }
 
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
         => $"to satisfy {_assertionBuilderExpression}";
 
     protected override async ValueTask<AssertionResult> GetResult(

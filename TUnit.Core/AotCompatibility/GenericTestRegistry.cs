@@ -121,7 +121,7 @@ public static class GenericTestRegistry
                    TypeArrayComparer.Instance.Equals(TypeArguments, other.TypeArguments);
         }
 
-        public readonly override int GetHashCode()
+        public override readonly int GetHashCode()
         {
 #if NETSTANDARD2_0
             unchecked

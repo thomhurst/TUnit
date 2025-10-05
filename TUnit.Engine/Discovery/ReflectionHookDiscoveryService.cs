@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -12,13 +12,10 @@ namespace TUnit.Engine.Discovery;
 /// <summary>
 /// Discovers hooks at runtime using reflection for VB.NET and other languages that don't support source generation.
 /// </summary>
-[UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Reflection mode cannot support trimming")]
-[UnconditionalSuppressMessage("Trimming", "IL2055:Call to 'System.Type.MakeGenericType' can not be statically analyzed", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2070:Target method does not satisfy annotation requirements", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' requirements", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicMethods' in call to 'System.Type.GetMethods(BindingFlags)'", Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "Reflection mode cannot support AOT")]
+#if NET6_0_OR_GREATER
+[RequiresUnreferencedCode("Uses reflection to access nested members")]
+[RequiresDynamicCode("Uses reflection to access nested members")]
+#endif
 internal sealed class ReflectionHookDiscoveryService
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
@@ -58,6 +55,10 @@ internal sealed class ReflectionHookDiscoveryService
     /// Discovers and registers instance hooks for a specific closed generic type.
     /// This is needed because closed generic types are created at runtime and don't appear in assembly.GetTypes().
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
+    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
+    #endif
     public static void DiscoverInstanceHooksForType(Type closedGenericType)
     {
         if (SourceRegistrar.IsEnabled)
@@ -134,6 +135,10 @@ internal sealed class ReflectionHookDiscoveryService
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Hook discovery scans assemblies and types using reflection")]
+    [RequiresDynamicCode("Hook delegate creation may require dynamic code generation")]
+    #endif
     public static void DiscoverHooks()
     {
         // Prevent running hook discovery multiple times in the same process
@@ -166,6 +171,9 @@ internal sealed class ReflectionHookDiscoveryService
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Assembly.GetReferencedAssemblies is reflection-based but safe for checking references")]
+    #endif
     private static bool ShouldScanAssembly(Assembly assembly)
     {
         if (_scannedAssemblies.ContainsKey(assembly))
@@ -218,6 +226,9 @@ internal sealed class ReflectionHookDiscoveryService
         return referencesTUnit;
     }
 
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Types from Assembly.GetTypes() are used with appropriate annotations")]
+    #endif
     private static void DiscoverHooksInAssembly(Assembly assembly)
     {
         if (!_scannedAssemblies.TryAdd(assembly, true))
@@ -227,7 +238,13 @@ internal sealed class ReflectionHookDiscoveryService
 
         try
         {
-            var types = assembly.GetTypes();
+            #if NET6_0_OR_GREATER
+            [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Assembly.GetTypes is reflection-based but required for hook discovery")]
+            [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Types from Assembly.GetTypes() are passed to annotated parameters")]
+            #endif
+            Type[] GetTypes() => assembly.GetTypes();
+
+            var types = GetTypes();
 
             foreach (var type in types)
             {
@@ -240,11 +257,15 @@ internal sealed class ReflectionHookDiscoveryService
         }
     }
 
-    private static void DiscoverHooksInType(Type type, Assembly assembly)
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Types in inheritance chain preserve annotations from the annotated parameter")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Types in inheritance chain preserve annotations from the annotated parameter")]
+    #endif
+    private static void DiscoverHooksInType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type, Assembly assembly)
     {
         // Build inheritance chain from base to derived to ensure hooks execute in correct order
         var inheritanceChain = new List<Type>();
-        var current = type;
+        Type? current = type;
         while (current != null && current != typeof(object))
         {
             inheritanceChain.Insert(0, current); // Insert at front to get base-to-derived order
@@ -308,7 +329,12 @@ internal sealed class ReflectionHookDiscoveryService
         }
     }
 
-    private static void RegisterBeforeHook(Type type, MethodInfo method, BeforeAttribute attr, Assembly assembly)
+    private static void RegisterBeforeHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        BeforeAttribute attr,
+        Assembly assembly)
     {
         // Prevent duplicate registrations of the same method
         var methodKey = GetMethodKey(method);
@@ -380,7 +406,12 @@ internal sealed class ReflectionHookDiscoveryService
         }
     }
 
-    private static void RegisterAfterHook(Type type, MethodInfo method, AfterAttribute attr, Assembly assembly)
+    private static void RegisterAfterHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        AfterAttribute attr,
+        Assembly assembly)
     {
         // Prevent duplicate registrations of the same method
         var methodKey = GetMethodKey(method);
@@ -455,7 +486,12 @@ internal sealed class ReflectionHookDiscoveryService
         }
     }
 
-    private static void RegisterBeforeEveryHook(Type type, MethodInfo method, BeforeEveryAttribute attr, Assembly assembly)
+    private static void RegisterBeforeEveryHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        BeforeEveryAttribute attr,
+        Assembly assembly)
     {
         // Prevent duplicate registrations of the same method
         var methodKey = GetMethodKey(method);
@@ -537,7 +573,12 @@ internal sealed class ReflectionHookDiscoveryService
         }
     }
 
-    private static void RegisterAfterEveryHook(Type type, MethodInfo method, AfterEveryAttribute attr, Assembly assembly)
+    private static void RegisterAfterEveryHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        AfterEveryAttribute attr,
+        Assembly assembly)
     {
         // Prevent duplicate registrations of the same method
         var methodKey = GetMethodKey(method);
@@ -628,7 +669,11 @@ internal sealed class ReflectionHookDiscoveryService
         }
     }
 
-    private static void RegisterInstanceBeforeHook(Type type, MethodInfo method, int order)
+    private static void RegisterInstanceBeforeHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type type,
+        MethodInfo method,
+        int order)
     {
         // Instance hooks on open generic types will be registered when closed types are discovered
         if (type.ContainsGenericParameters)
@@ -649,7 +694,11 @@ internal sealed class ReflectionHookDiscoveryService
         bag.Add(hook);
     }
 
-    private static void RegisterInstanceAfterHook(Type type, MethodInfo method, int order)
+    private static void RegisterInstanceAfterHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type type,
+        MethodInfo method,
+        int order)
     {
         // Instance hooks on open generic types will be registered when closed types are discovered
         if (type.ContainsGenericParameters)
@@ -670,7 +719,11 @@ internal sealed class ReflectionHookDiscoveryService
         bag.Add(hook);
     }
 
-    private static void RegisterBeforeClassHook(Type type, MethodInfo method, int order)
+    private static void RegisterBeforeClassHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        int order)
     {
         var bag = Sources.BeforeClassHooks.GetOrAdd(type, _ => new ConcurrentBag<BeforeClassHookMethod>());
         var hook = new BeforeClassHookMethod
@@ -686,7 +739,11 @@ internal sealed class ReflectionHookDiscoveryService
         bag.Add(hook);
     }
 
-    private static void RegisterAfterClassHook(Type type, MethodInfo method, int order)
+    private static void RegisterAfterClassHook(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        int order)
     {
         var bag = Sources.AfterClassHooks.GetOrAdd(type, _ => new ConcurrentBag<AfterClassHookMethod>());
         var hook = new AfterClassHookMethod
@@ -702,7 +759,12 @@ internal sealed class ReflectionHookDiscoveryService
         bag.Add(hook);
     }
 
-    private static void RegisterBeforeAssemblyHook(Assembly assembly, Type type, MethodInfo method, int order)
+    private static void RegisterBeforeAssemblyHook(
+        Assembly assembly,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        int order)
     {
         var bag = Sources.BeforeAssemblyHooks.GetOrAdd(assembly, _ => new ConcurrentBag<BeforeAssemblyHookMethod>());
         var hook = new BeforeAssemblyHookMethod
@@ -718,7 +780,12 @@ internal sealed class ReflectionHookDiscoveryService
         bag.Add(hook);
     }
 
-    private static void RegisterAfterAssemblyHook(Assembly assembly, Type type, MethodInfo method, int order)
+    private static void RegisterAfterAssemblyHook(
+        Assembly assembly,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+        Type type,
+        MethodInfo method,
+        int order)
     {
         var bag = Sources.AfterAssemblyHooks.GetOrAdd(assembly, _ => new ConcurrentBag<AfterAssemblyHookMethod>());
         var hook = new AfterAssemblyHookMethod
@@ -734,7 +801,13 @@ internal sealed class ReflectionHookDiscoveryService
         bag.Add(hook);
     }
 
-    private static MethodMetadata CreateMethodMetadata(Type type, MethodInfo method)
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Parameter types in hooks are determined at runtime and cannot be statically analyzed")]
+    #endif
+    private static MethodMetadata CreateMethodMetadata(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type type,
+        MethodInfo method)
     {
         return new MethodMetadata
         {
@@ -812,7 +885,7 @@ internal sealed class ReflectionHookDiscoveryService
         };
     }
 
-    private static Func<T, CancellationToken, ValueTask> CreateHookDelegate<T>(Type type, MethodInfo method)
+    private static Func<T, CancellationToken, ValueTask> CreateHookDelegate<T>([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type, MethodInfo method)
     {
         return async (context, cancellationToken) =>
         {
@@ -860,6 +933,10 @@ internal sealed class ReflectionHookDiscoveryService
     /// <summary>
     /// Extracts the HookExecutor from method attributes, or returns DefaultHookExecutor if not found
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Attribute type reflection is required for hook executor discovery")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Hook executor types are determined at runtime from attributes")]
+    #endif
     private static IHookExecutor GetHookExecutor(MethodInfo method)
     {
         // Look for HookExecutorAttribute on the method

@@ -30,7 +30,7 @@ public abstract class BaseAssertCondition
     /// </summary>
     public virtual TimeSpan? WaitFor { get; protected set; }
 
-    internal protected abstract string GetExpectation();
+    protected internal abstract string GetExpectation();
 
     internal virtual string GetExpectationWithReason()
         => $"{GetExpectation()}{GetBecauseReason()}";

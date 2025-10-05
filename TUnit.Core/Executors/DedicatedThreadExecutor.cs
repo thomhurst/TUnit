@@ -377,6 +377,9 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         }
     }
 
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+#endif
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetParallelLimiter(new ProcessorCountParallelLimit());
