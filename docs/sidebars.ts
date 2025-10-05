@@ -50,6 +50,7 @@ const sidebars: SidebarsConfig = {
         'test-authoring/depends-on',
         'test-authoring/order',
         'test-authoring/mocking',
+        'test-authoring/culture'
       ],
     },
     {
