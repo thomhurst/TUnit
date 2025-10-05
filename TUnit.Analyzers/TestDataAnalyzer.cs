@@ -27,7 +27,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             Rules.ReturnFunc,
             Rules.MatrixDataSourceAttributeRequired,
             Rules.TooManyArguments,
-            Rules.InstanceMethodSource
+            Rules.InstanceMethodSource,
+            Rules.PotentialEmptyDataSource
         );
 
     protected override void InitializeInternal(AnalysisContext context)
@@ -194,10 +195,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     context.Compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.MethodDataSource.WithoutGlobalPrefix)))
             {
                 // For property injection, only validate against the property type, not method parameters
-                var typesToValidate = propertySymbol != null 
+                var typesToValidate = propertySymbol != null
                     ? ImmutableArray.Create(propertySymbol.Type)
                     : parameters.Select(p => p.Type).ToImmutableArray().WithoutCancellationTokenParameter();
-                
+
                 CheckMethodDataSource(context, attribute, testClassType, typesToValidate, propertySymbol);
             }
 
