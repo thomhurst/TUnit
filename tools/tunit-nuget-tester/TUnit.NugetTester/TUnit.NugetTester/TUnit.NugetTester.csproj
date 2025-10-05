@@ -16,6 +16,7 @@
         <PublishAot>true</PublishAot>
         <PublishTrimmed>true</PublishTrimmed>
         <IlcSingleWarn>false</IlcSingleWarn>
+        <TrimmerSingleWarn>false</TrimmerSingleWarn>
     </PropertyGroup>
 
     <ItemGroup>
