@@ -75,7 +75,7 @@ public class RuntimeBenchmarks : BenchmarkBase
         var exeName = GetExecutableFileName();
 
         await Cli.Wrap(Path.Combine(binPath, exeName))
-            .WithArguments(["--filter-class", ClassName])
+            .WithArguments(["--filter-query", $"/*/*/{ClassName}/*"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }

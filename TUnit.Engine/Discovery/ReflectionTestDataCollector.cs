@@ -1566,32 +1566,72 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                     if (paramsElementType != null)
                     {
-                        var paramsArray = Array.CreateInstance(paramsElementType, paramsCount);
-                        for (var i = 0; i < paramsCount; i++)
+                        // C# params semantics:
+                        // - If single arg is null, pass null (not array with null element)
+                        // - If single arg is already the correct array type, pass it directly
+                        // - Otherwise, create array from remaining arguments
+                        if (paramsCount == 1)
                         {
-                            var arg = args[paramsStartIndex + i];
-                            if (arg != null)
+                            var singleArg = args[paramsStartIndex];
+                            if (singleArg == null)
                             {
-                                var argType = arg.GetType();
-                                if (paramsElementType.IsAssignableFrom(argType))
-                                {
-                                    paramsArray.SetValue(arg, i);
-                                }
-                                else if (IsCovariantCompatible(paramsElementType, argType))
-                                {
-                                    paramsArray.SetValue(arg, i);
-                                }
-                                else
-                                {
-                                    paramsArray.SetValue(CastHelper.Cast(paramsElementType, arg), i);
-                                }
+                                // Null should be passed as null, not as array with null element
+                                castedArgs[regularParamsCount] = null;
+                            }
+                            else if (lastParam.ParameterType.IsAssignableFrom(singleArg.GetType()))
+                            {
+                                // If the argument is already the correct array type, use it directly
+                                castedArgs[regularParamsCount] = singleArg;
                             }
                             else
                             {
-                                paramsArray.SetValue(null, i);
+                                // Single non-array argument - wrap in array
+                                var singleElementArray = Array.CreateInstance(paramsElementType, 1);
+                                if (paramsElementType.IsAssignableFrom(singleArg.GetType()))
+                                {
+                                    singleElementArray.SetValue(singleArg, 0);
+                                }
+                                else if (IsCovariantCompatible(paramsElementType, singleArg.GetType()))
+                                {
+                                    singleElementArray.SetValue(singleArg, 0);
+                                }
+                                else
+                                {
+                                    singleElementArray.SetValue(CastHelper.Cast(paramsElementType, singleArg), 0);
+                                }
+                                castedArgs[regularParamsCount] = singleElementArray;
                             }
                         }
-                        castedArgs[regularParamsCount] = paramsArray;
+                        else
+                        {
+                            // Multiple arguments or no arguments - create array
+                            var paramsArray = Array.CreateInstance(paramsElementType, paramsCount);
+                            for (var i = 0; i < paramsCount; i++)
+                            {
+                                var arg = args[paramsStartIndex + i];
+                                if (arg != null)
+                                {
+                                    var argType = arg.GetType();
+                                    if (paramsElementType.IsAssignableFrom(argType))
+                                    {
+                                        paramsArray.SetValue(arg, i);
+                                    }
+                                    else if (IsCovariantCompatible(paramsElementType, argType))
+                                    {
+                                        paramsArray.SetValue(arg, i);
+                                    }
+                                    else
+                                    {
+                                        paramsArray.SetValue(CastHelper.Cast(paramsElementType, arg), i);
+                                    }
+                                }
+                                else
+                                {
+                                    paramsArray.SetValue(null, i);
+                                }
+                            }
+                            castedArgs[regularParamsCount] = paramsArray;
+                        }
                     }
                 }
                 else

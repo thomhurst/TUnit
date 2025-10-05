@@ -18,23 +18,23 @@ public abstract class AssertionBuilder : ISource
 
     public AssertionBuilder(ISource source)
     {
-        _assertionDataTask = source.AssertionDataTask;
+        _lazyAssertionData = source.LazyAssertionData;
         _actualExpression = source.ActualExpression;
         _expressionBuilder = source.ExpressionBuilder;
         _assertions = source.Assertions;
     }
 
-    public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string actualExpression, StringBuilder expressionBuilder, Stack<BaseAssertCondition> assertions)
+    public AssertionBuilder(LazyAssertionData lazyAssertionData, string actualExpression, StringBuilder expressionBuilder, Stack<BaseAssertCondition> assertions)
     {
-        _assertionDataTask = assertionDataTask;
+        _lazyAssertionData= lazyAssertionData;
         _actualExpression = actualExpression;
         _expressionBuilder = expressionBuilder;
         _assertions = assertions;
     }
 
-    public AssertionBuilder(ValueTask<AssertionData> assertionDataTask, string? actualExpression)
+    public AssertionBuilder(LazyAssertionData lazyAssertionData, string? actualExpression)
     {
-        _assertionDataTask = assertionDataTask;
+        _lazyAssertionData= lazyAssertionData;
         _actualExpression = actualExpression;
 
         if (string.IsNullOrEmpty(actualExpression))
@@ -55,13 +55,13 @@ public abstract class AssertionBuilder : ISource
 
     string? ISource.ActualExpression => _actualExpression;
 
-    ValueTask<AssertionData> ISource.AssertionDataTask => _assertionDataTask;
+    LazyAssertionData ISource.LazyAssertionData => _lazyAssertionData;
 
     Stack<BaseAssertCondition> ISource.Assertions => _assertions;
 
     protected readonly List<AssertionResult> Results = [];
     private readonly StringBuilder _expressionBuilder;
-    private readonly ValueTask<AssertionData> _assertionDataTask;
+    private readonly LazyAssertionData _lazyAssertionData;
     private readonly Stack<BaseAssertCondition> _assertions = new();
     private readonly string? _actualExpression;
 
@@ -157,9 +157,9 @@ public abstract class AssertionBuilder : ISource
                 var exception = new AssertionException(
                     $"""
                      Expected {assertion.Subject} {assertion.GetExpectationWithReason()}
-                     
+
                      but {result.Message}
-                     
+
                      at {((IInvokableAssertionBuilder) this).GetExpression()}
                      """
                 );
@@ -179,16 +179,16 @@ public abstract class AssertionBuilder : ISource
 
     private async Task<AssertionData> GetAssertionData()
     {
-        var minimumWait = _assertions.Select(x => x.WaitFor).Min();
+        var timeout = _assertions.Select(x => x.WaitFor).Min();
 
-        if (minimumWait is null)
+        if (timeout is null)
         {
-            return await _assertionDataTask;
+            return await _lazyAssertionData.GetResultAsync();
         }
 
         using var cts = new CancellationTokenSource();
 
-        var completedTask = await Task.WhenAny(_assertionDataTask.AsTask(), GetMinimumWaitTask(minimumWait.Value, cts.Token));
+        var completedTask = await Task.WhenAny(_lazyAssertionData.GetResultAsync().AsTask(), GetMinimumWaitTask(timeout.Value, cts.Token));
 
         cts.Cancel();
 
