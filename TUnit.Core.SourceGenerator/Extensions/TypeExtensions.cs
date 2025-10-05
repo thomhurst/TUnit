@@ -109,9 +109,12 @@ public static class TypeExtensions
             ? [(INamedTypeSymbol) namedTypeSymbol, .. namedTypeSymbol.AllInterfaces]
             : namedTypeSymbol.AllInterfaces.AsEnumerable();
 
+        // Cache the special type lookup to avoid repeated calls
+        var enumerableT = compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T);
+
         foreach (var enumerable in interfaces
                      .Where(x => x.IsGenericType)
-                     .Where(x => SymbolEqualityComparer.Default.Equals(x.OriginalDefinition, compilation.GetSpecialType(SpecialType.System_Collections_Generic_IEnumerable_T))))
+                     .Where(x => SymbolEqualityComparer.Default.Equals(x.OriginalDefinition, enumerableT)))
         {
             innerType = enumerable.TypeArguments[0];
             return true;

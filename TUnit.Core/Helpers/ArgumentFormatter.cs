@@ -44,8 +44,11 @@ public static class ArgumentFormatter
             return "null";
         }
 
+        // Cache GetType() result to avoid repeated virtual method calls
+        var type = o.GetType();
+
         // Handle tuples specially
-        if (TupleHelper.IsTupleType(o.GetType()))
+        if (TupleHelper.IsTupleType(type))
         {
             return FormatTuple(o);
         }
@@ -63,14 +66,14 @@ public static class ArgumentFormatter
             return toString;
         }
 
-        if (o.GetType().IsPrimitive || o is string)
+        if (type.IsPrimitive || o is string)
         {
             return toString;
         }
 
-        if (toString == o.GetType().FullName || toString == o.GetType().AssemblyQualifiedName)
+        if (toString == type.FullName || toString == type.AssemblyQualifiedName)
         {
-            return o.GetType().Name;
+            return type.Name;
         }
 
         return toString;

@@ -2437,6 +2437,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return string.Join(",", formattedTypes);
     }
 
+    /// <summary>
+    /// Generates code that resolves the type name at runtime (FullName ?? Name).
+    /// Caches ToDisplayString result to avoid calling it twice.
+    /// </summary>
+    private static string FormatTypeForRuntimeName(ITypeSymbol type)
+    {
+        var typeString = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        return $"(typeof({typeString}).FullName ?? typeof({typeString}).Name)";
+    }
+
     private static void GenerateGenericTypeInfo(CodeWriter writer, INamedTypeSymbol typeSymbol)
     {
         writer.AppendLine("GenericTypeInfo = new global::TUnit.Core.GenericTypeInfo");
@@ -2694,7 +2704,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
 
                     // Generate a concrete instantiation for this type combination
-                    writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                    writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(FormatTypeForRuntimeName))}] = ");
                     GenerateConcreteTestMetadata(writer, compilation, testMethod, className, combinedTypes, classAttr);
                     writer.AppendLine(",");
                 }
@@ -2758,7 +2768,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
 
                     // Generate a concrete instantiation for this type combination
-                    writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                    writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
                     GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, argAttr);
                     writer.AppendLine(",");
                 }
@@ -2794,7 +2804,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
 
                     // Generate a concrete instantiation for this type combination
-                    writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                    writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
                     GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, methodArgAttr);
                     writer.AppendLine(",");
                 }
@@ -2838,7 +2848,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
 
                 // Generate a concrete instantiation for this type combination
-                writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
                 GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, dataSourceAttr);
                 writer.AppendLine(",");
             }
@@ -2859,7 +2869,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
                     {
                         // Generate a concrete instantiation for this type combination
-                        writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                        writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
                         GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
                         writer.AppendLine(",");
                     }
@@ -2889,7 +2899,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         if (ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes))
                         {
                             // Generate a concrete instantiation for this type combination
-                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
                             GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
                             writer.AppendLine(",");
                         }
@@ -2913,7 +2923,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (ValidateClassTypeConstraints(testMethod.TypeSymbol, typedDataSourceInferredTypes))
                     {
                         // Generate a concrete instantiation for this type combination
-                        writer.AppendLine($"[{string.Join(" + \",\" + ", typedDataSourceInferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                        writer.AppendLine($"[{string.Join(" + \",\" + ", typedDataSourceInferredTypes.Select(FormatTypeForRuntimeName))}] = ");
                         GenerateConcreteTestMetadata(writer, compilation, testMethod, className, typedDataSourceInferredTypes);
                         writer.AppendLine(",");
                     }
@@ -2943,7 +2953,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
                         {
                             // Generate a concrete instantiation for this type combination
-                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
                             GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
                             writer.AppendLine(",");
                         }
@@ -2991,7 +3001,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                                         ValidateTypeConstraints(testMethod.MethodSymbol, methodInferredTypes))
                                     {
                                         // Generate a concrete instantiation for this type combination
-                                        writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                                        writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(FormatTypeForRuntimeName))}] = ");
                                         GenerateConcreteTestMetadata(writer, compilation, testMethod, className, combinedTypes, argAttr);
                                         writer.AppendLine(",");
                                     }
@@ -3011,7 +3021,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classInferredTypes))
                             {
                                 // Generate a concrete instantiation for this type combination
-                                writer.AppendLine($"[{string.Join(" + \",\" + ", classInferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                                writer.AppendLine($"[{string.Join(" + \",\" + ", classInferredTypes.Select(FormatTypeForRuntimeName))}] = ");
                                 GenerateConcreteTestMetadata(writer, compilation, testMethod, className, classInferredTypes, argAttr);
                                 writer.AppendLine(",");
                             }
@@ -3137,7 +3147,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         {
                             // Generate a concrete instantiation for this type combination
                             // Use the same key format as runtime: FullName ?? Name
-                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
+                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
                             GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
                             writer.AppendLine(",");
                         }

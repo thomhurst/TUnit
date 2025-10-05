@@ -45,21 +45,21 @@ public static class AttributeDataExtensions
 
     public static bool IsNonGlobalHook(this AttributeData attributeData, Compilation compilation)
     {
-        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                   compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.BeforeAttribute
-                       .WithoutGlobalPrefix))
-               || SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                   compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.AfterAttribute
-                       .WithoutGlobalPrefix));
+        // Cache type symbols to avoid repeated GetTypeByMetadataName calls
+        var beforeAttribute = compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.BeforeAttribute.WithoutGlobalPrefix);
+        var afterAttribute = compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.AfterAttribute.WithoutGlobalPrefix);
+
+        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass, beforeAttribute)
+               || SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass, afterAttribute);
     }
 
     public static bool IsGlobalHook(this AttributeData attributeData, Compilation compilation)
     {
-        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                   compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.BeforeEveryAttribute
-                       .WithoutGlobalPrefix))
-               || SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-                   compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.AfterEveryAttribute
-                       .WithoutGlobalPrefix));
+        // Cache type symbols to avoid repeated GetTypeByMetadataName calls
+        var beforeEveryAttribute = compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.BeforeEveryAttribute.WithoutGlobalPrefix);
+        var afterEveryAttribute = compilation.GetTypeByMetadataName(WellKnownFullyQualifiedClassNames.AfterEveryAttribute.WithoutGlobalPrefix);
+
+        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass, beforeEveryAttribute)
+               || SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass, afterEveryAttribute);
     }
 }

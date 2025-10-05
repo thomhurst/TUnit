@@ -20,13 +20,28 @@ internal sealed class ReflectionHookDiscoveryService
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
     private static readonly ConcurrentDictionary<string, bool> _registeredMethods = new();
+    private static readonly ConcurrentDictionary<MethodInfo, string> _methodKeyCache = new();
     private static int _registrationIndex = 0;
     private static int _discoveryRunCount = 0;
 
     private static string GetMethodKey(MethodInfo method)
     {
-        // Create a unique key for the method based on its signature
-        return $"{method.DeclaringType?.FullName}.{method.Name}({string.Join(",", method.GetParameters().Select(p => p.ParameterType.FullName))})";
+        // Cache method keys to avoid repeated string allocations during discovery
+        return _methodKeyCache.GetOrAdd(method, m =>
+        {
+            var parameters = m.GetParameters();
+            if (parameters.Length == 0)
+            {
+                return $"{m.DeclaringType?.FullName}.{m.Name}()";
+            }
+
+            var paramTypes = new string[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                paramTypes[i] = parameters[i].ParameterType.FullName ?? "unknown";
+            }
+            return $"{m.DeclaringType?.FullName}.{m.Name}({string.Join(",", paramTypes)})";
+        });
     }
 
     private static void ClearSourceGeneratedHooks()
@@ -105,7 +120,8 @@ internal sealed class ReflectionHookDiscoveryService
                     if (beforeEveryAttr != null) orders.Add(beforeEveryAttr.Order);
                     if (afterEveryAttr != null) orders.Add(afterEveryAttr.Order);
 
-                    return orders.Any() ? orders.Min() : 0;
+                    // Use Count instead of Any() to avoid double enumeration
+                    return orders.Count > 0 ? orders.Min() : 0;
                 })
                 .ThenBy(m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
                 .ToArray();
@@ -291,7 +307,8 @@ internal sealed class ReflectionHookDiscoveryService
                     if (beforeEveryAttr != null) orders.Add(beforeEveryAttr.Order);
                     if (afterEveryAttr != null) orders.Add(afterEveryAttr.Order);
 
-                    return orders.Any() ? orders.Min() : 0;
+                    // Use Count instead of Any() to avoid double enumeration
+                    return orders.Count > 0 ? orders.Min() : 0;
                 })
                 .ThenBy(m => m.MetadataToken) // Then sort by MetadataToken to preserve source file order
                 .ToArray();

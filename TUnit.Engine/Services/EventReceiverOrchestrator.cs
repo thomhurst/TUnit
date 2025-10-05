@@ -103,13 +103,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     #endif
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestStartEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
-        // Filter scoped attributes
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
+        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
+            context.GetEligibleEventObjects()
+                .OfType<ITestStartEventReceiver>()
+                .OrderBy(r => r.Order));
 
         // Batch invocation for multiple receivers
         if (filteredReceivers.Count > 3)
@@ -145,13 +143,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     #endif
     private async ValueTask InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestEndEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
-        // Filter scoped attributes
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
+        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
+            context.GetEligibleEventObjects()
+                .OfType<ITestEndEventReceiver>()
+                .OrderBy(r => r.Order));
 
         foreach (var receiver in filteredReceivers)
         {
@@ -185,13 +181,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     #endif
     private async ValueTask InvokeTestSkippedEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestSkippedEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
-        // Filter scoped attributes
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
+        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
+            context.GetEligibleEventObjects()
+                .OfType<ITestSkippedEventReceiver>()
+                .OrderBy(r => r.Order));
 
         foreach (var receiver in filteredReceivers)
         {
@@ -223,14 +217,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     #endif
     public async ValueTask InvokeHookRegistrationEventReceiversAsync(HookRegisteredContext hookContext, CancellationToken cancellationToken)
     {
-        // Get event receivers from the hook method's attributes
-        var eventReceivers = hookContext.HookMethod.Attributes
-            .OfType<IHookRegisteredEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
         // Filter scoped attributes to ensure only the highest priority one of each type is invoked
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
+            hookContext.HookMethod.Attributes
+                .OfType<IHookRegisteredEventReceiver>()
+                .OrderBy(r => r.Order));
 
         foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
         {
