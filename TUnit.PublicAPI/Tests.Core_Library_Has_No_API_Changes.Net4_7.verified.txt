@@ -1887,7 +1887,6 @@ namespace .Helpers
     public static class DataSourceHelpers
     {
         public static <.<object?>>[] HandleTupleValue(object? value, bool shouldUnwrap) { }
-        public static . InitializeDataSourcePropertiesAsync(object? instance, .MethodMetadata testInformation, string testSessionId) { }
         public static object? InvokeIfFunc(object? value) { }
         public static T InvokeIfFunc<T>(object? value) { }
         public static bool IsTuple(object? obj) { }
@@ -1895,10 +1894,8 @@ namespace .Helpers
         public static .<object?> ProcessDataSourceResultGeneric<T>(T data) { }
         public static .<object?> ProcessEnumerableDataSource<T>(.<T> enumerable) { }
         public static <.<object?>>[] ProcessTestDataSource<T>(T data, int expectedParameterCount = -1) { }
-        public static void RegisterPropertyInitializer<T>(<T, .MethodMetadata, string, .> initializer) { }
         public static void RegisterTypeCreator<T>(<.MethodMetadata, string, .<T>> creator) { }
         public static .<object?> ResolveDataSourceForPropertyAsync( containingType, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
-        public static .<object?> ResolveDataSourcePropertyAsync(object instance, string propertyName, .MethodMetadata testInformation, string testSessionId) { }
         public static object?[] ToObjectArray(this object? item) { }
         public static object?[] ToObjectArrayWithTypes(this object? item, []? expectedTypes) { }
         [return: .(new string[] {

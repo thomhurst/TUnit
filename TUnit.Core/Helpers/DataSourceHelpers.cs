@@ -292,41 +292,6 @@ public static class DataSourceHelpers
         return [() => Task.FromResult<object?>(InvokeIfFunc(data))];
     }
 
-
-    /// <summary>
-    /// AOT-compatible runtime dispatcher for data source property initialization.
-    /// This will be populated by the generated DataSourceHelpers class.
-    /// </summary>
-    private static readonly Dictionary<Type, Func<object, MethodMetadata, string, Task>> PropertyInitializers = new();
-
-    /// <summary>
-    /// Register a type-specific property initializer (called by generated code)
-    /// </summary>
-    public static void RegisterPropertyInitializer<T>(Func<T, MethodMetadata, string, Task> initializer)
-    {
-        PropertyInitializers[typeof(T)] = (instance, testInfo, sessionId) =>
-            initializer((T)instance, testInfo, sessionId);
-    }
-
-    /// <summary>
-    /// Initialize data source properties on an instance using registered type-specific helpers
-    /// </summary>
-    public static async Task InitializeDataSourcePropertiesAsync(object? instance, MethodMetadata testInformation, string testSessionId)
-    {
-        if (instance == null)
-        {
-            return;
-        }
-
-        var instanceType = instance.GetType();
-
-        if (PropertyInitializers.TryGetValue(instanceType, out var initializer))
-        {
-            await initializer(instance, testInformation, testSessionId);
-        }
-        // If no initializer is registered, the type has no data source properties
-    }
-
     public static object?[] ToObjectArray(this object? item)
     {
         item = InvokeIfFunc(item);
@@ -617,16 +582,5 @@ public static class DataSourceHelpers
         }
 
         return null;
-    }
-    
-    /// <summary>
-    /// Resolves a data source property value at runtime for an existing instance.
-    /// This is used when we need to set init-only properties via reflection.
-    /// </summary>
-    public static Task<object?> ResolveDataSourcePropertyAsync(object instance, string propertyName, MethodMetadata testInformation, string testSessionId)
-    {
-        // For now, return a default value - the runtime resolution is complex
-        // In practice, this should be rare since most data sources can be resolved at compile time
-        return Task.FromResult<object?>(null);
     }
 }
