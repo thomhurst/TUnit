@@ -103,7 +103,7 @@ internal sealed class TestDependencyResolver
             
             if (allResolved)
             {
-                var uniqueDependencies = new Dictionary<AbstractExecutableTest, ResolvedDependency>();
+                var uniqueDependencies = new Dictionary<AbstractExecutableTest, ResolvedDependency>(capacity: 8);
                 foreach (var dep in resolvedDependencies)
                 {
                     if (dep.Test == test)

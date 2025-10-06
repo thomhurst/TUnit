@@ -61,8 +61,8 @@ internal sealed class TestGroupingService : ITestGroupingService
         var notInParallelList = new List<(AbstractExecutableTest Test, string ClassName, TestPriority Priority)>();
         var keyedNotInParallelList = new List<(AbstractExecutableTest Test, string ClassName, IReadOnlyList<string> ConstraintKeys, TestPriority Priority)>();
         var parallelTests = new List<AbstractExecutableTest>();
-        var parallelGroups = new Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>>();
-        var constrainedParallelGroups = new Dictionary<string, (List<AbstractExecutableTest> Unconstrained, List<(AbstractExecutableTest, string, IReadOnlyList<string>, TestPriority)> Keyed)>();
+        var parallelGroups = new Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>>(capacity: 16);
+        var constrainedParallelGroups = new Dictionary<string, (List<AbstractExecutableTest> Unconstrained, List<(AbstractExecutableTest, string, IReadOnlyList<string>, TestPriority)> Keyed)>(capacity: 16);
 
         foreach (var (test, sortKey) in testsWithKeys)
         {
@@ -136,7 +136,7 @@ internal sealed class TestGroupingService : ITestGroupingService
         }
 
         // Convert constrained parallel groups to the final format
-        var finalConstrainedGroups = new Dictionary<string, GroupedConstrainedTests>();
+        var finalConstrainedGroups = new Dictionary<string, GroupedConstrainedTests>(capacity: constrainedParallelGroups.Count);
         foreach (var kvp in constrainedParallelGroups)
         {
             var groupName = kvp.Key;
