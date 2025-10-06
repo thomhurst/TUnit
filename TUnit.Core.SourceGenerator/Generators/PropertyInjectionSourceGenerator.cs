@@ -457,3 +457,20 @@ internal sealed class PropertyWithDataSourceAttribute
     public required IPropertySymbol Property { get; init; }
     public required AttributeData DataSourceAttribute { get; init; }
 }
+
+internal sealed class ClassWithDataSourcePropertiesComparer : IEqualityComparer<ClassWithDataSourceProperties>
+{
+    public bool Equals(ClassWithDataSourceProperties? x, ClassWithDataSourceProperties? y)
+    {
+        if (ReferenceEquals(x, y)) return true;
+        if (x is null || y is null) return false;
+
+        // Compare based on the class symbol - this handles partial classes correctly
+        return SymbolEqualityComparer.Default.Equals(x.ClassSymbol, y.ClassSymbol);
+    }
+
+    public int GetHashCode(ClassWithDataSourceProperties obj)
+    {
+        return SymbolEqualityComparer.Default.GetHashCode(obj.ClassSymbol);
+    }
+}

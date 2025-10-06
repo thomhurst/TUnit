@@ -20,8 +20,14 @@ internal class TestFinder : ITestFinder
     /// </summary>
     public IEnumerable<TestContext> GetTests(Type classType)
     {
-        return _discoveryService.GetCachedTestContexts()
-            .Where(t => t.TestDetails?.ClassType == classType);
+        var allTests = _discoveryService.GetCachedTestContexts();
+        foreach (var test in allTests)
+        {
+            if (test.TestDetails?.ClassType == classType)
+            {
+                yield return test;
+            }
+        }
     }
 
     /// <summary>
@@ -30,26 +36,48 @@ internal class TestFinder : ITestFinder
     public TestContext[] GetTestsByNameAndParameters(string testName, IEnumerable<Type> methodParameterTypes,
         Type classType, IEnumerable<Type> classParameterTypes, IEnumerable<object?> classArguments)
     {
-        var paramTypes = methodParameterTypes?.ToArray() ?? [
-        ];
-        var classParamTypes = classParameterTypes?.ToArray() ?? [
-        ];
+        var paramTypes = methodParameterTypes?.ToArray() ?? [];
+        var classParamTypes = classParameterTypes?.ToArray() ?? [];
 
         var allTests = _discoveryService.GetCachedTestContexts();
+        var results = new List<TestContext>();
 
         // If no parameter types are specified, match by name and class type only
         if (paramTypes.Length == 0 && classParamTypes.Length == 0)
         {
-            return allTests.Where(t =>
-                t.TestName == testName &&
-                t.TestDetails?.ClassType == classType).ToArray();
+            foreach (var test in allTests)
+            {
+                if (test.TestName == testName && test.TestDetails?.ClassType == classType)
+                {
+                    results.Add(test);
+                }
+            }
+            return results.ToArray();
         }
 
-        return allTests.Where(t =>
-            t.TestName == testName &&
-            t.TestDetails?.ClassType == classType &&
-            ParameterTypesMatch(t.TestDetails.MethodMetadata.Parameters.Select(p => p.Type).ToArray(), paramTypes) &&
-            ClassParametersMatch(t, classParamTypes, classArguments)).ToArray();
+        // Match with parameter types
+        foreach (var test in allTests)
+        {
+            if (test.TestName != testName || test.TestDetails?.ClassType != classType)
+            {
+                continue;
+            }
+
+            var testParams = test.TestDetails.MethodMetadata.Parameters.ToArray();
+            var testParamTypes = new Type[testParams.Length];
+            for (int i = 0; i < testParams.Length; i++)
+            {
+                testParamTypes[i] = testParams[i].Type;
+            }
+
+            if (ParameterTypesMatch(testParamTypes, paramTypes) &&
+                ClassParametersMatch(test, classParamTypes, classArguments))
+            {
+                results.Add(test);
+            }
+        }
+
+        return results.ToArray();
     }
 
     private bool ParameterTypesMatch(Type[]? testParamTypes, Type[] expectedParamTypes)

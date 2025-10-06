@@ -22,8 +22,8 @@ namespace TUnit.Engine.Discovery;
 internal sealed class ReflectionTestDataCollector : ITestDataCollector
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
-    private static readonly ConcurrentBag<TestMetadata> _discoveredTests = new();
-    private static readonly Lock _resultsLock = new(); // Only for final results aggregation
+    private static readonly List<TestMetadata> _discoveredTests = new(capacity: 1000); // Pre-sized for typical test suites
+    private static readonly Lock _discoveredTestsLock = new(); // Lock for thread-safe access to _discoveredTests
     private static readonly ConcurrentDictionary<Assembly, Type[]> _assemblyTypesCache = new();
     private static readonly ConcurrentDictionary<Type, MethodInfo[]> _typeMethodsCache = new();
 
@@ -41,7 +41,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     public static void ClearCaches()
     {
         _scannedAssemblies.Clear();
-        while (_discoveredTests.TryTake(out _)) { }
+        lock (_discoveredTestsLock)
+        {
+            _discoveredTests.Clear();
+        }
         _assemblyTypesCache.Clear();
         _typeMethodsCache.Clear();
         lock (_assemblyCacheLock)
@@ -132,16 +135,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var dynamicTests = await DiscoverDynamicTests(testSessionId).ConfigureAwait(false);
         newTests.AddRange(dynamicTests);
 
-        // Add to concurrent collection without locking
-        foreach (var test in newTests)
+        // Add to discovered tests with lock (better enumeration performance than ConcurrentBag)
+        lock (_discoveredTestsLock)
         {
-            _discoveredTests.Add(test);
-        }
-
-        // Only lock when creating the final result list
-        lock (_resultsLock)
-        {
-            return _discoveredTests.ToList();
+            _discoveredTests.AddRange(newTests);
+            return new List<TestMetadata>(_discoveredTests);
         }
     }
 
@@ -179,8 +177,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // Stream tests from this assembly
             await foreach (var test in DiscoverTestsInAssemblyStreamingAsync(assembly, cancellationToken))
             {
-                // Use lock-free ConcurrentBag
-                _discoveredTests.Add(test);
+                lock (_discoveredTestsLock)
+                {
+                    _discoveredTests.Add(test);
+                }
                 yield return test;
             }
         }
@@ -188,7 +188,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // Stream dynamic tests
         await foreach (var dynamicTest in DiscoverDynamicTestsStreamingAsync(testSessionId, cancellationToken))
         {
-            _discoveredTests.Add(dynamicTest);
+            lock (_discoveredTestsLock)
+            {
+                _discoveredTests.Add(dynamicTest);
+            }
             yield return dynamicTest;
         }
     }

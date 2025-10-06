@@ -1,5 +1,5 @@
 using Microsoft.CodeAnalysis;
-using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Helpers;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
@@ -12,10 +12,10 @@ internal static class DataSourceAttributeHelper
             return false;
         }
 
-        // Check if the attribute implements IDataSourceAttribute
-        return attributeClass.AllInterfaces.Any(i => i.GloballyQualified() == "global::TUnit.Core.IDataSourceAttribute");
+        // Check if the attribute implements IDataSourceAttribute (using cache)
+        return InterfaceCache.ImplementsInterface(attributeClass, "global::TUnit.Core.IDataSourceAttribute");
     }
-    
+
     public static bool IsTypedDataSourceAttribute(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null)
@@ -23,12 +23,10 @@ internal static class DataSourceAttributeHelper
             return false;
         }
 
-        // Check if the attribute implements ITypedDataSourceAttribute<T>
-        return attributeClass.AllInterfaces.Any(i => 
-            i.IsGenericType && 
-            i.ConstructedFrom.GloballyQualified() == "global::TUnit.Core.ITypedDataSourceAttribute`1");
+        // Check if the attribute implements ITypedDataSourceAttribute<T> (using cache)
+        return InterfaceCache.ImplementsGenericInterface(attributeClass, "global::TUnit.Core.ITypedDataSourceAttribute`1");
     }
-    
+
     public static ITypeSymbol? GetTypedDataSourceType(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null)
@@ -36,10 +34,8 @@ internal static class DataSourceAttributeHelper
             return null;
         }
 
-        var typedInterface = attributeClass.AllInterfaces
-            .FirstOrDefault(i => i.IsGenericType && 
-                i.ConstructedFrom.GloballyQualified() == "global::TUnit.Core.ITypedDataSourceAttribute`1");
-                
+        var typedInterface = InterfaceCache.GetGenericInterface(attributeClass, "global::TUnit.Core.ITypedDataSourceAttribute`1");
+
         return typedInterface?.TypeArguments.FirstOrDefault();
     }
 }

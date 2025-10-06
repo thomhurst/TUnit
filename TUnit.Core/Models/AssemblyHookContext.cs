@@ -27,23 +27,31 @@ public class AssemblyHookContext : Context
     public required Assembly Assembly { get; init; }
 
     private readonly List<ClassHookContext> _testClasses = [];
+    private TestContext[]? _cachedAllTests;
 
     public void AddClass(ClassHookContext classHookContext)
     {
         _testClasses.Add(classHookContext);
+        InvalidateCache();
     }
 
     public IReadOnlyList<ClassHookContext> TestClasses => _testClasses;
 
-    public IReadOnlyList<TestContext> AllTests => TestClasses.SelectMany(x => x.Tests).ToArray();
+    public IReadOnlyList<TestContext> AllTests => _cachedAllTests ??= TestClasses.SelectMany(x => x.Tests).ToArray();
 
     public int TestCount => AllTests.Count;
+
+    private void InvalidateCache()
+    {
+        _cachedAllTests = null;
+    }
 
     internal bool FirstTestStarted { get; set; }
 
     internal void RemoveClass(ClassHookContext classContext)
     {
         _testClasses.Remove(classContext);
+        InvalidateCache();
 
         if (_testClasses.Count == 0)
         {

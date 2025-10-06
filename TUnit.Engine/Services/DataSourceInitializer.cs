@@ -74,7 +74,7 @@ internal sealed class DataSourceInitializer
         try
         {
             // Ensure we have required context
-            objectBag ??= new Dictionary<string, object?>();
+            objectBag ??= new Dictionary<string, object?>(capacity: 8);
             events ??= new TestContextEvents();
 
             // Initialize the data source directly here
@@ -111,7 +111,7 @@ internal sealed class DataSourceInitializer
     #endif
     private async Task InitializeNestedObjectsAsync(object rootObject)
     {
-        var objectsByDepth = new Dictionary<int, HashSet<object>>();
+        var objectsByDepth = new Dictionary<int, HashSet<object>>(capacity: 4);
         var visitedObjects = new HashSet<object>();
 
         // Collect all nested property-injected objects grouped by depth

@@ -58,17 +58,26 @@ public class TestSessionContext : Context
     public required string? TestFilter { get; init; }
 
     private readonly List<AssemblyHookContext> _assemblies = [];
+    private ClassHookContext[]? _cachedTestClasses;
+    private TestContext[]? _cachedAllTests;
 
     public void AddAssembly(AssemblyHookContext assemblyHookContext)
     {
         _assemblies.Add(assemblyHookContext);
+        InvalidateCaches();
     }
 
     public IReadOnlyList<AssemblyHookContext> Assemblies => _assemblies;
 
-    public IReadOnlyList<ClassHookContext> TestClasses => Assemblies.SelectMany(x => x.TestClasses).ToArray();
+    public IReadOnlyList<ClassHookContext> TestClasses => _cachedTestClasses ??= Assemblies.SelectMany(x => x.TestClasses).ToArray();
 
-    public IReadOnlyList<TestContext> AllTests => TestClasses.SelectMany(x => x.Tests).ToArray();
+    public IReadOnlyList<TestContext> AllTests => _cachedAllTests ??= TestClasses.SelectMany(x => x.Tests).ToArray();
+
+    private void InvalidateCaches()
+    {
+        _cachedTestClasses = null;
+        _cachedAllTests = null;
+    }
 
     internal bool FirstTestStarted { get; set; }
 
@@ -82,6 +91,7 @@ public class TestSessionContext : Context
     internal void RemoveAssembly(AssemblyHookContext assemblyContext)
     {
         _assemblies.Remove(assemblyContext);
+        InvalidateCaches();
     }
 
     internal override void SetAsyncLocalContext()

@@ -9,6 +9,7 @@ using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Generators;
@@ -1273,17 +1274,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool IsAsyncEnumerable(ITypeSymbol type)
     {
-        // Check if the type itself is an IAsyncEnumerable<T>
-        if (type is INamedTypeSymbol { IsGenericType: true } namedType &&
-            namedType.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>")
-        {
-            return true;
-        }
-
-        // Check if the type implements IAsyncEnumerable<T>
-        return type.AllInterfaces.Any(i =>
-            i.IsGenericType &&
-            i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>");
+        // Use cached interface check
+        return InterfaceCache.IsAsyncEnumerable(type);
     }
 
     private static bool IsTask(ITypeSymbol type)
@@ -1295,14 +1287,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool IsEnumerable(ITypeSymbol type)
     {
-        if (type.SpecialType == SpecialType.System_String)
-        {
-            return false;
-        }
-
-        return type.AllInterfaces.Any(i =>
-            i.OriginalDefinition.ToDisplayString() == "System.Collections.IEnumerable" ||
-            (i.IsGenericType && i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>"));
+        // Use cached interface check (already handles string exclusion)
+        return InterfaceCache.IsEnumerable(type);
     }
 
     private static void WriteTypedConstant(CodeWriter writer, TypedConstant constant)
