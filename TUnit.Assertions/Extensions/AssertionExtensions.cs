@@ -477,30 +477,26 @@ public static class AssertionExtensions
     /// Asserts that the dictionary contains the specified key.
     /// Example: await Assert.That(dict).ContainsKey("key");
     /// </summary>
-    public static DictionaryContainsKeyAssertion<TKey, TValue> ContainsKey<TDictionary, TKey, TValue>(
-        this IAssertionSource<TDictionary> source,
+    public static DictionaryContainsKeyAssertion<TKey, TValue> ContainsKey<TKey, TValue>(
+        this IAssertionSource<IReadOnlyDictionary<TKey, TValue>> source,
         TKey key,
         [CallerArgumentExpression(nameof(key))] string? expression = null)
-        where TDictionary : IReadOnlyDictionary<TKey, TValue>
     {
         source.ExpressionBuilder.Append($".ContainsKey({expression})");
-        var mappedContext = source.Context.Map<IReadOnlyDictionary<TKey, TValue>>(dict => dict);
-        return new DictionaryContainsKeyAssertion<TKey, TValue>(mappedContext, key, source.ExpressionBuilder);
+        return new DictionaryContainsKeyAssertion<TKey, TValue>(source.Context, key, source.ExpressionBuilder);
     }
 
     /// <summary>
     /// Asserts that the dictionary does NOT contain the specified key.
     /// Example: await Assert.That(dict).DoesNotContainKey("key");
     /// </summary>
-    public static DictionaryDoesNotContainKeyAssertion<TKey, TValue> DoesNotContainKey<TDictionary, TKey, TValue>(
-        this IAssertionSource<TDictionary> source,
+    public static DictionaryDoesNotContainKeyAssertion<TKey, TValue> DoesNotContainKey<TKey, TValue>(
+        this IAssertionSource<IReadOnlyDictionary<TKey, TValue>> source,
         TKey key,
         [CallerArgumentExpression(nameof(key))] string? expression = null)
-        where TDictionary : IReadOnlyDictionary<TKey, TValue>
     {
         source.ExpressionBuilder.Append($".DoesNotContainKey({expression})");
-        var mappedContext = source.Context.Map<IReadOnlyDictionary<TKey, TValue>>(dict => dict);
-        return new DictionaryDoesNotContainKeyAssertion<TKey, TValue>(mappedContext, key, source.ExpressionBuilder);
+        return new DictionaryDoesNotContainKeyAssertion<TKey, TValue>(source.Context, key, source.ExpressionBuilder);
     }
 
     // ============ COLLECTION ASSERTIONS ============

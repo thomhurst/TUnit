@@ -12,6 +12,57 @@ namespace TUnit.Assertions;
 public static class Assert
 {
     /// <summary>
+    /// Creates an assertion for a Dictionary value.
+    /// This overload enables better type inference for dictionary operations like ContainsKey.
+    /// Example: await Assert.That(dict).ContainsKey("key");
+    /// </summary>
+    public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
+        Dictionary<TKey, TValue> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+        where TKey : notnull
+    {
+        return new DictionaryAssertion<TKey, TValue>(value, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for an ImmutableDictionary value.
+    /// This overload enables better type inference for dictionary operations like ContainsKey.
+    /// Example: await Assert.That(dict).ContainsKey("key");
+    /// </summary>
+    public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
+        System.Collections.Immutable.ImmutableDictionary<TKey, TValue> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+        where TKey : notnull
+    {
+        return new DictionaryAssertion<TKey, TValue>(value, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for a ReadOnlyDictionary value.
+    /// This overload enables better type inference for dictionary operations like ContainsKey.
+    /// Example: await Assert.That(dict).ContainsKey("key");
+    /// </summary>
+    public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
+        System.Collections.ObjectModel.ReadOnlyDictionary<TKey, TValue> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+        where TKey : notnull
+    {
+        return new DictionaryAssertion<TKey, TValue>(value, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for an IReadOnlyDictionary value.
+    /// This overload enables better type inference for dictionary operations like ContainsKey.
+    /// Example: await Assert.That(dict).ContainsKey("key");
+    /// </summary>
+    public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
+        IReadOnlyDictionary<TKey, TValue> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new DictionaryAssertion<TKey, TValue>(value, expression);
+    }
+
+    /// <summary>
     /// Creates an assertion for an immediate value.
     /// Example: await Assert.That(42).IsEqualTo(42);
     /// </summary>
