@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Analyzers.Tests.Verifiers;
 
@@ -35,7 +34,7 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
                 AdditionalReferences =
                 {
                     typeof(TUnitAttribute).Assembly.Location,
-                    typeof(AssertionBuilder).Assembly.Location,
+                    typeof(Assert).Assembly.Location,
                 },
             },
             CompilerDiagnostics = CompilerDiagnostics.None

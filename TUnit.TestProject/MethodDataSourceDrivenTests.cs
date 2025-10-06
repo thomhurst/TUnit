@@ -60,7 +60,9 @@ public class MethodDataSourceDrivenTests
     [MethodDataSource(nameof(EnumerableFuncArrayTestData))]
     public async Task EnumerableFuncArrayTest(string[] strings)
     {
-        await Assert.That(strings).IsTypeOf<string[]>();
+        // Fixed: IsTypeOf requires IAssertionSource<object>, not IAssertionSource<string[]>
+        // This test doesn't make sense anyway since strings is already string[] at compile time
+        await Assert.That(strings).IsNotNull();
     }
 
     public static IEnumerable<Func<string[]>> EnumerableFuncArrayTestData()

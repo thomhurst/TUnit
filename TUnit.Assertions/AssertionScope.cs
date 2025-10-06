@@ -3,6 +3,11 @@ using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions;
 
+/// <summary>
+/// Internal implementation of Assert.Multiple() functionality.
+/// Accumulates assertion failures instead of throwing immediately,
+/// then throws all failures together when disposed.
+/// </summary>
 internal class AssertionScope : IDisposable
 {
     private static readonly AsyncLocal<AssertionScope?> CurrentScope = new();
@@ -44,7 +49,7 @@ internal class AssertionScope : IDisposable
 
         if (_exceptions.Count > 0 && _exceptions.All(e => e is not AssertionException))
         {
-            // If there's no assertion exceptions, return, and user thrown exceptions should just propogate up
+            // If there's no assertion exceptions, return, and user thrown exceptions should just propagate up
             return;
         }
 

@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using TUnit.Assertions.Analyzers.CodeFixers.Tests.Extensions;
-using TUnit.Assertions.AssertionBuilders;
 
 namespace TUnit.Assertions.Analyzers.CodeFixers.Tests.Verifiers;
 
@@ -41,7 +40,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
                 AdditionalReferences =
                 {
                     typeof(TUnitAttribute).Assembly.Location,
-                    typeof(AssertionBuilder).Assembly.Location,
+                    typeof(Assert).Assembly.Location,
                 },
             },
         };
@@ -76,7 +75,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
                 AdditionalReferences =
                 {
                     typeof(TUnitAttribute).Assembly.Location,
-                    typeof(AssertionBuilder).Assembly.Location,
+                    typeof(Assert).Assembly.Location,
                 },
             },
             CodeActionValidationMode = CodeActionValidationMode.SemanticStructure,
