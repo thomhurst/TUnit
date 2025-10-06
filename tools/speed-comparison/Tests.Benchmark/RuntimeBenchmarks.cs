@@ -41,7 +41,7 @@ public class RuntimeBenchmarks : BenchmarkBase
         var dllPath = Path.Combine(UnifiedPath, "bin", "Release-NUNIT", Framework, "UnifiedTests.dll");
 
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithArguments(["vstest", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
@@ -52,7 +52,7 @@ public class RuntimeBenchmarks : BenchmarkBase
         var dllPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT", Framework, "UnifiedTests.dll");
 
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithArguments(["vstest", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
@@ -63,7 +63,7 @@ public class RuntimeBenchmarks : BenchmarkBase
         var dllPath = Path.Combine(UnifiedPath, "bin", "Release-MSTEST", Framework, "UnifiedTests.dll");
 
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
+            .WithArguments(["vstest", dllPath, "--filter", $"FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
