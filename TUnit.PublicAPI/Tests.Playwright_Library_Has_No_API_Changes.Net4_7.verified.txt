@@ -1,14 +1,6 @@
 ﻿[assembly: .(".NETStandard,Version=v2.0", FrameworkDisplayName=".NET Standard 2.0")]
 namespace 
 {
-    public static class AotMethodInvokers
-    {
-        public static string GetMethodKey(string typeName, string methodName, int parameterCount = 0) { }
-        public static .<object?> InvokeMethodAsync(string methodKey, object? instance, params object?[]? parameters) { }
-    }
-}
-namespace 
-{
     public class BrowserTest : .PlaywrightTest
     {
         public BrowserTest() { }
