@@ -10,4 +10,12 @@ public class MyTests : TestBase
     {
         TestContext.Current!.GetDefaultLogger().LogInformation("Blah");
     }
+
+    [Test]
+    [Arguments(1)]
+    [Arguments(2)]
+    public void DataTest(int value)
+    {
+        TestContext.Current!.GetDefaultLogger().LogInformation(value);
+    }
 }
