@@ -174,7 +174,7 @@ public abstract class InvokableTestBase(TestMode testMode)
                                  @$"Output: {commandResult?.StandardOutput}"
 
                                  Expression: {assertionExpression}
-                                 """, e);
+                                 """);
         }
     }
 }
