@@ -35,11 +35,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetInheritsTestsClassMetadata(ctx))
             .Where(static m => m is not null);
 
-        context.RegisterSourceOutput(testMethodsProvider.Combine(context.CompilationProvider),
-            static (context, tuple) => GenerateTestMethodSource(context, tuple.Right, tuple.Left));
+        context.RegisterSourceOutput(testMethodsProvider,
+            static (context, testMethod) => GenerateTestMethodSource(context, testMethod));
 
-        context.RegisterSourceOutput(inheritsTestsClassesProvider.Combine(context.CompilationProvider),
-            static (context, tuple) => GenerateInheritedTestSources(context, tuple.Right, tuple.Left));
+        context.RegisterSourceOutput(inheritsTestsClassesProvider,
+            static (context, classInfo) => GenerateInheritedTestSources(context, classInfo));
     }
 
     private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context)
@@ -59,7 +59,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return new InheritsTestsClassMetadata
         {
             TypeSymbol = classSymbol,
-            ClassSyntax = classSyntax
+            ClassSyntax = classSyntax,
+            Context = context
         };
     }
 
@@ -102,7 +103,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         };
     }
 
-    private static void GenerateInheritedTestSources(SourceProductionContext context, Compilation compilation, InheritsTestsClassMetadata? classInfo)
+    private static void GenerateInheritedTestSources(SourceProductionContext context, InheritsTestsClassMetadata? classInfo)
     {
         if (classInfo?.TypeSymbol == null)
         {
@@ -150,7 +151,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 FilePath = filePath,
                 LineNumber = lineNumber,
                 TestAttribute = testAttribute,
-                Context = null, // No context for inherited tests
+                Context = classInfo.Context, // Use class context to access Compilation
                 MethodSyntax = null, // No syntax for inherited methods
                 IsGenericType = typeForMetadata.IsGenericType,
                 IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
@@ -158,7 +159,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 InheritanceDepth = inheritanceDepth
             };
 
-            GenerateTestMethodSource(context, compilation, testMethodMetadata);
+            GenerateTestMethodSource(context, testMethodMetadata);
         }
     }
 
@@ -185,18 +186,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return depth;
     }
 
-    private static void GenerateTestMethodSource(SourceProductionContext context, Compilation compilation, TestMethodMetadata? testMethod)
+    private static void GenerateTestMethodSource(SourceProductionContext context, TestMethodMetadata? testMethod)
     {
         try
         {
-            if (testMethod?.MethodSymbol == null)
+            if (testMethod?.MethodSymbol == null || testMethod.Context == null)
             {
                 return;
             }
 
+            // Get compilation from semantic model instead of parameter
+            var compilation = testMethod.Context.Value.SemanticModel.Compilation;
+
             var writer = new CodeWriter();
             GenerateFileHeader(writer);
-            GenerateTestMetadata(writer, compilation, testMethod);
+            GenerateTestMetadata(writer, testMethod);
 
             var fileName = $"{testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_{Guid.NewGuid():N}.g.cs";
             context.AddSource(fileName, SourceText.From(writer.ToString(), Encoding.UTF8));
@@ -230,8 +234,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static void GenerateTestMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GenerateTestMetadata(CodeWriter writer, TestMethodMetadata testMethod)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+
         var className = testMethod.TypeSymbol.GloballyQualified();
         var methodName = testMethod.MethodSymbol.Name;
         var guid = Guid.NewGuid().ToString("N");
@@ -277,16 +283,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArguments || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType || hasMethodDataSourceForGenericType)
             {
-                GenerateGenericTestWithConcreteTypes(writer, compilation, testMethod, className, combinationGuid);
+                GenerateGenericTestWithConcreteTypes(writer, testMethod, className, combinationGuid);
             }
             else
             {
-                GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
+                GenerateTestMetadataInstance(writer, testMethod, className, combinationGuid);
             }
         }
         else
         {
-            GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
+            GenerateTestMetadataInstance(writer, testMethod, className, combinationGuid);
         }
 
         writer.AppendLine("yield break;");
@@ -301,12 +307,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateSpecificGenericInstantiation(
         CodeWriter writer,
-        Compilation compilation,
         TestMethodMetadata testMethod,
         string className,
         string combinationGuid,
         ImmutableArray<ITypeSymbol> typeArguments)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
         var typeArgsString = string.Join(", ", typeArguments.Select(t => t.GloballyQualified()));
         var instantiatedMethodName = $"{methodName}<{typeArgsString}>";
@@ -338,7 +344,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
         writer.AppendLine($"GenericMethodTypeArguments = new global::System.Type[] {{ {string.Join(", ", typeArguments.Select(t => $"typeof({t.GloballyQualified()})"))}}},");
 
-        GenerateMetadata(writer, compilation, concreteTestMethod);
+        GenerateMetadata(writer, concreteTestMethod);
 
         if (testMethod.IsGenericType)
         {
@@ -456,7 +462,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return type;
     }
 
-    private static void GenerateTestMetadataInstance(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod, string className, string combinationGuid)
+    private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className, string combinationGuid)
     {
         var methodName = testMethod.MethodSymbol.Name;
 
@@ -477,7 +483,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestClassType = {GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)},");
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
 
-        GenerateMetadata(writer, compilation, testMethod);
+        GenerateMetadata(writer, testMethod);
 
         if (testMethod.IsGenericType)
         {
@@ -509,8 +515,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("yield return metadata;");
     }
 
-    private static void GenerateMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GenerateMetadata(CodeWriter writer, TestMethodMetadata testMethod)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodSymbol = testMethod.MethodSymbol;
 
 
@@ -531,7 +538,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("],");
 
-        GenerateDataSources(writer, compilation, testMethod);
+        GenerateDataSources(writer, testMethod);
 
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
@@ -547,8 +554,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
     }
 
-    private static void GenerateMetadataForConcreteInstantiation(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GenerateMetadataForConcreteInstantiation(CodeWriter writer, TestMethodMetadata testMethod)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodSymbol = testMethod.MethodSymbol;
 
 
@@ -591,8 +599,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
 
-    private static void GenerateDataSources(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GenerateDataSources(CodeWriter writer, TestMethodMetadata testMethod)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodSymbol = testMethod.MethodSymbol;
         var typeSymbol = testMethod.TypeSymbol;
 
@@ -647,7 +656,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Generate property data sources
-        GeneratePropertyDataSources(writer, compilation, testMethod);
+        GeneratePropertyDataSources(writer, testMethod);
     }
 
     private static void GenerateDataSourceAttribute(CodeWriter writer, Compilation compilation, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
@@ -1482,8 +1491,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GeneratePropertyDataSources(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GeneratePropertyDataSources(CodeWriter writer, TestMethodMetadata testMethod)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var typeSymbol = testMethod.TypeSymbol;
         var currentType = typeSymbol;
         var processedProperties = new HashSet<string>();
@@ -2564,11 +2574,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateGenericTestWithConcreteTypes(
         CodeWriter writer,
-        Compilation compilation,
         TestMethodMetadata testMethod,
         string className,
         string combinationGuid)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
 
         writer.AppendLine("// Create generic metadata with concrete type registrations");
@@ -2593,7 +2603,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
 
         // Add basic metadata (excluding data source attributes for concrete instantiations)
-        GenerateMetadataForConcreteInstantiation(writer, compilation, testMethod);
+        GenerateMetadataForConcreteInstantiation(writer, testMethod);
 
         // Generate instance factory that works with generic types
         writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
@@ -2691,7 +2701,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     // Generate a concrete instantiation for this type combination
                     writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(FormatTypeForRuntimeName))}] = ");
-                    GenerateConcreteTestMetadata(writer, compilation, testMethod, className, combinedTypes, classAttr);
+                    GenerateConcreteTestMetadata(writer, testMethod, className, combinedTypes, classAttr);
                     writer.AppendLine(",");
                 }
             }
@@ -2755,7 +2765,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     // Generate a concrete instantiation for this type combination
                     writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
-                    GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, argAttr);
+                    GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes, argAttr);
                     writer.AppendLine(",");
                 }
             }
@@ -2791,7 +2801,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     // Generate a concrete instantiation for this type combination
                     writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
-                    GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, methodArgAttr);
+                    GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes, methodArgAttr);
                     writer.AppendLine(",");
                 }
             }
@@ -2835,7 +2845,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 // Generate a concrete instantiation for this type combination
                 writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
-                GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, dataSourceAttr);
+                GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes, dataSourceAttr);
                 writer.AppendLine(",");
             }
         }
@@ -2856,7 +2866,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     {
                         // Generate a concrete instantiation for this type combination
                         writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
-                        GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                        GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes);
                         writer.AppendLine(",");
                     }
                 }
@@ -2886,7 +2896,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         {
                             // Generate a concrete instantiation for this type combination
                             writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
-                            GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                            GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes);
                             writer.AppendLine(",");
                         }
                     }
@@ -2910,7 +2920,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     {
                         // Generate a concrete instantiation for this type combination
                         writer.AppendLine($"[{string.Join(" + \",\" + ", typedDataSourceInferredTypes.Select(FormatTypeForRuntimeName))}] = ");
-                        GenerateConcreteTestMetadata(writer, compilation, testMethod, className, typedDataSourceInferredTypes);
+                        GenerateConcreteTestMetadata(writer, testMethod, className, typedDataSourceInferredTypes);
                         writer.AppendLine(",");
                     }
                 }
@@ -2940,7 +2950,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         {
                             // Generate a concrete instantiation for this type combination
                             writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
-                            GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                            GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes);
                             writer.AppendLine(",");
                         }
                     }
@@ -2988,7 +2998,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                                     {
                                         // Generate a concrete instantiation for this type combination
                                         writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(FormatTypeForRuntimeName))}] = ");
-                                        GenerateConcreteTestMetadata(writer, compilation, testMethod, className, combinedTypes, argAttr);
+                                        GenerateConcreteTestMetadata(writer, testMethod, className, combinedTypes, argAttr);
                                         writer.AppendLine(",");
                                     }
                                 }
@@ -3008,7 +3018,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             {
                                 // Generate a concrete instantiation for this type combination
                                 writer.AppendLine($"[{string.Join(" + \",\" + ", classInferredTypes.Select(FormatTypeForRuntimeName))}] = ");
-                                GenerateConcreteTestMetadata(writer, compilation, testMethod, className, classInferredTypes, argAttr);
+                                GenerateConcreteTestMetadata(writer, testMethod, className, classInferredTypes, argAttr);
                                 writer.AppendLine(",");
                             }
                         }
@@ -3044,7 +3054,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         // Generate a concrete test metadata for this combination
                         writer.AppendLine($"// Class arguments: {string.Join(", ", classArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
                         writer.AppendLine($"// Method arguments: {string.Join(", ", methodArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
-                        GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, classArgAttr, methodArgAttr);
+                        GenerateConcreteTestMetadataForNonGeneric(writer, testMethod, className, classArgAttr, methodArgAttr);
                         writer.AppendLine();
                     }
                 }
@@ -3055,7 +3065,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 foreach (var classArgAttr in nonGenericClassArguments)
                 {
                     writer.AppendLine($"// Class arguments: {string.Join(", ", classArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
-                    GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, classArgAttr, null);
+                    GenerateConcreteTestMetadataForNonGeneric(writer, testMethod, className, classArgAttr, null);
                     writer.AppendLine();
                 }
             }
@@ -3065,7 +3075,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 foreach (var methodArgAttr in nonGenericMethodArguments)
                 {
                     writer.AppendLine($"// Method arguments: {string.Join(", ", methodArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
-                    GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, null, methodArgAttr);
+                    GenerateConcreteTestMetadataForNonGeneric(writer, testMethod, className, null, methodArgAttr);
                     writer.AppendLine();
                 }
             }
@@ -3076,7 +3086,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 foreach (var dataSourceAttr in nonGenericClassDataSourceGenerators)
                 {
                     writer.AppendLine($"// Class data source generator: {dataSourceAttr.AttributeClass?.Name}");
-                    GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, dataSourceAttr, null);
+                    GenerateConcreteTestMetadataForNonGeneric(writer, testMethod, className, dataSourceAttr, null);
                     writer.AppendLine();
                 }
             }
@@ -3134,7 +3144,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             // Generate a concrete instantiation for this type combination
                             // Use the same key format as runtime: FullName ?? Name
                             writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
-                            GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                            GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes);
                             writer.AppendLine(",");
                         }
                     }
@@ -4048,12 +4058,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateConcreteTestMetadata(
         CodeWriter writer,
-        Compilation compilation,
         TestMethodMetadata testMethod,
         string className,
         ITypeSymbol[] typeArguments,
         AttributeData? specificArgumentsAttribute = null)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
 
         // Separate class type arguments from method type arguments
@@ -4105,7 +4115,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Generate metadata with filtered data sources for this specific type
-        GenerateConcreteMetadataWithFilteredDataSources(writer, compilation, testMethod, specificArgumentsAttribute, typeArguments);
+        GenerateConcreteMetadataWithFilteredDataSources(writer, testMethod, specificArgumentsAttribute, typeArguments);
 
         // Generate instance factory
         writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
@@ -4255,11 +4265,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateConcreteMetadataWithFilteredDataSources(
         CodeWriter writer,
-        Compilation compilation,
         TestMethodMetadata testMethod,
         AttributeData? specificArgumentsAttribute,
         ITypeSymbol[] typeArguments)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodSymbol = testMethod.MethodSymbol;
         var typeSymbol = testMethod.TypeSymbol;
 
@@ -4566,12 +4576,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateConcreteTestMetadataForNonGeneric(
         CodeWriter writer,
-        Compilation compilation,
         TestMethodMetadata testMethod,
         string className,
         AttributeData? classDataSourceAttribute,
         AttributeData? methodDataSourceAttribute)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
 
         writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{className}>");
@@ -4651,7 +4661,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Generate property data sources and injections
-        GeneratePropertyDataSources(writer, compilation, testMethod);
+        GeneratePropertyDataSources(writer, testMethod);
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, className);
 
 
@@ -4731,5 +4741,6 @@ public class InheritsTestsClassMetadata
 {
     public required INamedTypeSymbol TypeSymbol { get; init; }
     public required ClassDeclarationSyntax ClassSyntax { get; init; }
+    public GeneratorAttributeSyntaxContext Context { get; init; }
 }
 
