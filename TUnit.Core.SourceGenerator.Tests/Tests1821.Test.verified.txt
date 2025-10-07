@@ -35,17 +35,17 @@ internal sealed class Tests_MethodDataSource_TestSource_GUID : global::TUnit.Cor
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1821.Tests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.Tests)),
                 Name = "MethodDataSource",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(string))
                     {
                         Name = "value",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetMethod("MethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
@@ -55,7 +55,7 @@ internal sealed class Tests_MethodDataSource_TestSource_GUID : global::TUnit.Cor
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1821.Tests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._1821",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -64,7 +64,7 @@ internal sealed class Tests_MethodDataSource_TestSource_GUID : global::TUnit.Cor
                             new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._1821.MyData))
                             {
                                 Name = "data",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1821.MyData, TestsBase`1"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.MyData)),
                                 IsNullable = false,
                                 ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1821.MyData) })!.GetParameters()[0]
                             }
@@ -150,17 +150,17 @@ internal sealed class Tests_MatrixDataSource_TestSource_GUID : global::TUnit.Cor
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1821.Tests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.Tests)),
                 Name = "MatrixDataSource",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(string))
                     {
                         Name = "value",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetMethod("MatrixDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
@@ -170,7 +170,7 @@ internal sealed class Tests_MatrixDataSource_TestSource_GUID : global::TUnit.Cor
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1821.Tests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._1821",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -179,7 +179,7 @@ internal sealed class Tests_MatrixDataSource_TestSource_GUID : global::TUnit.Cor
                             new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._1821.MyData))
                             {
                                 Name = "data",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1821.MyData, TestsBase`1"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.MyData)),
                                 IsNullable = false,
                                 ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1821.MyData) })!.GetParameters()[0]
                             }

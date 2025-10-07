@@ -14,27 +14,27 @@ public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClas
     public MethodMetadata MethodInfo => field ??= new MethodMetadata
     {
         Type = typeof(ILastTestInClassEventReceiver),
-        TypeReference = TypeReference.CreateConcrete(typeof(ILastTestInClassEventReceiver).AssemblyQualifiedName!),
+        TypeInfo = new ConcreteType(typeof(ILastTestInClassEventReceiver)),
         Name = nameof(lastTestInClassEventReceiver.OnLastTestInClass),
         Parameters = [new ParameterMetadata<ClassHookContext>
         {
-            TypeReference = TypeReference.CreateConcrete(typeof(ClassHookContext).AssemblyQualifiedName!),
+            TypeInfo = new ConcreteType(typeof(ClassHookContext)),
             Name = "context",
             ReflectionInfo = typeof(ILastTestInClassEventReceiver).GetMethod(nameof(ILastTestInClassEventReceiver.OnLastTestInClass))!.GetParameters()[0],
         }, new ParameterMetadata<TestContext>
         {
-            TypeReference = TypeReference.CreateConcrete(typeof(TestContext).AssemblyQualifiedName!),
+            TypeInfo = new ConcreteType(typeof(TestContext)),
             Name = "testContext",
             ReflectionInfo = typeof(ILastTestInClassEventReceiver).GetMethod(nameof(ILastTestInClassEventReceiver.OnLastTestInClass))!.GetParameters()[0],
         }],
         GenericTypeCount = 0,
         ReturnType = typeof(ValueTask),
-        ReturnTypeReference = TypeReference.CreateConcrete(typeof(ValueTask).AssemblyQualifiedName!),
+        ReturnTypeInfo = new ConcreteType(typeof(ValueTask)),
         Class = new ClassMetadata
         {
             Parent = null,
             Type = typeof(ILastTestInClassEventReceiver),
-            TypeReference = TypeReference.CreateConcrete(typeof(ILastTestInClassEventReceiver).AssemblyQualifiedName!),
+            TypeInfo = new ConcreteType(typeof(ILastTestInClassEventReceiver)),
             Assembly = new AssemblyMetadata
             {
                 Name = "TUnit.Core",

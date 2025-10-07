@@ -31,17 +31,17 @@ internal sealed class ConstantArgumentsTests_String1_TestSource_GUID : global::T
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                 Name = "String1",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(string))
                     {
                         Name = "dummy",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("String1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
@@ -51,7 +51,7 @@ internal sealed class ConstantArgumentsTests_String1_TestSource_GUID : global::T
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                         Name = "ConstantArgumentsTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -130,17 +130,17 @@ internal sealed class ConstantArgumentsTests_Int_TestSource_GUID : global::TUnit
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                 Name = "Int",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(int))
                     {
                         Name = "dummy",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Int", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
                     }
@@ -150,7 +150,7 @@ internal sealed class ConstantArgumentsTests_Int_TestSource_GUID : global::TUnit
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                         Name = "ConstantArgumentsTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -229,17 +229,17 @@ internal sealed class ConstantArgumentsTests_Double_TestSource_GUID : global::TU
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                 Name = "Double",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(double))
                     {
                         Name = "dummy",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("double, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(double)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Double", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
                     }
@@ -249,7 +249,7 @@ internal sealed class ConstantArgumentsTests_Double_TestSource_GUID : global::TU
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                         Name = "ConstantArgumentsTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -328,17 +328,17 @@ internal sealed class ConstantArgumentsTests_Float_TestSource_GUID : global::TUn
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                 Name = "Float",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(float))
                     {
                         Name = "dummy",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("float, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(float)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Float", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
                     }
@@ -348,7 +348,7 @@ internal sealed class ConstantArgumentsTests_Float_TestSource_GUID : global::TUn
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                         Name = "ConstantArgumentsTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -427,17 +427,17 @@ internal sealed class ConstantArgumentsTests_Long_TestSource_GUID : global::TUni
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                 Name = "Long",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(long))
                     {
                         Name = "dummy",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("long, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(long)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("Long", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0]
                     }
@@ -447,7 +447,7 @@ internal sealed class ConstantArgumentsTests_Long_TestSource_GUID : global::TUni
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                         Name = "ConstantArgumentsTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -526,17 +526,17 @@ internal sealed class ConstantArgumentsTests_UInt_TestSource_GUID : global::TUni
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                 Name = "UInt",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(uint))
                     {
                         Name = "dummy",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("uint, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(uint)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("UInt", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(uint) }, null)!.GetParameters()[0]
                     }
@@ -546,7 +546,7 @@ internal sealed class ConstantArgumentsTests_UInt_TestSource_GUID : global::TUni
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                         Name = "ConstantArgumentsTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -625,17 +625,17 @@ internal sealed class ConstantArgumentsTests_ULong_TestSource_GUID : global::TUn
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                 Name = "ULong",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(ulong))
                     {
                         Name = "dummy",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("ulong, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(ulong)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ConstantArgumentsTests).GetMethod("ULong", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(ulong) }, null)!.GetParameters()[0]
                     }
@@ -645,7 +645,7 @@ internal sealed class ConstantArgumentsTests_ULong_TestSource_GUID : global::TUn
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ConstantArgumentsTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ConstantArgumentsTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConstantArgumentsTests)),
                         Name = "ConstantArgumentsTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),

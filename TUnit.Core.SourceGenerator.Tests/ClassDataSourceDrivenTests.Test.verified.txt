@@ -31,17 +31,17 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_TestSource_GUI
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                 Name = "DataSource_Class",
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass))
                     {
                         Name = "value",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Library.Models.SomeAsyncDisposableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
                     }
@@ -51,7 +51,7 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_TestSource_GUI
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                         Name = "ClassDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -131,17 +131,17 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_Generic_TestSo
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                 Name = "DataSource_Class_Generic",
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass))
                     {
                         Name = "value",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Library.Models.SomeAsyncDisposableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("DataSource_Class_Generic", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass) }, null)!.GetParameters()[0]
                     }
@@ -151,7 +151,7 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_Generic_TestSo
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                         Name = "ClassDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -231,17 +231,17 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataS
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                 Name = "IsInitialized_With_1_ClassDataSource",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class1",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_1_ClassDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass) }, null)!.GetParameters()[0]
                     }
@@ -251,7 +251,7 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataS
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                         Name = "ClassDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -330,24 +330,24 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataS
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                 Name = "IsInitialized_With_2_ClassDataSources",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class1",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[0]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class2",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_2_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[1]
                     }
@@ -357,7 +357,7 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataS
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                         Name = "ClassDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -436,31 +436,31 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataS
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                 Name = "IsInitialized_With_3_ClassDataSources",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class1",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[0]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class2",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[1]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class3",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_3_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[2]
                     }
@@ -470,7 +470,7 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataS
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                         Name = "ClassDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -549,38 +549,38 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataS
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                 Name = "IsInitialized_With_4_ClassDataSources",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class1",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[0]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class2",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[1]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class3",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[2]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class4",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_4_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[3]
                     }
@@ -590,7 +590,7 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataS
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                         Name = "ClassDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -669,45 +669,45 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataS
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                 Name = "IsInitialized_With_5_ClassDataSources",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class1",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[0]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class2",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[1]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class3",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[2]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class4",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[3]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(InitializableClass))
                     {
                         Name = "class5",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("InitializableClass, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(InitializableClass)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests).GetMethod("IsInitialized_With_5_ClassDataSources", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass), typeof(InitializableClass) }, null)!.GetParameters()[4]
                     }
@@ -717,7 +717,7 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataS
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ClassDataSourceDrivenTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests)),
                         Name = "ClassDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),

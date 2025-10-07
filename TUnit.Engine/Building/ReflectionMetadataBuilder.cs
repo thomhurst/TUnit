@@ -24,20 +24,20 @@ internal static class ReflectionMetadataBuilder
         {
             Name = method.Name,
             Type = type,
-            TypeReference = CreateTypeReference(type),
+            TypeInfo = CreateTypeInfo(type),
             Class = CreateClassMetadata(type),
             Parameters = method.GetParameters()
                 .Select((p, i) => CreateParameterMetadata(p.ParameterType, p.Name ?? "unnamed", i, p))
                 .ToArray(),
             GenericTypeCount = method.IsGenericMethodDefinition ? method.GetGenericArguments().Length : 0,
-            ReturnTypeReference = CreateTypeReference(method.ReturnType),
+            ReturnTypeInfo = CreateTypeInfo(method.ReturnType),
             ReturnType = method.ReturnType
         };
     }
 
-    private static TypeReference CreateTypeReference(Type type)
+    private static TypeInfo CreateTypeInfo(Type type)
     {
-        return TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name);
+        return new ConcreteType(type);
     }
 
 #if NET6_0_OR_GREATER
@@ -51,7 +51,7 @@ internal static class ReflectionMetadataBuilder
         return new ParameterMetadata(parameterType)
         {
             Name = name ?? $"param{index}",
-            TypeReference = CreateTypeReference(parameterType),
+            TypeInfo = CreateTypeInfo(parameterType),
             ReflectionInfo = reflectionInfo,
             Type = parameterType,
             IsNullable = parameterType.IsGenericType && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>)
@@ -82,7 +82,7 @@ internal static class ReflectionMetadataBuilder
             {
                 Name = type.Name,
                 Type = type,
-                TypeReference = CreateTypeReference(type),
+                TypeInfo = CreateTypeInfo(type),
                 Namespace = type.Namespace ?? string.Empty,
                 Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().FullName, () => new AssemblyMetadata
                 {

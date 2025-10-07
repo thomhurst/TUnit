@@ -31,17 +31,17 @@ internal sealed class Tests_Casted_Integer_To_Short_Converts_TestSource_GUID : g
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1603.Tests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1603.Tests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1603.Tests)),
                 Name = "Casted_Integer_To_Short_Converts",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(short))
                     {
                         Name = "value",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("short, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(short)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1603.Tests).GetMethod("Casted_Integer_To_Short_Converts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(short) }, null)!.GetParameters()[0]
                     }
@@ -51,7 +51,7 @@ internal sealed class Tests_Casted_Integer_To_Short_Converts_TestSource_GUID : g
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._1603.Tests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1603.Tests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1603.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._1603",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -130,17 +130,17 @@ internal sealed class Tests_Integer_To_Short_Converts_TestSource_GUID : global::
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1603.Tests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1603.Tests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1603.Tests)),
                 Name = "Integer_To_Short_Converts",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(short))
                     {
                         Name = "value",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("short, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(short)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1603.Tests).GetMethod("Integer_To_Short_Converts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(short) }, null)!.GetParameters()[0]
                     }
@@ -150,7 +150,7 @@ internal sealed class Tests_Integer_To_Short_Converts_TestSource_GUID : global::
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._1603.Tests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1603.Tests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1603.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._1603",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),

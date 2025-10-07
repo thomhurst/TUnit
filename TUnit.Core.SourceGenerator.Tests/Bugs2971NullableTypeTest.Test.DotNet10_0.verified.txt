@@ -28,18 +28,18 @@ internal sealed class Tests_SimpleTest_TestSource_GUID : global::TUnit.Core.Inte
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._2971.Tests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2971.Tests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2971.Tests)),
                 Name = "SimpleTest",
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2971.Tests", () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._2971.Tests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2971.Tests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2971.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._2971",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),

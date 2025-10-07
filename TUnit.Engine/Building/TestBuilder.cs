@@ -427,9 +427,9 @@ internal sealed class TestBuilder : ITestBuilder
                     // Check if this corresponds to a class generic parameter
                     // by looking at the method metadata
 
-                    if (methodParam.TypeReference is { IsGenericParameter: true, IsMethodGenericParameter: false })
+                    if (methodParam.TypeInfo is GenericParameter { IsMethodParameter: false } gp)
                     {
-                        var genericParamName = methodParam.TypeReference.GenericParameterName;
+                        var genericParamName = gp.Name;
                         // Find the matching generic parameter in the class
                         var matchingClassParam = genericParameters.FirstOrDefault(p => p.Name == genericParamName);
                         if (matchingClassParam != null)
@@ -577,9 +577,9 @@ internal sealed class TestBuilder : ITestBuilder
                                 if (paramType == typeof(object)) // Placeholder for generic parameter
                                 {
                                     var methodParam = metadata.MethodMetadata.Parameters[i];
-                                    if (methodParam.TypeReference is { IsGenericParameter: true, IsMethodGenericParameter: false })
+                                    if (methodParam.TypeInfo is GenericParameter { IsMethodParameter: false } gp2)
                                     {
-                                        var genericParamName = methodParam.TypeReference.GenericParameterName;
+                                        var genericParamName = gp2.Name;
                                         var matchingClassParam = genericParameters.FirstOrDefault(p => p.Name == genericParamName);
                                         if (matchingClassParam != null)
                                         {
@@ -1014,30 +1014,22 @@ internal sealed class TestBuilder : ITestBuilder
 
     private static Type? GetExpectedTypeForParameter(ParameterMetadata param, Type[] genericTypeArgs)
     {
-        if (param.TypeReference == null)
-        {
-            return null;
-        }
-
         // If it's a direct generic parameter (e.g., T)
-        if (param.TypeReference.IsGenericParameter)
+        if (param.TypeInfo is GenericParameter gp)
         {
-            var position = param.TypeReference.GenericParameterPosition;
+            var position = gp.Position;
             if (position < genericTypeArgs.Length)
             {
                 return genericTypeArgs[position];
             }
         }
 
-        // For constructed generic types, we'll just return the element type for now
-        // and let IsTypeCompatible handle the full type checking
-        if (param.TypeReference.GenericArguments?.Count > 0)
+        // For constructed generic types, check first type argument
+        if (param.TypeInfo is ConstructedGeneric cg && cg.TypeArguments.Length > 0)
         {
-            // For now, check the first type argument
-            var firstTypeArg = param.TypeReference.GenericArguments[0];
-            if (firstTypeArg.IsGenericParameter)
+            if (cg.TypeArguments[0] is GenericParameter firstGp)
             {
-                var position = firstTypeArg.GenericParameterPosition;
+                var position = firstGp.Position;
                 if (position < genericTypeArgs.Length)
                 {
                     // Return the element type - we'll check compatibility in IsTypeCompatible

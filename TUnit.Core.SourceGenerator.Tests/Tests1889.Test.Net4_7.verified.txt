@@ -29,18 +29,18 @@ internal sealed class DerivedTest_Test1_TestSource_GUID : global::TUnit.Core.Int
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.Library.Bugs._1889.BaseTest<>, TestsBase`1", global::TUnit.Core.TypeReference.CreateConcrete("DummyReferenceTypeClass, TestsBase`1")),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>)),
                 Name = "Test1",
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1889.DerivedTest, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest)),
                         Name = "DerivedTest",
                         Namespace = "TUnit.TestProject.Bugs._1889",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -114,17 +114,17 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.Library.Bugs._1889.BaseTest<>, TestsBase`1", global::TUnit.Core.TypeReference.CreateConcrete("DummyReferenceTypeClass, TestsBase`1")),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>)),
                 Name = "Test2",
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(bool))
                     {
                         Name = "condition",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0]
                     }
@@ -134,7 +134,7 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1889.DerivedTest, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest)),
                         Name = "DerivedTest",
                         Namespace = "TUnit.TestProject.Bugs._1889",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -216,17 +216,17 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConstructedGeneric("TUnit.TestProject.Library.Bugs._1889.BaseTest<>, TestsBase`1", global::TUnit.Core.TypeReference.CreateConcrete("DummyReferenceTypeClass, TestsBase`1")),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>)),
                 Name = "Test3",
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(bool))
                     {
                         Name = "condition",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
                         IsNullable = false,
                         ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0]
                     }
@@ -236,7 +236,7 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1889.DerivedTest, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest)),
                         Name = "DerivedTest",
                         Namespace = "TUnit.TestProject.Bugs._1889",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
