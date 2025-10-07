@@ -16,6 +16,6 @@ public class MyTests : TestBase
     [Arguments(2)]
     public void DataTest(int value)
     {
-        TestContext.Current!.GetDefaultLogger().LogInformation(value);
+        TestContext.Current!.GetDefaultLogger().LogInformation(value.ToString());
     }
 }
