@@ -74,12 +74,6 @@ public abstract class Assertion<TValue> : IAssertionSource<TValue>
     {
         var (value, exception) = await Context.GetAsync();
 
-        // Remove exception from scope if it was captured, since we're handling it
-        if (exception != null)
-        {
-            AssertionScope.GetCurrentAssertionScope()?.RemoveException(exception);
-        }
-
         var result = await CheckAsync(value, exception);
 
         if (!result.IsPassed)

@@ -11,6 +11,8 @@ namespace TUnit.Assertions.Sources;
 /// </summary>
 public class AsyncDelegateAssertion : Assertion<object?>, IDelegateAssertionSource<object?>
 {
+    internal Func<Task> AsyncAction { get; }
+
     public AsyncDelegateAssertion(Func<Task> action, string? expression)
         : base(new EvaluationContext<object?>(async () =>
         {
@@ -25,6 +27,7 @@ public class AsyncDelegateAssertion : Assertion<object?>, IDelegateAssertionSour
             }
         }))
     {
+        AsyncAction = action ?? throw new ArgumentNullException(nameof(action));
         ExpressionBuilder.Append($"Assert.That({expression ?? "?"})");
     }
 

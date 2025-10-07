@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics;
-using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.Assertions.Delegates;
 
 namespace TUnit.Assertions.Tests;
 

@@ -5,29 +5,28 @@ using TUnit.Assertions.Enums;
 namespace TUnit.Assertions.Conditions;
 
 /// <summary>
-/// Asserts that a collection is equivalent to another collection.
-/// Two collections are equivalent if they contain the same elements, regardless of order (default).
-/// Can be configured to require matching order using CollectionOrdering.Matching.
+/// Asserts that a collection is NOT equivalent to another collection.
+/// Two collections are considered NOT equivalent if they differ in elements or (optionally) their order.
 /// </summary>
-public class IsEquivalentToAssertion<TCollection, TItem> : Assertion<TCollection>
+public class NotEquivalentToAssertion<TCollection, TItem> : Assertion<TCollection>
     where TCollection : IEnumerable<TItem>
 {
-    private readonly IEnumerable<TItem> _expected;
+    private readonly IEnumerable<TItem> _notExpected;
     private readonly CollectionOrdering _ordering;
     private IEqualityComparer<TItem>? _comparer;
 
-    public IsEquivalentToAssertion(
+    public NotEquivalentToAssertion(
         EvaluationContext<TCollection> context,
-        IEnumerable<TItem> expected,
+        IEnumerable<TItem> notExpected,
         StringBuilder expressionBuilder,
         CollectionOrdering ordering = CollectionOrdering.Any)
         : base(context, expressionBuilder)
     {
-        _expected = expected ?? throw new ArgumentNullException(nameof(expected));
+        _notExpected = notExpected ?? throw new ArgumentNullException(nameof(notExpected));
         _ordering = ordering;
     }
 
-    public IsEquivalentToAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
+    public NotEquivalentToAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
     {
         _comparer = comparer;
         ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
@@ -45,13 +44,13 @@ public class IsEquivalentToAssertion<TCollection, TItem> : Assertion<TCollection
         var comparer = _comparer ?? EqualityComparer<TItem>.Default;
 
         var actualList = value.ToList();
-        var expectedList = _expected.ToList();
+        var expectedList = _notExpected.ToList();
 
         // Check counts first
         if (actualList.Count != expectedList.Count)
         {
-            return Task.FromResult(AssertionResult.Failed(
-                $"collection has {actualList.Count} items but expected {expectedList.Count}"));
+            // Different counts means NOT equivalent - this is what we want
+            return Task.FromResult(AssertionResult.Passed);
         }
 
         // If ordering must match, check items in order
@@ -67,12 +66,14 @@ public class IsEquivalentToAssertion<TCollection, TItem> : Assertion<TCollection
 
                 if (!areEqual)
                 {
-                    return Task.FromResult(AssertionResult.Failed(
-                        $"collection item at index {i} does not match: expected {expectedItem}, but was {actualItem}"));
+                    // Found a difference - collections are NOT equivalent, which is what we want
+                    return Task.FromResult(AssertionResult.Passed);
                 }
             }
 
-            return Task.FromResult(AssertionResult.Passed);
+            // All items matched in order - collections ARE equivalent, which is NOT what we want
+            return Task.FromResult(AssertionResult.Failed(
+                "collections are equivalent but should not be"));
         }
 
         // Otherwise, use frequency map for unordered comparison (CollectionOrdering.Any)
@@ -109,8 +110,8 @@ public class IsEquivalentToAssertion<TCollection, TItem> : Assertion<TCollection
             {
                 if (nullCount == 0)
                 {
-                    return Task.FromResult(AssertionResult.Failed(
-                        "collection does not contain expected null item"));
+                    // Missing null item - collections are NOT equivalent, which is what we want
+                    return Task.FromResult(AssertionResult.Passed);
                 }
                 nullCount--;
             }
@@ -118,16 +119,18 @@ public class IsEquivalentToAssertion<TCollection, TItem> : Assertion<TCollection
             {
                 if (!actualCounts.TryGetValue(expectedItem, out var count) || count == 0)
                 {
-                    return Task.FromResult(AssertionResult.Failed(
-                        $"collection does not contain expected item: {expectedItem}"));
+                    // Missing or insufficient item - collections are NOT equivalent, which is what we want
+                    return Task.FromResult(AssertionResult.Passed);
                 }
                 actualCounts[expectedItem] = count - 1;
             }
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        // All items matched - collections ARE equivalent, which is NOT what we want
+        return Task.FromResult(AssertionResult.Failed(
+            "collections are equivalent but should not be"));
     }
 
     protected override string GetExpectation() =>
-        $"to be equivalent to [{string.Join(", ", _expected)}]";
+        $"to not be equivalent to [{string.Join(", ", _notExpected)}]";
 }

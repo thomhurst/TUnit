@@ -1,5 +1,6 @@
 using System.Text;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions.Chaining;
 
@@ -21,6 +22,11 @@ public class AndAssertion<TValue> : Assertion<TValue>
         _second = second ?? throw new ArgumentNullException(nameof(second));
     }
 
+    /// <summary>
+    /// Throws when attempting to mix Or with And operators.
+    /// </summary>
+    public new OrContinuation<TValue> Or => throw new MixedAndOrAssertionsException();
+
     public override async Task<TValue?> AssertAsync()
     {
         // Both must pass - short circuit on first failure
@@ -28,9 +34,12 @@ public class AndAssertion<TValue> : Assertion<TValue>
         return await _second.AssertAsync();
     }
 
+    /// <summary>
+    /// Not used - AndAssertion overrides AssertAsync directly for custom composition logic.
+    /// </summary>
     protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
     {
-        return Task.FromResult(AssertionResult.Passed);
+        throw new NotImplementedException("AndAssertion uses custom AssertAsync logic and does not call CheckAsync");
     }
 
     protected override string GetExpectation() => "both conditions";

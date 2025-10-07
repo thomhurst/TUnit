@@ -1,0 +1,108 @@
+using System.Diagnostics;
+using System.Text;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+/// <summary>
+/// Asserts that an action completes execution within the specified time limit.
+/// Supports cancellation to avoid waiting for slow operations.
+/// </summary>
+public class CompletesWithinActionAssertion : Assertion<object?>
+{
+    private readonly TimeSpan _timeout;
+    private readonly Action _action;
+
+    public CompletesWithinActionAssertion(
+        Action action,
+        TimeSpan timeout,
+        StringBuilder expressionBuilder)
+        : base(new EvaluationContext<object?>(() => Task.FromResult<(object?, Exception?)>((null, null))), expressionBuilder)
+    {
+        _action = action ?? throw new ArgumentNullException(nameof(action));
+        _timeout = timeout;
+    }
+
+    protected override async Task<AssertionResult> CheckAsync(object? value, Exception? exception)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        using var cts = new CancellationTokenSource(_timeout);
+
+        try
+        {
+            await Task.Run(() => _action(), cts.Token);
+            stopwatch.Stop();
+
+            if (stopwatch.Elapsed > _timeout)
+            {
+                return AssertionResult.Failed($"it took {stopwatch.Elapsed.TotalMilliseconds:F0} milliseconds to complete");
+            }
+
+            return AssertionResult.Passed;
+        }
+        catch (OperationCanceledException)
+        {
+            return AssertionResult.Failed("it took too long to complete");
+        }
+        catch (Exception ex)
+        {
+            return AssertionResult.Failed($"threw {ex.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    protected override string GetExpectation() =>
+        $"action to complete within {_timeout.TotalMilliseconds:F0} milliseconds";
+}
+
+/// <summary>
+/// Asserts that an async function completes execution within the specified time limit.
+/// Supports cancellation to avoid waiting for slow operations.
+/// </summary>
+public class CompletesWithinAsyncAssertion : Assertion<object?>
+{
+    private readonly TimeSpan _timeout;
+    private readonly Func<Task> _asyncAction;
+
+    public CompletesWithinAsyncAssertion(
+        Func<Task> asyncAction,
+        TimeSpan timeout,
+        StringBuilder expressionBuilder)
+        : base(new EvaluationContext<object?>(() => Task.FromResult<(object?, Exception?)>((null, null))), expressionBuilder)
+    {
+        _asyncAction = asyncAction ?? throw new ArgumentNullException(nameof(asyncAction));
+        _timeout = timeout;
+    }
+
+    protected override async Task<AssertionResult> CheckAsync(object? value, Exception? exception)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        using var cts = new CancellationTokenSource(_timeout);
+
+        try
+        {
+            var task = _asyncAction();
+            var completedTask = await Task.WhenAny(task, Task.Delay(_timeout, cts.Token));
+
+            if (completedTask != task)
+            {
+                return AssertionResult.Failed("it took too long to complete");
+            }
+
+            await task; // Await to get any exceptions
+            stopwatch.Stop();
+
+            return AssertionResult.Passed;
+        }
+        catch (OperationCanceledException)
+        {
+            return AssertionResult.Failed("it took too long to complete");
+        }
+        catch (Exception ex)
+        {
+            return AssertionResult.Failed($"threw {ex.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    protected override string GetExpectation() =>
+        $"action to complete within {_timeout.TotalMilliseconds:F0} milliseconds";
+}

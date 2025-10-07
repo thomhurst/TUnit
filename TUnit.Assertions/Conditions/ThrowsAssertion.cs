@@ -15,6 +15,7 @@ public class ThrowsAssertion<TException> : Assertion<TException>
     private string? _expectedParameterName;
     private string? _notExpectedMessageSubstring;
     private string? _expectedMessagePattern;
+    private StringMatcher? _expectedMessageMatcher;
     private StringComparison _stringComparison = StringComparison.Ordinal;
 
     public ThrowsAssertion(
@@ -26,7 +27,21 @@ public class ThrowsAssertion<TException> : Assertion<TException>
 
     private static EvaluationContext<TException> MapToException(EvaluationContext<object?> context)
     {
-        return context.Map<TException>(exc => (TException)exc!);
+        return context.Map<TException>(exc =>
+        {
+            if (exc == null)
+            {
+                return default(TException)!;
+            }
+
+            if (exc is not TException typedException)
+            {
+                throw new InvalidCastException(
+                    $"Expected exception of type {typeof(TException).Name} but got {exc.GetType().Name}");
+            }
+
+            return typedException;
+        });
     }
 
     /// <summary>
@@ -109,6 +124,17 @@ public class ThrowsAssertion<TException> : Assertion<TException>
     }
 
     /// <summary>
+    /// Asserts that the exception message matches the specified StringMatcher pattern.
+    /// Supports regex, wildcards, and case-insensitive matching.
+    /// </summary>
+    public ThrowsAssertion<TException> WithMessageMatching(StringMatcher matcher)
+    {
+        _expectedMessageMatcher = matcher;
+        ExpressionBuilder.Append($".WithMessageMatching(StringMatcher.{(matcher.IsRegex ? "AsRegex" : "AsWildcard")}(\"{matcher.Pattern}\"){(matcher.IgnoreCase ? ".IgnoringCase()" : "")})");
+        return this;
+    }
+
+    /// <summary>
     /// Asserts that the ArgumentException has the specified parameter name.
     /// Only valid when TException is ArgumentException or a subclass.
     /// </summary>
@@ -165,6 +191,10 @@ public class ThrowsAssertion<TException> : Assertion<TException>
             return Task.FromResult(AssertionResult.Failed(
                 $"exception message \"{actualException.Message}\" does not match pattern \"{_expectedMessagePattern}\""));
 
+        if (_expectedMessageMatcher != null && !_expectedMessageMatcher.IsMatch(actualException.Message))
+            return Task.FromResult(AssertionResult.Failed(
+                $"exception message \"{actualException.Message}\" does not match {_expectedMessageMatcher}"));
+
         if (_expectedParameterName != null)
         {
             if (actualException is ArgumentException argumentException)
@@ -214,6 +244,7 @@ public class ThrowsExactlyAssertion<TException> : Assertion<TException>
     private string? _expectedParameterName;
     private string? _notExpectedMessageSubstring;
     private string? _expectedMessagePattern;
+    private StringMatcher? _expectedMessageMatcher;
     private StringComparison _stringComparison = StringComparison.Ordinal;
 
     public ThrowsExactlyAssertion(
@@ -225,7 +256,21 @@ public class ThrowsExactlyAssertion<TException> : Assertion<TException>
 
     private static EvaluationContext<TException> MapToException(EvaluationContext<object?> context)
     {
-        return context.Map<TException>(exc => (TException)exc!);
+        return context.Map<TException>(exc =>
+        {
+            if (exc == null)
+            {
+                return default(TException)!;
+            }
+
+            if (exc is not TException typedException)
+            {
+                throw new InvalidCastException(
+                    $"Expected exception of type {typeof(TException).Name} but got {exc.GetType().Name}");
+            }
+
+            return typedException;
+        });
     }
 
     /// <summary>
@@ -308,6 +353,17 @@ public class ThrowsExactlyAssertion<TException> : Assertion<TException>
     }
 
     /// <summary>
+    /// Asserts that the exception message matches the specified StringMatcher pattern.
+    /// Supports regex, wildcards, and case-insensitive matching.
+    /// </summary>
+    public ThrowsExactlyAssertion<TException> WithMessageMatching(StringMatcher matcher)
+    {
+        _expectedMessageMatcher = matcher;
+        ExpressionBuilder.Append($".WithMessageMatching(StringMatcher.{(matcher.IsRegex ? "AsRegex" : "AsWildcard")}(\"{matcher.Pattern}\"){(matcher.IgnoreCase ? ".IgnoringCase()" : "")})");
+        return this;
+    }
+
+    /// <summary>
     /// Asserts that the ArgumentException has the specified parameter name.
     /// Only valid when TException is ArgumentException or a subclass.
     /// </summary>
@@ -346,6 +402,10 @@ public class ThrowsExactlyAssertion<TException> : Assertion<TException>
         if (_expectedMessagePattern != null && !MatchesPattern(actualException.Message, _expectedMessagePattern))
             return Task.FromResult(AssertionResult.Failed(
                 $"exception message \"{actualException.Message}\" does not match pattern \"{_expectedMessagePattern}\""));
+
+        if (_expectedMessageMatcher != null && !_expectedMessageMatcher.IsMatch(actualException.Message))
+            return Task.FromResult(AssertionResult.Failed(
+                $"exception message \"{actualException.Message}\" does not match {_expectedMessageMatcher}"));
 
         if (_expectedParameterName != null)
         {

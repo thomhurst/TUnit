@@ -22,6 +22,11 @@ public class OrAssertion<TValue> : Assertion<TValue>
         this._second = _second ?? throw new ArgumentNullException(nameof(_second));
     }
 
+    /// <summary>
+    /// Throws when attempting to mix And with Or operators.
+    /// </summary>
+    public new AndContinuation<TValue> And => throw new MixedAndOrAssertionsException();
+
     public override async Task<TValue?> AssertAsync()
     {
         Exception? firstException = null;
@@ -53,9 +58,12 @@ public class OrAssertion<TValue> : Assertion<TValue>
         }
     }
 
+    /// <summary>
+    /// Not used - OrAssertion overrides AssertAsync directly for custom composition logic.
+    /// </summary>
     protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
     {
-        return Task.FromResult(AssertionResult.Passed);
+        throw new NotImplementedException("OrAssertion uses custom AssertAsync logic and does not call CheckAsync");
     }
 
     protected override string GetExpectation() => "either condition";

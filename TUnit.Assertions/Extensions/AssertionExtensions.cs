@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -1089,29 +1090,87 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that the value is equivalent (equal) to the expected value.
-    /// For non-collection types, this is the same as IsEqualTo.
+    /// Asserts that the collection is equivalent to the expected collection with the specified ordering requirement.
     /// </summary>
-    public static EqualsAssertion<TValue> IsEquivalentTo<TValue>(
-        this IAssertionSource<TValue> source,
-        TValue expected,
+    public static IsEquivalentToAssertion<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        IEnumerable<TItem> expected,
+        Enums.CollectionOrdering ordering,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
     {
-        source.ExpressionBuilder.Append($".IsEquivalentTo({expression})");
-        return new EqualsAssertion<TValue>(source.Context, expected, source.ExpressionBuilder);
+        source.ExpressionBuilder.Append($".IsEquivalentTo({expression}, CollectionOrdering.{ordering})");
+        return new IsEquivalentToAssertion<TCollection, TItem>(source.Context, expected, source.ExpressionBuilder, ordering);
     }
 
     /// <summary>
-    /// Asserts that the value is NOT equivalent (not equal) to the expected value.
-    /// For non-collection types, this is the same as IsNotEqualTo.
+    /// Asserts that the value is structurally equivalent to the expected value.
+    /// Performs deep comparison of properties and fields.
+    /// Supports .WithPartialEquivalency() and .IgnoringMember() for advanced scenarios.
     /// </summary>
-    public static NotEqualsAssertion<TValue> IsNotEquivalentTo<TValue>(
+    public static StructuralEquivalencyAssertion<TValue> IsEquivalentTo<TValue>(
         this IAssertionSource<TValue> source,
-        TValue expected,
+        object? expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.ExpressionBuilder.Append($".IsEquivalentTo({expression})");
+        return new StructuralEquivalencyAssertion<TValue>(source.Context, expected, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is NOT equivalent to the expected collection.
+    /// Two collections are NOT equivalent if they differ in elements or order.
+    /// </summary>
+    public static NotEquivalentToAssertion<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        IEnumerable<TItem> expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.ExpressionBuilder.Append($".IsNotEquivalentTo({expression})");
+        return new NotEquivalentToAssertion<TCollection, TItem>(source.Context, expected, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is NOT equivalent to the expected collection using the specified comparer.
+    /// </summary>
+    public static NotEquivalentToAssertion<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        IEnumerable<TItem> expected,
+        IEqualityComparer<TItem> comparer,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.ExpressionBuilder.Append($".IsNotEquivalentTo({expression}, comparer)");
+        return new NotEquivalentToAssertion<TCollection, TItem>(source.Context, expected, source.ExpressionBuilder).Using(comparer);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is NOT equivalent to the expected collection with the specified ordering requirement.
+    /// </summary>
+    public static NotEquivalentToAssertion<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        IEnumerable<TItem> expected,
+        Enums.CollectionOrdering ordering,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.ExpressionBuilder.Append($".IsNotEquivalentTo({expression}, CollectionOrdering.{ordering})");
+        return new NotEquivalentToAssertion<TCollection, TItem>(source.Context, expected, source.ExpressionBuilder, ordering);
+    }
+
+    /// <summary>
+    /// Asserts that the value is NOT structurally equivalent to the expected value.
+    /// Performs deep comparison of properties and fields.
+    /// Supports .WithPartialEquivalency() and .IgnoringMember() for advanced scenarios.
+    /// </summary>
+    public static NotStructuralEquivalencyAssertion<TValue> IsNotEquivalentTo<TValue>(
+        this IAssertionSource<TValue> source,
+        object? expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.ExpressionBuilder.Append($".IsNotEquivalentTo({expression})");
-        return new NotEqualsAssertion<TValue>(source.Context, expected, source.ExpressionBuilder);
+        return new NotStructuralEquivalencyAssertion<TValue>(source.Context, expected, source.ExpressionBuilder);
     }
 
     // ============ PREDICATE CHECKS ============
@@ -1585,5 +1644,182 @@ public static class AssertionExtensions
     {
         assertion.ExpressionBuilder.Append($".Within({tolerance})");
         return assertion.WithTolerance(tolerance);
+    }
+
+    // ============ TIMING ASSERTIONS ============
+
+    /// <summary>
+    /// Asserts that a synchronous delegate completes execution within the specified timeout.
+    /// If the delegate takes longer than the timeout, the assertion fails.
+    /// </summary>
+    public static CompletesWithinActionAssertion CompletesWithin(
+        this Sources.DelegateAssertion source,
+        TimeSpan timeout,
+        [CallerArgumentExpression(nameof(timeout))] string? expression = null)
+    {
+        var action = GetActionFromDelegate(source);
+        var assertionSource = (IAssertionSource<object?>)source;
+        assertionSource.ExpressionBuilder.Append($".CompletesWithin({expression})");
+        return new CompletesWithinActionAssertion(action, timeout, assertionSource.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that an asynchronous delegate completes execution within the specified timeout.
+    /// If the delegate takes longer than the timeout, the assertion fails.
+    /// </summary>
+    public static CompletesWithinAsyncAssertion CompletesWithin(
+        this Sources.AsyncDelegateAssertion source,
+        TimeSpan timeout,
+        [CallerArgumentExpression(nameof(timeout))] string? expression = null)
+    {
+        var asyncAction = GetFuncFromAsyncDelegate(source);
+        var assertionSource = (IAssertionSource<object?>)source;
+        assertionSource.ExpressionBuilder.Append($".CompletesWithin({expression})");
+        return new CompletesWithinAsyncAssertion(asyncAction, timeout, assertionSource.ExpressionBuilder);
+    }
+
+    private static Action GetActionFromDelegate(Sources.DelegateAssertion source)
+    {
+        return source.Action;
+    }
+
+    private static Func<Task> GetFuncFromAsyncDelegate(Sources.AsyncDelegateAssertion source)
+    {
+        return source.AsyncAction;
+    }
+
+    // ============ PARSING ASSERTIONS ============
+
+    /// <summary>
+    /// Asserts that a string can be parsed into the specified type.
+    /// </summary>
+    public static Assertions.Strings.IsParsableIntoAssertion<T> IsParsableInto<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] T>(
+        this IAssertionSource<string> source)
+    {
+        source.ExpressionBuilder.Append($".IsParsableInto<{typeof(T).Name}>()");
+        return new Assertions.Strings.IsParsableIntoAssertion<T>(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that a string cannot be parsed into the specified type.
+    /// </summary>
+    public static Assertions.Strings.IsNotParsableIntoAssertion<T> IsNotParsableInto<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] T>(
+        this IAssertionSource<string> source)
+    {
+        source.ExpressionBuilder.Append($".IsNotParsableInto<{typeof(T).Name}>()");
+        return new Assertions.Strings.IsNotParsableIntoAssertion<T>(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Parses a string into the specified type and returns an assertion on the parsed value.
+    /// This allows chaining assertions on the parsed result.
+    /// </summary>
+    public static Assertions.Strings.WhenParsedIntoAssertion<T> WhenParsedInto<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] T>(
+        this IAssertionSource<string> source)
+    {
+        source.ExpressionBuilder.Append($".WhenParsedInto<{typeof(T).Name}>()");
+        return new Assertions.Strings.WhenParsedIntoAssertion<T>(source.Context, source.ExpressionBuilder);
+    }
+
+    // ============ ENUM ASSERTIONS ============
+
+    /// <summary>
+    /// Asserts that a flags enum has the specified flag set.
+    /// </summary>
+    public static Assertions.Enums.HasFlagAssertion<TEnum> HasFlag<TEnum>(
+        this IAssertionSource<TEnum> source,
+        TEnum expectedFlag,
+        [CallerArgumentExpression(nameof(expectedFlag))] string? expression = null)
+        where TEnum : struct, Enum
+    {
+        source.ExpressionBuilder.Append($".HasFlag({expression})");
+        return new Assertions.Enums.HasFlagAssertion<TEnum>(source.Context, expectedFlag, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that a flags enum does NOT have the specified flag set.
+    /// </summary>
+    public static Assertions.Enums.DoesNotHaveFlagAssertion<TEnum> DoesNotHaveFlag<TEnum>(
+        this IAssertionSource<TEnum> source,
+        TEnum unexpectedFlag,
+        [CallerArgumentExpression(nameof(unexpectedFlag))] string? expression = null)
+        where TEnum : struct, Enum
+    {
+        source.ExpressionBuilder.Append($".DoesNotHaveFlag({expression})");
+        return new Assertions.Enums.DoesNotHaveFlagAssertion<TEnum>(source.Context, unexpectedFlag, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that an enum value is defined in its enum type.
+    /// </summary>
+    public static Assertions.Enums.IsDefinedAssertion<TEnum> IsDefined<TEnum>(
+        this IAssertionSource<TEnum> source)
+        where TEnum : struct, Enum
+    {
+        source.ExpressionBuilder.Append(".IsDefined()");
+        return new Assertions.Enums.IsDefinedAssertion<TEnum>(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that an enum value is NOT defined in its enum type.
+    /// </summary>
+    public static Assertions.Enums.IsNotDefinedAssertion<TEnum> IsNotDefined<TEnum>(
+        this IAssertionSource<TEnum> source)
+        where TEnum : struct, Enum
+    {
+        source.ExpressionBuilder.Append(".IsNotDefined()");
+        return new Assertions.Enums.IsNotDefinedAssertion<TEnum>(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that two enum values have the same name.
+    /// </summary>
+    public static Assertions.Enums.HasSameNameAsAssertion<TEnum> HasSameNameAs<TEnum>(
+        this IAssertionSource<TEnum> source,
+        Enum otherEnumValue,
+        [CallerArgumentExpression(nameof(otherEnumValue))] string? expression = null)
+        where TEnum : struct, Enum
+    {
+        source.ExpressionBuilder.Append($".HasSameNameAs({expression})");
+        return new Assertions.Enums.HasSameNameAsAssertion<TEnum>(source.Context, otherEnumValue, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that two enum values have the same underlying value.
+    /// </summary>
+    public static Assertions.Enums.HasSameValueAsAssertion<TEnum> HasSameValueAs<TEnum>(
+        this IAssertionSource<TEnum> source,
+        Enum otherEnumValue,
+        [CallerArgumentExpression(nameof(otherEnumValue))] string? expression = null)
+        where TEnum : struct, Enum
+    {
+        source.ExpressionBuilder.Append($".HasSameValueAs({expression})");
+        return new Assertions.Enums.HasSameValueAsAssertion<TEnum>(source.Context, otherEnumValue, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that two enum values do NOT have the same name.
+    /// </summary>
+    public static Assertions.Enums.DoesNotHaveSameNameAsAssertion<TEnum> DoesNotHaveSameNameAs<TEnum>(
+        this IAssertionSource<TEnum> source,
+        Enum otherEnumValue,
+        [CallerArgumentExpression(nameof(otherEnumValue))] string? expression = null)
+        where TEnum : struct, Enum
+    {
+        source.ExpressionBuilder.Append($".DoesNotHaveSameNameAs({expression})");
+        return new Assertions.Enums.DoesNotHaveSameNameAsAssertion<TEnum>(source.Context, otherEnumValue, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that two enum values do NOT have the same underlying value.
+    /// </summary>
+    public static Assertions.Enums.DoesNotHaveSameValueAsAssertion<TEnum> DoesNotHaveSameValueAs<TEnum>(
+        this IAssertionSource<TEnum> source,
+        Enum otherEnumValue,
+        [CallerArgumentExpression(nameof(otherEnumValue))] string? expression = null)
+        where TEnum : struct, Enum
+    {
+        source.ExpressionBuilder.Append($".DoesNotHaveSameValueAs({expression})");
+        return new Assertions.Enums.DoesNotHaveSameValueAsAssertion<TEnum>(source.Context, otherEnumValue, source.ExpressionBuilder);
     }
 }

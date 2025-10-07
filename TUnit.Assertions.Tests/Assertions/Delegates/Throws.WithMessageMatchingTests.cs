@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using TUnit.Assertions.AssertConditions;
+
 namespace TUnit.Assertions.Tests.Assertions.Delegates;
 
 public partial class Throws

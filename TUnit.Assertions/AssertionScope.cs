@@ -14,29 +14,17 @@ internal class AssertionScope : IDisposable
     private readonly AssertionScope? _parent;
     private readonly List<Exception> _exceptions = [];
 
-    static AssertionScope()
-    {
-        AppDomain.CurrentDomain.FirstChanceException += InterceptException;
-    }
-
     internal AssertionScope()
     {
         _parent = GetCurrentAssertionScope();
         SetCurrentAssertionScope(this);
     }
 
-    private static void InterceptException(object? sender, FirstChanceExceptionEventArgs firstChanceExceptionEventArgs)
-    {
-        if (GetCurrentAssertionScope() is { } validScope)
-        {
-            validScope._exceptions.Add(new MaybeCaughtException(firstChanceExceptionEventArgs.Exception));
-        }
-    }
-
     public void Dispose()
     {
         SetCurrentAssertionScope(_parent);
 
+        // If we have a parent scope, bubble up all exceptions to it
         if (_parent != null)
         {
             foreach (var exception in _exceptions)
@@ -47,24 +35,21 @@ internal class AssertionScope : IDisposable
             return;
         }
 
-        if (_exceptions.Count > 0 && _exceptions.All(e => e is not AssertionException))
+        // No exceptions accumulated - all assertions passed
+        if (_exceptions.Count == 0)
         {
-            // If there's no assertion exceptions, return, and user thrown exceptions should just propagate up
             return;
         }
 
-        // It could be an intercepted exception,
-        // In which case it should just throw itself, so we don't need to do that
+        // Single exception - throw it directly to preserve stack trace
         if (_exceptions.Count == 1)
         {
             ExceptionDispatchInfo.Capture(_exceptions[0]).Throw();
         }
 
-        if (_exceptions.Count > 1)
-        {
-            var message = string.Join(Environment.NewLine + Environment.NewLine, _exceptions.Select(e => e.Message));
-            throw new AssertionException(message, new AggregateException(_exceptions));
-        }
+        // Multiple exceptions - throw aggregate with combined messages
+        var message = string.Join(Environment.NewLine + Environment.NewLine, _exceptions.Select(e => e.Message));
+        throw new AssertionException(message, new AggregateException(_exceptions));
     }
 
     internal static AssertionScope? GetCurrentAssertionScope()

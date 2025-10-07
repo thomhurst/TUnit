@@ -179,7 +179,9 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         // Deep comparison with ignored types
         if (_ignoredTypes.Count > 0)
         {
-            var result = DeepEquals(value, _expected, _ignoredTypes);
+            // Use reference-based tracking to detect cycles
+            var visited = new HashSet<object>(new ReferenceEqualityComparer());
+            var result = DeepEquals(value, _expected, _ignoredTypes, visited);
             if (result.IsSuccess)
                 return Task.FromResult(AssertionResult.Passed);
             return Task.FromResult(AssertionResult.Failed(result.Message ?? $"found {value}"));
@@ -195,7 +197,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Deep comparison requires reflection access to all public properties and fields of runtime types")]
-    private static (bool IsSuccess, string? Message) DeepEquals(object? actual, object? expected, HashSet<Type> ignoredTypes)
+    private static (bool IsSuccess, string? Message) DeepEquals(object? actual, object? expected, HashSet<Type> ignoredTypes, HashSet<object> visited)
     {
         // Handle nulls
         if (actual == null && expected == null)
@@ -206,6 +208,18 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         var type = actual.GetType();
         if (type != expected.GetType())
             return (false, $"types differ: {actual.GetType().Name} vs {expected.GetType().Name}");
+
+        // Cycle detection - if we've already visited this object, assume equal to avoid infinite recursion
+        if (!visited.Add(actual))
+            return (true, null);
+
+        // For value types and strings, use standard equality
+        if (type.IsValueType || type == typeof(string))
+        {
+            if (!Equals(actual, expected))
+                return (false, $"values differ: {actual} vs {expected}");
+            return (true, null);
+        }
 
         // Get all public properties
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -220,8 +234,18 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             var actualValue = prop.GetValue(actual);
             var expectedValue = prop.GetValue(expected);
 
-            if (!Equals(actualValue, expectedValue))
-                return (false, $"property {prop.Name} differs: {actualValue} vs {expectedValue}");
+            // Recursively compare complex objects
+            if (actualValue != null && !actualValue.GetType().IsValueType && actualValue.GetType() != typeof(string))
+            {
+                var nestedResult = DeepEquals(actualValue, expectedValue, ignoredTypes, visited);
+                if (!nestedResult.IsSuccess)
+                    return (false, $"property {prop.Name} differs: {nestedResult.Message}");
+            }
+            else
+            {
+                if (!Equals(actualValue, expectedValue))
+                    return (false, $"property {prop.Name} differs: {actualValue} vs {expectedValue}");
+            }
         }
 
         // Get all public fields
@@ -237,8 +261,18 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             var actualValue = field.GetValue(actual);
             var expectedValue = field.GetValue(expected);
 
-            if (!Equals(actualValue, expectedValue))
-                return (false, $"field {field.Name} differs: {actualValue} vs {expectedValue}");
+            // Recursively compare complex objects
+            if (actualValue != null && !actualValue.GetType().IsValueType && actualValue.GetType() != typeof(string))
+            {
+                var nestedResult = DeepEquals(actualValue, expectedValue, ignoredTypes, visited);
+                if (!nestedResult.IsSuccess)
+                    return (false, $"field {field.Name} differs: {nestedResult.Message}");
+            }
+            else
+            {
+                if (!Equals(actualValue, expectedValue))
+                    return (false, $"field {field.Name} differs: {actualValue} vs {expectedValue}");
+            }
         }
 
         return (true, null);
@@ -248,4 +282,15 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         _tolerance != null
             ? $"to equal {_expected} within {_tolerance}"
             : $"to be equal to {_expected}";
+
+    /// <summary>
+    /// Comparer that uses reference equality instead of value equality.
+    /// Used for cycle detection in deep comparison.
+    /// </summary>
+    private sealed class ReferenceEqualityComparer : IEqualityComparer<object>
+    {
+        public new bool Equals(object? x, object? y) => ReferenceEquals(x, y);
+
+        public int GetHashCode(object obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
+    }
 }
