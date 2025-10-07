@@ -63,11 +63,47 @@ public static class Assert
     }
 
     /// <summary>
+    /// Creates an assertion for an array.
+    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
+    /// Example: await Assert.That(array).IsInOrder();
+    /// </summary>
+    public static CollectionAssertion<TItem> That<TItem>(
+        TItem[] value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new CollectionAssertion<TItem>(value, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for a List.
+    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
+    /// Example: await Assert.That(list).IsInOrder();
+    /// </summary>
+    public static CollectionAssertion<TItem> That<TItem>(
+        List<TItem> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new CollectionAssertion<TItem>(value, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for an IEnumerable.
+    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
+    /// Example: await Assert.That(enumerable).IsInOrder();
+    /// </summary>
+    public static CollectionAssertion<TItem> That<TItem>(
+        IEnumerable<TItem> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new CollectionAssertion<TItem>(value, expression);
+    }
+
+    /// <summary>
     /// Creates an assertion for an immediate value.
     /// Example: await Assert.That(42).IsEqualTo(42);
     /// </summary>
     public static ValueAssertion<TValue> That<TValue>(
-        TValue value,
+        TValue? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
         return new ValueAssertion<TValue>(value, expression);
@@ -206,6 +242,49 @@ public static class Assert
         catch (Exception ex)
         {
             throw new AssertionException($"Expected {typeof(TException).Name} but got {ex.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Asserts that the async action throws any exception (defaults to Exception).
+    /// Example: var exception = await Assert.ThrowsAsync(async () => await ThrowingMethodAsync());
+    /// </summary>
+    public static async Task<Exception> ThrowsAsync(Func<Task> action)
+    {
+        return await ThrowsAsync<Exception>(action);
+    }
+
+    /// <summary>
+    /// Asserts that the Task throws any exception (defaults to Exception).
+    /// Example: var exception = await Assert.ThrowsAsync(Task.FromException(new Exception()));
+    /// </summary>
+    public static async Task<Exception> ThrowsAsync(Task task)
+    {
+        try
+        {
+            await task;
+            throw new AssertionException("Expected an exception but none was thrown");
+        }
+        catch (Exception ex) when (ex is not AssertionException)
+        {
+            return ex;
+        }
+    }
+
+    /// <summary>
+    /// Asserts that the ValueTask throws any exception (defaults to Exception).
+    /// Example: var exception = await Assert.ThrowsAsync(new ValueTask(Task.FromException(new Exception())));
+    /// </summary>
+    public static async Task<Exception> ThrowsAsync(ValueTask task)
+    {
+        try
+        {
+            await task;
+            throw new AssertionException("Expected an exception but none was thrown");
+        }
+        catch (Exception ex) when (ex is not AssertionException)
+        {
+            return ex;
         }
     }
 

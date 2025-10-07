@@ -120,3 +120,38 @@ public class IsNotAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
 
     protected override string GetExpectation() => $"to not be assignable to {_targetType.Name}";
 }
+
+/// <summary>
+/// Asserts that a value is exactly of the specified type (using runtime Type parameter).
+/// </summary>
+public class IsTypeOfRuntimeAssertion<TValue> : Assertion<TValue>
+{
+    private readonly Type _expectedType;
+
+    public IsTypeOfRuntimeAssertion(
+        EvaluationContext<TValue> context,
+        Type expectedType,
+        StringBuilder expressionBuilder)
+        : base(context, expressionBuilder)
+    {
+        _expectedType = expectedType ?? throw new ArgumentNullException(nameof(expectedType));
+    }
+
+    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    {
+        if (exception != null)
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+
+        if (value == null)
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+
+        var actualType = value.GetType();
+
+        if (actualType == _expectedType)
+            return Task.FromResult(AssertionResult.Passed);
+
+        return Task.FromResult(AssertionResult.Failed($"type was {actualType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to be of type {_expectedType.Name}";
+}

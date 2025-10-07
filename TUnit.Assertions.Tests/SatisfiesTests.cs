@@ -208,7 +208,7 @@ public class SatisfiesTests
         var myModel3 = new MyModel { Value = "!" };
         List<MyModel> models = [myModel, myModel2, myModel3];
 
-        await Assert.That(models).All().Satisfy(model => model?.Value, assert => assert.HasCount().Positive());
+        await Assert.That(models).All().Satisfy(model => model?.Value?.Length ?? 0, assert => assert.IsGreaterThan(0));
     }
 
     [Test]

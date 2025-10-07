@@ -7,8 +7,9 @@ namespace TUnit.Assertions.Sources;
 /// Source assertion for synchronous delegates (Action).
 /// This is the entry point for: Assert.That(() => SomeMethod())
 /// Used primarily for exception checking.
+/// Implements IDelegateAssertionSource to enable Throws() extension methods.
 /// </summary>
-public class DelegateAssertion : Assertion<object?>
+public class DelegateAssertion : Assertion<object?>, IDelegateAssertionSource<object?>
 {
     public DelegateAssertion(Action action, string? expression)
         : base(new EvaluationContext<object?>(async () =>

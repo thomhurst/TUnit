@@ -9,14 +9,17 @@ namespace TUnit.Assertions.Conditions;
 public class DictionaryContainsKeyAssertion<TKey, TValue> : Assertion<IReadOnlyDictionary<TKey, TValue>>
 {
     private readonly TKey _expectedKey;
+    private readonly IEqualityComparer<TKey>? _comparer;
 
     public DictionaryContainsKeyAssertion(
         EvaluationContext<IReadOnlyDictionary<TKey, TValue>> context,
         TKey expectedKey,
-        StringBuilder expressionBuilder)
+        StringBuilder expressionBuilder,
+        IEqualityComparer<TKey>? comparer = null)
         : base(context, expressionBuilder)
     {
         _expectedKey = expectedKey;
+        _comparer = comparer;
     }
 
     protected override Task<AssertionResult> CheckAsync(IReadOnlyDictionary<TKey, TValue>? value, Exception? exception)
@@ -27,7 +30,18 @@ public class DictionaryContainsKeyAssertion<TKey, TValue> : Assertion<IReadOnlyD
         if (value == null)
             return Task.FromResult(AssertionResult.Failed("dictionary was null"));
 
-        if (value.ContainsKey(_expectedKey))
+        bool found;
+        if (_comparer != null)
+        {
+            // Use custom comparer to search for key
+            found = value.Keys.Any(k => _comparer.Equals(k, _expectedKey));
+        }
+        else
+        {
+            found = value.ContainsKey(_expectedKey);
+        }
+
+        if (found)
             return Task.FromResult(AssertionResult.Passed);
 
         return Task.FromResult(AssertionResult.Failed($"key {_expectedKey} not found"));

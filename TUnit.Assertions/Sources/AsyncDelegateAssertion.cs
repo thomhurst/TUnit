@@ -7,8 +7,9 @@ namespace TUnit.Assertions.Sources;
 /// Source assertion for asynchronous delegates (Func&lt;Task&gt;).
 /// This is the entry point for: Assert.That(async () => await SomeMethodAsync())
 /// Used primarily for exception checking.
+/// Implements IDelegateAssertionSource to enable Throws() extension methods.
 /// </summary>
-public class AsyncDelegateAssertion : Assertion<object?>
+public class AsyncDelegateAssertion : Assertion<object?>, IDelegateAssertionSource<object?>
 {
     public AsyncDelegateAssertion(Func<Task> action, string? expression)
         : base(new EvaluationContext<object?>(async () =>

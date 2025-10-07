@@ -7,19 +7,26 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a delegate throws a specific exception type (or subclass).
 /// Checks the exception captured during evaluation.
 /// </summary>
-public class ThrowsAssertion<TException> : Assertion<object?>
+public class ThrowsAssertion<TException> : Assertion<TException>
     where TException : Exception
 {
     private string? _expectedMessageSubstring;
     private string? _expectedExactMessage;
     private string? _expectedParameterName;
+    private string? _notExpectedMessageSubstring;
+    private string? _expectedMessagePattern;
     private StringComparison _stringComparison = StringComparison.Ordinal;
 
     public ThrowsAssertion(
         EvaluationContext<object?> context,
         StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        : base(MapToException(context), expressionBuilder)
     {
+    }
+
+    private static EvaluationContext<TException> MapToException(EvaluationContext<object?> context)
+    {
+        return context.Map<TException>(exc => (TException)exc!);
     }
 
     /// <summary>
@@ -70,6 +77,38 @@ public class ThrowsAssertion<TException> : Assertion<object?>
     }
 
     /// <summary>
+    /// Asserts that the exception message does NOT contain the specified substring.
+    /// </summary>
+    public ThrowsAssertion<TException> WithMessageNotContaining(string notExpectedSubstring)
+    {
+        _notExpectedMessageSubstring = notExpectedSubstring;
+        ExpressionBuilder.Append($".WithMessageNotContaining(\"{notExpectedSubstring}\")");
+        return this;
+    }
+
+    /// <summary>
+    /// Asserts that the exception message does NOT contain the specified substring using the specified string comparison.
+    /// </summary>
+    public ThrowsAssertion<TException> WithMessageNotContaining(string notExpectedSubstring, StringComparison comparison)
+    {
+        _notExpectedMessageSubstring = notExpectedSubstring;
+        _stringComparison = comparison;
+        ExpressionBuilder.Append($".WithMessageNotContaining(\"{notExpectedSubstring}\", StringComparison.{comparison})");
+        return this;
+    }
+
+    /// <summary>
+    /// Asserts that the exception message matches the specified pattern (using wildcards * and ?).
+    /// * matches any number of characters, ? matches a single character.
+    /// </summary>
+    public ThrowsAssertion<TException> WithMessageMatching(string pattern)
+    {
+        _expectedMessagePattern = pattern;
+        ExpressionBuilder.Append($".WithMessageMatching(\"{pattern}\")");
+        return this;
+    }
+
+    /// <summary>
     /// Asserts that the ArgumentException has the specified parameter name.
     /// Only valid when TException is ArgumentException or a subclass.
     /// </summary>
@@ -98,26 +137,37 @@ public class ThrowsAssertion<TException> : Assertion<object?>
         return new ThrowsAssertion<Exception>(innerExceptionContext, ExpressionBuilder);
     }
 
-    protected override Task<AssertionResult> CheckAsync(object? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(TException? value, Exception? exception)
     {
-        if (exception == null)
+        // For Throws assertions, the exception is stored as the value after mapping
+        var actualException = exception ?? value as Exception;
+
+        if (actualException == null)
             return Task.FromResult(AssertionResult.Failed("no exception was thrown"));
 
-        if (exception is not TException)
+        if (actualException is not TException)
             return Task.FromResult(AssertionResult.Failed(
-                $"wrong exception type: {exception.GetType().Name} instead of {typeof(TException).Name}"));
+                $"wrong exception type: {actualException.GetType().Name} instead of {typeof(TException).Name}"));
 
-        if (_expectedExactMessage != null && exception.Message != _expectedExactMessage)
+        if (_expectedExactMessage != null && actualException.Message != _expectedExactMessage)
             return Task.FromResult(AssertionResult.Failed(
-                $"exception message \"{exception.Message}\" does not equal \"{_expectedExactMessage}\""));
+                $"exception message \"{actualException.Message}\" does not equal \"{_expectedExactMessage}\""));
 
-        if (_expectedMessageSubstring != null && !exception.Message.Contains(_expectedMessageSubstring, _stringComparison))
+        if (_expectedMessageSubstring != null && !actualException.Message.Contains(_expectedMessageSubstring, _stringComparison))
             return Task.FromResult(AssertionResult.Failed(
-                $"exception message \"{exception.Message}\" does not contain \"{_expectedMessageSubstring}\""));
+                $"exception message \"{actualException.Message}\" does not contain \"{_expectedMessageSubstring}\""));
+
+        if (_notExpectedMessageSubstring != null && actualException.Message.Contains(_notExpectedMessageSubstring, _stringComparison))
+            return Task.FromResult(AssertionResult.Failed(
+                $"exception message \"{actualException.Message}\" should not contain \"{_notExpectedMessageSubstring}\""));
+
+        if (_expectedMessagePattern != null && !MatchesPattern(actualException.Message, _expectedMessagePattern))
+            return Task.FromResult(AssertionResult.Failed(
+                $"exception message \"{actualException.Message}\" does not match pattern \"{_expectedMessagePattern}\""));
 
         if (_expectedParameterName != null)
         {
-            if (exception is ArgumentException argumentException)
+            if (actualException is ArgumentException argumentException)
             {
                 if (argumentException.ParamName != _expectedParameterName)
                     return Task.FromResult(AssertionResult.Failed(
@@ -126,7 +176,7 @@ public class ThrowsAssertion<TException> : Assertion<object?>
             else
             {
                 return Task.FromResult(AssertionResult.Failed(
-                    $"WithParameterName can only be used with ArgumentException, but exception is {exception.GetType().Name}"));
+                    $"WithParameterName can only be used with ArgumentException, but exception is {actualException.GetType().Name}"));
             }
         }
 
@@ -139,24 +189,43 @@ public class ThrowsAssertion<TException> : Assertion<object?>
             : _expectedMessageSubstring != null
                 ? $"to throw {typeof(TException).Name} with message containing \"{_expectedMessageSubstring}\""
                 : $"to throw {typeof(TException).Name}";
+
+    private static bool MatchesPattern(string input, string pattern)
+    {
+        // Convert wildcard pattern to regex
+        // * matches any number of characters
+        // ? matches a single character
+        var regexPattern = "^" + System.Text.RegularExpressions.Regex.Escape(pattern)
+            .Replace("\\*", ".*")
+            .Replace("\\?", ".") + "$";
+
+        return System.Text.RegularExpressions.Regex.IsMatch(input, regexPattern);
+    }
 }
 
 /// <summary>
 /// Asserts that a delegate throws exactly the specified exception type (not subclasses).
 /// </summary>
-public class ThrowsExactlyAssertion<TException> : Assertion<object?>
+public class ThrowsExactlyAssertion<TException> : Assertion<TException>
     where TException : Exception
 {
     private string? _expectedMessageSubstring;
     private string? _expectedExactMessage;
     private string? _expectedParameterName;
+    private string? _notExpectedMessageSubstring;
+    private string? _expectedMessagePattern;
     private StringComparison _stringComparison = StringComparison.Ordinal;
 
     public ThrowsExactlyAssertion(
         EvaluationContext<object?> context,
         StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        : base(MapToException(context), expressionBuilder)
     {
+    }
+
+    private static EvaluationContext<TException> MapToException(EvaluationContext<object?> context)
+    {
+        return context.Map<TException>(exc => (TException)exc!);
     }
 
     /// <summary>
@@ -207,6 +276,38 @@ public class ThrowsExactlyAssertion<TException> : Assertion<object?>
     }
 
     /// <summary>
+    /// Asserts that the exception message does NOT contain the specified substring.
+    /// </summary>
+    public ThrowsExactlyAssertion<TException> WithMessageNotContaining(string notExpectedSubstring)
+    {
+        _notExpectedMessageSubstring = notExpectedSubstring;
+        ExpressionBuilder.Append($".WithMessageNotContaining(\"{notExpectedSubstring}\")");
+        return this;
+    }
+
+    /// <summary>
+    /// Asserts that the exception message does NOT contain the specified substring using the specified string comparison.
+    /// </summary>
+    public ThrowsExactlyAssertion<TException> WithMessageNotContaining(string notExpectedSubstring, StringComparison comparison)
+    {
+        _notExpectedMessageSubstring = notExpectedSubstring;
+        _stringComparison = comparison;
+        ExpressionBuilder.Append($".WithMessageNotContaining(\"{notExpectedSubstring}\", StringComparison.{comparison})");
+        return this;
+    }
+
+    /// <summary>
+    /// Asserts that the exception message matches the specified pattern (using wildcards * and ?).
+    /// * matches any number of characters, ? matches a single character.
+    /// </summary>
+    public ThrowsExactlyAssertion<TException> WithMessageMatching(string pattern)
+    {
+        _expectedMessagePattern = pattern;
+        ExpressionBuilder.Append($".WithMessageMatching(\"{pattern}\")");
+        return this;
+    }
+
+    /// <summary>
     /// Asserts that the ArgumentException has the specified parameter name.
     /// Only valid when TException is ArgumentException or a subclass.
     /// </summary>
@@ -217,27 +318,38 @@ public class ThrowsExactlyAssertion<TException> : Assertion<object?>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(object? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(TException? value, Exception? exception)
     {
-        if (exception == null)
+        // For Throws assertions, the exception is stored as the value after mapping
+        var actualException = exception ?? value as Exception;
+
+        if (actualException == null)
             return Task.FromResult(AssertionResult.Failed("no exception was thrown"));
 
         // Exact type match - not subclasses
-        if (exception.GetType() != typeof(TException))
+        if (actualException.GetType() != typeof(TException))
             return Task.FromResult(AssertionResult.Failed(
-                $"wrong exception type: {exception.GetType().Name} instead of exactly {typeof(TException).Name}"));
+                $"wrong exception type: {actualException.GetType().Name} instead of exactly {typeof(TException).Name}"));
 
-        if (_expectedExactMessage != null && exception.Message != _expectedExactMessage)
+        if (_expectedExactMessage != null && actualException.Message != _expectedExactMessage)
             return Task.FromResult(AssertionResult.Failed(
-                $"exception message \"{exception.Message}\" does not equal \"{_expectedExactMessage}\""));
+                $"exception message \"{actualException.Message}\" does not equal \"{_expectedExactMessage}\""));
 
-        if (_expectedMessageSubstring != null && !exception.Message.Contains(_expectedMessageSubstring, _stringComparison))
+        if (_expectedMessageSubstring != null && !actualException.Message.Contains(_expectedMessageSubstring, _stringComparison))
             return Task.FromResult(AssertionResult.Failed(
-                $"exception message \"{exception.Message}\" does not contain \"{_expectedMessageSubstring}\""));
+                $"exception message \"{actualException.Message}\" does not contain \"{_expectedMessageSubstring}\""));
+
+        if (_notExpectedMessageSubstring != null && actualException.Message.Contains(_notExpectedMessageSubstring, _stringComparison))
+            return Task.FromResult(AssertionResult.Failed(
+                $"exception message \"{actualException.Message}\" should not contain \"{_notExpectedMessageSubstring}\""));
+
+        if (_expectedMessagePattern != null && !MatchesPattern(actualException.Message, _expectedMessagePattern))
+            return Task.FromResult(AssertionResult.Failed(
+                $"exception message \"{actualException.Message}\" does not match pattern \"{_expectedMessagePattern}\""));
 
         if (_expectedParameterName != null)
         {
-            if (exception is ArgumentException argumentException)
+            if (actualException is ArgumentException argumentException)
             {
                 if (argumentException.ParamName != _expectedParameterName)
                     return Task.FromResult(AssertionResult.Failed(
@@ -246,7 +358,7 @@ public class ThrowsExactlyAssertion<TException> : Assertion<object?>
             else
             {
                 return Task.FromResult(AssertionResult.Failed(
-                    $"WithParameterName can only be used with ArgumentException, but exception is {exception.GetType().Name}"));
+                    $"WithParameterName can only be used with ArgumentException, but exception is {actualException.GetType().Name}"));
             }
         }
 
@@ -259,21 +371,34 @@ public class ThrowsExactlyAssertion<TException> : Assertion<object?>
             : _expectedMessageSubstring != null
                 ? $"to throw exactly {typeof(TException).Name} with message containing \"{_expectedMessageSubstring}\""
                 : $"to throw exactly {typeof(TException).Name}";
+
+    private static bool MatchesPattern(string input, string pattern)
+    {
+        // Convert wildcard pattern to regex
+        // * matches any number of characters
+        // ? matches a single character
+        var regexPattern = "^" + System.Text.RegularExpressions.Regex.Escape(pattern)
+            .Replace("\\*", ".*")
+            .Replace("\\?", ".") + "$";
+
+        return System.Text.RegularExpressions.Regex.IsMatch(input, regexPattern);
+    }
 }
 
 /// <summary>
 /// Asserts that a delegate does not throw any exception.
+/// Generic version that preserves the return value type.
 /// </summary>
-public class ThrowsNothingAssertion : Assertion<object?>
+public class ThrowsNothingAssertion<TValue> : Assertion<TValue>
 {
     public ThrowsNothingAssertion(
-        EvaluationContext<object?> context,
+        EvaluationContext<TValue> context,
         StringBuilder expressionBuilder)
         : base(context, expressionBuilder)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(object? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
     {
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed(

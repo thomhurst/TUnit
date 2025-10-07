@@ -9,7 +9,7 @@ namespace TUnit.Assertions.Sources;
 /// </summary>
 public class ValueAssertion<TValue> : Assertion<TValue>
 {
-    public ValueAssertion(TValue value, string? expression)
+    public ValueAssertion(TValue? value, string? expression)
         : base(new EvaluationContext<TValue>(value))
     {
         ExpressionBuilder.Append($"Assert.That({expression ?? "?"})");

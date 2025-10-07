@@ -26,7 +26,7 @@ public sealed class EvaluationContext<TValue>
     /// <summary>
     /// Creates a context for immediate values (no evaluation needed)
     /// </summary>
-    public EvaluationContext(TValue value)
+    public EvaluationContext(TValue? value)
     {
         _value = value;
         _evaluated = true;

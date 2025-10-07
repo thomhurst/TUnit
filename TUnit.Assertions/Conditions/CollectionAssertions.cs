@@ -293,11 +293,11 @@ public class CollectionAllSatisfyHelper<TCollection, TItem>
 
     /// <summary>
     /// Asserts that all items, when mapped, satisfy the given assertion.
-    /// Example: .All().Satisfy(model => model.Value, value => value.IsNotNull())
+    /// Example: .All().Satisfy(model => model.Value, assert => assert.IsNotNull())
     /// </summary>
     public CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> Satisfy<TMapped>(
         Func<TItem, TMapped> mapper,
-        Action<IAssertionSource<TMapped>> assertion,
+        Func<IAssertionSource<TMapped>, Assertion<TMapped>?> assertion,
         [CallerArgumentExpression(nameof(mapper))] string? mapperExpression = null,
         [CallerArgumentExpression(nameof(assertion))] string? assertionExpression = null)
     {
@@ -521,14 +521,14 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, TMapped> _mapper;
-    private readonly Action<IAssertionSource<TMapped>> _assertion;
+    private readonly Func<IAssertionSource<TMapped>, Assertion<TMapped>?> _assertion;
     private readonly string _mapperDescription;
     private readonly string _assertionDescription;
 
     public CollectionAllSatisfyMappedAssertion(
         EvaluationContext<TCollection> context,
         Func<TItem, TMapped> mapper,
-        Action<IAssertionSource<TMapped>> assertion,
+        Func<IAssertionSource<TMapped>, Assertion<TMapped>?> assertion,
         string mapperDescription,
         string assertionDescription,
         StringBuilder expressionBuilder)
@@ -540,13 +540,13 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
         _assertionDescription = assertionDescription;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
+    protected override async Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
     {
         if (exception != null)
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return AssertionResult.Failed($"threw {exception.GetType().Name}");
 
         if (value == null)
-            return Task.FromResult(AssertionResult.Failed("collection was null"));
+            return AssertionResult.Failed("collection was null");
 
         int index = 0;
         foreach (var item in value)
@@ -555,16 +555,20 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
             var mappedAssertion = new ValueAssertion<TMapped>(mappedValue, $"mapped[{index}]");
             try
             {
-                _assertion(mappedAssertion);
+                var resultingAssertion = _assertion(mappedAssertion);
+                if (resultingAssertion != null)
+                {
+                    await resultingAssertion.AssertAsync();
+                }
             }
             catch (Exception ex)
             {
-                return Task.FromResult(AssertionResult.Failed($"item at index {index} (mapped by {_mapperDescription}) failed assertion: {ex.Message}"));
+                return AssertionResult.Failed($"item at index {index} (mapped by {_mapperDescription}) failed assertion: {ex.Message}");
             }
             index++;
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult.Passed;
     }
 
     protected override string GetExpectation() => $"items mapped by {_mapperDescription} to satisfy {_assertionDescription}";
