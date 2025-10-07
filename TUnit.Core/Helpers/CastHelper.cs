@@ -10,7 +10,6 @@ namespace TUnit.Core.Helpers;
 [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 public static class CastHelper
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(object? value)
     {
         if (value is null)
@@ -179,7 +178,6 @@ public static class CastHelper
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, object? value)
     {
         if (value is null)
