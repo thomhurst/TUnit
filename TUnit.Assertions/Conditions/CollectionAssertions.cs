@@ -431,7 +431,7 @@ public class HasSingleItemAssertion<TValue> : Assertion<TValue>
 /// <summary>
 /// Asserts that a collection contains an item matching the predicate.
 /// </summary>
-public class CollectionContainsPredicateAssertion<TCollection, TItem> : Assertion<TCollection>
+public class CollectionContainsPredicateAssertion<TCollection, TItem> : Assertion<TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, bool> _predicate;
@@ -440,26 +440,30 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Assertio
         EvaluationContext<TCollection> context,
         Func<TItem, bool> predicate,
         StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        : base(context.Map<TItem>(collection =>
+        {
+            if (collection == null)
+                throw new ArgumentNullException(nameof(collection), "collection was null");
+
+            foreach (var item in collection)
+            {
+                if (predicate(item))
+                    return item;
+            }
+
+            throw new InvalidOperationException("no item matching predicate found in collection");
+        }), expressionBuilder)
     {
         _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
     }
 
-    protected override Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(TItem? value, Exception? exception)
     {
         if (exception != null)
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed(exception.Message));
 
-        if (value == null)
-            return Task.FromResult(AssertionResult.Failed("value was null"));
-
-        foreach (var item in value)
-        {
-            if (_predicate(item))
-                return Task.FromResult(AssertionResult.Passed);
-        }
-
-        return Task.FromResult(AssertionResult.Failed("no item matching predicate found in collection"));
+        // If we got here, the item was found (the Map function succeeded)
+        return Task.FromResult(AssertionResult.Passed);
     }
 
     protected override string GetExpectation() => "to contain item matching predicate";

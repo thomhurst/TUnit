@@ -30,8 +30,7 @@ public class AndAssertion<TValue> : Assertion<TValue>
 
     protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
     {
-        // Not used - overridden AssertAsync handles the logic
-        throw new NotImplementedException("AndAssertion overrides AssertAsync directly");
+        return Task.FromResult(AssertionResult.Passed);
     }
 
     protected override string GetExpectation() => "both conditions";

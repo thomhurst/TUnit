@@ -1,4 +1,9 @@
 namespace TUnit.Assertions.FSharp
 
-// Placeholder file - F# extensions are currently disabled
-// See Extensions.fs.disabled for the old implementation that needs updating
+open System.Runtime.CompilerServices
+open TUnit.Assertions.Core
+
+module Operations =
+    [<CustomOperation(MaintainsVariableSpaceUsingBind = true)>]
+    let check (assertion: Assertion<'T>) =
+        assertion.AssertAsync() |> Async.AwaitTask |> Async.Ignore

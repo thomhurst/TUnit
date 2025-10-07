@@ -165,13 +165,13 @@ public class AssertMultipleTests
 
         var aggregateException = (AggregateException) assertionException!.InnerException!;
 
-        await TUnitAssert.That(aggregateException.InnerExceptions[0]).IsTypeOf<TUnitAssertionException>();
-        await TUnitAssert.That(aggregateException.InnerExceptions[1]).IsTypeOf<TUnitAssertionException>();
-        await TUnitAssert.That(aggregateException.InnerExceptions[2]).IsTypeOf<TUnitAssertionException>();
-        await TUnitAssert.That(aggregateException.InnerExceptions[3]).IsTypeOf<TUnitAssertionException>();
-        await TUnitAssert.That(aggregateException.InnerExceptions[4]).IsTypeOf<TUnitAssertionException>();
-        await TUnitAssert.That(aggregateException.InnerExceptions[5]).IsTypeOf<TUnitAssertionException>();
-        await TUnitAssert.That(aggregateException.InnerExceptions[6]).IsTypeOf<TUnitAssertionException>();
+        await TUnitAssert.That((object)aggregateException.InnerExceptions[0]).IsTypeOf<TUnitAssertionException>();
+        await TUnitAssert.That((object)aggregateException.InnerExceptions[1]).IsTypeOf<TUnitAssertionException>();
+        await TUnitAssert.That((object)aggregateException.InnerExceptions[2]).IsTypeOf<TUnitAssertionException>();
+        await TUnitAssert.That((object)aggregateException.InnerExceptions[3]).IsTypeOf<TUnitAssertionException>();
+        await TUnitAssert.That((object)aggregateException.InnerExceptions[4]).IsTypeOf<TUnitAssertionException>();
+        await TUnitAssert.That((object)aggregateException.InnerExceptions[5]).IsTypeOf<TUnitAssertionException>();
+        await TUnitAssert.That((object)aggregateException.InnerExceptions[6]).IsTypeOf<TUnitAssertionException>();
 
         var assertionException1 = (TUnitAssertionException) aggregateException.InnerExceptions[0];
         var assertionException2 = (TUnitAssertionException) aggregateException.InnerExceptions[1];

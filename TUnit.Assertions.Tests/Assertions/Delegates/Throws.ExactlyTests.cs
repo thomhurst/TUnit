@@ -89,24 +89,21 @@ public partial class Throws
         }
 
         [Test]
-        [Skip("Extension method resolution issues with Polyfill package")]
         public async Task Can_Convert_To_Value_Assertion_Builder_On_Casted_Exception_Type()
         {
             Exception exception = CreateCustomException("Foo bar message");
 
             Action action = () => throw exception;
 
-            await Assert.That(action)
+            var ex = await Assert.That(action)
                 .ThrowsExactly<CustomException>()
                 .And
                 .HasMessageEqualTo("Foo bar message");
 
-            // Extension method resolution issues with Polyfill package
-            // await Assert.That((object)ex).IsAssignableTo<CustomException>();
+            await Assert.That((object)ex).IsAssignableTo<CustomException>();
         }
 
         [Test]
-        [Skip("Extension method resolution issues with Polyfill package")]
         public async Task Conversion_To_Value_Assertion_Builder_On_Casted_Exception_Type_Throws_When_Wrong_Type()
         {
             Exception exception = CreateCustomException("Foo bar message", new ArgumentNullException());
@@ -115,43 +112,39 @@ public partial class Throws
 
             var assertionException = await Assert.ThrowsAsync<AssertionException>(async () =>
             {
-                await Assert.That(action)
+                var ex = await Assert.That(action)
                     .ThrowsExactly<Exception>()
                     .And
                     .HasMessageEqualTo("Foo bar message");
 
-                // Extension method resolution issues with Polyfill package
-                // await Assert.That((object)ex).IsAssignableTo<CustomException>();
-                throw new AssertionException("Manual throw for test");
+                await Assert.That((object)ex).IsAssignableTo<CustomException>();
             });
 
-            // await Assert.That(assertionException).HasMessageStartingWith("""
-            //                                                              Expected action to throw exactly an Exception
-            //
-            //                                                              but a CustomException was thrown
-            //                                                              """);
+            await Assert.That(assertionException).HasMessageStartingWith("""
+                                                                         Expected action to throw exactly an Exception
+
+                                                                         but a CustomException was thrown
+                                                                         """);
         }
 
-        // [Test]
-        // [Skip("Extension method resolution issues with Polyfill package")]
-        // public async Task Conversion_To_Value_Assertion_Builder_On_Casted_Exception_Type_Throws_When_InvalidMessage()
-        // {
-        //     Exception exception = CreateCustomException("Foo bar message");
-        //
-        //     Action action = () => throw exception;
-        //
-        //     var assertionException = await Assert.ThrowsAsync<AssertionException>(async () =>
-        //     {
-        //         await Assert.That(action)
-        //             .ThrowsExactly<CustomException>()
-        //             .And
-        //             .HasMessageEqualTo("Foo bar message!");
-        //
-        //         // Extension method resolution issues with Polyfill package
-        //         // await Assert.That((object)ex).IsAssignableTo<CustomException>();
-        //     });
-        //
-        //     // await Assert.That(assertionException).HasMessageStartingWith(...);
-        // }
+        [Test]
+        public async Task Conversion_To_Value_Assertion_Builder_On_Casted_Exception_Type_Throws_When_InvalidMessage()
+        {
+            Exception exception = CreateCustomException("Foo bar message");
+
+            Action action = () => throw exception;
+
+            var assertionException = await Assert.ThrowsAsync<AssertionException>(async () =>
+            {
+                var ex = await Assert.That(action)
+                    .ThrowsExactly<CustomException>()
+                    .And
+                    .HasMessageEqualTo("Foo bar message!");
+
+                await Assert.That((object)ex).IsAssignableTo<CustomException>();
+            });
+
+            await Assert.That(assertionException).HasMessageStartingWith("Expected to have message equal to \"Foo bar message!\"");
+        }
     }
 }

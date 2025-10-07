@@ -37,7 +37,7 @@ public sealed class OrAssertionTests
     // public async Task Short_Circuits_When_First_Assertion_Succeeds()
     // {
     //     var exception = await Assert.That(() => throw new InvalidOperationException()).ThrowsException();
-    //     await Assert.That((object)exception)
+    //     await Assert.That(exception)
     //                 .IsNotAssignableTo<ArgumentOutOfRangeException>()
     //                 .Or
     //                 .Satisfies(x => (ArgumentOutOfRangeException) x,

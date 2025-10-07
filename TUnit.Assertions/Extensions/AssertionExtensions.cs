@@ -268,6 +268,62 @@ public static class AssertionExtensions
         return new BetweenAssertion<TValue>(source.Context, minimum, maximum, source.ExpressionBuilder);
     }
 
+    /// <summary>
+    /// Asserts that the numeric value is greater than zero (positive).
+    /// </summary>
+    public static GreaterThanAssertion<TValue> IsPositive<TValue>(
+        this IAssertionSource<TValue> source)
+        where TValue : IComparable<TValue>
+    {
+        source.ExpressionBuilder.Append(".IsPositive()");
+        return new GreaterThanAssertion<TValue>(source.Context, default(TValue)!, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the nullable numeric value is greater than zero (positive).
+    /// </summary>
+    public static GreaterThanAssertion<TValue> IsPositive<TValue>(
+        this IAssertionSource<TValue?> source)
+        where TValue : struct, IComparable<TValue>
+    {
+        source.ExpressionBuilder.Append(".IsPositive()");
+        var mappedContext = source.Context.Map<TValue>(nullableValue =>
+        {
+            if (!nullableValue.HasValue)
+                throw new ArgumentNullException(nameof(nullableValue), "value was null");
+            return nullableValue.Value;
+        });
+        return new GreaterThanAssertion<TValue>(mappedContext, default(TValue)!, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the numeric value is less than zero (negative).
+    /// </summary>
+    public static LessThanAssertion<TValue> IsNegative<TValue>(
+        this IAssertionSource<TValue> source)
+        where TValue : IComparable<TValue>
+    {
+        source.ExpressionBuilder.Append(".IsNegative()");
+        return new LessThanAssertion<TValue>(source.Context, default(TValue)!, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the nullable numeric value is less than zero (negative).
+    /// </summary>
+    public static LessThanAssertion<TValue> IsNegative<TValue>(
+        this IAssertionSource<TValue?> source)
+        where TValue : struct, IComparable<TValue>
+    {
+        source.ExpressionBuilder.Append(".IsNegative()");
+        var mappedContext = source.Context.Map<TValue>(nullableValue =>
+        {
+            if (!nullableValue.HasValue)
+                throw new ArgumentNullException(nameof(nullableValue), "value was null");
+            return nullableValue.Value;
+        });
+        return new LessThanAssertion<TValue>(mappedContext, default(TValue)!, source.ExpressionBuilder);
+    }
+
     // ============ BOOLEAN ============
 
     /// <summary>
@@ -293,23 +349,8 @@ public static class AssertionExtensions
     // ============ TYPE CHECKS ============
 
     /// <summary>
-    /// Asserts that the value is of the specified type.
+    /// Asserts that the value is of the specified type (single type parameter overload).
     /// Returns an assertion typed to TExpected, enabling type-safe chaining!
-    /// Example: await Assert.That(obj).IsTypeOf&lt;string&gt;().And.IsEqualTo("hello");
-    /// Example: await Assert.That(exception).IsTypeOf&lt;InvalidOperationException&gt;();
-    /// </summary>
-    public static TypeOfAssertion<object, TExpected> IsTypeOf<TExpected, TValue>(
-        this IAssertionSource<TValue> source)
-    {
-        source.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
-        // Map to object context since TypeOfAssertion expects object
-        var objectContext = source.Context.Map<object>(v => (object)v!);
-        return new TypeOfAssertion<object, TExpected>(objectContext, source.ExpressionBuilder);
-    }
-
-    /// <summary>
-    /// Asserts that the value is of the specified type.
-    /// Specific overload for object to avoid C# type inference issues.
     /// Example: await Assert.That(obj).IsTypeOf&lt;StringBuilder&gt;();
     /// </summary>
     public static TypeOfAssertion<object, TExpected> IsTypeOf<TExpected>(
@@ -320,11 +361,23 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that the value is exactly of the specified type (runtime Type parameter).
+    /// Asserts that the value is of the specified type (runtime Type parameter).
     /// Example: await Assert.That(obj).IsTypeOf(typeof(string));
     /// </summary>
+    public static Assertion<object> IsTypeOf(
+        this IAssertionSource<object> source,
+        Type expectedType)
+    {
+        source.ExpressionBuilder.Append($".IsTypeOf(typeof({expectedType.Name}))");
+        return new IsTypeOfRuntimeAssertion<object>(source.Context, expectedType, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the value is of the specified type (runtime Type parameter, for AndContinuation).
+    /// Example: await Assert.That(obj).IsEqualTo("foo").And.IsTypeOf(typeof(string));
+    /// </summary>
     public static Assertion<TValue> IsTypeOf<TValue>(
-        this IAssertionSource<TValue> source,
+        this AndContinuation<TValue> source,
         Type expectedType)
     {
         source.ExpressionBuilder.Append($".IsTypeOf(typeof({expectedType.Name}))");
@@ -332,16 +385,29 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that the exception is of the specified type.
-    /// Specific overload for Exception to avoid C# type inference issues.
-    /// Example: await Assert.That(exception).IsTypeOf&lt;InvalidOperationException&gt;();
+    /// Asserts that the value is of the specified type (two type parameter overload).
+    /// Returns an assertion typed to TExpected, enabling type-safe chaining!
+    /// Example: await Assert.That(obj).IsTypeOf&lt;string, object&gt;();
     /// </summary>
-    public static TypeOfAssertion<Exception, TExpected> IsTypeOf<TExpected>(
-        this IAssertionSource<Exception> source)
-        where TExpected : Exception
+    public static TypeOfAssertion<TValue, TExpected> IsTypeOf<TExpected, TValue>(
+        this IAssertionSource<TValue> source)
     {
         source.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
-        return new TypeOfAssertion<Exception, TExpected>(source.Context, source.ExpressionBuilder);
+        return new TypeOfAssertion<TValue, TExpected>(source.Context, source.ExpressionBuilder);
+    }
+
+
+
+    /// <summary>
+    /// Asserts that the value's type is assignable to the specified type (is the type or a derived type).
+    /// Specific overload for object to avoid Polyfill package conflicts.
+    /// Example: await Assert.That((object)myDog).IsAssignableTo&lt;Animal&gt;();
+    /// </summary>
+    public static IsAssignableToAssertion<object, TTarget> IsAssignableTo<TTarget>(
+        this IAssertionSource<object> source)
+    {
+        source.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsAssignableToAssertion<object, TTarget>(source.Context, source.ExpressionBuilder);
     }
 
     /// <summary>
@@ -353,6 +419,18 @@ public static class AssertionExtensions
     {
         source.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
         return new IsAssignableToAssertion<TValue, TTarget>(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the value's type is NOT assignable to the specified type.
+    /// Specific overload for object to avoid Polyfill package conflicts.
+    /// Example: await Assert.That((object)myDog).IsNotAssignableTo&lt;Cat&gt;();
+    /// </summary>
+    public static IsNotAssignableToAssertion<object, TTarget> IsNotAssignableTo<TTarget>(
+        this IAssertionSource<object> source)
+    {
+        source.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableToAssertion<object, TTarget>(source.Context, source.ExpressionBuilder);
     }
 
     /// <summary>
@@ -1358,6 +1436,31 @@ public static class AssertionExtensions
     {
         source.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\", StringComparison.{comparison})");
         return new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage, source.ExpressionBuilder, comparison);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property starts with the expected string.
+    /// Works with both direct exception assertions and chained exception assertions (via .And).
+    /// </summary>
+    public static HasMessageStartingWithAssertion<TValue> HasMessageStartingWith<TValue>(
+        this IAssertionSource<TValue> source,
+        string expectedPrefix)
+    {
+        source.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\")");
+        return new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property starts with the expected string using the specified string comparison.
+    /// Works with both direct exception assertions and chained exception assertions (via .And).
+    /// </summary>
+    public static HasMessageStartingWithAssertion<TValue> HasMessageStartingWith<TValue>(
+        this IAssertionSource<TValue> source,
+        string expectedPrefix,
+        StringComparison comparison)
+    {
+        source.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\", StringComparison.{comparison})");
+        return new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix, source.ExpressionBuilder, comparison);
     }
 
     /// <summary>

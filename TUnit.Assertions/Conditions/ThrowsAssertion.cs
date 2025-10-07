@@ -453,3 +453,47 @@ public class HasMessageEqualToAssertion<TValue> : Assertion<TValue>
 
     protected override string GetExpectation() => $"to have message equal to \"{_expectedMessage}\"";
 }
+
+/// <summary>
+/// Asserts that an exception's Message property starts with the expected string.
+/// Works with both direct exception assertions and chained exception assertions (via .And).
+/// </summary>
+public class HasMessageStartingWithAssertion<TValue> : Assertion<TValue>
+{
+    private readonly string _expectedPrefix;
+    private readonly StringComparison _comparison;
+
+    public HasMessageStartingWithAssertion(
+        EvaluationContext<TValue> context,
+        string expectedPrefix,
+        StringBuilder expressionBuilder,
+        StringComparison comparison = StringComparison.Ordinal)
+        : base(context, expressionBuilder)
+    {
+        _expectedPrefix = expectedPrefix;
+        _comparison = comparison;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    {
+        Exception? exceptionToCheck = null;
+
+        // If we have an exception parameter (from Throws/ThrowsExactly), use that
+        if (exception is Exception ex)
+            exceptionToCheck = ex;
+        // Otherwise, the value should be an exception (direct assertion on exception)
+        else if (value is Exception valueAsException)
+            exceptionToCheck = valueAsException;
+        else if (value == null && exception == null)
+            return Task.FromResult(AssertionResult.Failed("exception was null"));
+        else
+            return Task.FromResult(AssertionResult.Failed($"value is not an exception (type: {value?.GetType().Name ?? "null"})"));
+
+        if (exceptionToCheck.Message.StartsWith(_expectedPrefix, _comparison))
+            return Task.FromResult(AssertionResult.Passed);
+
+        return Task.FromResult(AssertionResult.Failed($"message was \"{exceptionToCheck.Message}\""));
+    }
+
+    protected override string GetExpectation() => $"to have message starting with \"{_expectedPrefix}\"";
+}
