@@ -1,16 +1,16 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core.Converters;
 
 namespace TUnit.Core.Helpers;
 
+[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
+[UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 public static class CastHelper
 {
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Type conversion uses reflection for custom conversions")]
-    [RequiresDynamicCode("Dynamic type conversion may require runtime code generation")]
-    #endif
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(object? value)
     {
         if (value is null)
@@ -69,6 +69,7 @@ public static class CastHelper
             // Handle null -> empty array
             if (value is null)
             {
+                ThrowOnAot(value, underlyingType);
                 return (T?)(object)Array.CreateInstance(targetElementType, 0);
             }
 
@@ -77,6 +78,8 @@ public static class CastHelper
             {
                 if (value is IConvertible)
                 {
+                    ThrowOnAot(value, underlyingType);
+
                     try
                     {
                         var convertedValue = Convert.ChangeType(value, targetElementType);
@@ -104,6 +107,7 @@ public static class CastHelper
                 // Otherwise, convert each element
                 try
                 {
+                    ThrowOnAot(value, underlyingType);
                     var targetArray = Array.CreateInstance(targetElementType, sourceArray.Length);
                     for (var i = 0; i < sourceArray.Length; i++)
                     {
@@ -175,10 +179,7 @@ public static class CastHelper
         }
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Type conversion uses reflection for custom conversions")]
-    [RequiresDynamicCode("Dynamic type conversion may require runtime code generation")]
-    #endif
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, object? value)
     {
         if (value is null)
@@ -217,6 +218,7 @@ public static class CastHelper
                 var firstItem = enumerable.Cast<object>().FirstOrDefault();
                 if (firstItem != null)
                 {
+                    ThrowOnAot(value, underlyingType);
                     // Use reflection to get the Value property
                     var valueProperty = GetValuePropertySafe(firstItem.GetType());
                     if (valueProperty != null)
@@ -252,6 +254,7 @@ public static class CastHelper
             // Handle null -> empty array
             if (value is null)
             {
+                ThrowOnAot(value, underlyingType);
                 return Array.CreateInstance(targetElementType, 0);
             }
 
@@ -260,6 +263,7 @@ public static class CastHelper
             {
                 if (value is IConvertible)
                 {
+                    ThrowOnAot(value, underlyingType);
                     try
                     {
                         var convertedValue = Convert.ChangeType(value, targetElementType);
@@ -287,6 +291,7 @@ public static class CastHelper
                 // Otherwise, convert each element
                 try
                 {
+                    ThrowOnAot(value, underlyingType);
                     var targetArray = Array.CreateInstance(targetElementType, sourceArray.Length);
                     for (var i = 0; i < sourceArray.Length; i++)
                     {
@@ -363,6 +368,19 @@ public static class CastHelper
                 mi.Name == "op_Explicit" && mi.ReturnType == targetType && HasCorrectInputType(baseType, mi));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void ThrowOnAot(object? value, Type? targetType)
+    {
+#if NET
+        if (!RuntimeFeature.IsDynamicCodeSupported)
+        {
+            throw new InvalidOperationException(
+                $"Cannot cast {value?.GetType()?.Name ?? "null"} to {targetType?.Name} in AOT mode. " +
+                "Consider using AotConverterRegistry.Register() for custom type conversions.");
+        }
+#endif
+    }
+
     private static bool HasCorrectInputType(Type baseType, MethodInfo mi)
     {
         var pi = mi.GetParameters().FirstOrDefault();
@@ -372,9 +390,6 @@ public static class CastHelper
     /// <summary>
     /// Gets the "Value" property from a type in an AOT-safer manner.
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Property access for CustomAttributeTypedArgument unwrapping")]
-    #endif
     private static PropertyInfo? GetValuePropertySafe([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         return type.GetProperty("Value");

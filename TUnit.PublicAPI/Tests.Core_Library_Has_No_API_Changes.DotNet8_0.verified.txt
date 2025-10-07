@@ -1949,13 +1949,14 @@ namespace .Helpers
         public static string FormatArguments(.<object?> arguments) { }
         public static string GetConstantValue(.TestContext testContext, object? o) { }
     }
+    [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+        "nctionality when AOT compiling.")]
+    [.("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttr" +
+        "ibute\' in call to target method. The return value of the source method does not " +
+        "have matching annotations.")]
     public static class CastHelper
     {
-        [.("Dynamic type conversion may require runtime code generation")]
-        [.("Type conversion uses reflection for custom conversions")]
         public static object? Cast([.(..None | ..PublicMethods | ..NonPublicMethods)]  type, object? value) { }
-        [.("Dynamic type conversion may require runtime code generation")]
-        [.("Type conversion uses reflection for custom conversions")]
         public static T? Cast<[.(..None | ..PublicMethods | ..NonPublicMethods)]  T>(object? value) { }
         public static .MethodInfo? GetConversionMethod([.(..None | ..PublicMethods | ..NonPublicMethods)]  baseType, [.(..None | ..PublicMethods | ..NonPublicMethods)]  targetType) { }
     }

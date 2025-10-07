@@ -20,7 +20,7 @@ public class FSharp
                 [
                     "run",
                     "--no-build",
-                    "-f", "net9.0",
+                    "-f", "net10.0",
                     "--configuration", "Release",
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
