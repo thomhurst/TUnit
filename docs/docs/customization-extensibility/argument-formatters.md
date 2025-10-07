@@ -10,10 +10,10 @@ For example:
 ```csharp
     [Test]
     [MethodDataSource(nameof(SomeMethod))]
-    [ArgumentDisplayFormatter<SomeClassFormatter>]
-    public async Task Test(SomeClass)
+    [ArgumentDisplayFormatter<MyFormatter>]
+    public async Task Test(SomeClass someClass)
     {
-        await Assert.That(TestContext.Current!.GetTestDisplayName()).IsEqualTo("A super important test!");
+        await Assert.That(TestContext.Current!.GetDisplayName()).IsEqualTo("A super important test!");
     }
 ```
 
