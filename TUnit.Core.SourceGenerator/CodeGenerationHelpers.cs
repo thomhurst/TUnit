@@ -108,7 +108,8 @@ internal static class CodeGenerationHelpers
                                 if (isDecimalType &&
                                     syntaxArguments != null && syntaxIndex < syntaxArguments.Count)
                                 {
-                                    var originalText = syntaxArguments[syntaxIndex].Expression.ToString();
+                                    var syntaxExpression = syntaxArguments[syntaxIndex].Expression;
+                                    var originalText = syntaxExpression.ToString();
                                     syntaxIndex++;
 
                                     // Skip special handling for null values
@@ -123,6 +124,15 @@ internal static class CodeGenerationHelpers
                                     {
                                         // For string literals, let the normal processing handle it (will use decimal.Parse)
                                         syntaxIndex--; // Back up so normal processing can handle it
+                                        elementIndex++;
+                                        return TypedConstantParser.GetRawTypedConstantValue(v, paramType);
+                                    }
+
+                                    // Check if it's a constant reference (identifier) rather than a literal
+                                    // Identifiers don't contain dots, parentheses, or other operators
+                                    if (syntaxExpression is NameSyntax)
+                                    {
+                                        // For constant references, use the actual value from TypedConstant
                                         elementIndex++;
                                         return TypedConstantParser.GetRawTypedConstantValue(v, paramType);
                                     }
@@ -151,7 +161,8 @@ internal static class CodeGenerationHelpers
                         if (isDecimalType &&
                             syntaxArguments != null && syntaxIndex < syntaxArguments.Count)
                         {
-                            var originalText = syntaxArguments[syntaxIndex].Expression.ToString();
+                            var syntaxExpression = syntaxArguments[syntaxIndex].Expression;
+                            var originalText = syntaxExpression.ToString();
                             syntaxIndex++;
 
                             // Skip special handling for null values
@@ -164,6 +175,13 @@ internal static class CodeGenerationHelpers
                             {
                                 // For string literals, let the normal processing handle it (will use decimal.Parse)
                                 syntaxIndex--; // Back up so normal processing can handle it
+                                argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg, paramType));
+                            }
+                            // Check if it's a constant reference (identifier) rather than a literal
+                            // Identifiers don't contain dots, parentheses, or other operators
+                            else if (syntaxExpression is NameSyntax)
+                            {
+                                // For constant references, use the actual value from TypedConstant
                                 argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg, paramType));
                             }
                             else
@@ -188,13 +206,21 @@ internal static class CodeGenerationHelpers
                     if (paramType?.SpecialType == SpecialType.System_Decimal &&
                         syntaxArguments != null && syntaxIndex < syntaxArguments.Count)
                     {
-                        var originalText = syntaxArguments[syntaxIndex].Expression.ToString();
+                        var syntaxExpression = syntaxArguments[syntaxIndex].Expression;
+                        var originalText = syntaxExpression.ToString();
                         syntaxIndex++;
                         // Check if it's a string literal (starts and ends with quotes)
                         if (originalText.StartsWith("\"") && originalText.EndsWith("\""))
                         {
                             // For string literals, let the normal processing handle it (will use decimal.Parse)
                             syntaxIndex--; // Back up so normal processing can handle it
+                            argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg, paramType));
+                        }
+                        // Check if it's a constant reference (identifier) rather than a literal
+                        // Identifiers don't contain dots, parentheses, or other operators
+                        else if (syntaxExpression is NameSyntax)
+                        {
+                            // For constant references, use the actual value from TypedConstant
                             argStrings.Add(TypedConstantParser.GetRawTypedConstantValue(arg, paramType));
                         }
                         else

@@ -113,4 +113,13 @@ public class DecimalArgumentTests
 
         await Assert.That(credit).IsEqualTo(123_999.00000000000000001m);
     }
+
+    private const int BatchSize = 42;
+
+    [Test]
+    [Arguments(BatchSize)]
+    public async Task TestMethod(decimal batchingSize)
+    {
+        await Assert.That(batchingSize).IsEqualTo(BatchSize);
+    }
 }

@@ -127,7 +127,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var (filePath, lineNumber) = GetTestMethodSourceLocation(method, testAttribute, classInfo);
 
             // If the method is from a generic base class, use the constructed version from the inheritance hierarchy
-            INamedTypeSymbol typeForMetadata = classInfo.TypeSymbol;
+            var typeForMetadata = classInfo.TypeSymbol;
             if (method.ContainingType.IsGenericType && method.ContainingType.IsDefinition)
             {
                 // Find the constructed generic type in the inheritance chain
@@ -711,10 +711,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var formatter = new TypedConstantFormatter();
             writer.Append($"new {attrTypeName}(");
 
-            if (attr.ConstructorArguments.Length == 1 && attr.ConstructorArguments[0].Kind == TypedConstantKind.Array)
+            if (attr.ConstructorArguments is
+                [
+                    { Kind: TypedConstantKind.Array } _
+                ])
             {
                 var arrayValues = attr.ConstructorArguments[0].Values;
-                for (int i = 0; i < arrayValues.Length; i++)
+                for (var i = 0; i < arrayValues.Length; i++)
                 {
                     var targetType = i < testMethodParameters.Length ? testMethodParameters[i].Type : null;
                     writer.Append(formatter.FormatForCode(arrayValues[i], targetType));
@@ -723,7 +726,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             else
             {
-                for (int i = 0; i < attr.ConstructorArguments.Length; i++)
+                for (var i = 0; i < attr.ConstructorArguments.Length; i++)
                 {
                     var targetType = i < testMethodParameters.Length ? testMethodParameters[i].Type : null;
                     writer.Append(formatter.FormatForCode(attr.ConstructorArguments[i], targetType));
@@ -751,18 +754,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Only process positional arguments (exclude named arguments)
         var positionalArgs = argumentList.Arguments.Where(a => a.NameEquals == null).ToList();
 
-        for (int i = 0; i < positionalArgs.Count; i++)
+        for (var i = 0; i < positionalArgs.Count; i++)
         {
             var argumentSyntax = positionalArgs[i];
             var expression = argumentSyntax.Expression;
 
             // Get target parameter type
-            ITypeSymbol? targetParameterType = i < testMethodParameters.Length
+            var targetParameterType = i < testMethodParameters.Length
                 ? testMethodParameters[i].Type
                 : null;
 
             // For decimal parameters, preserve source text and add 'm' suffix (only for numeric literals)
-            if (targetParameterType?.SpecialType == SpecialType.System_Decimal
+            if (expression is not IdentifierNameSyntax
+                && targetParameterType?.SpecialType == SpecialType.System_Decimal
                 && expression.Kind() != SyntaxKind.StringLiteralExpression
                 && expression.Kind() != SyntaxKind.NullLiteralExpression)
             {
@@ -792,7 +796,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("{");
             writer.Indent();
 
-            for (int i = 0; i < namedArgs.Count; i++)
+            for (var i = 0; i < namedArgs.Count; i++)
             {
                 var namedArg = namedArgs[i];
                 var propertyName = namedArg.NameEquals!.Name.ToString();
@@ -1805,7 +1809,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate InvokeTypedTest for non-generic tests
         var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
-        if (!testMethod.IsGenericType && !testMethod.IsGenericMethod)
+        if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
             GenerateConcreteTestInvoker(writer, testMethod, className, methodName, isAsync, hasCancellationToken, parametersFromArgs);
         }
@@ -1828,7 +1832,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Special case: Single tuple parameter (same as in TestInvoker)
         // If we have exactly one parameter that's a tuple type, we need to handle it specially
         // In source-generated mode, tuples are always unwrapped into their elements
-        if (parametersFromArgs.Length == 1 && parametersFromArgs[0].Type is INamedTypeSymbol { IsTupleType: true } singleTupleParam)
+        if (parametersFromArgs is
+            [
+                { Type: INamedTypeSymbol { IsTupleType: true } singleTupleParam }
+            ])
         {
             writer.AppendLine("// Special handling for single tuple parameter");
             writer.AppendLine($"if (args.Length == {singleTupleParam.TupleElements.Length})");
