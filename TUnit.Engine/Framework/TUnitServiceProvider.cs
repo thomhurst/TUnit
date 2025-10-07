@@ -211,7 +211,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 testStateManager));
 
         // Create scheduler configuration from command line options
-        var testGroupingService = Register<ITestGroupingService>(new TestGroupingService());
+        var testGroupingService = Register<ITestGroupingService>(new TestGroupingService(Logger));
         var circularDependencyDetector = Register(new CircularDependencyDetector());
 
         var constraintKeyScheduler = Register<IConstraintKeyScheduler>(new ConstraintKeyScheduler(
