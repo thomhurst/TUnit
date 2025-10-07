@@ -66,10 +66,15 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
             var exclusionValue = exclusion[i];
             var rowValue = rowArray[i];
 
-            // Handle enum to underlying type conversion
-            if (exclusionValue != null && exclusionValue.GetType().IsEnum && rowValue != null)
+            // Handle enum to underlying type conversion for both values
+            if (exclusionValue != null && exclusionValue.GetType().IsEnum)
             {
                 exclusionValue = Convert.ChangeType(exclusionValue, Enum.GetUnderlyingType(exclusionValue.GetType()));
+            }
+
+            if (rowValue != null && rowValue.GetType().IsEnum)
+            {
+                rowValue = Convert.ChangeType(rowValue, Enum.GetUnderlyingType(rowValue.GetType()));
             }
 
             if (!Equals(exclusionValue, rowValue))
