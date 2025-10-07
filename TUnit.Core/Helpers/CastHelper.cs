@@ -6,8 +6,8 @@ using TUnit.Core.Converters;
 
 namespace TUnit.Core.Helpers;
 
-[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = "<Pending>")]
-[SuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
+[UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 public static class CastHelper
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -374,7 +374,9 @@ public static class CastHelper
 #if NET
         if (!RuntimeFeature.IsDynamicCodeSupported)
         {
-            throw new InvalidOperationException($"Cannot cast {value} to {targetType} in AOT mode as it requires reflection.");
+            throw new InvalidOperationException(
+                $"Cannot cast {value?.GetType()?.Name ?? "null"} to {targetType?.Name} in AOT mode. " +
+                "Consider using AotConverterRegistry.Register() for custom type conversions.");
         }
 #endif
     }
