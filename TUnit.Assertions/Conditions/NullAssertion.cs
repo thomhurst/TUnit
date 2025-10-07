@@ -50,6 +50,33 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
 }
 
 /// <summary>
+/// Asserts that a value is equal to the default value for its type.
+/// For reference types, this is null. For value types, this is the zero-initialized value.
+/// </summary>
+public class IsDefaultAssertion<TValue> : Assertion<TValue>
+{
+    public IsDefaultAssertion(
+        EvaluationContext<TValue> context,
+        StringBuilder expressionBuilder)
+        : base(context, expressionBuilder)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    {
+        if (exception != null)
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+
+        if (EqualityComparer<TValue>.Default.Equals(value!, default!))
+            return Task.FromResult(AssertionResult.Passed);
+
+        return Task.FromResult(AssertionResult.Failed($"value is {value}"));
+    }
+
+    protected override string GetExpectation() => $"to be default({typeof(TValue).Name})";
+}
+
+/// <summary>
 /// Asserts that a value is not the default value for its type.
 /// </summary>
 public class IsNotDefaultAssertion<TValue> : Assertion<TValue>

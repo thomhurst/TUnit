@@ -12,6 +12,8 @@ public class ThrowsAssertion<TException> : Assertion<object?>
 {
     private string? _expectedMessageSubstring;
     private string? _expectedExactMessage;
+    private string? _expectedParameterName;
+    private StringComparison _stringComparison = StringComparison.Ordinal;
 
     public ThrowsAssertion(
         EvaluationContext<object?> context,
@@ -41,11 +43,59 @@ public class ThrowsAssertion<TException> : Assertion<object?>
     }
 
     /// <summary>
+    /// Asserts that the exception message contains the specified substring using the specified string comparison.
+    /// </summary>
+    public ThrowsAssertion<TException> WithMessageContaining(string expectedSubstring, StringComparison comparison)
+    {
+        _expectedMessageSubstring = expectedSubstring;
+        _stringComparison = comparison;
+        ExpressionBuilder.Append($".WithMessageContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        return this;
+    }
+
+    /// <summary>
     /// Alias for WithMessageContaining - asserts that the exception message contains the specified substring.
     /// </summary>
     public ThrowsAssertion<TException> HasMessageContaining(string expectedSubstring)
     {
         return WithMessageContaining(expectedSubstring);
+    }
+
+    /// <summary>
+    /// Alias for WithMessageContaining - asserts that the exception message contains the specified substring using the specified string comparison.
+    /// </summary>
+    public ThrowsAssertion<TException> HasMessageContaining(string expectedSubstring, StringComparison comparison)
+    {
+        return WithMessageContaining(expectedSubstring, comparison);
+    }
+
+    /// <summary>
+    /// Asserts that the ArgumentException has the specified parameter name.
+    /// Only valid when TException is ArgumentException or a subclass.
+    /// </summary>
+    public ThrowsAssertion<TException> WithParameterName(string expectedParameterName)
+    {
+        _expectedParameterName = expectedParameterName;
+        ExpressionBuilder.Append($".WithParameterName(\"{expectedParameterName}\")");
+        return this;
+    }
+
+    /// <summary>
+    /// Creates an assertion for the inner exception.
+    /// The returned assertion can be used to assert properties of the inner exception.
+    /// </summary>
+    public ThrowsAssertion<Exception> WithInnerException()
+    {
+        ExpressionBuilder.Append(".WithInnerException()");
+
+        // Create a new evaluation context that evaluates to the inner exception
+        var innerExceptionContext = new EvaluationContext<object?>(async () =>
+        {
+            var (value, exception) = await Context.GetAsync();
+            return (value, exception?.InnerException);
+        });
+
+        return new ThrowsAssertion<Exception>(innerExceptionContext, ExpressionBuilder);
     }
 
     protected override Task<AssertionResult> CheckAsync(object? value, Exception? exception)
@@ -61,9 +111,24 @@ public class ThrowsAssertion<TException> : Assertion<object?>
             return Task.FromResult(AssertionResult.Failed(
                 $"exception message \"{exception.Message}\" does not equal \"{_expectedExactMessage}\""));
 
-        if (_expectedMessageSubstring != null && !exception.Message.Contains(_expectedMessageSubstring))
+        if (_expectedMessageSubstring != null && !exception.Message.Contains(_expectedMessageSubstring, _stringComparison))
             return Task.FromResult(AssertionResult.Failed(
                 $"exception message \"{exception.Message}\" does not contain \"{_expectedMessageSubstring}\""));
+
+        if (_expectedParameterName != null)
+        {
+            if (exception is ArgumentException argumentException)
+            {
+                if (argumentException.ParamName != _expectedParameterName)
+                    return Task.FromResult(AssertionResult.Failed(
+                        $"ArgumentException parameter name \"{argumentException.ParamName}\" does not equal \"{_expectedParameterName}\""));
+            }
+            else
+            {
+                return Task.FromResult(AssertionResult.Failed(
+                    $"WithParameterName can only be used with ArgumentException, but exception is {exception.GetType().Name}"));
+            }
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -84,6 +149,8 @@ public class ThrowsExactlyAssertion<TException> : Assertion<object?>
 {
     private string? _expectedMessageSubstring;
     private string? _expectedExactMessage;
+    private string? _expectedParameterName;
+    private StringComparison _stringComparison = StringComparison.Ordinal;
 
     public ThrowsExactlyAssertion(
         EvaluationContext<object?> context,
@@ -113,11 +180,41 @@ public class ThrowsExactlyAssertion<TException> : Assertion<object?>
     }
 
     /// <summary>
+    /// Asserts that the exception message contains the specified substring using the specified string comparison.
+    /// </summary>
+    public ThrowsExactlyAssertion<TException> WithMessageContaining(string expectedSubstring, StringComparison comparison)
+    {
+        _expectedMessageSubstring = expectedSubstring;
+        _stringComparison = comparison;
+        ExpressionBuilder.Append($".WithMessageContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        return this;
+    }
+
+    /// <summary>
     /// Alias for WithMessageContaining - asserts that the exception message contains the specified substring.
     /// </summary>
     public ThrowsExactlyAssertion<TException> HasMessageContaining(string expectedSubstring)
     {
         return WithMessageContaining(expectedSubstring);
+    }
+
+    /// <summary>
+    /// Alias for WithMessageContaining - asserts that the exception message contains the specified substring using the specified string comparison.
+    /// </summary>
+    public ThrowsExactlyAssertion<TException> HasMessageContaining(string expectedSubstring, StringComparison comparison)
+    {
+        return WithMessageContaining(expectedSubstring, comparison);
+    }
+
+    /// <summary>
+    /// Asserts that the ArgumentException has the specified parameter name.
+    /// Only valid when TException is ArgumentException or a subclass.
+    /// </summary>
+    public ThrowsExactlyAssertion<TException> WithParameterName(string expectedParameterName)
+    {
+        _expectedParameterName = expectedParameterName;
+        ExpressionBuilder.Append($".WithParameterName(\"{expectedParameterName}\")");
+        return this;
     }
 
     protected override Task<AssertionResult> CheckAsync(object? value, Exception? exception)
@@ -134,9 +231,24 @@ public class ThrowsExactlyAssertion<TException> : Assertion<object?>
             return Task.FromResult(AssertionResult.Failed(
                 $"exception message \"{exception.Message}\" does not equal \"{_expectedExactMessage}\""));
 
-        if (_expectedMessageSubstring != null && !exception.Message.Contains(_expectedMessageSubstring))
+        if (_expectedMessageSubstring != null && !exception.Message.Contains(_expectedMessageSubstring, _stringComparison))
             return Task.FromResult(AssertionResult.Failed(
                 $"exception message \"{exception.Message}\" does not contain \"{_expectedMessageSubstring}\""));
+
+        if (_expectedParameterName != null)
+        {
+            if (exception is ArgumentException argumentException)
+            {
+                if (argumentException.ParamName != _expectedParameterName)
+                    return Task.FromResult(AssertionResult.Failed(
+                        $"ArgumentException parameter name \"{argumentException.ParamName}\" does not equal \"{_expectedParameterName}\""));
+            }
+            else
+            {
+                return Task.FromResult(AssertionResult.Failed(
+                    $"WithParameterName can only be used with ArgumentException, but exception is {exception.GetType().Name}"));
+            }
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -171,4 +283,48 @@ public class ThrowsNothingAssertion : Assertion<object?>
     }
 
     protected override string GetExpectation() => "to not throw any exception";
+}
+
+/// <summary>
+/// Asserts that an exception's Message property equals the expected string.
+/// Works with both direct exception assertions and chained exception assertions (via .And).
+/// </summary>
+public class HasMessageEqualToAssertion<TValue> : Assertion<TValue>
+{
+    private readonly string _expectedMessage;
+    private readonly StringComparison _comparison;
+
+    public HasMessageEqualToAssertion(
+        EvaluationContext<TValue> context,
+        string expectedMessage,
+        StringBuilder expressionBuilder,
+        StringComparison comparison = StringComparison.Ordinal)
+        : base(context, expressionBuilder)
+    {
+        _expectedMessage = expectedMessage;
+        _comparison = comparison;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    {
+        Exception? exceptionToCheck = null;
+
+        // If we have an exception parameter (from Throws/ThrowsExactly), use that
+        if (exception is Exception ex)
+            exceptionToCheck = ex;
+        // Otherwise, the value should be an exception (direct assertion on exception)
+        else if (value is Exception valueAsException)
+            exceptionToCheck = valueAsException;
+        else if (value == null && exception == null)
+            return Task.FromResult(AssertionResult.Failed("exception was null"));
+        else
+            return Task.FromResult(AssertionResult.Failed($"value is not an exception (type: {value?.GetType().Name ?? "null"})"));
+
+        if (string.Equals(exceptionToCheck.Message, _expectedMessage, _comparison))
+            return Task.FromResult(AssertionResult.Passed);
+
+        return Task.FromResult(AssertionResult.Failed($"message was \"{exceptionToCheck.Message}\""));
+    }
+
+    protected override string GetExpectation() => $"to have message equal to \"{_expectedMessage}\"";
 }

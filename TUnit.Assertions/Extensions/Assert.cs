@@ -210,6 +210,32 @@ public static class Assert
     }
 
     /// <summary>
+    /// Asserts that the specified exception type is thrown and returns the exception.
+    /// Non-generic version that takes a Type parameter at runtime.
+    /// </summary>
+    public static async Task<Exception?> ThrowsAsync(Type exceptionType, Func<Task> action)
+    {
+        if (!typeof(Exception).IsAssignableFrom(exceptionType))
+        {
+            throw new ArgumentException($"Type {exceptionType.Name} must be an Exception type", nameof(exceptionType));
+        }
+
+        try
+        {
+            await action();
+            throw new AssertionException($"Expected {exceptionType.Name} but no exception was thrown");
+        }
+        catch (Exception ex) when (exceptionType.IsInstanceOfType(ex))
+        {
+            return ex;
+        }
+        catch (Exception ex)
+        {
+            throw new AssertionException($"Expected {exceptionType.Name} but got {ex.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    /// <summary>
     /// Asserts that exactly the specified exception type is thrown (not subclasses) and returns the exception.
     /// Example: var exception = Assert.ThrowsExactly&lt;InvalidOperationException&gt;(() => ThrowingMethod());
     /// </summary>

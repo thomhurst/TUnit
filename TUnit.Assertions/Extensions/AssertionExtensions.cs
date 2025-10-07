@@ -1,9 +1,11 @@
 using System.Collections;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Conditions.Wrappers;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Sources;
 
 namespace TUnit.Assertions.Extensions;
 
@@ -268,27 +270,49 @@ public static class AssertionExtensions
     /// Asserts that the value is of the specified type.
     /// Returns an assertion typed to TExpected, enabling type-safe chaining!
     /// Example: await Assert.That(obj).IsTypeOf&lt;string&gt;().And.IsEqualTo("hello");
-    /// </summary>
-    public static TypeOfAssertion<object, TExpected> IsTypeOf<TExpected>(
-        this IAssertionSource<object> source)
-    {
-        source.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
-        return new TypeOfAssertion<object, TExpected>(source.Context, source.ExpressionBuilder);
-    }
-
-    /// <summary>
-    /// Asserts that the value is of the specified type.
-    /// Returns an assertion typed to TExpected, enabling type-safe chaining!
     /// Example: await Assert.That(exception).IsTypeOf&lt;InvalidOperationException&gt;();
     /// </summary>
-    public static TypeOfAssertion<object, TExpected> IsTypeOf<TValue, TExpected>(
+    public static TypeOfAssertion<object, TExpected> IsTypeOf<TExpected, TValue>(
         this IAssertionSource<TValue> source)
-        where TValue : class
     {
         source.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
         // Map to object context since TypeOfAssertion expects object
-        var objectContext = source.Context.Map<object>(v => v);
+        var objectContext = source.Context.Map<object>(v => (object)v!);
         return new TypeOfAssertion<object, TExpected>(objectContext, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the value's type is assignable to the specified type (is the type or a derived type).
+    /// Example: await Assert.That(myDog).IsAssignableTo&lt;Animal&gt;();
+    /// </summary>
+    public static IsAssignableToAssertion<TValue, TTarget> IsAssignableTo<TTarget, TValue>(
+        this IAssertionSource<TValue> source)
+    {
+        source.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsAssignableToAssertion<TValue, TTarget>(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the value's type is NOT assignable to the specified type.
+    /// Example: await Assert.That(myDog).IsNotAssignableTo&lt;Cat&gt;();
+    /// </summary>
+    public static IsNotAssignableToAssertion<TValue, TTarget> IsNotAssignableTo<TTarget, TValue>(
+        this IAssertionSource<TValue> source)
+    {
+        source.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableToAssertion<TValue, TTarget>(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts on a member of an object using a lambda selector.
+    /// Returns an assertion on the member value for further chaining.
+    /// Example: await Assert.That(myObject).HasMember(x => x.PropertyName).IsEqualTo(expectedValue);
+    /// </summary>
+    public static MemberAssertion<TObject, TMember> HasMember<TObject, TMember>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, TMember>> memberSelector)
+    {
+        return new MemberAssertion<TObject, TMember>(source.Context, memberSelector, source.ExpressionBuilder);
     }
 
     // ============ REFERENCE EQUALITY ============
@@ -390,6 +414,26 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that the string is null or empty.
+    /// </summary>
+    public static StringIsNullOrEmptyAssertion IsNullOrEmpty(
+        this IAssertionSource<string> source)
+    {
+        source.ExpressionBuilder.Append(".IsNullOrEmpty()");
+        return new StringIsNullOrEmptyAssertion(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the string is NOT null or empty.
+    /// </summary>
+    public static StringIsNotNullOrEmptyAssertion IsNotNullOrEmpty(
+        this IAssertionSource<string> source)
+    {
+        source.ExpressionBuilder.Append(".IsNotNullOrEmpty()");
+        return new StringIsNotNullOrEmptyAssertion(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
     /// Returns a wrapper for string length assertions.
     /// Example: await Assert.That(str).HasLength().EqualTo(5);
     /// </summary>
@@ -487,6 +531,22 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that the dictionary contains the specified key.
+    /// This overload works with custom dictionary types.
+    /// Example: await Assert.That(customDict).ContainsKey("key");
+    /// </summary>
+    public static DictionaryContainsKeyAssertion<TKey, TValue> ContainsKey<TDictionary, TKey, TValue>(
+        this IAssertionSource<TDictionary> source,
+        TKey key,
+        [CallerArgumentExpression(nameof(key))] string? expression = null)
+        where TDictionary : IReadOnlyDictionary<TKey, TValue>
+    {
+        source.ExpressionBuilder.Append($".ContainsKey({expression})");
+        var mappedContext = source.Context.Map<IReadOnlyDictionary<TKey, TValue>>(dict => dict);
+        return new DictionaryContainsKeyAssertion<TKey, TValue>(mappedContext, key, source.ExpressionBuilder);
+    }
+
+    /// <summary>
     /// Asserts that the dictionary does NOT contain the specified key.
     /// Example: await Assert.That(dict).DoesNotContainKey("key");
     /// </summary>
@@ -497,6 +557,22 @@ public static class AssertionExtensions
     {
         source.ExpressionBuilder.Append($".DoesNotContainKey({expression})");
         return new DictionaryDoesNotContainKeyAssertion<TKey, TValue>(source.Context, key, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary does NOT contain the specified key.
+    /// This overload works with custom dictionary types.
+    /// Example: await Assert.That(customDict).DoesNotContainKey("key");
+    /// </summary>
+    public static DictionaryDoesNotContainKeyAssertion<TKey, TValue> DoesNotContainKey<TDictionary, TKey, TValue>(
+        this IAssertionSource<TDictionary> source,
+        TKey key,
+        [CallerArgumentExpression(nameof(key))] string? expression = null)
+        where TDictionary : IReadOnlyDictionary<TKey, TValue>
+    {
+        source.ExpressionBuilder.Append($".DoesNotContainKey({expression})");
+        var mappedContext = source.Context.Map<IReadOnlyDictionary<TKey, TValue>>(dict => dict);
+        return new DictionaryDoesNotContainKeyAssertion<TKey, TValue>(mappedContext, key, source.ExpressionBuilder);
     }
 
     // ============ COLLECTION ASSERTIONS ============
@@ -563,6 +639,56 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that the collection does NOT contain any item matching the predicate.
+    /// </summary>
+    public static CollectionDoesNotContainPredicateAssertion<TCollection, TItem> DoesNotContain<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.ExpressionBuilder.Append($".DoesNotContain({expression})");
+        return new CollectionDoesNotContainPredicateAssertion<TCollection, TItem>(source.Context, predicate, expression ?? "predicate", source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains ONLY items matching the predicate (all items satisfy the predicate).
+    /// </summary>
+    public static CollectionAllAssertion<TCollection, TItem> ContainsOnly<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.ExpressionBuilder.Append($".ContainsOnly({expression})");
+        return new CollectionAllAssertion<TCollection, TItem>(source.Context, predicate, expression ?? "predicate", source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is in ascending order.
+    /// </summary>
+    public static CollectionIsInOrderAssertion<TCollection, TItem> IsInOrder<TCollection, TItem>(
+        this IAssertionSource<TCollection> source)
+        where TCollection : IEnumerable<TItem>
+        where TItem : IComparable<TItem>
+    {
+        source.ExpressionBuilder.Append(".IsInOrder()");
+        return new CollectionIsInOrderAssertion<TCollection, TItem>(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is in descending order.
+    /// </summary>
+    public static CollectionIsInDescendingOrderAssertion<TCollection, TItem> IsInDescendingOrder<TCollection, TItem>(
+        this IAssertionSource<TCollection> source)
+        where TCollection : IEnumerable<TItem>
+        where TItem : IComparable<TItem>
+    {
+        source.ExpressionBuilder.Append(".IsInDescendingOrder()");
+        return new CollectionIsInDescendingOrderAssertion<TCollection, TItem>(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
     /// Returns a wrapper for collection count assertions.
     /// Example: await Assert.That(list).HasCount().EqualTo(5);
     /// </summary>
@@ -586,6 +712,18 @@ public static class AssertionExtensions
     {
         source.ExpressionBuilder.Append($".HasCount({expression})");
         return new CollectionCountAssertion<TValue>(source.Context, expectedCount, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Creates a helper for asserting that all items in the collection satisfy custom assertions.
+    /// Example: await Assert.That(list).All().Satisfy(item => item.IsNotNull());
+    /// </summary>
+    public static CollectionAllSatisfyHelper<TCollection, TItem> All<TCollection, TItem>(
+        this IAssertionSource<TCollection> source)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.ExpressionBuilder.Append(".All()");
+        return new CollectionAllSatisfyHelper<TCollection, TItem>(source.Context, source.ExpressionBuilder);
     }
 
     /// <summary>
@@ -661,6 +799,19 @@ public static class AssertionExtensions
     {
         source.ExpressionBuilder.Append($".IsEquivalentTo({expression})");
         return new EqualsAssertion<TValue>(source.Context, expected, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the value is NOT equivalent (not equal) to the expected value.
+    /// For non-collection types, this is the same as IsNotEqualTo.
+    /// </summary>
+    public static NotEqualsAssertion<TValue> IsNotEquivalentTo<TValue>(
+        this IAssertionSource<TValue> source,
+        TValue expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.ExpressionBuilder.Append($".IsNotEquivalentTo({expression})");
+        return new NotEqualsAssertion<TValue>(source.Context, expected, source.ExpressionBuilder);
     }
 
     // ============ PREDICATE CHECKS ============
@@ -750,7 +901,7 @@ public static class AssertionExtensions
     /// Asserts that the delegate throws the specified exception type (or subclass).
     /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;InvalidOperationException&gt;();
     /// </summary>
-    public static ThrowsAssertion<TException> Throws<TValue, TException>(
+    public static ThrowsAssertion<TException> Throws<TException, TValue>(
         this IAssertionSource<TValue> source)
         where TException : Exception
     {
@@ -764,7 +915,7 @@ public static class AssertionExtensions
     /// Alias for Throws - asserts that the delegate throws the specified exception type.
     /// Example: await Assert.That(() => ThrowingMethod()).ThrowsException&lt;InvalidOperationException&gt;();
     /// </summary>
-    public static ThrowsAssertion<TException> ThrowsException<TValue, TException>(
+    public static ThrowsAssertion<TException> ThrowsException<TException, TValue>(
         this IAssertionSource<TValue> source)
         where TException : Exception
     {
@@ -803,7 +954,7 @@ public static class AssertionExtensions
     /// Asserts that the delegate throws exactly the specified exception type (not subclasses).
     /// Example: await Assert.That(() => ThrowingMethod()).ThrowsExactly&lt;InvalidOperationException&gt;();
     /// </summary>
-    public static ThrowsExactlyAssertion<TException> ThrowsExactly<TValue, TException>(
+    public static ThrowsExactlyAssertion<TException> ThrowsExactly<TException, TValue>(
         this IAssertionSource<TValue> source)
         where TException : Exception
     {
@@ -827,6 +978,151 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that the exception message contains the specified substring.
+    /// Works on AndContinuation after Throws assertions.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.HasMessageContaining("error");
+    /// </summary>
+    public static ExceptionMessageAssertion HasMessageContaining(
+        this IAssertionSource<object?> source,
+        string expectedSubstring)
+    {
+        source.ExpressionBuilder.Append($".HasMessageContaining(\"{expectedSubstring}\")");
+        return new ExceptionMessageAssertion(source.Context, expectedSubstring, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the exception message contains the specified substring using the specified comparison.
+    /// Works on AndContinuation after Throws assertions.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.HasMessageContaining("error", StringComparison.OrdinalIgnoreCase);
+    /// </summary>
+    public static ExceptionMessageAssertion HasMessageContaining(
+        this IAssertionSource<object?> source,
+        string expectedSubstring,
+        StringComparison comparison)
+    {
+        source.ExpressionBuilder.Append($".HasMessageContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        return new ExceptionMessageAssertion(source.Context, expectedSubstring, source.ExpressionBuilder, comparison);
+    }
+
+    /// <summary>
+    /// Asserts that the exception message contains the specified substring.
+    /// Alias for HasMessageContaining.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.WithMessageContaining("error");
+    /// </summary>
+    public static ExceptionMessageAssertion WithMessageContaining(
+        this IAssertionSource<object?> source,
+        string expectedSubstring)
+    {
+        source.ExpressionBuilder.Append($".WithMessageContaining(\"{expectedSubstring}\")");
+        return new ExceptionMessageAssertion(source.Context, expectedSubstring, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the exception message contains the specified substring using the specified comparison.
+    /// Alias for HasMessageContaining.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.WithMessageContaining("error", StringComparison.OrdinalIgnoreCase);
+    /// </summary>
+    public static ExceptionMessageAssertion WithMessageContaining(
+        this IAssertionSource<object?> source,
+        string expectedSubstring,
+        StringComparison comparison)
+    {
+        source.ExpressionBuilder.Append($".WithMessageContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        return new ExceptionMessageAssertion(source.Context, expectedSubstring, source.ExpressionBuilder, comparison);
+    }
+
+    // Specific overloads for delegate types where TValue is always object?
+    public static ThrowsAssertion<TException> Throws<TException>(this DelegateAssertion source) where TException : Exception
+    {
+        var iface = (IAssertionSource<object?>)source;
+        iface.ExpressionBuilder.Append($".Throws<{typeof(TException).Name}>()");
+        var mappedContext = iface.Context.Map<object?>(_ => null);
+        return new ThrowsAssertion<TException>(mappedContext, iface.ExpressionBuilder);
+    }
+
+    public static ThrowsExactlyAssertion<TException> ThrowsExactly<TException>(this DelegateAssertion source) where TException : Exception
+    {
+        var iface = (IAssertionSource<object?>)source;
+        iface.ExpressionBuilder.Append($".ThrowsExactly<{typeof(TException).Name}>()");
+        var mappedContext = iface.Context.Map<object?>(_ => null);
+        return new ThrowsExactlyAssertion<TException>(mappedContext, iface.ExpressionBuilder);
+    }
+
+    public static ThrowsAssertion<TException> Throws<TException>(this AsyncDelegateAssertion source) where TException : Exception
+    {
+        var iface = (IAssertionSource<object?>)source;
+        iface.ExpressionBuilder.Append($".Throws<{typeof(TException).Name}>()");
+        var mappedContext = iface.Context.Map<object?>(_ => null);
+        return new ThrowsAssertion<TException>(mappedContext, iface.ExpressionBuilder);
+    }
+
+    public static ThrowsExactlyAssertion<TException> ThrowsExactly<TException>(this AsyncDelegateAssertion source) where TException : Exception
+    {
+        var iface = (IAssertionSource<object?>)source;
+        iface.ExpressionBuilder.Append($".ThrowsExactly<{typeof(TException).Name}>()");
+        var mappedContext = iface.Context.Map<object?>(_ => null);
+        return new ThrowsExactlyAssertion<TException>(mappedContext, iface.ExpressionBuilder);
+    }
+
+    // Specific overloads for Func/AsyncFunc assertions - TValue is inferred from the receiver type
+    public static ThrowsAssertion<TException> Throws<TException, TValue>(this FuncAssertion<TValue> source) where TException : Exception
+    {
+        var iface = (IAssertionSource<TValue>)source;
+        iface.ExpressionBuilder.Append($".Throws<{typeof(TException).Name}>()");
+        var mappedContext = iface.Context.Map<object?>(_ => null);
+        return new ThrowsAssertion<TException>(mappedContext, iface.ExpressionBuilder);
+    }
+
+    public static ThrowsAssertion<TException> Throws<TException, TValue>(this AsyncFuncAssertion<TValue> source) where TException : Exception
+    {
+        var iface = (IAssertionSource<TValue>)source;
+        iface.ExpressionBuilder.Append($".Throws<{typeof(TException).Name}>()");
+        var mappedContext = iface.Context.Map<object?>(_ => null);
+        return new ThrowsAssertion<TException>(mappedContext, iface.ExpressionBuilder);
+    }
+
+    public static ThrowsExactlyAssertion<TException> ThrowsExactly<TException, TValue>(this FuncAssertion<TValue> source) where TException : Exception
+    {
+        var iface = (IAssertionSource<TValue>)source;
+        iface.ExpressionBuilder.Append($".ThrowsExactly<{typeof(TException).Name}>()");
+        var mappedContext = iface.Context.Map<object?>(_ => null);
+        return new ThrowsExactlyAssertion<TException>(mappedContext, iface.ExpressionBuilder);
+    }
+
+    public static ThrowsExactlyAssertion<TException> ThrowsExactly<TException, TValue>(this AsyncFuncAssertion<TValue> source) where TException : Exception
+    {
+        var iface = (IAssertionSource<TValue>)source;
+        iface.ExpressionBuilder.Append($".ThrowsExactly<{typeof(TException).Name}>()");
+        var mappedContext = iface.Context.Map<object?>(_ => null);
+        return new ThrowsExactlyAssertion<TException>(mappedContext, iface.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property exactly equals the expected string.
+    /// Works with both direct exception assertions and chained exception assertions (via .And).
+    /// </summary>
+    public static HasMessageEqualToAssertion<TValue> HasMessageEqualTo<TValue>(
+        this IAssertionSource<TValue> source,
+        string expectedMessage)
+    {
+        source.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\")");
+        return new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property exactly equals the expected string using the specified string comparison.
+    /// Works with both direct exception assertions and chained exception assertions (via .And).
+    /// </summary>
+    public static HasMessageEqualToAssertion<TValue> HasMessageEqualTo<TValue>(
+        this IAssertionSource<TValue> source,
+        string expectedMessage,
+        StringComparison comparison)
+    {
+        source.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\", StringComparison.{comparison})");
+        return new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage, source.ExpressionBuilder, comparison);
+    }
+
+    /// <summary>
     /// Asserts that the DateTime is after or equal to the expected DateTime.
     /// Alias for IsGreaterThanOrEqualTo for better readability with dates.
     /// </summary>
@@ -840,6 +1136,17 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that the value is equal to its default value.
+    /// For reference types, this is null. For value types, this is the zero-initialized value.
+    /// </summary>
+    public static IsDefaultAssertion<TValue> IsDefault<TValue>(
+        this IAssertionSource<TValue> source)
+    {
+        source.ExpressionBuilder.Append(".IsDefault()");
+        return new IsDefaultAssertion<TValue>(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
     /// Asserts that the value is not the default value for its type.
     /// </summary>
     public static IsNotDefaultAssertion<TValue> IsNotDefault<TValue>(
@@ -847,5 +1154,95 @@ public static class AssertionExtensions
     {
         source.ExpressionBuilder.Append(".IsNotDefault()");
         return new IsNotDefaultAssertion<TValue>(source.Context, source.ExpressionBuilder);
+    }
+
+    /// <summary>
+    /// Asserts that the TimeSpan is equal to the expected value within the specified tolerance.
+    /// </summary>
+    public static EqualsAssertion<TimeSpan> Within(
+        this EqualsAssertion<TimeSpan> assertion,
+        TimeSpan tolerance)
+    {
+        assertion.ExpressionBuilder.Append($".Within({tolerance})");
+        return assertion.WithTolerance(tolerance);
+    }
+
+    /// <summary>
+    /// Asserts that the DateTime is equal to the expected value within the specified tolerance.
+    /// </summary>
+    public static EqualsAssertion<DateTime> Within(
+        this EqualsAssertion<DateTime> assertion,
+        TimeSpan tolerance)
+    {
+        assertion.ExpressionBuilder.Append($".Within({tolerance})");
+        return assertion.WithTolerance(tolerance);
+    }
+
+    /// <summary>
+    /// Asserts that the DateTimeOffset is equal to the expected value within the specified tolerance.
+    /// </summary>
+    public static EqualsAssertion<DateTimeOffset> Within(
+        this EqualsAssertion<DateTimeOffset> assertion,
+        TimeSpan tolerance)
+    {
+        assertion.ExpressionBuilder.Append($".Within({tolerance})");
+        return assertion.WithTolerance(tolerance);
+    }
+
+#if NET6_0_OR_GREATER
+    /// <summary>
+    /// Asserts that the TimeOnly is equal to the expected value within the specified tolerance.
+    /// </summary>
+    public static EqualsAssertion<TimeOnly> Within(
+        this EqualsAssertion<TimeOnly> assertion,
+        TimeSpan tolerance)
+    {
+        assertion.ExpressionBuilder.Append($".Within({tolerance})");
+        return assertion.WithTolerance(tolerance);
+    }
+#endif
+
+    /// <summary>
+    /// Asserts that the int is equal to the expected value within the specified tolerance.
+    /// </summary>
+    public static EqualsAssertion<int> Within(
+        this EqualsAssertion<int> assertion,
+        int tolerance)
+    {
+        assertion.ExpressionBuilder.Append($".Within({tolerance})");
+        return assertion.WithTolerance(tolerance);
+    }
+
+    /// <summary>
+    /// Asserts that the long is equal to the expected value within the specified tolerance.
+    /// </summary>
+    public static EqualsAssertion<long> Within(
+        this EqualsAssertion<long> assertion,
+        long tolerance)
+    {
+        assertion.ExpressionBuilder.Append($".Within({tolerance})");
+        return assertion.WithTolerance(tolerance);
+    }
+
+    /// <summary>
+    /// Asserts that the double is equal to the expected value within the specified tolerance.
+    /// </summary>
+    public static EqualsAssertion<double> Within(
+        this EqualsAssertion<double> assertion,
+        double tolerance)
+    {
+        assertion.ExpressionBuilder.Append($".Within({tolerance})");
+        return assertion.WithTolerance(tolerance);
+    }
+
+    /// <summary>
+    /// Asserts that the decimal is equal to the expected value within the specified tolerance.
+    /// </summary>
+    public static EqualsAssertion<decimal> Within(
+        this EqualsAssertion<decimal> assertion,
+        decimal tolerance)
+    {
+        assertion.ExpressionBuilder.Append($".Within({tolerance})");
+        return assertion.WithTolerance(tolerance);
     }
 }

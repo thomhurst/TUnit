@@ -11,6 +11,8 @@ public class StringContainsAssertion : Assertion<string>
 {
     private readonly string _expected;
     private StringComparison _comparison = StringComparison.Ordinal;
+    private bool _trimming = false;
+    private bool _ignoringWhitespace = false;
 
     public StringContainsAssertion(
         EvaluationContext<string> context,
@@ -35,6 +37,20 @@ public class StringContainsAssertion : Assertion<string>
         return this;
     }
 
+    public StringContainsAssertion WithTrimming()
+    {
+        _trimming = true;
+        ExpressionBuilder.Append(".WithTrimming()");
+        return this;
+    }
+
+    public StringContainsAssertion IgnoringWhitespace()
+    {
+        _ignoringWhitespace = true;
+        ExpressionBuilder.Append(".IgnoringWhitespace()");
+        return this;
+    }
+
     protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
     {
         if (exception != null)
@@ -43,7 +59,22 @@ public class StringContainsAssertion : Assertion<string>
         if (value == null)
             return Task.FromResult(AssertionResult.Failed("value was null"));
 
-        if (value.Contains(_expected, _comparison))
+        var actualValue = value;
+        var expectedValue = _expected;
+
+        if (_trimming)
+        {
+            actualValue = actualValue.Trim();
+            expectedValue = expectedValue.Trim();
+        }
+
+        if (_ignoringWhitespace)
+        {
+            actualValue = string.Concat(actualValue.Where(c => !char.IsWhiteSpace(c)));
+            expectedValue = string.Concat(expectedValue.Where(c => !char.IsWhiteSpace(c)));
+        }
+
+        if (actualValue.Contains(expectedValue, _comparison))
             return Task.FromResult(AssertionResult.Passed);
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
@@ -407,4 +438,59 @@ public class StringDoesNotMatchAssertion : Assertion<string>
     }
 
     protected override string GetExpectation() => $"to not match pattern \"{_pattern}\"";
+}
+
+/// <summary>
+/// Asserts that a string is null or empty.
+/// </summary>
+public class StringIsNullOrEmptyAssertion : Assertion<string>
+{
+    public StringIsNullOrEmptyAssertion(
+        EvaluationContext<string> context,
+        StringBuilder expressionBuilder)
+        : base(context, expressionBuilder)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    {
+        if (exception != null)
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+
+        if (string.IsNullOrEmpty(value))
+            return Task.FromResult(AssertionResult.Passed);
+
+        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
+    }
+
+    protected override string GetExpectation() => "to be null or empty";
+}
+
+/// <summary>
+/// Asserts that a string is NOT null or empty.
+/// </summary>
+public class StringIsNotNullOrEmptyAssertion : Assertion<string>
+{
+    public StringIsNotNullOrEmptyAssertion(
+        EvaluationContext<string> context,
+        StringBuilder expressionBuilder)
+        : base(context, expressionBuilder)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    {
+        if (exception != null)
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+
+        if (!string.IsNullOrEmpty(value))
+            return Task.FromResult(AssertionResult.Passed);
+
+        if (value == null)
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+
+        return Task.FromResult(AssertionResult.Failed("value was empty"));
+    }
+
+    protected override string GetExpectation() => "to not be null or empty";
 }

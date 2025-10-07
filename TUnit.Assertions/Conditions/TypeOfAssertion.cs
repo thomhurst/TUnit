@@ -40,3 +40,83 @@ public class TypeOfAssertion<TFrom, TTo> : Assertion<TTo>
 
     protected override string GetExpectation() => $"to be of type {_expectedType.Name}";
 }
+
+/// <summary>
+/// Asserts that a value's type is assignable to a specific type (is the type or a subtype).
+/// Works with both direct value assertions and exception assertions (via .And after Throws).
+/// </summary>
+public class IsAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
+{
+    private readonly Type _targetType;
+
+    public IsAssignableToAssertion(
+        EvaluationContext<TValue> context,
+        StringBuilder expressionBuilder)
+        : base(context, expressionBuilder)
+    {
+        _targetType = typeof(TTarget);
+    }
+
+    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    {
+        object? objectToCheck = null;
+
+        // If we have an exception (from Throws/ThrowsExactly), check that
+        if (exception != null)
+            objectToCheck = exception;
+        // Otherwise check the value
+        else if (value != null)
+            objectToCheck = value;
+        else
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+
+        var actualType = objectToCheck.GetType();
+
+        if (_targetType.IsAssignableFrom(actualType))
+            return Task.FromResult(AssertionResult.Passed);
+
+        return Task.FromResult(AssertionResult.Failed($"type {actualType.Name} is not assignable to {_targetType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to be assignable to {_targetType.Name}";
+}
+
+/// <summary>
+/// Asserts that a value's type is NOT assignable to a specific type.
+/// Works with both direct value assertions and exception assertions (via .And after Throws).
+/// </summary>
+public class IsNotAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
+{
+    private readonly Type _targetType;
+
+    public IsNotAssignableToAssertion(
+        EvaluationContext<TValue> context,
+        StringBuilder expressionBuilder)
+        : base(context, expressionBuilder)
+    {
+        _targetType = typeof(TTarget);
+    }
+
+    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    {
+        object? objectToCheck = null;
+
+        // If we have an exception (from Throws/ThrowsExactly), check that
+        if (exception != null)
+            objectToCheck = exception;
+        // Otherwise check the value
+        else if (value != null)
+            objectToCheck = value;
+        else
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+
+        var actualType = objectToCheck.GetType();
+
+        if (!_targetType.IsAssignableFrom(actualType))
+            return Task.FromResult(AssertionResult.Passed);
+
+        return Task.FromResult(AssertionResult.Failed($"type {actualType.Name} is assignable to {_targetType.Name}"));
+    }
+
+    protected override string GetExpectation() => $"to not be assignable to {_targetType.Name}";
+}
