@@ -1450,6 +1450,10 @@ namespace
         where T :  class
     {
         public TestMetadata() { }
+        [.("AOT", "IL3050", Justification="Source-generated tests provide strongly-typed factories that avoid reflection. Re" +
+            "flection paths are only used in fallback scenarios for dynamic test discovery.")]
+        [.("Trimming", "IL2072", Justification="TestMetadata uses DynamicallyAccessedMembers attributes to preserve required memb" +
+            "ers for test execution.")]
         public override <.ExecutableTestCreationContext, .TestMetadata, .AbstractExecutableTest> CreateExecutableTestFactory { get; }
         public new <[], object?[], T>? InstanceFactory { get; init; }
         public <T, object?[], .CancellationToken, .>? InvokeTypedTest { get; init; }
