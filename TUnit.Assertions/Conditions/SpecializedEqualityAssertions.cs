@@ -33,19 +33,25 @@ public class DateOnlyEqualsAssertion : Assertion<DateOnly>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (_toleranceDays.HasValue)
         {
             var diff = Math.Abs(value.DayNumber - _expected.DayNumber);
             if (diff <= _toleranceDays.Value)
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
 
             return Task.FromResult(AssertionResult.Failed($"found {value}, which is {diff} days from expected"));
         }
 
         if (value == _expected)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
@@ -87,19 +93,25 @@ public class TimeOnlyEqualsAssertion : Assertion<TimeOnly>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (_tolerance.HasValue)
         {
             var diff = value > _expected ? value.ToTimeSpan() - _expected.ToTimeSpan() : _expected.ToTimeSpan() - value.ToTimeSpan();
             if (diff <= _tolerance.Value)
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
 
             return Task.FromResult(AssertionResult.Failed($"found {value}, which is {diff} from expected"));
         }
 
         if (value == _expected)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
@@ -140,19 +152,25 @@ public class DoubleEqualsAssertion : Assertion<double>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (_tolerance.HasValue)
         {
             var diff = Math.Abs(value - _expected);
             if (diff <= _tolerance.Value)
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
 
             return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
         }
 
         if (value == _expected)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
@@ -192,19 +210,25 @@ public class LongEqualsAssertion : Assertion<long>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (_tolerance.HasValue)
         {
             var diff = Math.Abs(value - _expected);
             if (diff <= _tolerance.Value)
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
 
             return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
         }
 
         if (value == _expected)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
@@ -244,19 +268,25 @@ public class DateTimeOffsetEqualsAssertion : Assertion<DateTimeOffset>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (_tolerance.HasValue)
         {
             var diff = value > _expected ? value - _expected : _expected - value;
             if (diff <= _tolerance.Value)
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
 
             return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
         }
 
         if (value == _expected)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }

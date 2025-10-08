@@ -26,10 +26,14 @@ public class GreaterThanAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value is null"));
+        }
 
         if (value.CompareTo(_minimum) > 0)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
@@ -59,10 +63,14 @@ public class GreaterThanOrEqualAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value is null"));
+        }
 
         if (value.CompareTo(_minimum) >= 0)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }

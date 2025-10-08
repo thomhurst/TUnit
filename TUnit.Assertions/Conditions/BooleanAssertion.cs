@@ -20,10 +20,14 @@ public class TrueAssertion : Assertion<bool>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == true)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
@@ -48,10 +52,14 @@ public class FalseAssertion : Assertion<bool>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == false)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }

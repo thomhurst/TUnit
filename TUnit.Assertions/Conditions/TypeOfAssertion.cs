@@ -16,7 +16,9 @@ public class TypeOfAssertion<TFrom, TTo> : Assertion<TTo>
         : base(parentContext.Map<TTo>(value =>
             {
                 if (value is TTo casted)
+                {
                     return casted;
+                }
 
                 throw new InvalidCastException(
                     $"Value is of type {value?.GetType().Name ?? "null"}, not {typeof(TTo).Name}");
@@ -33,7 +35,9 @@ public class TypeOfAssertion<TFrom, TTo> : Assertion<TTo>
         // The type check already happened in the Map function
         // If we got here without exception, the type is correct
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed(exception.Message));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -65,17 +69,25 @@ public class IsAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
 
         // If we have an exception (from Throws/ThrowsExactly), check that
         if (exception != null)
+        {
             objectToCheck = exception;
+        }
         // Otherwise check the value
         else if (value != null)
+        {
             objectToCheck = value;
+        }
         else
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         var actualType = objectToCheck.GetType();
 
         if (_targetType.IsAssignableFrom(actualType))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"type {actualType.Name} is not assignable to {_targetType.Name}"));
     }
@@ -107,17 +119,25 @@ public class IsNotAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
 
         // If we have an exception (from Throws/ThrowsExactly), check that
         if (exception != null)
+        {
             objectToCheck = exception;
+        }
         // Otherwise check the value
         else if (value != null)
+        {
             objectToCheck = value;
+        }
         else
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         var actualType = objectToCheck.GetType();
 
         if (!_targetType.IsAssignableFrom(actualType))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"type {actualType.Name} is assignable to {_targetType.Name}"));
     }
@@ -146,15 +166,21 @@ public class IsTypeOfRuntimeAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         var actualType = value.GetType();
 
         if (actualType == _expectedType)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"type was {actualType.Name}"));
     }

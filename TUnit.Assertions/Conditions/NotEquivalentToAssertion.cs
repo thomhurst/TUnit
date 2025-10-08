@@ -38,10 +38,14 @@ public class NotEquivalentToAssertion<TCollection, TItem> : Assertion<TCollectio
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("collection was null"));
+        }
 
         var comparer = _comparer ?? EqualityComparer<TItem>.Default;
 

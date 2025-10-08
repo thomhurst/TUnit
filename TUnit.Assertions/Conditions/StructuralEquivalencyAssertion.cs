@@ -69,7 +69,9 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         var result = CompareObjects(value, _expected, "", new HashSet<object>(new ReferenceEqualityComparer()));
         return Task.FromResult(result);
@@ -79,17 +81,25 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
     {
         // Check for ignored paths
         if (_ignoredMembers.Contains(path))
+        {
             return AssertionResult.Passed;
+        }
 
         // Handle nulls
         if (actual == null && expected == null)
+        {
             return AssertionResult.Passed;
+        }
 
         if (actual == null)
+        {
             return AssertionResult.Failed($"Property {path} did not match\nExpected: {expected}\nReceived: null");
+        }
 
         if (expected == null)
+        {
             return AssertionResult.Failed($"Property {path} did not match\nExpected: null\nReceived: {actual.GetType().Name}");
+        }
 
         var actualType = actual.GetType();
         var expectedType = expected.GetType();
@@ -106,7 +116,9 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
 
         // Handle cycles
         if (visited.Contains(actual))
+        {
             return AssertionResult.Passed;
+        }
 
         visited.Add(actual);
 
@@ -127,7 +139,9 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
                 var itemPath = $"{path}.[{i}]";
                 var result = CompareObjects(actualList[i], expectedList[i], itemPath, visited);
                 if (!result.IsPassed)
+                {
                     return result;
+                }
             }
 
             return AssertionResult.Passed;
@@ -143,7 +157,9 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
             var memberPath = string.IsNullOrEmpty(path) ? member.Name : $"{path}.{member.Name}";
 
             if (_ignoredMembers.Contains(memberPath))
+            {
                 continue;
+            }
 
             var expectedValue = GetMemberValue(expected, member);
 
@@ -156,7 +172,10 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
             };
 
             if (memberType != null && _ignoredTypes.Contains(memberType))
+            {
                 continue;
+            }
+
             object? actualValue;
 
             // In partial equivalency mode, skip members that don't exist on actual
@@ -166,7 +185,10 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
                 var actualMember = GetMemberInfo(actualType, member.Name);
 #pragma warning restore IL2072
                 if (actualMember == null)
+                {
                     continue;
+                }
+
                 actualValue = GetMemberValue(actual, actualMember);
             }
             else
@@ -183,7 +205,9 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
 
             var result = CompareObjects(actualValue, expectedValue, memberPath, visited);
             if (!result.IsPassed)
+            {
                 return result;
+            }
         }
 
         // In non-partial mode, check for extra properties on actual
@@ -207,7 +231,9 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
                     };
 
                     if (memberType != null && _ignoredTypes.Contains(memberType))
+                    {
                         continue;
+                    }
 
                     var memberPath = string.IsNullOrEmpty(path) ? member.Name : $"{path}.{member.Name}";
                     var actualValue = GetMemberValue(actual, member);
@@ -238,7 +264,9 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
     {
         var property = type.GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
         if (property != null)
+        {
             return property;
+        }
 
         var field = type.GetField(name, BindingFlags.Public | BindingFlags.Instance);
         return field;
@@ -257,10 +285,14 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
     private static string FormatValue(object? value)
     {
         if (value == null)
+        {
             return "null";
+        }
 
         if (value is string s)
+        {
             return $"\"{s}\"";
+        }
 
         return value.ToString() ?? "null";
     }

@@ -21,16 +21,22 @@ public class HasDistinctItemsAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("collection was null"));
+        }
 
         var list = value.Cast<object?>().ToList();
         var distinctList = list.Distinct().ToList();
 
         if (list.Count == distinctList.Count)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         var duplicates = list.GroupBy(x => x)
             .Where(g => g.Count() > 1)

@@ -8,10 +8,12 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts on a member of an object selected via an expression.
 /// This allows chaining assertions on object properties/fields.
 /// </summary>
-public class MemberAssertion<TObject, TMember> : Assertion<TMember>
+public class MemberAssertion<TObject, TMember> : Assertion<TMember>, IAssertionSource<TMember>
 {
     private readonly Expression<Func<TObject, TMember>> _memberSelector;
     private readonly string _memberPath;
+
+    AssertionContext<TMember> IAssertionSource<TMember>.Context => Context;
 
     public MemberAssertion(
         AssertionContext<TObject> parentContext,
@@ -42,7 +44,9 @@ public class MemberAssertion<TObject, TMember> : Assertion<TMember>
         // HasMember itself doesn't perform a check - it's a transformation
         // The actual check comes from the chained assertion (.EqualTo, etc.)
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed(exception.Message));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }

@@ -24,16 +24,22 @@ public class CollectionIsEmptyAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         var enumerator = value.GetEnumerator();
         try
         {
             if (!enumerator.MoveNext())
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
 
             return Task.FromResult(AssertionResult.Failed("collection contains items"));
         }
@@ -64,16 +70,22 @@ public class CollectionIsNotEmptyAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         var enumerator = value.GetEnumerator();
         try
         {
             if (enumerator.MoveNext())
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
 
             return Task.FromResult(AssertionResult.Failed("collection is empty"));
         }
@@ -111,17 +123,23 @@ public class CollectionContainsAssertion<TCollection, TItem> : Assertion<TCollec
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         var comparer = _comparer ?? EqualityComparer<TItem>.Default;
 
         foreach (var item in value)
         {
             if (comparer.Equals(item, _expected))
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
         }
 
         return Task.FromResult(AssertionResult.Failed($"item not found in collection"));
@@ -155,17 +173,23 @@ public class CollectionDoesNotContainAssertion<TCollection, TItem> : Assertion<T
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         var comparer = _comparer ?? EqualityComparer<TItem>.Default;
 
         foreach (var item in value)
         {
             if (comparer.Equals(item, _expected))
+            {
                 return Task.FromResult(AssertionResult.Failed($"found {_expected} in collection"));
+            }
         }
 
         return Task.FromResult(AssertionResult.Passed);
@@ -199,15 +223,21 @@ public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : As
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         foreach (var item in value)
         {
             if (_predicate(item))
+            {
                 return Task.FromResult(AssertionResult.Failed($"found item matching predicate"));
+            }
         }
 
         return Task.FromResult(AssertionResult.Passed);
@@ -238,10 +268,14 @@ public class CollectionCountAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         // Try to get count efficiently
         int actualCount;
@@ -265,7 +299,9 @@ public class CollectionCountAssertion<TValue> : Assertion<TValue>
         }
 
         if (actualCount == _expectedCount)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found count {actualCount}"));
     }
@@ -339,16 +375,23 @@ public class CollectionAllAssertion<TCollection, TItem> : Assertion<TCollection>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         int index = 0;
         foreach (var item in value)
         {
             if (!_predicate(item))
+            {
                 return Task.FromResult(AssertionResult.Failed($"item at index {index} does not satisfy predicate"));
+            }
+
             index++;
         }
 
@@ -383,15 +426,21 @@ public class CollectionAnyAssertion<TCollection, TItem> : Assertion<TCollection>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         foreach (var item in value)
         {
             if (_predicate(item))
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
         }
 
         return Task.FromResult(AssertionResult.Failed("no item satisfies predicate"));
@@ -418,20 +467,28 @@ public class HasSingleItemAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         var enumerator = value.GetEnumerator();
         try
         {
             if (!enumerator.MoveNext())
+            {
                 return Task.FromResult(AssertionResult.Failed("collection is empty"));
+            }
 
             // First item exists, check if there's a second
             if (enumerator.MoveNext())
+            {
                 return Task.FromResult(AssertionResult.Failed("collection has more than one item"));
+            }
 
             return Task.FromResult(AssertionResult.Passed);
         }
@@ -458,12 +515,16 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Assertio
         : base(context.Map<TItem>(collection =>
         {
             if (collection == null)
+            {
                 throw new ArgumentNullException(nameof(collection), "collection was null");
+            }
 
             foreach (var item in collection)
             {
                 if (predicate(item))
+                {
                     return item;
+                }
             }
 
             throw new InvalidOperationException("no item matching predicate found in collection");
@@ -478,7 +539,9 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Assertio
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed(exception.Message));
+        }
 
         // If we got here, the item was found (the Map function succeeded)
         return Task.FromResult(AssertionResult.Passed);
@@ -512,10 +575,14 @@ public class CollectionAllSatisfyAssertion<TCollection, TItem> : Assertion<TColl
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("collection was null"));
+        }
 
         int index = 0;
         foreach (var item in value)
@@ -569,10 +636,14 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return AssertionResult.Failed($"threw {exception.GetType().Name}");
+        }
 
         if (value == null)
+        {
             return AssertionResult.Failed("collection was null");
+        }
 
         int index = 0;
         foreach (var item in value)
@@ -619,10 +690,14 @@ public class CollectionIsInOrderAssertion<TCollection, TItem> : Assertion<TColle
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("collection was null"));
+        }
 
         TItem? previous = default;
         bool first = true;
@@ -633,7 +708,9 @@ public class CollectionIsInOrderAssertion<TCollection, TItem> : Assertion<TColle
             if (!first && previous != null)
             {
                 if (previous.CompareTo(item) > 0)
+                {
                     return Task.FromResult(AssertionResult.Failed($"item at index {index} ({item}) is less than previous item ({previous})"));
+                }
             }
 
             previous = item;
@@ -666,10 +743,14 @@ public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Assert
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("collection was null"));
+        }
 
         TItem? previous = default;
         bool first = true;
@@ -680,7 +761,9 @@ public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Assert
             if (!first && previous != null)
             {
                 if (previous.CompareTo(item) < 0)
+                {
                     return Task.FromResult(AssertionResult.Failed($"item at index {index} ({item}) is greater than previous item ({previous})"));
+                }
             }
 
             previous = item;

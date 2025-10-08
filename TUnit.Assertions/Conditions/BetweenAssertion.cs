@@ -75,7 +75,9 @@ public class BetweenAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value is null"));
+        }
 
         var minComparison = value.CompareTo(_minimum);
         var maxComparison = value.CompareTo(_maximum);
@@ -84,7 +86,9 @@ public class BetweenAssertion<TValue> : Assertion<TValue>
         var maxOk = _maxInclusive ? maxComparison <= 0 : maxComparison < 0;
 
         if (minOk && maxOk)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }

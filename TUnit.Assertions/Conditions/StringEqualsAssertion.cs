@@ -105,7 +105,9 @@ public class StringEqualsAssertion : Assertion<string>
         }
 
         if (string.Equals(actualValue, expectedValue, _comparison))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
     }

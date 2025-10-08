@@ -32,14 +32,18 @@ public class IsInAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         var comparer = _comparer ?? EqualityComparer<TValue>.Default;
 
         foreach (var item in _collection)
         {
             if (comparer.Equals(value!, item))
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
         }
 
         return Task.FromResult(AssertionResult.Failed($"value {value} was not found in collection"));
@@ -77,14 +81,18 @@ public class IsNotInAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         var comparer = _comparer ?? EqualityComparer<TValue>.Default;
 
         foreach (var item in _collection)
         {
             if (comparer.Equals(value!, item))
+            {
                 return Task.FromResult(AssertionResult.Failed($"value {value} was found in collection"));
+            }
         }
 
         return Task.FromResult(AssertionResult.Passed);

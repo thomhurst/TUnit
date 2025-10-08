@@ -60,7 +60,9 @@ public sealed class EvaluationContext<TValue>
         {
             var (value, exception) = await GetAsync();
             if (exception != null)
+            {
                 return (default(TNew), exception);
+            }
 
             try
             {

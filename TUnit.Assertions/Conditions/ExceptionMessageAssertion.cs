@@ -28,13 +28,19 @@ public class ExceptionMessageAssertion : Assertion<object?>
         var exception = metadata.Exception;
 
         if (exception == null)
+        {
             return Task.FromResult(AssertionResult.Failed("no exception was thrown"));
+        }
 
         if (exception.Message == null)
+        {
             return Task.FromResult(AssertionResult.Failed("exception message was null"));
+        }
 
         if (exception.Message.Contains(_expectedSubstring, _comparison))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"exception message was \"{exception.Message}\""));
     }

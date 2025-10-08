@@ -18,10 +18,14 @@ public class IsInvariantCultureAssertion : Assertion<CultureInfo>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null || !value.Equals(CultureInfo.InvariantCulture))
+        {
             return Task.FromResult(AssertionResult.Failed($"culture was {value?.Name ?? "null"}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -43,10 +47,14 @@ public class IsNotInvariantCultureAssertion : Assertion<CultureInfo>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value != null && value.Equals(CultureInfo.InvariantCulture))
+        {
             return Task.FromResult(AssertionResult.Failed("culture was invariant"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -68,10 +76,14 @@ public class IsNeutralCultureAssertion : Assertion<CultureInfo>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null || !value.IsNeutralCulture)
+        {
             return Task.FromResult(AssertionResult.Failed($"culture {value?.Name ?? "null"} is not neutral"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -93,10 +105,14 @@ public class IsNotNeutralCultureAssertion : Assertion<CultureInfo>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value != null && value.IsNeutralCulture)
+        {
             return Task.FromResult(AssertionResult.Failed($"culture {value.Name} is neutral"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -118,10 +134,14 @@ public class IsEnglishCultureAssertion : Assertion<CultureInfo>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null || value.TwoLetterISOLanguageName != "en")
+        {
             return Task.FromResult(AssertionResult.Failed($"culture was {value?.Name ?? "null"} (language code: {value?.TwoLetterISOLanguageName ?? "null"})"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -143,10 +163,14 @@ public class IsNotEnglishCultureAssertion : Assertion<CultureInfo>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value != null && value.TwoLetterISOLanguageName == "en")
+        {
             return Task.FromResult(AssertionResult.Failed($"culture {value.Name} is English"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -168,10 +192,14 @@ public class IsRightToLeftCultureAssertion : Assertion<CultureInfo>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null || !value.TextInfo.IsRightToLeft)
+        {
             return Task.FromResult(AssertionResult.Failed($"culture {value?.Name ?? "null"} is not right-to-left"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -193,10 +221,14 @@ public class IsLeftToRightCultureAssertion : Assertion<CultureInfo>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value != null && value.TextInfo.IsRightToLeft)
+        {
             return Task.FromResult(AssertionResult.Failed($"culture {value.Name} is right-to-left"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -218,10 +250,14 @@ public class IsReadOnlyCultureAssertion : Assertion<CultureInfo>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null || !value.IsReadOnly)
+        {
             return Task.FromResult(AssertionResult.Failed($"culture {value?.Name ?? "null"} is not read-only"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }

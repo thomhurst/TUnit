@@ -44,9 +44,16 @@ public class CountWrapper<TValue> : IAssertionSource<TValue>
         // Map context to get the count
         var countContext = _context.Map<int>(value =>
         {
-            if (value == null) return 0;
+            if (value == null)
+            {
+                return 0;
+            }
+
             if (value is System.Collections.ICollection collection)
+            {
                 return collection.Count;
+            }
+
             return value.Cast<object>().Count();
         });
         return new GreaterThanOrEqualAssertion<int>(countContext, expected);
@@ -61,9 +68,16 @@ public class CountWrapper<TValue> : IAssertionSource<TValue>
         // Map context to get the count
         var countContext = _context.Map<int>(value =>
         {
-            if (value == null) return 0;
+            if (value == null)
+            {
+                return 0;
+            }
+
             if (value is System.Collections.ICollection collection)
+            {
                 return collection.Count;
+            }
+
             return value.Cast<object>().Count();
         });
         return new GreaterThanAssertion<int>(countContext, 0);

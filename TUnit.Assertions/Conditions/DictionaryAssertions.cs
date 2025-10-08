@@ -27,10 +27,14 @@ public class DictionaryContainsKeyAssertion<TKey, TValue> : Assertion<IReadOnlyD
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("dictionary was null"));
+        }
 
         bool found;
         if (_comparer != null)
@@ -44,7 +48,9 @@ public class DictionaryContainsKeyAssertion<TKey, TValue> : Assertion<IReadOnlyD
         }
 
         if (found)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"key {_expectedKey} not found"));
     }
@@ -73,13 +79,19 @@ public class DictionaryDoesNotContainKeyAssertion<TKey, TValue> : Assertion<IRea
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("dictionary was null"));
+        }
 
         if (!value.ContainsKey(_expectedKey))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"key {_expectedKey} was found"));
     }

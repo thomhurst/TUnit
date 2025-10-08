@@ -260,21 +260,27 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         // Handle tolerance-based comparisons using strategy pattern
         if (_tolerance != null && value != null && ToleranceComparers.TryGetValue(typeof(TValue), out var toleranceComparer))
         {
             // Invoke the appropriate comparer using dynamic invocation
-            var compareMethod = toleranceComparer.GetType().GetMethod("Invoke");
-            var parameters = new object?[] { value, _expected, _tolerance, null };
-            var result = (bool)compareMethod!.Invoke(toleranceComparer, parameters)!;
+            var parameters = new[] { value, _expected, _tolerance, null };
+            var result = (bool)toleranceComparer.DynamicInvoke(parameters)!;
             var errorMessage = (string?)parameters[3];
 
             if (result)
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
+
             if (errorMessage != null)
+            {
                 return Task.FromResult(AssertionResult.Failed(errorMessage));
+            }
         }
 
         // Deep comparison with ignored types
@@ -284,7 +290,10 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             var visited = new HashSet<object>(new ReferenceEqualityComparer());
             var result = DeepEquals(value, _expected, _ignoredTypes, visited);
             if (result.IsSuccess)
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
+
             return Task.FromResult(AssertionResult.Failed(result.Message ?? $"found {value}"));
         }
 
@@ -292,7 +301,9 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         var comparer = _comparer ?? EqualityComparer<TValue>.Default;
 
         if (comparer.Equals(value!, _expected))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
@@ -303,23 +314,35 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     {
         // Handle nulls
         if (actual == null && expected == null)
+        {
             return (true, null);
+        }
+
         if (actual == null || expected == null)
+        {
             return (false, $"one value is null: actual={actual}, expected={expected}");
+        }
 
         var type = actual.GetType();
         if (type != expected.GetType())
+        {
             return (false, $"types differ: {actual.GetType().Name} vs {expected.GetType().Name}");
+        }
 
         // Cycle detection - if we've already visited this object, assume equal to avoid infinite recursion
         if (!visited.Add(actual))
+        {
             return (true, null);
+        }
 
         // For value types and strings, use standard equality
         if (type.IsValueType || type == typeof(string))
         {
             if (!Equals(actual, expected))
+            {
                 return (false, $"values differ: {actual} vs {expected}");
+            }
+
             return (true, null);
         }
 
@@ -331,7 +354,9 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             var propType = prop.PropertyType;
             var underlyingType = Nullable.GetUnderlyingType(propType) ?? propType;
             if (ignoredTypes.Contains(underlyingType))
+            {
                 continue;
+            }
 
             var actualValue = prop.GetValue(actual);
             var expectedValue = prop.GetValue(expected);
@@ -341,12 +366,16 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             {
                 var nestedResult = DeepEquals(actualValue, expectedValue, ignoredTypes, visited);
                 if (!nestedResult.IsSuccess)
+                {
                     return (false, $"property {prop.Name} differs: {nestedResult.Message}");
+                }
             }
             else
             {
                 if (!Equals(actualValue, expectedValue))
+                {
                     return (false, $"property {prop.Name} differs: {actualValue} vs {expectedValue}");
+                }
             }
         }
 
@@ -358,7 +387,9 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             var fieldType = field.FieldType;
             var underlyingType = Nullable.GetUnderlyingType(fieldType) ?? fieldType;
             if (ignoredTypes.Contains(underlyingType))
+            {
                 continue;
+            }
 
             var actualValue = field.GetValue(actual);
             var expectedValue = field.GetValue(expected);
@@ -368,12 +399,16 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             {
                 var nestedResult = DeepEquals(actualValue, expectedValue, ignoredTypes, visited);
                 if (!nestedResult.IsSuccess)
+                {
                     return (false, $"field {field.Name} differs: {nestedResult.Message}");
+                }
             }
             else
             {
                 if (!Equals(actualValue, expectedValue))
+                {
                     return (false, $"field {field.Name} differs: {actualValue} vs {expectedValue}");
+                }
             }
         }
 

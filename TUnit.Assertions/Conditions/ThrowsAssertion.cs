@@ -163,32 +163,46 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
         var actualException = exception ?? value as Exception;
 
         if (actualException == null)
+        {
             return Task.FromResult(AssertionResult.Failed("no exception was thrown"));
+        }
 
         // Delegate type checking to derived class
         if (!CheckExceptionType(actualException, out var typeErrorMessage))
+        {
             return Task.FromResult(AssertionResult.Failed(typeErrorMessage!));
+        }
 
         // Validate message expectations
         if (_expectedExactMessage != null && actualException.Message != _expectedExactMessage)
+        {
             return Task.FromResult(AssertionResult.Failed(
                 $"exception message \"{actualException.Message}\" does not equal \"{_expectedExactMessage}\""));
+        }
 
         if (_expectedMessageSubstring != null && !actualException.Message.Contains(_expectedMessageSubstring, _stringComparison))
+        {
             return Task.FromResult(AssertionResult.Failed(
                 $"exception message \"{actualException.Message}\" does not contain \"{_expectedMessageSubstring}\""));
+        }
 
         if (_notExpectedMessageSubstring != null && actualException.Message.Contains(_notExpectedMessageSubstring, _stringComparison))
+        {
             return Task.FromResult(AssertionResult.Failed(
                 $"exception message \"{actualException.Message}\" should not contain \"{_notExpectedMessageSubstring}\""));
+        }
 
         if (_expectedMessagePattern != null && !MatchesPattern(actualException.Message, _expectedMessagePattern))
+        {
             return Task.FromResult(AssertionResult.Failed(
                 $"exception message \"{actualException.Message}\" does not match pattern \"{_expectedMessagePattern}\""));
+        }
 
         if (_expectedMessageMatcher != null && !_expectedMessageMatcher.IsMatch(actualException.Message))
+        {
             return Task.FromResult(AssertionResult.Failed(
                 $"exception message \"{actualException.Message}\" does not match {_expectedMessageMatcher}"));
+        }
 
         // Validate parameter name for ArgumentException
         if (_expectedParameterName != null)
@@ -196,8 +210,10 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
             if (actualException is ArgumentException argumentException)
             {
                 if (argumentException.ParamName != _expectedParameterName)
+                {
                     return Task.FromResult(AssertionResult.Failed(
                         $"ArgumentException parameter name \"{argumentException.ParamName}\" does not equal \"{_expectedParameterName}\""));
+                }
             }
             else
             {
@@ -321,8 +337,10 @@ public class ThrowsNothingAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed(
                 $"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -358,17 +376,27 @@ public class HasMessageEqualToAssertion<TValue> : Assertion<TValue>
 
         // If we have an exception parameter (from Throws/ThrowsExactly), use that
         if (exception is Exception ex)
+        {
             exceptionToCheck = ex;
+        }
         // Otherwise, the value should be an exception (direct assertion on exception)
         else if (value is Exception valueAsException)
+        {
             exceptionToCheck = valueAsException;
+        }
         else if (value == null && exception == null)
+        {
             return Task.FromResult(AssertionResult.Failed("exception was null"));
+        }
         else
+        {
             return Task.FromResult(AssertionResult.Failed($"value is not an exception (type: {value?.GetType().Name ?? "null"})"));
+        }
 
         if (string.Equals(exceptionToCheck.Message, _expectedMessage, _comparison))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"message was \"{exceptionToCheck.Message}\""));
     }
@@ -404,17 +432,27 @@ public class HasMessageStartingWithAssertion<TValue> : Assertion<TValue>
 
         // If we have an exception parameter (from Throws/ThrowsExactly), use that
         if (exception is Exception ex)
+        {
             exceptionToCheck = ex;
+        }
         // Otherwise, the value should be an exception (direct assertion on exception)
         else if (value is Exception valueAsException)
+        {
             exceptionToCheck = valueAsException;
+        }
         else if (value == null && exception == null)
+        {
             return Task.FromResult(AssertionResult.Failed("exception was null"));
+        }
         else
+        {
             return Task.FromResult(AssertionResult.Failed($"value is not an exception (type: {value?.GetType().Name ?? "null"})"));
+        }
 
         if (exceptionToCheck.Message.StartsWith(_expectedPrefix, _comparison))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"message was \"{exceptionToCheck.Message}\""));
     }

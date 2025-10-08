@@ -33,7 +33,9 @@ public class MappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return AssertionResult.Failed($"threw {exception.GetType().Name}");
+        }
 
         // Map the value
         TMapped mappedValue;
@@ -97,7 +99,9 @@ public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return AssertionResult.Failed($"threw {exception.GetType().Name}");
+        }
 
         // Map the value asynchronously
         TMapped mappedValue;

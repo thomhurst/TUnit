@@ -25,14 +25,18 @@ public class HasFlagAssertion<TEnum> : Assertion<TEnum>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         // Use HasFlag method for enum flag checking
         var enumValue = (Enum)(object)value;
         var enumFlag = (Enum)(object)_expectedFlag;
 
         if (enumValue.HasFlag(enumFlag))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"value {value} does not have flag {_expectedFlag}"));
     }
@@ -62,13 +66,17 @@ public class DoesNotHaveFlagAssertion<TEnum> : Assertion<TEnum>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         var enumValue = (Enum)(object)value;
         var enumFlag = (Enum)(object)_unexpectedFlag;
 
         if (!enumValue.HasFlag(enumFlag))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"value {value} has flag {_unexpectedFlag}"));
     }
@@ -94,10 +102,14 @@ public class IsDefinedAssertion<TEnum> : Assertion<TEnum>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         if (Enum.IsDefined(typeof(TEnum), value))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"value {value} is not defined in {typeof(TEnum).Name}"));
     }
@@ -123,10 +135,14 @@ public class IsNotDefinedAssertion<TEnum> : Assertion<TEnum>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         if (!Enum.IsDefined(typeof(TEnum), value))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"value {value} is defined in {typeof(TEnum).Name}"));
     }
@@ -156,13 +172,17 @@ public class HasSameNameAsAssertion<TEnum> : Assertion<TEnum>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         var valueName = value.ToString();
         var otherName = _otherEnumValue.ToString();
 
         if (valueName == otherName)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"value name \"{valueName}\" does not equal \"{otherName}\""));
     }
@@ -192,14 +212,18 @@ public class HasSameValueAsAssertion<TEnum> : Assertion<TEnum>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         // Convert both to their underlying integral types
         var valueAsInt = Convert.ToInt64(value);
         var otherAsInt = Convert.ToInt64(_otherEnumValue);
 
         if (valueAsInt == otherAsInt)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"value {valueAsInt} does not equal {otherAsInt}"));
     }
@@ -229,13 +253,17 @@ public class DoesNotHaveSameNameAsAssertion<TEnum> : Assertion<TEnum>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         var valueName = value.ToString();
         var otherName = _otherEnumValue.ToString();
 
         if (valueName != otherName)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"value name \"{valueName}\" equals \"{otherName}\""));
     }
@@ -265,13 +293,17 @@ public class DoesNotHaveSameValueAsAssertion<TEnum> : Assertion<TEnum>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         var valueAsInt = Convert.ToInt64(value);
         var otherAsInt = Convert.ToInt64(_otherEnumValue);
 
         if (valueAsInt != otherAsInt)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"value {valueAsInt} equals {otherAsInt}"));
     }

@@ -56,10 +56,14 @@ public class StringContainsAssertion : Assertion<string>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         var actualValue = value;
         var expectedValue = _expected;
@@ -77,7 +81,9 @@ public class StringContainsAssertion : Assertion<string>
         }
 
         if (actualValue.Contains(expectedValue, _comparison))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
     }
@@ -121,13 +127,19 @@ public class StringDoesNotContainAssertion : Assertion<string>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         if (!value.Contains(_expected, _comparison))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{_expected}\" in \"{value}\""));
     }
@@ -171,13 +183,19 @@ public class StringStartsWithAssertion : Assertion<string>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         if (value.StartsWith(_expected, _comparison))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
     }
@@ -221,13 +239,19 @@ public class StringEndsWithAssertion : Assertion<string>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         if (value.EndsWith(_expected, _comparison))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
     }
@@ -252,13 +276,19 @@ public class StringIsNotEmptyAssertion : Assertion<string>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         if (!string.IsNullOrWhiteSpace(value))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
     }
@@ -283,13 +313,19 @@ public class StringIsEmptyAssertion : Assertion<string>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         if (string.IsNullOrWhiteSpace(value))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
     }
@@ -318,13 +354,19 @@ public class StringLengthAssertion : Assertion<string>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         if (value.Length == _expectedLength)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found length {value.Length}"));
     }
@@ -349,10 +391,14 @@ public class StringIsNullOrWhitespaceAssertion : Assertion<string>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (string.IsNullOrWhiteSpace(value))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
     }
@@ -396,13 +442,19 @@ public class StringMatchesAssertion : Assertion<string>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         if (Regex.IsMatch(value, _pattern, _options))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
     }
@@ -446,13 +498,19 @@ public class StringDoesNotMatchAssertion : Assertion<string>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         if (!Regex.IsMatch(value, _pattern, _options))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\" matching pattern"));
     }
@@ -477,10 +535,14 @@ public class StringIsNullOrEmptyAssertion : Assertion<string>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (string.IsNullOrEmpty(value))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
     }
@@ -505,13 +567,19 @@ public class StringIsNotNullOrEmptyAssertion : Assertion<string>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (!string.IsNullOrEmpty(value))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         return Task.FromResult(AssertionResult.Failed("value was empty"));
     }

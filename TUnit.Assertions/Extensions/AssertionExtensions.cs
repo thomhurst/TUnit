@@ -291,7 +291,10 @@ public static class AssertionExtensions
         var mappedContext = source.Context.Map<TValue>(nullableValue =>
         {
             if (!nullableValue.HasValue)
+            {
                 throw new ArgumentNullException(nameof(nullableValue), "value was null");
+            }
+
             return nullableValue.Value;
         });
         return new GreaterThanAssertion<TValue>(mappedContext, default(TValue)!);
@@ -319,7 +322,10 @@ public static class AssertionExtensions
         var mappedContext = source.Context.Map<TValue>(nullableValue =>
         {
             if (!nullableValue.HasValue)
+            {
                 throw new ArgumentNullException(nameof(nullableValue), "value was null");
+            }
+
             return nullableValue.Value;
         });
         return new LessThanAssertion<TValue>(mappedContext, default(TValue)!);

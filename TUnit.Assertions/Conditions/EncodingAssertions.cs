@@ -17,10 +17,14 @@ public class IsUTF8EncodingAssertion : Assertion<Encoding>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null || !value.Equals(Encoding.UTF8))
+        {
             return Task.FromResult(AssertionResult.Failed($"encoding was {value?.EncodingName ?? "null"}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -42,10 +46,14 @@ public class IsNotUTF8EncodingAssertion : Assertion<Encoding>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value != null && value.Equals(Encoding.UTF8))
+        {
             return Task.FromResult(AssertionResult.Failed("encoding was UTF-8"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -67,10 +75,14 @@ public class IsASCIIEncodingAssertion : Assertion<Encoding>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null || !value.Equals(Encoding.ASCII))
+        {
             return Task.FromResult(AssertionResult.Failed($"encoding was {value?.EncodingName ?? "null"}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -92,10 +104,14 @@ public class IsUnicodeEncodingAssertion : Assertion<Encoding>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null || !value.Equals(Encoding.Unicode))
+        {
             return Task.FromResult(AssertionResult.Failed($"encoding was {value?.EncodingName ?? "null"}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -117,10 +133,14 @@ public class IsUTF32EncodingAssertion : Assertion<Encoding>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null || !value.Equals(Encoding.UTF32))
+        {
             return Task.FromResult(AssertionResult.Failed($"encoding was {value?.EncodingName ?? "null"}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -142,10 +162,14 @@ public class IsBigEndianUnicodeEncodingAssertion : Assertion<Encoding>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null || !value.Equals(Encoding.BigEndianUnicode))
+        {
             return Task.FromResult(AssertionResult.Failed($"encoding was {value?.EncodingName ?? "null"}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -167,10 +191,14 @@ public class IsSingleByteEncodingAssertion : Assertion<Encoding>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null || !value.IsSingleByte)
+        {
             return Task.FromResult(AssertionResult.Failed($"encoding {value?.EncodingName ?? "null"} is not single-byte"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -192,10 +220,14 @@ public class IsNotSingleByteEncodingAssertion : Assertion<Encoding>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value != null && value.IsSingleByte)
+        {
             return Task.FromResult(AssertionResult.Failed($"encoding {value.EncodingName} is single-byte"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }

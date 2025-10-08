@@ -35,13 +35,19 @@ public class IsParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("value was null"));
+        }
 
         if (TryParse(value, _formatProvider, out _))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"\"{value}\" cannot be parsed into {typeof(T).Name}"));
     }
@@ -133,13 +139,19 @@ public class IsNotParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyA
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Passed); // null cannot be parsed
+        }
 
         if (!TryParse(value, _formatProvider, out _))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"\"{value}\" can be parsed into {typeof(T).Name}"));
     }
@@ -206,9 +218,11 @@ public class IsNotParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyA
 /// Parses a string into the specified type and returns an assertion on the parsed value.
 /// Allows chaining assertions on the parsed result.
 /// </summary>
-public class WhenParsedIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] T> : Assertion<T>
+public class WhenParsedIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] T> : Assertion<T>, IAssertionSource<T>
 {
     private readonly IFormatProvider? _formatProvider;
+
+    AssertionContext<T> IAssertionSource<T>.Context => Context;
 
     public WhenParsedIntoAssertion(
         AssertionContext<string> stringContext,
@@ -243,13 +257,19 @@ public class WhenParsedIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
             var (stringValue, exception) = await stringContext.GetAsync();
 
             if (exception != null)
+            {
                 return (default(T)!, exception);
+            }
 
             if (stringValue == null)
+            {
                 return (default(T)!, new ArgumentNullException(nameof(stringValue), "Cannot parse null string"));
+            }
 
             if (TryParse(stringValue, formatProvider, out var result))
+            {
                 return (result!, null);
+            }
 
             return (default(T)!, new FormatException($"Cannot parse \"{stringValue}\" into {typeof(T).Name}"));
         });
@@ -263,7 +283,9 @@ public class WhenParsedIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
         // WhenParsedInto doesn't perform its own check - it just transforms the value
         // The actual assertion will be done by chained assertions
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"parsing failed: {exception.Message}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }

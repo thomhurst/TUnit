@@ -18,11 +18,15 @@ public class IsSuccessStatusCodeAssertion : Assertion<HttpStatusCode>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         var statusCode = (int)value;
         if (statusCode < 200 || statusCode >= 300)
+        {
             return Task.FromResult(AssertionResult.Failed($"status code was {statusCode} ({value})"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -44,11 +48,15 @@ public class IsNotSuccessStatusCodeAssertion : Assertion<HttpStatusCode>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         var statusCode = (int)value;
         if (statusCode >= 200 && statusCode < 300)
+        {
             return Task.FromResult(AssertionResult.Failed($"status code was {statusCode} ({value})"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -70,11 +78,15 @@ public class IsClientErrorStatusCodeAssertion : Assertion<HttpStatusCode>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         var statusCode = (int)value;
         if (statusCode < 400 || statusCode >= 500)
+        {
             return Task.FromResult(AssertionResult.Failed($"status code was {statusCode} ({value})"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -96,11 +108,15 @@ public class IsServerErrorStatusCodeAssertion : Assertion<HttpStatusCode>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         var statusCode = (int)value;
         if (statusCode < 500 || statusCode >= 600)
+        {
             return Task.FromResult(AssertionResult.Failed($"status code was {statusCode} ({value})"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -122,11 +138,15 @@ public class IsRedirectionStatusCodeAssertion : Assertion<HttpStatusCode>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         var statusCode = (int)value;
         if (statusCode < 300 || statusCode >= 400)
+        {
             return Task.FromResult(AssertionResult.Failed($"status code was {statusCode} ({value})"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -148,11 +168,15 @@ public class IsInformationalStatusCodeAssertion : Assertion<HttpStatusCode>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         var statusCode = (int)value;
         if (statusCode < 100 || statusCode >= 200)
+        {
             return Task.FromResult(AssertionResult.Failed($"status code was {statusCode} ({value})"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -174,11 +198,15 @@ public class IsErrorStatusCodeAssertion : Assertion<HttpStatusCode>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         var statusCode = (int)value;
         if (statusCode < 400 || statusCode >= 600)
+        {
             return Task.FromResult(AssertionResult.Failed($"status code was {statusCode} ({value})"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }

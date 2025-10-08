@@ -37,12 +37,16 @@ public class DateTimeEqualsAssertion : Assertion<DateTime>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         var diff = Math.Abs((_expected - value).Ticks);
 
         if (diff <= _tolerance.Ticks)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         var actualDiff = TimeSpan.FromTicks(diff);
         return Task.FromResult(AssertionResult.Failed($"difference was {actualDiff}"));

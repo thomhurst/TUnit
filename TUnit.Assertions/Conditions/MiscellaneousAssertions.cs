@@ -18,13 +18,19 @@ public class HasInnerExceptionAssertion : Assertion<Exception>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("exception was null"));
+        }
 
         if (value.InnerException == null)
+        {
             return Task.FromResult(AssertionResult.Failed("exception has no inner exception"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -46,13 +52,19 @@ public class HasNoInnerExceptionAssertion : Assertion<Exception>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("exception was null"));
+        }
 
         if (value.InnerException != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"exception has inner exception: {value.InnerException.GetType().Name}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -74,13 +86,19 @@ public class HasStackTraceAssertion : Assertion<Exception>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("exception was null"));
+        }
 
         if (string.IsNullOrWhiteSpace(value.StackTrace))
+        {
             return Task.FromResult(AssertionResult.Failed("exception has no stack trace"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -102,13 +120,19 @@ public class HasNoDataAssertion : Assertion<Exception>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("exception was null"));
+        }
 
         if (value.Data.Count > 0)
+        {
             return Task.FromResult(AssertionResult.Failed($"exception has {value.Data.Count} data entries"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -131,13 +155,19 @@ public class StringBuilderIsEmptyAssertion : Assertion<StringBuilder>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("StringBuilder was null"));
+        }
 
         if (value.Length > 0)
+        {
             return Task.FromResult(AssertionResult.Failed($"StringBuilder has length {value.Length}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -159,13 +189,19 @@ public class StringBuilderIsNotEmptyAssertion : Assertion<StringBuilder>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("StringBuilder was null"));
+        }
 
         if (value.Length == 0)
+        {
             return Task.FromResult(AssertionResult.Failed("StringBuilder is empty"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -187,13 +223,19 @@ public class StringBuilderHasExcessCapacityAssertion : Assertion<StringBuilder>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("StringBuilder was null"));
+        }
 
         if (value.Capacity <= value.Length)
+        {
             return Task.FromResult(AssertionResult.Failed($"StringBuilder has no excess capacity (capacity: {value.Capacity}, length: {value.Length})"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -216,10 +258,14 @@ public class IsWeekendAssertion : Assertion<DayOfWeek>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value != DayOfWeek.Saturday && value != DayOfWeek.Sunday)
+        {
             return Task.FromResult(AssertionResult.Failed($"day was {value}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -241,10 +287,14 @@ public class IsWeekdayAssertion : Assertion<DayOfWeek>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == DayOfWeek.Saturday || value == DayOfWeek.Sunday)
+        {
             return Task.FromResult(AssertionResult.Failed($"day was {value}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -266,10 +316,14 @@ public class IsMondayAssertion : Assertion<DayOfWeek>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value != DayOfWeek.Monday)
+        {
             return Task.FromResult(AssertionResult.Failed($"day was {value}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -291,10 +345,14 @@ public class IsFridayAssertion : Assertion<DayOfWeek>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value != DayOfWeek.Friday)
+        {
             return Task.FromResult(AssertionResult.Failed($"day was {value}"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -317,13 +375,19 @@ public class IsAliveAssertion : Assertion<WeakReference>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("WeakReference was null"));
+        }
 
         if (!value.IsAlive)
+        {
             return Task.FromResult(AssertionResult.Failed("WeakReference target is not alive"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
@@ -345,13 +409,19 @@ public class IsDeadAssertion : Assertion<WeakReference>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Failed("WeakReference was null"));
+        }
 
         if (value.IsAlive)
+        {
             return Task.FromResult(AssertionResult.Failed("WeakReference target is still alive"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }

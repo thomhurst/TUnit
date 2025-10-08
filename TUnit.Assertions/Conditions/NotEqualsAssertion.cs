@@ -52,21 +52,28 @@ public class NotEqualsAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         // Deep comparison with ignored types
         if (_ignoredTypes.Count > 0)
         {
             var result = DeepEquals(value, _notExpected, _ignoredTypes);
             if (!result.IsSuccess)
+            {
                 return Task.FromResult(AssertionResult.Passed);
+            }
+
             return Task.FromResult(AssertionResult.Failed($"both values are equivalent"));
         }
 
         var comparer = _comparer ?? EqualityComparer<TValue>.Default;
 
         if (!comparer.Equals(value!, _notExpected))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"both values are {value}"));
     }
@@ -76,13 +83,20 @@ public class NotEqualsAssertion<TValue> : Assertion<TValue>
     {
         // Handle nulls
         if (actual == null && expected == null)
+        {
             return (true, null);
+        }
+
         if (actual == null || expected == null)
+        {
             return (false, $"one value is null: actual={actual}, expected={expected}");
+        }
 
         var type = actual.GetType();
         if (type != expected.GetType())
+        {
             return (false, $"types differ: {actual.GetType().Name} vs {expected.GetType().Name}");
+        }
 
         // Get all public properties
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -92,13 +106,17 @@ public class NotEqualsAssertion<TValue> : Assertion<TValue>
             var propType = prop.PropertyType;
             var underlyingType = Nullable.GetUnderlyingType(propType) ?? propType;
             if (ignoredTypes.Contains(underlyingType))
+            {
                 continue;
+            }
 
             var actualValue = prop.GetValue(actual);
             var expectedValue = prop.GetValue(expected);
 
             if (!Equals(actualValue, expectedValue))
+            {
                 return (false, $"property {prop.Name} differs: {actualValue} vs {expectedValue}");
+            }
         }
 
         // Get all public fields
@@ -109,13 +127,17 @@ public class NotEqualsAssertion<TValue> : Assertion<TValue>
             var fieldType = field.FieldType;
             var underlyingType = Nullable.GetUnderlyingType(fieldType) ?? fieldType;
             if (ignoredTypes.Contains(underlyingType))
+            {
                 continue;
+            }
 
             var actualValue = field.GetValue(actual);
             var expectedValue = field.GetValue(expected);
 
             if (!Equals(actualValue, expectedValue))
+            {
                 return (false, $"field {field.Name} differs: {actualValue} vs {expectedValue}");
+            }
         }
 
         return (true, null);

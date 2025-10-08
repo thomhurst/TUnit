@@ -20,7 +20,9 @@ public class NullAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (value == null)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
@@ -45,7 +47,9 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (value != null)
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed("value is null"));
     }
@@ -71,10 +75,14 @@ public class IsDefaultAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (EqualityComparer<TValue>.Default.Equals(value!, default!))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"value is {value}"));
     }
@@ -99,10 +107,14 @@ public class IsNotDefaultAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
 
         if (!EqualityComparer<TValue>.Default.Equals(value!, default!))
+        {
             return Task.FromResult(AssertionResult.Passed);
+        }
 
         return Task.FromResult(AssertionResult.Failed($"value is default({typeof(TValue).Name})"));
     }

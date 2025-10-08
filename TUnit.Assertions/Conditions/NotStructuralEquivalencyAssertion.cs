@@ -65,7 +65,9 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         var exception = metadata.Exception;
 
         if (exception != null)
+        {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
+        }
 
         // Create a temporary StructuralEquivalencyAssertion to reuse the comparison logic
         var tempAssertion = new StructuralEquivalencyAssertion<TValue>(
@@ -73,7 +75,9 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
             _notExpected);
 
         if (_usePartialEquivalency)
+        {
             tempAssertion.WithPartialEquivalency();
+        }
 
         foreach (var member in _ignoredMembers)
             tempAssertion.IgnoringMember(member);
@@ -85,7 +89,9 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
 
         // Invert the result - we want them to NOT be equivalent
         if (result.IsPassed)
+        {
             return Task.FromResult(AssertionResult.Failed("objects are equivalent but should not be"));
+        }
 
         return Task.FromResult(AssertionResult.Passed);
     }
