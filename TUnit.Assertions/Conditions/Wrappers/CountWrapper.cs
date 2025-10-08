@@ -49,7 +49,7 @@ public class CountWrapper<TValue> : IAssertionSource<TValue>
                 return 0;
             }
 
-            if (value is System.Collections.ICollection collection)
+            if (value is ICollection collection)
             {
                 return collection.Count;
             }
@@ -73,7 +73,7 @@ public class CountWrapper<TValue> : IAssertionSource<TValue>
                 return 0;
             }
 
-            if (value is System.Collections.ICollection collection)
+            if (value is ICollection collection)
             {
                 return collection.Count;
             }

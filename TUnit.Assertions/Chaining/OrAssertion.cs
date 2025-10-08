@@ -14,11 +14,11 @@ public class OrAssertion<TValue> : Assertion<TValue>
 
     public OrAssertion(
         Assertion<TValue> first,
-        Assertion<TValue> _second)
+        Assertion<TValue> second)
         : base(((IAssertionSource<TValue>)first).Context)
     {
         _first = first ?? throw new ArgumentNullException(nameof(first));
-        this._second = _second ?? throw new ArgumentNullException(nameof(_second));
+        _second = second ?? throw new ArgumentNullException(nameof(second));
     }
 
     /// <summary>

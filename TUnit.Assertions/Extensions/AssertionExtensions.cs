@@ -1567,7 +1567,7 @@ public static class AssertionExtensions
     /// If the delegate takes longer than the timeout, the assertion fails.
     /// </summary>
     public static CompletesWithinActionAssertion CompletesWithin(
-        this Sources.DelegateAssertion source,
+        this DelegateAssertion source,
         TimeSpan timeout,
         [CallerArgumentExpression(nameof(timeout))] string? expression = null)
     {
@@ -1582,7 +1582,7 @@ public static class AssertionExtensions
     /// If the delegate takes longer than the timeout, the assertion fails.
     /// </summary>
     public static CompletesWithinAsyncAssertion CompletesWithin(
-        this Sources.AsyncDelegateAssertion source,
+        this AsyncDelegateAssertion source,
         TimeSpan timeout,
         [CallerArgumentExpression(nameof(timeout))] string? expression = null)
     {
@@ -1592,12 +1592,12 @@ public static class AssertionExtensions
         return new CompletesWithinAsyncAssertion(asyncAction, timeout);
     }
 
-    private static Action GetActionFromDelegate(Sources.DelegateAssertion source)
+    private static Action GetActionFromDelegate(DelegateAssertion source)
     {
         return source.Action;
     }
 
-    private static Func<Task> GetFuncFromAsyncDelegate(Sources.AsyncDelegateAssertion source)
+    private static Func<Task> GetFuncFromAsyncDelegate(AsyncDelegateAssertion source)
     {
         return source.AsyncAction;
     }
