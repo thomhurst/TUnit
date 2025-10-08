@@ -636,7 +636,7 @@ public static class AssertionExtensions
         [CallerArgumentExpression(nameof(regex))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".Matches({expression})");
-        return new StringMatchesAssertion(source.Context, regex.ToString());
+        return new StringMatchesAssertion(source.Context, regex);
     }
 
     /// <summary>
@@ -660,7 +660,7 @@ public static class AssertionExtensions
         [CallerArgumentExpression(nameof(regex))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".DoesNotMatch({expression})");
-        return new StringDoesNotMatchAssertion(source.Context, regex.ToString());
+        return new StringDoesNotMatchAssertion(source.Context, regex);
     }
 
     // ============ DICTIONARY ASSERTIONS ============

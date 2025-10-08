@@ -412,6 +412,7 @@ public class StringIsNullOrWhitespaceAssertion : Assertion<string>
 public class StringMatchesAssertion : Assertion<string>
 {
     private readonly string _pattern;
+    private readonly Regex? _regex;
     private RegexOptions _options = RegexOptions.None;
 
     public StringMatchesAssertion(
@@ -420,6 +421,16 @@ public class StringMatchesAssertion : Assertion<string>
         : base(context)
     {
         _pattern = pattern;
+        _regex = null;
+    }
+
+    public StringMatchesAssertion(
+        AssertionContext<string> context,
+        Regex regex)
+        : base(context)
+    {
+        _pattern = regex.ToString();
+        _regex = regex;
     }
 
     public StringMatchesAssertion IgnoringCase()
@@ -451,7 +462,13 @@ public class StringMatchesAssertion : Assertion<string>
             return Task.FromResult(AssertionResult.Failed("value was null"));
         }
 
-        if (Regex.IsMatch(value, _pattern, _options))
+        // Use the Regex object if available (preserves timeout and other settings)
+        // Otherwise create a new Regex with the pattern and options
+        bool isMatch = _regex != null
+            ? _regex.IsMatch(value)
+            : Regex.IsMatch(value, _pattern, _options);
+
+        if (isMatch)
         {
             return Task.FromResult(AssertionResult.Passed);
         }
@@ -468,6 +485,7 @@ public class StringMatchesAssertion : Assertion<string>
 public class StringDoesNotMatchAssertion : Assertion<string>
 {
     private readonly string _pattern;
+    private readonly Regex? _regex;
     private RegexOptions _options = RegexOptions.None;
 
     public StringDoesNotMatchAssertion(
@@ -476,6 +494,16 @@ public class StringDoesNotMatchAssertion : Assertion<string>
         : base(context)
     {
         _pattern = pattern;
+        _regex = null;
+    }
+
+    public StringDoesNotMatchAssertion(
+        AssertionContext<string> context,
+        Regex regex)
+        : base(context)
+    {
+        _pattern = regex.ToString();
+        _regex = regex;
     }
 
     public StringDoesNotMatchAssertion IgnoringCase()
@@ -507,7 +535,13 @@ public class StringDoesNotMatchAssertion : Assertion<string>
             return Task.FromResult(AssertionResult.Failed("value was null"));
         }
 
-        if (!Regex.IsMatch(value, _pattern, _options))
+        // Use the Regex object if available (preserves timeout and other settings)
+        // Otherwise create a new Regex with the pattern and options
+        bool isMatch = _regex != null
+            ? _regex.IsMatch(value)
+            : Regex.IsMatch(value, _pattern, _options);
+
+        if (!isMatch)
         {
             return Task.FromResult(AssertionResult.Passed);
         }
