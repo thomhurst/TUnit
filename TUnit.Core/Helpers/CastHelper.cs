@@ -10,7 +10,8 @@ namespace TUnit.Core.Helpers;
 [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 public static class CastHelper
 {
-    public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(object? value)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(object? value)
     {
         if (value is null)
         {
@@ -162,7 +163,7 @@ public static class CastHelper
         {
             return (T?) conversionMethod.Invoke(null, [value]);
         }
-        catch (Exception ex) when (ex is NotSupportedException || ex is InvalidOperationException)
+        catch (Exception ex) when (ex is NotSupportedException or InvalidOperationException)
         {
             // In AOT scenarios, reflection invoke might fail
             // Try a direct cast as a last resort
@@ -178,7 +179,8 @@ public static class CastHelper
         }
     }
 
-    public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, object? value)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type, object? value)
     {
         if (value is null)
         {
@@ -337,7 +339,7 @@ public static class CastHelper
         return conversionMethod.Invoke(null, [value]);
     }
 
-    public static MethodInfo? GetConversionMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType)
+    public static MethodInfo? GetConversionMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type targetType)
     {
         // In single file mode, we might need to look harder for conversion methods
         // First try the base type methods (including inherited and declared only)
