@@ -2300,6 +2300,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         MethodDeclarationSyntax methodSyntax,
         AttributeData testAttribute)
     {
+        // Prioritize TestAttribute's File/Line from [CallerFilePath]/[CallerLineNumber] first
+        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+        if (!string.IsNullOrEmpty(attrFilePath))
+        {
+            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 0;
+            if (attrLineNumber > 0)
+            {
+                return (attrFilePath!, attrLineNumber);
+            }
+        }
+
+        // Fall back to method syntax location
         var methodLocation = methodSyntax.GetLocation();
         var filePath = methodLocation.SourceTree?.FilePath;
         if (!string.IsNullOrEmpty(filePath))
@@ -2308,14 +2320,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return (filePath!, lineNumber);
         }
 
-        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
-        if (!string.IsNullOrEmpty(attrFilePath))
-        {
-            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
-                                 methodLocation.GetLineSpan().StartLinePosition.Line + 1;
-            return (attrFilePath!, attrLineNumber);
-        }
-
+        // Final fallback
         filePath = methodSyntax.SyntaxTree.FilePath ?? "";
         var fallbackLineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
         return (filePath, fallbackLineNumber);
@@ -2326,6 +2331,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         AttributeData testAttribute,
         InheritsTestsClassMetadata classInfo)
     {
+        // Prioritize TestAttribute's File/Line from [CallerFilePath]/[CallerLineNumber] first
+        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+        if (!string.IsNullOrEmpty(attrFilePath))
+        {
+            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 0;
+            if (attrLineNumber > 0)
+            {
+                return (attrFilePath!, attrLineNumber);
+            }
+        }
+
+        // Fall back to method symbol location
         var methodLocation = method.Locations.FirstOrDefault();
         if (methodLocation != null && methodLocation.IsInSource)
         {
@@ -2337,14 +2354,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
-        if (!string.IsNullOrEmpty(attrFilePath))
-        {
-            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
-                                 classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-            return (attrFilePath!, attrLineNumber);
-        }
-
+        // Final fallback to class location
         var classLocation = classInfo.ClassSyntax.GetLocation();
         var derivedFilePath = classLocation.SourceTree?.FilePath ?? classInfo.ClassSyntax.SyntaxTree.FilePath ?? "";
         var derivedLineNumber = classLocation.GetLineSpan().StartLinePosition.Line + 1;
