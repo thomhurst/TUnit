@@ -147,7 +147,7 @@ public class EnumerableTests
 
         IEnumerable enumerable = array;
 
-        await Assert.That(enumerable).IsEqualTo(enumerable);
+        await Assert.That(enumerable).IsSameReferenceAs(enumerable);
     }
 
     [Test]
