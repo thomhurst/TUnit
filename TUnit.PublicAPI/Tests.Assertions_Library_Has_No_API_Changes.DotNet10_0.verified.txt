@@ -172,23 +172,6 @@ namespace .Attributes
         public bool TreatAsInstance { get; set; }
     }
 }
-namespace .Chaining
-{
-    public class AndAssertion<TValue> : .<TValue>
-    {
-        public AndAssertion(.<TValue> first, .<TValue> second) { }
-        public new .<TValue> Or { get; }
-        public override .<TValue?> AssertAsync() { }
-        protected override string GetExpectation() { }
-    }
-    public class OrAssertion<TValue> : .<TValue>
-    {
-        public OrAssertion(.<TValue> first, .<TValue> second) { }
-        public new .<TValue> And { get; }
-        public override .<TValue?> AssertAsync() { }
-        protected override string GetExpectation() { }
-    }
-}
 namespace .Conditions
 {
     public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
