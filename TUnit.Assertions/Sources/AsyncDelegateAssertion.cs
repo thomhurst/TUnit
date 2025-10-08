@@ -12,14 +12,15 @@ namespace TUnit.Assertions.Sources;
 /// </summary>
 public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssertionSource<object?>
 {
-    public EvaluationContext<object?> Context { get; }
-    public StringBuilder ExpressionBuilder { get; }
+    public AssertionContext<object?> Context { get; }
     internal Func<Task> AsyncAction { get; }
 
     public AsyncDelegateAssertion(Func<Task> action, string? expression)
     {
         AsyncAction = action ?? throw new ArgumentNullException(nameof(action));
-        Context = new EvaluationContext<object?>(async () =>
+        var expressionBuilder = new StringBuilder();
+        expressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        var evaluationContext = new EvaluationContext<object?>(async () =>
         {
             try
             {
@@ -31,7 +32,6 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
                 return (null, ex);
             }
         });
-        ExpressionBuilder = new StringBuilder();
-        ExpressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        Context = new AssertionContext<object?>(evaluationContext, expressionBuilder);
     }
 }

@@ -13,10 +13,9 @@ public class DateTimeEqualsAssertion : Assertion<DateTime>
     private TimeSpan _tolerance = TimeSpan.Zero;
 
     public DateTimeEqualsAssertion(
-        EvaluationContext<DateTime> context,
-        DateTime expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<DateTime> context,
+        DateTime expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -28,7 +27,7 @@ public class DateTimeEqualsAssertion : Assertion<DateTime>
     public DateTimeEqualsAssertion Within(TimeSpan tolerance)
     {
         _tolerance = tolerance;
-        ExpressionBuilder.Append($".Within({tolerance})");
+        Context.ExpressionBuilder.Append($".Within({tolerance})");
         return this; // Return self for continued chaining
     }
 

@@ -13,10 +13,9 @@ public class GreaterThanAssertion<TValue> : Assertion<TValue>
     private readonly TValue _minimum;
 
     public GreaterThanAssertion(
-        EvaluationContext<TValue> context,
-        TValue minimum,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        TValue minimum)
+        : base(context)
     {
         _minimum = minimum;
     }
@@ -47,10 +46,9 @@ public class GreaterThanOrEqualAssertion<TValue> : Assertion<TValue>
     private readonly TValue _minimum;
 
     public GreaterThanOrEqualAssertion(
-        EvaluationContext<TValue> context,
-        TValue minimum,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        TValue minimum)
+        : base(context)
     {
         _minimum = minimum;
     }

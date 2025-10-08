@@ -11,13 +11,12 @@ namespace TUnit.Assertions.Sources;
 /// </summary>
 public class CollectionAssertion<TItem> : IAssertionSource<IEnumerable<TItem>>
 {
-    public EvaluationContext<IEnumerable<TItem>> Context { get; }
-    public StringBuilder ExpressionBuilder { get; }
+    public AssertionContext<IEnumerable<TItem>> Context { get; }
 
     public CollectionAssertion(IEnumerable<TItem> value, string? expression)
     {
-        Context = new EvaluationContext<IEnumerable<TItem>>(value);
-        ExpressionBuilder = new StringBuilder();
-        ExpressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        var expressionBuilder = new StringBuilder();
+        expressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        Context = new AssertionContext<IEnumerable<TItem>>(value, expressionBuilder);
     }
 }

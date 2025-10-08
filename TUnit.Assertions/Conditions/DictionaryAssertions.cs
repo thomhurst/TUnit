@@ -12,11 +12,10 @@ public class DictionaryContainsKeyAssertion<TKey, TValue> : Assertion<IReadOnlyD
     private readonly IEqualityComparer<TKey>? _comparer;
 
     public DictionaryContainsKeyAssertion(
-        EvaluationContext<IReadOnlyDictionary<TKey, TValue>> context,
+        AssertionContext<IReadOnlyDictionary<TKey, TValue>> context,
         TKey expectedKey,
-        StringBuilder expressionBuilder,
         IEqualityComparer<TKey>? comparer = null)
-        : base(context, expressionBuilder)
+        : base(context)
     {
         _expectedKey = expectedKey;
         _comparer = comparer;
@@ -61,10 +60,9 @@ public class DictionaryDoesNotContainKeyAssertion<TKey, TValue> : Assertion<IRea
     private readonly TKey _expectedKey;
 
     public DictionaryDoesNotContainKeyAssertion(
-        EvaluationContext<IReadOnlyDictionary<TKey, TValue>> context,
-        TKey expectedKey,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<IReadOnlyDictionary<TKey, TValue>> context,
+        TKey expectedKey)
+        : base(context)
     {
         _expectedKey = expectedKey;
     }

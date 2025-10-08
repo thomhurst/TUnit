@@ -6,9 +6,8 @@ namespace TUnit.Assertions.Conditions;
 public class IsUTF8EncodingAssertion : Assertion<Encoding>
 {
     public IsUTF8EncodingAssertion(
-        EvaluationContext<Encoding> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<Encoding> context)
+        : base(context)
     {
     }
 
@@ -32,9 +31,8 @@ public class IsUTF8EncodingAssertion : Assertion<Encoding>
 public class IsNotUTF8EncodingAssertion : Assertion<Encoding>
 {
     public IsNotUTF8EncodingAssertion(
-        EvaluationContext<Encoding> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<Encoding> context)
+        : base(context)
     {
     }
 
@@ -58,9 +56,8 @@ public class IsNotUTF8EncodingAssertion : Assertion<Encoding>
 public class IsASCIIEncodingAssertion : Assertion<Encoding>
 {
     public IsASCIIEncodingAssertion(
-        EvaluationContext<Encoding> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<Encoding> context)
+        : base(context)
     {
     }
 
@@ -84,9 +81,8 @@ public class IsASCIIEncodingAssertion : Assertion<Encoding>
 public class IsUnicodeEncodingAssertion : Assertion<Encoding>
 {
     public IsUnicodeEncodingAssertion(
-        EvaluationContext<Encoding> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<Encoding> context)
+        : base(context)
     {
     }
 
@@ -110,9 +106,8 @@ public class IsUnicodeEncodingAssertion : Assertion<Encoding>
 public class IsUTF32EncodingAssertion : Assertion<Encoding>
 {
     public IsUTF32EncodingAssertion(
-        EvaluationContext<Encoding> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<Encoding> context)
+        : base(context)
     {
     }
 
@@ -136,9 +131,8 @@ public class IsUTF32EncodingAssertion : Assertion<Encoding>
 public class IsBigEndianUnicodeEncodingAssertion : Assertion<Encoding>
 {
     public IsBigEndianUnicodeEncodingAssertion(
-        EvaluationContext<Encoding> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<Encoding> context)
+        : base(context)
     {
     }
 
@@ -162,9 +156,8 @@ public class IsBigEndianUnicodeEncodingAssertion : Assertion<Encoding>
 public class IsSingleByteEncodingAssertion : Assertion<Encoding>
 {
     public IsSingleByteEncodingAssertion(
-        EvaluationContext<Encoding> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<Encoding> context)
+        : base(context)
     {
     }
 
@@ -188,9 +181,8 @@ public class IsSingleByteEncodingAssertion : Assertion<Encoding>
 public class IsNotSingleByteEncodingAssertion : Assertion<Encoding>
 {
     public IsNotSingleByteEncodingAssertion(
-        EvaluationContext<Encoding> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<Encoding> context)
+        : base(context)
     {
     }
 

@@ -14,9 +14,8 @@ public class IsParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
     private IFormatProvider? _formatProvider;
 
     public IsParsableIntoAssertion(
-        EvaluationContext<string> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context)
+        : base(context)
     {
     }
 
@@ -26,7 +25,7 @@ public class IsParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
     public IsParsableIntoAssertion<T> WithFormatProvider(IFormatProvider formatProvider)
     {
         _formatProvider = formatProvider;
-        ExpressionBuilder.Append($".WithFormatProvider(formatProvider)");
+        Context.ExpressionBuilder.Append($".WithFormatProvider(formatProvider)");
         return this;
     }
 
@@ -113,9 +112,8 @@ public class IsNotParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyA
     private IFormatProvider? _formatProvider;
 
     public IsNotParsableIntoAssertion(
-        EvaluationContext<string> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context)
+        : base(context)
     {
     }
 
@@ -125,7 +123,7 @@ public class IsNotParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyA
     public IsNotParsableIntoAssertion<T> WithFormatProvider(IFormatProvider formatProvider)
     {
         _formatProvider = formatProvider;
-        ExpressionBuilder.Append($".WithFormatProvider(formatProvider)");
+        Context.ExpressionBuilder.Append($".WithFormatProvider(formatProvider)");
         return this;
     }
 
@@ -213,10 +211,9 @@ public class WhenParsedIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
     private readonly IFormatProvider? _formatProvider;
 
     public WhenParsedIntoAssertion(
-        EvaluationContext<string> stringContext,
-        StringBuilder expressionBuilder,
+        AssertionContext<string> stringContext,
         IFormatProvider? formatProvider = null)
-        : base(CreateParsedContext(stringContext, formatProvider), expressionBuilder)
+        : base(new AssertionContext<T>(CreateParsedContext(stringContext.Evaluation, formatProvider), stringContext.ExpressionBuilder))
     {
         _formatProvider = formatProvider;
     }
@@ -227,7 +224,7 @@ public class WhenParsedIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
     /// </summary>
     public WhenParsedIntoAssertion<T> WithFormatProvider(IFormatProvider formatProvider)
     {
-        ExpressionBuilder.Append($".WithFormatProvider(formatProvider)");
+        Context.ExpressionBuilder.Append($".WithFormatProvider(formatProvider)");
 
         // We need to get the original string context - this is a limitation of the current design
         // For now, return a new instance (this won't work perfectly, but it's the best we can do)

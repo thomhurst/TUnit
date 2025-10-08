@@ -12,10 +12,9 @@ public class IsInAssertion<TValue> : Assertion<TValue>
     private IEqualityComparer<TValue>? _comparer;
 
     public IsInAssertion(
-        EvaluationContext<TValue> context,
-        IEnumerable<TValue> collection,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        IEnumerable<TValue> collection)
+        : base(context)
     {
         _collection = collection;
     }
@@ -23,7 +22,7 @@ public class IsInAssertion<TValue> : Assertion<TValue>
     public IsInAssertion<TValue> Using(IEqualityComparer<TValue> comparer)
     {
         _comparer = comparer;
-        ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
+        Context.ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
         return this;
     }
 
@@ -58,10 +57,9 @@ public class IsNotInAssertion<TValue> : Assertion<TValue>
     private IEqualityComparer<TValue>? _comparer;
 
     public IsNotInAssertion(
-        EvaluationContext<TValue> context,
-        IEnumerable<TValue> collection,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        IEnumerable<TValue> collection)
+        : base(context)
     {
         _collection = collection;
     }
@@ -69,7 +67,7 @@ public class IsNotInAssertion<TValue> : Assertion<TValue>
     public IsNotInAssertion<TValue> Using(IEqualityComparer<TValue> comparer)
     {
         _comparer = comparer;
-        ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
+        Context.ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
         return this;
     }
 

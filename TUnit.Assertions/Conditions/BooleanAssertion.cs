@@ -9,9 +9,8 @@ namespace TUnit.Assertions.Conditions;
 public class TrueAssertion : Assertion<bool>
 {
     public TrueAssertion(
-        EvaluationContext<bool> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<bool> context)
+        : base(context)
     {
     }
 
@@ -38,9 +37,8 @@ public class TrueAssertion : Assertion<bool>
 public class FalseAssertion : Assertion<bool>
 {
     public FalseAssertion(
-        EvaluationContext<bool> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<bool> context)
+        : base(context)
     {
     }
 

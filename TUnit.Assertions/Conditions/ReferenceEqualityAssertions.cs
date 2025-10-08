@@ -11,10 +11,9 @@ public class SameReferenceAssertion<TValue> : Assertion<TValue>
     private readonly object? _expected;
 
     public SameReferenceAssertion(
-        EvaluationContext<TValue> context,
-        object? expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        object? expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -44,10 +43,9 @@ public class NotSameReferenceAssertion<TValue> : Assertion<TValue>
     private readonly object? _expected;
 
     public NotSameReferenceAssertion(
-        EvaluationContext<TValue> context,
-        object? expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        object? expected)
+        : base(context)
     {
         _expected = expected;
     }

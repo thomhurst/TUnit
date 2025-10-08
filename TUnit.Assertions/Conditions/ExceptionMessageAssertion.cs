@@ -13,11 +13,10 @@ public class ExceptionMessageAssertion : Assertion<object?>
     private readonly StringComparison _comparison;
 
     public ExceptionMessageAssertion(
-        EvaluationContext<object?> context,
+        AssertionContext<object?> context,
         string expectedSubstring,
-        StringBuilder expressionBuilder,
         StringComparison comparison = StringComparison.Ordinal)
-        : base(context, expressionBuilder)
+        : base(context)
     {
         _expectedSubstring = expectedSubstring;
         _comparison = comparison;

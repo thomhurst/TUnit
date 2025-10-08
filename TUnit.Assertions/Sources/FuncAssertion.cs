@@ -12,12 +12,13 @@ namespace TUnit.Assertions.Sources;
 /// </summary>
 public class FuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertionSource<TValue>
 {
-    public EvaluationContext<TValue> Context { get; }
-    public StringBuilder ExpressionBuilder { get; }
+    public AssertionContext<TValue> Context { get; }
 
     public FuncAssertion(Func<TValue> func, string? expression)
     {
-        Context = new EvaluationContext<TValue>(async () =>
+        var expressionBuilder = new StringBuilder();
+        expressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        var evaluationContext = new EvaluationContext<TValue>(async () =>
         {
             try
             {
@@ -30,8 +31,7 @@ public class FuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
                 return (default(TValue), ex);
             }
         });
-        ExpressionBuilder = new StringBuilder();
-        ExpressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        Context = new AssertionContext<TValue>(evaluationContext, expressionBuilder);
     }
 
     /// <summary>
@@ -41,9 +41,9 @@ public class FuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
     /// </summary>
     public ThrowsAssertion<TException> Throws<TException>() where TException : Exception
     {
-        ExpressionBuilder.Append($".Throws<{typeof(TException).Name}>()");
+        Context.ExpressionBuilder.Append($".Throws<{typeof(TException).Name}>()");
         var mappedContext = Context.Map<object?>(_ => null);
-        return new ThrowsAssertion<TException>(mappedContext, ExpressionBuilder);
+        return new ThrowsAssertion<TException>(mappedContext);
     }
 
     /// <summary>
@@ -53,8 +53,8 @@ public class FuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
     /// </summary>
     public ThrowsExactlyAssertion<TException> ThrowsExactly<TException>() where TException : Exception
     {
-        ExpressionBuilder.Append($".ThrowsExactly<{typeof(TException).Name}>()");
+        Context.ExpressionBuilder.Append($".ThrowsExactly<{typeof(TException).Name}>()");
         var mappedContext = Context.Map<object?>(_ => null);
-        return new ThrowsExactlyAssertion<TException>(mappedContext, ExpressionBuilder);
+        return new ThrowsExactlyAssertion<TException>(mappedContext);
     }
 }

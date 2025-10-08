@@ -16,11 +16,10 @@ public class NotEquivalentToAssertion<TCollection, TItem> : Assertion<TCollectio
     private IEqualityComparer<TItem>? _comparer;
 
     public NotEquivalentToAssertion(
-        EvaluationContext<TCollection> context,
+        AssertionContext<TCollection> context,
         IEnumerable<TItem> notExpected,
-        StringBuilder expressionBuilder,
         CollectionOrdering ordering = CollectionOrdering.Any)
-        : base(context, expressionBuilder)
+        : base(context)
     {
         _notExpected = notExpected ?? throw new ArgumentNullException(nameof(notExpected));
         _ordering = ordering;
@@ -29,7 +28,7 @@ public class NotEquivalentToAssertion<TCollection, TItem> : Assertion<TCollectio
     public NotEquivalentToAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
     {
         _comparer = comparer;
-        ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
+        Context.ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
         return this;
     }
 

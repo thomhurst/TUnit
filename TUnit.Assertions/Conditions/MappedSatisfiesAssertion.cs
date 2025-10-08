@@ -16,12 +16,11 @@ public class MappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
     private readonly string _selectorDescription;
 
     public MappedSatisfiesAssertion(
-        EvaluationContext<TValue> context,
+        AssertionContext<TValue> context,
         Func<TValue?, TMapped> selector,
         Func<ValueAssertion<TMapped>, Assertion<TMapped>?> assertions,
-        string selectorDescription,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        string selectorDescription)
+        : base(context)
     {
         _selector = selector;
         _assertions = assertions;
@@ -81,12 +80,11 @@ public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
     private readonly string _selectorDescription;
 
     public AsyncMappedSatisfiesAssertion(
-        EvaluationContext<TValue> context,
+        AssertionContext<TValue> context,
         Func<TValue?, Task<TMapped>> selector,
         Func<ValueAssertion<TMapped>, Assertion<TMapped>?> assertions,
-        string selectorDescription,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        string selectorDescription)
+        : base(context)
     {
         _selector = selector;
         _assertions = assertions;

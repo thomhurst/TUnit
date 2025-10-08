@@ -16,10 +16,9 @@ public class StringEqualsAssertion : Assertion<string>
     private bool _ignoringWhitespace = false;
 
     public StringEqualsAssertion(
-        EvaluationContext<string> context,
-        string expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context,
+        string expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -31,7 +30,7 @@ public class StringEqualsAssertion : Assertion<string>
     public StringEqualsAssertion IgnoringCase()
     {
         _comparison = StringComparison.OrdinalIgnoreCase;
-        ExpressionBuilder.Append(".IgnoringCase()");
+        Context.ExpressionBuilder.Append(".IgnoringCase()");
         return this;
     }
 
@@ -42,7 +41,7 @@ public class StringEqualsAssertion : Assertion<string>
     public StringEqualsAssertion WithComparison(StringComparison comparison)
     {
         _comparison = comparison;
-        ExpressionBuilder.Append($".WithComparison({comparison})");
+        Context.ExpressionBuilder.Append($".WithComparison({comparison})");
         return this;
     }
 
@@ -53,7 +52,7 @@ public class StringEqualsAssertion : Assertion<string>
     public StringEqualsAssertion WithTrimming()
     {
         _trimming = true;
-        ExpressionBuilder.Append(".WithTrimming()");
+        Context.ExpressionBuilder.Append(".WithTrimming()");
         return this;
     }
 
@@ -64,7 +63,7 @@ public class StringEqualsAssertion : Assertion<string>
     public StringEqualsAssertion WithNullAndEmptyEquality()
     {
         _nullAndEmptyEquality = true;
-        ExpressionBuilder.Append(".WithNullAndEmptyEquality()");
+        Context.ExpressionBuilder.Append(".WithNullAndEmptyEquality()");
         return this;
     }
 
@@ -75,7 +74,7 @@ public class StringEqualsAssertion : Assertion<string>
     public StringEqualsAssertion IgnoringWhitespace()
     {
         _ignoringWhitespace = true;
-        ExpressionBuilder.Append(".IgnoringWhitespace()");
+        Context.ExpressionBuilder.Append(".IgnoringWhitespace()");
         return this;
     }
 

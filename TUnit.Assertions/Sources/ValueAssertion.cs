@@ -10,13 +10,12 @@ namespace TUnit.Assertions.Sources;
 /// </summary>
 public class ValueAssertion<TValue> : IAssertionSource<TValue>
 {
-    public EvaluationContext<TValue> Context { get; }
-    public StringBuilder ExpressionBuilder { get; }
+    public AssertionContext<TValue> Context { get; }
 
     public ValueAssertion(TValue? value, string? expression)
     {
-        Context = new EvaluationContext<TValue>(value);
-        ExpressionBuilder = new StringBuilder();
-        ExpressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        var expressionBuilder = new StringBuilder();
+        expressionBuilder.Append($"Assert.That({expression ?? "?"})");
+        Context = new AssertionContext<TValue>(value, expressionBuilder);
     }
 }

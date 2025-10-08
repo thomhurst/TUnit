@@ -13,17 +13,14 @@ namespace TUnit.Assertions.Conditions.Wrappers;
 public class CountWrapper<TValue> : IAssertionSource<TValue>
     where TValue : IEnumerable
 {
-    private readonly EvaluationContext<TValue> _context;
-    private readonly StringBuilder _expressionBuilder;
+    private readonly AssertionContext<TValue> _context;
 
-    public CountWrapper(EvaluationContext<TValue> context, StringBuilder expressionBuilder)
+    public CountWrapper(AssertionContext<TValue> context)
     {
         _context = context;
-        _expressionBuilder = expressionBuilder;
     }
 
-    EvaluationContext<TValue> IAssertionSource<TValue>.Context => _context;
-    StringBuilder IAssertionSource<TValue>.ExpressionBuilder => _expressionBuilder;
+    AssertionContext<TValue> IAssertionSource<TValue>.Context => _context;
 
     /// <summary>
     /// Asserts that the collection count is equal to the expected count.
@@ -32,8 +29,8 @@ public class CountWrapper<TValue> : IAssertionSource<TValue>
         int expectedCount,
         [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
     {
-        _expressionBuilder.Append($".EqualTo({expression})");
-        return new CollectionCountAssertion<TValue>(_context, expectedCount, _expressionBuilder);
+        _context.ExpressionBuilder.Append($".EqualTo({expression})");
+        return new CollectionCountAssertion<TValue>(_context, expectedCount);
     }
 
     /// <summary>
@@ -43,7 +40,7 @@ public class CountWrapper<TValue> : IAssertionSource<TValue>
         int expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
-        _expressionBuilder.Append($".GreaterThanOrEqualTo({expression})");
+        _context.ExpressionBuilder.Append($".GreaterThanOrEqualTo({expression})");
         // Map context to get the count
         var countContext = _context.Map<int>(value =>
         {
@@ -52,7 +49,7 @@ public class CountWrapper<TValue> : IAssertionSource<TValue>
                 return collection.Count;
             return value.Cast<object>().Count();
         });
-        return new GreaterThanOrEqualAssertion<int>(countContext, expected, _expressionBuilder);
+        return new GreaterThanOrEqualAssertion<int>(countContext, expected);
     }
 
     /// <summary>
@@ -60,7 +57,7 @@ public class CountWrapper<TValue> : IAssertionSource<TValue>
     /// </summary>
     public GreaterThanAssertion<int> Positive()
     {
-        _expressionBuilder.Append(".Positive()");
+        _context.ExpressionBuilder.Append(".Positive()");
         // Map context to get the count
         var countContext = _context.Map<int>(value =>
         {
@@ -69,6 +66,6 @@ public class CountWrapper<TValue> : IAssertionSource<TValue>
                 return collection.Count;
             return value.Cast<object>().Count();
         });
-        return new GreaterThanAssertion<int>(countContext, 0, _expressionBuilder);
+        return new GreaterThanAssertion<int>(countContext, 0);
     }
 }

@@ -13,9 +13,8 @@ public class CollectionIsEmptyAssertion<TValue> : Assertion<TValue>
     where TValue : IEnumerable
 {
     public CollectionIsEmptyAssertion(
-        EvaluationContext<TValue> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context)
+        : base(context)
     {
     }
 
@@ -54,9 +53,8 @@ public class CollectionIsNotEmptyAssertion<TValue> : Assertion<TValue>
     where TValue : IEnumerable
 {
     public CollectionIsNotEmptyAssertion(
-        EvaluationContext<TValue> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context)
+        : base(context)
     {
     }
 
@@ -98,11 +96,10 @@ public class CollectionContainsAssertion<TCollection, TItem> : Assertion<TCollec
     private readonly IEqualityComparer<TItem>? _comparer;
 
     public CollectionContainsAssertion(
-        EvaluationContext<TCollection> context,
+        AssertionContext<TCollection> context,
         TItem expected,
-        StringBuilder expressionBuilder,
         IEqualityComparer<TItem>? comparer = null)
-        : base(context, expressionBuilder)
+        : base(context)
     {
         _expected = expected;
         _comparer = comparer;
@@ -143,11 +140,10 @@ public class CollectionDoesNotContainAssertion<TCollection, TItem> : Assertion<T
     private readonly IEqualityComparer<TItem>? _comparer;
 
     public CollectionDoesNotContainAssertion(
-        EvaluationContext<TCollection> context,
+        AssertionContext<TCollection> context,
         TItem expected,
-        StringBuilder expressionBuilder,
         IEqualityComparer<TItem>? comparer = null)
-        : base(context, expressionBuilder)
+        : base(context)
     {
         _expected = expected;
         _comparer = comparer;
@@ -188,11 +184,10 @@ public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : As
     private readonly string _predicateDescription;
 
     public CollectionDoesNotContainPredicateAssertion(
-        EvaluationContext<TCollection> context,
+        AssertionContext<TCollection> context,
         Func<TItem, bool> predicate,
-        string predicateDescription,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        string predicateDescription)
+        : base(context)
     {
         _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
         _predicateDescription = predicateDescription;
@@ -230,10 +225,9 @@ public class CollectionCountAssertion<TValue> : Assertion<TValue>
     private readonly int _expectedCount;
 
     public CollectionCountAssertion(
-        EvaluationContext<TValue> context,
-        int expectedCount,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        int expectedCount)
+        : base(context)
     {
         _expectedCount = expectedCount;
     }
@@ -288,13 +282,11 @@ public class CollectionCountAssertion<TValue> : Assertion<TValue>
 public class CollectionAllSatisfyHelper<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
-    private readonly EvaluationContext<TCollection> _context;
-    private readonly StringBuilder _expressionBuilder;
+    private readonly AssertionContext<TCollection> _context;
 
-    public CollectionAllSatisfyHelper(EvaluationContext<TCollection> context, StringBuilder expressionBuilder)
+    public CollectionAllSatisfyHelper(AssertionContext<TCollection> context)
     {
         _context = context;
-        _expressionBuilder = expressionBuilder;
     }
 
     /// <summary>
@@ -305,8 +297,8 @@ public class CollectionAllSatisfyHelper<TCollection, TItem>
         Action<IAssertionSource<TItem>> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
     {
-        _expressionBuilder.Append($".Satisfy({expression})");
-        return new CollectionAllSatisfyAssertion<TCollection, TItem>(_context, assertion, expression ?? "assertion", _expressionBuilder);
+        _context.ExpressionBuilder.Append($".Satisfy({expression})");
+        return new CollectionAllSatisfyAssertion<TCollection, TItem>(_context, assertion, expression ?? "assertion");
     }
 
     /// <summary>
@@ -319,9 +311,9 @@ public class CollectionAllSatisfyHelper<TCollection, TItem>
         [CallerArgumentExpression(nameof(mapper))] string? mapperExpression = null,
         [CallerArgumentExpression(nameof(assertion))] string? assertionExpression = null)
     {
-        _expressionBuilder.Append($".Satisfy({mapperExpression}, {assertionExpression})");
+        _context.ExpressionBuilder.Append($".Satisfy({mapperExpression}, {assertionExpression})");
         return new CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped>(
-            _context, mapper, assertion, mapperExpression ?? "mapper", assertionExpression ?? "assertion", _expressionBuilder);
+            _context, mapper, assertion, mapperExpression ?? "mapper", assertionExpression ?? "assertion");
     }
 }
 
@@ -332,11 +324,10 @@ public class CollectionAllAssertion<TCollection, TItem> : Assertion<TCollection>
     private readonly string _predicateDescription;
 
     public CollectionAllAssertion(
-        EvaluationContext<TCollection> context,
+        AssertionContext<TCollection> context,
         Func<TItem, bool> predicate,
-        string predicateDescription,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        string predicateDescription)
+        : base(context)
     {
         _predicate = predicate;
         _predicateDescription = predicateDescription;
@@ -377,11 +368,10 @@ public class CollectionAnyAssertion<TCollection, TItem> : Assertion<TCollection>
     private readonly string _predicateDescription;
 
     public CollectionAnyAssertion(
-        EvaluationContext<TCollection> context,
+        AssertionContext<TCollection> context,
         Func<TItem, bool> predicate,
-        string predicateDescription,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        string predicateDescription)
+        : base(context)
     {
         _predicate = predicate;
         _predicateDescription = predicateDescription;
@@ -417,9 +407,8 @@ public class HasSingleItemAssertion<TValue> : Assertion<TValue>
     where TValue : IEnumerable
 {
     public HasSingleItemAssertion(
-        EvaluationContext<TValue> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context)
+        : base(context)
     {
     }
 
@@ -464,9 +453,8 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Assertio
     private readonly Func<TItem, bool> _predicate;
 
     public CollectionContainsPredicateAssertion(
-        EvaluationContext<TCollection> context,
-        Func<TItem, bool> predicate,
-        StringBuilder expressionBuilder)
+        AssertionContext<TCollection> context,
+        Func<TItem, bool> predicate)
         : base(context.Map<TItem>(collection =>
         {
             if (collection == null)
@@ -479,7 +467,7 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Assertio
             }
 
             throw new InvalidOperationException("no item matching predicate found in collection");
-        }), expressionBuilder)
+        }))
     {
         _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
     }
@@ -509,11 +497,10 @@ public class CollectionAllSatisfyAssertion<TCollection, TItem> : Assertion<TColl
     private readonly string _assertionDescription;
 
     public CollectionAllSatisfyAssertion(
-        EvaluationContext<TCollection> context,
+        AssertionContext<TCollection> context,
         Action<IAssertionSource<TItem>> assertion,
-        string assertionDescription,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        string assertionDescription)
+        : base(context)
     {
         _assertion = assertion;
         _assertionDescription = assertionDescription;
@@ -563,13 +550,12 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
     private readonly string _assertionDescription;
 
     public CollectionAllSatisfyMappedAssertion(
-        EvaluationContext<TCollection> context,
+        AssertionContext<TCollection> context,
         Func<TItem, TMapped> mapper,
         Func<IAssertionSource<TMapped>, Assertion<TMapped>?> assertion,
         string mapperDescription,
-        string assertionDescription,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        string assertionDescription)
+        : base(context)
     {
         _mapper = mapper;
         _assertion = assertion;
@@ -622,9 +608,8 @@ public class CollectionIsInOrderAssertion<TCollection, TItem> : Assertion<TColle
     where TItem : IComparable<TItem>
 {
     public CollectionIsInOrderAssertion(
-        EvaluationContext<TCollection> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TCollection> context)
+        : base(context)
     {
     }
 
@@ -670,9 +655,8 @@ public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Assert
     where TItem : IComparable<TItem>
 {
     public CollectionIsInDescendingOrderAssertion(
-        EvaluationContext<TCollection> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TCollection> context)
+        : base(context)
     {
     }
 

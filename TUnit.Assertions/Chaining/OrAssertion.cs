@@ -1,4 +1,3 @@
-using System.Text;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Exceptions;
 
@@ -16,7 +15,7 @@ public class OrAssertion<TValue> : Assertion<TValue>
     public OrAssertion(
         Assertion<TValue> first,
         Assertion<TValue> _second)
-        : base(((IAssertionSource<TValue>)first).Context, ((IAssertionSource<TValue>)first).ExpressionBuilder)
+        : base(((IAssertionSource<TValue>)first).Context)
     {
         _first = first ?? throw new ArgumentNullException(nameof(first));
         this._second = _second ?? throw new ArgumentNullException(nameof(_second));

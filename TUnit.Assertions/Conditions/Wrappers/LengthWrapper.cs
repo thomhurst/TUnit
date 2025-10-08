@@ -10,17 +10,14 @@ namespace TUnit.Assertions.Conditions.Wrappers;
 /// </summary>
 public class LengthWrapper : IAssertionSource<string>
 {
-    private readonly EvaluationContext<string> _context;
-    private readonly StringBuilder _expressionBuilder;
+    private readonly AssertionContext<string> _context;
 
-    public LengthWrapper(EvaluationContext<string> context, StringBuilder expressionBuilder)
+    public LengthWrapper(AssertionContext<string> context)
     {
         _context = context;
-        _expressionBuilder = expressionBuilder;
     }
 
-    EvaluationContext<string> IAssertionSource<string>.Context => _context;
-    StringBuilder IAssertionSource<string>.ExpressionBuilder => _expressionBuilder;
+    AssertionContext<string> IAssertionSource<string>.Context => _context;
 
     /// <summary>
     /// Asserts that the string length is equal to the expected length.
@@ -29,7 +26,7 @@ public class LengthWrapper : IAssertionSource<string>
         int expectedLength,
         [CallerArgumentExpression(nameof(expectedLength))] string? expression = null)
     {
-        _expressionBuilder.Append($".EqualTo({expression})");
-        return new StringLengthAssertion(_context, expectedLength, _expressionBuilder);
+        _context.ExpressionBuilder.Append($".EqualTo({expression})");
+        return new StringLengthAssertion(_context, expectedLength);
     }
 }

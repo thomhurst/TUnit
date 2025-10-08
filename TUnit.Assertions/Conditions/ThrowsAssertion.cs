@@ -1,4 +1,3 @@
-using System.Text;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -20,9 +19,8 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
     private StringComparison _stringComparison = StringComparison.Ordinal;
 
     protected BaseThrowsAssertion(
-        EvaluationContext<object?> context,
-        StringBuilder expressionBuilder)
-        : base(MapToException(context), expressionBuilder)
+        AssertionContext<object?> context)
+        : base(new AssertionContext<TException>(MapToException(context.Evaluation), context.ExpressionBuilder))
     {
     }
 
@@ -61,7 +59,7 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
     public TSelf WithMessage(string expectedMessage)
     {
         _expectedExactMessage = expectedMessage;
-        ExpressionBuilder.Append($".WithMessage(\"{expectedMessage}\")");
+        Context.ExpressionBuilder.Append($".WithMessage(\"{expectedMessage}\")");
         return (TSelf)this;
     }
 
@@ -71,7 +69,7 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
     public TSelf WithMessageContaining(string expectedSubstring)
     {
         _expectedMessageSubstring = expectedSubstring;
-        ExpressionBuilder.Append($".WithMessageContaining(\"{expectedSubstring}\")");
+        Context.ExpressionBuilder.Append($".WithMessageContaining(\"{expectedSubstring}\")");
         return (TSelf)this;
     }
 
@@ -82,7 +80,7 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
     {
         _expectedMessageSubstring = expectedSubstring;
         _stringComparison = comparison;
-        ExpressionBuilder.Append($".WithMessageContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        Context.ExpressionBuilder.Append($".WithMessageContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
         return (TSelf)this;
     }
 
@@ -108,7 +106,7 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
     public TSelf WithMessageNotContaining(string notExpectedSubstring)
     {
         _notExpectedMessageSubstring = notExpectedSubstring;
-        ExpressionBuilder.Append($".WithMessageNotContaining(\"{notExpectedSubstring}\")");
+        Context.ExpressionBuilder.Append($".WithMessageNotContaining(\"{notExpectedSubstring}\")");
         return (TSelf)this;
     }
 
@@ -119,7 +117,7 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
     {
         _notExpectedMessageSubstring = notExpectedSubstring;
         _stringComparison = comparison;
-        ExpressionBuilder.Append($".WithMessageNotContaining(\"{notExpectedSubstring}\", StringComparison.{comparison})");
+        Context.ExpressionBuilder.Append($".WithMessageNotContaining(\"{notExpectedSubstring}\", StringComparison.{comparison})");
         return (TSelf)this;
     }
 
@@ -130,7 +128,7 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
     public TSelf WithMessageMatching(string pattern)
     {
         _expectedMessagePattern = pattern;
-        ExpressionBuilder.Append($".WithMessageMatching(\"{pattern}\")");
+        Context.ExpressionBuilder.Append($".WithMessageMatching(\"{pattern}\")");
         return (TSelf)this;
     }
 
@@ -141,7 +139,7 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
     public TSelf WithMessageMatching(StringMatcher matcher)
     {
         _expectedMessageMatcher = matcher;
-        ExpressionBuilder.Append($".WithMessageMatching(StringMatcher.{(matcher.IsRegex ? "AsRegex" : "AsWildcard")}(\"{matcher.Pattern}\"){(matcher.IgnoreCase ? ".IgnoringCase()" : "")})");
+        Context.ExpressionBuilder.Append($".WithMessageMatching(StringMatcher.{(matcher.IsRegex ? "AsRegex" : "AsWildcard")}(\"{matcher.Pattern}\"){(matcher.IgnoreCase ? ".IgnoringCase()" : "")})");
         return (TSelf)this;
     }
 
@@ -152,7 +150,7 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
     public TSelf WithParameterName(string expectedParameterName)
     {
         _expectedParameterName = expectedParameterName;
-        ExpressionBuilder.Append($".WithParameterName(\"{expectedParameterName}\")");
+        Context.ExpressionBuilder.Append($".WithParameterName(\"{expectedParameterName}\")");
         return (TSelf)this;
     }
 
@@ -239,9 +237,8 @@ public class ThrowsAssertion<TException> : BaseThrowsAssertion<TException, Throw
     where TException : Exception
 {
     public ThrowsAssertion(
-        EvaluationContext<object?> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<object?> context)
+        : base(context)
     {
     }
 
@@ -265,7 +262,7 @@ public class ThrowsAssertion<TException> : BaseThrowsAssertion<TException, Throw
     /// </summary>
     public ThrowsAssertion<Exception> WithInnerException()
     {
-        ExpressionBuilder.Append(".WithInnerException()");
+        Context.ExpressionBuilder.Append(".WithInnerException()");
 
         // Create a new evaluation context that evaluates to the inner exception
         var innerExceptionContext = new EvaluationContext<object?>(async () =>
@@ -274,7 +271,7 @@ public class ThrowsAssertion<TException> : BaseThrowsAssertion<TException, Throw
             return (value, exception?.InnerException);
         });
 
-        return new ThrowsAssertion<Exception>(innerExceptionContext, ExpressionBuilder);
+        return new ThrowsAssertion<Exception>(new AssertionContext<object?>(innerExceptionContext, Context.ExpressionBuilder));
     }
 }
 
@@ -285,9 +282,8 @@ public class ThrowsExactlyAssertion<TException> : BaseThrowsAssertion<TException
     where TException : Exception
 {
     public ThrowsExactlyAssertion(
-        EvaluationContext<object?> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<object?> context)
+        : base(context)
     {
     }
 
@@ -314,9 +310,8 @@ public class ThrowsExactlyAssertion<TException> : BaseThrowsAssertion<TException
 public class ThrowsNothingAssertion<TValue> : Assertion<TValue>
 {
     public ThrowsNothingAssertion(
-        EvaluationContext<TValue> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context)
+        : base(context)
     {
     }
 
@@ -345,11 +340,10 @@ public class HasMessageEqualToAssertion<TValue> : Assertion<TValue>
     private readonly StringComparison _comparison;
 
     public HasMessageEqualToAssertion(
-        EvaluationContext<TValue> context,
+        AssertionContext<TValue> context,
         string expectedMessage,
-        StringBuilder expressionBuilder,
         StringComparison comparison = StringComparison.Ordinal)
-        : base(context, expressionBuilder)
+        : base(context)
     {
         _expectedMessage = expectedMessage;
         _comparison = comparison;
@@ -392,11 +386,10 @@ public class HasMessageStartingWithAssertion<TValue> : Assertion<TValue>
     private readonly StringComparison _comparison;
 
     public HasMessageStartingWithAssertion(
-        EvaluationContext<TValue> context,
+        AssertionContext<TValue> context,
         string expectedPrefix,
-        StringBuilder expressionBuilder,
         StringComparison comparison = StringComparison.Ordinal)
-        : base(context, expressionBuilder)
+        : base(context)
     {
         _expectedPrefix = expectedPrefix;
         _comparison = comparison;

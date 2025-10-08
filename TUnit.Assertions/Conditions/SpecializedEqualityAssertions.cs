@@ -13,10 +13,9 @@ public class DateOnlyEqualsAssertion : Assertion<DateOnly>
     private int? _toleranceDays;
 
     public DateOnlyEqualsAssertion(
-        EvaluationContext<DateOnly> context,
-        DateOnly expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<DateOnly> context,
+        DateOnly expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -24,7 +23,7 @@ public class DateOnlyEqualsAssertion : Assertion<DateOnly>
     public DateOnlyEqualsAssertion WithinDays(int days)
     {
         _toleranceDays = days;
-        ExpressionBuilder.Append($".WithinDays({days})");
+        Context.ExpressionBuilder.Append($".WithinDays({days})");
         return this;
     }
 
@@ -68,10 +67,9 @@ public class TimeOnlyEqualsAssertion : Assertion<TimeOnly>
     private TimeSpan? _tolerance;
 
     public TimeOnlyEqualsAssertion(
-        EvaluationContext<TimeOnly> context,
-        TimeOnly expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TimeOnly> context,
+        TimeOnly expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -79,7 +77,7 @@ public class TimeOnlyEqualsAssertion : Assertion<TimeOnly>
     public TimeOnlyEqualsAssertion Within(TimeSpan tolerance)
     {
         _tolerance = tolerance;
-        ExpressionBuilder.Append($".Within({tolerance})");
+        Context.ExpressionBuilder.Append($".Within({tolerance})");
         return this;
     }
 
@@ -122,10 +120,9 @@ public class DoubleEqualsAssertion : Assertion<double>
     private double? _tolerance;
 
     public DoubleEqualsAssertion(
-        EvaluationContext<double> context,
-        double expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<double> context,
+        double expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -133,7 +130,7 @@ public class DoubleEqualsAssertion : Assertion<double>
     public DoubleEqualsAssertion Within(double tolerance)
     {
         _tolerance = tolerance;
-        ExpressionBuilder.Append($".Within({tolerance})");
+        Context.ExpressionBuilder.Append($".Within({tolerance})");
         return this;
     }
 
@@ -175,10 +172,9 @@ public class LongEqualsAssertion : Assertion<long>
     private long? _tolerance;
 
     public LongEqualsAssertion(
-        EvaluationContext<long> context,
-        long expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<long> context,
+        long expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -186,7 +182,7 @@ public class LongEqualsAssertion : Assertion<long>
     public LongEqualsAssertion Within(long tolerance)
     {
         _tolerance = tolerance;
-        ExpressionBuilder.Append($".Within({tolerance})");
+        Context.ExpressionBuilder.Append($".Within({tolerance})");
         return this;
     }
 
@@ -228,10 +224,9 @@ public class DateTimeOffsetEqualsAssertion : Assertion<DateTimeOffset>
     private TimeSpan? _tolerance;
 
     public DateTimeOffsetEqualsAssertion(
-        EvaluationContext<DateTimeOffset> context,
-        DateTimeOffset expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<DateTimeOffset> context,
+        DateTimeOffset expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -239,7 +234,7 @@ public class DateTimeOffsetEqualsAssertion : Assertion<DateTimeOffset>
     public DateTimeOffsetEqualsAssertion Within(TimeSpan tolerance)
     {
         _tolerance = tolerance;
-        ExpressionBuilder.Append($".Within({tolerance})");
+        Context.ExpressionBuilder.Append($".Within({tolerance})");
         return this;
     }
 

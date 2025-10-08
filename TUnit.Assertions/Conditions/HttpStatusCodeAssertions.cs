@@ -7,9 +7,8 @@ namespace TUnit.Assertions.Conditions;
 public class IsSuccessStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsSuccessStatusCodeAssertion(
-        EvaluationContext<HttpStatusCode> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<HttpStatusCode> context)
+        : base(context)
     {
     }
 
@@ -34,9 +33,8 @@ public class IsSuccessStatusCodeAssertion : Assertion<HttpStatusCode>
 public class IsNotSuccessStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsNotSuccessStatusCodeAssertion(
-        EvaluationContext<HttpStatusCode> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<HttpStatusCode> context)
+        : base(context)
     {
     }
 
@@ -61,9 +59,8 @@ public class IsNotSuccessStatusCodeAssertion : Assertion<HttpStatusCode>
 public class IsClientErrorStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsClientErrorStatusCodeAssertion(
-        EvaluationContext<HttpStatusCode> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<HttpStatusCode> context)
+        : base(context)
     {
     }
 
@@ -88,9 +85,8 @@ public class IsClientErrorStatusCodeAssertion : Assertion<HttpStatusCode>
 public class IsServerErrorStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsServerErrorStatusCodeAssertion(
-        EvaluationContext<HttpStatusCode> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<HttpStatusCode> context)
+        : base(context)
     {
     }
 
@@ -115,9 +111,8 @@ public class IsServerErrorStatusCodeAssertion : Assertion<HttpStatusCode>
 public class IsRedirectionStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsRedirectionStatusCodeAssertion(
-        EvaluationContext<HttpStatusCode> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<HttpStatusCode> context)
+        : base(context)
     {
     }
 
@@ -142,9 +137,8 @@ public class IsRedirectionStatusCodeAssertion : Assertion<HttpStatusCode>
 public class IsInformationalStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsInformationalStatusCodeAssertion(
-        EvaluationContext<HttpStatusCode> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<HttpStatusCode> context)
+        : base(context)
     {
     }
 
@@ -169,9 +163,8 @@ public class IsInformationalStatusCodeAssertion : Assertion<HttpStatusCode>
 public class IsErrorStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsErrorStatusCodeAssertion(
-        EvaluationContext<HttpStatusCode> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<HttpStatusCode> context)
+        : base(context)
     {
     }
 

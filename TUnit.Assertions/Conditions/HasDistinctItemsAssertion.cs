@@ -10,9 +10,8 @@ public class HasDistinctItemsAssertion<TValue> : Assertion<TValue>
     where TValue : System.Collections.IEnumerable
 {
     public HasDistinctItemsAssertion(
-        EvaluationContext<TValue> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context)
+        : base(context)
     {
     }
 

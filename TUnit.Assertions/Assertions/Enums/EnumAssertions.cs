@@ -12,10 +12,9 @@ public class HasFlagAssertion<TEnum> : Assertion<TEnum>
     private readonly TEnum _expectedFlag;
 
     public HasFlagAssertion(
-        EvaluationContext<TEnum> context,
-        TEnum expectedFlag,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TEnum> context,
+        TEnum expectedFlag)
+        : base(context)
     {
         _expectedFlag = expectedFlag;
     }
@@ -50,10 +49,9 @@ public class DoesNotHaveFlagAssertion<TEnum> : Assertion<TEnum>
     private readonly TEnum _unexpectedFlag;
 
     public DoesNotHaveFlagAssertion(
-        EvaluationContext<TEnum> context,
-        TEnum unexpectedFlag,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TEnum> context,
+        TEnum unexpectedFlag)
+        : base(context)
     {
         _unexpectedFlag = unexpectedFlag;
     }
@@ -85,9 +83,8 @@ public class IsDefinedAssertion<TEnum> : Assertion<TEnum>
     where TEnum : struct, Enum
 {
     public IsDefinedAssertion(
-        EvaluationContext<TEnum> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TEnum> context)
+        : base(context)
     {
     }
 
@@ -115,9 +112,8 @@ public class IsNotDefinedAssertion<TEnum> : Assertion<TEnum>
     where TEnum : struct, Enum
 {
     public IsNotDefinedAssertion(
-        EvaluationContext<TEnum> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TEnum> context)
+        : base(context)
     {
     }
 
@@ -147,10 +143,9 @@ public class HasSameNameAsAssertion<TEnum> : Assertion<TEnum>
     private readonly Enum _otherEnumValue;
 
     public HasSameNameAsAssertion(
-        EvaluationContext<TEnum> context,
-        Enum otherEnumValue,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TEnum> context,
+        Enum otherEnumValue)
+        : base(context)
     {
         _otherEnumValue = otherEnumValue;
     }
@@ -184,10 +179,9 @@ public class HasSameValueAsAssertion<TEnum> : Assertion<TEnum>
     private readonly Enum _otherEnumValue;
 
     public HasSameValueAsAssertion(
-        EvaluationContext<TEnum> context,
-        Enum otherEnumValue,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TEnum> context,
+        Enum otherEnumValue)
+        : base(context)
     {
         _otherEnumValue = otherEnumValue;
     }
@@ -222,10 +216,9 @@ public class DoesNotHaveSameNameAsAssertion<TEnum> : Assertion<TEnum>
     private readonly Enum _otherEnumValue;
 
     public DoesNotHaveSameNameAsAssertion(
-        EvaluationContext<TEnum> context,
-        Enum otherEnumValue,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TEnum> context,
+        Enum otherEnumValue)
+        : base(context)
     {
         _otherEnumValue = otherEnumValue;
     }
@@ -259,10 +252,9 @@ public class DoesNotHaveSameValueAsAssertion<TEnum> : Assertion<TEnum>
     private readonly Enum _otherEnumValue;
 
     public DoesNotHaveSameValueAsAssertion(
-        EvaluationContext<TEnum> context,
-        Enum otherEnumValue,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TEnum> context,
+        Enum otherEnumValue)
+        : base(context)
     {
         _otherEnumValue = otherEnumValue;
     }

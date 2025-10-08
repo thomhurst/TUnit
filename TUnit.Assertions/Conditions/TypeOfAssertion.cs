@@ -12,18 +12,15 @@ public class TypeOfAssertion<TFrom, TTo> : Assertion<TTo>
     private readonly Type _expectedType;
 
     public TypeOfAssertion(
-        EvaluationContext<TFrom> parentContext,
-        StringBuilder expressionBuilder)
-        : base(
-            parentContext.Map<TTo>(value =>
+        AssertionContext<TFrom> parentContext)
+        : base(parentContext.Map<TTo>(value =>
             {
                 if (value is TTo casted)
                     return casted;
 
                 throw new InvalidCastException(
                     $"Value is of type {value?.GetType().Name ?? "null"}, not {typeof(TTo).Name}");
-            }),
-            expressionBuilder)
+            }))
     {
         _expectedType = typeof(TTo);
     }
@@ -53,9 +50,8 @@ public class IsAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
     private readonly Type _targetType;
 
     public IsAssignableToAssertion(
-        EvaluationContext<TValue> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context)
+        : base(context)
     {
         _targetType = typeof(TTarget);
     }
@@ -96,9 +92,8 @@ public class IsNotAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
     private readonly Type _targetType;
 
     public IsNotAssignableToAssertion(
-        EvaluationContext<TValue> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context)
+        : base(context)
     {
         _targetType = typeof(TTarget);
     }
@@ -138,10 +133,9 @@ public class IsTypeOfRuntimeAssertion<TValue> : Assertion<TValue>
     private readonly Type _expectedType;
 
     public IsTypeOfRuntimeAssertion(
-        EvaluationContext<TValue> context,
-        Type expectedType,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        Type expectedType)
+        : base(context)
     {
         _expectedType = expectedType ?? throw new ArgumentNullException(nameof(expectedType));
     }

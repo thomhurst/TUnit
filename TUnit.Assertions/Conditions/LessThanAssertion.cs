@@ -12,10 +12,9 @@ public class LessThanAssertion<TValue> : Assertion<TValue>
     private readonly TValue _maximum;
 
     public LessThanAssertion(
-        EvaluationContext<TValue> context,
-        TValue maximum,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        TValue maximum)
+        : base(context)
     {
         _maximum = maximum;
     }
@@ -46,10 +45,9 @@ public class LessThanOrEqualAssertion<TValue> : Assertion<TValue>
     private readonly TValue _maximum;
 
     public LessThanOrEqualAssertion(
-        EvaluationContext<TValue> context,
-        TValue maximum,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        TValue maximum)
+        : base(context)
     {
         _maximum = maximum;
     }

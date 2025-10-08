@@ -1,4 +1,3 @@
-using System.Text;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Core;
@@ -12,19 +11,13 @@ namespace TUnit.Assertions.Core;
 public class OrContinuation<TValue> : IAssertionSource<TValue>
 {
     /// <summary>
-    /// The evaluation context shared by all assertions in the chain.
+    /// The assertion context shared by all assertions in the chain.
     /// </summary>
-    public EvaluationContext<TValue> Context { get; }
+    public AssertionContext<TValue> Context { get; }
 
-    /// <summary>
-    /// The expression builder being mutated as the chain grows.
-    /// </summary>
-    public StringBuilder ExpressionBuilder { get; }
-
-    internal OrContinuation(EvaluationContext<TValue> context, StringBuilder expressionBuilder)
+    internal OrContinuation(AssertionContext<TValue> context)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
-        ExpressionBuilder = expressionBuilder ?? throw new ArgumentNullException(nameof(expressionBuilder));
-        ExpressionBuilder.Append(".Or");
+        Context.ExpressionBuilder.Append(".Or");
     }
 }

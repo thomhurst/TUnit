@@ -7,9 +7,8 @@ namespace TUnit.Assertions.Conditions;
 public class HasInnerExceptionAssertion : Assertion<Exception>
 {
     public HasInnerExceptionAssertion(
-        EvaluationContext<Exception> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<Exception> context)
+        : base(context)
     {
     }
 
@@ -36,9 +35,8 @@ public class HasInnerExceptionAssertion : Assertion<Exception>
 public class HasNoInnerExceptionAssertion : Assertion<Exception>
 {
     public HasNoInnerExceptionAssertion(
-        EvaluationContext<Exception> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<Exception> context)
+        : base(context)
     {
     }
 
@@ -65,9 +63,8 @@ public class HasNoInnerExceptionAssertion : Assertion<Exception>
 public class HasStackTraceAssertion : Assertion<Exception>
 {
     public HasStackTraceAssertion(
-        EvaluationContext<Exception> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<Exception> context)
+        : base(context)
     {
     }
 
@@ -94,9 +91,8 @@ public class HasStackTraceAssertion : Assertion<Exception>
 public class HasNoDataAssertion : Assertion<Exception>
 {
     public HasNoDataAssertion(
-        EvaluationContext<Exception> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<Exception> context)
+        : base(context)
     {
     }
 
@@ -124,9 +120,8 @@ public class HasNoDataAssertion : Assertion<Exception>
 public class StringBuilderIsEmptyAssertion : Assertion<StringBuilder>
 {
     public StringBuilderIsEmptyAssertion(
-        EvaluationContext<StringBuilder> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<StringBuilder> context)
+        : base(context)
     {
     }
 
@@ -153,9 +148,8 @@ public class StringBuilderIsEmptyAssertion : Assertion<StringBuilder>
 public class StringBuilderIsNotEmptyAssertion : Assertion<StringBuilder>
 {
     public StringBuilderIsNotEmptyAssertion(
-        EvaluationContext<StringBuilder> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<StringBuilder> context)
+        : base(context)
     {
     }
 
@@ -182,9 +176,8 @@ public class StringBuilderIsNotEmptyAssertion : Assertion<StringBuilder>
 public class StringBuilderHasExcessCapacityAssertion : Assertion<StringBuilder>
 {
     public StringBuilderHasExcessCapacityAssertion(
-        EvaluationContext<StringBuilder> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<StringBuilder> context)
+        : base(context)
     {
     }
 
@@ -212,9 +205,8 @@ public class StringBuilderHasExcessCapacityAssertion : Assertion<StringBuilder>
 public class IsWeekendAssertion : Assertion<DayOfWeek>
 {
     public IsWeekendAssertion(
-        EvaluationContext<DayOfWeek> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<DayOfWeek> context)
+        : base(context)
     {
     }
 
@@ -238,9 +230,8 @@ public class IsWeekendAssertion : Assertion<DayOfWeek>
 public class IsWeekdayAssertion : Assertion<DayOfWeek>
 {
     public IsWeekdayAssertion(
-        EvaluationContext<DayOfWeek> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<DayOfWeek> context)
+        : base(context)
     {
     }
 
@@ -264,9 +255,8 @@ public class IsWeekdayAssertion : Assertion<DayOfWeek>
 public class IsMondayAssertion : Assertion<DayOfWeek>
 {
     public IsMondayAssertion(
-        EvaluationContext<DayOfWeek> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<DayOfWeek> context)
+        : base(context)
     {
     }
 
@@ -290,9 +280,8 @@ public class IsMondayAssertion : Assertion<DayOfWeek>
 public class IsFridayAssertion : Assertion<DayOfWeek>
 {
     public IsFridayAssertion(
-        EvaluationContext<DayOfWeek> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<DayOfWeek> context)
+        : base(context)
     {
     }
 
@@ -317,9 +306,8 @@ public class IsFridayAssertion : Assertion<DayOfWeek>
 public class IsAliveAssertion : Assertion<WeakReference>
 {
     public IsAliveAssertion(
-        EvaluationContext<WeakReference> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<WeakReference> context)
+        : base(context)
     {
     }
 
@@ -346,9 +334,8 @@ public class IsAliveAssertion : Assertion<WeakReference>
 public class IsDeadAssertion : Assertion<WeakReference>
 {
     public IsDeadAssertion(
-        EvaluationContext<WeakReference> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<WeakReference> context)
+        : base(context)
     {
     }
 

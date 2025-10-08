@@ -15,10 +15,9 @@ public class StringContainsAssertion : Assertion<string>
     private bool _ignoringWhitespace = false;
 
     public StringContainsAssertion(
-        EvaluationContext<string> context,
-        string expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context,
+        string expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -26,28 +25,28 @@ public class StringContainsAssertion : Assertion<string>
     public StringContainsAssertion IgnoringCase()
     {
         _comparison = StringComparison.OrdinalIgnoreCase;
-        ExpressionBuilder.Append(".IgnoringCase()");
+        Context.ExpressionBuilder.Append(".IgnoringCase()");
         return this;
     }
 
     public StringContainsAssertion WithComparison(StringComparison comparison)
     {
         _comparison = comparison;
-        ExpressionBuilder.Append($".WithComparison({comparison})");
+        Context.ExpressionBuilder.Append($".WithComparison({comparison})");
         return this;
     }
 
     public StringContainsAssertion WithTrimming()
     {
         _trimming = true;
-        ExpressionBuilder.Append(".WithTrimming()");
+        Context.ExpressionBuilder.Append(".WithTrimming()");
         return this;
     }
 
     public StringContainsAssertion IgnoringWhitespace()
     {
         _ignoringWhitespace = true;
-        ExpressionBuilder.Append(".IgnoringWhitespace()");
+        Context.ExpressionBuilder.Append(".IgnoringWhitespace()");
         return this;
     }
 
@@ -95,10 +94,9 @@ public class StringDoesNotContainAssertion : Assertion<string>
     private StringComparison _comparison = StringComparison.Ordinal;
 
     public StringDoesNotContainAssertion(
-        EvaluationContext<string> context,
-        string expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context,
+        string expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -106,14 +104,14 @@ public class StringDoesNotContainAssertion : Assertion<string>
     public StringDoesNotContainAssertion IgnoringCase()
     {
         _comparison = StringComparison.OrdinalIgnoreCase;
-        ExpressionBuilder.Append(".IgnoringCase()");
+        Context.ExpressionBuilder.Append(".IgnoringCase()");
         return this;
     }
 
     public StringDoesNotContainAssertion WithComparison(StringComparison comparison)
     {
         _comparison = comparison;
-        ExpressionBuilder.Append($".WithComparison({comparison})");
+        Context.ExpressionBuilder.Append($".WithComparison({comparison})");
         return this;
     }
 
@@ -146,10 +144,9 @@ public class StringStartsWithAssertion : Assertion<string>
     private StringComparison _comparison = StringComparison.Ordinal;
 
     public StringStartsWithAssertion(
-        EvaluationContext<string> context,
-        string expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context,
+        string expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -157,14 +154,14 @@ public class StringStartsWithAssertion : Assertion<string>
     public StringStartsWithAssertion IgnoringCase()
     {
         _comparison = StringComparison.OrdinalIgnoreCase;
-        ExpressionBuilder.Append(".IgnoringCase()");
+        Context.ExpressionBuilder.Append(".IgnoringCase()");
         return this;
     }
 
     public StringStartsWithAssertion WithComparison(StringComparison comparison)
     {
         _comparison = comparison;
-        ExpressionBuilder.Append($".WithComparison({comparison})");
+        Context.ExpressionBuilder.Append($".WithComparison({comparison})");
         return this;
     }
 
@@ -197,10 +194,9 @@ public class StringEndsWithAssertion : Assertion<string>
     private StringComparison _comparison = StringComparison.Ordinal;
 
     public StringEndsWithAssertion(
-        EvaluationContext<string> context,
-        string expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context,
+        string expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -208,14 +204,14 @@ public class StringEndsWithAssertion : Assertion<string>
     public StringEndsWithAssertion IgnoringCase()
     {
         _comparison = StringComparison.OrdinalIgnoreCase;
-        ExpressionBuilder.Append(".IgnoringCase()");
+        Context.ExpressionBuilder.Append(".IgnoringCase()");
         return this;
     }
 
     public StringEndsWithAssertion WithComparison(StringComparison comparison)
     {
         _comparison = comparison;
-        ExpressionBuilder.Append($".WithComparison({comparison})");
+        Context.ExpressionBuilder.Append($".WithComparison({comparison})");
         return this;
     }
 
@@ -245,9 +241,8 @@ public class StringEndsWithAssertion : Assertion<string>
 public class StringIsNotEmptyAssertion : Assertion<string>
 {
     public StringIsNotEmptyAssertion(
-        EvaluationContext<string> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context)
+        : base(context)
     {
     }
 
@@ -277,9 +272,8 @@ public class StringIsNotEmptyAssertion : Assertion<string>
 public class StringIsEmptyAssertion : Assertion<string>
 {
     public StringIsEmptyAssertion(
-        EvaluationContext<string> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context)
+        : base(context)
     {
     }
 
@@ -311,10 +305,9 @@ public class StringLengthAssertion : Assertion<string>
     private readonly int _expectedLength;
 
     public StringLengthAssertion(
-        EvaluationContext<string> context,
-        int expectedLength,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context,
+        int expectedLength)
+        : base(context)
     {
         _expectedLength = expectedLength;
     }
@@ -345,9 +338,8 @@ public class StringLengthAssertion : Assertion<string>
 public class StringIsNullOrWhitespaceAssertion : Assertion<string>
 {
     public StringIsNullOrWhitespaceAssertion(
-        EvaluationContext<string> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context)
+        : base(context)
     {
     }
 
@@ -377,10 +369,9 @@ public class StringMatchesAssertion : Assertion<string>
     private RegexOptions _options = RegexOptions.None;
 
     public StringMatchesAssertion(
-        EvaluationContext<string> context,
-        string pattern,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context,
+        string pattern)
+        : base(context)
     {
         _pattern = pattern;
     }
@@ -388,14 +379,14 @@ public class StringMatchesAssertion : Assertion<string>
     public StringMatchesAssertion IgnoringCase()
     {
         _options |= RegexOptions.IgnoreCase;
-        ExpressionBuilder.Append(".IgnoringCase()");
+        Context.ExpressionBuilder.Append(".IgnoringCase()");
         return this;
     }
 
     public StringMatchesAssertion WithOptions(RegexOptions options)
     {
         _options = options;
-        ExpressionBuilder.Append($".WithOptions({options})");
+        Context.ExpressionBuilder.Append($".WithOptions({options})");
         return this;
     }
 
@@ -428,10 +419,9 @@ public class StringDoesNotMatchAssertion : Assertion<string>
     private RegexOptions _options = RegexOptions.None;
 
     public StringDoesNotMatchAssertion(
-        EvaluationContext<string> context,
-        string pattern,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context,
+        string pattern)
+        : base(context)
     {
         _pattern = pattern;
     }
@@ -439,14 +429,14 @@ public class StringDoesNotMatchAssertion : Assertion<string>
     public StringDoesNotMatchAssertion IgnoringCase()
     {
         _options |= RegexOptions.IgnoreCase;
-        ExpressionBuilder.Append(".IgnoringCase()");
+        Context.ExpressionBuilder.Append(".IgnoringCase()");
         return this;
     }
 
     public StringDoesNotMatchAssertion WithOptions(RegexOptions options)
     {
         _options = options;
-        ExpressionBuilder.Append($".WithOptions({options})");
+        Context.ExpressionBuilder.Append($".WithOptions({options})");
         return this;
     }
 
@@ -476,9 +466,8 @@ public class StringDoesNotMatchAssertion : Assertion<string>
 public class StringIsNullOrEmptyAssertion : Assertion<string>
 {
     public StringIsNullOrEmptyAssertion(
-        EvaluationContext<string> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context)
+        : base(context)
     {
     }
 
@@ -505,9 +494,8 @@ public class StringIsNullOrEmptyAssertion : Assertion<string>
 public class StringIsNotNullOrEmptyAssertion : Assertion<string>
 {
     public StringIsNotNullOrEmptyAssertion(
-        EvaluationContext<string> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<string> context)
+        : base(context)
     {
     }
 

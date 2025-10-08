@@ -12,11 +12,10 @@ public class SatisfiesAssertion<TValue> : Assertion<TValue>
     private readonly string _predicateDescription;
 
     public SatisfiesAssertion(
-        EvaluationContext<TValue> context,
+        AssertionContext<TValue> context,
         Func<TValue?, bool> predicate,
-        string predicateDescription,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        string predicateDescription)
+        : base(context)
     {
         _predicate = predicate;
         _predicateDescription = predicateDescription;
@@ -49,10 +48,9 @@ public class IsEquatableOrEqualToAssertion<TValue> : Assertion<TValue>
     private IEqualityComparer<TValue>? _comparer;
 
     public IsEquatableOrEqualToAssertion(
-        EvaluationContext<TValue> context,
-        TValue expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        TValue expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -60,7 +58,7 @@ public class IsEquatableOrEqualToAssertion<TValue> : Assertion<TValue>
     public IsEquatableOrEqualToAssertion<TValue> Using(IEqualityComparer<TValue> comparer)
     {
         _comparer = comparer;
-        ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
+        Context.ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
         return this;
     }
 

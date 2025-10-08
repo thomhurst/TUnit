@@ -16,11 +16,10 @@ public class BetweenAssertion<TValue> : Assertion<TValue>
     private bool _maxInclusive = true;
 
     public BetweenAssertion(
-        EvaluationContext<TValue> context,
+        AssertionContext<TValue> context,
         TValue minimum,
-        TValue maximum,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        TValue maximum)
+        : base(context)
     {
         _minimum = minimum;
         _maximum = maximum;
@@ -33,7 +32,7 @@ public class BetweenAssertion<TValue> : Assertion<TValue>
     {
         _minInclusive = true;
         _maxInclusive = true;
-        ExpressionBuilder.Append(".Inclusive()");
+        Context.ExpressionBuilder.Append(".Inclusive()");
         return this;
     }
 
@@ -44,7 +43,7 @@ public class BetweenAssertion<TValue> : Assertion<TValue>
     {
         _minInclusive = false;
         _maxInclusive = false;
-        ExpressionBuilder.Append(".Exclusive()");
+        Context.ExpressionBuilder.Append(".Exclusive()");
         return this;
     }
 
@@ -55,7 +54,7 @@ public class BetweenAssertion<TValue> : Assertion<TValue>
     {
         _minInclusive = true;
         _maxInclusive = false;
-        ExpressionBuilder.Append(".InclusiveMinimum()");
+        Context.ExpressionBuilder.Append(".InclusiveMinimum()");
         return this;
     }
 
@@ -66,7 +65,7 @@ public class BetweenAssertion<TValue> : Assertion<TValue>
     {
         _minInclusive = false;
         _maxInclusive = true;
-        ExpressionBuilder.Append(".InclusiveMaximum()");
+        Context.ExpressionBuilder.Append(".InclusiveMaximum()");
         return this;
     }
 

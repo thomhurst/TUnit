@@ -7,9 +7,8 @@ namespace TUnit.Assertions.Conditions;
 public class DirectoryExistsAssertion : Assertion<DirectoryInfo>
 {
     public DirectoryExistsAssertion(
-        EvaluationContext<DirectoryInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<DirectoryInfo> context)
+        : base(context)
     {
     }
 
@@ -37,9 +36,8 @@ public class DirectoryExistsAssertion : Assertion<DirectoryInfo>
 public class DirectoryDoesNotExistAssertion : Assertion<DirectoryInfo>
 {
     public DirectoryDoesNotExistAssertion(
-        EvaluationContext<DirectoryInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<DirectoryInfo> context)
+        : base(context)
     {
     }
 
@@ -67,9 +65,8 @@ public class DirectoryDoesNotExistAssertion : Assertion<DirectoryInfo>
 public class DirectoryIsNotEmptyAssertion : Assertion<DirectoryInfo>
 {
     public DirectoryIsNotEmptyAssertion(
-        EvaluationContext<DirectoryInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<DirectoryInfo> context)
+        : base(context)
     {
     }
 
@@ -101,9 +98,8 @@ public class DirectoryIsNotEmptyAssertion : Assertion<DirectoryInfo>
 public class DirectoryHasFilesAssertion : Assertion<DirectoryInfo>
 {
     public DirectoryHasFilesAssertion(
-        EvaluationContext<DirectoryInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<DirectoryInfo> context)
+        : base(context)
     {
     }
 
@@ -135,9 +131,8 @@ public class DirectoryHasFilesAssertion : Assertion<DirectoryInfo>
 public class DirectoryHasNoSubdirectoriesAssertion : Assertion<DirectoryInfo>
 {
     public DirectoryHasNoSubdirectoriesAssertion(
-        EvaluationContext<DirectoryInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<DirectoryInfo> context)
+        : base(context)
     {
     }
 
@@ -170,9 +165,8 @@ public class DirectoryHasNoSubdirectoriesAssertion : Assertion<DirectoryInfo>
 public class FileExistsAssertion : Assertion<FileInfo>
 {
     public FileExistsAssertion(
-        EvaluationContext<FileInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<FileInfo> context)
+        : base(context)
     {
     }
 
@@ -200,9 +194,8 @@ public class FileExistsAssertion : Assertion<FileInfo>
 public class FileDoesNotExistAssertion : Assertion<FileInfo>
 {
     public FileDoesNotExistAssertion(
-        EvaluationContext<FileInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<FileInfo> context)
+        : base(context)
     {
     }
 
@@ -230,9 +223,8 @@ public class FileDoesNotExistAssertion : Assertion<FileInfo>
 public class FileIsNotEmptyAssertion : Assertion<FileInfo>
 {
     public FileIsNotEmptyAssertion(
-        EvaluationContext<FileInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<FileInfo> context)
+        : base(context)
     {
     }
 
@@ -263,9 +255,8 @@ public class FileIsNotEmptyAssertion : Assertion<FileInfo>
 public class FileIsNotReadOnlyAssertion : Assertion<FileInfo>
 {
     public FileIsNotReadOnlyAssertion(
-        EvaluationContext<FileInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<FileInfo> context)
+        : base(context)
     {
     }
 
@@ -296,9 +287,8 @@ public class FileIsNotReadOnlyAssertion : Assertion<FileInfo>
 public class FileIsNotHiddenAssertion : Assertion<FileInfo>
 {
     public FileIsNotHiddenAssertion(
-        EvaluationContext<FileInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<FileInfo> context)
+        : base(context)
     {
     }
 
@@ -329,9 +319,8 @@ public class FileIsNotHiddenAssertion : Assertion<FileInfo>
 public class FileIsNotSystemAssertion : Assertion<FileInfo>
 {
     public FileIsNotSystemAssertion(
-        EvaluationContext<FileInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<FileInfo> context)
+        : base(context)
     {
     }
 
@@ -362,9 +351,8 @@ public class FileIsNotSystemAssertion : Assertion<FileInfo>
 public class FileIsNotExecutableAssertion : Assertion<FileInfo>
 {
     public FileIsNotExecutableAssertion(
-        EvaluationContext<FileInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<FileInfo> context)
+        : base(context)
     {
     }
 

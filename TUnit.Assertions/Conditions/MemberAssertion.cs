@@ -14,9 +14,8 @@ public class MemberAssertion<TObject, TMember> : Assertion<TMember>
     private readonly string _memberPath;
 
     public MemberAssertion(
-        EvaluationContext<TObject> parentContext,
-        Expression<Func<TObject, TMember>> memberSelector,
-        StringBuilder expressionBuilder)
+        AssertionContext<TObject> parentContext,
+        Expression<Func<TObject, TMember>> memberSelector)
         : base(
             parentContext.Map<TMember>(obj =>
             {
@@ -27,13 +26,12 @@ public class MemberAssertion<TObject, TMember> : Assertion<TMember>
 
                 var compiled = memberSelector.Compile();
                 return compiled(obj);
-            }),
-            expressionBuilder)
+            }))
     {
         _memberSelector = memberSelector;
         _memberPath = GetMemberPath(memberSelector);
 
-        expressionBuilder.Append($".HasMember(x => x.{_memberPath})");
+        parentContext.ExpressionBuilder.Append($".HasMember(x => x.{_memberPath})");
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TMember> metadata)

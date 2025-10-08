@@ -14,10 +14,9 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
     private readonly HashSet<Type> _ignoredTypes = new();
 
     public NotStructuralEquivalencyAssertion(
-        EvaluationContext<TValue> context,
-        object? notExpected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        object? notExpected)
+        : base(context)
     {
         _notExpected = notExpected;
     }
@@ -28,7 +27,7 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
     public NotStructuralEquivalencyAssertion<TValue> WithPartialEquivalency()
     {
         _usePartialEquivalency = true;
-        ExpressionBuilder.Append(".WithPartialEquivalency()");
+        Context.ExpressionBuilder.Append(".WithPartialEquivalency()");
         return this;
     }
 
@@ -38,7 +37,7 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
     public NotStructuralEquivalencyAssertion<TValue> IgnoringMember(string memberPath)
     {
         _ignoredMembers.Add(memberPath);
-        ExpressionBuilder.Append($".IgnoringMember(\"{memberPath}\")");
+        Context.ExpressionBuilder.Append($".IgnoringMember(\"{memberPath}\")");
         return this;
     }
 
@@ -56,7 +55,7 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
     public NotStructuralEquivalencyAssertion<TValue> IgnoringType(Type type)
     {
         _ignoredTypes.Add(type);
-        ExpressionBuilder.Append($".IgnoringType<{type.Name}>()");
+        Context.ExpressionBuilder.Append($".IgnoringType<{type.Name}>()");
         return this;
     }
 
@@ -70,9 +69,8 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
 
         // Create a temporary StructuralEquivalencyAssertion to reuse the comparison logic
         var tempAssertion = new StructuralEquivalencyAssertion<TValue>(
-            Context,
-            _notExpected,
-            new StringBuilder());
+            new AssertionContext<TValue>(Context.Evaluation, new StringBuilder()),
+            _notExpected);
 
         if (_usePartialEquivalency)
             tempAssertion.WithPartialEquivalency();

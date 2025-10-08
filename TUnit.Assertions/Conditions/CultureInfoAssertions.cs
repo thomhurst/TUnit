@@ -7,9 +7,8 @@ namespace TUnit.Assertions.Conditions;
 public class IsInvariantCultureAssertion : Assertion<CultureInfo>
 {
     public IsInvariantCultureAssertion(
-        EvaluationContext<CultureInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<CultureInfo> context)
+        : base(context)
     {
     }
 
@@ -33,9 +32,8 @@ public class IsInvariantCultureAssertion : Assertion<CultureInfo>
 public class IsNotInvariantCultureAssertion : Assertion<CultureInfo>
 {
     public IsNotInvariantCultureAssertion(
-        EvaluationContext<CultureInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<CultureInfo> context)
+        : base(context)
     {
     }
 
@@ -59,9 +57,8 @@ public class IsNotInvariantCultureAssertion : Assertion<CultureInfo>
 public class IsNeutralCultureAssertion : Assertion<CultureInfo>
 {
     public IsNeutralCultureAssertion(
-        EvaluationContext<CultureInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<CultureInfo> context)
+        : base(context)
     {
     }
 
@@ -85,9 +82,8 @@ public class IsNeutralCultureAssertion : Assertion<CultureInfo>
 public class IsNotNeutralCultureAssertion : Assertion<CultureInfo>
 {
     public IsNotNeutralCultureAssertion(
-        EvaluationContext<CultureInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<CultureInfo> context)
+        : base(context)
     {
     }
 
@@ -111,9 +107,8 @@ public class IsNotNeutralCultureAssertion : Assertion<CultureInfo>
 public class IsEnglishCultureAssertion : Assertion<CultureInfo>
 {
     public IsEnglishCultureAssertion(
-        EvaluationContext<CultureInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<CultureInfo> context)
+        : base(context)
     {
     }
 
@@ -137,9 +132,8 @@ public class IsEnglishCultureAssertion : Assertion<CultureInfo>
 public class IsNotEnglishCultureAssertion : Assertion<CultureInfo>
 {
     public IsNotEnglishCultureAssertion(
-        EvaluationContext<CultureInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<CultureInfo> context)
+        : base(context)
     {
     }
 
@@ -163,9 +157,8 @@ public class IsNotEnglishCultureAssertion : Assertion<CultureInfo>
 public class IsRightToLeftCultureAssertion : Assertion<CultureInfo>
 {
     public IsRightToLeftCultureAssertion(
-        EvaluationContext<CultureInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<CultureInfo> context)
+        : base(context)
     {
     }
 
@@ -189,9 +182,8 @@ public class IsRightToLeftCultureAssertion : Assertion<CultureInfo>
 public class IsLeftToRightCultureAssertion : Assertion<CultureInfo>
 {
     public IsLeftToRightCultureAssertion(
-        EvaluationContext<CultureInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<CultureInfo> context)
+        : base(context)
     {
     }
 
@@ -215,9 +207,8 @@ public class IsLeftToRightCultureAssertion : Assertion<CultureInfo>
 public class IsReadOnlyCultureAssertion : Assertion<CultureInfo>
 {
     public IsReadOnlyCultureAssertion(
-        EvaluationContext<CultureInfo> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<CultureInfo> context)
+        : base(context)
     {
     }
 

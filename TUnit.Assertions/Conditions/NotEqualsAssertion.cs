@@ -15,11 +15,10 @@ public class NotEqualsAssertion<TValue> : Assertion<TValue>
     private readonly HashSet<Type> _ignoredTypes = new();
 
     public NotEqualsAssertion(
-        EvaluationContext<TValue> context,
+        AssertionContext<TValue> context,
         TValue notExpected,
-        StringBuilder expressionBuilder,
         IEqualityComparer<TValue>? comparer = null)
-        : base(context, expressionBuilder)
+        : base(context)
     {
         _notExpected = notExpected;
         _comparer = comparer;
@@ -32,7 +31,7 @@ public class NotEqualsAssertion<TValue> : Assertion<TValue>
     public NotEqualsAssertion<TValue> IgnoringType<TIgnore>()
     {
         _ignoredTypes.Add(typeof(TIgnore));
-        ExpressionBuilder.Append($".IgnoringType<{typeof(TIgnore).Name}>()");
+        Context.ExpressionBuilder.Append($".IgnoringType<{typeof(TIgnore).Name}>()");
         return this;
     }
 
@@ -43,7 +42,7 @@ public class NotEqualsAssertion<TValue> : Assertion<TValue>
     public NotEqualsAssertion<TValue> IgnoringType(Type type)
     {
         _ignoredTypes.Add(type);
-        ExpressionBuilder.Append($".IgnoringType(typeof({type.Name}))");
+        Context.ExpressionBuilder.Append($".IgnoringType(typeof({type.Name}))");
         return this;
     }
 

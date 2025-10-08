@@ -18,10 +18,9 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
     private readonly HashSet<Type> _ignoredTypes = new();
 
     public StructuralEquivalencyAssertion(
-        EvaluationContext<TValue> context,
-        object? expected,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context,
+        object? expected)
+        : base(context)
     {
         _expected = expected;
     }
@@ -32,7 +31,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
     public StructuralEquivalencyAssertion<TValue> WithPartialEquivalency()
     {
         _usePartialEquivalency = true;
-        ExpressionBuilder.Append(".WithPartialEquivalency()");
+        Context.ExpressionBuilder.Append(".WithPartialEquivalency()");
         return this;
     }
 
@@ -42,7 +41,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
     public StructuralEquivalencyAssertion<TValue> IgnoringMember(string memberPath)
     {
         _ignoredMembers.Add(memberPath);
-        ExpressionBuilder.Append($".IgnoringMember(\"{memberPath}\")");
+        Context.ExpressionBuilder.Append($".IgnoringMember(\"{memberPath}\")");
         return this;
     }
 
@@ -60,7 +59,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
     public StructuralEquivalencyAssertion<TValue> IgnoringType(Type type)
     {
         _ignoredTypes.Add(type);
-        ExpressionBuilder.Append($".IgnoringType<{type.Name}>()");
+        Context.ExpressionBuilder.Append($".IgnoringType<{type.Name}>()");
         return this;
     }
 

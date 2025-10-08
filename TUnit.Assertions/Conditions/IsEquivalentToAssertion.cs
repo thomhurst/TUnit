@@ -17,11 +17,10 @@ public class IsEquivalentToAssertion<TCollection, TItem> : Assertion<TCollection
     private IEqualityComparer<TItem>? _comparer;
 
     public IsEquivalentToAssertion(
-        EvaluationContext<TCollection> context,
+        AssertionContext<TCollection> context,
         IEnumerable<TItem> expected,
-        StringBuilder expressionBuilder,
         CollectionOrdering ordering = CollectionOrdering.Any)
-        : base(context, expressionBuilder)
+        : base(context)
     {
         _expected = expected ?? throw new ArgumentNullException(nameof(expected));
         _ordering = ordering;
@@ -30,7 +29,7 @@ public class IsEquivalentToAssertion<TCollection, TItem> : Assertion<TCollection
     public IsEquivalentToAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
     {
         _comparer = comparer;
-        ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
+        Context.ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
         return this;
     }
 

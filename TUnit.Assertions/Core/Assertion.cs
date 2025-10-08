@@ -7,7 +7,7 @@ namespace TUnit.Assertions.Core;
 /// <summary>
 /// Base class for all assertions in the new architecture.
 /// Each assertion represents a single check that can be chained with others.
-/// All assertions in a chain share the same EvaluationContext.
+/// All assertions in a chain share the same AssertionContext.
 /// </summary>
 ///
 /// Note: This class does NOT implement IAssertionSource to enforce type-safe chaining.
@@ -18,16 +18,10 @@ namespace TUnit.Assertions.Core;
 public abstract class Assertion<TValue>
 {
     /// <summary>
-    /// The evaluation context shared by all assertions in this chain.
-    /// Handles lazy evaluation and caching of the source value.
+    /// The assertion context shared by all assertions in this chain.
+    /// Contains the evaluation context (value, timing, exceptions) and expression builder (error messages).
     /// </summary>
-    protected readonly EvaluationContext<TValue> Context;
-
-    /// <summary>
-    /// Expression builder that captures the assertion chain for error messages.
-    /// Shared and mutated as assertions are chained together.
-    /// </summary>
-    protected readonly StringBuilder ExpressionBuilder;
+    protected readonly AssertionContext<TValue> Context;
 
     /// <summary>
     /// Custom message added via .Because() to explain why the assertion should pass.
@@ -35,10 +29,9 @@ public abstract class Assertion<TValue>
     private string? _becauseMessage;
 
 
-    protected Assertion(EvaluationContext<TValue> context, StringBuilder? expressionBuilder = null)
+    protected Assertion(AssertionContext<TValue> context)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
-        ExpressionBuilder = expressionBuilder ?? new StringBuilder();
     }
 
     /// <summary>
@@ -67,7 +60,7 @@ public abstract class Assertion<TValue>
     public Assertion<TValue> Because(string message)
     {
         _becauseMessage = message;
-        ExpressionBuilder.Append($".Because(\"{message}\")");
+        Context.ExpressionBuilder.Append($".Because(\"{message}\")");
         return this;
     }
 
@@ -114,13 +107,13 @@ public abstract class Assertion<TValue>
     /// Creates an And continuation for chaining additional assertions.
     /// All assertions in an And chain must pass.
     /// </summary>
-    public AndContinuation<TValue> And => new(Context, ExpressionBuilder);
+    public AndContinuation<TValue> And => new(Context);
 
     /// <summary>
     /// Creates an Or continuation for chaining alternative assertions.
     /// At least one assertion in an Or chain must pass.
     /// </summary>
-    public OrContinuation<TValue> Or => new(Context, ExpressionBuilder);
+    public OrContinuation<TValue> Or => new(Context);
 
     /// <summary>
     /// Creates an AssertionException with a formatted error message.
@@ -131,7 +124,7 @@ public abstract class Assertion<TValue>
             Expected {GetExpectation()}
             but {result.Message}
 
-            at {ExpressionBuilder}
+            at {Context.ExpressionBuilder}
             """;
 
         if (_becauseMessage != null)
@@ -150,7 +143,7 @@ public abstract class Assertion<TValue>
     {
         if (!string.IsNullOrEmpty(expression))
         {
-            ExpressionBuilder.Append(expression);
+            Context.ExpressionBuilder.Append(expression);
         }
     }
 }

@@ -16,8 +16,10 @@ public class CompletesWithinActionAssertion : Assertion<object?>
     public CompletesWithinActionAssertion(
         Action action,
         TimeSpan timeout,
-        StringBuilder expressionBuilder)
-        : base(new EvaluationContext<object?>(() => Task.FromResult<(object?, Exception?)>((null, null))), expressionBuilder)
+        AssertionContext<object?>? context = null)
+        : base(context ?? new AssertionContext<object?>(
+            new EvaluationContext<object?>(() => Task.FromResult<(object?, Exception?)>((null, null))),
+            new StringBuilder()))
     {
         _action = action ?? throw new ArgumentNullException(nameof(action));
         _timeout = timeout;
@@ -69,8 +71,10 @@ public class CompletesWithinAsyncAssertion : Assertion<object?>
     public CompletesWithinAsyncAssertion(
         Func<Task> asyncAction,
         TimeSpan timeout,
-        StringBuilder expressionBuilder)
-        : base(new EvaluationContext<object?>(() => Task.FromResult<(object?, Exception?)>((null, null))), expressionBuilder)
+        AssertionContext<object?>? context = null)
+        : base(context ?? new AssertionContext<object?>(
+            new EvaluationContext<object?>(() => Task.FromResult<(object?, Exception?)>((null, null))),
+            new StringBuilder()))
     {
         _asyncAction = asyncAction ?? throw new ArgumentNullException(nameof(asyncAction));
         _timeout = timeout;

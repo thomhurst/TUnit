@@ -9,9 +9,8 @@ namespace TUnit.Assertions.Conditions;
 public class NullAssertion<TValue> : Assertion<TValue>
 {
     public NullAssertion(
-        EvaluationContext<TValue> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context)
+        : base(context)
     {
     }
 
@@ -35,9 +34,8 @@ public class NullAssertion<TValue> : Assertion<TValue>
 public class NotNullAssertion<TValue> : Assertion<TValue>
 {
     public NotNullAssertion(
-        EvaluationContext<TValue> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context)
+        : base(context)
     {
     }
 
@@ -62,9 +60,8 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
 public class IsDefaultAssertion<TValue> : Assertion<TValue>
 {
     public IsDefaultAssertion(
-        EvaluationContext<TValue> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context)
+        : base(context)
     {
     }
 
@@ -91,9 +88,8 @@ public class IsDefaultAssertion<TValue> : Assertion<TValue>
 public class IsNotDefaultAssertion<TValue> : Assertion<TValue>
 {
     public IsNotDefaultAssertion(
-        EvaluationContext<TValue> context,
-        StringBuilder expressionBuilder)
-        : base(context, expressionBuilder)
+        AssertionContext<TValue> context)
+        : base(context)
     {
     }
 

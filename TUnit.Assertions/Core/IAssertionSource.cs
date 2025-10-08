@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace TUnit.Assertions.Core;
 
 /// <summary>
@@ -10,12 +8,8 @@ namespace TUnit.Assertions.Core;
 public interface IAssertionSource<TValue>
 {
     /// <summary>
-    /// The evaluation context shared by all assertions in this chain.
+    /// The assertion context shared by all assertions in this chain.
+    /// Contains the evaluation context (value, timing, exceptions) and expression builder (error messages).
     /// </summary>
-    EvaluationContext<TValue> Context { get; }
-
-    /// <summary>
-    /// The expression builder for constructing error messages.
-    /// </summary>
-    StringBuilder ExpressionBuilder { get; }
+    AssertionContext<TValue> Context { get; }
 }

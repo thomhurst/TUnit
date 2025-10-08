@@ -200,34 +200,32 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     /// </summary>
     public TValue Expected => _expected;
 
-    /// <summary>
-    /// Gets the evaluation context for this assertion.
-    /// Used by extension methods to create derived assertions.
-    /// </summary>
-    public new EvaluationContext<TValue> Context => base.Context;
-
-    /// <summary>
-    /// Gets the expression builder for this assertion.
-    /// Used by extension methods to continue building assertion expressions.
-    /// </summary>
-    public new StringBuilder ExpressionBuilder => base.ExpressionBuilder;
-
     public EqualsAssertion(
-        EvaluationContext<TValue> context,
+        AssertionContext<TValue> context,
         TValue expected,
-        StringBuilder expressionBuilder,
         IEqualityComparer<TValue>? comparer = null)
-        : base(context, expressionBuilder)
+        : base(context)
     {
         _expected = expected;
         _comparer = comparer;
     }
 
     /// <summary>
-    /// Sets a tolerance for numeric/temporal comparisons.
-    /// Returns this assertion for fluent chaining.
+    /// Specifies a tolerance for numeric/temporal comparisons.
+    /// Supports TimeSpan (for DateTime/DateTimeOffset/TimeOnly), and numeric types (int, long, double, decimal).
     /// </summary>
-    public EqualsAssertion<TValue> WithTolerance(object tolerance)
+    public EqualsAssertion<TValue> Within(object tolerance)
+    {
+        _tolerance = tolerance;
+        Context.ExpressionBuilder.Append($".Within({tolerance})");
+        return this;
+    }
+
+    /// <summary>
+    /// Sets a tolerance for numeric/temporal comparisons.
+    /// Internal method used by Within(). Most users should call Within() instead.
+    /// </summary>
+    internal EqualsAssertion<TValue> WithTolerance(object tolerance)
     {
         _tolerance = tolerance;
         return this;
@@ -240,7 +238,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     public EqualsAssertion<TValue> IgnoringType<TIgnore>()
     {
         _ignoredTypes.Add(typeof(TIgnore));
-        ExpressionBuilder.Append($".IgnoringType<{typeof(TIgnore).Name}>()");
+        Context.ExpressionBuilder.Append($".IgnoringType<{typeof(TIgnore).Name}>()");
         return this;
     }
 
@@ -251,7 +249,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     public EqualsAssertion<TValue> IgnoringType(Type type)
     {
         _ignoredTypes.Add(type);
-        ExpressionBuilder.Append($".IgnoringType(typeof({type.Name}))");
+        Context.ExpressionBuilder.Append($".IgnoringType(typeof({type.Name}))");
         return this;
     }
 
