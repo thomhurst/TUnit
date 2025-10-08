@@ -32,7 +32,7 @@ public class CodeWriter : ICodeWriter
             _builder.AppendLine("#pragma warning disable");
             // Surface AOT incompatibility errors
             _builder.AppendLine("#pragma warning enable IL2072");
-            _builder.AppendLine("#pragma warning enable IL3035");
+            _builder.AppendLine("#pragma warning enable IL3050");
             _builder.AppendLine();
             _isNewLine = true;
         }
