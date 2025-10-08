@@ -31,9 +31,15 @@ namespace
         public static .<?> ThrowsAsync( exceptionType, <.> action) { }
         public static .<TException> ThrowsAsync<TException>(<.> action)
             where TException :  { }
+        public static .<TException> ThrowsAsync<TException>(string parameterName, <.> action)
+            where TException :  { }
         public static TException ThrowsExactly<TException>( action)
             where TException :  { }
+        public static TException ThrowsExactly<TException>(string parameterName,  action)
+            where TException :  { }
         public static .<TException> ThrowsExactlyAsync<TException>(<.> action)
+            where TException :  { }
+        public static .<TException> ThrowsExactlyAsync<TException>(string parameterName, <.> action)
             where TException :  { }
     }
     public static class Fail
