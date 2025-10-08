@@ -33,11 +33,17 @@ public class ObjectBaseEqualsMethodAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if ((invocationOperation.Instance?.Type as INamedTypeSymbol)
-            ?.AllInterfaces
+        var instanceType = invocationOperation.Instance?.Type as INamedTypeSymbol;
+
+        // Check if the instance implements IAssertionSource or inherits from Assertion<T>
+        var isAssertionSource = instanceType?.AllInterfaces
             .Select(x => x.GloballyQualifiedNonGeneric())
-            .Any(x => x is "global::TUnit.Assertions.AssertConditions.Interfaces.IValueSource"
-            or "global::TUnit.Assertions.AssertConditions.Interfaces.IDelegateSource") != true)
+            .Any(x => x is "global::TUnit.Assertions.Core.IAssertionSource") == true;
+
+        var isAssertion = instanceType?.BaseType != null &&
+            IsAssertionType(instanceType.BaseType);
+
+        if (!isAssertionSource && !isAssertion)
         {
             return;
         }
@@ -45,5 +51,22 @@ public class ObjectBaseEqualsMethodAnalyzer : ConcurrentDiagnosticAnalyzer
         context.ReportDiagnostic(
             Diagnostic.Create(Rules.ObjectEqualsBaseMethod, invocationOperation.Syntax.GetLocation())
         );
+    }
+
+    private static bool IsAssertionType(INamedTypeSymbol? type)
+    {
+        if (type == null)
+        {
+            return false;
+        }
+
+        // Check if this type is Assertion<T>
+        if (type.GloballyQualifiedNonGeneric() is "global::TUnit.Assertions.Core.Assertion")
+        {
+            return true;
+        }
+
+        // Check base type recursively
+        return IsAssertionType(type.BaseType);
     }
 }

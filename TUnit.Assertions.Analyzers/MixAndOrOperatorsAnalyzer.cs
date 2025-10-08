@@ -28,11 +28,14 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        // Check if the awaited type implements IAssertionSource<T> (new API)
-        var isAssertion = awaitOperation.Operation.Type?.AllInterfaces.Any(x =>
+        // Check if the awaited type implements IAssertionSource<T> or inherits from Assertion<T>
+        var awaitedType = awaitOperation.Operation.Type;
+        var isAssertionSource = awaitedType?.AllInterfaces.Any(x =>
             x.GloballyQualifiedNonGeneric() is "global::TUnit.Assertions.Core.IAssertionSource") == true;
+        var isAssertion = awaitedType?.BaseType != null &&
+            IsAssertionType(awaitedType.BaseType);
 
-        if (!isAssertion)
+        if (!isAssertionSource && !isAssertion)
         {
             return;
         }
@@ -44,5 +47,22 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
         {
             context.ReportDiagnostic(Diagnostic.Create(Rules.MixAndOrConditionsAssertion, awaitOperation?.Syntax.GetLocation()));
         }
+    }
+
+    private static bool IsAssertionType(INamedTypeSymbol? type)
+    {
+        if (type == null)
+        {
+            return false;
+        }
+
+        // Check if this type is Assertion<T>
+        if (type.GloballyQualifiedNonGeneric() is "global::TUnit.Assertions.Core.Assertion")
+        {
+            return true;
+        }
+
+        // Check base type recursively
+        return IsAssertionType(type.BaseType);
     }
 }
