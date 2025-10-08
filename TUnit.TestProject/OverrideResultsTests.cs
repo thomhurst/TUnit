@@ -15,10 +15,8 @@ public class OverrideResultsTests
     [After(Class)]
     public static async Task AfterClass(ClassHookContext classHookContext)
     {
-        await Assert.That(classHookContext.Tests)
-            .HasSingleItem()
-            .And
-            .ContainsOnly(t => t.Result?.State == TestState.Passed);
+        await Assert.That(classHookContext.Tests).HasSingleItem();
+        await Assert.That(classHookContext.Tests).ContainsOnly<IReadOnlyList<TestContext>, TestContext>(t => t.Result?.State == TestState.Passed);
     }
 
     public class OverridePassAttribute : Attribute, ITestEndEventReceiver

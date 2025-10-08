@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
@@ -15,6 +16,183 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     private readonly IEqualityComparer<TValue>? _comparer;
     private object? _tolerance;
     private readonly HashSet<Type> _ignoredTypes = new();
+
+    // Delegate for tolerance comparison strategies
+    private delegate bool ToleranceComparer<T>(T actual, T expected, object tolerance, out string? errorMessage);
+
+    // Static dictionary mapping types to their tolerance comparison strategies
+    private static readonly Dictionary<Type, Delegate> ToleranceComparers = new()
+    {
+        [typeof(TimeSpan)] = new ToleranceComparer<TimeSpan>(CompareTimeSpan),
+        [typeof(DateTime)] = new ToleranceComparer<DateTime>(CompareDateTime),
+        [typeof(DateTimeOffset)] = new ToleranceComparer<DateTimeOffset>(CompareDateTimeOffset),
+#if NET6_0_OR_GREATER
+        [typeof(TimeOnly)] = new ToleranceComparer<TimeOnly>(CompareTimeOnly),
+#endif
+        [typeof(int)] = new ToleranceComparer<int>(CompareInt),
+        [typeof(long)] = new ToleranceComparer<long>(CompareLong),
+        [typeof(double)] = new ToleranceComparer<double>(CompareDouble),
+        [typeof(decimal)] = new ToleranceComparer<decimal>(CompareDecimal)
+    };
+
+    // Cache reflection results for better performance in deep comparison
+    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache = new();
+    private static readonly ConcurrentDictionary<Type, FieldInfo[]> FieldCache = new();
+
+    // Tolerance comparison strategies
+    private static bool CompareTimeSpan(TimeSpan actual, TimeSpan expected, object tolerance, out string? errorMessage)
+    {
+        if (tolerance is not TimeSpan timeSpanTolerance)
+        {
+            errorMessage = null;
+            return false;
+        }
+
+        var difference = actual > expected ? actual - expected : expected - actual;
+        if (difference <= timeSpanTolerance)
+        {
+            errorMessage = null;
+            return true;
+        }
+
+        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {timeSpanTolerance}";
+        return false;
+    }
+
+    private static bool CompareDateTime(DateTime actual, DateTime expected, object tolerance, out string? errorMessage)
+    {
+        if (tolerance is not TimeSpan dateTimeTolerance)
+        {
+            errorMessage = null;
+            return false;
+        }
+
+        var difference = actual > expected ? actual - expected : expected - actual;
+        if (difference <= dateTimeTolerance)
+        {
+            errorMessage = null;
+            return true;
+        }
+
+        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {dateTimeTolerance}";
+        return false;
+    }
+
+    private static bool CompareDateTimeOffset(DateTimeOffset actual, DateTimeOffset expected, object tolerance, out string? errorMessage)
+    {
+        if (tolerance is not TimeSpan dateTimeOffsetTolerance)
+        {
+            errorMessage = null;
+            return false;
+        }
+
+        var difference = actual > expected ? actual - expected : expected - actual;
+        if (difference <= dateTimeOffsetTolerance)
+        {
+            errorMessage = null;
+            return true;
+        }
+
+        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {dateTimeOffsetTolerance}";
+        return false;
+    }
+
+#if NET6_0_OR_GREATER
+    private static bool CompareTimeOnly(TimeOnly actual, TimeOnly expected, object tolerance, out string? errorMessage)
+    {
+        if (tolerance is not TimeSpan timeOnlyTolerance)
+        {
+            errorMessage = null;
+            return false;
+        }
+
+        var difference = actual > expected ? actual.ToTimeSpan() - expected.ToTimeSpan() : expected.ToTimeSpan() - actual.ToTimeSpan();
+        if (difference <= timeOnlyTolerance)
+        {
+            errorMessage = null;
+            return true;
+        }
+
+        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {timeOnlyTolerance}";
+        return false;
+    }
+#endif
+
+    private static bool CompareInt(int actual, int expected, object tolerance, out string? errorMessage)
+    {
+        if (tolerance is not int intTolerance)
+        {
+            errorMessage = null;
+            return false;
+        }
+
+        var difference = actual > expected ? actual - expected : expected - actual;
+        if (difference <= intTolerance)
+        {
+            errorMessage = null;
+            return true;
+        }
+
+        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {intTolerance}";
+        return false;
+    }
+
+    private static bool CompareLong(long actual, long expected, object tolerance, out string? errorMessage)
+    {
+        if (tolerance is not long longTolerance)
+        {
+            errorMessage = null;
+            return false;
+        }
+
+        var difference = actual > expected ? actual - expected : expected - actual;
+        if (difference <= longTolerance)
+        {
+            errorMessage = null;
+            return true;
+        }
+
+        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {longTolerance}";
+        return false;
+    }
+
+    private static bool CompareDouble(double actual, double expected, object tolerance, out string? errorMessage)
+    {
+        if (tolerance is not double doubleTolerance)
+        {
+            errorMessage = null;
+            return false;
+        }
+
+        var difference = actual > expected ? actual - expected : expected - actual;
+        if (difference <= doubleTolerance)
+        {
+            errorMessage = null;
+            return true;
+        }
+
+        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {doubleTolerance}";
+        return false;
+    }
+
+    private static bool CompareDecimal(decimal actual, decimal expected, object tolerance, out string? errorMessage)
+    {
+        if (tolerance is not decimal decimalTolerance)
+        {
+            errorMessage = null;
+            return false;
+        }
+
+        var difference = actual > expected ? actual - expected : expected - actual;
+        if (difference <= decimalTolerance)
+        {
+            errorMessage = null;
+            return true;
+        }
+
+        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {decimalTolerance}";
+        return false;
+    }
 
     /// <summary>
     /// Gets the expected value for this equality assertion.
@@ -77,103 +255,25 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         return this;
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Tolerance comparison requires dynamic invocation of known comparer delegates")]
     protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
     {
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
-        // Handle tolerance-based comparisons for specific types
-        if (_tolerance != null && value != null)
+        // Handle tolerance-based comparisons using strategy pattern
+        if (_tolerance != null && value != null && ToleranceComparers.TryGetValue(typeof(TValue), out var toleranceComparer))
         {
-            // TimeSpan
-            if (typeof(TValue) == typeof(TimeSpan) && _tolerance is TimeSpan timeSpanTolerance)
-            {
-                var actual = (TimeSpan)(object)value;
-                var expected = (TimeSpan)(object)_expected!;
-                var difference = actual > expected ? actual - expected : expected - actual;
-                if (difference <= timeSpanTolerance)
-                    return Task.FromResult(AssertionResult.Passed);
-                return Task.FromResult(AssertionResult.Failed($"found {value}, difference {difference} exceeds tolerance {timeSpanTolerance}"));
-            }
+            // Invoke the appropriate comparer using dynamic invocation
+            var compareMethod = toleranceComparer.GetType().GetMethod("Invoke");
+            var parameters = new object?[] { value, _expected, _tolerance, null };
+            var result = (bool)compareMethod!.Invoke(toleranceComparer, parameters)!;
+            var errorMessage = (string?)parameters[3];
 
-            // DateTime
-            if (typeof(TValue) == typeof(DateTime) && _tolerance is TimeSpan dateTimeTolerance)
-            {
-                var actual = (DateTime)(object)value;
-                var expected = (DateTime)(object)_expected!;
-                var difference = actual > expected ? actual - expected : expected - actual;
-                if (difference <= dateTimeTolerance)
-                    return Task.FromResult(AssertionResult.Passed);
-                return Task.FromResult(AssertionResult.Failed($"found {value}, difference {difference} exceeds tolerance {dateTimeTolerance}"));
-            }
-
-            // DateTimeOffset
-            if (typeof(TValue) == typeof(DateTimeOffset) && _tolerance is TimeSpan dateTimeOffsetTolerance)
-            {
-                var actual = (DateTimeOffset)(object)value;
-                var expected = (DateTimeOffset)(object)_expected!;
-                var difference = actual > expected ? actual - expected : expected - actual;
-                if (difference <= dateTimeOffsetTolerance)
-                    return Task.FromResult(AssertionResult.Passed);
-                return Task.FromResult(AssertionResult.Failed($"found {value}, difference {difference} exceeds tolerance {dateTimeOffsetTolerance}"));
-            }
-
-#if NET6_0_OR_GREATER
-            // TimeOnly
-            if (typeof(TValue) == typeof(TimeOnly) && _tolerance is TimeSpan timeOnlyTolerance)
-            {
-                var actual = (TimeOnly)(object)value;
-                var expected = (TimeOnly)(object)_expected!;
-                var difference = actual > expected ? actual.ToTimeSpan() - expected.ToTimeSpan() : expected.ToTimeSpan() - actual.ToTimeSpan();
-                if (difference <= timeOnlyTolerance)
-                    return Task.FromResult(AssertionResult.Passed);
-                return Task.FromResult(AssertionResult.Failed($"found {value}, difference {difference} exceeds tolerance {timeOnlyTolerance}"));
-            }
-#endif
-
-            // int
-            if (typeof(TValue) == typeof(int) && _tolerance is int intTolerance)
-            {
-                var actual = (int)(object)value;
-                var expected = (int)(object)_expected!;
-                var difference = actual > expected ? actual - expected : expected - actual;
-                if (difference <= intTolerance)
-                    return Task.FromResult(AssertionResult.Passed);
-                return Task.FromResult(AssertionResult.Failed($"found {value}, difference {difference} exceeds tolerance {intTolerance}"));
-            }
-
-            // long
-            if (typeof(TValue) == typeof(long) && _tolerance is long longTolerance)
-            {
-                var actual = (long)(object)value;
-                var expected = (long)(object)_expected!;
-                var difference = actual > expected ? actual - expected : expected - actual;
-                if (difference <= longTolerance)
-                    return Task.FromResult(AssertionResult.Passed);
-                return Task.FromResult(AssertionResult.Failed($"found {value}, difference {difference} exceeds tolerance {longTolerance}"));
-            }
-
-            // double
-            if (typeof(TValue) == typeof(double) && _tolerance is double doubleTolerance)
-            {
-                var actual = (double)(object)value;
-                var expected = (double)(object)_expected!;
-                var difference = actual > expected ? actual - expected : expected - actual;
-                if (difference <= doubleTolerance)
-                    return Task.FromResult(AssertionResult.Passed);
-                return Task.FromResult(AssertionResult.Failed($"found {value}, difference {difference} exceeds tolerance {doubleTolerance}"));
-            }
-
-            // decimal
-            if (typeof(TValue) == typeof(decimal) && _tolerance is decimal decimalTolerance)
-            {
-                var actual = (decimal)(object)value;
-                var expected = (decimal)(object)_expected!;
-                var difference = actual > expected ? actual - expected : expected - actual;
-                if (difference <= decimalTolerance)
-                    return Task.FromResult(AssertionResult.Passed);
-                return Task.FromResult(AssertionResult.Failed($"found {value}, difference {difference} exceeds tolerance {decimalTolerance}"));
-            }
+            if (result)
+                return Task.FromResult(AssertionResult.Passed);
+            if (errorMessage != null)
+                return Task.FromResult(AssertionResult.Failed(errorMessage));
         }
 
         // Deep comparison with ignored types
@@ -196,6 +296,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         return Task.FromResult(AssertionResult.Failed($"found {value}"));
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Deep comparison requires reflection access to all public properties and fields of runtime types")]
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Deep comparison requires reflection access to all public properties and fields of runtime types")]
     private static (bool IsSuccess, string? Message) DeepEquals(object? actual, object? expected, HashSet<Type> ignoredTypes, HashSet<object> visited)
     {
@@ -221,8 +322,8 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             return (true, null);
         }
 
-        // Get all public properties
-        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        // Get all public properties (cached for performance)
+        var properties = PropertyCache.GetOrAdd(type, t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance));
         foreach (var prop in properties)
         {
             // Skip if property type should be ignored
@@ -248,8 +349,8 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
             }
         }
 
-        // Get all public fields
-        var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
+        // Get all public fields (cached for performance)
+        var fields = FieldCache.GetOrAdd(type, t => t.GetFields(BindingFlags.Public | BindingFlags.Instance));
         foreach (var field in fields)
         {
             // Skip if field type should be ignored

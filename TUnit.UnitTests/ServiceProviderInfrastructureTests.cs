@@ -94,7 +94,7 @@ public class ServiceProviderInfrastructureTests
         // Assert
         await Assert.That(resolvedConcrete).IsEqualTo(concreteService);
         await Assert.That(resolvedInterface).IsEqualTo(concreteService);
-        await Assert.That(resolvedConcrete).IsEqualTo(resolvedInterface);
+        await Assert.That((object?)resolvedConcrete).IsEqualTo(resolvedInterface);
     }
 
     [Test]
