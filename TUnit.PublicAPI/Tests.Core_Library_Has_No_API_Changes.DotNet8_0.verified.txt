@@ -1956,9 +1956,18 @@ namespace .Helpers
         "have matching annotations.")]
     public static class CastHelper
     {
-        public static object? Cast([.(..None | ..PublicMethods | ..NonPublicMethods)]  type, object? value) { }
-        public static T? Cast<[.(..None | ..PublicMethods | ..NonPublicMethods)]  T>(object? value) { }
-        public static .MethodInfo? GetConversionMethod([.(..None | ..PublicMethods | ..NonPublicMethods)]  baseType, [.(..None | ..PublicMethods | ..NonPublicMethods)]  targetType) { }
+        [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.")]
+        [.("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttr" +
+            "ibute\' in call to target method. The return value of the source method does not " +
+            "have matching annotations.")]
+        public static object? Cast([.(..PublicMethods)]  type, object? value) { }
+        [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.")]
+        [.("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttr" +
+            "ibute\' in call to target method. The return value of the source method does not " +
+            "have matching annotations.")]
+        public static T? Cast<[.(..PublicMethods)]  T>(object? value) { }
     }
     public static class ClassConstructorHelper
     {
