@@ -27,13 +27,15 @@ public static class CastHelper
 
         var underlyingType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
 
-        if (value.GetType().IsAssignableTo(underlyingType))
+        var sourceType = value.GetType();
+
+        if (sourceType.IsAssignableTo(underlyingType))
         {
             return (T) value;
         }
 
         // Try AOT converter registry first
-        if (AotConverterRegistry.TryConvert(value.GetType(), underlyingType, value, out var converted))
+        if (AotConverterRegistry.TryConvert(sourceType, underlyingType, value, out var converted))
         {
             return (T?) converted;
         }
@@ -52,7 +54,7 @@ public static class CastHelper
 
         if (value is not string
             && value is IEnumerable enumerable
-            && !value.GetType().IsArray  // Don't unwrap arrays
+            && !sourceType.IsArray  // Don't unwrap arrays
             && !typeof(IEnumerable).IsAssignableFrom(typeof(T)))
         {
             value = enumerable.Cast<object>().ElementAtOrDefault(0);
@@ -61,71 +63,6 @@ public static class CastHelper
         if (underlyingType.IsEnum)
         {
             return (T?) Enum.ToObject(underlyingType, value!);
-        }
-
-        // Special handling for array types - check this before IConvertible
-        if (underlyingType.IsArray)
-        {
-            var targetElementType = underlyingType.GetElementType()!;
-
-            // Handle null -> empty array
-            if (value is null)
-            {
-                ThrowOnAot(value, underlyingType);
-                return (T?)(object)Array.CreateInstance(targetElementType, 0);
-            }
-
-            // Handle single value -> single element array
-            if (!value.GetType().IsArray)
-            {
-                if (value is IConvertible)
-                {
-                    ThrowOnAot(value, underlyingType);
-
-                    try
-                    {
-                        var convertedValue = Convert.ChangeType(value, targetElementType);
-                        var array = Array.CreateInstance(targetElementType, 1);
-                        array.SetValue(convertedValue, 0);
-                        return (T?)(object)array;
-                    }
-                    catch
-                    {
-                        // If direct conversion fails, continue with other approaches
-                    }
-                }
-            }
-            // Handle array -> array with element type conversion
-            else if (value is Array sourceArray)
-            {
-                var sourceElementType = value.GetType().GetElementType()!;
-
-                // If element types match, return as-is
-                if (sourceElementType == targetElementType)
-                {
-                    return (T?)value;
-                }
-
-                // Otherwise, convert each element
-                try
-                {
-                    ThrowOnAot(value, underlyingType);
-                    var targetArray = Array.CreateInstance(targetElementType, sourceArray.Length);
-                    for (var i = 0; i < sourceArray.Length; i++)
-                    {
-                        var sourceElement = sourceArray.GetValue(i);
-                        var convertedElement = sourceElement is IConvertible
-                            ? Convert.ChangeType(sourceElement, targetElementType)
-                            : sourceElement;
-                        targetArray.SetValue(convertedElement, i);
-                    }
-                    return (T?)(object)targetArray;
-                }
-                catch
-                {
-                    // If conversion fails, continue with other approaches
-                }
-            }
         }
 
         var conversionMethod = GetConversionMethod(value!.GetType(), underlyingType);
@@ -138,7 +75,7 @@ public static class CastHelper
         if (conversionMethod is null)
         {
             // Check if we can do unboxing directly for value types
-            if (underlyingType.IsValueType && value.GetType() == typeof(object))
+            if (underlyingType.IsValueType && sourceType == typeof(object))
             {
                 try
                 {
@@ -153,7 +90,7 @@ public static class CastHelper
             // Log diagnostic information for debugging single file mode issues
             if (Environment.GetEnvironmentVariable("TUNIT_DIAGNOSTIC_CAST") == "true")
             {
-                Console.WriteLine($"[CastHelper] No conversion found from {value.GetType().FullName} to {underlyingType.FullName}");
+                Console.WriteLine($"[CastHelper] No conversion found from {sourceType.FullName} to {underlyingType.FullName}");
             }
 
             return (T?) value;
@@ -193,13 +130,15 @@ public static class CastHelper
 
         var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 
-        if (value.GetType().IsAssignableTo(underlyingType))
+        var sourceType = value.GetType();
+
+        if (sourceType.IsAssignableTo(underlyingType))
         {
             return value;
         }
 
         // Try AOT converter registry first
-        if (AotConverterRegistry.TryConvert(value.GetType(), underlyingType, value, out var converted))
+        if (AotConverterRegistry.TryConvert(sourceType, underlyingType, value, out var converted))
         {
             return converted;
         }
@@ -211,107 +150,15 @@ public static class CastHelper
 
         if (value is not string
             && value is IEnumerable enumerable
-            && !value.GetType().IsArray  // Don't unwrap arrays
+            && !sourceType.IsArray  // Don't unwrap arrays
             && !typeof(IEnumerable).IsAssignableFrom(type))
         {
-            // Special handling for CustomAttributeTypedArgument collections in .NET Framework
-            var typeName = value.GetType().FullName;
-            if (typeName != null && typeName.Contains("CustomAttributeTypedArgument"))
-            {
-                // For ReadOnlyCollection<CustomAttributeTypedArgument>, we need to extract the actual values
-                var firstItem = enumerable.Cast<object>().FirstOrDefault();
-                if (firstItem != null)
-                {
-                    ThrowOnAot(value, underlyingType);
-                    // Use reflection to get the Value property
-                    var valueProperty = GetValuePropertySafe(firstItem.GetType());
-                    if (valueProperty != null)
-                    {
-                        value = valueProperty.GetValue(firstItem);
-                    }
-                    else
-                    {
-                        value = firstItem;
-                    }
-                }
-                else
-                {
-                    value = null;
-                }
-            }
-            else
-            {
-                value = enumerable.Cast<object>().ElementAtOrDefault(0);
-            }
+            value = enumerable.Cast<object>().ElementAtOrDefault(0);
         }
 
         if (underlyingType.IsEnum)
         {
             return Enum.ToObject(underlyingType, value!);
-        }
-
-        // Special handling for array types - check this before IConvertible
-        if (underlyingType.IsArray)
-        {
-            var targetElementType = underlyingType.GetElementType()!;
-
-            // Handle null -> empty array
-            if (value is null)
-            {
-                ThrowOnAot(value, underlyingType);
-                return Array.CreateInstance(targetElementType, 0);
-            }
-
-            // Handle single value -> single element array
-            if (!value.GetType().IsArray)
-            {
-                if (value is IConvertible)
-                {
-                    ThrowOnAot(value, underlyingType);
-                    try
-                    {
-                        var convertedValue = Convert.ChangeType(value, targetElementType);
-                        var array = Array.CreateInstance(targetElementType, 1);
-                        array.SetValue(convertedValue, 0);
-                        return array;
-                    }
-                    catch
-                    {
-                        // If direct conversion fails, continue with other approaches
-                    }
-                }
-            }
-            // Handle array -> array with element type conversion
-            else if (value is Array sourceArray)
-            {
-                var sourceElementType = value.GetType().GetElementType()!;
-
-                // If element types match, return as-is
-                if (sourceElementType == targetElementType)
-                {
-                    return value;
-                }
-
-                // Otherwise, convert each element
-                try
-                {
-                    ThrowOnAot(value, underlyingType);
-                    var targetArray = Array.CreateInstance(targetElementType, sourceArray.Length);
-                    for (var i = 0; i < sourceArray.Length; i++)
-                    {
-                        var sourceElement = sourceArray.GetValue(i);
-                        var convertedElement = sourceElement is IConvertible
-                            ? Convert.ChangeType(sourceElement, targetElementType)
-                            : sourceElement;
-                        targetArray.SetValue(convertedElement, i);
-                    }
-                    return targetArray;
-                }
-                catch
-                {
-                    // If conversion fails, continue with other approaches
-                }
-            }
         }
 
         var conversionMethod = GetConversionMethod(value!.GetType(), underlyingType);
@@ -324,7 +171,7 @@ public static class CastHelper
         if (conversionMethod is null)
         {
             // Check if we can do unboxing directly for value types
-            if (underlyingType.IsValueType && value.GetType() == typeof(object))
+            if (underlyingType.IsValueType && sourceType == typeof(object))
             {
                 try
                 {
@@ -372,31 +219,9 @@ public static class CastHelper
                 mi.Name == "op_Explicit" && mi.ReturnType == targetType && HasCorrectInputType(baseType, mi));
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void ThrowOnAot(object? value, Type? targetType)
-    {
-#if NET
-        if (!RuntimeFeature.IsDynamicCodeSupported)
-        {
-            throw new InvalidOperationException(
-                $"Cannot cast {value?.GetType()?.Name ?? "null"} to {targetType?.Name} in AOT mode. " +
-                "Consider using AotConverterRegistry.Register() for custom type conversions.");
-        }
-#endif
-    }
-
     private static bool HasCorrectInputType(Type baseType, MethodInfo mi)
     {
         var pi = mi.GetParameters().FirstOrDefault();
         return pi != null && pi.ParameterType == baseType;
     }
-
-    /// <summary>
-    /// Gets the "Value" property from a type in an AOT-safer manner.
-    /// </summary>
-    private static PropertyInfo? GetValuePropertySafe([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
-    {
-        return type.GetProperty("Value");
-    }
-
 }
