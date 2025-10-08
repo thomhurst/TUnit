@@ -1,4 +1,6 @@
 using TUnit.Core;
+using TUnit.Core.Logging;
+using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 using TUnit.Engine.Scheduling;
 
@@ -14,6 +16,13 @@ internal interface ITestGroupingService
 
 internal sealed class TestGroupingService : ITestGroupingService
 {
+    private readonly TUnitFrameworkLogger _logger;
+
+    public TestGroupingService(TUnitFrameworkLogger logger)
+    {
+        _logger = logger;
+    }
+
     private struct TestSortKey
     {
         public int ExecutionPriority { get; init; }
@@ -22,7 +31,7 @@ internal sealed class TestGroupingService : ITestGroupingService
         public NotInParallelConstraint? NotInParallelConstraint { get; init; }
     }
     
-    public ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<AbstractExecutableTest> tests)
+    public async ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<AbstractExecutableTest> tests)
     {
         var testsWithKeys = new List<(AbstractExecutableTest Test, TestSortKey Key)>();
         foreach (var test in tests)
@@ -78,24 +87,34 @@ internal sealed class TestGroupingService : ITestGroupingService
             }
             var notInParallel = sortKey.NotInParallelConstraint;
 
+            // Log parallel limiter if present
+            var parallelLimiterInfo = test.Context.ParallelLimiter != null
+                ? $" [ParallelLimiter: {test.Context.ParallelLimiter.GetType().Name} (limit: {test.Context.ParallelLimiter.Limit})]"
+                : "";
+
             if (parallelGroup != null && notInParallel != null)
             {
                 // Test has both ParallelGroup and NotInParallel constraints
+                await _logger.LogDebugAsync($"Test '{test.TestId}': → ConstrainedParallelGroup '{parallelGroup.Group}' + NotInParallel{parallelLimiterInfo}").ConfigureAwait(false);
                 ProcessCombinedConstraints(test, sortKey.ClassFullName, parallelGroup, notInParallel, constrainedParallelGroups);
             }
             else if (parallelGroup != null)
             {
                 // Only ParallelGroup constraint
+                await _logger.LogDebugAsync($"Test '{test.TestId}': → ParallelGroup '{parallelGroup.Group}'{parallelLimiterInfo}").ConfigureAwait(false);
                 ProcessParallelGroupConstraint(test, parallelGroup, parallelGroups);
             }
             else if (notInParallel != null)
             {
                 // Only NotInParallel constraint
+                var keys = notInParallel.NotInParallelConstraintKeys.Count > 0 ? $" (keys: {string.Join(", ", notInParallel.NotInParallelConstraintKeys)})" : "";
+                await _logger.LogDebugAsync($"Test '{test.TestId}': → NotInParallel{keys}{parallelLimiterInfo}").ConfigureAwait(false);
                 ProcessNotInParallelConstraint(test, sortKey.ClassFullName, notInParallel, notInParallelList, keyedNotInParallelList);
             }
             else
             {
                 // No constraints - can run in parallel
+                await _logger.LogDebugAsync($"Test '{test.TestId}': → Parallel (no constraints){parallelLimiterInfo}").ConfigureAwait(false);
                 parallelTests.Add(test);
             }
         }
@@ -177,7 +196,16 @@ internal sealed class TestGroupingService : ITestGroupingService
             ConstrainedParallelGroups = finalConstrainedGroups
         };
 
-        return new ValueTask<GroupedTests>(result);
+        // Log summary of test categorization
+        await _logger.LogDebugAsync("═══ Test Grouping Summary ═══").ConfigureAwait(false);
+        await _logger.LogDebugAsync($"  Parallel (no constraints): {parallelTests.Count} tests").ConfigureAwait(false);
+        await _logger.LogDebugAsync($"  ParallelGroups: {parallelGroups.Count} groups").ConfigureAwait(false);
+        await _logger.LogDebugAsync($"  ConstrainedParallelGroups: {finalConstrainedGroups.Count} groups").ConfigureAwait(false);
+        await _logger.LogDebugAsync($"  NotInParallel (global): {sortedNotInParallel.Length} tests").ConfigureAwait(false);
+        await _logger.LogDebugAsync($"  KeyedNotInParallel: {keyedArrays.Length} tests").ConfigureAwait(false);
+        await _logger.LogDebugAsync("════════════════════════════").ConfigureAwait(false);
+
+        return result;
     }
 
     private static void ProcessNotInParallelConstraint(
