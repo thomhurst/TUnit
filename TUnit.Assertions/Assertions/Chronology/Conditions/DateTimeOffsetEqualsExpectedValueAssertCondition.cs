@@ -4,7 +4,7 @@ public class DateTimeOffsetEqualsExpectedValueAssertCondition(DateTimeOffset exp
 {
     private TimeSpan? _tolerance;
 
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
     {
         if (_tolerance == null || _tolerance == TimeSpan.Zero)
         {

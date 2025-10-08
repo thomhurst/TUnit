@@ -19,20 +19,13 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         var symbol = node.GetSymbolInfo(semanticModel);
 
         // Special handling for double/float special constants (NaN, PositiveInfinity, NegativeInfinity)
-        if (symbol is IFieldSymbol fieldSymbol && fieldSymbol.IsConst)
+        if (symbol is IFieldSymbol { IsConst: true, ContainingType.SpecialType: SpecialType.System_Double or SpecialType.System_Single, HasConstantValue: true } fieldSymbol)
+            // Get the constant value and use the helper to create the appropriate syntax
         {
-            var containingType = fieldSymbol.ContainingType;
-            if (containingType?.SpecialType is SpecialType.System_Double or SpecialType.System_Single)
+            var specialSyntax = SpecialFloatingPointValuesHelper.TryCreateSpecialFloatingPointSyntax(fieldSymbol.ConstantValue);
+            if (specialSyntax != null)
             {
-                // Get the constant value and use the helper to create the appropriate syntax
-                if (fieldSymbol.HasConstantValue)
-                {
-                    var specialSyntax = SpecialFloatingPointValuesHelper.TryCreateSpecialFloatingPointSyntax(fieldSymbol.ConstantValue);
-                    if (specialSyntax != null)
-                    {
-                        return specialSyntax;
-                    }
-                }
+                return specialSyntax;
             }
         }
 

@@ -25,6 +25,9 @@ internal sealed class HookCollectionService : IHookCollectionService
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task ProcessHookRegistrationAsync(HookMethod hookMethod, CancellationToken cancellationToken = default)
     {
         // Only process each hook once
@@ -45,6 +48,9 @@ internal sealed class HookCollectionService : IHookCollectionService
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeTestHooksAsync(Type testClassType)
     {
         if (_beforeTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
@@ -57,6 +63,9 @@ internal sealed class HookCollectionService : IHookCollectionService
         return hooks;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildBeforeTestHooksAsync(Type type)
         {
             var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)> hooks)>();
@@ -106,12 +115,15 @@ internal sealed class HookCollectionService : IHookCollectionService
             foreach (var (_, typeHooks) in hooksByType)
             {
                 // Within each type level, sort by Order then by RegistrationIndex
-                finalHooks.AddRange(typeHooks.OrderBy(h => h.order).ThenBy(h => h.registrationIndex).Select(h => h.hook));
+                finalHooks.AddRange(typeHooks.OrderBy(static h => h.order).ThenBy(static h => h.registrationIndex).Select(static h => h.hook));
             }
 
             return finalHooks;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectAfterTestHooksAsync(Type testClassType)
     {
         if (_afterTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
@@ -124,6 +136,9 @@ internal sealed class HookCollectionService : IHookCollectionService
         return hooks;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildAfterTestHooksAsync(Type type)
         {
             var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)> hooks)>();
@@ -172,12 +187,15 @@ internal sealed class HookCollectionService : IHookCollectionService
             foreach (var (_, typeHooks) in hooksByType)
             {
                 // Within each type level, sort by Order then by RegistrationIndex
-                finalHooks.AddRange(typeHooks.OrderBy(h => h.order).ThenBy(h => h.registrationIndex).Select(h => h.hook));
+                finalHooks.AddRange(typeHooks.OrderBy(static h => h.order).ThenBy(static h => h.registrationIndex).Select(static h => h.hook));
             }
 
             return finalHooks;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeEveryTestHooksAsync(Type testClassType)
     {
         if (_beforeEveryTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
@@ -190,6 +208,9 @@ internal sealed class HookCollectionService : IHookCollectionService
         return hooks;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildBeforeEveryTestHooksAsync(Type type)
         {
             var allHooks = new List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)>();
@@ -202,12 +223,15 @@ internal sealed class HookCollectionService : IHookCollectionService
             }
 
             return allHooks
-                .OrderBy(h => h.order)
-                .ThenBy(h => h.registrationIndex)
-                .Select(h => h.hook)
+                .OrderBy(static h => h.order)
+                .ThenBy(static h => h.registrationIndex)
+                .Select(static h => h.hook)
                 .ToList();
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectAfterEveryTestHooksAsync(Type testClassType)
     {
         if (_afterEveryTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
@@ -220,6 +244,9 @@ internal sealed class HookCollectionService : IHookCollectionService
         return hooks;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildAfterEveryTestHooksAsync(Type type)
         {
             var allHooks = new List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)>();
@@ -232,9 +259,9 @@ internal sealed class HookCollectionService : IHookCollectionService
             }
 
             return allHooks
-                .OrderBy(h => h.order)
-                .ThenBy(h => h.registrationIndex)
-                .Select(h => h.hook)
+                .OrderBy(static h => h.order)
+                .ThenBy(static h => h.registrationIndex)
+                .Select(static h => h.hook)
                 .ToList();
     }
 
@@ -289,7 +316,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             foreach (var (_, typeHooks) in hooksByType)
             {
                 // Within each type level, sort by Order then by RegistrationIndex
-                finalHooks.AddRange(typeHooks.OrderBy(h => h.order).ThenBy(h => h.registrationIndex).Select(h => h.hook));
+                finalHooks.AddRange(typeHooks.OrderBy(static h => h.order).ThenBy(static h => h.registrationIndex).Select(static h => h.hook));
             }
 
             return finalHooks;
@@ -348,7 +375,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             foreach (var (_, typeHooks) in hooksByType)
             {
                 // Within each type level, sort by Order then by RegistrationIndex
-                finalHooks.AddRange(typeHooks.OrderBy(h => h.order).ThenBy(h => h.registrationIndex).Select(h => h.hook));
+                finalHooks.AddRange(typeHooks.OrderBy(static h => h.order).ThenBy(static h => h.registrationIndex).Select(static h => h.hook));
             }
 
             return finalHooks;
@@ -551,6 +578,9 @@ internal sealed class HookCollectionService : IHookCollectionService
         return new ValueTask<IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>>(hooks);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task<Func<TestContext, CancellationToken, Task>> CreateInstanceHookDelegateAsync(InstanceHookMethod hook)
     {
         // Process hook registration event receivers
@@ -569,6 +599,9 @@ internal sealed class HookCollectionService : IHookCollectionService
         };
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task<Func<TestContext, CancellationToken, Task>> CreateStaticHookDelegateAsync(StaticHookMethod<TestContext> hook)
     {
         // Process hook registration event receivers

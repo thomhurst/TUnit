@@ -4,7 +4,7 @@ namespace TUnit.Assertions.AssertConditions.Throws;
 
 public class ThrowsOfTypeAssertCondition(Type type) : DelegateAssertCondition<object?, Exception>
 {
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
         => $"to throw {type.Name.PrependAOrAn()}";
 
     protected override ValueTask<AssertionResult> GetResult(
@@ -21,7 +21,7 @@ public class ThrowsOfTypeAssertCondition(Type type) : DelegateAssertCondition<ob
 public class ThrowsOfTypeAssertCondition<TActual, TExpectedException> : DelegateAssertCondition<TActual, TExpectedException>
     where TExpectedException : Exception
 {
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
         => $"to throw {typeof(TExpectedException).Name.PrependAOrAn()}";
 
     protected override ValueTask<AssertionResult> GetResult(

@@ -5,9 +5,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Models;
 
 namespace TUnit.Core.SourceGenerator.Generators;
@@ -33,11 +35,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 transform: static (ctx, _) => GetInheritsTestsClassMetadata(ctx))
             .Where(static m => m is not null);
 
-        context.RegisterSourceOutput(testMethodsProvider.Combine(context.CompilationProvider),
-            static (context, tuple) => GenerateTestMethodSource(context, tuple.Right, tuple.Left));
+        context.RegisterSourceOutput(testMethodsProvider,
+            static (context, testMethod) => GenerateTestMethodSource(context, testMethod));
 
-        context.RegisterSourceOutput(inheritsTestsClassesProvider.Combine(context.CompilationProvider),
-            static (context, tuple) => GenerateInheritedTestSources(context, tuple.Right, tuple.Left));
+        context.RegisterSourceOutput(inheritsTestsClassesProvider,
+            static (context, classInfo) => GenerateInheritedTestSources(context, classInfo));
     }
 
     private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context)
@@ -57,7 +59,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return new InheritsTestsClassMetadata
         {
             TypeSymbol = classSymbol,
-            ClassSyntax = classSyntax
+            ClassSyntax = classSyntax,
+            Context = context
         };
     }
 
@@ -100,7 +103,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         };
     }
 
-    private static void GenerateInheritedTestSources(SourceProductionContext context, Compilation compilation, InheritsTestsClassMetadata? classInfo)
+    private static void GenerateInheritedTestSources(SourceProductionContext context, InheritsTestsClassMetadata? classInfo)
     {
         if (classInfo?.TypeSymbol == null)
         {
@@ -124,7 +127,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var (filePath, lineNumber) = GetTestMethodSourceLocation(method, testAttribute, classInfo);
 
             // If the method is from a generic base class, use the constructed version from the inheritance hierarchy
-            INamedTypeSymbol typeForMetadata = classInfo.TypeSymbol;
+            var typeForMetadata = classInfo.TypeSymbol;
             if (method.ContainingType.IsGenericType && method.ContainingType.IsDefinition)
             {
                 // Find the constructed generic type in the inheritance chain
@@ -148,7 +151,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 FilePath = filePath,
                 LineNumber = lineNumber,
                 TestAttribute = testAttribute,
-                Context = null, // No context for inherited tests
+                Context = classInfo.Context, // Use class context to access Compilation
                 MethodSyntax = null, // No syntax for inherited methods
                 IsGenericType = typeForMetadata.IsGenericType,
                 IsGenericMethod = (concreteMethod ?? method).IsGenericMethod,
@@ -156,7 +159,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 InheritanceDepth = inheritanceDepth
             };
 
-            GenerateTestMethodSource(context, compilation, testMethodMetadata);
+            GenerateTestMethodSource(context, testMethodMetadata);
         }
     }
 
@@ -183,18 +186,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return depth;
     }
 
-    private static void GenerateTestMethodSource(SourceProductionContext context, Compilation compilation, TestMethodMetadata? testMethod)
+    private static void GenerateTestMethodSource(SourceProductionContext context, TestMethodMetadata? testMethod)
     {
         try
         {
-            if (testMethod?.MethodSymbol == null)
+            if (testMethod?.MethodSymbol == null || testMethod.Context == null)
             {
                 return;
             }
 
+            // Get compilation from semantic model instead of parameter
+            var compilation = testMethod.Context.Value.SemanticModel.Compilation;
+
             var writer = new CodeWriter();
             GenerateFileHeader(writer);
-            GenerateTestMetadata(writer, compilation, testMethod);
+            GenerateTestMetadata(writer, testMethod);
 
             var fileName = $"{testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_{Guid.NewGuid():N}.g.cs";
             context.AddSource(fileName, SourceText.From(writer.ToString(), Encoding.UTF8));
@@ -228,8 +234,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine();
     }
 
-    private static void GenerateTestMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GenerateTestMetadata(CodeWriter writer, TestMethodMetadata testMethod)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
+
         var className = testMethod.TypeSymbol.GloballyQualified();
         var methodName = testMethod.MethodSymbol.Name;
         var guid = Guid.NewGuid().ToString("N");
@@ -275,16 +283,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArguments || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType || hasMethodDataSourceForGenericType)
             {
-                GenerateGenericTestWithConcreteTypes(writer, compilation, testMethod, className, combinationGuid);
+                GenerateGenericTestWithConcreteTypes(writer, testMethod, className, combinationGuid);
             }
             else
             {
-                GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
+                GenerateTestMetadataInstance(writer, testMethod, className, combinationGuid);
             }
         }
         else
         {
-            GenerateTestMetadataInstance(writer, compilation, testMethod, className, combinationGuid);
+            GenerateTestMetadataInstance(writer, testMethod, className, combinationGuid);
         }
 
         writer.AppendLine("yield break;");
@@ -299,12 +307,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static void GenerateSpecificGenericInstantiation(
         CodeWriter writer,
-        Compilation compilation,
         TestMethodMetadata testMethod,
         string className,
         string combinationGuid,
         ImmutableArray<ITypeSymbol> typeArguments)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
         var typeArgsString = string.Join(", ", typeArguments.Select(t => t.GloballyQualified()));
         var instantiatedMethodName = $"{methodName}<{typeArgsString}>";
@@ -336,7 +344,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
         writer.AppendLine($"GenericMethodTypeArguments = new global::System.Type[] {{ {string.Join(", ", typeArguments.Select(t => $"typeof({t.GloballyQualified()})"))}}},");
 
-        GenerateMetadata(writer, compilation, concreteTestMethod);
+        GenerateMetadata(writer, concreteTestMethod);
 
         if (testMethod.IsGenericType)
         {
@@ -454,7 +462,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return type;
     }
 
-    private static void GenerateTestMetadataInstance(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod, string className, string combinationGuid)
+    private static void GenerateTestMetadataInstance(CodeWriter writer, TestMethodMetadata testMethod, string className, string combinationGuid)
     {
         var methodName = testMethod.MethodSymbol.Name;
 
@@ -475,7 +483,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"TestClassType = {GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)},");
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
 
-        GenerateMetadata(writer, compilation, testMethod);
+        GenerateMetadata(writer, testMethod);
 
         if (testMethod.IsGenericType)
         {
@@ -507,8 +515,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("yield return metadata;");
     }
 
-    private static void GenerateMetadata(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GenerateMetadata(CodeWriter writer, TestMethodMetadata testMethod)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodSymbol = testMethod.MethodSymbol;
 
 
@@ -519,6 +528,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
 
         var attributes = methodSymbol.GetAttributes()
+            .Where(a => !DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
             .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
             .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
             .ToImmutableArray();
@@ -528,7 +538,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("],");
 
-        GenerateDataSources(writer, compilation, testMethod);
+        GenerateDataSources(writer, testMethod);
 
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
 
@@ -544,8 +554,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
     }
 
-    private static void GenerateMetadataForConcreteInstantiation(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GenerateMetadataForConcreteInstantiation(CodeWriter writer, TestMethodMetadata testMethod)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodSymbol = testMethod.MethodSymbol;
 
 
@@ -588,8 +599,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
 
-    private static void GenerateDataSources(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GenerateDataSources(CodeWriter writer, TestMethodMetadata testMethod)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodSymbol = testMethod.MethodSymbol;
         var typeSymbol = testMethod.TypeSymbol;
 
@@ -644,7 +656,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Generate property data sources
-        GeneratePropertyDataSources(writer, compilation, testMethod);
+        GeneratePropertyDataSources(writer, testMethod);
     }
 
     private static void GenerateDataSourceAttribute(CodeWriter writer, Compilation compilation, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
@@ -661,9 +673,148 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             GenerateMethodDataSourceAttribute(writer, attr, methodSymbol, typeSymbol);
         }
+        else if (attrName == "global::TUnit.Core.ArgumentsAttribute")
+        {
+            try
+            {
+                GenerateArgumentsAttributeWithParameterTypes(writer, compilation, attr, methodSymbol);
+            }
+            catch
+            {
+                // Fall back to default behavior if parameter type matching fails
+                AttributeWriter.WriteAttribute(writer, compilation, attr);
+                writer.AppendLine(",");
+            }
+        }
         else
         {
             AttributeWriter.WriteAttribute(writer, compilation, attr);
+            writer.AppendLine(",");
+        }
+    }
+
+    private static void GenerateArgumentsAttributeWithParameterTypes(CodeWriter writer, Compilation compilation, AttributeData attr, IMethodSymbol methodSymbol)
+    {
+        if (attr.AttributeClass == null)
+        {
+            return;
+        }
+
+        var attrTypeName = attr.AttributeClass.GloballyQualified();
+        var testMethodParameters = methodSymbol.Parameters;
+
+        // Get the attribute syntax to access source text (preserves precision for decimals)
+        var attributeSyntax = attr.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
+        if (attributeSyntax == null)
+        {
+            // No syntax available - fall back to TypedConstant-based formatting
+            var formatter = new TypedConstantFormatter();
+            writer.Append($"new {attrTypeName}(");
+
+            if (attr.ConstructorArguments is
+                [
+                    { Kind: TypedConstantKind.Array } _
+                ])
+            {
+                var arrayValues = attr.ConstructorArguments[0].Values;
+                for (var i = 0; i < arrayValues.Length; i++)
+                {
+                    var targetType = i < testMethodParameters.Length ? testMethodParameters[i].Type : null;
+                    writer.Append(formatter.FormatForCode(arrayValues[i], targetType));
+                    if (i < arrayValues.Length - 1) writer.Append(", ");
+                }
+            }
+            else
+            {
+                for (var i = 0; i < attr.ConstructorArguments.Length; i++)
+                {
+                    var targetType = i < testMethodParameters.Length ? testMethodParameters[i].Type : null;
+                    writer.Append(formatter.FormatForCode(attr.ConstructorArguments[i], targetType));
+                    if (i < attr.ConstructorArguments.Length - 1) writer.Append(", ");
+                }
+            }
+
+            writer.AppendLine("),");
+            return;
+        }
+
+        // Get the argument expressions from syntax
+        var argumentList = attributeSyntax.ArgumentList;
+        if (argumentList == null || argumentList.Arguments.Count == 0)
+        {
+            writer.AppendLine($"new {attrTypeName}(),");
+            return;
+        }
+
+        // Get semantic model for rewriting expressions with fully qualified names
+        var semanticModel = compilation.GetSemanticModel(attributeSyntax.SyntaxTree);
+
+        writer.Append($"new {attrTypeName}(");
+
+        // Only process positional arguments (exclude named arguments)
+        var positionalArgs = argumentList.Arguments.Where(a => a.NameEquals == null).ToList();
+
+        for (var i = 0; i < positionalArgs.Count; i++)
+        {
+            var argumentSyntax = positionalArgs[i];
+            var expression = argumentSyntax.Expression;
+
+            // Get target parameter type
+            var targetParameterType = i < testMethodParameters.Length
+                ? testMethodParameters[i].Type
+                : null;
+
+            // For decimal parameters, preserve source text and add 'm' suffix (only for numeric literals)
+            if (expression is not IdentifierNameSyntax
+                && targetParameterType?.SpecialType == SpecialType.System_Decimal
+                && expression.Kind() != SyntaxKind.StringLiteralExpression
+                && expression.Kind() != SyntaxKind.NullLiteralExpression)
+            {
+                var sourceText = expression.ToString().TrimEnd('d', 'D', 'f', 'F', 'm', 'M').Trim();
+                writer.Append($"{sourceText}m");
+            }
+            else
+            {
+                // For other types (including strings and nulls), rewrite with fully qualified names
+                var fullyQualifiedExpression = expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
+                writer.Append(fullyQualifiedExpression.ToFullString());
+            }
+
+            if (i < positionalArgs.Count - 1)
+            {
+                writer.Append(", ");
+            }
+        }
+
+        writer.Append(")");
+
+        // Handle named arguments (like Skip property)
+        var namedArgs = argumentList.Arguments.Where(a => a.NameEquals != null).ToList();
+        if (namedArgs.Count > 0)
+        {
+            writer.AppendLine();
+            writer.AppendLine("{");
+            writer.Indent();
+
+            for (var i = 0; i < namedArgs.Count; i++)
+            {
+                var namedArg = namedArgs[i];
+                var propertyName = namedArg.NameEquals!.Name.ToString();
+                var fullyQualifiedExpression = namedArg.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(semanticModel))!;
+                writer.Append($"{propertyName} = {fullyQualifiedExpression.ToFullString()}");
+
+                if (i < namedArgs.Count - 1)
+                {
+                    writer.AppendLine(",");
+                }
+            }
+
+            writer.AppendLine();
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
+        else
+        {
             writer.AppendLine(",");
         }
     }
@@ -1136,17 +1287,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool IsAsyncEnumerable(ITypeSymbol type)
     {
-        // Check if the type itself is an IAsyncEnumerable<T>
-        if (type is INamedTypeSymbol { IsGenericType: true } namedType &&
-            namedType.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>")
-        {
-            return true;
-        }
-
-        // Check if the type implements IAsyncEnumerable<T>
-        return type.AllInterfaces.Any(i =>
-            i.IsGenericType &&
-            i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>");
+        // Use cached interface check
+        return InterfaceCache.IsAsyncEnumerable(type);
     }
 
     private static bool IsTask(ITypeSymbol type)
@@ -1158,14 +1300,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static bool IsEnumerable(ITypeSymbol type)
     {
-        if (type.SpecialType == SpecialType.System_String)
-        {
-            return false;
-        }
-
-        return type.AllInterfaces.Any(i =>
-            i.OriginalDefinition.ToDisplayString() == "System.Collections.IEnumerable" ||
-            (i.IsGenericType && i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IEnumerable<T>"));
+        // Use cached interface check (already handles string exclusion)
+        return InterfaceCache.IsEnumerable(type);
     }
 
     private static void WriteTypedConstant(CodeWriter writer, TypedConstant constant)
@@ -1359,8 +1495,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GeneratePropertyDataSources(CodeWriter writer, Compilation compilation, TestMethodMetadata testMethod)
+    private static void GeneratePropertyDataSources(CodeWriter writer, TestMethodMetadata testMethod)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var typeSymbol = testMethod.TypeSymbol;
         var currentType = typeSymbol;
         var processedProperties = new HashSet<string>();
@@ -1670,251 +1807,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Use centralized instance factory generator for all types (generic and non-generic)
         InstanceFactoryGenerator.GenerateInstanceFactory(writer, testMethod.TypeSymbol, testMethod);
 
-        // For generic types or methods, we need to use reflection to invoke the test method
+        // Generate InvokeTypedTest for non-generic tests
         var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
-        if (testMethod.IsGenericType || testMethod.IsGenericMethod)
-        {
-            GenerateGenericTestInvoker(writer, testMethod, methodName, isAsync, hasCancellationToken, parametersFromArgs);
-        }
-        else
+        if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
             GenerateConcreteTestInvoker(writer, testMethod, className, methodName, isAsync, hasCancellationToken, parametersFromArgs);
         }
     }
 
 
-
-    private static void GenerateGenericTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string methodName, bool isAsync, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
-    {
-        writer.AppendLine("TestInvoker = async (instance, args) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Use reflection to invoke the method on the generic type instance
-        writer.AppendLine("var instanceType = instance.GetType();");
-        writer.AppendLine($"var method = instanceType.GetMethod(\"{methodName}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance);");
-        writer.AppendLine("if (method == null)");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"throw new global::System.InvalidOperationException($\"Method '{methodName}' not found on type {{instanceType.FullName}}\");");
-        writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-
-        // Handle generic method case
-        if (testMethod is { IsGenericMethod: true, MethodSymbol.TypeParameters.Length: > 0 })
-        {
-            writer.AppendLine("// Make the method generic if it has type parameters");
-            writer.AppendLine("if (method.IsGenericMethodDefinition)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("// Use the resolved generic types from the test context");
-            writer.AppendLine("var testContext = global::TUnit.Core.TestContext.Current;");
-            writer.AppendLine("var resolvedTypes = testContext?.TestDetails?.MethodGenericArguments;");
-            writer.AppendLine();
-            writer.AppendLine("if (resolvedTypes != null && resolvedTypes.Length > 0)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("// Use the pre-resolved generic types");
-            writer.AppendLine("method = method.MakeGenericMethod(resolvedTypes);");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("else");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("// Fallback: infer type arguments from the actual argument types");
-            writer.AppendLine("var typeArgs = new global::System.Type[" + testMethod.MethodSymbol.TypeParameters.Length + "];");
-            writer.AppendLine("for (int i = 0; i < typeArgs.Length && i < args.Length; i++)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("typeArgs[i] = args[i]?.GetType() ?? typeof(object);");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("method = method.MakeGenericMethod(typeArgs);");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine();
-        }
-
-writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationToken ? " + 1" : "") + "];");
-        writer.AppendLine("args.CopyTo(methodArgs, 0);");
-
-        if (hasCancellationToken)
-        {
-            writer.AppendLine("methodArgs[args.Length] = global::TUnit.Core.TestContext.Current?.CancellationToken ?? global::System.Threading.CancellationToken.None;");
-        }
-
-        writer.AppendLine();
-        writer.AppendLine("// Invoke the method");
-        writer.AppendLine("var result = method.Invoke(instance, methodArgs);");
-
-        if (isAsync)
-        {
-            writer.AppendLine("if (result is global::System.Threading.Tasks.Task task)");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("await task;");
-            writer.Unindent();
-            writer.AppendLine("}");
-        }
-
-        writer.Unindent();
-        writer.AppendLine("},");
-    }
-
     private static void GenerateConcreteTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, bool isAsync, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
     {
-        writer.AppendLine("TestInvoker = async (instance, args) =>");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.AppendLine($"var typedInstance = ({className})instance;");
-
-        // Only declare context if it's needed (when hasCancellationToken is true)
-        if (hasCancellationToken)
-        {
-            writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
-        }
-
-        // Special case: Single tuple parameter
-        // If we have exactly one parameter that's a tuple type, we need to handle it specially
-        // In source-generated mode, tuples are always unwrapped into their elements
-        if (parametersFromArgs.Length == 1 && parametersFromArgs[0].Type is INamedTypeSymbol { IsTupleType: true } tupleType)
-        {
-            writer.AppendLine("// Special handling for single tuple parameter");
-            writer.AppendLine($"if (args.Length == {tupleType.TupleElements.Length})");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("// Arguments are unwrapped tuple elements, reconstruct the tuple");
-
-            // Build tuple reconstruction
-            var tupleConstruction = $"({string.Join(", ", tupleType.TupleElements.Select((_, i) => $"({tupleType.TupleElements[i].Type.GloballyQualified()})args[{i}]"))})";
-
-            var methodCallReconstructed = hasCancellationToken
-                ? $"typedInstance.{methodName}({tupleConstruction}, context?.CancellationToken ?? System.Threading.CancellationToken.None)"
-                : $"typedInstance.{methodName}({tupleConstruction})";
-            if (isAsync)
-            {
-                writer.AppendLine($"await {methodCallReconstructed};");
-            }
-            else
-            {
-                writer.AppendLine($"{methodCallReconstructed};");
-            }
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine("// Rare case: tuple is wrapped as a single argument");
-            var methodCallDirect = hasCancellationToken
-                ? $"typedInstance.{methodName}(({tupleType.GloballyQualified()})args[0], context?.CancellationToken ?? System.Threading.CancellationToken.None)"
-                : $"typedInstance.{methodName}(({tupleType.GloballyQualified()})args[0])";
-            if (isAsync)
-            {
-                writer.AppendLine($"await {methodCallDirect};");
-            }
-            else
-            {
-                writer.AppendLine($"{methodCallDirect};");
-            }
-            writer.Unindent();
-            writer.AppendLine("}");
-            writer.AppendLine("else");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine($"throw new global::System.ArgumentException($\"Expected {tupleType.TupleElements.Length} unwrapped elements or 1 wrapped tuple, but got {{args.Length}} arguments\");");
-            writer.Unindent();
-            writer.AppendLine("}");
-        }
-        else if (parametersFromArgs.Length == 0)
-        {
-            var methodCall = hasCancellationToken
-                ? $"typedInstance.{methodName}(context?.CancellationToken ?? System.Threading.CancellationToken.None)"
-                : $"typedInstance.{methodName}()";
-            if (isAsync)
-            {
-                writer.AppendLine($"await {methodCall};");
-            }
-            else
-            {
-                writer.AppendLine($"{methodCall};");
-                writer.AppendLine("await global::System.Threading.Tasks.Task.CompletedTask;");
-            }
-        }
-        else
-        {
-            // Count required parameters (those without default values, excluding CancellationToken and params parameters)
-            var requiredParamCount = parametersFromArgs.Count(p => !p.HasExplicitDefaultValue && p is { IsOptional: false, IsParams: false });
-
-            // Generate runtime logic to handle variable argument counts
-            writer.AppendLine("switch (args.Length)");
-            writer.AppendLine("{");
-            writer.Indent();
-
-            // Check if last parameter is params array
-            var hasParams = parametersFromArgs.Length > 0 && parametersFromArgs[parametersFromArgs.Length - 1].IsParams;
-
-            // For params arrays, we need to handle any number of arguments >= required count
-            // Generate a reasonable number of cases plus a default that handles the rest
-            var casesToGenerate = hasParams ? 10 : parametersFromArgs.Length - requiredParamCount + 1;
-
-            // Generate cases for each valid argument count
-            for (var i = 0; i < casesToGenerate && requiredParamCount + i <= parametersFromArgs.Length + 5; i++)
-            {
-                var argCount = requiredParamCount + i;
-                writer.AppendLine($"case {argCount}:");
-                writer.Indent();
-
-                // Build the arguments to pass, handling params arrays correctly
-                var argsToPass = TupleArgumentHelper.GenerateArgumentAccessWithParams(parametersFromArgs, "args", argCount);
-
-                // Add CancellationToken if present
-                if (hasCancellationToken)
-                {
-                    argsToPass.Add("context?.CancellationToken ?? System.Threading.CancellationToken.None");
-                }
-
-                var methodCall = $"typedInstance.{methodName}({string.Join(", ", argsToPass)})";
-
-                if (isAsync)
-                {
-                    writer.AppendLine($"await {methodCall};");
-                }
-                else
-                {
-                    writer.AppendLine($"{methodCall};");
-                }
-                writer.AppendLine("break;");
-                writer.Unindent();
-            }
-
-            writer.AppendLine("default:");
-            writer.Indent();
-            if (requiredParamCount == parametersFromArgs.Length && !hasParams)
-            {
-                writer.AppendLine($"throw new global::System.ArgumentException($\"Expected exactly {parametersFromArgs.Length} argument{(parametersFromArgs.Length == 1 ? "" : "s")}, but got {{args.Length}}\");");
-            }
-            else
-            {
-                writer.AppendLine($"throw new global::System.ArgumentException($\"Expected between {requiredParamCount} and {parametersFromArgs.Length} arguments, but got {{args.Length}}\");");
-            }
-            writer.Unindent();
-
-            writer.Unindent();
-            writer.AppendLine("}");
-
-            if (!isAsync)
-            {
-                writer.AppendLine("await global::System.Threading.Tasks.Task.CompletedTask;");
-            }
-        }
-
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        // Also generate InvokeTypedTest which is required by CreateExecutableTestFactory
+        // Generate InvokeTypedTest which is required by CreateExecutableTestFactory
         writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
@@ -1928,7 +1832,10 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         // Special case: Single tuple parameter (same as in TestInvoker)
         // If we have exactly one parameter that's a tuple type, we need to handle it specially
         // In source-generated mode, tuples are always unwrapped into their elements
-        if (parametersFromArgs.Length == 1 && parametersFromArgs[0].Type is INamedTypeSymbol { IsTupleType: true } singleTupleParam)
+        if (parametersFromArgs is
+            [
+                { Type: INamedTypeSymbol { IsTupleType: true } singleTupleParam }
+            ])
         {
             writer.AppendLine("// Special handling for single tuple parameter");
             writer.AppendLine($"if (args.Length == {singleTupleParam.TupleElements.Length})");
@@ -2393,6 +2300,18 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         MethodDeclarationSyntax methodSyntax,
         AttributeData testAttribute)
     {
+        // Prioritize TestAttribute's File/Line from [CallerFilePath]/[CallerLineNumber] first
+        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+        if (!string.IsNullOrEmpty(attrFilePath))
+        {
+            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 0;
+            if (attrLineNumber > 0)
+            {
+                return (attrFilePath!, attrLineNumber);
+            }
+        }
+
+        // Fall back to method syntax location
         var methodLocation = methodSyntax.GetLocation();
         var filePath = methodLocation.SourceTree?.FilePath;
         if (!string.IsNullOrEmpty(filePath))
@@ -2401,14 +2320,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
             return (filePath!, lineNumber);
         }
 
-        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
-        if (!string.IsNullOrEmpty(attrFilePath))
-        {
-            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
-                                 methodLocation.GetLineSpan().StartLinePosition.Line + 1;
-            return (attrFilePath!, attrLineNumber);
-        }
-
+        // Final fallback
         filePath = methodSyntax.SyntaxTree.FilePath ?? "";
         var fallbackLineNumber = methodLocation.GetLineSpan().StartLinePosition.Line + 1;
         return (filePath, fallbackLineNumber);
@@ -2419,6 +2331,18 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         AttributeData testAttribute,
         InheritsTestsClassMetadata classInfo)
     {
+        // Prioritize TestAttribute's File/Line from [CallerFilePath]/[CallerLineNumber] first
+        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
+        if (!string.IsNullOrEmpty(attrFilePath))
+        {
+            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ?? 0;
+            if (attrLineNumber > 0)
+            {
+                return (attrFilePath!, attrLineNumber);
+            }
+        }
+
+        // Fall back to method symbol location
         var methodLocation = method.Locations.FirstOrDefault();
         if (methodLocation != null && methodLocation.IsInSource)
         {
@@ -2430,14 +2354,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
             }
         }
 
-        var attrFilePath = testAttribute.ConstructorArguments.ElementAtOrDefault(0).Value?.ToString();
-        if (!string.IsNullOrEmpty(attrFilePath))
-        {
-            var attrLineNumber = (int?)testAttribute.ConstructorArguments.ElementAtOrDefault(1).Value ??
-                                 classInfo.ClassSyntax.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
-            return (attrFilePath!, attrLineNumber);
-        }
-
+        // Final fallback to class location
         var classLocation = classInfo.ClassSyntax.GetLocation();
         var derivedFilePath = classLocation.SourceTree?.FilePath ?? classInfo.ClassSyntax.SyntaxTree.FilePath ?? "";
         var derivedLineNumber = classLocation.GetLineSpan().StartLinePosition.Line + 1;
@@ -2515,6 +2432,32 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         }
         var fullyQualifiedName = typeSymbol.GloballyQualified();
         return $"typeof({fullyQualifiedName})";
+    }
+
+    private static string BuildTypeKey(IEnumerable<ITypeSymbol> types)
+    {
+        var typesList = types as IList<ITypeSymbol> ?? types.ToArray();
+        if (typesList.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var formattedTypes = new string[typesList.Count];
+        for (var i = 0; i < typesList.Count; i++)
+        {
+            formattedTypes[i] = typesList[i].ToDisplayString(DisplayFormats.FullyQualifiedGenericWithoutGlobalPrefix);
+        }
+        return string.Join(",", formattedTypes);
+    }
+
+    /// <summary>
+    /// Generates code that resolves the type name at runtime (FullName ?? Name).
+    /// Caches ToDisplayString result to avoid calling it twice.
+    /// </summary>
+    private static string FormatTypeForRuntimeName(ITypeSymbol type)
+    {
+        var typeString = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        return $"(typeof({typeString}).FullName ?? typeof({typeString}).Name)";
     }
 
     private static void GenerateGenericTypeInfo(CodeWriter writer, INamedTypeSymbol typeSymbol)
@@ -2648,11 +2591,11 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
 
     private static void GenerateGenericTestWithConcreteTypes(
         CodeWriter writer,
-        Compilation compilation,
         TestMethodMetadata testMethod,
         string className,
         string combinationGuid)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
 
         writer.AppendLine("// Create generic metadata with concrete type registrations");
@@ -2677,7 +2620,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         writer.AppendLine($"TestMethodName = \"{methodName}\",");
 
         // Add basic metadata (excluding data source attributes for concrete instantiations)
-        GenerateMetadataForConcreteInstantiation(writer, compilation, testMethod);
+        GenerateMetadataForConcreteInstantiation(writer, testMethod);
 
         // Generate instance factory that works with generic types
         writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
@@ -2705,17 +2648,6 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
 
         writer.Unindent();
         writer.AppendLine("},");
-
-        // Generate TestInvoker for generic methods
-        var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
-        var hasCancellationToken = testMethod.MethodSymbol.Parameters.Any(p =>
-            p.Type.Name == "CancellationToken" &&
-            p.Type.ContainingNamespace?.ToString() == "System.Threading");
-        var parametersFromArgs = testMethod.MethodSymbol.Parameters
-            .Where(p => p.Type.Name != "CancellationToken")
-            .ToArray();
-
-        GenerateGenericTestInvoker(writer, testMethod, methodName, isAsync, hasCancellationToken, parametersFromArgs);
 
         // Generate concrete instantiations dictionary
         writer.AppendLine("ConcreteInstantiations = new global::System.Collections.Generic.Dictionary<string, global::TUnit.Core.TestMetadata>");
@@ -2764,7 +2696,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                     Array.Copy(classTypes, 0, combinedTypes, 0, classTypes.Length);
                     Array.Copy(methodTypes, 0, combinedTypes, classTypes.Length, methodTypes.Length);
 
-                    var typeKey = string.Join(",", combinedTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    var typeKey = BuildTypeKey(combinedTypes);
 
                     // Skip if we've already processed this type combination
                     if (!processedTypeCombinations.Add(typeKey))
@@ -2785,8 +2717,8 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                     }
 
                     // Generate a concrete instantiation for this type combination
-                    writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                    GenerateConcreteTestMetadata(writer, compilation, testMethod, className, combinedTypes, classAttr);
+                    writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(FormatTypeForRuntimeName))}] = ");
+                    GenerateConcreteTestMetadata(writer, testMethod, className, combinedTypes, classAttr);
                     writer.AppendLine(",");
                 }
             }
@@ -2822,7 +2754,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
 
                 if (inferredTypes is { Length: > 0 })
                 {
-                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    var typeKey = BuildTypeKey(inferredTypes);
 
                     // Skip if we've already processed this type combination
                     if (!processedTypeCombinations.Add(typeKey))
@@ -2849,8 +2781,8 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                     }
 
                     // Generate a concrete instantiation for this type combination
-                    writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                    GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, argAttr);
+                    writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
+                    GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes, argAttr);
                     writer.AppendLine(",");
                 }
             }
@@ -2865,7 +2797,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                 var inferredTypes = InferClassTypesFromMethodArguments(testMethod.TypeSymbol, testMethod.MethodSymbol, methodArgAttr, compilation);
                 if (inferredTypes is { Length: > 0 })
                 {
-                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    var typeKey = BuildTypeKey(inferredTypes);
 
                     // Skip if we've already processed this type combination
                     if (!processedTypeCombinations.Add(typeKey))
@@ -2885,8 +2817,8 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                     }
 
                     // Generate a concrete instantiation for this type combination
-                    writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                    GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, methodArgAttr);
+                    writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
+                    GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes, methodArgAttr);
                     writer.AppendLine(",");
                 }
             }
@@ -2902,7 +2834,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
             var inferredTypes = InferTypesFromDataSourceAttribute(testMethod.MethodSymbol, dataSourceAttr);
             if (inferredTypes is { Length: > 0 })
             {
-                var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                var typeKey = BuildTypeKey(inferredTypes);
 
                 // Skip if we've already processed this type combination
                 if (!processedTypeCombinations.Add(typeKey))
@@ -2929,8 +2861,8 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                 }
 
                 // Generate a concrete instantiation for this type combination
-                writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes, dataSourceAttr);
+                writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
+                GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes, dataSourceAttr);
                 writer.AppendLine(",");
             }
         }
@@ -2941,7 +2873,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
             var inferredTypes = InferTypesFromTypeInferringAttributes(testMethod.MethodSymbol);
             if (inferredTypes is { Length: > 0 })
             {
-                var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                var typeKey = BuildTypeKey(inferredTypes);
 
                 // Skip if we've already processed this type combination
                 if (processedTypeCombinations.Add(typeKey))
@@ -2950,8 +2882,8 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                     if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
                     {
                         // Generate a concrete instantiation for this type combination
-                        writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                        GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                        writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
+                        GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes);
                         writer.AppendLine(",");
                     }
                 }
@@ -2971,7 +2903,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                 var inferredTypes = InferClassTypesFromMethodDataSource(compilation, testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
                 {
-                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    var typeKey = BuildTypeKey(inferredTypes);
 
                     // Skip if we've already processed this type combination
                     if (processedTypeCombinations.Add(typeKey))
@@ -2980,8 +2912,8 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                         if (ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes))
                         {
                             // Generate a concrete instantiation for this type combination
-                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                            GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
+                            GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes);
                             writer.AppendLine(",");
                         }
                     }
@@ -2995,7 +2927,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
             var typedDataSourceInferredTypes = InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol);
             if (typedDataSourceInferredTypes is { Length: > 0 })
             {
-                var typeKey = string.Join(",", typedDataSourceInferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                var typeKey = BuildTypeKey(typedDataSourceInferredTypes);
 
                 // Skip if we've already processed this type combination
                 if (processedTypeCombinations.Add(typeKey))
@@ -3004,8 +2936,8 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                     if (ValidateClassTypeConstraints(testMethod.TypeSymbol, typedDataSourceInferredTypes))
                     {
                         // Generate a concrete instantiation for this type combination
-                        writer.AppendLine($"[{string.Join(" + \",\" + ", typedDataSourceInferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                        GenerateConcreteTestMetadata(writer, compilation, testMethod, className, typedDataSourceInferredTypes);
+                        writer.AppendLine($"[{string.Join(" + \",\" + ", typedDataSourceInferredTypes.Select(FormatTypeForRuntimeName))}] = ");
+                        GenerateConcreteTestMetadata(writer, testMethod, className, typedDataSourceInferredTypes);
                         writer.AppendLine(",");
                     }
                 }
@@ -3025,7 +2957,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                 var inferredTypes = InferTypesFromMethodDataSource(compilation, testMethod, mdsAttr);
                 if (inferredTypes is { Length: > 0 })
                 {
-                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    var typeKey = BuildTypeKey(inferredTypes);
 
                     // Skip if we've already processed this type combination
                     if (processedTypeCombinations.Add(typeKey))
@@ -3034,8 +2966,8 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                         if (ValidateTypeConstraints(testMethod.MethodSymbol, inferredTypes))
                         {
                             // Generate a concrete instantiation for this type combination
-                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                            GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
+                            GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes);
                             writer.AppendLine(",");
                         }
                     }
@@ -3072,7 +3004,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                             {
                                 // Combine class types and method types
                                 var combinedTypes = classInferredTypes.Concat(methodInferredTypes).ToArray();
-                                var typeKey = string.Join(",", combinedTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                                var typeKey = BuildTypeKey(combinedTypes);
 
                                 // Skip if we've already processed this type combination
                                 if (processedTypeCombinations.Add(typeKey))
@@ -3082,8 +3014,8 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                                         ValidateTypeConstraints(testMethod.MethodSymbol, methodInferredTypes))
                                     {
                                         // Generate a concrete instantiation for this type combination
-                                        writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                                        GenerateConcreteTestMetadata(writer, compilation, testMethod, className, combinedTypes, argAttr);
+                                        writer.AppendLine($"[{string.Join(" + \",\" + ", combinedTypes.Select(FormatTypeForRuntimeName))}] = ");
+                                        GenerateConcreteTestMetadata(writer, testMethod, className, combinedTypes, argAttr);
                                         writer.AppendLine(",");
                                     }
                                 }
@@ -3093,7 +3025,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                     else
                     {
                         // For non-generic methods, just use class types
-                        var typeKey = string.Join(",", classInferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                        var typeKey = BuildTypeKey(classInferredTypes);
 
                         // Skip if we've already processed this type combination
                         if (processedTypeCombinations.Add(typeKey))
@@ -3102,8 +3034,8 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                             if (ValidateClassTypeConstraints(testMethod.TypeSymbol, classInferredTypes))
                             {
                                 // Generate a concrete instantiation for this type combination
-                                writer.AppendLine($"[{string.Join(" + \",\" + ", classInferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                                GenerateConcreteTestMetadata(writer, compilation, testMethod, className, classInferredTypes, argAttr);
+                                writer.AppendLine($"[{string.Join(" + \",\" + ", classInferredTypes.Select(FormatTypeForRuntimeName))}] = ");
+                                GenerateConcreteTestMetadata(writer, testMethod, className, classInferredTypes, argAttr);
                                 writer.AppendLine(",");
                             }
                         }
@@ -3139,7 +3071,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                         // Generate a concrete test metadata for this combination
                         writer.AppendLine($"// Class arguments: {string.Join(", ", classArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
                         writer.AppendLine($"// Method arguments: {string.Join(", ", methodArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
-                        GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, classArgAttr, methodArgAttr);
+                        GenerateConcreteTestMetadataForNonGeneric(writer, testMethod, className, classArgAttr, methodArgAttr);
                         writer.AppendLine();
                     }
                 }
@@ -3150,7 +3082,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                 foreach (var classArgAttr in nonGenericClassArguments)
                 {
                     writer.AppendLine($"// Class arguments: {string.Join(", ", classArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
-                    GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, classArgAttr, null);
+                    GenerateConcreteTestMetadataForNonGeneric(writer, testMethod, className, classArgAttr, null);
                     writer.AppendLine();
                 }
             }
@@ -3160,7 +3092,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                 foreach (var methodArgAttr in nonGenericMethodArguments)
                 {
                     writer.AppendLine($"// Method arguments: {string.Join(", ", methodArgAttr.ConstructorArguments.SelectMany(a => a.Values.Select(v => v.Value?.ToString() ?? "null")))}");
-                    GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, null, methodArgAttr);
+                    GenerateConcreteTestMetadataForNonGeneric(writer, testMethod, className, null, methodArgAttr);
                     writer.AppendLine();
                 }
             }
@@ -3171,7 +3103,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                 foreach (var dataSourceAttr in nonGenericClassDataSourceGenerators)
                 {
                     writer.AppendLine($"// Class data source generator: {dataSourceAttr.AttributeClass?.Name}");
-                    GenerateConcreteTestMetadataForNonGeneric(writer, compilation, testMethod, className, dataSourceAttr, null);
+                    GenerateConcreteTestMetadataForNonGeneric(writer, testMethod, className, dataSourceAttr, null);
                     writer.AppendLine();
                 }
             }
@@ -3218,7 +3150,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                 if (typeArgs.Count > 0)
                 {
                     var inferredTypes = typeArgs.ToArray();
-                    var typeKey = string.Join(",", inferredTypes.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")));
+                    var typeKey = BuildTypeKey(inferredTypes);
 
                     // Skip if we've already processed this type combination
                     if (processedTypeCombinations.Add(typeKey))
@@ -3228,8 +3160,8 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
                         {
                             // Generate a concrete instantiation for this type combination
                             // Use the same key format as runtime: FullName ?? Name
-                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(t => $"(typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).FullName ?? typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}).Name)"))}] = ");
-                            GenerateConcreteTestMetadata(writer, compilation, testMethod, className, inferredTypes);
+                            writer.AppendLine($"[{string.Join(" + \",\" + ", inferredTypes.Select(FormatTypeForRuntimeName))}] = ");
+                            GenerateConcreteTestMetadata(writer, testMethod, className, inferredTypes);
                             writer.AppendLine(",");
                         }
                     }
@@ -4143,12 +4075,12 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
 
     private static void GenerateConcreteTestMetadata(
         CodeWriter writer,
-        Compilation compilation,
         TestMethodMetadata testMethod,
         string className,
         ITypeSymbol[] typeArguments,
         AttributeData? specificArgumentsAttribute = null)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
 
         // Separate class type arguments from method type arguments
@@ -4200,7 +4132,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         }
 
         // Generate metadata with filtered data sources for this specific type
-        GenerateConcreteMetadataWithFilteredDataSources(writer, compilation, testMethod, specificArgumentsAttribute, typeArguments);
+        GenerateConcreteMetadataWithFilteredDataSources(writer, testMethod, specificArgumentsAttribute, typeArguments);
 
         // Generate instance factory
         writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
@@ -4350,11 +4282,11 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
 
     private static void GenerateConcreteMetadataWithFilteredDataSources(
         CodeWriter writer,
-        Compilation compilation,
         TestMethodMetadata testMethod,
         AttributeData? specificArgumentsAttribute,
         ITypeSymbol[] typeArguments)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodSymbol = testMethod.MethodSymbol;
         var typeSymbol = testMethod.TypeSymbol;
 
@@ -4661,12 +4593,12 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
 
     private static void GenerateConcreteTestMetadataForNonGeneric(
         CodeWriter writer,
-        Compilation compilation,
         TestMethodMetadata testMethod,
         string className,
         AttributeData? classDataSourceAttribute,
         AttributeData? methodDataSourceAttribute)
     {
+        var compilation = testMethod.Context!.Value.SemanticModel.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
 
         writer.AppendLine($"var metadata = new global::TUnit.Core.TestMetadata<{className}>");
@@ -4746,7 +4678,7 @@ writer.AppendLine("var methodArgs = new object?[args.Length" + (hasCancellationT
         }
 
         // Generate property data sources and injections
-        GeneratePropertyDataSources(writer, compilation, testMethod);
+        GeneratePropertyDataSources(writer, testMethod);
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, className);
 
 
@@ -4826,5 +4758,6 @@ public class InheritsTestsClassMetadata
 {
     public required INamedTypeSymbol TypeSymbol { get; init; }
     public required ClassDeclarationSyntax ClassSyntax { get; init; }
+    public GeneratorAttributeSyntaxContext Context { get; init; }
 }
 

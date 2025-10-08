@@ -16,7 +16,6 @@ internal sealed class Tests_Eight_Args_TestSource_GUID : global::TUnit.Core.Inte
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("EightItems"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -139,19 +138,6 @@ internal sealed class Tests_Eight_Args_TestSource_GUID : global::TUnit.Core.Inte
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1538.Tests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1538.Tests)instance;
-                switch (args.Length)
-                {
-                    case 8:
-                        typedInstance.Eight_Args(TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[6]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[7]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 8 arguments, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -200,7 +186,6 @@ internal sealed class Tests_SixteenArgs_TestSource_GUID : global::TUnit.Core.Int
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("SixteenItems"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -379,19 +364,6 @@ internal sealed class Tests_SixteenArgs_TestSource_GUID : global::TUnit.Core.Int
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1538.Tests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1538.Tests)instance;
-                switch (args.Length)
-                {
-                    case 16:
-                        typedInstance.SixteenArgs(TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[6]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[7]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[8]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[9]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[10]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[11]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[12]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[13]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[14]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[15]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 16 arguments, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

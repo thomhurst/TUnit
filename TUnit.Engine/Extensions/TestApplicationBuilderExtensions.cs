@@ -34,15 +34,13 @@ public static class TestApplicationBuilderExtensions
         testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ReflectionModeCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new DisableLogoCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new LogLevelCommandProvider(extension));
 
         // Adaptive parallelism command providers
         testApplicationBuilder.CommandLine.AddProvider(() => new ParallelismStrategyCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new AdaptiveMetricsCommandProvider(extension));
 
-        // Unified verbosity control (replaces HideTestOutput, DisableLogo)
-        testApplicationBuilder.CommandLine.AddProvider(() => new VerbosityCommandProvider(extension));
-        
-        // Keep detailed stacktrace option for backward compatibility 
+        // Keep detailed stacktrace option for backward compatibility
         testApplicationBuilder.CommandLine.AddProvider(() => new DetailedStacktraceCommandProvider(extension));
 
         // GitHub reporter configuration

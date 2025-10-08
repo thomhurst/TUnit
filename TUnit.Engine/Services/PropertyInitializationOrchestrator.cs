@@ -63,7 +63,9 @@ internal sealed class PropertyInitializationOrchestrator
     /// <summary>
     /// Initializes all properties for an instance using reflection.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection mode support")]
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Reflection-based property initialization uses PropertyInfo")]
+#endif
     public async Task InitializePropertiesAsync(
         object instance,
         (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties,
@@ -86,6 +88,9 @@ internal sealed class PropertyInitializationOrchestrator
     /// <summary>
     /// Handles the complete initialization flow for an object with properties.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Reflection-based property initialization uses PropertyInfo")]
+    #endif
     public async Task InitializeObjectWithPropertiesAsync(
         object instance,
         PropertyInjectionPlan plan,
@@ -94,13 +99,6 @@ internal sealed class PropertyInitializationOrchestrator
         TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects)
     {
-        if (!plan.HasProperties)
-        {
-            // No properties to inject, just initialize the object
-            await ObjectInitializer.InitializeAsync(instance);
-            return;
-        }
-
         // Initialize properties based on the mode
         // Properties will be fully initialized (including nested initialization) by the strategies
         if (SourceRegistrar.IsEnabled)
@@ -113,10 +111,6 @@ internal sealed class PropertyInitializationOrchestrator
             await InitializePropertiesAsync(
                 instance, plan.ReflectionProperties, objectBag, methodMetadata, events, visitedObjects);
         }
-
-        // Initialize the object itself after all its properties are fully initialized
-        // This ensures properties are available when IAsyncInitializer.InitializeAsync() is called
-        await ObjectInitializer.InitializeAsync(instance);
     }
 
     /// <summary>
@@ -150,6 +144,9 @@ internal sealed class PropertyInitializationOrchestrator
     /// <summary>
     /// Creates initialization context for reflection-based properties.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection-based property setter creation is only used in reflection mode, not in AOT")]
+    #endif
     private PropertyInitializationContext CreateContext(
         object instance,
         PropertyInfo property,

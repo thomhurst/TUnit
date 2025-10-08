@@ -8,7 +8,7 @@ namespace Tests.Benchmark;
 public class FrameworkVersionColumn : IColumn
 {
     private static readonly Dictionary<string, string> VersionCache = new();
-    
+
     public string Id => nameof(FrameworkVersionColumn);
     public string ColumnName => "Version";
     public bool AlwaysShow => true;
@@ -43,6 +43,7 @@ public class FrameworkVersionColumn : IColumn
         {
             "TUnit" or "TUnit_AOT" or "Build_TUnit" => GetTUnitVersion(),
             "xUnit" or "Build_xUnit" => GetXUnitVersion(),
+            "xUnit3" or "Build_xUnit3" => GetXUnit3Version(),
             "NUnit" or "Build_NUnit" => GetNUnitVersion(),
             "MSTest" or "Build_MSTest" => GetMSTestVersion(),
             _ => "Unknown"
@@ -69,7 +70,7 @@ public class FrameworkVersionColumn : IColumn
                 if (File.Exists(packagesPropsPath))
                 {
                     var content = File.ReadAllText(packagesPropsPath);
-                    var match = System.Text.RegularExpressions.Regex.Match(content, 
+                    var match = System.Text.RegularExpressions.Regex.Match(content,
                         @"<PackageVersion\s+Include=""TUnit""\s+Version=""([^""]+)""");
                     if (match.Success)
                     {
@@ -81,7 +82,7 @@ public class FrameworkVersionColumn : IColumn
             // Fallback: try to get from loaded assemblies
             var tunitAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .FirstOrDefault(a => a.GetName().Name == "TUnit.Core");
-            
+
             if (tunitAssembly != null)
             {
                 var version = tunitAssembly.GetName().Version;
@@ -116,8 +117,42 @@ public class FrameworkVersionColumn : IColumn
                 if (File.Exists(packagesPropsPath))
                 {
                     var content = File.ReadAllText(packagesPropsPath);
-                    var match = System.Text.RegularExpressions.Regex.Match(content, 
+                    var match = System.Text.RegularExpressions.Regex.Match(content,
                         @"<PackageVersion\s+Include=""xunit""\s+Version=""([^""]+)""");
+                    if (match.Success)
+                    {
+                        return match.Groups[1].Value;
+                    }
+                }
+            }
+
+            return "";
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
+    private static string GetXUnit3Version()
+    {
+        try
+        {
+            // Get from Directory.Packages.props
+            var directory = new DirectoryInfo(Environment.CurrentDirectory);
+            while (directory != null && directory.Name != "TUnit")
+            {
+                directory = directory.Parent;
+            }
+
+            if (directory != null)
+            {
+                var packagesPropsPath = Path.Combine(directory.FullName, "Directory.Packages.props");
+                if (File.Exists(packagesPropsPath))
+                {
+                    var content = File.ReadAllText(packagesPropsPath);
+                    var match = System.Text.RegularExpressions.Regex.Match(content,
+                        @"<PackageVersion\s+Include=""xunit.v3""\s+Version=""([^""]+)""");
                     if (match.Success)
                     {
                         return match.Groups[1].Value;
@@ -150,7 +185,7 @@ public class FrameworkVersionColumn : IColumn
                 if (File.Exists(packagesPropsPath))
                 {
                     var content = File.ReadAllText(packagesPropsPath);
-                    var match = System.Text.RegularExpressions.Regex.Match(content, 
+                    var match = System.Text.RegularExpressions.Regex.Match(content,
                         @"<PackageVersion\s+Include=""NUnit""\s+Version=""([^""]+)""");
                     if (match.Success)
                     {
@@ -184,7 +219,7 @@ public class FrameworkVersionColumn : IColumn
                 if (File.Exists(packagesPropsPath))
                 {
                     var content = File.ReadAllText(packagesPropsPath);
-                    var match = System.Text.RegularExpressions.Regex.Match(content, 
+                    var match = System.Text.RegularExpressions.Regex.Match(content,
                         @"<PackageVersion\s+Include=""MSTest\.TestFramework""\s+Version=""([^""]+)""");
                     if (match.Success)
                     {

@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Enums;
@@ -8,15 +8,9 @@ namespace TUnit.Core;
 /// <summary>
 /// Handles initialization of static properties with data sources in reflection mode
 /// </summary>
-[UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access",
-    Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter argument does not satisfy annotation requirements",
-    Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicProperties'",
-    Justification = "Reflection mode requires dynamic access")]
-[UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicProperties'",
-    Justification = "Reflection mode requires dynamic access")]
-
+#if NET6_0_OR_GREATER
+[RequiresUnreferencedCode("Reflection mode requires dynamic access for static property initialization")]
+#endif
 public static class StaticPropertyReflectionInitializer
 {
     private static readonly ConcurrentDictionary<Type, bool> _initializedTypes = new();
@@ -24,6 +18,9 @@ public static class StaticPropertyReflectionInitializer
     /// <summary>
     /// Initializes static properties with data sources for all loaded types
     /// </summary>
+#if NET6_0_OR_GREATER
+    [RequiresDynamicCode("Data source initialization may require dynamic code generation")]
+#endif
     public static async Task InitializeAllStaticPropertiesAsync()
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies()
@@ -52,6 +49,9 @@ public static class StaticPropertyReflectionInitializer
     /// <summary>
     /// Initializes static properties with data sources for a specific type
     /// </summary>
+#if NET6_0_OR_GREATER
+    [RequiresDynamicCode("Data source initialization may require dynamic code generation")]
+#endif
     public static async Task InitializeStaticPropertiesForType(Type type)
     {
         // Skip if already initialized
@@ -84,6 +84,9 @@ public static class StaticPropertyReflectionInitializer
             .Any(attr => attr is IDataSourceAttribute);
     }
 
+#if NET6_0_OR_GREATER
+    [RequiresDynamicCode("Data source initialization may require dynamic code generation")]
+#endif
     private static async Task InitializeStaticProperty(Type type, PropertyInfo property)
     {
         if (property.GetCustomAttributes()
@@ -123,12 +126,6 @@ public static class StaticPropertyReflectionInitializer
 
                 // Set the property value
                 property.SetValue(null, value);
-
-                // Initialize the value if it's an object
-                if (value != null)
-                {
-                    await ObjectInitializer.InitializeAsync(value);
-                }
 
                 // Only use the first value for static properties
                 break;

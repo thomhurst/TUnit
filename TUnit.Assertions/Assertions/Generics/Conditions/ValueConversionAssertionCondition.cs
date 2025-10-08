@@ -7,13 +7,13 @@ public class ValueConversionAssertionCondition<TFromType, TToType>(
     ISource source,
     ConvertToAssertCondition<TFromType, TToType> convertToAssertCondition) : BaseAssertCondition<TToType>
 {
-    internal protected override string GetExpectation() => convertToAssertCondition.GetExpectation();
+    protected internal override string GetExpectation() => convertToAssertCondition.GetExpectation();
 
     protected override async ValueTask<AssertionResult> GetResult(
         TToType? actualValue, Exception? exception,
         AssertionMetadata assertionMetadata
     )
     {
-        return await convertToAssertCondition.GetAssertionResult(await source.AssertionDataTask);
+        return await convertToAssertCondition.GetAssertionResult(await source.LazyAssertionData.GetResultAsync());
     }
 }

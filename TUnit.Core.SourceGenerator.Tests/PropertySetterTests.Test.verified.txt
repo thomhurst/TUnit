@@ -320,11 +320,6 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
                 Property6 = default!,
                 Property7 = default!,
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.PropertySetterTests)instance;
-                await typedInstance.Test();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.Test();

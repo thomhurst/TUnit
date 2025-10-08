@@ -16,12 +16,6 @@ internal sealed class MethodDataSourceDrivenWithCancellationTokenTests_MyTest_Te
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute("T"),
-                new global::TUnit.Core.MethodDataSourceAttribute("FuncT"),
-                new global::TUnit.Core.MethodDataSourceAttribute("EnumerableT"),
-                new global::TUnit.Core.MethodDataSourceAttribute("EnumerableFuncT"),
-                new global::TUnit.Core.MethodDataSourceAttribute("ArrayT"),
-                new global::TUnit.Core.MethodDataSourceAttribute("ArrayFuncT"),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Usage", "TUnit0046:Return a `Func<T>` rather than a `<T>`")
             ],
@@ -193,20 +187,6 @@ internal sealed class MethodDataSourceDrivenWithCancellationTokenTests_MyTest_Te
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests)instance;
-                var context = global::TUnit.Core.TestContext.Current;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.MyTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 var context = global::TUnit.Core.TestContext.Current;

@@ -444,6 +444,24 @@
     <data name="TUnit0058Title" xml:space="preserve">
         <value>Hook method has unknown parameters</value>
     </data>
+    <data name="TUnit0059Description" xml:space="preserve">
+        <value>Abstract test class has test methods with data source attributes. Tests from abstract classes require a concrete class with [InheritsTests] attribute to be executed.</value>
+    </data>
+    <data name="TUnit0059MessageFormat" xml:space="preserve">
+        <value>Abstract test class '{0}' has test methods with data sources. Add [InheritsTests] on a concrete class to execute these tests.</value>
+    </data>
+    <data name="TUnit0059Title" xml:space="preserve">
+        <value>Abstract test class with data sources requires [InheritsTests]</value>
+    </data>
+    <data name="TUnit0060Description" xml:space="preserve">
+        <value>Instance method data source may return an empty collection at runtime, which would result in no tests being generated. Ensure the data source method returns at least one item.</value>
+    </data>
+    <data name="TUnit0060MessageFormat" xml:space="preserve">
+        <value>Data source '{0}' may return no data. Ensure it provides at least one test case.</value>
+    </data>
+    <data name="TUnit0060Title" xml:space="preserve">
+        <value>Data source may produce no tests</value>
+    </data>
     <data name="TUnit0300Description" xml:space="preserve">
         <value>Generic types and methods may not be AOT-compatible when using dynamic type creation. Consider using concrete types or ensure all generic combinations are known at compile time.</value>
     </data>

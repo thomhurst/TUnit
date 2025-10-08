@@ -30,7 +30,9 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
     /// <summary>
     /// Initializes a property using reflection.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Reflection mode support")]
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode throws at runtime if used in AOT, property data resolver handles reflection appropriately")]
+    #endif
     public async Task InitializePropertyAsync(PropertyInitializationContext context)
     {
 #if NET

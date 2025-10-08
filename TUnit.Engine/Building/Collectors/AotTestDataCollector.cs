@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -15,6 +15,12 @@ namespace TUnit.Engine.Building.Collectors;
 /// </summary>
 internal sealed class AotTestDataCollector : ITestDataCollector
 {
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "AOT implementation uses source-generated metadata, not reflection")]
+    [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "AOT implementation uses source-generated metadata, not dynamic code")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Dynamic tests are optional and not used in AOT scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Dynamic tests are optional and not used in AOT scenarios")]
+    #endif
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
         // Stream from all test sources
@@ -31,6 +37,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         return [..standardTestMetadatas, ..dynamicTestMetadatas];
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresDynamicCode("Dynamic test conversion requires expression compilation")]
+    [RequiresUnreferencedCode("Method extraction from expressions uses reflection")]
+    #endif
     private async IAsyncEnumerable<TestMetadata> CollectDynamicTestsStreaming(
         string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -76,8 +86,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.",
-        Justification = "Dynamic tests are opt-in and users are warned via RequiresDynamicCode on the method they call")]
+    #if NET6_0_OR_GREATER
+    [RequiresDynamicCode("Dynamic test conversion requires expression compilation")]
+    [RequiresUnreferencedCode("Method extraction from expressions uses reflection")]
+    #endif
     private async IAsyncEnumerable<TestMetadata> ConvertDynamicTestToMetadataStreaming(
         AbstractDynamicTest abstractDynamicTest,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -94,7 +106,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
     }
 
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic tests require runtime compilation of lambda expressions and are not supported in native AOT scenarios.")]
+    #if NET6_0_OR_GREATER
+    [RequiresDynamicCode("Dynamic test metadata creation requires expression extraction and reflection")]
+    [RequiresUnreferencedCode("Method extraction from expressions uses reflection")]
+    #endif
     private Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
     {
         if (result.TestClassType == null || result.TestMethod == null)
@@ -124,9 +139,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         return Task.FromResult<TestMetadata>(new AotDynamicTestMetadata(result)
         {
             TestName = testName,
-#pragma warning disable IL2072
             TestClassType = result.TestClassType,
-#pragma warning restore IL2072
             TestMethodName = methodInfo.Name,
             Dependencies = result.Attributes.OfType<DependsOnAttribute>().Select(a => a.ToTestDependency()).ToArray(),
             DataSources = [], // Dynamic tests don't use data sources in the same way
@@ -141,28 +154,14 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             GenericMethodInfo = null,
             GenericMethodTypeArguments = null,
             AttributeFactory = () => result.Attributes.ToArray(),
-#pragma warning disable IL2072
             PropertyInjections = PropertySourceRegistry.DiscoverInjectableProperties(result.TestClassType)
-#pragma warning restore IL2072
         });
     }
 
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic test instance creation requires Activator.CreateInstance and MakeGenericType which are not supported in native AOT scenarios.")]
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2070:'this' argument does not satisfy 'DynamicallyAccessedMemberTypes.PublicConstructors' in call to 'System.Type.GetConstructors()'",
-        Justification = "AOT mode uses source-generated factories")]
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2067:Target parameter does not satisfy annotation requirements",
-        Justification = "AOT mode uses source-generated factories")]
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2072:Target method return value does not have matching annotations",
-        Justification = "AOT mode uses source-generated factories")]
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2055:Call to 'MakeGenericType' can not be statically analyzed",
-        Justification = "Dynamic tests may use generic types")]
-    [UnconditionalSuppressMessage("AOT",
-        "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling",
-        Justification = "Dynamic tests require dynamic code generation")]
+    #if NET6_0_OR_GREATER
+    [RequiresDynamicCode("Dynamic instance creation uses Activator.CreateInstance and MakeGenericType")]
+    [RequiresUnreferencedCode("Dynamic type instantiation requires access to constructors")]
+    #endif
     private static Func<Type[], object?[], object>? CreateAotDynamicInstanceFactory(Type testClass, object?[]? predefinedClassArgs)
     {
         // Check if we have predefined args to use as defaults
@@ -191,7 +190,10 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic test invocation requires LambdaExpression.Compile() which is not supported in native AOT scenarios.")]
+    #if NET6_0_OR_GREATER
+    [RequiresDynamicCode("Dynamic test invocation requires LambdaExpression.Compile")]
+    [RequiresUnreferencedCode("Expression compilation and MethodInfo.Invoke use reflection")]
+    #endif
     private static Func<object, object?[], Task> CreateAotDynamicTestInvoker(DynamicDiscoveryResult result)
     {
         return async (instance, args) =>
@@ -203,21 +205,32 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                     throw new InvalidOperationException("Dynamic test method expression is null");
                 }
 
-                // Since we're in AOT mode, we need to handle this differently
-                // The expression should already be compiled in source generation
+                // Extract method info from the expression
                 var lambdaExpression = result.TestMethod as LambdaExpression;
                 if (lambdaExpression == null)
                 {
                     throw new InvalidOperationException("Dynamic test method must be a lambda expression");
                 }
 
-                var compiledExpression = lambdaExpression.Compile();
+                MethodInfo? methodInfo = null;
+                if (lambdaExpression.Body is MethodCallExpression methodCall)
+                {
+                    methodInfo = methodCall.Method;
+                }
+                else if (lambdaExpression.Body is UnaryExpression { Operand: MethodCallExpression unaryMethodCall })
+                {
+                    methodInfo = unaryMethodCall.Method;
+                }
+
+                if (methodInfo == null)
+                {
+                    throw new InvalidOperationException("Could not extract method info from dynamic test expression");
+                }
+
                 var testInstance = instance ?? throw new InvalidOperationException("Test instance is null");
 
-                // The expression is already bound to the correct method with arguments
-                // so we just need to invoke it with the instance
-                var invokeMethod = compiledExpression.GetType().GetMethod("Invoke")!;
-                var invokeResult = invokeMethod.Invoke(compiledExpression, [testInstance]);
+                // Use the provided args from TestMethodArguments instead of the expression's placeholder values
+                var invokeResult = methodInfo.Invoke(testInstance, args);
 
                 if (invokeResult is Task task)
                 {
@@ -236,8 +249,9 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.",
-        Justification = "We won't instantiate this since it failed")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Failed metadata creation accesses Type.Name and assembly info")]
+    #endif
     private static TestMetadata CreateFailedTestMetadataForDynamicSource(IDynamicTestSource source, Exception ex)
     {
         var testName = $"[DYNAMIC SOURCE FAILED] {source.GetType().Name}";
@@ -257,12 +271,9 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2067:Target parameter does not satisfy annotation requirements",
-        Justification = "Dynamic test metadata creation")]
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2072:Target method return value does not have matching annotations",
-        Justification = "Dynamic test metadata creation")]
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Dummy metadata creation accesses type and assembly information")]
+    #endif
     private static MethodMetadata CreateDummyMethodMetadata(Type type, string methodName)
     {
         return new MethodMetadata

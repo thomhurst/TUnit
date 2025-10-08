@@ -55,11 +55,6 @@ internal sealed class CleanupTests_Test1_TestSource_GUID : global::TUnit.Core.In
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AfterTests.CleanupTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.AfterTests.CleanupTests)instance;
-                await typedInstance.Test1();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.Test1();
@@ -139,11 +134,6 @@ internal sealed class CleanupTests_Test2_TestSource_GUID : global::TUnit.Core.In
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AfterTests.CleanupTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.AfterTests.CleanupTests)instance;
-                await typedInstance.Test2();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.Test2();

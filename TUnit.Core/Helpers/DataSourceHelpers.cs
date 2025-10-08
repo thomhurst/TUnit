@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
@@ -71,8 +71,6 @@ public static class DataSourceHelpers
     /// <summary>
     /// AOT-compatible tuple unwrapping that handles common tuple types without reflection
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2091:Target generic argument does not satisfy 'DynamicallyAccessedMembersAttribute' in target method or type.",
-        Justification = "We handle specific known tuple types without reflection")]
     public static object?[] UnwrapTupleAot(object? value)
     {
         if (value == null)
@@ -292,41 +290,6 @@ public static class DataSourceHelpers
 
         // Default: return as single value, invoking the original function each time
         return [() => Task.FromResult<object?>(InvokeIfFunc(data))];
-    }
-
-
-    /// <summary>
-    /// AOT-compatible runtime dispatcher for data source property initialization.
-    /// This will be populated by the generated DataSourceHelpers class.
-    /// </summary>
-    private static readonly Dictionary<Type, Func<object, MethodMetadata, string, Task>> PropertyInitializers = new();
-
-    /// <summary>
-    /// Register a type-specific property initializer (called by generated code)
-    /// </summary>
-    public static void RegisterPropertyInitializer<T>(Func<T, MethodMetadata, string, Task> initializer)
-    {
-        PropertyInitializers[typeof(T)] = (instance, testInfo, sessionId) =>
-            initializer((T)instance, testInfo, sessionId);
-    }
-
-    /// <summary>
-    /// Initialize data source properties on an instance using registered type-specific helpers
-    /// </summary>
-    public static async Task InitializeDataSourcePropertiesAsync(object? instance, MethodMetadata testInformation, string testSessionId)
-    {
-        if (instance == null)
-        {
-            return;
-        }
-
-        var instanceType = instance.GetType();
-
-        if (PropertyInitializers.TryGetValue(instanceType, out var initializer))
-        {
-            await initializer(instance, testInformation, testSessionId);
-        }
-        // If no initializer is registered, the type has no data source properties
     }
 
     public static object?[] ToObjectArray(this object? item)
@@ -567,6 +530,10 @@ public static class DataSourceHelpers
     /// Resolves a data source property value at runtime.
     /// This method handles all IDataSourceAttribute implementations generically.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Property types are resolved through reflection")]
+    [RequiresDynamicCode("Data source resolution may require dynamic code generation")]
+    #endif
     public static async Task<object?> ResolveDataSourceForPropertyAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type containingType, string propertyName, MethodMetadata testInformation, string testSessionId)
     {
         // Use PropertyInjectionService to resolve the data source attribute
@@ -583,7 +550,7 @@ public static class DataSourceHelpers
         }
 
         var dataSourceAttribute = (IDataSourceAttribute)dataSourceAttributes[0];
-        
+
         // Create the data generator metadata with required fields
         var dataGeneratorMetadata = DataGeneratorMetadataCreator.CreateForPropertyInjection(
             propertyInfo,
@@ -598,7 +565,7 @@ public static class DataSourceHelpers
 
         // Generate the data source value using the attribute's GetDataRowsAsync method
         var dataRows = dataSourceAttribute.GetDataRowsAsync(dataGeneratorMetadata);
-        
+
         // Get the first value from the async enumerable
         await foreach (var factory in dataRows)
         {
@@ -606,25 +573,14 @@ public static class DataSourceHelpers
             if (args is { Length: > 0 })
             {
                 var value = args[0];
-                
+
                 // Initialize the value if it implements IAsyncInitializer
                 await ObjectInitializer.InitializeAsync(value);
-                
+
                 return value;
             }
         }
 
         return null;
-    }
-    
-    /// <summary>
-    /// Resolves a data source property value at runtime for an existing instance.
-    /// This is used when we need to set init-only properties via reflection.
-    /// </summary>
-    public static Task<object?> ResolveDataSourcePropertyAsync(object instance, string propertyName, MethodMetadata testInformation, string testSessionId)
-    {
-        // For now, return a default value - the runtime resolution is complex
-        // In practice, this should be rare since most data sources can be resolved at compile time
-        return Task.FromResult<object?>(null);
     }
 }

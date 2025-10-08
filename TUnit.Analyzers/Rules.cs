@@ -147,6 +147,12 @@ public static class Rules
     public static readonly DiagnosticDescriptor HookUnknownParameters =
         CreateDescriptor("TUnit0058", UsageCategory, DiagnosticSeverity.Error);
 
+    public static readonly DiagnosticDescriptor AbstractTestClassWithDataSources =
+        CreateDescriptor("TUnit0059", UsageCategory, DiagnosticSeverity.Warning);
+
+    public static readonly DiagnosticDescriptor PotentialEmptyDataSource =
+        CreateDescriptor("TUnit0060", UsageCategory, DiagnosticSeverity.Info);
+
     public static readonly DiagnosticDescriptor GenericTypeNotAotCompatible =
         CreateDescriptor("TUnit0300", UsageCategory, DiagnosticSeverity.Warning);
 

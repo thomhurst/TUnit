@@ -16,8 +16,6 @@ internal sealed class NullableByteArgumentTests_Test_TestSource_GUID : global::T
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute((byte) 1),
-                new global::TUnit.Core.ArgumentsAttribute(null),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -71,19 +69,6 @@ internal sealed class NullableByteArgumentTests_Test_TestSource_GUID : global::T
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.NullableByteArgumentTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.NullableByteArgumentTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<byte?>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -132,8 +117,6 @@ internal sealed class NullableByteArgumentTests_Test2_TestSource_GUID : global::
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute((byte) 1, (byte) 1),
-                new global::TUnit.Core.ArgumentsAttribute((byte) 1, null),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -194,19 +177,6 @@ internal sealed class NullableByteArgumentTests_Test2_TestSource_GUID : global::
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.NullableByteArgumentTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.NullableByteArgumentTests)instance;
-                switch (args.Length)
-                {
-                    case 2:
-                        typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<byte>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<byte?>(args[1]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

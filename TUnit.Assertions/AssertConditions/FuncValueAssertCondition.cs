@@ -10,7 +10,7 @@ public class FuncValueAssertCondition<TActual, TExpected>(
 )
     : ExpectedValueAssertCondition<TActual, TExpected>(expected)
 {
-    internal protected override string GetExpectation() => expectation;
+    protected internal override string GetExpectation() => expectation;
 
     protected override ValueTask<AssertionResult> GetResult(TActual? actualValue, TExpected? expectedValue)
     {

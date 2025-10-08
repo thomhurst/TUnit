@@ -52,8 +52,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         MethodNameProvidingDataSource = methodNameProvidingDataSource;
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL2072:UnrecognizedReflectionPattern", Justification = "Method data sources require runtime discovery and invocation of methods. The target type is determined dynamically from test metadata. For AOT scenarios, source generation should be used to pre-compile method references.")]
-    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", Justification = "GetType() is called on runtime objects from test class instances. The actual types cannot be statically determined. For AOT scenarios, source generation captures these types at compile time.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (Factory != null)
@@ -157,11 +157,11 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 hasAnyItems = true;
                 yield return async () =>
                 {
-                    var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+                    var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
                     return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
                 };
             }
-            
+
             // If the async enumerable was empty, yield one empty result like NoDataSource does
             if (!hasAnyItems)
             {
@@ -182,11 +182,11 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                     hasAnyItems = true;
                     yield return async () =>
                     {
-                        var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+                        var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
                         return await Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
                     };
                 }
-                
+
                 // If the enumerable was empty, yield one empty result like NoDataSource does
                 if (!hasAnyItems)
                 {
@@ -197,7 +197,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             {
                 yield return async () =>
                 {
-                    var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+                    var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
                     return await Task.FromResult<object?[]?>(taskResult.ToObjectArrayWithTypes(paramTypes));
                 };
             }
@@ -210,10 +210,10 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             foreach (var item in enumerable)
             {
                 hasAnyItems = true;
-                var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+                var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
                 yield return () => Task.FromResult<object?[]?>(item.ToObjectArrayWithTypes(paramTypes));
             }
-            
+
             // If the enumerable was empty, yield one empty result like NoDataSource does
             if (!hasAnyItems)
             {
@@ -222,7 +222,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
         else
         {
-            var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(p => p.Type).ToArray();
+            var paramTypes = dataGeneratorMetadata.TestInformation?.Parameters.Select(static p => p.Type).ToArray();
             yield return async () =>
             {
                 return await Task.FromResult<object?[]?>(methodResult.ToObjectArrayWithTypes(paramTypes));
@@ -237,7 +237,9 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                      i.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>));
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", Justification = "Reflection is required to convert IAsyncEnumerable<T> from data source methods. The generic type T is determined at runtime from the data source's return type. For AOT scenarios, source generation should be used instead.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection usage is documented. AOT-safe path available via Factory property")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection usage is documented. AOT-safe path available via Factory property")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Dynamic code usage is documented. AOT-safe path available via Factory property")]
     private static async IAsyncEnumerable<object?> ConvertToAsyncEnumerable(object asyncEnumerable, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var type = asyncEnumerable.GetType();
@@ -316,7 +318,9 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         }
     }
 
-    [UnconditionalSuppressMessage("AOT", "IL2075:UnrecognizedReflectionPattern", Justification = "Accessing Result property on Task<T> requires reflection since T is not known at compile time. This is used to extract values from data source methods that return Task<T>. For AOT, source generation pre-compiles these access patterns.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection usage is documented. AOT-safe path available via Factory property")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection usage is documented. AOT-safe path available via Factory property")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Dynamic code usage is documented. AOT-safe path available via Factory property")]
     private static object? GetTaskResult(Task task)
     {
         var taskType = task.GetType();

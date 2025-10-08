@@ -49,9 +49,7 @@ public static class AotConversionHelper
     public static bool HasConversionOperators(ITypeSymbol type)
     {
         var members = type.GetMembers();
-        return members.Any(m => m is IMethodSymbol method && 
-            method.Name is "op_Implicit" or "op_Explicit" &&
-            method.IsStatic);
+        return members.Any(m => m is IMethodSymbol { Name: "op_Implicit" or "op_Explicit", IsStatic: true });
     }
 
     /// <summary>
@@ -62,9 +60,7 @@ public static class AotConversionHelper
         var members = type.GetMembers();
         foreach (var member in members)
         {
-            if (member is IMethodSymbol method && 
-                method.Name is "op_Implicit" or "op_Explicit" &&
-                method is { IsStatic: true, Parameters.Length: 1 })
+            if (member is IMethodSymbol { Name: "op_Implicit" or "op_Explicit" } method and { IsStatic: true, Parameters.Length: 1 })
             {
                 yield return (method, method.ReturnType);
             }

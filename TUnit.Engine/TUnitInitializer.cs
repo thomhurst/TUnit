@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.CommandLine;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using TUnit.Core;
@@ -9,7 +8,7 @@ using TUnit.Engine.Exceptions;
 
 namespace TUnit.Engine;
 
-internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
+internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookDiscoveryService hookDiscoveryService)
 {
     public void Initialize(ExecuteRequestContext context)
     {
@@ -17,28 +16,13 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions)
         SetUpExceptionListeners();
         ParseParameters();
 
-        // Discover hooks via reflection if in reflection mode
-        if (IsReflectionMode())
-        {
-            DiscoverHooksViaReflection();
-        }
+        // Discover hooks using the mode-specific service
+        hookDiscoveryService.DiscoverHooks();
 
         if (!string.IsNullOrEmpty(TestContext.OutputDirectory))
         {
             TestContext.WorkingDirectory = TestContext.OutputDirectory!;
         }
-    }
-
-    private bool IsReflectionMode()
-    {
-        return !SourceRegistrar.IsEnabled;
-    }
-
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code")]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling")]
-    private void DiscoverHooksViaReflection()
-    {
-        ReflectionHookDiscoveryService.DiscoverHooks();
     }
 
     private void SetUpExceptionListeners()

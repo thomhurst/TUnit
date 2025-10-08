@@ -73,11 +73,6 @@ internal sealed class ClassAndMethodArgumentsTests_Simple_TestSource_GUID : glob
             {
                 return new global::TUnit.TestProject.ClassAndMethodArgumentsTests(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassAndMethodArgumentsTests)instance;
-                await typedInstance.Simple();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.Simple();
@@ -118,8 +113,6 @@ internal sealed class ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GU
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("3"),
-                new global::TUnit.Core.ArgumentsAttribute("4"),
                 new global::TUnit.Core.ArgumentsAttribute("1"),
                 new global::TUnit.Core.ArgumentsAttribute("2")
             ],
@@ -190,18 +183,6 @@ internal sealed class ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GU
             {
                 return new global::TUnit.TestProject.ClassAndMethodArgumentsTests(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassAndMethodArgumentsTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.WithMethodLevel(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -249,8 +230,6 @@ internal sealed class ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_G
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute("3"),
-                new global::TUnit.Core.ArgumentsAttribute("4"),
                 new global::TUnit.Core.ArgumentsAttribute("1"),
                 new global::TUnit.Core.ArgumentsAttribute("2")
             ],
@@ -320,18 +299,6 @@ internal sealed class ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_G
             InstanceFactory = (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.ClassAndMethodArgumentsTests(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-            },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassAndMethodArgumentsTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.IgnoreParameters(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {

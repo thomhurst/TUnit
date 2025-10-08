@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.PropertyInjection.Initialization;
 
@@ -28,6 +29,9 @@ internal sealed class SourceGeneratedPropertyStrategy : IPropertyInitializationS
     /// <summary>
     /// Initializes a property using source-generated metadata.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Property data resolver handles both AOT and reflection modes appropriately")]
+    #endif
     public async Task InitializePropertyAsync(PropertyInitializationContext context)
     {
         if (context.SourceGeneratedMetadata == null)

@@ -74,12 +74,6 @@ internal sealed class MyTests_Test1_TestSource_GUID : global::TUnit.Core.Interfa
             {
                 return new global::TUnit.TestProject.Bugs._1594.MyTests(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._1594.MyFixture>(args[0]));
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1594.MyTests)instance;
-                typedInstance.Test1();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Test1();

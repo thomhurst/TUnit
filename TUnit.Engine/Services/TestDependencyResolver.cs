@@ -9,6 +9,7 @@ internal sealed class TestDependencyResolver
     ];
     private readonly Dictionary<Type, List<AbstractExecutableTest>> _testsByType = new();
     private readonly Dictionary<string, List<AbstractExecutableTest>> _testsByMethodName = new();
+    private readonly Dictionary<(Type ClassType, string MethodName), AbstractExecutableTest> _testLookupCache = new();
     private readonly List<AbstractExecutableTest> _testsWithPendingDependencies =
     [
     ];
@@ -22,7 +23,7 @@ internal sealed class TestDependencyResolver
         lock (_resolutionLock)
         {
             _allTests.Add(test);
-            
+
             var testType = test.Metadata.TestClassType;
             if (!_testsByType.TryGetValue(testType, out var testsForType))
             {
@@ -32,7 +33,7 @@ internal sealed class TestDependencyResolver
                 _testsByType[testType] = testsForType;
             }
             testsForType.Add(test);
-            
+
             var methodName = test.Metadata.TestMethodName;
             if (!_testsByMethodName.TryGetValue(methodName, out var testsForMethod))
             {
@@ -42,7 +43,10 @@ internal sealed class TestDependencyResolver
                 _testsByMethodName[methodName] = testsForMethod;
             }
             testsForMethod.Add(test);
-            
+
+            // Cache test by composite key for fast lookups in GetTransitiveDependencies
+            _testLookupCache[(testType, methodName)] = test;
+
             ResolvePendingDependencies();
         }
     }
@@ -99,7 +103,7 @@ internal sealed class TestDependencyResolver
             
             if (allResolved)
             {
-                var uniqueDependencies = new Dictionary<AbstractExecutableTest, ResolvedDependency>();
+                var uniqueDependencies = new Dictionary<AbstractExecutableTest, ResolvedDependency>(capacity: 8);
                 foreach (var dep in resolvedDependencies)
                 {
                     if (dep.Test == test)
@@ -228,12 +232,14 @@ internal sealed class TestDependencyResolver
             {
                 return;
             }
-            
-            var test = _allTests.FirstOrDefault(t => 
-                t.Metadata.TestClassType == current.ClassType &&
-                t.Metadata.TestMethodName == current.TestName);
-            
-            if (test?.Dependencies != null)
+
+            // Use cached lookup instead of linear search through all tests
+            if (!_testLookupCache.TryGetValue((current.ClassType, current.TestName), out var test))
+            {
+                return;
+            }
+
+            if (test.Dependencies != null)
             {
                 foreach (var dep in test.Dependencies)
                 {

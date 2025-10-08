@@ -18,7 +18,7 @@ internal sealed class CircularDependencyDetector
     {
         var testList = tests.ToList();
         var circularDependencies = new List<(AbstractExecutableTest Test, List<AbstractExecutableTest> DependencyChain)>();
-        var visitedStates = new Dictionary<string, VisitState>();
+        var visitedStates = new Dictionary<string, VisitState>(capacity: testList.Count);
 
         foreach (var test in testList)
         {

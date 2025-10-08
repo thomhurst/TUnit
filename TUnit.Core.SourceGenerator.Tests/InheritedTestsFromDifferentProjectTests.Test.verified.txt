@@ -58,12 +58,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                typedInstance.Test();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Test();
@@ -105,7 +99,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>("Foo"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
@@ -160,19 +153,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.GenericMethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -221,7 +201,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.TestData), "Foo"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
@@ -287,19 +266,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.NonGenericMethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -390,11 +356,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                await typedInstance.VerifyInheritedCategoriesAreAvailable();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.VerifyInheritedCategoriesAreAvailable();
@@ -478,12 +439,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTest_TestSourc
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                typedInstance.BaseTest();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.BaseTest();
@@ -569,12 +524,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_BaseTestWithMultip
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                typedInstance.BaseTestWithMultipleCategories();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.BaseTestWithMultipleCategories();
@@ -658,12 +607,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_Test_TestSource_GU
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                typedInstance.Test();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Test();
@@ -705,7 +648,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute<global::TUnit.TestProject.TestData>("Foo"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
@@ -760,19 +702,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.GenericMethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -821,7 +750,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.TestData), "Foo"),
                 new global::TUnit.TestProject.Attributes.EngineTest(Pass),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.Core.CategoryAttribute("BaseCategoriesOnClass")
@@ -887,19 +815,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.NonGenericMethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -990,11 +905,6 @@ internal sealed class InheritedTestsFromDifferentProjectTests_VerifyInheritedCat
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests)instance;
-                await typedInstance.VerifyInheritedCategoriesAreAvailable();
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 await instance.VerifyInheritedCategoriesAreAvailable();

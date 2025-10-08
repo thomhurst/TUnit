@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace TUnit.Assertions.AssertConditions;
 
 public abstract class ExpectedValueAssertCondition<TActual, TExpected>(TExpected? expected) : BaseAssertCondition<TActual>

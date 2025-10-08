@@ -18,6 +18,9 @@ internal sealed class TestGenericTypeResolver
     /// <param name="metadata">The test metadata containing generic type information</param>
     /// <param name="testData">The runtime test data containing actual arguments</param>
     /// <returns>A result containing resolved generic types for both class and method</returns>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
+    #endif
     public static TestGenericTypeResolution Resolve(TestMetadata metadata, TestBuilder.TestData testData)
     {
         var result = new TestGenericTypeResolution();
@@ -52,6 +55,9 @@ internal sealed class TestGenericTypeResolver
         return result;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
+    #endif
     private static Type[] ResolveClassGenericArguments(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type genericClassType,
         GenericTypeInfo genericTypeInfo,
@@ -114,6 +120,9 @@ internal sealed class TestGenericTypeResolver
         return resolvedTypes;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
+    #endif
     private static Type[] ResolveMethodGenericArguments(
         MethodMetadata methodMetadata,
         GenericMethodInfo genericMethodInfo,
@@ -406,6 +415,9 @@ internal sealed class TestGenericTypeResolver
         return resolvedTypesFromMapping;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
+    #endif
     private static bool TryInferTypesFromArguments(
         ParameterInfo[] parameters,
         object?[] arguments,
@@ -429,6 +441,9 @@ internal sealed class TestGenericTypeResolver
         return true;
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
+    #endif
     private static void InferTypeMapping(
         Type parameterType,
         Type argumentType,
@@ -442,9 +457,12 @@ internal sealed class TestGenericTypeResolver
         }
     }
 
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
+#endif
     private static bool TryInferTypeMapping(
-        Type parameterType, 
-        Type argumentType, 
+        Type parameterType,
+        Type argumentType,
         Dictionary<Type, Type> typeMapping)
     {
         // Direct generic parameter
@@ -505,10 +523,7 @@ internal sealed class TestGenericTypeResolver
         if (parameterType is { IsGenericType: true, IsInterface: true })
         {
             // Check if argument type implements the parameter interface
-            #pragma warning disable IL2070 // Type.GetInterfaces() requires preserved interfaces
-            // Note: Interface discovery for generic type resolution. AOT scenarios should use concrete types or source-generated type mappings.
             var implementedInterfaces = argumentType.GetInterfaces();
-            #pragma warning restore IL2070
             foreach (var implementedInterface in implementedInterfaces)
             {
                 if (implementedInterface.IsGenericType)

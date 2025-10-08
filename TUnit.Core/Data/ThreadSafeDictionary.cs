@@ -16,7 +16,9 @@ public class ThreadSafeDictionary<TKey,
 
     public ICollection<TKey> Keys => _innerDictionary.Keys;
 
-    public ICollection<TValue> Values => _innerDictionary.Values.Select(lazy => lazy.Value).ToList();
+    // Return IEnumerable to avoid allocating a List on every access
+    // Callers can materialize if needed
+    public IEnumerable<TValue> Values => _innerDictionary.Values.Select(lazy => lazy.Value);
 
     public TValue GetOrAdd(TKey key, Func<TKey, TValue> func)
     {

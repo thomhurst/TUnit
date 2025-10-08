@@ -67,19 +67,6 @@ internal sealed class GenericTestClass_TestMethod_TestSource_GUID : global::TUni
                 }
                 throw new global::System.InvalidOperationException("No type arguments provided for generic class");
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var instanceType = instance.GetType();
-                var method = instanceType.GetMethod("TestMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance);
-                if (method == null)
-                {
-                    throw new global::System.InvalidOperationException($"Method 'TestMethod' not found on type {instanceType.FullName}");
-                }
-                var methodArgs = new object?[args.Length];
-                args.CopyTo(methodArgs, 0);
-                // Invoke the method
-                var result = method.Invoke(instance, methodArgs);
-            },
             ConcreteInstantiations = new global::System.Collections.Generic.Dictionary<string, global::TUnit.Core.TestMetadata>
             {
                 [(typeof(int).FullName ?? typeof(int).Name)] = 

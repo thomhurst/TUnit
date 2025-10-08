@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using EnumerableAsyncProcessor.Extensions;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
@@ -26,7 +27,7 @@ internal sealed class TestBuilderPipeline
         _contextProvider = contextBuilder;
         _eventReceiverOrchestrator = eventReceiverOrchestrator ?? throw new ArgumentNullException(nameof(eventReceiverOrchestrator));
     }
-    
+
     private TestBuilderContext CreateTestBuilderContext(TestMetadata metadata)
     {
         var testBuilderContext = new TestBuilderContext
@@ -35,25 +36,27 @@ internal sealed class TestBuilderPipeline
             Events = new TestContextEvents(),
             ObjectBag = new Dictionary<string, object?>()
         };
-        
+
         // Check for ClassConstructor attribute and set it early if present
         var attributes = metadata.AttributeFactory();
-        
+
         // Look for any attribute that inherits from ClassConstructorAttribute
         // This handles both ClassConstructorAttribute and ClassConstructorAttribute<T>
         var classConstructorAttribute = attributes
             .Where(a => a is ClassConstructorAttribute)
             .Cast<ClassConstructorAttribute>()
             .FirstOrDefault();
-            
+
         if (classConstructorAttribute != null)
         {
             testBuilderContext.ClassConstructor = (IClassConstructor)Activator.CreateInstance(classConstructorAttribute.ClassConstructorType)!;
         }
-        
+
         return testBuilderContext;
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsAsync(string testSessionId)
     {
         var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
@@ -64,6 +67,8 @@ internal sealed class TestBuilderPipeline
     /// <summary>
     /// Streaming version that yields tests as they're built without buffering
     /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsStreamingAsync(
         string testSessionId,
         CancellationToken cancellationToken = default)
@@ -86,6 +91,8 @@ internal sealed class TestBuilderPipeline
         }
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(IEnumerable<TestMetadata> testMetadata)
     {
         var testGroups = await testMetadata.SelectAsync(async metadata =>
@@ -111,6 +118,9 @@ internal sealed class TestBuilderPipeline
         return testGroups.SelectMany(x => x);
     }
 
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task<AbstractExecutableTest[]> GenerateDynamicTests(TestMetadata metadata)
     {
         // Get attributes first
@@ -141,14 +151,14 @@ internal sealed class TestBuilderPipeline
             };
 
             var testId = TestIdentifierService.GenerateTestId(metadata, testData);
-            
+
             var displayName = repeatCount > 0
                 ? $"{metadata.TestName} (Repeat {repeatIndex + 1}/{repeatCount + 1})"
                 : metadata.TestName;
 
             // Get attributes first
             var attributes = metadata.AttributeFactory();
-            
+
             // Create TestDetails for dynamic tests
             var testDetails = new TestDetails
             {
@@ -169,7 +179,7 @@ internal sealed class TestBuilderPipeline
             };
 
             var testBuilderContext = CreateTestBuilderContext(metadata);
-            
+
             var context = _contextProvider.CreateTestContext(
                 metadata.TestName,
                 metadata.TestClassType,
@@ -200,6 +210,10 @@ internal sealed class TestBuilderPipeline
     /// <summary>
     /// Build tests from a single metadata item, yielding them as they're created
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
+    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
+    #endif
     private async IAsyncEnumerable<AbstractExecutableTest> BuildTestsFromSingleMetadataAsync(TestMetadata metadata)
     {
         TestMetadata resolvedMetadata;
@@ -439,6 +453,9 @@ internal sealed class TestBuilderPipeline
         };
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
     {
         var discoveredContext = new DiscoveredTestContext(

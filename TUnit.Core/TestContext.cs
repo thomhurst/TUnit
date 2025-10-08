@@ -59,7 +59,6 @@ public class TestContext : Context
 
     public static string? OutputDirectory
     {
-        [UnconditionalSuppressMessage("SingleFile", "IL3000:Avoid accessing Assembly file path when publishing as a single file", Justification = "Dynamic code check implemented")]
         get
         {
 #if NET
@@ -68,8 +67,14 @@ public class TestContext : Context
                 return AppContext.BaseDirectory;
             }
 #endif
-            return Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
-                   ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            [UnconditionalSuppressMessage("SingleFile", "IL3000:Avoid accessing Assembly file path when publishing as a single file", Justification = "Dynamic code check implemented")]
+            string GetOutputDirectory()
+            {
+                return Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)
+                       ?? Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+            }
+
+            return GetOutputDirectory();
         }
     }
 
@@ -214,8 +219,12 @@ public class TestContext : Context
             return TestName;
         }
 
-        var arguments = string.Join(", ", TestDetails.TestMethodArguments
-            .Select(arg => ArgumentFormatter.Format(arg, ArgumentDisplayFormatters)));
+        var formattedArgs = new string[TestDetails.TestMethodArguments.Length];
+        for (var i = 0; i < TestDetails.TestMethodArguments.Length; i++)
+        {
+            formattedArgs[i] = ArgumentFormatter.Format(TestDetails.TestMethodArguments[i], ArgumentDisplayFormatters);
+        }
+        var arguments = string.Join(", ", formattedArgs);
 
         if (string.IsNullOrEmpty(arguments))
         {
@@ -246,7 +255,9 @@ public class TestContext : Context
         else
         {
             var existingToken = LinkedCancellationTokens.Token;
+            var oldCts = LinkedCancellationTokens;
             LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(existingToken, cancellationToken);
+            oldCts.Dispose();
         }
 
         CancellationToken = LinkedCancellationTokens.Token;
@@ -316,9 +327,11 @@ public class TestContext : Context
 
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
 
-    internal HashSet<object> TrackedObjects { get; } = [];
+    internal ConcurrentDictionary<int, HashSet<object>> TrackedObjects { get; } = [];
 
     public DateTimeOffset? TestEnd { get; set; }
+
+    public int CurrentRetryAttempt { get; internal set; }
 
 
     public IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)

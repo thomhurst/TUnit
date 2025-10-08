@@ -81,7 +81,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
         // Create test invoker with CancellationToken support
         // Determine if the test method has a CancellationToken parameter
-        var parameterTypes = MethodMetadata.Parameters.Select(p => p.Type).ToArray();
+        var parameterTypes = MethodMetadata.Parameters.Select(static p => p.Type).ToArray();
         var hasCancellationToken = parameterTypes.Any(t => t == typeof(CancellationToken));
         var cancellationTokenIndex = hasCancellationToken
             ? Array.IndexOf(parameterTypes, typeof(CancellationToken))

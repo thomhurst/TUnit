@@ -16,7 +16,6 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_TestSource_GUI
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -69,19 +68,6 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_TestSource_GUI
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.DataSource_Class(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -130,7 +116,6 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_Generic_TestSo
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -183,19 +168,6 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_Generic_TestSo
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.DataSource_Class_Generic(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -244,7 +216,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<InitializableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -297,18 +268,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.IsInitialized_With_1_ClassDataSource(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -356,7 +315,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<InitializableClass, InitializableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -416,18 +374,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 2:
-                        await typedInstance.IsInitialized_With_2_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -475,7 +421,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<InitializableClass, InitializableClass, InitializableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -542,18 +487,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 3:
-                        await typedInstance.IsInitialized_With_3_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[2]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -601,7 +534,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<InitializableClass, InitializableClass, InitializableClass, InitializableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -675,18 +607,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 4:
-                        await typedInstance.IsInitialized_With_4_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[3]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 4 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -734,7 +654,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataS
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<InitializableClass, InitializableClass, InitializableClass, InitializableClass, InitializableClass>(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -815,18 +734,6 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests)instance;
-                switch (args.Length)
-                {
-                    case 5:
-                        await typedInstance.IsInitialized_With_5_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[4]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 5 arguments, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

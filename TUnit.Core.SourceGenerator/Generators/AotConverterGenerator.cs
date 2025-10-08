@@ -82,8 +82,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         
         // Also skip if the target type of the conversion is not publicly accessible
         // (unless it's a built-in type)
-        if (targetType is INamedTypeSymbol namedTargetType && 
-            namedTargetType.SpecialType == SpecialType.None &&
+        if (targetType is INamedTypeSymbol { SpecialType: SpecialType.None } namedTargetType &&
             namedTargetType.DeclaredAccessibility != Accessibility.Public)
         {
             return null;

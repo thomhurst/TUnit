@@ -22,7 +22,7 @@ internal static class AssemblyBase1_AfterAll1_After_Assembly_GUIDInitializer
     public static void Initialize()
     {
         var TestsBase`1_assembly = typeof(global::TUnit.TestProject.AfterTests.AssemblyBase1).Assembly;
-        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
+        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
         global::TUnit.Core.Sources.AfterAssemblyHooks[TestsBase`1_assembly].Add(
             new AfterAssemblyHookMethod
             {
@@ -97,7 +97,7 @@ internal static class AssemblyBase1_AfterEach1_After_Test_GUIDInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyBase1), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyBase1), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.AfterTestHooks[typeof(global::TUnit.TestProject.AfterTests.AssemblyBase1)].Add(
             new InstanceHookMethod
             {
@@ -173,7 +173,7 @@ internal static class AssemblyBase2_AfterAll2_After_Assembly_GUIDInitializer
     public static void Initialize()
     {
         var TestsBase`1_assembly = typeof(global::TUnit.TestProject.AfterTests.AssemblyBase2).Assembly;
-        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
+        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
         global::TUnit.Core.Sources.AfterAssemblyHooks[TestsBase`1_assembly].Add(
             new AfterAssemblyHookMethod
             {
@@ -248,7 +248,7 @@ internal static class AssemblyBase2_AfterEach2_After_Test_GUIDInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyBase2), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyBase2), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.AfterTestHooks[typeof(global::TUnit.TestProject.AfterTests.AssemblyBase2)].Add(
             new InstanceHookMethod
             {
@@ -324,7 +324,7 @@ internal static class AssemblyBase3_AfterAll3_After_Assembly_GUIDInitializer
     public static void Initialize()
     {
         var TestsBase`1_assembly = typeof(global::TUnit.TestProject.AfterTests.AssemblyBase3).Assembly;
-        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
+        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
         global::TUnit.Core.Sources.AfterAssemblyHooks[TestsBase`1_assembly].Add(
             new AfterAssemblyHookMethod
             {
@@ -399,7 +399,7 @@ internal static class AssemblyBase3_AfterEach3_After_Test_GUIDInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyBase3), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyBase3), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.AfterTestHooks[typeof(global::TUnit.TestProject.AfterTests.AssemblyBase3)].Add(
             new InstanceHookMethod
             {
@@ -475,7 +475,7 @@ internal static class AssemblyCleanupTests_AfterAllCleanUp_After_Assembly_GUIDIn
     public static void Initialize()
     {
         var TestsBase`1_assembly = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).Assembly;
-        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
+        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
         global::TUnit.Core.Sources.AfterAssemblyHooks[TestsBase`1_assembly].Add(
             new AfterAssemblyHookMethod
             {
@@ -551,7 +551,7 @@ internal static class AssemblyCleanupTests_AfterAllCleanUpWithContext_After_Asse
     public static void Initialize()
     {
         var TestsBase`1_assembly = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).Assembly;
-        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
+        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
         global::TUnit.Core.Sources.AfterAssemblyHooks[TestsBase`1_assembly].Add(
             new AfterAssemblyHookMethod
             {
@@ -636,7 +636,7 @@ internal static class AssemblyCleanupTests_AfterAllCleanUp2_After_Assembly_GUIDI
     public static void Initialize()
     {
         var TestsBase`1_assembly = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).Assembly;
-        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
+        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
         global::TUnit.Core.Sources.AfterAssemblyHooks[TestsBase`1_assembly].Add(
             new AfterAssemblyHookMethod
             {
@@ -712,7 +712,7 @@ internal static class AssemblyCleanupTests_AfterAllCleanUpWithContextAndToken_Af
     public static void Initialize()
     {
         var TestsBase`1_assembly = typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests).Assembly;
-        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
+        global::TUnit.Core.Sources.AfterAssemblyHooks.GetOrAdd(TestsBase`1_assembly, static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.AfterAssemblyHookMethod>());
         global::TUnit.Core.Sources.AfterAssemblyHooks[TestsBase`1_assembly].Add(
             new AfterAssemblyHookMethod
             {
@@ -803,7 +803,7 @@ internal static class AssemblyCleanupTests_Cleanup_After_Test_GUIDInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.AfterTestHooks[typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests)].Add(
             new InstanceHookMethod
             {
@@ -878,7 +878,7 @@ internal static class AssemblyCleanupTests_Cleanup_After_Test_GUIDInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.AfterTestHooks[typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests)].Add(
             new InstanceHookMethod
             {
@@ -962,7 +962,7 @@ internal static class AssemblyCleanupTests_CleanupWithContext_After_Test_GUIDIni
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.AfterTestHooks[typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests)].Add(
             new InstanceHookMethod
             {
@@ -1046,7 +1046,7 @@ internal static class AssemblyCleanupTests_CleanupWithContext_After_Test_GUIDIni
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests), _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
+        global::TUnit.Core.Sources.AfterTestHooks.GetOrAdd(typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests), static _ => new global::System.Collections.Concurrent.ConcurrentBag<global::TUnit.Core.Hooks.InstanceHookMethod>());
         global::TUnit.Core.Sources.AfterTestHooks[typeof(global::TUnit.TestProject.AfterTests.AssemblyCleanupTests)].Add(
             new InstanceHookMethod
             {

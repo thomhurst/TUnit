@@ -74,12 +74,6 @@ internal sealed class ClassDataSourceDrivenTests2_Base_Derived1_TestSource_GUID 
             {
                 return new global::TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>(args[0]));
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests2)instance;
-                typedInstance.Base_Derived1();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.Base_Derived1();
@@ -178,12 +172,6 @@ internal sealed class ClassDataSourceDrivenTests2_Base_Derived2_TestSource_GUID 
             InstanceFactory = (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>(args[0]));
-            },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTests2)instance;
-                typedInstance.Base_Derived2();
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {

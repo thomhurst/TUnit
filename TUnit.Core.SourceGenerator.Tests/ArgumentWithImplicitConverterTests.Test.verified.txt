@@ -16,9 +16,6 @@ internal sealed class ArgumentWithImplicitConverterTests_Explicit_TestSource_GUI
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1),
-                new global::TUnit.Core.ArgumentsAttribute(2),
-                new global::TUnit.Core.ArgumentsAttribute(3),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -73,19 +70,6 @@ internal sealed class ArgumentWithImplicitConverterTests_Explicit_TestSource_GUI
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgumentWithImplicitConverterTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ArgumentWithImplicitConverterTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.Explicit(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ExplicitInteger>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -134,9 +118,6 @@ internal sealed class ArgumentWithImplicitConverterTests_Implicit_TestSource_GUI
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1),
-                new global::TUnit.Core.ArgumentsAttribute(2),
-                new global::TUnit.Core.ArgumentsAttribute(3),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -191,19 +172,6 @@ internal sealed class ArgumentWithImplicitConverterTests_Implicit_TestSource_GUI
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgumentWithImplicitConverterTests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ArgumentWithImplicitConverterTests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.Implicit(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ImplicitInteger>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

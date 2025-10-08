@@ -10,7 +10,7 @@ public class ThrowsWithParamNameAssertCondition<TActual, TException>(
     : DelegateAssertCondition<TActual, ArgumentException>()
     where TException : ArgumentException
 {
-    internal protected override string GetExpectation()
+    protected internal override string GetExpectation()
         => $"to throw {typeof(TException).Name.PrependAOrAn()} which param name equals \"{expectedParamName.TruncateWithEllipsis(100)}\"";
 
     protected override ValueTask<AssertionResult> GetResult(

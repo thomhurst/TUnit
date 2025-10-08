@@ -16,8 +16,6 @@ internal sealed class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Tes
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
-{Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -71,19 +69,6 @@ internal sealed class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Tes
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.DataSource_Class(TUnit.Core.Helpers.CastHelper.Cast<SomeAsyncDisposableClass>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -132,8 +117,6 @@ internal sealed class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Gen
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ClassDataSourceAttribute<SomeAsyncDisposableClass>()
-{Shared = global::TUnit.Core.SharedType.Keyed,Key = "🔑",},
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -187,19 +170,6 @@ internal sealed class ClassDataSourceDrivenTestsSharedKeyed_DataSource_Class_Gen
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.DataSource_Class_Generic(TUnit.Core.Helpers.CastHelper.Cast<SomeAsyncDisposableClass>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)

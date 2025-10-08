@@ -4,6 +4,7 @@ using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
+using TUnit.Core.Tracking;
 using TUnit.Engine.Events;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
@@ -16,6 +17,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 {
     private readonly EventReceiverRegistry _registry = new();
     private readonly TUnitFrameworkLogger _logger;
+    private readonly TrackableObjectGraphProvider _trackableObjectGraphProvider;
 
     // Track which assemblies/classes/sessions have had their "first" event invoked
     private ThreadSafeDictionary<string, Task> _firstTestInAssemblyTasks = new();
@@ -33,25 +35,22 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     // Track registered First event receiver types to avoid duplicate registrations
     private readonly ConcurrentHashSet<Type> _registeredFirstEventReceiverTypes = new();
 
-    public EventReceiverOrchestrator(TUnitFrameworkLogger logger)
+    public EventReceiverOrchestrator(TUnitFrameworkLogger logger, TrackableObjectGraphProvider trackableObjectGraphProvider)
     {
         _logger = logger;
+        _trackableObjectGraphProvider = trackableObjectGraphProvider;
     }
 
-    public async ValueTask InitializeAllEligibleObjectsAsync(TestContext context, CancellationToken cancellationToken)
+    public void RegisterReceivers(TestContext context, CancellationToken cancellationToken)
     {
         var eligibleObjects = context.GetEligibleEventObjects().ToArray();
 
-        // Only initialize and register objects that haven't been processed yet
-        var newObjects = new List<object>();
         var objectsToRegister = new List<object>();
 
         foreach (var obj in eligibleObjects)
         {
             if (_initializedObjects.Add(obj)) // Add returns false if already present
             {
-                newObjects.Add(obj);
-
                 // For First event receivers, only register one instance per type
                 var objType = obj.GetType();
                 bool isFirstEventReceiver = obj is IFirstTestInTestSessionEventReceiver ||
@@ -80,20 +79,14 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             // Register only the objects that should be registered
             _registry.RegisterReceivers(objectsToRegister);
         }
-
-        if (newObjects.Count > 0)
-        {
-            // Initialize all new objects (even if not registered)
-            foreach (var obj in newObjects)
-            {
-                await ObjectInitializer.InitializeAsync(obj, cancellationToken);
-            }
-        }
     }
 
 
     // Fast-path checks with inlining
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask InvokeTestStartEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         // Fast path - no allocation if no receivers
@@ -105,15 +98,16 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         await InvokeTestStartEventReceiversCore(context, cancellationToken);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestStartEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
-        // Filter scoped attributes
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
+        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
+            context.GetEligibleEventObjects()
+                .OfType<ITestStartEventReceiver>()
+                .OrderBy(static r => r.Order));
 
         // Batch invocation for multiple receivers
         if (filteredReceivers.Count > 3)
@@ -131,6 +125,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask InvokeTestEndEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         if (!_registry.HasTestEndReceivers())
@@ -141,15 +138,16 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         await InvokeTestEndEventReceiversCore(context, cancellationToken);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async ValueTask InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestEndEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
-        // Filter scoped attributes
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
+        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
+            context.GetEligibleEventObjects()
+                .OfType<ITestEndEventReceiver>()
+                .OrderBy(static r => r.Order));
 
         foreach (var receiver in filteredReceivers)
         {
@@ -165,6 +163,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask InvokeTestSkippedEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         if (!_registry.HasTestSkippedReceivers())
@@ -175,15 +176,16 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         await InvokeTestSkippedEventReceiversCore(context, cancellationToken);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     private async ValueTask InvokeTestSkippedEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var receivers = context.GetEligibleEventObjects()
-            .OfType<ITestSkippedEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
-        // Filter scoped attributes
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
+        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
+            context.GetEligibleEventObjects()
+                .OfType<ITestSkippedEventReceiver>()
+                .OrderBy(static r => r.Order));
 
         foreach (var receiver in filteredReceivers)
         {
@@ -191,34 +193,37 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask InvokeTestDiscoveryEventReceiversAsync(TestContext context, DiscoveredTestContext discoveredContext, CancellationToken cancellationToken)
     {
         var eventReceivers = context.GetEligibleEventObjects()
             .OfType<ITestDiscoveryEventReceiver>()
-            .OrderBy(r => r.Order)
+            .OrderBy(static r => r.Order)
             .ToList();
 
         // Filter scoped attributes to ensure only the highest priority one of each type is invoked
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
 
-        foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
+        foreach (var receiver in filteredReceivers.OrderBy(static r => r.Order))
         {
             await receiver.OnTestDiscovered(discoveredContext);
         }
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    #endif
     public async ValueTask InvokeHookRegistrationEventReceiversAsync(HookRegisteredContext hookContext, CancellationToken cancellationToken)
     {
-        // Get event receivers from the hook method's attributes
-        var eventReceivers = hookContext.HookMethod.Attributes
-            .OfType<IHookRegisteredEventReceiver>()
-            .OrderBy(r => r.Order)
-            .ToList();
-
         // Filter scoped attributes to ensure only the highest priority one of each type is invoked
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
+            hookContext.HookMethod.Attributes
+                .OfType<IHookRegisteredEventReceiver>()
+                .OrderBy(static r => r.Order));
 
-        foreach (var receiver in filteredReceivers.OrderBy(r => r.Order))
+        foreach (var receiver in filteredReceivers.OrderBy(static r => r.Order))
         {
             await receiver.OnHookRegistered(hookContext);
         }
@@ -375,7 +380,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
 
-        var assemblyCount = _assemblyTestCounts.GetOrAdd(assemblyName, _ => new Counter()).Decrement();
+        var assemblyCount = _assemblyTestCounts.GetOrAdd(assemblyName, static _ => new Counter()).Decrement();
 
         if (assemblyCount == 0)
         {
@@ -416,7 +421,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         var classType = classContext.ClassType;
 
-        var classCount = _classTestCounts.GetOrAdd(classType, _ => new Counter()).Decrement();
+        var classCount = _classTestCounts.GetOrAdd(classType, static _ => new Counter()).Decrement();
 
         if (classCount == 0)
         {
@@ -459,7 +464,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var group in contexts.GroupBy(c => c.ClassContext.AssemblyContext.Assembly.GetName().FullName))
         {
-            var counter = _assemblyTestCounts.GetOrAdd(group.Key, _ => new Counter());
+            var counter = _assemblyTestCounts.GetOrAdd(group.Key, static _ => new Counter());
 
             for (var i = 0; i < group.Count(); i++)
             {
@@ -469,7 +474,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var group in contexts.GroupBy(c => c.ClassContext.ClassType))
         {
-            var counter = _classTestCounts.GetOrAdd(group.Key, _ => new Counter());
+            var counter = _classTestCounts.GetOrAdd(group.Key, static _ => new Counter());
 
             for (var i = 0; i < group.Count(); i++)
             {

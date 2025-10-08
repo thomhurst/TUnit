@@ -10,11 +10,8 @@ internal static class TypedDataSourceOptimizer
     /// </summary>
     public static bool CanOptimizeTypedDataSource(AttributeData dataSourceAttribute, IMethodSymbol testMethod)
     {
-        if (!dataSourceAttribute.IsTypedDataSourceAttribute())
-        {
-            return false;
-        }
-
+        // GetTypedDataSourceType already checks if it's a typed data source (returns null if not)
+        // This avoids enumerating AllInterfaces twice
         var dataSourceType = dataSourceAttribute.GetTypedDataSourceType();
         if (dataSourceType == null)
         {

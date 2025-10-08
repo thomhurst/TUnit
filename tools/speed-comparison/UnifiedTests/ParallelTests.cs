@@ -17,7 +17,7 @@ public class ParallelTests
 #if TUNIT
     [Test]
     public async Task ParallelTest1()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void ParallelTest1()
 #elif NUNIT
@@ -31,7 +31,7 @@ public class ParallelTests
         var localData = ProcessData(Enumerable.Range(1, 1000).ToList());
 #if TUNIT
         await Assert.That(localData.Sum()).IsEqualTo(500500);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(500500, localData.Sum());
 #elif NUNIT
         Assert.That(localData.Sum(), Is.EqualTo(500500));
@@ -48,7 +48,7 @@ public class ParallelTests
 #if TUNIT
     [Test]
     public async Task ParallelTest2()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void ParallelTest2()
 #elif NUNIT
@@ -62,7 +62,7 @@ public class ParallelTests
         var localData = ProcessData(Enumerable.Range(1001, 1000).ToList());
 #if TUNIT
         await Assert.That(localData.Sum()).IsEqualTo(1500500);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(1500500, localData.Sum());
 #elif NUNIT
         Assert.That(localData.Sum(), Is.EqualTo(1500500));
@@ -79,7 +79,7 @@ public class ParallelTests
 #if TUNIT
     [Test]
     public async Task ParallelTest3()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void ParallelTest3()
 #elif NUNIT
@@ -93,7 +93,7 @@ public class ParallelTests
         var localData = ProcessData(Enumerable.Range(2001, 1000).ToList());
 #if TUNIT
         await Assert.That(localData.Sum()).IsEqualTo(2500500);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(2500500, localData.Sum());
 #elif NUNIT
         Assert.That(localData.Sum(), Is.EqualTo(2500500));
@@ -110,7 +110,7 @@ public class ParallelTests
 #if TUNIT
     [Test]
     public async Task ParallelTest4()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void ParallelTest4()
 #elif NUNIT
@@ -124,7 +124,7 @@ public class ParallelTests
         var localData = ProcessData(Enumerable.Range(3001, 1000).ToList());
 #if TUNIT
         await Assert.That(localData.Sum()).IsEqualTo(3500500);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(3500500, localData.Sum());
 #elif NUNIT
         Assert.That(localData.Sum(), Is.EqualTo(3500500));
@@ -141,7 +141,7 @@ public class ParallelTests
 #if TUNIT
     [Test]
     public async Task ParallelTest5()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void ParallelTest5()
 #elif NUNIT
@@ -155,7 +155,7 @@ public class ParallelTests
         var localData = ProcessData(Enumerable.Range(4001, 1000).ToList());
 #if TUNIT
         await Assert.That(localData.Sum()).IsEqualTo(4500500);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(4500500, localData.Sum());
 #elif NUNIT
         Assert.That(localData.Sum(), Is.EqualTo(4500500));
@@ -193,7 +193,7 @@ public class SequentialTests
 [TestClass]
 [DoNotParallelize]
 public class SequentialTests
-#elif XUNIT
+#elif XUNIT || XUNIT3
 [Collection("Sequential")]
 public class SequentialTests
 #endif
@@ -205,7 +205,7 @@ public class SequentialTests
     [Test]
     [NotInParallel("sequential-group")]
     public async Task SequentialTest1()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void SequentialTest1()
 #elif NUNIT
@@ -221,7 +221,7 @@ public class SequentialTests
 
 #if TUNIT
         await Assert.That(_sequentialCounter).IsEqualTo(_executionOrder.Count);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(_executionOrder.Count, _sequentialCounter);
 #elif NUNIT
         Assert.That(_sequentialCounter, Is.EqualTo(_executionOrder.Count));
@@ -235,7 +235,7 @@ public class SequentialTests
     [Test]
     [NotInParallel("sequential-group")]
     public async Task SequentialTest2()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void SequentialTest2()
 #elif NUNIT
@@ -251,7 +251,7 @@ public class SequentialTests
 
 #if TUNIT
         await Assert.That(_sequentialCounter).IsEqualTo(_executionOrder.Count);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(_executionOrder.Count, _sequentialCounter);
 #elif NUNIT
         Assert.That(_sequentialCounter, Is.EqualTo(_executionOrder.Count));
@@ -265,7 +265,7 @@ public class SequentialTests
     [Test]
     [NotInParallel("sequential-group")]
     public async Task SequentialTest3()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public void SequentialTest3()
 #elif NUNIT
@@ -281,7 +281,7 @@ public class SequentialTests
 
 #if TUNIT
         await Assert.That(_sequentialCounter).IsEqualTo(_executionOrder.Count);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(_executionOrder.Count, _sequentialCounter);
 #elif NUNIT
         Assert.That(_sequentialCounter, Is.EqualTo(_executionOrder.Count));
@@ -310,7 +310,7 @@ public class ThreadSafeTests
     [Arguments(4)]
     [Arguments(5)]
     public async Task ConcurrentCollectionTest(int id)
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Theory]
     [InlineData(1)]
     [InlineData(2)]
@@ -342,7 +342,7 @@ public class ThreadSafeTests
 #if TUNIT
         await Assert.That(_concurrentData.ContainsKey(key)).IsTrue();
         await Assert.That(_concurrentData[key]).Contains($"Item_{id}");
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.True(_concurrentData.ContainsKey(key));
         Assert.Contains($"Item_{id}", _concurrentData[key]);
 #elif NUNIT
@@ -357,7 +357,7 @@ public class ThreadSafeTests
         var sum = Enumerable.Range(1, 100).Select(x => x * id).Sum();
 #if TUNIT
         await Assert.That(sum).IsEqualTo(5050 * id);
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(5050 * id, sum);
 #elif NUNIT
         Assert.That(sum, Is.EqualTo(5050 * id));
@@ -369,7 +369,7 @@ public class ThreadSafeTests
 #if TUNIT
     [Test]
     public async Task ParallelAsyncTest()
-#elif XUNIT
+#elif XUNIT || XUNIT3
     [Fact]
     public async Task ParallelAsyncTest()
 #elif NUNIT
@@ -393,7 +393,7 @@ public class ThreadSafeTests
         await Assert.That(results.Sum()).IsEqualTo(55);
         await Assert.That(results).HasCount(5);
         await Assert.That(results.All(r => r > 0)).IsTrue();
-#elif XUNIT
+#elif XUNIT || XUNIT3
         Assert.Equal(55, results.Sum());
         Assert.Equal(5, results.Length);
         Assert.True(results.All(r => r > 0));

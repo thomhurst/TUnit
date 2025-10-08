@@ -28,6 +28,9 @@ internal sealed class PropertyInjectionService
     /// This ensures properties are only initialized when the test is about to run.
     /// Arguments are processed in parallel for better performance.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     public async Task InjectPropertiesIntoArgumentsAsync(object?[] arguments, Dictionary<string, object?> objectBag, MethodMetadata methodMetadata, TestContextEvents events)
     {
         if (arguments.Length == 0)
@@ -63,6 +66,9 @@ internal sealed class PropertyInjectionService
     /// <param name="objectBag">Shared object bag for the test context. Must not be null.</param>
     /// <param name="methodMetadata">Method metadata for the test. Can be null.</param>
     /// <param name="events">Test context events for tracking. Must not be null and must be unique per test permutation.</param>
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     public Task InjectPropertiesIntoObjectAsync(object instance, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
     {
         if (objectBag == null)
@@ -84,6 +90,9 @@ internal sealed class PropertyInjectionService
         return InjectPropertiesIntoObjectAsyncCore(instance, objectBag, methodMetadata, events, visitedObjects);
     }
 
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
     internal async Task InjectPropertiesIntoObjectAsyncCore(object instance, Dictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, ConcurrentDictionary<object, byte> visitedObjects)
     {
         if (instance == null)

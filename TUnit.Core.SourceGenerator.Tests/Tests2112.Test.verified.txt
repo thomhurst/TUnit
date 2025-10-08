@@ -16,8 +16,6 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(0, 1L),
-                new global::TUnit.Core.ArgumentsAttribute(0, 1L),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -78,37 +76,6 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2112.Tests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._2112.Tests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
-                        break;
-                    case 2:
-                        typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) });
-                        break;
-                    case 3:
-                        typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });
-                        break;
-                    case 4:
-                        typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]) });
-                        break;
-                    case 5:
-                        typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]) });
-                        break;
-                    case 6:
-                        typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]) });
-                        break;
-                    case 7:
-                        typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]) });
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -117,7 +84,7 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
                         instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
                         break;
                     case 2:
-                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) });
+                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is long[] arr ? arr : new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) }));
                         break;
                     case 3:
                         instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });
@@ -175,8 +142,6 @@ internal sealed class Tests_Test2_TestSource_GUID : global::TUnit.Core.Interface
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(0, 1L, 2L, 3L),
-                new global::TUnit.Core.ArgumentsAttribute(0, 1L, 2L, 3L),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
             DataSources = new global::TUnit.Core.IDataSourceAttribute[]
@@ -237,37 +202,6 @@ internal sealed class Tests_Test2_TestSource_GUID : global::TUnit.Core.Interface
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2112.Tests(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._2112.Tests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
-                        break;
-                    case 2:
-                        typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) });
-                        break;
-                    case 3:
-                        typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });
-                        break;
-                    case 4:
-                        typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]) });
-                        break;
-                    case 5:
-                        typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]) });
-                        break;
-                    case 6:
-                        typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]) });
-                        break;
-                    case 7:
-                        typedInstance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]) });
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
-                }
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -276,7 +210,7 @@ internal sealed class Tests_Test2_TestSource_GUID : global::TUnit.Core.Interface
                         instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
                         break;
                     case 2:
-                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) });
+                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is long[] arr ? arr : new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) }));
                         break;
                     case 3:
                         instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });

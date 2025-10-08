@@ -15,7 +15,13 @@ public static class MetadataExtensions
 
     public static MethodInfo GetReflectionInfo(this MethodMetadata method)
     {
-        return GetMethodFromType(method.Type, method.Name, method.Parameters.Select(x => x.Type).ToArray())!;
+        // Optimize: Use for-loop instead of LINQ to reduce allocations
+        var paramTypes = new Type[method.Parameters.Length];
+        for (int i = 0; i < method.Parameters.Length; i++)
+        {
+            paramTypes[i] = method.Parameters[i].Type;
+        }
+        return GetMethodFromType(method.Type, method.Name, paramTypes)!;
     }
 
     public static IEnumerable<Attribute> GetCustomAttributes(this MethodMetadata method)
@@ -36,10 +42,33 @@ public static class MetadataExtensions
         string name,
         Type[] parameters)
     {
-        return type
-                .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-                .SingleOrDefault(x => x.Name == name && x.GetParameters().Select(p => p.ParameterType).SequenceEqual(parameters))
-            ?? type.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+        // Optimize: Avoid LINQ Select in hot path - use manual parameter comparison
+        var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+
+        foreach (var method in methods)
+        {
+            if (method.Name != name)
+                continue;
+
+            var methodParams = method.GetParameters();
+            if (methodParams.Length != parameters.Length)
+                continue;
+
+            bool parametersMatch = true;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (methodParams[i].ParameterType != parameters[i])
+                {
+                    parametersMatch = false;
+                    break;
+                }
+            }
+
+            if (parametersMatch)
+                return method;
+        }
+
+        return type.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.FlattenHierarchy)
             ?? throw new InvalidOperationException($"Method '{name}' with parameters {string.Join(", ", parameters.Select(p => p.Name))} not found in type '{type.FullName}'.");
     }
 }

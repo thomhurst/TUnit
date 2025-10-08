@@ -13,7 +13,7 @@
     <PackageVersion Include="CliWrap" Version="3.9.0" />
     <PackageVersion Include="EnumerableAsyncProcessor" Version="3.8.4" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
-    <PackageVersion Include="FSharp.Core" Version="9.0.303" />
+    <PackageVersion Include="FSharp.Core" Version="10.0.100-preview7.25451.107" />
     <PackageVersion Include="Humanizer" Version="2.14.1" />
     <PackageVersion Include="MessagePack" Version="3.1.4" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.9" />
@@ -48,20 +48,17 @@
     <PackageVersion Include="ModularPipelines.DotNet" Version="2.47.8" />
     <PackageVersion Include="ModularPipelines.Git" Version="2.47.8" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="2.47.8" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="3.11.0" />
-    <PackageVersion Include="MSTest.TestFramework" Version="3.11.0" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.0.0" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.0.0" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="NuGet.Protocol" Version="6.14.0" />
     <PackageVersion Include="NUnit" Version="4.4.0" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.10.0" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="5.1.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
     <PackageVersion Include="Polly" Version="8.6.4" />
-    <PackageVersion Include="Polyfill" Version="8.9.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageVersion>
+    <PackageVersion Include="Polyfill" Version="8.9.0" />
     <PackageVersion Include="PublicApiGenerator" Version="11.4.6" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
@@ -73,7 +70,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="StreamJsonRpc" Version="2.22.11" />
+    <PackageVersion Include="StreamJsonRpc" Version="2.22.23" />
     <PackageVersion Include="System.Collections.Immutable" Version="9.0.0" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-rc.1.25451.107" />
     <PackageVersion Include="System.Text.Json" Version="9.0.0" />
@@ -82,16 +79,17 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.7.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.7.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="Verify" Version="30.19.2" />
-    <PackageVersion Include="Verify.NUnit" Version="30.19.2" />
-    <PackageVersion Include="TUnit" Version="0.61.58" />
-    <PackageVersion Include="TUnit.Core" Version="0.61.58" />
-    <PackageVersion Include="TUnit.Assertions" Version="0.61.58" />
-    <PackageVersion Include="Verify.TUnit" Version="30.19.2" />
+    <PackageVersion Include="Verify" Version="30.20.1" />
+    <PackageVersion Include="Verify.NUnit" Version="30.20.1" />
+    <PackageVersion Include="TUnit" Version="0.67.10" />
+    <PackageVersion Include="TUnit.Core" Version="0.67.10" />
+    <PackageVersion Include="TUnit.Assertions" Version="0.67.10" />
+    <PackageVersion Include="Verify.TUnit" Version="30.20.1" />
     <PackageVersion Include="Vogen" Version="8.0.2" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageVersion Include="xunit.v3" Version="3.1.0" />
     <PackageVersion Include="xunit.v3.assert" Version="3.1.0" />
     <PackageVersion Include="xunit.v3.extensibility.core" Version="3.1.0" />
   </ItemGroup>

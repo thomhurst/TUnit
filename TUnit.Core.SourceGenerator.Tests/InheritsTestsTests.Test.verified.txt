@@ -20,9 +20,6 @@ internal sealed class BaseClass_Test_TestSource_GUID : global::TUnit.Core.Interf
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1),
-                new global::TUnit.Core.ArgumentsAttribute(2),
-                new global::TUnit.Core.ArgumentsAttribute(3),
                 new global::TUnit.Core.RepeatAttribute(10),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
             ],
@@ -120,18 +117,6 @@ internal sealed class BaseClass_Test_TestSource_GUID : global::TUnit.Core.Interf
             {
                 Data = default!,
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1924.None.BaseClass)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -183,9 +168,6 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1),
-                new global::TUnit.Core.ArgumentsAttribute(2),
-                new global::TUnit.Core.ArgumentsAttribute(3),
                 new global::TUnit.Core.RepeatAttribute(10),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -271,18 +253,6 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
             {
                 Data = default!,
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1924.None.Tests)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -334,9 +304,6 @@ internal sealed class Tests2_Test_TestSource_GUID : global::TUnit.Core.Interface
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1),
-                new global::TUnit.Core.ArgumentsAttribute(2),
-                new global::TUnit.Core.ArgumentsAttribute(3),
                 new global::TUnit.Core.RepeatAttribute(10),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -422,18 +389,6 @@ internal sealed class Tests2_Test_TestSource_GUID : global::TUnit.Core.Interface
             {
                 Data = default!,
             },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1924.None.Tests2)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
@@ -485,9 +440,6 @@ internal sealed class Tests3_Test_TestSource_GUID : global::TUnit.Core.Interface
             AttributeFactory = () =>
             [
                 new global::TUnit.Core.TestAttribute(),
-                new global::TUnit.Core.ArgumentsAttribute(1),
-                new global::TUnit.Core.ArgumentsAttribute(2),
-                new global::TUnit.Core.ArgumentsAttribute(3),
                 new global::TUnit.Core.RepeatAttribute(10),
                 new global::TUnit.Core.InheritsTestsAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -572,18 +524,6 @@ internal sealed class Tests3_Test_TestSource_GUID : global::TUnit.Core.Interface
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1924.None.Tests3()
             {
                 Data = default!,
-            },
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.Bugs._1924.None.Tests3)instance;
-                switch (args.Length)
-                {
-                    case 1:
-                        await typedInstance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
-                }
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {

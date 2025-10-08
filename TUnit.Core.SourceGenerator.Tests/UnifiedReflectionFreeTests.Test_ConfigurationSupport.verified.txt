@@ -55,12 +55,6 @@ internal sealed class ConfigurationTest_TestWithConfiguration_TestSource_GUID : 
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConfigurationTest(),
-            TestInvoker = async (instance, args) =>
-            {
-                var typedInstance = (global::TUnit.TestProject.ConfigurationTest)instance;
-                typedInstance.TestWithConfiguration();
-                await global::System.Threading.Tasks.Task.CompletedTask;
-            },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 instance.TestWithConfiguration();
