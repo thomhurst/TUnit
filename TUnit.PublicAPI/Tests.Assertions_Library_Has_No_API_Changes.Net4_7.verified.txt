@@ -1198,6 +1198,7 @@ namespace .Conditions
     }
     public class StringDoesNotMatchAssertion : .<string>
     {
+        public StringDoesNotMatchAssertion(.<string> context, . regex) { }
         public StringDoesNotMatchAssertion(.<string> context, string pattern) { }
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
@@ -1261,6 +1262,7 @@ namespace .Conditions
     }
     public class StringMatchesAssertion : .<string>
     {
+        public StringMatchesAssertion(.<string> context, . regex) { }
         public StringMatchesAssertion(.<string> context, string pattern) { }
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
