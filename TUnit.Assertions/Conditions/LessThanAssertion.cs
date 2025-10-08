@@ -20,8 +20,11 @@ public class LessThanAssertion<TValue> : Assertion<TValue>
         _maximum = maximum;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (value == null)
             return Task.FromResult(AssertionResult.Failed("value is null"));
 
@@ -51,8 +54,11 @@ public class LessThanOrEqualAssertion<TValue> : Assertion<TValue>
         _maximum = maximum;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (value == null)
             return Task.FromResult(AssertionResult.Failed("value is null"));
 

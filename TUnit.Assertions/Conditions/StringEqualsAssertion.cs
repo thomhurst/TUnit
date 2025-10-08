@@ -79,8 +79,11 @@ public class StringEqualsAssertion : Assertion<string>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         var actualValue = value;
         var expectedValue = _expected;
 

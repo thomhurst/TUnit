@@ -21,8 +21,11 @@ public class GreaterThanAssertion<TValue> : Assertion<TValue>
         _minimum = minimum;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (value == null)
             return Task.FromResult(AssertionResult.Failed("value is null"));
 
@@ -52,8 +55,11 @@ public class GreaterThanOrEqualAssertion<TValue> : Assertion<TValue>
         _minimum = minimum;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (value == null)
             return Task.FromResult(AssertionResult.Failed("value is null"));
 

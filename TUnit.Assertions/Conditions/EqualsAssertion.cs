@@ -256,8 +256,11 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Tolerance comparison requires dynamic invocation of known comparer delegates")]
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

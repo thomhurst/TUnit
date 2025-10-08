@@ -36,8 +36,11 @@ public class MemberAssertion<TObject, TMember> : Assertion<TMember>
         expressionBuilder.Append($".HasMember(x => x.{_memberPath})");
     }
 
-    protected override Task<AssertionResult> CheckAsync(TMember? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TMember> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         // HasMember itself doesn't perform a check - it's a transformation
         // The actual check comes from the chained assertion (.EqualTo, etc.)
         if (exception != null)

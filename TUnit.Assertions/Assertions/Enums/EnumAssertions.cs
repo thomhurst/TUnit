@@ -20,8 +20,11 @@ public class HasFlagAssertion<TEnum> : Assertion<TEnum>
         _expectedFlag = expectedFlag;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TEnum value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TEnum> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
 
@@ -55,8 +58,11 @@ public class DoesNotHaveFlagAssertion<TEnum> : Assertion<TEnum>
         _unexpectedFlag = unexpectedFlag;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TEnum value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TEnum> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
 
@@ -85,8 +91,11 @@ public class IsDefinedAssertion<TEnum> : Assertion<TEnum>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(TEnum value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TEnum> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
 
@@ -112,8 +121,11 @@ public class IsNotDefinedAssertion<TEnum> : Assertion<TEnum>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(TEnum value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TEnum> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
 
@@ -143,8 +155,11 @@ public class HasSameNameAsAssertion<TEnum> : Assertion<TEnum>
         _otherEnumValue = otherEnumValue;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TEnum value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TEnum> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
 
@@ -177,8 +192,11 @@ public class HasSameValueAsAssertion<TEnum> : Assertion<TEnum>
         _otherEnumValue = otherEnumValue;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TEnum value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TEnum> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
 
@@ -212,8 +230,11 @@ public class DoesNotHaveSameNameAsAssertion<TEnum> : Assertion<TEnum>
         _otherEnumValue = otherEnumValue;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TEnum value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TEnum> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
 
@@ -246,8 +267,11 @@ public class DoesNotHaveSameValueAsAssertion<TEnum> : Assertion<TEnum>
         _otherEnumValue = otherEnumValue;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TEnum value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TEnum> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
 

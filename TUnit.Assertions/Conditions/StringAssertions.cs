@@ -51,8 +51,11 @@ public class StringContainsAssertion : Assertion<string>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -114,8 +117,11 @@ public class StringDoesNotContainAssertion : Assertion<string>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -162,8 +168,11 @@ public class StringStartsWithAssertion : Assertion<string>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -210,8 +219,11 @@ public class StringEndsWithAssertion : Assertion<string>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -239,8 +251,11 @@ public class StringIsNotEmptyAssertion : Assertion<string>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -268,8 +283,11 @@ public class StringIsEmptyAssertion : Assertion<string>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -301,8 +319,11 @@ public class StringLengthAssertion : Assertion<string>
         _expectedLength = expectedLength;
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -330,8 +351,11 @@ public class StringIsNullOrWhitespaceAssertion : Assertion<string>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -375,8 +399,11 @@ public class StringMatchesAssertion : Assertion<string>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -423,8 +450,11 @@ public class StringDoesNotMatchAssertion : Assertion<string>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -452,8 +482,11 @@ public class StringIsNullOrEmptyAssertion : Assertion<string>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -478,8 +511,11 @@ public class StringIsNotNullOrEmptyAssertion : Assertion<string>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

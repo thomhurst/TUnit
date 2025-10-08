@@ -28,8 +28,11 @@ public class DateOnlyEqualsAssertion : Assertion<DateOnly>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(DateOnly value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DateOnly> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -80,8 +83,11 @@ public class TimeOnlyEqualsAssertion : Assertion<TimeOnly>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TimeOnly value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TimeOnly> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -131,8 +137,11 @@ public class DoubleEqualsAssertion : Assertion<double>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(double value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<double> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -181,8 +190,11 @@ public class LongEqualsAssertion : Assertion<long>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(long value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<long> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -231,8 +243,11 @@ public class DateTimeOffsetEqualsAssertion : Assertion<DateTimeOffset>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(DateTimeOffset value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DateTimeOffset> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

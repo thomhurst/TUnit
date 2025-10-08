@@ -13,8 +13,11 @@ public class DirectoryExistsAssertion : Assertion<DirectoryInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(DirectoryInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DirectoryInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -40,8 +43,11 @@ public class DirectoryDoesNotExistAssertion : Assertion<DirectoryInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(DirectoryInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DirectoryInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -67,8 +73,11 @@ public class DirectoryIsNotEmptyAssertion : Assertion<DirectoryInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(DirectoryInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DirectoryInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -98,8 +107,11 @@ public class DirectoryHasFilesAssertion : Assertion<DirectoryInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(DirectoryInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DirectoryInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -129,8 +141,11 @@ public class DirectoryHasNoSubdirectoriesAssertion : Assertion<DirectoryInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(DirectoryInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DirectoryInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -161,8 +176,11 @@ public class FileExistsAssertion : Assertion<FileInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(FileInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<FileInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -188,8 +206,11 @@ public class FileDoesNotExistAssertion : Assertion<FileInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(FileInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<FileInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -215,8 +236,11 @@ public class FileIsNotEmptyAssertion : Assertion<FileInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(FileInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<FileInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -245,8 +269,11 @@ public class FileIsNotReadOnlyAssertion : Assertion<FileInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(FileInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<FileInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -275,8 +302,11 @@ public class FileIsNotHiddenAssertion : Assertion<FileInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(FileInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<FileInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -305,8 +335,11 @@ public class FileIsNotSystemAssertion : Assertion<FileInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(FileInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<FileInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -335,8 +368,11 @@ public class FileIsNotExecutableAssertion : Assertion<FileInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(FileInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<FileInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

@@ -23,8 +23,11 @@ public class CompletesWithinActionAssertion : Assertion<object?>
         _timeout = timeout;
     }
 
-    protected override async Task<AssertionResult> CheckAsync(object? value, Exception? exception)
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<object?> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         var stopwatch = Stopwatch.StartNew();
         using var cts = new CancellationTokenSource(_timeout);
 
@@ -73,8 +76,11 @@ public class CompletesWithinAsyncAssertion : Assertion<object?>
         _timeout = timeout;
     }
 
-    protected override async Task<AssertionResult> CheckAsync(object? value, Exception? exception)
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<object?> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         var stopwatch = Stopwatch.StartNew();
         using var cts = new CancellationTokenSource(_timeout);
 

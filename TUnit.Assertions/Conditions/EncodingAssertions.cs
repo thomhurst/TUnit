@@ -12,8 +12,11 @@ public class IsUTF8EncodingAssertion : Assertion<Encoding>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(Encoding? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Encoding> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -35,8 +38,11 @@ public class IsNotUTF8EncodingAssertion : Assertion<Encoding>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(Encoding? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Encoding> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -58,8 +64,11 @@ public class IsASCIIEncodingAssertion : Assertion<Encoding>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(Encoding? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Encoding> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -81,8 +90,11 @@ public class IsUnicodeEncodingAssertion : Assertion<Encoding>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(Encoding? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Encoding> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -104,8 +116,11 @@ public class IsUTF32EncodingAssertion : Assertion<Encoding>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(Encoding? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Encoding> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -127,8 +142,11 @@ public class IsBigEndianUnicodeEncodingAssertion : Assertion<Encoding>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(Encoding? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Encoding> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -150,8 +168,11 @@ public class IsSingleByteEncodingAssertion : Assertion<Encoding>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(Encoding? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Encoding> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -173,8 +194,11 @@ public class IsNotSingleByteEncodingAssertion : Assertion<Encoding>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(Encoding? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Encoding> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

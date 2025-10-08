@@ -34,8 +34,11 @@ public class IsEquivalentToAssertion<TCollection, TItem> : Assertion<TCollection
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

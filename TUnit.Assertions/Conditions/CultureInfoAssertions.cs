@@ -13,8 +13,11 @@ public class IsInvariantCultureAssertion : Assertion<CultureInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(CultureInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<CultureInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -36,8 +39,11 @@ public class IsNotInvariantCultureAssertion : Assertion<CultureInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(CultureInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<CultureInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -59,8 +65,11 @@ public class IsNeutralCultureAssertion : Assertion<CultureInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(CultureInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<CultureInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -82,8 +91,11 @@ public class IsNotNeutralCultureAssertion : Assertion<CultureInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(CultureInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<CultureInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -105,8 +117,11 @@ public class IsEnglishCultureAssertion : Assertion<CultureInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(CultureInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<CultureInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -128,8 +143,11 @@ public class IsNotEnglishCultureAssertion : Assertion<CultureInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(CultureInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<CultureInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -151,8 +169,11 @@ public class IsRightToLeftCultureAssertion : Assertion<CultureInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(CultureInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<CultureInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -174,8 +195,11 @@ public class IsLeftToRightCultureAssertion : Assertion<CultureInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(CultureInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<CultureInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -197,8 +221,11 @@ public class IsReadOnlyCultureAssertion : Assertion<CultureInfo>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(CultureInfo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<CultureInfo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

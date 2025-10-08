@@ -156,8 +156,11 @@ public abstract class BaseThrowsAssertion<TException, TSelf> : Assertion<TExcept
         return (TSelf)this;
     }
 
-    protected sealed override Task<AssertionResult> CheckAsync(TException? value, Exception? exception)
+    protected sealed override Task<AssertionResult> CheckAsync(EvaluationMetadata<TException> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         // For Throws assertions, the exception is stored as the value after mapping
         var actualException = exception ?? value as Exception;
 
@@ -317,8 +320,11 @@ public class ThrowsNothingAssertion<TValue> : Assertion<TValue>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed(
                 $"threw {exception.GetType().Name}: {exception.Message}"));
@@ -349,8 +355,11 @@ public class HasMessageEqualToAssertion<TValue> : Assertion<TValue>
         _comparison = comparison;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         Exception? exceptionToCheck = null;
 
         // If we have an exception parameter (from Throws/ThrowsExactly), use that
@@ -393,8 +402,11 @@ public class HasMessageStartingWithAssertion<TValue> : Assertion<TValue>
         _comparison = comparison;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         Exception? exceptionToCheck = null;
 
         // If we have an exception parameter (from Throws/ThrowsExactly), use that

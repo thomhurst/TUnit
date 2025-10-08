@@ -22,8 +22,11 @@ public class DictionaryContainsKeyAssertion<TKey, TValue> : Assertion<IReadOnlyD
         _comparer = comparer;
     }
 
-    protected override Task<AssertionResult> CheckAsync(IReadOnlyDictionary<TKey, TValue>? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IReadOnlyDictionary<TKey, TValue>> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -66,8 +69,11 @@ public class DictionaryDoesNotContainKeyAssertion<TKey, TValue> : Assertion<IRea
         _expectedKey = expectedKey;
     }
 
-    protected override Task<AssertionResult> CheckAsync(IReadOnlyDictionary<TKey, TValue>? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IReadOnlyDictionary<TKey, TValue>> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

@@ -45,10 +45,9 @@ public abstract class Assertion<TValue> : IAssertionSource<TValue>
     /// Override this method if your assertion uses the default AssertAsync() flow.
     /// If you override AssertAsync() with custom logic (like AndAssertion/OrAssertion), you don't need to implement this.
     /// </summary>
-    /// <param name="value">The evaluated value (may be null)</param>
-    /// <param name="exception">Any exception that occurred during evaluation (may be null)</param>
+    /// <param name="metadata">Metadata about the evaluation including value, exception, and timing information</param>
     /// <returns>The result of the assertion check</returns>
-    protected virtual Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected virtual Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
         throw new NotImplementedException($"{GetType().Name} must override either CheckAsync() or AssertAsync()");
     }
@@ -78,8 +77,10 @@ public abstract class Assertion<TValue> : IAssertionSource<TValue>
     public virtual async Task<TValue?> AssertAsync()
     {
         var (value, exception) = await Context.GetAsync();
+        var (startTime, endTime) = Context.GetTiming();
 
-        var result = await CheckAsync(value, exception);
+        var metadata = new EvaluationMetadata<TValue>(value, exception, startTime, endTime);
+        var result = await CheckAsync(metadata);
 
         if (!result.IsPassed)
         {
@@ -124,9 +125,6 @@ public abstract class Assertion<TValue> : IAssertionSource<TValue>
     /// </summary>
     protected Exception CreateException(AssertionResult result)
     {
-        var timing = Context.GetTiming();
-        var duration = timing.End - timing.Start;
-
         var message = $"""
             Expected {GetExpectation()}
             but {result.Message}

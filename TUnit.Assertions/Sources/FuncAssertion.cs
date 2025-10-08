@@ -29,8 +29,11 @@ public class FuncAssertion<TValue> : Assertion<TValue>, IDelegateAssertionSource
         ExpressionBuilder.Append($"Assert.That({expression ?? "?"})");
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         // Source assertions don't perform checks
         return Task.FromResult(AssertionResult.Passed);
     }

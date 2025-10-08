@@ -56,56 +56,56 @@ namespace .
         where TEnum :  struct, 
     {
         public DoesNotHaveFlagAssertion(.<TEnum> context, TEnum unexpectedFlag, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TEnum value, ? exception) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
         protected override string GetExpectation() { }
     }
     public class DoesNotHaveSameNameAsAssertion<TEnum> : .<TEnum>
         where TEnum :  struct, 
     {
         public DoesNotHaveSameNameAsAssertion(.<TEnum> context,  otherEnumValue, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TEnum value, ? exception) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
         protected override string GetExpectation() { }
     }
     public class DoesNotHaveSameValueAsAssertion<TEnum> : .<TEnum>
         where TEnum :  struct, 
     {
         public DoesNotHaveSameValueAsAssertion(.<TEnum> context,  otherEnumValue, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TEnum value, ? exception) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
         protected override string GetExpectation() { }
     }
     public class HasFlagAssertion<TEnum> : .<TEnum>
         where TEnum :  struct, 
     {
         public HasFlagAssertion(.<TEnum> context, TEnum expectedFlag, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TEnum value, ? exception) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
         protected override string GetExpectation() { }
     }
     public class HasSameNameAsAssertion<TEnum> : .<TEnum>
         where TEnum :  struct, 
     {
         public HasSameNameAsAssertion(.<TEnum> context,  otherEnumValue, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TEnum value, ? exception) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
         protected override string GetExpectation() { }
     }
     public class HasSameValueAsAssertion<TEnum> : .<TEnum>
         where TEnum :  struct, 
     {
         public HasSameValueAsAssertion(.<TEnum> context,  otherEnumValue, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TEnum value, ? exception) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsDefinedAssertion<TEnum> : .<TEnum>
         where TEnum :  struct, 
     {
         public IsDefinedAssertion(.<TEnum> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TEnum value, ? exception) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsNotDefinedAssertion<TEnum> : .<TEnum>
         where TEnum :  struct, 
     {
         public IsNotDefinedAssertion(.<TEnum> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TEnum value, ? exception) { }
+        protected override .<.> CheckAsync(.<TEnum> metadata) { }
         protected override string GetExpectation() { }
     }
 }
@@ -114,21 +114,21 @@ namespace .
     public class IsNotParsableIntoAssertion<[.(..None | ..PublicMethods | ..Interfaces)]  T> : .<string>
     {
         public IsNotParsableIntoAssertion(.<string> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public ..IsNotParsableIntoAssertion<T> WithFormatProvider( formatProvider) { }
     }
     public class IsParsableIntoAssertion<[.(..None | ..PublicMethods | ..Interfaces)]  T> : .<string>
     {
         public IsParsableIntoAssertion(.<string> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public ..IsParsableIntoAssertion<T> WithFormatProvider( formatProvider) { }
     }
     public class WhenParsedIntoAssertion<[.(..None | ..PublicMethods | ..Interfaces)]  T> : .<T>
     {
         public WhenParsedIntoAssertion(.<string> stringContext, .StringBuilder expressionBuilder, ? formatProvider = null) { }
-        protected override .<.> CheckAsync(T? value, ? exception) { }
+        protected override .<.> CheckAsync(.<T> metadata) { }
         protected override string GetExpectation() { }
         public ..WhenParsedIntoAssertion<T> WithFormatProvider( formatProvider) { }
     }
@@ -184,7 +184,7 @@ namespace .Conditions
     public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
     {
         public AsyncMappedSatisfiesAssertion(.<TValue> context, <TValue?, .<TMapped>> selector, <.<TMapped>, .<TMapped>?> assertions, string selectorDescription, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public abstract class BaseThrowsAssertion<TException, TSelf> : .<TException>
@@ -193,7 +193,7 @@ namespace .Conditions
     {
         protected BaseThrowsAssertion(.<object?> context, .StringBuilder expressionBuilder) { }
         protected abstract bool IsExactTypeMatch { get; }
-        protected override sealed .<.> CheckAsync(TException? value, ? exception) { }
+        protected override sealed .<.> CheckAsync(.<TException> metadata) { }
         protected abstract bool CheckExceptionType( actualException, out string? errorMessage);
         protected override string GetExpectation() { }
         public TSelf HasMessageContaining(string expectedSubstring) { }
@@ -211,7 +211,7 @@ namespace .Conditions
         where TValue : <TValue>
     {
         public BetweenAssertion(.<TValue> context, TValue minimum, TValue maximum, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         public .<TValue> Exclusive() { }
         protected override string GetExpectation() { }
         public .<TValue> Inclusive() { }
@@ -222,14 +222,14 @@ namespace .Conditions
         where TCollection : .<TItem>
     {
         public CollectionAllAssertion(.<TCollection> context, <TItem, bool> predicate, string predicateDescription, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TCollection? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionAllSatisfyAssertion<TCollection, TItem> : .<TCollection>
         where TCollection : .<TItem>
     {
         public CollectionAllSatisfyAssertion(.<TCollection> context, <.<TItem>> assertion, string assertionDescription, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TCollection? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionAllSatisfyHelper<TCollection, TItem>
@@ -243,56 +243,56 @@ namespace .Conditions
         where TCollection : .<TItem>
     {
         public CollectionAllSatisfyMappedAssertion(.<TCollection> context, <TItem, TMapped> mapper, <.<TMapped>, .<TMapped>?> assertion, string mapperDescription, string assertionDescription, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TCollection? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionAnyAssertion<TCollection, TItem> : .<TCollection>
         where TCollection : .<TItem>
     {
         public CollectionAnyAssertion(.<TCollection> context, <TItem, bool> predicate, string predicateDescription, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TCollection? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionContainsAssertion<TCollection, TItem> : .<TCollection>
         where TCollection : .<TItem>
     {
         public CollectionContainsAssertion(.<TCollection> context, TItem expected, .StringBuilder expressionBuilder, .<TItem>? comparer = null) { }
-        protected override .<.> CheckAsync(TCollection? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionContainsPredicateAssertion<TCollection, TItem> : .<TItem>
         where TCollection : .<TItem>
     {
         public CollectionContainsPredicateAssertion(.<TCollection> context, <TItem, bool> predicate, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TItem? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TItem> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionCountAssertion<TValue> : .<TValue>
         where TValue : .IEnumerable
     {
         public CollectionCountAssertion(.<TValue> context, int expectedCount, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionDoesNotContainAssertion<TCollection, TItem> : .<TCollection>
         where TCollection : .<TItem>
     {
         public CollectionDoesNotContainAssertion(.<TCollection> context, TItem expected, .StringBuilder expressionBuilder, .<TItem>? comparer = null) { }
-        protected override .<.> CheckAsync(TCollection? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : .<TCollection>
         where TCollection : .<TItem>
     {
         public CollectionDoesNotContainPredicateAssertion(.<TCollection> context, <TItem, bool> predicate, string predicateDescription, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TCollection? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionIsEmptyAssertion<TValue> : .<TValue>
         where TValue : .IEnumerable
     {
         public CollectionIsEmptyAssertion(.<TValue> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : .<TCollection>
@@ -300,7 +300,7 @@ namespace .Conditions
         where TItem : <TItem>
     {
         public CollectionIsInDescendingOrderAssertion(.<TCollection> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TCollection? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionIsInOrderAssertion<TCollection, TItem> : .<TCollection>
@@ -308,95 +308,95 @@ namespace .Conditions
         where TItem : <TItem>
     {
         public CollectionIsInOrderAssertion(.<TCollection> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TCollection? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionIsNotEmptyAssertion<TValue> : .<TValue>
         where TValue : .IEnumerable
     {
         public CollectionIsNotEmptyAssertion(.<TValue> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CompletesWithinActionAssertion : .<object?>
     {
         public CompletesWithinActionAssertion( action,  timeout, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(object? value, ? exception) { }
+        protected override .<.> CheckAsync(.<object?> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CompletesWithinAsyncAssertion : .<object?>
     {
         public CompletesWithinAsyncAssertion(<.> asyncAction,  timeout, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(object? value, ? exception) { }
+        protected override .<.> CheckAsync(.<object?> metadata) { }
         protected override string GetExpectation() { }
     }
     public class DateOnlyEqualsAssertion : .<>
     {
         public DateOnlyEqualsAssertion(.<> context,  expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync( value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
         public . WithinDays(int days) { }
     }
     public class DateTimeEqualsAssertion : .<>
     {
         public DateTimeEqualsAssertion(.<> context,  expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync( value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
         public . Within( tolerance) { }
     }
     public class DateTimeOffsetEqualsAssertion : .<>
     {
         public DateTimeOffsetEqualsAssertion(.<> context,  expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync( value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
         public . Within( tolerance) { }
     }
     public class DictionaryContainsKeyAssertion<TKey, TValue> : .<.<TKey, TValue>>
     {
         public DictionaryContainsKeyAssertion(.<.<TKey, TValue>> context, TKey expectedKey, .StringBuilder expressionBuilder, .<TKey>? comparer = null) { }
-        protected override .<.> CheckAsync(.<TKey, TValue>? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.<TKey, TValue>> metadata) { }
         protected override string GetExpectation() { }
     }
     public class DictionaryDoesNotContainKeyAssertion<TKey, TValue> : .<.<TKey, TValue>>
     {
         public DictionaryDoesNotContainKeyAssertion(.<.<TKey, TValue>> context, TKey expectedKey, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.<TKey, TValue>? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.<TKey, TValue>> metadata) { }
         protected override string GetExpectation() { }
     }
     public class DirectoryDoesNotExistAssertion : .<.DirectoryInfo>
     {
         public DirectoryDoesNotExistAssertion(.<.DirectoryInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.DirectoryInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class DirectoryExistsAssertion : .<.DirectoryInfo>
     {
         public DirectoryExistsAssertion(.<.DirectoryInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.DirectoryInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class DirectoryHasFilesAssertion : .<.DirectoryInfo>
     {
         public DirectoryHasFilesAssertion(.<.DirectoryInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.DirectoryInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class DirectoryHasNoSubdirectoriesAssertion : .<.DirectoryInfo>
     {
         public DirectoryHasNoSubdirectoriesAssertion(.<.DirectoryInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.DirectoryInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class DirectoryIsNotEmptyAssertion : .<.DirectoryInfo>
     {
         public DirectoryIsNotEmptyAssertion(.<.DirectoryInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.DirectoryInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class DoubleEqualsAssertion : .<double>
     {
         public DoubleEqualsAssertion(.<double> context, double expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(double value, ? exception) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
         protected override string GetExpectation() { }
         public . Within(double tolerance) { }
     }
@@ -407,7 +407,7 @@ namespace .Conditions
         public TValue Expected { get; }
         public .StringBuilder ExpressionBuilder { get; }
         [.("Trimming", "IL2075", Justification="Tolerance comparison requires dynamic invocation of known comparer delegates")]
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
         public .<TValue> IgnoringType( type) { }
         public .<TValue> IgnoringType<TIgnore>() { }
@@ -416,173 +416,173 @@ namespace .Conditions
     public class ExceptionMessageAssertion : .<object?>
     {
         public ExceptionMessageAssertion(.<object?> context, string expectedSubstring, .StringBuilder expressionBuilder,  comparison = 4) { }
-        protected override .<.> CheckAsync(object? value, ? exception) { }
+        protected override .<.> CheckAsync(.<object?> metadata) { }
         protected override string GetExpectation() { }
     }
     public class FalseAssertion : .<bool>
     {
         public FalseAssertion(.<bool> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(bool value, ? exception) { }
+        protected override .<.> CheckAsync(.<bool> metadata) { }
         protected override string GetExpectation() { }
     }
     public class FileDoesNotExistAssertion : .<.FileInfo>
     {
         public FileDoesNotExistAssertion(.<.FileInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.FileInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class FileExistsAssertion : .<.FileInfo>
     {
         public FileExistsAssertion(.<.FileInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.FileInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class FileIsNotEmptyAssertion : .<.FileInfo>
     {
         public FileIsNotEmptyAssertion(.<.FileInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.FileInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class FileIsNotExecutableAssertion : .<.FileInfo>
     {
         public FileIsNotExecutableAssertion(.<.FileInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.FileInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class FileIsNotHiddenAssertion : .<.FileInfo>
     {
         public FileIsNotHiddenAssertion(.<.FileInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.FileInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class FileIsNotReadOnlyAssertion : .<.FileInfo>
     {
         public FileIsNotReadOnlyAssertion(.<.FileInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.FileInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class FileIsNotSystemAssertion : .<.FileInfo>
     {
         public FileIsNotSystemAssertion(.<.FileInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.FileInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class GreaterThanAssertion<TValue> : .<TValue>
         where TValue : <TValue>
     {
         public GreaterThanAssertion(.<TValue> context, TValue minimum, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class GreaterThanOrEqualAssertion<TValue> : .<TValue>
         where TValue : <TValue>
     {
         public GreaterThanOrEqualAssertion(.<TValue> context, TValue minimum, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class HasDistinctItemsAssertion<TValue> : .<TValue>
         where TValue : .IEnumerable
     {
         public HasDistinctItemsAssertion(.<TValue> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class HasInnerExceptionAssertion : .<>
     {
         public HasInnerExceptionAssertion(.<> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(? value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
     public class HasMessageEqualToAssertion<TValue> : .<TValue>
     {
         public HasMessageEqualToAssertion(.<TValue> context, string expectedMessage, .StringBuilder expressionBuilder,  comparison = 4) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class HasMessageStartingWithAssertion<TValue> : .<TValue>
     {
         public HasMessageStartingWithAssertion(.<TValue> context, string expectedPrefix, .StringBuilder expressionBuilder,  comparison = 4) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class HasNoDataAssertion : .<>
     {
         public HasNoDataAssertion(.<> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(? value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
     public class HasNoInnerExceptionAssertion : .<>
     {
         public HasNoInnerExceptionAssertion(.<> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(? value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
     public class HasSingleItemAssertion<TValue> : .<TValue>
         where TValue : .IEnumerable
     {
         public HasSingleItemAssertion(.<TValue> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class HasStackTraceAssertion : .<>
     {
         public HasStackTraceAssertion(.<> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(? value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsASCIIEncodingAssertion : .<.Encoding>
     {
         public IsASCIIEncodingAssertion(.<.Encoding> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.Encoding? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsAliveAssertion : .<>
     {
         public IsAliveAssertion(.<> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(? value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsAssignableToAssertion<TValue, TTarget> : .<TValue>
     {
         public IsAssignableToAssertion(.<TValue> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsBigEndianUnicodeEncodingAssertion : .<.Encoding>
     {
         public IsBigEndianUnicodeEncodingAssertion(.<.Encoding> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.Encoding? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsClientErrorStatusCodeAssertion : .<.HttpStatusCode>
     {
         public IsClientErrorStatusCodeAssertion(.<.HttpStatusCode> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.HttpStatusCode value, ? exception) { }
+        protected override .<.> CheckAsync(.<.HttpStatusCode> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsDeadAssertion : .<>
     {
         public IsDeadAssertion(.<> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(? value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsDefaultAssertion<TValue> : .<TValue>
     {
         public IsDefaultAssertion(.<TValue> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsEnglishCultureAssertion : .<.CultureInfo>
     {
         public IsEnglishCultureAssertion(.<.CultureInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.CultureInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsEquatableOrEqualToAssertion<TValue> : .<TValue>
     {
         public IsEquatableOrEqualToAssertion(.<TValue> context, TValue expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
         public .<TValue> Using(.<TValue> comparer) { }
     }
@@ -590,223 +590,223 @@ namespace .Conditions
         where TCollection : .<TItem>
     {
         public IsEquivalentToAssertion(.<TCollection> context, .<TItem> expected, .StringBuilder expressionBuilder, . ordering = 0) { }
-        protected override .<.> CheckAsync(TCollection? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
         public .<TCollection, TItem> Using(.<TItem> comparer) { }
     }
     public class IsErrorStatusCodeAssertion : .<.HttpStatusCode>
     {
         public IsErrorStatusCodeAssertion(.<.HttpStatusCode> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.HttpStatusCode value, ? exception) { }
+        protected override .<.> CheckAsync(.<.HttpStatusCode> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsFridayAssertion : .<>
     {
         public IsFridayAssertion(.<> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync( value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsInAssertion<TValue> : .<TValue>
     {
         public IsInAssertion(.<TValue> context, .<TValue> collection, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
         public .<TValue> Using(.<TValue> comparer) { }
     }
     public class IsInformationalStatusCodeAssertion : .<.HttpStatusCode>
     {
         public IsInformationalStatusCodeAssertion(.<.HttpStatusCode> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.HttpStatusCode value, ? exception) { }
+        protected override .<.> CheckAsync(.<.HttpStatusCode> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsInvariantCultureAssertion : .<.CultureInfo>
     {
         public IsInvariantCultureAssertion(.<.CultureInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.CultureInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsLeftToRightCultureAssertion : .<.CultureInfo>
     {
         public IsLeftToRightCultureAssertion(.<.CultureInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.CultureInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsMondayAssertion : .<>
     {
         public IsMondayAssertion(.<> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync( value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsNeutralCultureAssertion : .<.CultureInfo>
     {
         public IsNeutralCultureAssertion(.<.CultureInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.CultureInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsNotAssignableToAssertion<TValue, TTarget> : .<TValue>
     {
         public IsNotAssignableToAssertion(.<TValue> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsNotDefaultAssertion<TValue> : .<TValue>
     {
         public IsNotDefaultAssertion(.<TValue> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsNotEnglishCultureAssertion : .<.CultureInfo>
     {
         public IsNotEnglishCultureAssertion(.<.CultureInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.CultureInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsNotInAssertion<TValue> : .<TValue>
     {
         public IsNotInAssertion(.<TValue> context, .<TValue> collection, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
         public .<TValue> Using(.<TValue> comparer) { }
     }
     public class IsNotInvariantCultureAssertion : .<.CultureInfo>
     {
         public IsNotInvariantCultureAssertion(.<.CultureInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.CultureInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsNotNeutralCultureAssertion : .<.CultureInfo>
     {
         public IsNotNeutralCultureAssertion(.<.CultureInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.CultureInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsNotSingleByteEncodingAssertion : .<.Encoding>
     {
         public IsNotSingleByteEncodingAssertion(.<.Encoding> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.Encoding? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsNotSuccessStatusCodeAssertion : .<.HttpStatusCode>
     {
         public IsNotSuccessStatusCodeAssertion(.<.HttpStatusCode> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.HttpStatusCode value, ? exception) { }
+        protected override .<.> CheckAsync(.<.HttpStatusCode> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsNotUTF8EncodingAssertion : .<.Encoding>
     {
         public IsNotUTF8EncodingAssertion(.<.Encoding> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.Encoding? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsReadOnlyCultureAssertion : .<.CultureInfo>
     {
         public IsReadOnlyCultureAssertion(.<.CultureInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.CultureInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsRedirectionStatusCodeAssertion : .<.HttpStatusCode>
     {
         public IsRedirectionStatusCodeAssertion(.<.HttpStatusCode> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.HttpStatusCode value, ? exception) { }
+        protected override .<.> CheckAsync(.<.HttpStatusCode> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsRightToLeftCultureAssertion : .<.CultureInfo>
     {
         public IsRightToLeftCultureAssertion(.<.CultureInfo> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.CultureInfo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsServerErrorStatusCodeAssertion : .<.HttpStatusCode>
     {
         public IsServerErrorStatusCodeAssertion(.<.HttpStatusCode> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.HttpStatusCode value, ? exception) { }
+        protected override .<.> CheckAsync(.<.HttpStatusCode> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsSingleByteEncodingAssertion : .<.Encoding>
     {
         public IsSingleByteEncodingAssertion(.<.Encoding> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.Encoding? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsSuccessStatusCodeAssertion : .<.HttpStatusCode>
     {
         public IsSuccessStatusCodeAssertion(.<.HttpStatusCode> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.HttpStatusCode value, ? exception) { }
+        protected override .<.> CheckAsync(.<.HttpStatusCode> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsTypeOfRuntimeAssertion<TValue> : .<TValue>
     {
         public IsTypeOfRuntimeAssertion(.<TValue> context,  expectedType, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsUTF32EncodingAssertion : .<.Encoding>
     {
         public IsUTF32EncodingAssertion(.<.Encoding> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.Encoding? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsUTF8EncodingAssertion : .<.Encoding>
     {
         public IsUTF8EncodingAssertion(.<.Encoding> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.Encoding? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsUnicodeEncodingAssertion : .<.Encoding>
     {
         public IsUnicodeEncodingAssertion(.<.Encoding> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.Encoding? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsWeekdayAssertion : .<>
     {
         public IsWeekdayAssertion(.<> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync( value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
     public class IsWeekendAssertion : .<>
     {
         public IsWeekendAssertion(.<> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync( value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
     public class LessThanAssertion<TValue> : .<TValue>
         where TValue : <TValue>
     {
         public LessThanAssertion(.<TValue> context, TValue maximum, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class LessThanOrEqualAssertion<TValue> : .<TValue>
         where TValue : <TValue>
     {
         public LessThanOrEqualAssertion(.<TValue> context, TValue maximum, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class LongEqualsAssertion : .<long>
     {
         public LongEqualsAssertion(.<long> context, long expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(long value, ? exception) { }
+        protected override .<.> CheckAsync(.<long> metadata) { }
         protected override string GetExpectation() { }
         public . Within(long tolerance) { }
     }
     public class MappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
     {
         public MappedSatisfiesAssertion(.<TValue> context, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, string selectorDescription, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class MemberAssertion<TObject, TMember> : .<TMember>
     {
         public MemberAssertion(.<TObject> parentContext, .<<TObject, TMember>> memberSelector, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TMember? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TMember> metadata) { }
         protected override string GetExpectation() { }
     }
     public class NotEqualsAssertion<TValue> : .<TValue>
     {
         public NotEqualsAssertion(.<TValue> context, TValue notExpected, .StringBuilder expressionBuilder, .<TValue>? comparer = null) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
         public .<TValue> IgnoringType( type) { }
         public .<TValue> IgnoringType<TIgnore>() { }
@@ -815,26 +815,26 @@ namespace .Conditions
         where TCollection : .<TItem>
     {
         public NotEquivalentToAssertion(.<TCollection> context, .<TItem> notExpected, .StringBuilder expressionBuilder, . ordering = 0) { }
-        protected override .<.> CheckAsync(TCollection? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
         public .<TCollection, TItem> Using(.<TItem> comparer) { }
     }
     public class NotNullAssertion<TValue> : .<TValue>
     {
         public NotNullAssertion(.<TValue> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class NotSameReferenceAssertion<TValue> : .<TValue>
     {
         public NotSameReferenceAssertion(.<TValue> context, object? expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class NotStructuralEquivalencyAssertion<TValue> : .<TValue>
     {
         public NotStructuralEquivalencyAssertion(.<TValue> context, object? notExpected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
         public .<TValue> IgnoringMember(string memberPath) { }
         public .<TValue> IgnoringType( type) { }
@@ -844,43 +844,43 @@ namespace .Conditions
     public class NullAssertion<TValue> : .<TValue>
     {
         public NullAssertion(.<TValue> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class SameReferenceAssertion<TValue> : .<TValue>
     {
         public SameReferenceAssertion(.<TValue> context, object? expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class SatisfiesAssertion<TValue> : .<TValue>
     {
         public SatisfiesAssertion(.<TValue> context, <TValue?, bool> predicate, string predicateDescription, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class StringBuilderHasExcessCapacityAssertion : .<.StringBuilder>
     {
         public StringBuilderHasExcessCapacityAssertion(.<.StringBuilder> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.StringBuilder? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.StringBuilder> metadata) { }
         protected override string GetExpectation() { }
     }
     public class StringBuilderIsEmptyAssertion : .<.StringBuilder>
     {
         public StringBuilderIsEmptyAssertion(.<.StringBuilder> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.StringBuilder? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.StringBuilder> metadata) { }
         protected override string GetExpectation() { }
     }
     public class StringBuilderIsNotEmptyAssertion : .<.StringBuilder>
     {
         public StringBuilderIsNotEmptyAssertion(.<.StringBuilder> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(.StringBuilder? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.StringBuilder> metadata) { }
         protected override string GetExpectation() { }
     }
     public class StringContainsAssertion : .<string>
     {
         public StringContainsAssertion(.<string> context, string expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
         public . IgnoringWhitespace() { }
@@ -890,7 +890,7 @@ namespace .Conditions
     public class StringDoesNotContainAssertion : .<string>
     {
         public StringDoesNotContainAssertion(.<string> context, string expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
         public . WithComparison( comparison) { }
@@ -898,7 +898,7 @@ namespace .Conditions
     public class StringDoesNotMatchAssertion : .<string>
     {
         public StringDoesNotMatchAssertion(.<string> context, string pattern, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
         public . WithOptions(. options) { }
@@ -906,7 +906,7 @@ namespace .Conditions
     public class StringEndsWithAssertion : .<string>
     {
         public StringEndsWithAssertion(.<string> context, string expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
         public . WithComparison( comparison) { }
@@ -914,7 +914,7 @@ namespace .Conditions
     public class StringEqualsAssertion : .<string>
     {
         public StringEqualsAssertion(.<string> context, string expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
         public . IgnoringWhitespace() { }
@@ -925,43 +925,43 @@ namespace .Conditions
     public class StringIsEmptyAssertion : .<string>
     {
         public StringIsEmptyAssertion(.<string> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
     }
     public class StringIsNotEmptyAssertion : .<string>
     {
         public StringIsNotEmptyAssertion(.<string> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
     }
     public class StringIsNotNullOrEmptyAssertion : .<string>
     {
         public StringIsNotNullOrEmptyAssertion(.<string> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
     }
     public class StringIsNullOrEmptyAssertion : .<string>
     {
         public StringIsNullOrEmptyAssertion(.<string> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
     }
     public class StringIsNullOrWhitespaceAssertion : .<string>
     {
         public StringIsNullOrWhitespaceAssertion(.<string> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
     }
     public class StringLengthAssertion : .<string>
     {
         public StringLengthAssertion(.<string> context, int expectedLength, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
     }
     public class StringMatchesAssertion : .<string>
     {
         public StringMatchesAssertion(.<string> context, string pattern, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
         public . WithOptions(. options) { }
@@ -969,7 +969,7 @@ namespace .Conditions
     public class StringStartsWithAssertion : .<string>
     {
         public StringStartsWithAssertion(.<string> context, string expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(string? value, ? exception) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
         public . WithComparison( comparison) { }
@@ -977,7 +977,7 @@ namespace .Conditions
     public class StructuralEquivalencyAssertion<TValue> : .<TValue>
     {
         public StructuralEquivalencyAssertion(.<TValue> context, object? expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
         public .<TValue> IgnoringMember(string memberPath) { }
         public .<TValue> IgnoringType( type) { }
@@ -1002,26 +1002,26 @@ namespace .Conditions
     public class ThrowsNothingAssertion<TValue> : .<TValue>
     {
         public ThrowsNothingAssertion(.<TValue> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
     public class TimeOnlyEqualsAssertion : .<>
     {
         public TimeOnlyEqualsAssertion(.<> context,  expected, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync( value, ? exception) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
         public . Within( tolerance) { }
     }
     public class TrueAssertion : .<bool>
     {
         public TrueAssertion(.<bool> context, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(bool value, ? exception) { }
+        protected override .<.> CheckAsync(.<bool> metadata) { }
         protected override string GetExpectation() { }
     }
     public class TypeOfAssertion<TFrom, TTo> : .<TTo>
     {
         public TypeOfAssertion(.<TFrom> parentContext, .StringBuilder expressionBuilder) { }
-        protected override .<.> CheckAsync(TTo? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TTo> metadata) { }
         protected override string GetExpectation() { }
     }
 }
@@ -1066,7 +1066,7 @@ namespace .Core
         protected void AppendExpression(string expression) { }
         public virtual .<TValue?> AssertAsync() { }
         public .<TValue> Because(string message) { }
-        protected virtual .<.> CheckAsync(TValue? value, ? exception) { }
+        protected virtual .<.> CheckAsync(.<TValue> metadata) { }
         protected  CreateException(. result) { }
         public .<TValue?> GetAwaiter() { }
         protected abstract string GetExpectation();
@@ -1090,6 +1090,15 @@ namespace .Core
                 "End"})]
         public <, > GetTiming() { }
         public .<TNew> Map<TNew>(<TValue?, TNew?> mapper) { }
+    }
+    public readonly struct EvaluationMetadata<TValue>
+    {
+        public EvaluationMetadata(TValue? value, ? exception,  startTime,  endTime) { }
+        public  Duration { get; }
+        public  EndTime { get; }
+        public ? Exception { get; }
+        public  StartTime { get; }
+        public TValue Value { get; }
     }
     public interface IAssertionSource<TValue>
     {
@@ -1402,13 +1411,13 @@ namespace .Sources
     public class AsyncDelegateAssertion : .<object?>, .<object?>, .<object?>
     {
         public AsyncDelegateAssertion(<.> action, string? expression) { }
-        protected override .<.> CheckAsync(object? value, ? exception) { }
+        protected override .<.> CheckAsync(.<object?> metadata) { }
         protected override string GetExpectation() { }
     }
     public class AsyncFuncAssertion<TValue> : .<TValue>, .<TValue>, .<TValue>
     {
         public AsyncFuncAssertion(<.<TValue>> func, string? expression) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
         public .<TException> Throws<TException>()
             where TException :  { }
@@ -1418,25 +1427,25 @@ namespace .Sources
     public class CollectionAssertion<TItem> : .<.<TItem>>
     {
         public CollectionAssertion(.<TItem> value, string? expression) { }
-        protected override .<.> CheckAsync(.<TItem>? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.<TItem>> metadata) { }
         protected override string GetExpectation() { }
     }
     public class DelegateAssertion : .<object?>, .<object?>, .<object?>
     {
         public DelegateAssertion( action, string? expression) { }
-        protected override .<.> CheckAsync(object? value, ? exception) { }
+        protected override .<.> CheckAsync(.<object?> metadata) { }
         protected override string GetExpectation() { }
     }
     public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>>
     {
         public DictionaryAssertion(.<TKey, TValue> value, string? expression) { }
-        protected override .<.> CheckAsync(.<TKey, TValue>? value, ? exception) { }
+        protected override .<.> CheckAsync(.<.<TKey, TValue>> metadata) { }
         protected override string GetExpectation() { }
     }
     public class FuncAssertion<TValue> : .<TValue>, .<TValue>, .<TValue>
     {
         public FuncAssertion(<TValue> func, string? expression) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
         public .<TException> Throws<TException>()
             where TException :  { }
@@ -1446,7 +1455,7 @@ namespace .Sources
     public class ValueAssertion<TValue> : .<TValue>
     {
         public ValueAssertion(TValue? value, string? expression) { }
-        protected override .<.> CheckAsync(TValue? value, ? exception) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
 }

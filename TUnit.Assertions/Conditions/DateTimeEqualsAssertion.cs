@@ -32,8 +32,11 @@ public class DateTimeEqualsAssertion : Assertion<DateTime>
         return this; // Return self for continued chaining
     }
 
-    protected override Task<AssertionResult> CheckAsync(DateTime value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DateTime> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

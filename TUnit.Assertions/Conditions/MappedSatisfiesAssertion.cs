@@ -28,8 +28,11 @@ public class MappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
         _selectorDescription = selectorDescription;
     }
 
-    protected override async Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return AssertionResult.Failed($"threw {exception.GetType().Name}");
 
@@ -90,8 +93,11 @@ public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
         _selectorDescription = selectorDescription;
     }
 
-    protected override async Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return AssertionResult.Failed($"threw {exception.GetType().Name}");
 

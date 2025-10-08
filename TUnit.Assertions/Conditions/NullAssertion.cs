@@ -15,8 +15,11 @@ public class NullAssertion<TValue> : Assertion<TValue>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (value == null)
             return Task.FromResult(AssertionResult.Passed);
 
@@ -38,8 +41,11 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (value != null)
             return Task.FromResult(AssertionResult.Passed);
 
@@ -62,8 +68,11 @@ public class IsDefaultAssertion<TValue> : Assertion<TValue>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -88,8 +97,11 @@ public class IsNotDefaultAssertion<TValue> : Assertion<TValue>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

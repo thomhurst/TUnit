@@ -28,8 +28,11 @@ public class TypeOfAssertion<TFrom, TTo> : Assertion<TTo>
         _expectedType = typeof(TTo);
     }
 
-    protected override Task<AssertionResult> CheckAsync(TTo? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TTo> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         // The type check already happened in the Map function
         // If we got here without exception, the type is correct
         if (exception != null)
@@ -57,8 +60,11 @@ public class IsAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
         _targetType = typeof(TTarget);
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         object? objectToCheck = null;
 
         // If we have an exception (from Throws/ThrowsExactly), check that
@@ -97,8 +103,11 @@ public class IsNotAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
         _targetType = typeof(TTarget);
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         object? objectToCheck = null;
 
         // If we have an exception (from Throws/ThrowsExactly), check that
@@ -137,8 +146,11 @@ public class IsTypeOfRuntimeAssertion<TValue> : Assertion<TValue>
         _expectedType = expectedType ?? throw new ArgumentNullException(nameof(expectedType));
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

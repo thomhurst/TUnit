@@ -15,8 +15,11 @@ public class TrueAssertion : Assertion<bool>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(bool value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<bool> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -41,8 +44,11 @@ public class FalseAssertion : Assertion<bool>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(bool value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<bool> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

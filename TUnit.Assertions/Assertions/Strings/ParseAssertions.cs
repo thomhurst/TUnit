@@ -30,8 +30,11 @@ public class IsParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
 
@@ -126,8 +129,11 @@ public class IsNotParsableIntoAssertion<[DynamicallyAccessedMembers(DynamicallyA
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
 
@@ -252,8 +258,11 @@ public class WhenParsedIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
         });
     }
 
-    protected override Task<AssertionResult> CheckAsync(T? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<T> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         // WhenParsedInto doesn't perform its own check - it just transforms the value
         // The actual assertion will be done by chained assertions
         if (exception != null)

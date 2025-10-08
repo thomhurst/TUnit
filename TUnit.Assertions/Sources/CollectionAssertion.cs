@@ -16,8 +16,11 @@ public class CollectionAssertion<TItem> : Assertion<IEnumerable<TItem>>
         ExpressionBuilder.Append($"Assert.That({expression ?? "?"})");
     }
 
-    protected override Task<AssertionResult> CheckAsync(IEnumerable<TItem>? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         // Source assertions don't perform checks - they just provide the value
         return Task.FromResult(AssertionResult.Passed);
     }

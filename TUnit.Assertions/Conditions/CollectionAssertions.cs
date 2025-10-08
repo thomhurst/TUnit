@@ -19,8 +19,11 @@ public class CollectionIsEmptyAssertion<TValue> : Assertion<TValue>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -57,8 +60,11 @@ public class CollectionIsNotEmptyAssertion<TValue> : Assertion<TValue>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -102,8 +108,11 @@ public class CollectionContainsAssertion<TCollection, TItem> : Assertion<TCollec
         _comparer = comparer;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -144,8 +153,11 @@ public class CollectionDoesNotContainAssertion<TCollection, TItem> : Assertion<T
         _comparer = comparer;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -186,8 +198,11 @@ public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : As
         _predicateDescription = predicateDescription;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -223,8 +238,11 @@ public class CollectionCountAssertion<TValue> : Assertion<TValue>
         _expectedCount = expectedCount;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -324,8 +342,11 @@ public class CollectionAllAssertion<TCollection, TItem> : Assertion<TCollection>
         _predicateDescription = predicateDescription;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -366,8 +387,11 @@ public class CollectionAnyAssertion<TCollection, TItem> : Assertion<TCollection>
         _predicateDescription = predicateDescription;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -399,8 +423,11 @@ public class HasSingleItemAssertion<TValue> : Assertion<TValue>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -457,8 +484,11 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Assertio
         _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
     }
 
-    protected override Task<AssertionResult> CheckAsync(TItem? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TItem> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed(exception.Message));
 
@@ -489,8 +519,11 @@ public class CollectionAllSatisfyAssertion<TCollection, TItem> : Assertion<TColl
         _assertionDescription = assertionDescription;
     }
 
-    protected override Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -544,8 +577,11 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
         _assertionDescription = assertionDescription;
     }
 
-    protected override async Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return AssertionResult.Failed($"threw {exception.GetType().Name}");
 
@@ -592,8 +628,11 @@ public class CollectionIsInOrderAssertion<TCollection, TItem> : Assertion<TColle
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -637,8 +676,11 @@ public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Assert
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(TCollection? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

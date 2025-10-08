@@ -23,8 +23,11 @@ public class ExceptionMessageAssertion : Assertion<object?>
         _comparison = comparison;
     }
 
-    protected override Task<AssertionResult> CheckAsync(object? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<object?> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception == null)
             return Task.FromResult(AssertionResult.Failed("no exception was thrown"));
 

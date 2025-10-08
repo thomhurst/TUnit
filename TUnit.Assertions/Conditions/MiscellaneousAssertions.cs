@@ -13,8 +13,11 @@ public class HasInnerExceptionAssertion : Assertion<Exception>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(Exception? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Exception> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -39,8 +42,11 @@ public class HasNoInnerExceptionAssertion : Assertion<Exception>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(Exception? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Exception> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -65,8 +71,11 @@ public class HasStackTraceAssertion : Assertion<Exception>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(Exception? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Exception> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -91,8 +100,11 @@ public class HasNoDataAssertion : Assertion<Exception>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(Exception? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Exception> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -118,8 +130,11 @@ public class StringBuilderIsEmptyAssertion : Assertion<StringBuilder>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(StringBuilder? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<StringBuilder> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -144,8 +159,11 @@ public class StringBuilderIsNotEmptyAssertion : Assertion<StringBuilder>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(StringBuilder? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<StringBuilder> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -170,8 +188,11 @@ public class StringBuilderHasExcessCapacityAssertion : Assertion<StringBuilder>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(StringBuilder? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<StringBuilder> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -197,8 +218,11 @@ public class IsWeekendAssertion : Assertion<DayOfWeek>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(DayOfWeek value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DayOfWeek> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -220,8 +244,11 @@ public class IsWeekdayAssertion : Assertion<DayOfWeek>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(DayOfWeek value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DayOfWeek> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -243,8 +270,11 @@ public class IsMondayAssertion : Assertion<DayOfWeek>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(DayOfWeek value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DayOfWeek> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -266,8 +296,11 @@ public class IsFridayAssertion : Assertion<DayOfWeek>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(DayOfWeek value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DayOfWeek> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -290,8 +323,11 @@ public class IsAliveAssertion : Assertion<WeakReference>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(WeakReference? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<WeakReference> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -316,8 +352,11 @@ public class IsDeadAssertion : Assertion<WeakReference>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(WeakReference? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<WeakReference> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 

@@ -13,8 +13,11 @@ public class IsSuccessStatusCodeAssertion : Assertion<HttpStatusCode>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(HttpStatusCode value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -37,8 +40,11 @@ public class IsNotSuccessStatusCodeAssertion : Assertion<HttpStatusCode>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(HttpStatusCode value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -61,8 +67,11 @@ public class IsClientErrorStatusCodeAssertion : Assertion<HttpStatusCode>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(HttpStatusCode value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -85,8 +94,11 @@ public class IsServerErrorStatusCodeAssertion : Assertion<HttpStatusCode>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(HttpStatusCode value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -109,8 +121,11 @@ public class IsRedirectionStatusCodeAssertion : Assertion<HttpStatusCode>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(HttpStatusCode value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -133,8 +148,11 @@ public class IsInformationalStatusCodeAssertion : Assertion<HttpStatusCode>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(HttpStatusCode value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -157,8 +175,11 @@ public class IsErrorStatusCodeAssertion : Assertion<HttpStatusCode>
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(HttpStatusCode value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
