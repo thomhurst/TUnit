@@ -34,13 +34,5 @@ public class AndAssertion<TValue> : Assertion<TValue>
         return await _second.AssertAsync();
     }
 
-    /// <summary>
-    /// Not used - AndAssertion overrides AssertAsync directly for custom composition logic.
-    /// </summary>
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
-    {
-        throw new NotImplementedException("AndAssertion uses custom AssertAsync logic and does not call CheckAsync");
-    }
-
     protected override string GetExpectation() => "both conditions";
 }

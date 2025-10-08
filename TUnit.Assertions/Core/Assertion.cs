@@ -42,11 +42,16 @@ public abstract class Assertion<TValue> : IAssertionSource<TValue>
     /// <summary>
     /// Implements the specific check logic for this assertion.
     /// Called after the context has been evaluated.
+    /// Override this method if your assertion uses the default AssertAsync() flow.
+    /// If you override AssertAsync() with custom logic (like AndAssertion/OrAssertion), you don't need to implement this.
     /// </summary>
     /// <param name="value">The evaluated value (may be null)</param>
     /// <param name="exception">Any exception that occurred during evaluation (may be null)</param>
     /// <returns>The result of the assertion check</returns>
-    protected abstract Task<AssertionResult> CheckAsync(TValue? value, Exception? exception);
+    protected virtual Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
+    {
+        throw new NotImplementedException($"{GetType().Name} must override either CheckAsync() or AssertAsync()");
+    }
 
     /// <summary>
     /// Gets a human-readable description of what this assertion expects.

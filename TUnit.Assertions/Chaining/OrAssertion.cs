@@ -58,13 +58,5 @@ public class OrAssertion<TValue> : Assertion<TValue>
         }
     }
 
-    /// <summary>
-    /// Not used - OrAssertion overrides AssertAsync directly for custom composition logic.
-    /// </summary>
-    protected override Task<AssertionResult> CheckAsync(TValue? value, Exception? exception)
-    {
-        throw new NotImplementedException("OrAssertion uses custom AssertAsync logic and does not call CheckAsync");
-    }
-
     protected override string GetExpectation() => "either condition";
 }

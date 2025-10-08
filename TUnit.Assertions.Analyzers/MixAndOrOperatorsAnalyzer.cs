@@ -28,8 +28,11 @@ public class MixAndOrOperatorsAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        if (awaitOperation.Operation.Type?.AllInterfaces.Any(x => x.GloballyQualifiedNonGeneric()
-        is "global::TUnit.Assertions.AssertionBuilders.IInvokableAssertionBuilder") != true)
+        // Check if the awaited type implements IAssertionSource<T> (new API)
+        var isAssertion = awaitOperation.Operation.Type?.AllInterfaces.Any(x =>
+            x.GloballyQualifiedNonGeneric() is "global::TUnit.Assertions.Core.IAssertionSource") == true;
+
+        if (!isAssertion)
         {
             return;
         }
