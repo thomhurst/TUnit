@@ -9,8 +9,13 @@ namespace TUnit.Assertions.Core;
 /// Each assertion represents a single check that can be chained with others.
 /// All assertions in a chain share the same EvaluationContext.
 /// </summary>
+///
+/// Note: This class does NOT implement IAssertionSource to enforce type-safe chaining.
+/// Only sources (ValueAssertion, CollectionAssertion, etc.) and continuations (AndContinuation,
+/// OrContinuation) implement IAssertionSource. This design prevents direct chaining of assertions
+/// without And/Or keywords and prevents awaiting bare sources without an assertion.
 /// <typeparam name="TValue">The type of value being asserted</typeparam>
-public abstract class Assertion<TValue> : IAssertionSource<TValue>
+public abstract class Assertion<TValue>
 {
     /// <summary>
     /// The evaluation context shared by all assertions in this chain.
@@ -29,9 +34,6 @@ public abstract class Assertion<TValue> : IAssertionSource<TValue>
     /// </summary>
     private string? _becauseMessage;
 
-    // Explicit interface implementation
-    EvaluationContext<TValue> IAssertionSource<TValue>.Context => Context;
-    StringBuilder IAssertionSource<TValue>.ExpressionBuilder => ExpressionBuilder;
 
     protected Assertion(EvaluationContext<TValue> context, StringBuilder? expressionBuilder = null)
     {

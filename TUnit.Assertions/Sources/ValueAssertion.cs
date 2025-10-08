@@ -6,23 +6,17 @@ namespace TUnit.Assertions.Sources;
 /// <summary>
 /// Source assertion for immediate values.
 /// This is the entry point for: Assert.That(value)
+/// Does not inherit from Assertion to prevent premature awaiting.
 /// </summary>
-public class ValueAssertion<TValue> : Assertion<TValue>
+public class ValueAssertion<TValue> : IAssertionSource<TValue>
 {
+    public EvaluationContext<TValue> Context { get; }
+    public StringBuilder ExpressionBuilder { get; }
+
     public ValueAssertion(TValue? value, string? expression)
-        : base(new EvaluationContext<TValue>(value))
     {
+        Context = new EvaluationContext<TValue>(value);
+        ExpressionBuilder = new StringBuilder();
         ExpressionBuilder.Append($"Assert.That({expression ?? "?"})");
     }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        // Source assertions don't perform checks - they just provide the value
-        return Task.FromResult(AssertionResult.Passed);
-    }
-
-    protected override string GetExpectation() => "to have a value";
 }

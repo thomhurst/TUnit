@@ -8,13 +8,18 @@ namespace TUnit.Assertions.Sources;
 /// This is the entry point for: Assert.That(() => SomeMethod())
 /// Used primarily for exception checking.
 /// Implements IDelegateAssertionSource to enable Throws() extension methods.
+/// Does not inherit from Assertion to prevent premature awaiting.
 /// </summary>
-public class DelegateAssertion : Assertion<object?>, IDelegateAssertionSource<object?>
+public class DelegateAssertion : IAssertionSource<object?>, IDelegateAssertionSource<object?>
 {
+    public EvaluationContext<object?> Context { get; }
+    public StringBuilder ExpressionBuilder { get; }
     internal Action Action { get; }
 
     public DelegateAssertion(Action action, string? expression)
-        : base(new EvaluationContext<object?>(async () =>
+    {
+        Action = action ?? throw new ArgumentNullException(nameof(action));
+        Context = new EvaluationContext<object?>(async () =>
         {
             try
             {
@@ -25,20 +30,8 @@ public class DelegateAssertion : Assertion<object?>, IDelegateAssertionSource<ob
             {
                 return (null, ex);
             }
-        }))
-    {
-        Action = action ?? throw new ArgumentNullException(nameof(action));
+        });
+        ExpressionBuilder = new StringBuilder();
         ExpressionBuilder.Append($"Assert.That({expression ?? "?"})");
     }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<object?> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        // Source assertions don't perform checks
-        return Task.FromResult(AssertionResult.Passed);
-    }
-
-    protected override string GetExpectation() => "to execute";
 }

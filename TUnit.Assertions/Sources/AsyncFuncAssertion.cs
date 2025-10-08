@@ -8,11 +8,16 @@ namespace TUnit.Assertions.Sources;
 /// Source assertion for asynchronous functions.
 /// This is the entry point for: Assert.That(async () => await GetValueAsync())
 /// Implements IDelegateAssertionSource to enable Throws() extension methods.
+/// Does not inherit from Assertion to prevent premature awaiting.
 /// </summary>
-public class AsyncFuncAssertion<TValue> : Assertion<TValue>, IDelegateAssertionSource<TValue>
+public class AsyncFuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertionSource<TValue>
 {
+    public EvaluationContext<TValue> Context { get; }
+    public StringBuilder ExpressionBuilder { get; }
+
     public AsyncFuncAssertion(Func<Task<TValue>> func, string? expression)
-        : base(new EvaluationContext<TValue>(async () =>
+    {
+        Context = new EvaluationContext<TValue>(async () =>
         {
             try
             {
@@ -23,21 +28,10 @@ public class AsyncFuncAssertion<TValue> : Assertion<TValue>, IDelegateAssertionS
             {
                 return (default(TValue), ex);
             }
-        }))
-    {
+        });
+        ExpressionBuilder = new StringBuilder();
         ExpressionBuilder.Append($"Assert.That({expression ?? "?"})");
     }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        // Source assertions don't perform checks
-        return Task.FromResult(AssertionResult.Passed);
-    }
-
-    protected override string GetExpectation() => "to evaluate successfully";
 
     /// <summary>
     /// Asserts that the async function throws the specified exception type (or subclass).
