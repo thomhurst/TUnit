@@ -236,6 +236,48 @@ public static class Assert
     }
 
     /// <summary>
+    /// Asserts that the action throws an exception of the specified type (or subclass) and returns the exception.
+    /// Non-generic version that accepts a Type parameter at runtime.
+    /// Example: var exception = Assert.Throws(typeof(InvalidOperationException), () => ThrowingMethod());
+    /// </summary>
+    public static Exception Throws(Type exceptionType, Action action)
+    {
+        if (!typeof(Exception).IsAssignableFrom(exceptionType))
+        {
+            throw new ArgumentException($"Type {exceptionType.Name} must be an Exception type", nameof(exceptionType));
+        }
+
+        try
+        {
+            action();
+            throw new AssertionException($"Expected {exceptionType.Name} but no exception was thrown");
+        }
+        catch (Exception ex) when (exceptionType.IsInstanceOfType(ex))
+        {
+            return ex;
+        }
+        catch (Exception ex)
+        {
+            throw new AssertionException($"Expected {exceptionType.Name} but got {ex.GetType().Name}: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Asserts that the action throws the specified exception type with the expected parameter name (for ArgumentException types) and returns the exception.
+    /// Example: var exception = Assert.Throws&lt;ArgumentNullException&gt;("paramName", () => ThrowingMethod());
+    /// </summary>
+    public static TException Throws<TException>(string parameterName, Action action)
+        where TException : ArgumentException
+    {
+        var exception = Throws<TException>(action);
+        if (exception.ParamName != parameterName)
+        {
+            throw new AssertionException($"Expected {typeof(TException).Name} with ParamName '{parameterName}' but got ParamName '{exception.ParamName}'");
+        }
+        return exception;
+    }
+
+    /// <summary>
     /// Asserts that the async action throws the specified exception type and returns the exception.
     /// Example: var exception = await Assert.ThrowsAsync&lt;InvalidOperationException&gt;(async () => await ThrowingMethodAsync());
     /// </summary>

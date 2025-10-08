@@ -23,7 +23,10 @@ namespace
             where TKey :  notnull { }
         public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue> value, [.("value")] string? expression = null)
             where TKey :  notnull { }
+        public static  Throws( exceptionType,  action) { }
         public static TException Throws<TException>( action)
+            where TException :  { }
+        public static TException Throws<TException>(string parameterName,  action)
             where TException :  { }
         public static .<> ThrowsAsync(<.> action) { }
         public static .<> ThrowsAsync(. task) { }
