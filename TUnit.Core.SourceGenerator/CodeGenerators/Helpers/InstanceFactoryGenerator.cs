@@ -14,11 +14,15 @@ public static class InstanceFactoryGenerator
     public static void GenerateInstanceFactory(CodeWriter writer, ITypeSymbol typeSymbol, TestMethodMetadata? testMethod)
     {
         var className = typeSymbol.GloballyQualified();
+        
+        // Check if the type is accessible (public) from the generated namespace
+        var isTypeAccessible = typeSymbol is INamedTypeSymbol namedTypeSymbol && 
+                              namedTypeSymbol.DeclaredAccessibility == Accessibility.Public;
 
         // Check if the class has a ClassConstructor attribute first, before any other checks
-        if (typeSymbol is INamedTypeSymbol namedTypeSymbol)
+        if (typeSymbol is INamedTypeSymbol namedType)
         {
-            var hasClassConstructor = namedTypeSymbol.GetAttributesIncludingBaseTypes()
+            var hasClassConstructor = namedType.GetAttributesIncludingBaseTypes()
                 .Any(a => a.AttributeClass?.GloballyQualifiedNonGeneric() == WellKnownFullyQualifiedClassNames.ClassConstructorAttribute.WithGlobalPrefix);
 
             if (hasClassConstructor)
@@ -38,10 +42,10 @@ public static class InstanceFactoryGenerator
         }
 
         // Check if this is a generic type definition
-        if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments.Any(ta => ta is ITypeParameterSymbol))
+        if (typeSymbol is INamedTypeSymbol { IsGenericType: true } namedTypeGeneric && namedTypeGeneric.TypeArguments.Any(ta => ta is ITypeParameterSymbol))
         {
             // Generate factory that uses MakeGenericType
-            GenerateGenericInstanceFactory(writer, namedType);
+            GenerateGenericInstanceFactory(writer, namedTypeGeneric);
             return;
         }
 
@@ -50,7 +54,7 @@ public static class InstanceFactoryGenerator
             var constructor = GetPrimaryConstructor(typeSymbol);
             if (constructor != null)
             {
-                GenerateTypedConstructorCall(writer, className, constructor, testMethod);
+                GenerateTypedConstructorCall(writer, className, constructor, testMethod, isTypeAccessible);
             }
             else
             {
@@ -62,7 +66,32 @@ public static class InstanceFactoryGenerator
             // For classes with default constructor, check for ALL required properties
             var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(typeSymbol);
 
-            if (!requiredProperties.Any())
+            if (!isTypeAccessible)
+            {
+                // Use Activator.CreateInstance for non-public types
+                if (!requiredProperties.Any())
+                {
+                    writer.AppendLine($"InstanceFactory = (typeArgs, args) => global::System.Activator.CreateInstance(typeof({className}), true)!,");
+                }
+                else
+                {
+                    writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+                    writer.AppendLine("{");
+                    writer.Indent();
+                    writer.AppendLine($"var instance = global::System.Activator.CreateInstance(typeof({className}), true)!;");
+                    
+                    foreach (var property in requiredProperties)
+                    {
+                        var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
+                        writer.AppendLine($"typeof({className}).GetProperty(\"{property.Name}\")?.SetValue(instance, {defaultValue});");
+                    }
+                    
+                    writer.AppendLine("return instance;");
+                    writer.Unindent();
+                    writer.AppendLine("},");
+                }
+            }
+            else if (!requiredProperties.Any())
             {
                 writer.AppendLine($"InstanceFactory = (typeArgs, args) => new {className}(),");
             }
@@ -114,7 +143,7 @@ public static class InstanceFactoryGenerator
         return publicConstructors.Length == 1 ? publicConstructors[0] : publicConstructors.FirstOrDefault();
     }
 
-    private static void GenerateTypedConstructorCall(CodeWriter writer, string className, IMethodSymbol constructor, TestMethodMetadata? testMethod)
+    private static void GenerateTypedConstructorCall(CodeWriter writer, string className, IMethodSymbol constructor, TestMethodMetadata? testMethod, bool isTypeAccessible)
     {
         writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
         writer.AppendLine("{");
@@ -125,49 +154,99 @@ public static class InstanceFactoryGenerator
 
         if (constructor.Parameters.Length == 0 && !requiredProperties.Any())
         {
-            writer.AppendLine($"return new {className}();");
+            if (isTypeAccessible)
+            {
+                writer.AppendLine($"return new {className}();");
+            }
+            else
+            {
+                writer.AppendLine($"return global::System.Activator.CreateInstance(typeof({className}), true)!;");
+            }
         }
         else
         {
-            writer.Append($"return new {className}(");
-
-            // Generate constructor arguments
-            var parameterTypes = constructor.Parameters.Select(p => p.Type).ToList();
-            
-            for (var i = 0; i < parameterTypes.Count; i++)
+            if (isTypeAccessible)
             {
-                if (i > 0)
-                {
-                    writer.Append(", ");
-                }
+                writer.Append($"return new {className}(");
+
+                // Generate constructor arguments
+                var parameterTypes = constructor.Parameters.Select(p => p.Type).ToList();
                 
-                var parameterType = parameterTypes[i];
-                var argAccess = $"args[{i}]";
-                
-                // Use CastHelper which now has AOT converter registry support
-                writer.Append($"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");
-            }
-
-            writer.Append(")");
-
-            // Add object initializer for required properties
-            if (requiredProperties.Any())
-            {
-                writer.AppendLine();
-                writer.AppendLine("{");
-                writer.Indent();
-
-                foreach (var property in requiredProperties)
+                for (var i = 0; i < parameterTypes.Count; i++)
                 {
-                    var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
-                    writer.AppendLine($"{property.Name} = {defaultValue},");
+                    if (i > 0)
+                    {
+                        writer.Append(", ");
+                    }
+                    
+                    var parameterType = parameterTypes[i];
+                    var argAccess = $"args[{i}]";
+                    
+                    // Use CastHelper which now has AOT converter registry support
+                    writer.Append($"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");
                 }
 
-                writer.Unindent();
-                writer.Append("}");
-            }
+                writer.Append(")");
 
-            writer.AppendLine(";");
+                // Add object initializer for required properties
+                if (requiredProperties.Any())
+                {
+                    writer.AppendLine();
+                    writer.AppendLine("{");
+                    writer.Indent();
+
+                    foreach (var property in requiredProperties)
+                    {
+                        var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
+                        writer.AppendLine($"{property.Name} = {defaultValue},");
+                    }
+
+                    writer.Unindent();
+                    writer.Append("}");
+                }
+
+                writer.AppendLine(";");
+            }
+            else
+            {
+                // Use Activator.CreateInstance for non-public types
+                writer.Append($"var instance = global::System.Activator.CreateInstance(typeof({className}), true");
+                
+                if (constructor.Parameters.Length > 0)
+                {
+                    writer.Append(", new object?[] { ");
+                    var parameterTypes = constructor.Parameters.Select(p => p.Type).ToList();
+                    
+                    for (var i = 0; i < parameterTypes.Count; i++)
+                    {
+                        if (i > 0)
+                        {
+                            writer.Append(", ");
+                        }
+                        
+                        var parameterType = parameterTypes[i];
+                        var argAccess = $"args[{i}]";
+                        
+                        writer.Append($"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");
+                    }
+                    
+                    writer.Append(" }");
+                }
+                
+                writer.AppendLine(")!;");
+                
+                // Set required properties
+                if (requiredProperties.Any())
+                {
+                    foreach (var property in requiredProperties)
+                    {
+                        var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
+                        writer.AppendLine($"typeof({className}).GetProperty(\"{property.Name}\")?.SetValue(instance, {defaultValue});");
+                    }
+                }
+                
+                writer.AppendLine("return instance;");
+            }
         }
 
         writer.Unindent();

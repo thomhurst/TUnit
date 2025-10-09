@@ -1816,8 +1816,73 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
 
+    private static void GenerateReflectionBasedInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, bool isAsync, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
+    {
+        // Get the method using reflection with NonPublic binding flags
+        writer.AppendLine($"var methodInfo = typeof({className}).GetMethod(");
+        writer.Indent();
+        writer.AppendLine($"\"{methodName}\",");
+        writer.AppendLine("global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance);");
+        writer.Unindent();
+        
+        writer.AppendLine("if (methodInfo == null)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"throw new global::System.InvalidOperationException($\"Method '{methodName}' not found on type '{className}'\");");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        
+        // Build the invocation arguments array
+        if (parametersFromArgs.Length > 0 || hasCancellationToken)
+        {
+            var argCount = parametersFromArgs.Length + (hasCancellationToken ? 1 : 0);
+            writer.AppendLine($"var methodArgs = new object?[{argCount}];");
+            
+            // Copy regular arguments
+            for (var i = 0; i < parametersFromArgs.Length; i++)
+            {
+                var param = parametersFromArgs[i];
+                writer.AppendLine($"methodArgs[{i}] = TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>(args[{i}]);");
+            }
+            
+            // Add cancellation token if needed
+            if (hasCancellationToken)
+            {
+                writer.AppendLine($"methodArgs[{parametersFromArgs.Length}] = cancellationToken;");
+            }
+        }
+        else
+        {
+            writer.AppendLine("var methodArgs = global::System.Array.Empty<object?>();");
+        }
+        
+        writer.AppendLine();
+        
+        // Invoke the method
+        if (isAsync)
+        {
+            writer.AppendLine("var result = methodInfo.Invoke(instance, methodArgs);");
+            writer.AppendLine("if (result is global::System.Threading.Tasks.Task task)");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("await task;");
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+        else
+        {
+            writer.AppendLine("methodInfo.Invoke(instance, methodArgs);");
+            writer.AppendLine("await global::System.Threading.Tasks.Task.CompletedTask;");
+        }
+    }
+
+
     private static void GenerateConcreteTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, bool isAsync, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
     {
+        // Check if method is accessible (public) from the generated namespace
+        var isMethodAccessible = testMethod.MethodSymbol.DeclaredAccessibility == Accessibility.Public;
+        
         // Generate InvokeTypedTest which is required by CreateExecutableTestFactory
         writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
@@ -1827,6 +1892,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (hasCancellationToken && parametersFromArgs.Length > 0)
         {
             writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+        }
+        
+        // For non-public methods, we need to use reflection
+        if (!isMethodAccessible)
+        {
+            GenerateReflectionBasedInvoker(writer, testMethod, className, methodName, isAsync, hasCancellationToken, parametersFromArgs);
+            writer.Unindent();
+            writer.AppendLine("},");
+            return;
         }
 
         // Special case: Single tuple parameter (same as in TestInvoker)
