@@ -54,7 +54,7 @@ internal sealed class StringArgumentTests_Normal_TestSource_GUID : global::TUnit
                         Name = "s",
                         TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.StringArgumentTests).GetMethod("Normal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.StringArgumentTests).GetMethod("Normal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.StringArgumentTests", () => 
@@ -161,7 +161,7 @@ internal sealed class StringArgumentTests_Nullable_TestSource_GUID : global::TUn
                         Name = "s",
                         TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
                         IsNullable = true,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.StringArgumentTests).GetMethod("Nullable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.StringArgumentTests).GetMethod("Nullable", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.StringArgumentTests", () => 

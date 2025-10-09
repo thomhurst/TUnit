@@ -45,7 +45,7 @@ internal sealed class ArgumentWithImplicitConverterTests_Explicit_TestSource_GUI
                         Name = "integer",
                         TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ExplicitInteger, TestsBase`1"),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Explicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ExplicitInteger) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Explicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ExplicitInteger) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => 
@@ -147,7 +147,7 @@ internal sealed class ArgumentWithImplicitConverterTests_Implicit_TestSource_GUI
                         Name = "integer",
                         TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.ImplicitInteger, TestsBase`1"),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Implicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ImplicitInteger) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests).GetMethod("Implicit", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.ImplicitInteger) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ArgumentWithImplicitConverterTests", () => 

@@ -119,7 +119,7 @@ internal sealed class DataSourceClassCombinedWithDataSourceMethod_DataSourceClas
                         Name = "i",
                         TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("int, System.Private.CoreLib"),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetMethod("DataSourceClassCombinedWithDataSourceMethodTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod).GetMethod("DataSourceClassCombinedWithDataSourceMethodTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DataSourceClassCombinedWithDataSourceMethod", () => 
