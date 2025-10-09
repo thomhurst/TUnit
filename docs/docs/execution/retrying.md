@@ -68,3 +68,29 @@ public class MyTestClass
     }
 }
 ```
+
+## Global Retry Policy
+
+In case you want to apply the retry logic to all tests in a project, you can add the attribute on the assembly level.
+
+```csharp
+[assembly: Retry(3)]
+```
+
+Or you can apply the retry policy on all the tests in a class like this:
+
+```csharp
+[Retry(3)]
+public class MyTestClass
+{
+}
+```
+
+The more specific attribute will always override the more general one.
+For example, the `[Retry(3)]` on a method will override the `[Retry(5)]` on the class,
+which in turn will override the `[Retry(7)]` on the assembly.
+
+So the order of precedence is:
+1. Method
+1. Class
+1. Assembly

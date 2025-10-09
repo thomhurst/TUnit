@@ -61,3 +61,20 @@ public record MyParallelLimit : IParallelLimit
 
 ## Caveats
 If a test uses `[DependsOn(nameof(OtherTest))]` and the other test has its own different parallel limit, this isn't guaranteed to be honoured.
+
+## Global Parallel Limit
+
+In case you want to apply the Parallel Limit logic to all tests in a project, you can add the attribute on the assembly level.
+
+```csharp
+[assembly: ParallelLimiter<MyParallelLimit>]
+```
+
+The more specific attribute will always override the more general one.
+For example, the `[ParallelLimiter<MethodParallelLimit>]` on a method will override the `[ParallelLimiter<ClassParallelLimit>]` on the class,
+which in turn will override the `[ParallelLimiter<AssemblyParallelLimit>]` on the assembly.
+
+So the order of precedence is:
+1. Method
+1. Class
+1. Assembly
