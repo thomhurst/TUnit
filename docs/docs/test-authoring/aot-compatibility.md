@@ -173,7 +173,7 @@ namespace MyTestProject;
 
 public class ServiceInjectionTests
 {
-    [ClassDataSource<DatabaseService>(Shared = SharedType.Globally)]
+    [ClassDataSource<DatabaseService>(Shared = SharedType.PerTestSession)]
     public required DatabaseService Database { get; init; }
 
     [ClassDataSource<LoggingService>]
