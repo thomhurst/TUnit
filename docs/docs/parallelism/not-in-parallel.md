@@ -44,3 +44,12 @@ public class MyTestClass
     }
 }
 ```
+
+## Global [NotInParallel]
+
+If you want to disable parallelism for all tests in an assembly (To run tests sequentially),
+you can add the following:
+
+```csharp
+[assembly: NotInParallel]
+```

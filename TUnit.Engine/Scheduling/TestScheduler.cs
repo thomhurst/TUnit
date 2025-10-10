@@ -230,8 +230,15 @@ internal sealed class TestScheduler : ITestScheduler
         // Check if test has parallel limit constraint
         if (test.Context.ParallelLimiter != null)
         {
+            var limiterType = test.Context.ParallelLimiter.GetType().Name;
             var semaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
+
+            await _logger.LogDebugAsync($"Test '{test.TestId}': Waiting for ParallelLimiter '{limiterType}' (available: {semaphore.CurrentCount}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
+
             await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            await _logger.LogDebugAsync($"Test '{test.TestId}': Acquired ParallelLimiter '{limiterType}' (remaining: {semaphore.CurrentCount}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
+
             try
             {
                 await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
@@ -239,10 +246,12 @@ internal sealed class TestScheduler : ITestScheduler
             finally
             {
                 semaphore.Release();
+                await _logger.LogDebugAsync($"Test '{test.TestId}': Released ParallelLimiter '{limiterType}' (available: {semaphore.CurrentCount}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
             }
         }
         else
         {
+            await _logger.LogDebugAsync($"Test '{test.TestId}': No ParallelLimiter, executing directly").ConfigureAwait(false);
             await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -361,6 +370,8 @@ internal sealed class TestScheduler : ITestScheduler
         int maxParallelism,
         CancellationToken cancellationToken)
     {
+        await _logger.LogDebugAsync($"Starting {tests.Length} tests with global max parallelism: {maxParallelism}").ConfigureAwait(false);
+
         // Global semaphore limits total concurrent test execution
         var globalSemaphore = new SemaphoreSlim(maxParallelism, maxParallelism);
 
@@ -383,8 +394,13 @@ internal sealed class TestScheduler : ITestScheduler
             // Phase 1: Acquire ParallelLimiter first (if test has one)
             if (test.Context.ParallelLimiter != null)
             {
+                var limiterName = test.Context.ParallelLimiter.GetType().Name;
+                await _logger.LogDebugAsync($"Test '{test.TestId}': [Phase 1] Acquiring ParallelLimiter '{limiterName}' (limit: {test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
+
                 parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
                 await parallelLimiterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+                await _logger.LogDebugAsync($"Test '{test.TestId}': [Phase 1] Acquired ParallelLimiter '{limiterName}'").ConfigureAwait(false);
             }
 
             try
@@ -392,7 +408,13 @@ internal sealed class TestScheduler : ITestScheduler
                 // Phase 2: Acquire global semaphore
                 // At this point, we have the constrained resource (if needed),
                 // so we can immediately use the global slot for execution
+                await _logger.LogDebugAsync($"Test '{test.TestId}': [Phase 2] Acquiring global semaphore (available: {globalSemaphore.CurrentCount}/{maxParallelism})").ConfigureAwait(false);
+
                 await globalSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+                var slotsUsed = maxParallelism - globalSemaphore.CurrentCount;
+                await _logger.LogDebugAsync($"Test '{test.TestId}': [Phase 2] Acquired global semaphore - executing (global slots used: {slotsUsed}/{maxParallelism})").ConfigureAwait(false);
+
                 try
                 {
                     // Execute the test
@@ -404,12 +426,17 @@ internal sealed class TestScheduler : ITestScheduler
                 {
                     // Always release global semaphore after execution
                     globalSemaphore.Release();
+                    await _logger.LogDebugAsync($"Test '{test.TestId}': [Phase 2] Released global semaphore (available: {globalSemaphore.CurrentCount}/{maxParallelism})").ConfigureAwait(false);
                 }
             }
             finally
             {
                 // Always release ParallelLimiter semaphore (if we acquired one)
-                parallelLimiterSemaphore?.Release();
+                if (parallelLimiterSemaphore != null)
+                {
+                    parallelLimiterSemaphore.Release();
+                    await _logger.LogDebugAsync($"Test '{test.TestId}': [Phase 1] Released ParallelLimiter").ConfigureAwait(false);
+                }
             }
         }).ToArray();
 
