@@ -155,14 +155,14 @@ internal sealed class MethodDataSourceDrivenWithCancellationTokenTests_MyTest_Te
                         Name = "value",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
                     {
                         Name = "cancellationToken",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => 

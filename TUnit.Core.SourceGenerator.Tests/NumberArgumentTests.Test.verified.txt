@@ -43,7 +43,7 @@ internal sealed class NumberArgumentTests_Int_TestSource_GUID : global::TUnit.Co
                         Name = "i",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(int)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Int", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Int", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", () => 
@@ -143,7 +143,7 @@ internal sealed class NumberArgumentTests_Double_TestSource_GUID : global::TUnit
                         Name = "d",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(double)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Double", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Double", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", () => 
@@ -243,7 +243,7 @@ internal sealed class NumberArgumentTests_Float_TestSource_GUID : global::TUnit.
                         Name = "f",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(float)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Float", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Float", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", () => 
@@ -343,7 +343,7 @@ internal sealed class NumberArgumentTests_Long_TestSource_GUID : global::TUnit.C
                         Name = "l",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(long)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Long", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Long", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", () => 
@@ -443,7 +443,7 @@ internal sealed class NumberArgumentTests_ULong_TestSource_GUID : global::TUnit.
                         Name = "l",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(ulong)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("ULong", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(ulong) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("ULong", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(ulong) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", () => 
@@ -543,7 +543,7 @@ internal sealed class NumberArgumentTests_UInt_TestSource_GUID : global::TUnit.C
                         Name = "i",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(uint)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("UInt", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(uint) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("UInt", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(uint) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", () => 

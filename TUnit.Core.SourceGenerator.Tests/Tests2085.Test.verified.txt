@@ -43,7 +43,7 @@ internal sealed class Tests_Double_SpecialConsts_TestSource_GUID : global::TUnit
                         Name = "d",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(double)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Double_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Double_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2085.Tests", () => 
@@ -142,7 +142,7 @@ internal sealed class Tests_Float_SpecialConsts_TestSource_GUID : global::TUnit.
                         Name = "d",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(float)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Float_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._2085.Tests).GetMethod("Float_SpecialConsts", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2085.Tests", () => 

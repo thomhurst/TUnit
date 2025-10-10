@@ -44,7 +44,7 @@ internal sealed class Tests_NullTest_TestSource_GUID : global::TUnit.Core.Interf
                         Name = "t",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
                         IsNullable = true,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1692.Tests).GetMethod("NullTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1692.Tests).GetMethod("NullTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1692.Tests", () => 

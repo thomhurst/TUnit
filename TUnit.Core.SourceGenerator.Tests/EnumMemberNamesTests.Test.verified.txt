@@ -45,7 +45,7 @@ internal sealed class EnumMemberNamesTests_SomeTest_TestSource_GUID : global::TU
                         Name = "value",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests).GetMethod("SomeTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests).GetMethod("SomeTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1432.EnumMemberNamesTests", () => 

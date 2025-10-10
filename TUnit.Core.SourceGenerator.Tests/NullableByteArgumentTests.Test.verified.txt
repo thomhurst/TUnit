@@ -44,7 +44,7 @@ internal sealed class NullableByteArgumentTests_Test_TestSource_GUID : global::T
                         Name = "someByte",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(byte?)),
                         IsNullable = true,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(byte?) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(byte?) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NullableByteArgumentTests", () => 
@@ -145,14 +145,14 @@ internal sealed class NullableByteArgumentTests_Test2_TestSource_GUID : global::
                         Name = "byte1",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(byte)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(byte), typeof(byte?) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(byte), typeof(byte?) }, null)!.GetParameters()[0]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(byte?))
                     {
                         Name = "byte2",
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(byte?)),
                         IsNullable = true,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(byte), typeof(byte?) }, null)!.GetParameters()[1]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(byte), typeof(byte?) }, null)!.GetParameters()[1]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NullableByteArgumentTests", () => 
