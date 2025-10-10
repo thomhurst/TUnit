@@ -252,6 +252,13 @@ Declare your dependencies with attributes and TUnit manages the orchestration.
 5. **Keep classes focused** - one responsibility per class
 6. **Use TUnit's orchestration** - avoid manual dependency management
 
+## Multiple Test Projects and SharedType.PerTestSession
+In larger solutions, it is often beneficial to structure tests into different test projects, sometimes alongside a common test library for shared  common code like infrastructure orchestration. Test runners like `dotnet test`, typically launch separate .NET processes for each test project. And because each test project runs as its own process, they cant share the dependencies.
+
+This means that classes configured with a `SharedType.PerTestSession` lifetime will be **initialized once per test project**, rather than once for the entire test session.
+
+If you intend for services or data to be shared across those separate test projects, you will need to consolidate the execution using a Test Orchestrator approach to load all projects into a single process and run `dotnet test` directly on that. 
+
 ## Summary
 
 TUnit's property injection system helps simplify complex test infrastructure setup through a declarative, type-safe approach. By handling initialization order, lifecycle management, and dependency injection, TUnit allows you to focus on writing tests that validate your application's behavior.
