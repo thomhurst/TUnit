@@ -834,7 +834,7 @@ internal sealed class ReflectionHookDiscoveryService
             {
                 Name = type.Name,
                 Type = type,
-                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!),
+                TypeInfo = new ConcreteType(type),
                 Namespace = type.Namespace ?? string.Empty,
                 Assembly = new AssemblyMetadata
                 {
@@ -848,13 +848,13 @@ internal sealed class ReflectionHookDiscoveryService
             {
                 Name = p.Name ?? string.Empty,
                 Type = p.ParameterType,
-                TypeReference = TypeReference.CreateConcrete(p.ParameterType.AssemblyQualifiedName!),
+                TypeInfo = new ConcreteType(p.ParameterType),
                 ReflectionInfo = p
             }).ToArray(),
             GenericTypeCount = 0,
-            ReturnTypeReference = TypeReference.CreateConcrete(method.ReturnType.AssemblyQualifiedName!),
+            ReturnTypeInfo = new ConcreteType(method.ReturnType),
             ReturnType = method.ReturnType,
-            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!)
+            TypeInfo = new ConcreteType(type)
         };
     }
 

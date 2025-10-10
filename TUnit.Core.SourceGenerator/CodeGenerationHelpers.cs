@@ -36,7 +36,7 @@ internal static class CodeGenerationHelpers
                 using (writer.BeginObjectInitializer($"new global::TUnit.Core.ParameterMetadata(typeof({typeForConstructor}))", ","))
                 {
                     writer.AppendLine($"Name = \"{param.Name}\",");
-                    writer.AppendLine($"TypeReference = {GenerateTypeReference(param.Type)},");
+                    writer.AppendLine($"TypeInfo = {GenerateTypeInfo(param.Type)},");
                     writer.AppendLine($"IsNullable = {param.Type.IsNullable().ToString().ToLowerInvariant()},");
                     var paramTypesArray = GenerateParameterTypesArray(method);
                     if (paramTypesArray == "null")
@@ -574,52 +574,51 @@ internal static class CodeGenerationHelpers
     }
 
     /// <summary>
-    /// Generates C# code to create a TypeReference from an ITypeSymbol.
+    /// Generates C# code to create a TypeInfo from an ITypeSymbol.
     /// </summary>
-    public static string GenerateTypeReference(ITypeSymbol typeSymbol)
+    public static string GenerateTypeInfo(ITypeSymbol typeSymbol)
     {
         if (typeSymbol is ITypeParameterSymbol typeParameter)
         {
             // This is a generic parameter (e.g., T, TKey)
             var position = GetGenericParameterPosition(typeParameter);
             var isMethodParameter = typeParameter.DeclaringMethod != null;
-            return $@"global::TUnit.Core.TypeReference.CreateGenericParameter({position}, {(isMethodParameter ? "true" : "false")}, ""{typeParameter.Name}"")";
-        }
-
-        if (typeSymbol is IArrayTypeSymbol arrayType)
-        {
-            // This is an array type
-            var elementTypeRef = GenerateTypeReference(arrayType.ElementType);
-            return $@"global::TUnit.Core.TypeReference.CreateArray({elementTypeRef}, {arrayType.Rank})";
-        }
-
-        if (typeSymbol is IPointerTypeSymbol pointerType)
-        {
-            // This is a pointer type
-            var elementTypeRef = GenerateTypeReference(pointerType.PointedAtType);
-            return $@"new global::TUnit.Core.TypeReference {{ IsPointer = true, ElementType = {elementTypeRef} }}";
+            return $@"new global::TUnit.Core.GenericParameter({position}, {(isMethodParameter ? "true" : "false")}, ""{typeParameter.Name}"")";
         }
 
         if (typeSymbol is INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } namedType)
         {
             // This is a constructed generic type (e.g., List<int>, Dictionary<string, T>)
-            var genericDef = GetGenericTypeDefinitionName(namedType);
-            var genericArgs = namedType.TypeArguments.Select(GenerateTypeReference).ToArray();
+            // Check if all type arguments are concrete (no generic parameters)
+            var hasGenericParameters = namedType.TypeArguments.Any(ContainsTypeParameter);
 
-            using var writer = new CodeWriter("", includeHeader: false);
-            writer.SetIndentLevel(1);
-            writer.Append($@"global::TUnit.Core.TypeReference.CreateConstructedGeneric(""{genericDef}""");
-            foreach (var arg in genericArgs)
+            if (hasGenericParameters)
             {
-                writer.Append($", {arg}");
+                // Has generic parameters - use ConstructedGeneric
+                var genericDefType = GetTypeOfExpression(namedType.ConstructUnboundGenericType());
+                var genericArgs = namedType.TypeArguments.Select(GenerateTypeInfo).ToArray();
+
+                using var writer = new CodeWriter("", includeHeader: false);
+                writer.SetIndentLevel(1);
+                writer.Append($@"new global::TUnit.Core.ConstructedGeneric({genericDefType}, [{string.Join(", ", genericArgs)}])");
+                return writer.ToString().Trim();
             }
-            writer.Append(")");
-            return writer.ToString().Trim();
+            // All type arguments are concrete - this is just a concrete type
+            // Fall through to regular typeof() handling
         }
 
-        // Regular concrete type
-        var assemblyQualifiedName = GetAssemblyQualifiedName(typeSymbol);
-        return $@"global::TUnit.Core.TypeReference.CreateConcrete(""{assemblyQualifiedName}"")";
+        // Regular concrete type (including fully closed generic types like List<int>)
+        var typeOfExpression = GetTypeOfExpression(typeSymbol);
+        return $@"new global::TUnit.Core.ConcreteType({typeOfExpression})";
+    }
+
+    /// <summary>
+    /// Generates a typeof() expression for the given type symbol.
+    /// </summary>
+    private static string GetTypeOfExpression(ITypeSymbol typeSymbol)
+    {
+        var fullyQualifiedName = typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        return $"typeof({fullyQualifiedName})";
     }
 
     private static int GetGenericParameterPosition(ITypeParameterSymbol typeParameter)

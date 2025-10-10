@@ -284,7 +284,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             {
                 Name = type.Name,
                 Type = type,
-                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!),
+                TypeInfo = new ConcreteType(type),
                 Namespace = type.Namespace ?? string.Empty,
                 Assembly = new AssemblyMetadata
                 {
@@ -296,9 +296,9 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             },
             Parameters = [],
             GenericTypeCount = 0,
-            ReturnTypeReference = TypeReference.CreateConcrete(typeof(void).AssemblyQualifiedName!),
+            ReturnTypeInfo = new ConcreteType(typeof(void)),
             ReturnType = typeof(void),
-            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!)
+            TypeInfo = new ConcreteType(type)
         };
     }
 

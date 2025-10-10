@@ -73,11 +73,11 @@ internal static class MetadataGenerationHelper
         var safeReturnTypeDisplay = methodSymbol.ReturnType.GloballyQualified();
 
         writer.AppendLine($"Type = typeof({safeTypeDisplay}),");
-        writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ContainingType)},");
+        writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(methodSymbol.ContainingType)},");
         writer.AppendLine($"Name = \"{methodSymbol.Name}\",");
         writer.AppendLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
         writer.AppendLine($"ReturnType = typeof({safeReturnTypeDisplay}),");
-        writer.AppendLine($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ReturnType)},");
+        writer.AppendLine($"ReturnTypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(methodSymbol.ReturnType)},");
         writer.Append($"Parameters = ");
         WriteParameterMetadataArrayForMethod(writer, methodSymbol);
         writer.AppendLine(",");
@@ -106,11 +106,11 @@ internal static class MetadataGenerationHelper
         var safeReturnTypeDisplay = methodSymbol.ReturnType.GloballyQualified();
 
         writer.AppendLine($"Type = typeof({safeTypeDisplay}),");
-        writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ContainingType)},");
+        writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(methodSymbol.ContainingType)},");
         writer.AppendLine($"Name = \"{methodSymbol.Name}\",");
         writer.AppendLine($"GenericTypeCount = {methodSymbol.TypeParameters.Length},");
         writer.AppendLine($"ReturnType = typeof({safeReturnTypeDisplay}),");
-        writer.AppendLine($"ReturnTypeReference = {CodeGenerationHelpers.GenerateTypeReference(methodSymbol.ReturnType)},");
+        writer.AppendLine($"ReturnTypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(methodSymbol.ReturnType)},");
         writer.AppendLine($"Parameters = {GenerateParameterMetadataArrayForMethod(methodSymbol, writer.IndentLevel)},");
         writer.AppendLine($"Class = {classMetadataExpression}");
 
@@ -141,7 +141,7 @@ internal static class MetadataGenerationHelper
         writer.SetIndentLevel(currentIndent + 2);
 
         writer.AppendLine($"Type = typeof({typeSymbol.GloballyQualified()}),");
-        writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(typeSymbol)},");
+        writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(typeSymbol)},");
         writer.AppendLine($"Name = \"{typeSymbol.Name}\",");
         writer.AppendLine($"Namespace = \"{typeSymbol.ContainingNamespace?.ToDisplayString() ?? ""}\",");
         writer.AppendLine($"Assembly = {GenerateAssemblyMetadataGetOrAdd(typeSymbol.ContainingAssembly)},");
@@ -209,7 +209,7 @@ internal static class MetadataGenerationHelper
         writer.Indent();
 
         writer.AppendLine($"Type = typeof({typeSymbol.GloballyQualified()}),");
-        writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(typeSymbol)},");
+        writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(typeSymbol)},");
         writer.AppendLine($"Name = \"{typeSymbol.Name}\",");
         writer.AppendLine($"Namespace = \"{typeSymbol.ContainingNamespace?.ToDisplayString() ?? ""}\",");
         writer.AppendLine($"Assembly = {GenerateAssemblyMetadataGetOrAdd(typeSymbol.ContainingAssembly)},");
@@ -277,7 +277,7 @@ internal static class MetadataGenerationHelper
         writer.SetIndentLevel(currentIndent + 1);
 
         writer.AppendLine($"Name = \"{parameter.Name}\",");
-        writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(parameter.Type)},");
+        writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(parameter.Type)},");
         writer.Append($"ReflectionInfo = {reflectionInfo}");
 
         // Manually restore indent level
@@ -303,7 +303,7 @@ internal static class MetadataGenerationHelper
         writer.SetIndentLevel(currentIndent + 1);
 
         writer.AppendLine($"Name = \"{parameter.Name}\",");
-        writer.AppendLine($"TypeReference = {CodeGenerationHelpers.GenerateTypeReference(parameter.Type)},");
+        writer.AppendLine($"TypeInfo = {CodeGenerationHelpers.GenerateTypeInfo(parameter.Type)},");
         writer.AppendLine($"IsNullable = {parameter.Type.IsNullable().ToString().ToLowerInvariant()},");
         writer.Append($"ReflectionInfo = {reflectionInfo}");
 

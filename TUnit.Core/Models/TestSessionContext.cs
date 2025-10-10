@@ -25,8 +25,8 @@ public class TestSessionContext : Context
         {
             Type = typeof(object),
             Name = "StaticPropertyInitialization",
-            TypeReference = TypeReference.CreateConcrete(typeof(object).AssemblyQualifiedName ?? "System.Object"),
-            ReturnTypeReference = TypeReference.CreateConcrete(typeof(void).AssemblyQualifiedName ?? "System.Void"),
+            TypeInfo = new ConcreteType(typeof(object)),
+            ReturnTypeInfo = new ConcreteType(typeof(void)),
             Parameters = Array.Empty<ParameterMetadata>(),
             GenericTypeCount = 0,
             Class = new ClassMetadata
@@ -34,7 +34,7 @@ public class TestSessionContext : Context
                 Name = "GlobalStaticPropertyInitializer",
                 Type = typeof(object),
                 Namespace = "TUnit.Core",
-                TypeReference = TypeReference.CreateConcrete(typeof(object).AssemblyQualifiedName ?? "System.Object"),
+                TypeInfo = new ConcreteType(typeof(object)),
                 Assembly = AssemblyMetadata.GetOrAdd("TUnit.Core", () => new AssemblyMetadata { Name = "TUnit.Core" }),
                 Properties = Array.Empty<PropertyMetadata>(),
                 Parameters = Array.Empty<ParameterMetadata>(),

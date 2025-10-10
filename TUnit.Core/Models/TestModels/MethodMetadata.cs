@@ -13,15 +13,15 @@ public record MethodMetadata : MemberMetadata
 
     public required ClassMetadata Class { get; init; }
 
-    public required TypeReference ReturnTypeReference { get; init; }
+    public required TypeInfo ReturnTypeInfo { get; init; }
 
     /// <summary>
     /// The concrete return type (only available for non-generic types).
-    /// For generic types, this will be null and ReturnTypeReference must be resolved at runtime.
+    /// For generic types, this will be null and ReturnTypeInfo must be resolved at runtime.
     /// </summary>
     public Type? ReturnType { get; init; }
 
-    public required TypeReference TypeReference { get; init; }
+    public required TypeInfo TypeInfo { get; init; }
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
@@ -32,9 +32,9 @@ public record MethodMetadata : MemberMetadata
 
     protected override bool PrintMembers(StringBuilder stringBuilder)
     {
-        stringBuilder.Append($"ReturnTypeReference = {ReturnTypeReference.AssemblyQualifiedName ?? "GenericParameter"},");
+        stringBuilder.Append($"ReturnTypeInfo = {ReturnTypeInfo},");
         stringBuilder.Append($"GenericTypeCount = {GenericTypeCount},");
-        stringBuilder.Append($"TypeReference = {TypeReference.AssemblyQualifiedName ?? "GenericParameter"},");
+        stringBuilder.Append($"TypeInfo = {TypeInfo},");
         stringBuilder.Append($"Name = {Name}");
         return true;
     }
@@ -51,7 +51,7 @@ public record MethodMetadata : MemberMetadata
             return true;
         }
 
-        return base.Equals(other) && Parameters.SequenceEqual(other.Parameters) && GenericTypeCount == other.GenericTypeCount && Class.Equals(other.Class) && ReturnTypeReference.Equals(other.ReturnTypeReference) && TypeReference.Equals(other.TypeReference) && Type.Equals(other.Type);
+        return base.Equals(other) && Parameters.SequenceEqual(other.Parameters) && GenericTypeCount == other.GenericTypeCount && Class.Equals(other.Class) && ReturnTypeInfo.Equals(other.ReturnTypeInfo) && TypeInfo.Equals(other.TypeInfo) && Type.Equals(other.Type);
     }
 
     public override int GetHashCode()
@@ -62,8 +62,8 @@ public record MethodMetadata : MemberMetadata
             hashCode = (hashCode * 397) ^ Parameters.GetHashCode();
             hashCode = (hashCode * 397) ^ GenericTypeCount;
             hashCode = (hashCode * 397) ^ Class.GetHashCode();
-            hashCode = (hashCode * 397) ^ ReturnTypeReference.GetHashCode();
-            hashCode = (hashCode * 397) ^ TypeReference.GetHashCode();
+            hashCode = (hashCode * 397) ^ ReturnTypeInfo.GetHashCode();
+            hashCode = (hashCode * 397) ^ TypeInfo.GetHashCode();
             hashCode = (hashCode * 397) ^ Type.GetHashCode();
             return hashCode;
         }

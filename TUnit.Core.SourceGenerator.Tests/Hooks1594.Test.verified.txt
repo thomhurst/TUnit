@@ -34,18 +34,18 @@ internal sealed class MyTests_Test1_TestSource_GUID : global::TUnit.Core.Interfa
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1594.MyTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyTests)),
                 Name = "Test1",
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1594.MyTests", () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._1594.MyTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1594.MyTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyTests)),
                         Name = "MyTests",
                         Namespace = "TUnit.TestProject.Bugs._1594",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -54,7 +54,7 @@ internal sealed class MyTests_Test1_TestSource_GUID : global::TUnit.Core.Interfa
                             new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture))
                             {
                                 Name = "myFixture",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._1594.MyFixture, TestsBase`1"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1594.MyFixture)),
                                 IsNullable = false,
                                 ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1594.MyTests).GetConstructor(new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._1594.MyFixture) })!.GetParameters()[0]
                             }

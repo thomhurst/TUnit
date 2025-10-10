@@ -26,7 +26,7 @@ public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedM
         | DynamicallyAccessedMemberTypes.PublicProperties)]
     public override Type Type { get; init; } = Type;
 
-    public required TypeReference TypeReference { get; init; }
+    public required TypeInfo TypeInfo { get; init; }
     public required ParameterInfo ReflectionInfo { get; set; }
     public bool IsParams => CachedIsParams ?? ReflectionInfo.IsDefined(typeof(ParamArrayAttribute), false);
     public bool IsOptional => CachedIsOptional ?? ReflectionInfo.IsOptional;

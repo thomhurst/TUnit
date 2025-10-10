@@ -29,24 +29,24 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                 Name = "GenericArgumentsTest",
                 GenericTypeCount = 1,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(object))
                     {
                         Name = "value",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
+                        TypeInfo = new global::TUnit.Core.GenericParameter(0, true, "T"),
                         IsNullable = false,
                         ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(string))
                     {
                         Name = "expected",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
                         IsNullable = false,
                         ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
                     }
@@ -56,7 +56,7 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._2136",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -106,24 +106,24 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                         Name = "GenericArgumentsTest",
                         GenericTypeCount = 1,
                         ReturnType = typeof(global::System.Threading.Tasks.Task),
-                        ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                        ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(object))
                             {
                                 Name = "value",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
+                                TypeInfo = new global::TUnit.Core.GenericParameter(0, true, "T"),
                                 IsNullable = false,
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
                             },
                             new global::TUnit.Core.ParameterMetadata(typeof(string))
                             {
                                 Name = "expected",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
                                 IsNullable = false,
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
                             }
@@ -133,7 +133,7 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
                                 Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                                 Name = "Tests",
                                 Namespace = "TUnit.TestProject.Bugs._2136",
                                 Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -188,24 +188,24 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                         Name = "GenericArgumentsTest",
                         GenericTypeCount = 1,
                         ReturnType = typeof(global::System.Threading.Tasks.Task),
-                        ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                        ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(object))
                             {
                                 Name = "value",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
+                                TypeInfo = new global::TUnit.Core.GenericParameter(0, true, "T"),
                                 IsNullable = false,
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
                             },
                             new global::TUnit.Core.ParameterMetadata(typeof(string))
                             {
                                 Name = "expected",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
                                 IsNullable = false,
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
                             }
@@ -215,7 +215,7 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
                                 Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                                 Name = "Tests",
                                 Namespace = "TUnit.TestProject.Bugs._2136",
                                 Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -270,24 +270,24 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                         Name = "GenericArgumentsTest",
                         GenericTypeCount = 1,
                         ReturnType = typeof(global::System.Threading.Tasks.Task),
-                        ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                        ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(object))
                             {
                                 Name = "value",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
+                                TypeInfo = new global::TUnit.Core.GenericParameter(0, true, "T"),
                                 IsNullable = false,
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
                             },
                             new global::TUnit.Core.ParameterMetadata(typeof(string))
                             {
                                 Name = "expected",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
                                 IsNullable = false,
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
                             }
@@ -297,7 +297,7 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
                                 Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                                 Name = "Tests",
                                 Namespace = "TUnit.TestProject.Bugs._2136",
                                 Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -352,24 +352,24 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                         Name = "GenericArgumentsTest",
                         GenericTypeCount = 1,
                         ReturnType = typeof(global::System.Threading.Tasks.Task),
-                        ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                        ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(object))
                             {
                                 Name = "value",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
+                                TypeInfo = new global::TUnit.Core.GenericParameter(0, true, "T"),
                                 IsNullable = false,
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
                             },
                             new global::TUnit.Core.ParameterMetadata(typeof(string))
                             {
                                 Name = "expected",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
                                 IsNullable = false,
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
                             }
@@ -379,7 +379,7 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
                                 Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                                 Name = "Tests",
                                 Namespace = "TUnit.TestProject.Bugs._2136",
                                 Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -434,24 +434,24 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                     MethodMetadata = new global::TUnit.Core.MethodMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                         Name = "GenericArgumentsTest",
                         GenericTypeCount = 1,
                         ReturnType = typeof(global::System.Threading.Tasks.Task),
-                        ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                        ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(object))
                             {
                                 Name = "value",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateGenericParameter(0, true, "T"),
+                                TypeInfo = new global::TUnit.Core.GenericParameter(0, true, "T"),
                                 IsNullable = false,
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[0]!
                             },
                             new global::TUnit.Core.ParameterMetadata(typeof(string))
                             {
                                 Name = "expected",
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("string, System.Private.CoreLib"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(string)),
                                 IsNullable = false,
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
                             }
@@ -461,7 +461,7 @@ internal sealed class Tests_GenericArgumentsTest_TestSource_GUID : global::TUnit
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
                                 Type = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
-                                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.Bugs._2136.Tests, TestsBase`1"),
+                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                                 Name = "Tests",
                                 Namespace = "TUnit.TestProject.Bugs._2136",
                                 Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),

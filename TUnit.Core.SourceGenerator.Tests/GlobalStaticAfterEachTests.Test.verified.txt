@@ -29,18 +29,18 @@ internal static class GlobalBase1_AfterEach1_After_Test_GUIDInitializer
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase1, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalBase1)),
                     Name = "AfterEach1",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                     Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.GlobalBase1", () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase1, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalBase1)),
                             Name = "GlobalBase1",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -104,18 +104,18 @@ internal static class GlobalBase2_AfterEach2_After_Test_GUIDInitializer
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase2, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalBase2)),
                     Name = "AfterEach2",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                     Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.GlobalBase2", () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase2, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalBase2)),
                             Name = "GlobalBase2",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -179,18 +179,18 @@ internal static class GlobalBase3_AfterEach3_After_Test_GUIDInitializer
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase3, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalBase3)),
                     Name = "AfterEach3",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                     Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.GlobalBase3", () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase3, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalBase3)),
                             Name = "GlobalBase3",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -254,18 +254,18 @@ internal static class GlobalCleanUpTests_CleanUp_After_Test_GUIDInitializer
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                     Name = "CleanUp",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                     Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.GlobalCleanUpTests", () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                             Name = "GlobalCleanUpTests",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -329,17 +329,17 @@ internal static class GlobalCleanUpTests_CleanUp_After_Test_GUIDInitializer
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                     Name = "CleanUp",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
                         new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
                         {
                             Name = "cancellationToken",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.CancellationToken, System.Private.CoreLib"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("CleanUp", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
                         }
@@ -349,7 +349,7 @@ internal static class GlobalCleanUpTests_CleanUp_After_Test_GUIDInitializer
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                             Name = "GlobalCleanUpTests",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -413,17 +413,17 @@ internal static class GlobalCleanUpTests_CleanUpWithContext_After_Test_GUIDIniti
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                     Name = "CleanUpWithContext",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
                         new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
                         {
                             Name = "testContext",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("CleanUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
                         }
@@ -433,7 +433,7 @@ internal static class GlobalCleanUpTests_CleanUpWithContext_After_Test_GUIDIniti
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                             Name = "GlobalCleanUpTests",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -497,24 +497,24 @@ internal static class GlobalCleanUpTests_CleanUpWithContext_After_Test_GUIDIniti
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                     Name = "CleanUpWithContext",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
                         new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
                         {
                             Name = "testContext",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("CleanUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
                         },
                         new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
                         {
                             Name = "cancellationToken",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.CancellationToken, System.Private.CoreLib"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("CleanUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
                         }
@@ -524,7 +524,7 @@ internal static class GlobalCleanUpTests_CleanUpWithContext_After_Test_GUIDIniti
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                             Name = "GlobalCleanUpTests",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -586,17 +586,17 @@ internal static class GlobalBase1_AfterAll1_AfterEvery_Test_GUIDInitializer
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase1, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalBase1)),
                     Name = "AfterAll1",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
                         new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
                         {
                             Name = "context",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1).GetMethod("AfterAll1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
                         }
@@ -606,7 +606,7 @@ internal static class GlobalBase1_AfterAll1_AfterEvery_Test_GUIDInitializer
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase1),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase1, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalBase1)),
                             Name = "GlobalBase1",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -669,17 +669,17 @@ internal static class GlobalBase2_AfterAll2_AfterEvery_Test_GUIDInitializer
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase2, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalBase2)),
                     Name = "AfterAll2",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
                         new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
                         {
                             Name = "context",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2).GetMethod("AfterAll2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
                         }
@@ -689,7 +689,7 @@ internal static class GlobalBase2_AfterAll2_AfterEvery_Test_GUIDInitializer
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase2),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase2, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalBase2)),
                             Name = "GlobalBase2",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -752,17 +752,17 @@ internal static class GlobalBase3_AfterAll3_AfterEvery_Test_GUIDInitializer
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase3, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalBase3)),
                     Name = "AfterAll3",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
                         new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
                         {
                             Name = "context",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3).GetMethod("AfterAll3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
                         }
@@ -772,7 +772,7 @@ internal static class GlobalBase3_AfterAll3_AfterEvery_Test_GUIDInitializer
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalBase3),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalBase3, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalBase3)),
                             Name = "GlobalBase3",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -835,17 +835,17 @@ internal static class GlobalCleanUpTests_AfterAllCleanUp_AfterEvery_Test_GUIDIni
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                     Name = "AfterAllCleanUp",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
                         new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
                         {
                             Name = "context",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("AfterAllCleanUp", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
                         }
@@ -855,7 +855,7 @@ internal static class GlobalCleanUpTests_AfterAllCleanUp_AfterEvery_Test_GUIDIni
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                             Name = "GlobalCleanUpTests",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -918,24 +918,24 @@ internal static class GlobalCleanUpTests_AfterAllCleanUp_AfterEvery_Test_GUIDIni
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                     Name = "AfterAllCleanUp",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
                         new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
                         {
                             Name = "context",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("AfterAllCleanUp", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
                         },
                         new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
                         {
                             Name = "cancellationToken",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.CancellationToken, System.Private.CoreLib"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("AfterAllCleanUp", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
                         }
@@ -945,7 +945,7 @@ internal static class GlobalCleanUpTests_AfterAllCleanUp_AfterEvery_Test_GUIDIni
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                             Name = "GlobalCleanUpTests",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -1008,17 +1008,17 @@ internal static class GlobalCleanUpTests_AfterAllCleanUpWithContext_AfterEvery_T
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                     Name = "AfterAllCleanUpWithContext",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
                         new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
                         {
                             Name = "context",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("AfterAllCleanUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
                         }
@@ -1028,7 +1028,7 @@ internal static class GlobalCleanUpTests_AfterAllCleanUpWithContext_AfterEvery_T
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                             Name = "GlobalCleanUpTests",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -1091,24 +1091,24 @@ internal static class GlobalCleanUpTests_AfterAllCleanUpWithContext_AfterEvery_T
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                     Name = "AfterAllCleanUpWithContext",
                     GenericTypeCount = 0,
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = new global::TUnit.Core.ParameterMetadata[]
                     {
                         new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.Core.TestContext))
                         {
                             Name = "context",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.Core.TestContext, TUnit.Core"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.Core.TestContext)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("AfterAllCleanUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
                         },
                         new global::TUnit.Core.ParameterMetadata(typeof(global::System.Threading.CancellationToken))
                         {
                             Name = "cancellationToken",
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.CancellationToken, System.Private.CoreLib"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)),
                             IsNullable = false,
                             ReflectionInfo = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests).GetMethod("AfterAllCleanUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
                         }
@@ -1118,7 +1118,7 @@ internal static class GlobalCleanUpTests_AfterAllCleanUpWithContext_AfterEvery_T
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.AfterTests.GlobalCleanUpTests, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.GlobalCleanUpTests)),
                             Name = "GlobalCleanUpTests",
                             Namespace = "TUnit.TestProject.AfterTests",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),

@@ -39,7 +39,7 @@ public record ClassMetadata : MemberMetadata
         return Type.GetHashCode();
     }
 
-    public required TypeReference TypeReference { get; init; }
+    public required TypeInfo TypeInfo { get; init; }
 
     [DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
