@@ -17,16 +17,16 @@ public class ComplexGenericInheritanceTests
             MethodMetadata = new MethodMetadata
             {
                 Type = typeof(T),
-                TypeReference = TypeReference.CreateConcrete(typeof(T).AssemblyQualifiedName ?? typeof(T).FullName ?? typeof(T).Name),
+                TypeInfo = new ConcreteType(typeof(T)),
                 Name = methodName,
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
-                ReturnTypeReference = TypeReference.CreateConcrete(typeof(void).AssemblyQualifiedName ?? "System.Void"),
+                ReturnTypeInfo = new ConcreteType(typeof(void)),
                 Parameters = [],
                 Class = new ClassMetadata
                 {
                     Type = typeof(T),
-                    TypeReference = TypeReference.CreateConcrete(typeof(T).AssemblyQualifiedName ?? typeof(T).FullName ?? typeof(T).Name),
+                    TypeInfo = new ConcreteType(typeof(T)),
                     Name = typeof(T).Name,
                     Namespace = typeof(T).Namespace ?? string.Empty,
                     Assembly = new AssemblyMetadata
