@@ -4,10 +4,10 @@
 
     <PropertyGroup>
         <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+        <IsAotCompatible>true</IsAotCompatible>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
-        <IsAotCompatible>true</IsAotCompatible>
         <PublishAot>true</PublishAot>
         <PublishTrimmed>true</PublishTrimmed>
         <AotMsCodeCoverageInstrumentation>true</AotMsCodeCoverageInstrumentation>
