@@ -1188,7 +1188,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 Name = type.Name,
                 Type = type,
-                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!),
+                TypeInfo = new ConcreteType(type),
                 Namespace = type.Namespace ?? string.Empty,
                 Assembly = new AssemblyMetadata
                 {
@@ -1206,9 +1206,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             [
             ],
             GenericTypeCount = 0,
-            ReturnTypeReference = TypeReference.CreateConcrete(typeof(void).AssemblyQualifiedName!),
+            ReturnTypeInfo = new ConcreteType(typeof(void)),
             ReturnType = typeof(void),
-            TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName!)
+            TypeInfo = new ConcreteType(type)
         };
     }
 

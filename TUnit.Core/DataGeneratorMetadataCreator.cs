@@ -123,7 +123,7 @@ internal static class DataGeneratorMetadataCreator
         var dummyParameter = new ParameterMetadata(typeof(object))
         {
             Name = "param0",
-            TypeReference = new TypeReference { AssemblyQualifiedName = typeof(object).AssemblyQualifiedName },
+            TypeInfo = new ConcreteType(typeof(object)),
             ReflectionInfo = null!
         };
 
@@ -136,7 +136,7 @@ internal static class DataGeneratorMetadataCreator
                 Name = "Discovery",
                 Type = typeof(object),
                 Namespace = string.Empty,
-                TypeReference = new TypeReference { AssemblyQualifiedName = typeof(object).AssemblyQualifiedName },
+                TypeInfo = new ConcreteType(typeof(object)),
                 Assembly = AssemblyMetadata.GetOrAdd("Discovery", () => new AssemblyMetadata { Name = "Discovery" }),
                 Parameters = [dummyParameter],
                 Properties = [],
@@ -144,9 +144,9 @@ internal static class DataGeneratorMetadataCreator
             }),
             Parameters = [],
             GenericTypeCount = 0,
-            ReturnTypeReference = new TypeReference { AssemblyQualifiedName = typeof(void).AssemblyQualifiedName },
+            ReturnTypeInfo = new ConcreteType(typeof(void)),
             ReturnType = typeof(void),
-            TypeReference = new TypeReference { AssemblyQualifiedName = typeof(object).AssemblyQualifiedName }
+            TypeInfo = new ConcreteType(typeof(object))
         };
 
         return new DataGeneratorMetadata
@@ -268,14 +268,14 @@ internal static class DataGeneratorMetadataCreator
             var constructorParameters = constructor?.GetParameters().Select((p, i) => new ParameterMetadata(p.ParameterType)
             {
                 Name = p.Name ?? $"param{i}",
-                TypeReference = new TypeReference { AssemblyQualifiedName = p.ParameterType.AssemblyQualifiedName },
+                TypeInfo = new ConcreteType(p.ParameterType),
                 ReflectionInfo = p
             }).ToArray() ?? Array.Empty<ParameterMetadata>();
 
             return new ClassMetadata
             {
                 Type = type,
-                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
+                TypeInfo = new ConcreteType(type),
                 Name = type.Name,
                 Namespace = type.Namespace ?? string.Empty,
                 Assembly = AssemblyMetadata.GetOrAdd(type.Assembly.GetName().Name ?? type.Assembly.GetName().FullName ?? "Unknown", () => new AssemblyMetadata

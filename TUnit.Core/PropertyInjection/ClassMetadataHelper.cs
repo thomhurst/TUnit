@@ -32,14 +32,14 @@ internal static class ClassMetadataHelper
             var constructorParameters = constructor?.GetParameters().Select((p, i) => new ParameterMetadata(p.ParameterType)
             {
                 Name = p.Name ?? $"param{i}",
-                TypeReference = new TypeReference { AssemblyQualifiedName = p.ParameterType.AssemblyQualifiedName },
+                TypeInfo = new ConcreteType(p.ParameterType),
                 ReflectionInfo = p
             }).ToArray() ?? Array.Empty<ParameterMetadata>();
 
             return new ClassMetadata
             {
                 Type = type,
-                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
+                TypeInfo = new ConcreteType(type),
                 Name = type.Name,
                 Namespace = type.Namespace ?? string.Empty,
                 Assembly = AssemblyMetadata.GetOrAdd(

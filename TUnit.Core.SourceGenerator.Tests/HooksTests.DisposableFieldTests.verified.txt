@@ -29,18 +29,18 @@ internal static class DisposableFieldTests_Setup_Before_Test_GUIDInitializer
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.DisposableFieldTests),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DisposableFieldTests, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DisposableFieldTests)),
                     Name = "Setup",
                     GenericTypeCount = 0,
                     ReturnType = typeof(void),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                     Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                     Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DisposableFieldTests", () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.DisposableFieldTests),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DisposableFieldTests, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DisposableFieldTests)),
                             Name = "DisposableFieldTests",
                             Namespace = "TUnit.TestProject",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -104,18 +104,18 @@ internal static class DisposableFieldTests_Blah_After_Test_GUIDInitializer
                 MethodInfo = new global::TUnit.Core.MethodMetadata
                 {
                     Type = typeof(global::TUnit.TestProject.DisposableFieldTests),
-                    TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DisposableFieldTests, TestsBase`1"),
+                    TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DisposableFieldTests)),
                     Name = "Blah",
                     GenericTypeCount = 0,
                     ReturnType = typeof(void),
-                    ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                    ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                     Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                     Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DisposableFieldTests", () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
                             Type = typeof(global::TUnit.TestProject.DisposableFieldTests),
-                            TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DisposableFieldTests, TestsBase`1"),
+                            TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DisposableFieldTests)),
                             Name = "DisposableFieldTests",
                             Namespace = "TUnit.TestProject",
                             Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),

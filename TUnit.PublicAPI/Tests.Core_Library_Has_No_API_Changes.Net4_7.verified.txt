@@ -339,10 +339,23 @@ namespace
         public required .PropertyMetadata[] Properties { get; init; }
         public int TestConstructorIndex { get; init; }
         public override required  Type { get; init; }
-        public required .TypeReference TypeReference { get; init; }
+        public required .TypeInfo TypeInfo { get; init; }
         public virtual bool Equals(.ClassMetadata? other) { }
         public override int GetHashCode() { }
         public static .ClassMetadata GetOrAdd(string name, <.ClassMetadata> factory) { }
+    }
+    public sealed class ConcreteType : .TypeInfo, <.ConcreteType>
+    {
+        public ConcreteType( Type) { }
+        public  Type { get; init; }
+        public override string ToString() { }
+    }
+    public sealed class ConstructedGeneric : .TypeInfo, <.ConstructedGeneric>
+    {
+        public ConstructedGeneric( GenericDefinition, .TypeInfo[] TypeArguments) { }
+        public  GenericDefinition { get; init; }
+        public .TypeInfo[] TypeArguments { get; init; }
+        public override string ToString() { }
     }
     public abstract class Context : , .
     {
@@ -706,6 +719,14 @@ namespace
         public string[] ParameterNames { get; init; }
         public int[] ParameterPositions { get; init; }
     }
+    public sealed class GenericParameter : .TypeInfo, <.GenericParameter>
+    {
+        public GenericParameter(int Position, bool IsMethodParameter, string? Name = null) { }
+        public bool IsMethodParameter { get; init; }
+        public string? Name { get; init; }
+        public int Position { get; init; }
+        public override string ToString() { }
+    }
     public sealed class GenericParameterConstraints
     {
         public GenericParameterConstraints() { }
@@ -893,9 +914,9 @@ namespace
         public required int GenericTypeCount { get; init; }
         public required .ParameterMetadata[] Parameters { get; init; }
         public ? ReturnType { get; init; }
-        public required .TypeReference ReturnTypeReference { get; init; }
+        public required .TypeInfo ReturnTypeInfo { get; init; }
         public override required  Type { get; init; }
-        public required .TypeReference TypeReference { get; init; }
+        public required .TypeInfo TypeInfo { get; init; }
         public virtual bool Equals(.MethodMetadata? other) { }
         public override int GetHashCode() { }
         protected override bool PrintMembers(.StringBuilder stringBuilder) { }
@@ -963,7 +984,7 @@ namespace
         public int Position { get; init; }
         public required .ParameterInfo ReflectionInfo { get; set; }
         public override  Type { get; init; }
-        public required .TypeReference TypeReference { get; init; }
+        public required .TypeInfo TypeInfo { get; init; }
     }
     [.DebuggerDisplay("{Type} {Name}")]
     public class ParameterMetadata<T> : .ParameterMetadata, <.ParameterMetadata<T>>
@@ -1449,41 +1470,9 @@ namespace
         public bool Equals([]? x, []? y) { }
         public int GetHashCode([] obj) { }
     }
-    public sealed class TypeReference
+    public abstract class TypeInfo : <.TypeInfo>
     {
-        public TypeReference() { }
-        public int ArrayRank { get; set; }
-        public string? AssemblyQualifiedName { get; set; }
-        public .TypeReference? ElementType { get; set; }
-        public .<.TypeReference> GenericArguments { get; set; }
-        public string? GenericParameterName { get; set; }
-        public int GenericParameterPosition { get; set; }
-        public bool IsArray { get; set; }
-        public bool IsByRef { get; set; }
-        public bool IsGenericParameter { get; set; }
-        public bool IsMethodGenericParameter { get; set; }
-        public bool IsPointer { get; set; }
-        public static .TypeReference CreateArray(.TypeReference elementType, int rank = 1) { }
-        public static .TypeReference CreateConcrete(string assemblyQualifiedName) { }
-        public static .TypeReference CreateConstructedGeneric(string genericTypeDefinition, params .TypeReference[] genericArguments) { }
-        public static .TypeReference CreateGenericParameter(int position, bool isMethodParameter, string? name = null) { }
-    }
-    public static class TypeRegistry
-    {
-        public static .<string, > GetAllRegisteredTypes() { }
-        public static void RegisterArrayType( elementType, int rank,  arrayType) { }
-        public static void RegisterByRefType( elementType,  byRefType) { }
-        public static void RegisterConstructedGenericType( genericDefinition, [] genericArguments,  constructedType) { }
-        public static void RegisterPointerType( elementType,  pointerType) { }
-        public static void RegisterType(string assemblyQualifiedName,  type) { }
-    }
-    public sealed class TypeResolver
-    {
-        public TypeResolver(? declaringType = null, .MethodInfo? declaringMethod = null) { }
-        public  Resolve(.TypeReference typeReference) { }
-        public [] ResolveMany(.<.TypeReference> typeReferences) { }
-        public static .TypeResolver CreateSimple() { }
-        public static .TypeResolver FromTestInstance(object testInstance, .MethodInfo? testMethod = null) { }
+        protected TypeInfo() { }
     }
     public abstract class TypedDataSourceAttribute<T> : , .IDataSourceAttribute, .ITypedDataSourceAttribute<T>
     {

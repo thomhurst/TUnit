@@ -33,26 +33,26 @@ internal sealed class DecimalArgumentTests_Transfer_TestSource_GUID : global::TU
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                 Name = "Transfer",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "debit",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Transfer", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Transfer", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal) }, null)!.GetParameters()[0]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "credit",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Transfer", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal) }, null)!.GetParameters()[1]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Transfer", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal) }, null)!.GetParameters()[1]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
@@ -60,7 +60,7 @@ internal sealed class DecimalArgumentTests_Transfer_TestSource_GUID : global::TU
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -139,19 +139,19 @@ internal sealed class DecimalArgumentTests_SimpleDecimal_TestSource_GUID : globa
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                 Name = "SimpleDecimal",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "value",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("SimpleDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("SimpleDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
@@ -159,7 +159,7 @@ internal sealed class DecimalArgumentTests_SimpleDecimal_TestSource_GUID : globa
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -238,19 +238,19 @@ internal sealed class DecimalArgumentTests_SmallDecimal_TestSource_GUID : global
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                 Name = "SmallDecimal",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "value",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("SmallDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("SmallDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
@@ -258,7 +258,7 @@ internal sealed class DecimalArgumentTests_SmallDecimal_TestSource_GUID : global
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -337,19 +337,19 @@ internal sealed class DecimalArgumentTests_MaxDecimal_TestSource_GUID : global::
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                 Name = "MaxDecimal",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "value",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MaxDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MaxDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
@@ -357,7 +357,7 @@ internal sealed class DecimalArgumentTests_MaxDecimal_TestSource_GUID : global::
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -436,19 +436,19 @@ internal sealed class DecimalArgumentTests_MinDecimal_TestSource_GUID : global::
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                 Name = "MinDecimal",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "value",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MinDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MinDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
@@ -456,7 +456,7 @@ internal sealed class DecimalArgumentTests_MinDecimal_TestSource_GUID : global::
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -535,19 +535,19 @@ internal sealed class DecimalArgumentTests_ExplicitDecimalValue_TestSource_GUID 
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                 Name = "ExplicitDecimalValue",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "value",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("ExplicitDecimalValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("ExplicitDecimalValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
@@ -555,7 +555,7 @@ internal sealed class DecimalArgumentTests_ExplicitDecimalValue_TestSource_GUID 
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -634,33 +634,33 @@ internal sealed class DecimalArgumentTests_MultipleDecimals_TestSource_GUID : gl
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                 Name = "MultipleDecimals",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "a",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[0]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "b",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[1]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[1]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "c",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[2]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[2]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
@@ -668,7 +668,7 @@ internal sealed class DecimalArgumentTests_MultipleDecimals_TestSource_GUID : gl
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -749,19 +749,19 @@ internal sealed class DecimalArgumentTests_Test_TestSource_GUID : global::TUnit.
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                 Name = "Test",
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "test",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
@@ -769,7 +769,7 @@ internal sealed class DecimalArgumentTests_Test_TestSource_GUID : global::TUnit.
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -851,54 +851,54 @@ internal sealed class DecimalArgumentTests_TransactionDiscountCalculations_TestS
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                 Name = "TransactionDiscountCalculations",
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("void, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "amountPaying",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[0]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "invoiceBalance",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[1]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[1]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "invoiceBalanceDue",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[2]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[2]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "discountAmount",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[3]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[3]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "appliedDiscountAmount",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[4]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[4]
                     },
                     new global::TUnit.Core.ParameterMetadata(typeof(bool))
                     {
                         Name = "discountAllowedForUser",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("bool, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(bool)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[5]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[5]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
@@ -906,7 +906,7 @@ internal sealed class DecimalArgumentTests_TransactionDiscountCalculations_TestS
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -986,19 +986,19 @@ internal sealed class DecimalArgumentTests_Equality3_TestSource_GUID : global::T
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                 Name = "Equality3",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "credit",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Equality3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Equality3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
@@ -1006,7 +1006,7 @@ internal sealed class DecimalArgumentTests_Equality3_TestSource_GUID : global::T
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -1085,19 +1085,19 @@ internal sealed class DecimalArgumentTests_Equality4_TestSource_GUID : global::T
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                 Name = "Equality4",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "credit",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Equality4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Equality4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
@@ -1105,7 +1105,7 @@ internal sealed class DecimalArgumentTests_Equality4_TestSource_GUID : global::T
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
@@ -1184,19 +1184,19 @@ internal sealed class DecimalArgumentTests_TestMethod_TestSource_GUID : global::
             MethodMetadata = new global::TUnit.Core.MethodMetadata
             {
                 Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                 Name = "TestMethod",
                 GenericTypeCount = 0,
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
-                ReturnTypeReference = global::TUnit.Core.TypeReference.CreateConcrete("System.Threading.Tasks.Task, System.Private.CoreLib"),
+                ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = new global::TUnit.Core.ParameterMetadata[]
                 {
                     new global::TUnit.Core.ParameterMetadata(typeof(decimal))
                     {
                         Name = "batchingSize",
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("decimal, System.Private.CoreLib"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(decimal)),
                         IsNullable = false,
-                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TestMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
+                        ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TestMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
                 Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
@@ -1204,7 +1204,7 @@ internal sealed class DecimalArgumentTests_TestMethod_TestSource_GUID : global::
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
                         Type = typeof(global::TUnit.TestProject.DecimalArgumentTests),
-                        TypeReference = global::TUnit.Core.TypeReference.CreateConcrete("TUnit.TestProject.DecimalArgumentTests, TestsBase`1"),
+                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
                         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),

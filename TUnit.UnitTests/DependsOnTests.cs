@@ -9,11 +9,11 @@ public class DependsOnTests
             parameterTypes = parameterCount == 1 ? [typeof(string)] : [typeof(string), typeof(int)];
         }
 
-        var parameters = parameterTypes?.Select((type, index) => 
+        var parameters = parameterTypes?.Select((type, index) =>
             new ParameterMetadata(type)
             {
                 Name = $"param{index}",
-                TypeReference = TypeReference.CreateConcrete(type.AssemblyQualifiedName ?? type.FullName ?? type.Name),
+                TypeInfo = new ConcreteType(type),
                 ReflectionInfo = null!,
                 IsNullable = false
             }).ToArray() ?? [];
@@ -31,16 +31,16 @@ public class DependsOnTests
             MethodMetadata = new MethodMetadata
             {
                 Type = typeof(T),
-                TypeReference = TypeReference.CreateConcrete(typeof(T).AssemblyQualifiedName ?? typeof(T).FullName ?? typeof(T).Name),
+                TypeInfo = new ConcreteType(typeof(T)),
                 Name = methodName,
                 GenericTypeCount = 0,
                 ReturnType = typeof(void),
-                ReturnTypeReference = TypeReference.CreateConcrete(typeof(void).AssemblyQualifiedName ?? "System.Void"),
+                ReturnTypeInfo = new ConcreteType(typeof(void)),
                 Parameters = parameters,
                 Class = new ClassMetadata
                 {
                     Type = typeof(T),
-                    TypeReference = TypeReference.CreateConcrete(typeof(T).AssemblyQualifiedName ?? typeof(T).FullName ?? typeof(T).Name),
+                    TypeInfo = new ConcreteType(typeof(T)),
                     Name = typeof(T).Name,
                     Namespace = typeof(T).Namespace ?? string.Empty,
                     Assembly = new AssemblyMetadata
