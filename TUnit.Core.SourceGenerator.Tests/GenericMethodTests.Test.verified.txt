@@ -74,7 +74,7 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
                     new global::TUnit.Core.ParameterMetadata(typeof(object))
                     {
                         Name = "expected",
-                        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>)),
+                        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.IEnumerable<>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.KeyValuePair<,>), [new global::TUnit.Core.GenericParameter(1, true, "TKey"), new global::TUnit.Core.GenericParameter(2, true, "TAccumulate")])]),
                         IsNullable = false,
                         ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[5]!
                     }
@@ -223,7 +223,7 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
                             new global::TUnit.Core.ParameterMetadata(typeof(object))
                             {
                                 Name = "expected",
-                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>)),
+                                TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.IEnumerable<>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.KeyValuePair<,>), [new global::TUnit.Core.GenericParameter(1, true, "TKey"), new global::TUnit.Core.GenericParameter(2, true, "TAccumulate")])]),
                                 IsNullable = false,
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[5]!
                             }
@@ -377,7 +377,7 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
                             new global::TUnit.Core.ParameterMetadata(typeof(object))
                             {
                                 Name = "expected",
-                                TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<TKey, TAccumulate>>)),
+                                TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.IEnumerable<>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.KeyValuePair<,>), [new global::TUnit.Core.GenericParameter(1, true, "TKey"), new global::TUnit.Core.GenericParameter(2, true, "TAccumulate")])]),
                                 IsNullable = false,
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[5]!
                             }

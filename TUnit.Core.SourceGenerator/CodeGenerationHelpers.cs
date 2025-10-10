@@ -590,7 +590,7 @@ internal static class CodeGenerationHelpers
         {
             // This is a constructed generic type (e.g., List<int>, Dictionary<string, T>)
             // Check if all type arguments are concrete (no generic parameters)
-            var hasGenericParameters = namedType.TypeArguments.Any(t => t is ITypeParameterSymbol);
+            var hasGenericParameters = namedType.TypeArguments.Any(ContainsTypeParameter);
 
             if (hasGenericParameters)
             {
