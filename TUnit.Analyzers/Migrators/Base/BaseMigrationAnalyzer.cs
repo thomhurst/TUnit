@@ -41,32 +41,44 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (HasFrameworkInterfaces(symbol))
             {
-                Flag(context);
+                Flag(context, classDeclarationSyntax.GetLocation());
                 return;
             }
 
-            if (AnalyzeAttributes(context, symbol))
+            var classAttributeLocation = AnalyzeAttributes(context, symbol, classDeclarationSyntax);
+            if (classAttributeLocation != null)
             {
+                Flag(context, classAttributeLocation);
                 return;
             }
 
             foreach (var methodSymbol in symbol.GetMembers().OfType<IMethodSymbol>())
             {
-                if (AnalyzeAttributes(context, methodSymbol))
+                var syntaxReferences = methodSymbol.DeclaringSyntaxReferences;
+                if (syntaxReferences.Length == 0)
                 {
+                    continue;
+                }
+
+                var methodSyntax = syntaxReferences[0].GetSyntax();
+                var methodAttributeLocation = AnalyzeAttributes(context, methodSymbol, methodSyntax);
+                if (methodAttributeLocation != null)
+                {
+                    Flag(context, methodAttributeLocation);
                     return;
                 }
             }
 
-            if (CheckUsingDirectives(classDeclarationSyntax))
+            var usingLocation = CheckUsingDirectives(classDeclarationSyntax);
+            if (usingLocation != null)
             {
-                Flag(context);
+                Flag(context, usingLocation);
                 return;
             }
 
             if (HasFrameworkTypes(symbol))
             {
-                Flag(context);
+                Flag(context, classDeclarationSyntax.GetLocation());
                 return;
             }
         }
@@ -79,7 +91,7 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
             IsFrameworkNamespace(i.ContainingNamespace?.ToDisplayString()));
     }
 
-    protected virtual bool CheckUsingDirectives(ClassDeclarationSyntax classDeclarationSyntax)
+    protected virtual Location? CheckUsingDirectives(ClassDeclarationSyntax classDeclarationSyntax)
     {
         var usingDirectiveSyntaxes = classDeclarationSyntax
             .SyntaxTree
@@ -91,11 +103,11 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
             var nameString = usingDirectiveSyntax.Name?.ToString() ?? "";
             if (IsFrameworkUsing(nameString))
             {
-                return true;
+                return usingDirectiveSyntax.GetLocation();
             }
         }
 
-        return false;
+        return null;
     }
 
     protected virtual bool HasFrameworkTypes(INamedTypeSymbol namedTypeSymbol)
@@ -122,28 +134,35 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                IsFrameworkNamespace(type.ContainingNamespace?.ToDisplayString());
     }
 
-    protected virtual bool AnalyzeAttributes(SyntaxNodeAnalysisContext context, ISymbol symbol)
+    protected virtual Location? AnalyzeAttributes(SyntaxNodeAnalysisContext context, ISymbol symbol, SyntaxNode syntaxNode)
     {
-        foreach (var attributeData in symbol.GetAttributes())
+        var attributes = symbol.GetAttributes();
+
+        for (var i = 0; i < attributes.Length; i++)
         {
+            var attributeData = attributes[i];
             var namespaceName = attributeData.AttributeClass?.ContainingNamespace?.Name;
             var fullNamespace = attributeData.AttributeClass?.ContainingNamespace?.ToDisplayString();
-            
+
             if (namespaceName == TargetFrameworkNamespace || IsFrameworkNamespace(fullNamespace))
             {
-                Flag(context);
-                return true;
+                // Get the attribute syntax for this specific attribute
+                var attributeSyntax = attributeData.ApplicationSyntaxReference?.GetSyntax();
+                if (attributeSyntax != null)
+                {
+                    return attributeSyntax.GetLocation();
+                }
             }
         }
 
-        return false;
+        return null;
     }
 
     protected abstract bool IsFrameworkUsing(string usingName);
     protected abstract bool IsFrameworkNamespace(string? namespaceName);
 
-    protected void Flag(SyntaxNodeAnalysisContext context)
+    protected void Flag(SyntaxNodeAnalysisContext context, Location location)
     {
-        context.ReportDiagnostic(Diagnostic.Create(DiagnosticRule, context.Node.GetLocation()));
+        context.ReportDiagnostic(Diagnostic.Create(DiagnosticRule, location));
     }
 }
