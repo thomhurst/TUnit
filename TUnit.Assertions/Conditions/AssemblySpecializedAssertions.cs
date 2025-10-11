@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using System.Reflection;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
+[AssertionExtension("IsCollectible")]
 public class IsCollectibleAssertion : Assertion<Assembly>
 {
     public IsCollectibleAssertion(AssertionContext<Assembly> context) : base(context) { }
@@ -20,6 +22,7 @@ public class IsCollectibleAssertion : Assertion<Assembly>
     }
 }
 
+[AssertionExtension("IsNotCollectible")]
 public class IsNotCollectibleAssertion : Assertion<Assembly>
 {
     public IsNotCollectibleAssertion(AssertionContext<Assembly> context) : base(context) { }
@@ -36,6 +39,7 @@ public class IsNotCollectibleAssertion : Assertion<Assembly>
     }
 }
 
+[AssertionExtension("IsDynamic")]
 public class IsDynamicAssertion : Assertion<Assembly>
 {
     public IsDynamicAssertion(AssertionContext<Assembly> context) : base(context) { }
@@ -48,6 +52,7 @@ public class IsDynamicAssertion : Assertion<Assembly>
     }
 }
 
+[AssertionExtension("IsNotDynamic")]
 public class IsNotDynamicAssertion : Assertion<Assembly>
 {
     public IsNotDynamicAssertion(AssertionContext<Assembly> context) : base(context) { }
@@ -60,6 +65,7 @@ public class IsNotDynamicAssertion : Assertion<Assembly>
     }
 }
 
+[AssertionExtension("IsFullyTrusted")]
 public class IsFullyTrustedAssertion : Assertion<Assembly>
 {
     public IsFullyTrustedAssertion(AssertionContext<Assembly> context) : base(context) { }
@@ -74,6 +80,7 @@ public class IsFullyTrustedAssertion : Assertion<Assembly>
     }
 }
 
+[AssertionExtension("IsNotFullyTrusted")]
 public class IsNotFullyTrustedAssertion : Assertion<Assembly>
 {
     public IsNotFullyTrustedAssertion(AssertionContext<Assembly> context) : base(context) { }
@@ -88,6 +95,7 @@ public class IsNotFullyTrustedAssertion : Assertion<Assembly>
     }
 }
 
+[AssertionExtension("IsSigned")]
 public class IsSignedAssertion : Assertion<Assembly>
 {
     public IsSignedAssertion(AssertionContext<Assembly> context) : base(context) { }
@@ -101,6 +109,7 @@ public class IsSignedAssertion : Assertion<Assembly>
     }
 }
 
+[AssertionExtension("IsNotSigned")]
 public class IsNotSignedAssertion : Assertion<Assembly>
 {
     public IsNotSignedAssertion(AssertionContext<Assembly> context) : base(context) { }
@@ -114,6 +123,7 @@ public class IsNotSignedAssertion : Assertion<Assembly>
     }
 }
 
+[AssertionExtension("IsDebugBuild")]
 public class IsDebugBuildAssertion : Assertion<Assembly>
 {
     public IsDebugBuildAssertion(AssertionContext<Assembly> context) : base(context) { }
@@ -127,6 +137,7 @@ public class IsDebugBuildAssertion : Assertion<Assembly>
     }
 }
 
+[AssertionExtension("IsReleaseBuild")]
 public class IsReleaseBuildAssertion : Assertion<Assembly>
 {
     public IsReleaseBuildAssertion(AssertionContext<Assembly> context) : base(context) { }

@@ -1,9 +1,11 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
 // DirectoryInfo assertions
+[AssertionExtension("Exists")]
 public class DirectoryExistsAssertion : Assertion<DirectoryInfo>
 {
     public DirectoryExistsAssertion(
@@ -39,6 +41,7 @@ public class DirectoryExistsAssertion : Assertion<DirectoryInfo>
     protected override string GetExpectation() => "to exist";
 }
 
+[AssertionExtension("DoesNotExist")]
 public class DirectoryDoesNotExistAssertion : Assertion<DirectoryInfo>
 {
     public DirectoryDoesNotExistAssertion(
@@ -74,6 +77,7 @@ public class DirectoryDoesNotExistAssertion : Assertion<DirectoryInfo>
     protected override string GetExpectation() => "to not exist";
 }
 
+[AssertionExtension("IsNotEmpty")]
 public class DirectoryIsNotEmptyAssertion : Assertion<DirectoryInfo>
 {
     public DirectoryIsNotEmptyAssertion(
@@ -115,6 +119,7 @@ public class DirectoryIsNotEmptyAssertion : Assertion<DirectoryInfo>
     protected override string GetExpectation() => "to not be empty";
 }
 
+[AssertionExtension("HasFiles")]
 public class DirectoryHasFilesAssertion : Assertion<DirectoryInfo>
 {
     public DirectoryHasFilesAssertion(
@@ -156,6 +161,7 @@ public class DirectoryHasFilesAssertion : Assertion<DirectoryInfo>
     protected override string GetExpectation() => "to have files";
 }
 
+[AssertionExtension("HasNoSubdirectories")]
 public class DirectoryHasNoSubdirectoriesAssertion : Assertion<DirectoryInfo>
 {
     public DirectoryHasNoSubdirectoriesAssertion(
@@ -198,6 +204,7 @@ public class DirectoryHasNoSubdirectoriesAssertion : Assertion<DirectoryInfo>
 }
 
 // FileInfo assertions
+[AssertionExtension("Exists")]
 public class FileExistsAssertion : Assertion<FileInfo>
 {
     public FileExistsAssertion(
@@ -233,6 +240,7 @@ public class FileExistsAssertion : Assertion<FileInfo>
     protected override string GetExpectation() => "to exist";
 }
 
+[AssertionExtension("DoesNotExist")]
 public class FileDoesNotExistAssertion : Assertion<FileInfo>
 {
     public FileDoesNotExistAssertion(
@@ -268,6 +276,7 @@ public class FileDoesNotExistAssertion : Assertion<FileInfo>
     protected override string GetExpectation() => "to not exist";
 }
 
+[AssertionExtension("IsNotEmpty")]
 public class FileIsNotEmptyAssertion : Assertion<FileInfo>
 {
     public FileIsNotEmptyAssertion(
@@ -308,6 +317,7 @@ public class FileIsNotEmptyAssertion : Assertion<FileInfo>
     protected override string GetExpectation() => "to not be empty";
 }
 
+[AssertionExtension("IsNotReadOnly")]
 public class FileIsNotReadOnlyAssertion : Assertion<FileInfo>
 {
     public FileIsNotReadOnlyAssertion(
@@ -348,6 +358,7 @@ public class FileIsNotReadOnlyAssertion : Assertion<FileInfo>
     protected override string GetExpectation() => "to not be read-only";
 }
 
+[AssertionExtension("IsNotHidden")]
 public class FileIsNotHiddenAssertion : Assertion<FileInfo>
 {
     public FileIsNotHiddenAssertion(
@@ -388,6 +399,7 @@ public class FileIsNotHiddenAssertion : Assertion<FileInfo>
     protected override string GetExpectation() => "to not be hidden";
 }
 
+[AssertionExtension("IsNotSystem")]
 public class FileIsNotSystemAssertion : Assertion<FileInfo>
 {
     public FileIsNotSystemAssertion(
@@ -428,6 +440,7 @@ public class FileIsNotSystemAssertion : Assertion<FileInfo>
     protected override string GetExpectation() => "to not be a system file";
 }
 
+[AssertionExtension("IsNotExecutable")]
 public class FileIsNotExecutableAssertion : Assertion<FileInfo>
 {
     public FileIsNotExecutableAssertion(

@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -6,6 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a boolean value is true.
 /// </summary>
+[AssertionExtension("IsTrue")]
 public class TrueAssertion : Assertion<bool>
 {
     public TrueAssertion(
@@ -38,6 +40,7 @@ public class TrueAssertion : Assertion<bool>
 /// <summary>
 /// Asserts that a boolean value is false.
 /// </summary>
+[AssertionExtension("IsFalse")]
 public class FalseAssertion : Assertion<bool>
 {
     public FalseAssertion(

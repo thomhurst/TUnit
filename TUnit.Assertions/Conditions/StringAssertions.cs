@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -7,6 +8,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a string contains the expected substring.
 /// </summary>
+[AssertionExtension("Contains")]
 public class StringContainsAssertion : Assertion<string>
 {
     private readonly string _expected;
@@ -94,6 +96,7 @@ public class StringContainsAssertion : Assertion<string>
 /// <summary>
 /// Asserts that a string does NOT contain the expected substring.
 /// </summary>
+[AssertionExtension("DoesNotContain")]
 public class StringDoesNotContainAssertion : Assertion<string>
 {
     private readonly string _expected;
@@ -150,6 +153,7 @@ public class StringDoesNotContainAssertion : Assertion<string>
 /// <summary>
 /// Asserts that a string starts with the expected substring.
 /// </summary>
+[AssertionExtension("StartsWith")]
 public class StringStartsWithAssertion : Assertion<string>
 {
     private readonly string _expected;
@@ -206,6 +210,7 @@ public class StringStartsWithAssertion : Assertion<string>
 /// <summary>
 /// Asserts that a string ends with the expected substring.
 /// </summary>
+[AssertionExtension("EndsWith")]
 public class StringEndsWithAssertion : Assertion<string>
 {
     private readonly string _expected;
@@ -262,6 +267,7 @@ public class StringEndsWithAssertion : Assertion<string>
 /// <summary>
 /// Asserts that a string is not empty or whitespace.
 /// </summary>
+[AssertionExtension("IsNotEmpty")]
 public class StringIsNotEmptyAssertion : Assertion<string>
 {
     public StringIsNotEmptyAssertion(
@@ -299,6 +305,7 @@ public class StringIsNotEmptyAssertion : Assertion<string>
 /// <summary>
 /// Asserts that a string is empty or whitespace.
 /// </summary>
+[AssertionExtension("IsEmpty")]
 public class StringIsEmptyAssertion : Assertion<string>
 {
     public StringIsEmptyAssertion(
@@ -336,6 +343,7 @@ public class StringIsEmptyAssertion : Assertion<string>
 /// <summary>
 /// Asserts that a string has a specific length.
 /// </summary>
+[AssertionExtension("HasLength")]
 public class StringLengthAssertion : Assertion<string>
 {
     private readonly int _expectedLength;
@@ -377,6 +385,7 @@ public class StringLengthAssertion : Assertion<string>
 /// <summary>
 /// Asserts that a string is null, empty, or whitespace.
 /// </summary>
+[AssertionExtension("IsNullOrWhitespace")]
 public class StringIsNullOrWhitespaceAssertion : Assertion<string>
 {
     public StringIsNullOrWhitespaceAssertion(
@@ -409,6 +418,7 @@ public class StringIsNullOrWhitespaceAssertion : Assertion<string>
 /// <summary>
 /// Asserts that a string matches a regular expression pattern.
 /// </summary>
+[AssertionExtension("Matches")]
 public class StringMatchesAssertion : Assertion<string>
 {
     private readonly string _pattern;
@@ -493,6 +503,7 @@ public class StringMatchesAssertion : Assertion<string>
 /// <summary>
 /// Asserts that a string does NOT match a regular expression pattern.
 /// </summary>
+[AssertionExtension("DoesNotMatch")]
 public class StringDoesNotMatchAssertion : Assertion<string>
 {
     private readonly string _pattern;
@@ -577,6 +588,7 @@ public class StringDoesNotMatchAssertion : Assertion<string>
 /// <summary>
 /// Asserts that a string is null or empty.
 /// </summary>
+[AssertionExtension("IsNullOrEmpty")]
 public class StringIsNullOrEmptyAssertion : Assertion<string>
 {
     public StringIsNullOrEmptyAssertion(
@@ -609,6 +621,7 @@ public class StringIsNullOrEmptyAssertion : Assertion<string>
 /// <summary>
 /// Asserts that a string is NOT null or empty.
 /// </summary>
+[AssertionExtension("IsNotNullOrEmpty")]
 public class StringIsNotNullOrEmptyAssertion : Assertion<string>
 {
     public StringIsNotNullOrEmptyAssertion(

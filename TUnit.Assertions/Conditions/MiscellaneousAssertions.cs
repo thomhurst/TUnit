@@ -1,9 +1,11 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
 // Exception assertions
+[AssertionExtension("HasInnerException")]
 public class HasInnerExceptionAssertion : Assertion<Exception>
 {
     public HasInnerExceptionAssertion(
@@ -38,6 +40,7 @@ public class HasInnerExceptionAssertion : Assertion<Exception>
     protected override string GetExpectation() => "to have an inner exception";
 }
 
+[AssertionExtension("HasNoInnerException")]
 public class HasNoInnerExceptionAssertion : Assertion<Exception>
 {
     public HasNoInnerExceptionAssertion(
@@ -72,6 +75,7 @@ public class HasNoInnerExceptionAssertion : Assertion<Exception>
     protected override string GetExpectation() => "to have no inner exception";
 }
 
+[AssertionExtension("HasStackTrace")]
 public class HasStackTraceAssertion : Assertion<Exception>
 {
     public HasStackTraceAssertion(
@@ -106,6 +110,7 @@ public class HasStackTraceAssertion : Assertion<Exception>
     protected override string GetExpectation() => "to have a stack trace";
 }
 
+[AssertionExtension("HasNoData")]
 public class HasNoDataAssertion : Assertion<Exception>
 {
     public HasNoDataAssertion(
@@ -141,6 +146,7 @@ public class HasNoDataAssertion : Assertion<Exception>
 }
 
 // StringBuilder assertions
+[AssertionExtension("IsEmpty")]
 public class StringBuilderIsEmptyAssertion : Assertion<StringBuilder>
 {
     public StringBuilderIsEmptyAssertion(
@@ -175,6 +181,7 @@ public class StringBuilderIsEmptyAssertion : Assertion<StringBuilder>
     protected override string GetExpectation() => "to be empty";
 }
 
+[AssertionExtension("IsNotEmpty")]
 public class StringBuilderIsNotEmptyAssertion : Assertion<StringBuilder>
 {
     public StringBuilderIsNotEmptyAssertion(
@@ -209,6 +216,7 @@ public class StringBuilderIsNotEmptyAssertion : Assertion<StringBuilder>
     protected override string GetExpectation() => "to not be empty";
 }
 
+[AssertionExtension("HasExcessCapacity")]
 public class StringBuilderHasExcessCapacityAssertion : Assertion<StringBuilder>
 {
     public StringBuilderHasExcessCapacityAssertion(
@@ -244,6 +252,7 @@ public class StringBuilderHasExcessCapacityAssertion : Assertion<StringBuilder>
 }
 
 // DayOfWeek assertions
+[AssertionExtension("IsWeekend")]
 public class IsWeekendAssertion : Assertion<DayOfWeek>
 {
     public IsWeekendAssertion(
@@ -273,6 +282,7 @@ public class IsWeekendAssertion : Assertion<DayOfWeek>
     protected override string GetExpectation() => "to be a weekend day";
 }
 
+[AssertionExtension("IsWeekday")]
 public class IsWeekdayAssertion : Assertion<DayOfWeek>
 {
     public IsWeekdayAssertion(
@@ -302,6 +312,7 @@ public class IsWeekdayAssertion : Assertion<DayOfWeek>
     protected override string GetExpectation() => "to be a weekday";
 }
 
+[AssertionExtension("IsMonday")]
 public class IsMondayAssertion : Assertion<DayOfWeek>
 {
     public IsMondayAssertion(
@@ -331,6 +342,7 @@ public class IsMondayAssertion : Assertion<DayOfWeek>
     protected override string GetExpectation() => "to be Monday";
 }
 
+[AssertionExtension("IsFriday")]
 public class IsFridayAssertion : Assertion<DayOfWeek>
 {
     public IsFridayAssertion(
@@ -361,6 +373,7 @@ public class IsFridayAssertion : Assertion<DayOfWeek>
 }
 
 // WeakReference assertions
+[AssertionExtension("IsAlive")]
 public class IsAliveAssertion : Assertion<WeakReference>
 {
     public IsAliveAssertion(
@@ -395,6 +408,7 @@ public class IsAliveAssertion : Assertion<WeakReference>
     protected override string GetExpectation() => "to be alive";
 }
 
+[AssertionExtension("IsDead")]
 public class IsDeadAssertion : Assertion<WeakReference>
 {
     public IsDeadAssertion(
