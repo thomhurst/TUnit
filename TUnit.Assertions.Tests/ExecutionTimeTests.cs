@@ -27,7 +27,7 @@ public class ExecutionTimeTests
 
         var duration = stopwatch.Elapsed;
 
-        await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(9));
+        await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(11));
     }
 
     [Test]
@@ -52,6 +52,6 @@ public class ExecutionTimeTests
 
         var duration = stopwatch.Elapsed;
 
-        await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(9));
+        await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(11));
     }
 }

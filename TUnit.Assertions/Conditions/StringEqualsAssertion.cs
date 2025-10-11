@@ -150,12 +150,12 @@ public class StringEqualsAssertion : Assertion<string>
 
         // Build the message with truncation and diff display
         var message = new StringBuilder();
-        message.Append($"found \"{TruncateString(originalValue, 100)}\" which differs at index {diffIndex}:");
+        message.Append($"found \"{TruncateString(originalValue, 99)}\" which differs at index {diffIndex}:");
         message.AppendLine();
 
-        // Show context around the difference (about 25 chars before and after)
-        int contextStart = Math.Max(0, diffIndex - 25);
-        int contextEnd = Math.Min(expectedValue.Length, Math.Min(actualValue.Length, diffIndex + 25));
+        // Show context around the difference (about 24 chars before and 26 after)
+        int contextStart = Math.Max(0, diffIndex - 24);
+        int contextEnd = Math.Min(expectedValue.Length, Math.Min(actualValue.Length, diffIndex + 27));
 
         // Build the diff display with arrows
         var expectedContext = expectedValue.Substring(contextStart, Math.Min(contextEnd - contextStart, expectedValue.Length - contextStart));
@@ -166,10 +166,9 @@ public class StringEqualsAssertion : Assertion<string>
         string arrow = new string(' ', arrowPosition + 4); // +3 for "   " prefix, +1 for opening quote
 
         message.AppendLine($"{arrow}↓");
-        message.AppendLine($"   \"{TruncateString(expectedContext, 50)}\"");
         message.AppendLine($"   \"{TruncateString(actualContext, 50)}\"");
-        message.AppendLine($"{arrow}↑");
-        message.AppendLine();
+        message.AppendLine($"   \"{TruncateString(expectedContext, 50)}\"");
+        message.Append($"{arrow}↑");
 
         return message.ToString();
     }
@@ -204,7 +203,7 @@ public class StringEqualsAssertion : Assertion<string>
         var comparisonDesc = _comparison == StringComparison.Ordinal
             ? ""
             : $" ({_comparison})";
-        var truncatedExpected = TruncateString(_expected, 100);
+        var truncatedExpected = TruncateString(_expected, 99);
         return $"to be equal to \"{truncatedExpected}\"{comparisonDesc}";
     }
 }
