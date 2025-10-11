@@ -1,0 +1,2081 @@
+using System.Collections;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using TUnit.Assertions.Conditions;
+using TUnit.Assertions.Conditions.Wrappers;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Sources;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Extension methods for IAssertionSource&lt;T&gt; - the primary assertion API surface.
+/// These methods work on Assertion&lt;T&gt;, AndContinuation&lt;T&gt;, and OrContinuation&lt;T&gt;!
+/// No duplication needed - one set of extensions for everything!
+/// </summary>
+public static class AssertionExtensions
+{
+    // ============ NULL CHECKS ============
+
+    /// <summary>
+    /// Asserts that the value is null.
+    /// </summary>
+    public static NullAssertion<TValue> IsNull<TValue>(
+        this IAssertionSource<TValue> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNull()");
+        return new NullAssertion<TValue>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the value is not null.
+    /// </summary>
+    public static NotNullAssertion<TValue> IsNotNull<TValue>(
+        this IAssertionSource<TValue> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotNull()");
+        return new NotNullAssertion<TValue>(source.Context);
+    }
+
+    // ============ EQUALITY ============
+
+    /// <summary>
+    /// Asserts that the value is equal to the expected value (generic version).
+    /// Works with assertions, And, and Or continuations!
+    /// </summary>
+    public static EqualsAssertion<TValue> IsEqualTo<TValue>(
+        this IAssertionSource<TValue> source,
+        TValue expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        return new EqualsAssertion<TValue>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the value is equal to the expected value using the specified comparer.
+    /// </summary>
+    public static EqualsAssertion<TValue> IsEqualTo<TValue>(
+        this IAssertionSource<TValue> source,
+        TValue expected,
+        IEqualityComparer<TValue> comparer,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression}, comparer)");
+        return new EqualsAssertion<TValue>(source.Context, expected,  comparer);
+    }
+
+    /// <summary>
+    /// Alias for IsEqualTo - asserts that the value is equal to the expected value.
+    /// Works with assertions, And, and Or continuations!
+    /// </summary>
+    public static EqualsAssertion<TValue> EqualTo<TValue>(
+        this IAssertionSource<TValue> source,
+        TValue expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".EqualTo({expression})");
+        return new EqualsAssertion<TValue>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the value is NOT equal to the expected value.
+    /// </summary>
+    public static NotEqualsAssertion<TValue> IsNotEqualTo<TValue>(
+        this IAssertionSource<TValue> source,
+        TValue notExpected,
+        [CallerArgumentExpression(nameof(notExpected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotEqualTo({expression})");
+        return new NotEqualsAssertion<TValue>(source.Context, notExpected);
+    }
+
+    /// <summary>
+    /// Asserts that the DateTime is equal to the expected value.
+    /// Returns DateTimeEqualsAssertion which has .Within() method!
+    /// </summary>
+    public static DateTimeEqualsAssertion IsEqualTo(
+        this IAssertionSource<DateTime> source,
+        DateTime expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        return new DateTimeEqualsAssertion(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the string is equal to the expected value.
+    /// Returns StringEqualsAssertion which has .IgnoringCase() and .WithComparison() methods!
+    /// </summary>
+    public static StringEqualsAssertion IsEqualTo(
+        this IAssertionSource<string> source,
+        string expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        return new StringEqualsAssertion(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the string is equal to the expected value using the specified comparison.
+    /// </summary>
+    public static StringEqualsAssertion IsEqualTo(
+        this IAssertionSource<string> source,
+        string expected,
+        StringComparison comparison,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression}, {comparison})");
+        var assertion = new StringEqualsAssertion(source.Context, expected);
+        return assertion.WithComparison(comparison);
+    }
+
+#if NET6_0_OR_GREATER
+    /// <summary>
+    /// Asserts that the DateOnly is equal to the expected value.
+    /// Returns DateOnlyEqualsAssertion which has .WithinDays() method!
+    /// </summary>
+    public static DateOnlyEqualsAssertion IsEqualTo(
+        this IAssertionSource<DateOnly> source,
+        DateOnly expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        return new DateOnlyEqualsAssertion(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the TimeOnly is equal to the expected value.
+    /// Returns TimeOnlyEqualsAssertion which has .Within() method!
+    /// </summary>
+    public static TimeOnlyEqualsAssertion IsEqualTo(
+        this IAssertionSource<TimeOnly> source,
+        TimeOnly expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        return new TimeOnlyEqualsAssertion(source.Context, expected);
+    }
+#endif
+
+    /// <summary>
+    /// Asserts that the double is equal to the expected value.
+    /// Returns DoubleEqualsAssertion which has .Within() method!
+    /// </summary>
+    public static DoubleEqualsAssertion IsEqualTo(
+        this IAssertionSource<double> source,
+        double expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        return new DoubleEqualsAssertion(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the long is equal to the expected value.
+    /// Returns LongEqualsAssertion which has .Within() method!
+    /// </summary>
+    public static LongEqualsAssertion IsEqualTo(
+        this IAssertionSource<long> source,
+        long expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        return new LongEqualsAssertion(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the DateTimeOffset is equal to the expected value.
+    /// Returns DateTimeOffsetEqualsAssertion which has .Within() method!
+    /// </summary>
+    public static DateTimeOffsetEqualsAssertion IsEqualTo(
+        this IAssertionSource<DateTimeOffset> source,
+        DateTimeOffset expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        return new DateTimeOffsetEqualsAssertion(source.Context, expected);
+    }
+
+    // ============ COMPARISONS ============
+
+    /// <summary>
+    /// Asserts that the value is greater than the minimum.
+    /// </summary>
+    public static GreaterThanAssertion<TValue> IsGreaterThan<TValue>(
+        this IAssertionSource<TValue> source,
+        TValue minimum,
+        [CallerArgumentExpression(nameof(minimum))] string? expression = null)
+        where TValue : IComparable<TValue>
+    {
+        source.Context.ExpressionBuilder.Append($".IsGreaterThan({expression})");
+        return new GreaterThanAssertion<TValue>(source.Context, minimum);
+    }
+
+    /// <summary>
+    /// Asserts that the value is greater than or equal to the minimum.
+    /// </summary>
+    public static GreaterThanOrEqualAssertion<TValue> IsGreaterThanOrEqualTo<TValue>(
+        this IAssertionSource<TValue> source,
+        TValue minimum,
+        [CallerArgumentExpression(nameof(minimum))] string? expression = null)
+        where TValue : IComparable<TValue>
+    {
+        source.Context.ExpressionBuilder.Append($".IsGreaterThanOrEqualTo({expression})");
+        return new GreaterThanOrEqualAssertion<TValue>(source.Context, minimum);
+    }
+
+    /// <summary>
+    /// Asserts that the value is less than the maximum.
+    /// </summary>
+    public static LessThanAssertion<TValue> IsLessThan<TValue>(
+        this IAssertionSource<TValue> source,
+        TValue maximum,
+        [CallerArgumentExpression(nameof(maximum))] string? expression = null)
+        where TValue : IComparable<TValue>
+    {
+        source.Context.ExpressionBuilder.Append($".IsLessThan({expression})");
+        return new LessThanAssertion<TValue>(source.Context, maximum);
+    }
+
+    /// <summary>
+    /// Asserts that the value is less than or equal to the maximum.
+    /// </summary>
+    public static LessThanOrEqualAssertion<TValue> IsLessThanOrEqualTo<TValue>(
+        this IAssertionSource<TValue> source,
+        TValue maximum,
+        [CallerArgumentExpression(nameof(maximum))] string? expression = null)
+        where TValue : IComparable<TValue>
+    {
+        source.Context.ExpressionBuilder.Append($".IsLessThanOrEqualTo({expression})");
+        return new LessThanOrEqualAssertion<TValue>(source.Context, maximum);
+    }
+
+    /// <summary>
+    /// Asserts that the value is between minimum and maximum.
+    /// Returns BetweenAssertion with .Inclusive(), .Exclusive() methods!
+    /// </summary>
+    public static BetweenAssertion<TValue> IsBetween<TValue>(
+        this IAssertionSource<TValue> source,
+        TValue minimum,
+        TValue maximum,
+        [CallerArgumentExpression(nameof(minimum))] string? minExpr = null,
+        [CallerArgumentExpression(nameof(maximum))] string? maxExpr = null)
+        where TValue : IComparable<TValue>
+    {
+        source.Context.ExpressionBuilder.Append($".IsBetween({minExpr}, {maxExpr})");
+        return new BetweenAssertion<TValue>(source.Context, minimum, maximum);
+    }
+
+    /// <summary>
+    /// Asserts that the numeric value is greater than zero (positive).
+    /// </summary>
+    public static GreaterThanAssertion<TValue> IsPositive<TValue>(
+        this IAssertionSource<TValue> source)
+        where TValue : IComparable<TValue>
+    {
+        source.Context.ExpressionBuilder.Append(".IsPositive()");
+        return new GreaterThanAssertion<TValue>(source.Context, default(TValue)!);
+    }
+
+    /// <summary>
+    /// Asserts that the nullable numeric value is greater than zero (positive).
+    /// </summary>
+    public static GreaterThanAssertion<TValue> IsPositive<TValue>(
+        this IAssertionSource<TValue?> source)
+        where TValue : struct, IComparable<TValue>
+    {
+        source.Context.ExpressionBuilder.Append(".IsPositive()");
+        var mappedContext = source.Context.Map<TValue>(nullableValue =>
+        {
+            if (!nullableValue.HasValue)
+            {
+                throw new ArgumentNullException(nameof(nullableValue), "value was null");
+            }
+
+            return nullableValue.Value;
+        });
+        return new GreaterThanAssertion<TValue>(mappedContext, default(TValue)!);
+    }
+
+    /// <summary>
+    /// Asserts that the numeric value is less than zero (negative).
+    /// </summary>
+    public static LessThanAssertion<TValue> IsNegative<TValue>(
+        this IAssertionSource<TValue> source)
+        where TValue : IComparable<TValue>
+    {
+        source.Context.ExpressionBuilder.Append(".IsNegative()");
+        return new LessThanAssertion<TValue>(source.Context, default(TValue)!);
+    }
+
+    /// <summary>
+    /// Asserts that the nullable numeric value is less than zero (negative).
+    /// </summary>
+    public static LessThanAssertion<TValue> IsNegative<TValue>(
+        this IAssertionSource<TValue?> source)
+        where TValue : struct, IComparable<TValue>
+    {
+        source.Context.ExpressionBuilder.Append(".IsNegative()");
+        var mappedContext = source.Context.Map<TValue>(nullableValue =>
+        {
+            if (!nullableValue.HasValue)
+            {
+                throw new ArgumentNullException(nameof(nullableValue), "value was null");
+            }
+
+            return nullableValue.Value;
+        });
+        return new LessThanAssertion<TValue>(mappedContext, default(TValue)!);
+    }
+
+    // ============ BOOLEAN ============
+
+    /// <summary>
+    /// Asserts that the boolean value is true.
+    /// </summary>
+    public static TrueAssertion IsTrue(
+        this IAssertionSource<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsTrue()");
+        return new TrueAssertion(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the boolean value is true (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<bool> IsTrue(
+        this AndContinuation<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsTrue()");
+        var newAssertion = new TrueAssertion(source.Context);
+        return new Chaining.AndAssertion<bool>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the boolean value is true (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<bool> IsTrue(
+        this OrContinuation<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsTrue()");
+        var newAssertion = new TrueAssertion(source.Context);
+        return new Chaining.OrAssertion<bool>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the boolean value is false.
+    /// </summary>
+    public static FalseAssertion IsFalse(
+        this IAssertionSource<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsFalse()");
+        return new FalseAssertion(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the boolean value is false (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<bool> IsFalse(
+        this AndContinuation<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsFalse()");
+        var newAssertion = new FalseAssertion(source.Context);
+        return new Chaining.AndAssertion<bool>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the boolean value is false (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<bool> IsFalse(
+        this OrContinuation<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsFalse()");
+        var newAssertion = new FalseAssertion(source.Context);
+        return new Chaining.OrAssertion<bool>(source.PreviousAssertion, newAssertion);
+    }
+
+    // ============ AND/OR CONTINUATION OVERLOADS FOR COMMON METHODS ============
+
+    /// <summary>
+    /// Asserts that the value is equal to the expected value (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> IsEqualTo<TValue>(
+        this AndContinuation<TValue> source,
+        TValue expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        var newAssertion = new EqualsAssertion<TValue>(source.Context, expected);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the value is equal to the expected value (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> IsEqualTo<TValue>(
+        this OrContinuation<TValue> source,
+        TValue expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        var newAssertion = new EqualsAssertion<TValue>(source.Context, expected);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the string is equal to the expected value using the specified comparison (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<string> IsEqualTo(
+        this AndContinuation<string> source,
+        string expected,
+        StringComparison comparison,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression}, StringComparison.{comparison})");
+        var newAssertion = new StringEqualsAssertion(source.Context, expected).WithComparison(comparison);
+        return new Chaining.AndAssertion<string>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the string is equal to the expected value using the specified comparison (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<string> IsEqualTo(
+        this OrContinuation<string> source,
+        string expected,
+        StringComparison comparison,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression}, StringComparison.{comparison})");
+        var newAssertion = new StringEqualsAssertion(source.Context, expected).WithComparison(comparison);
+        return new Chaining.OrAssertion<string>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the string is null or empty (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<string> IsNullOrEmpty(
+        this AndContinuation<string> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNullOrEmpty()");
+        var newAssertion = new StringIsNullOrEmptyAssertion(source.Context);
+        return new Chaining.AndAssertion<string>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the string is null or empty (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<string> IsNullOrEmpty(
+        this OrContinuation<string> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNullOrEmpty()");
+        var newAssertion = new StringIsNullOrEmptyAssertion(source.Context);
+        return new Chaining.OrAssertion<string>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the value is not equal to the expected value (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> IsNotEqualTo<TValue>(
+        this AndContinuation<TValue> source,
+        TValue expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotEqualTo({expression})");
+        var newAssertion = new NotEqualsAssertion<TValue>(source.Context, expected);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the value is not equal to the expected value (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> IsNotEqualTo<TValue>(
+        this OrContinuation<TValue> source,
+        TValue expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotEqualTo({expression})");
+        var newAssertion = new NotEqualsAssertion<TValue>(source.Context, expected);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    // ============ TYPE CHECKS ============
+
+    /// <summary>
+    /// Asserts that the value is of the specified type (single type parameter overload).
+    /// Returns an assertion typed to TExpected, enabling type-safe chaining!
+    /// Example: await Assert.That(obj).IsTypeOf&lt;StringBuilder&gt;();
+    /// </summary>
+    public static TypeOfAssertion<object, TExpected> IsTypeOf<TExpected>(
+        this IAssertionSource<object> source)
+    {
+        source.Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
+        return new TypeOfAssertion<object, TExpected>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the value is of the specified type (runtime Type parameter).
+    /// Example: await Assert.That(obj).IsTypeOf(typeof(string));
+    /// </summary>
+    public static Assertion<object> IsTypeOf(
+        this IAssertionSource<object> source,
+        Type expectedType)
+    {
+        source.Context.ExpressionBuilder.Append($".IsTypeOf(typeof({expectedType.Name}))");
+        return new IsTypeOfRuntimeAssertion<object>(source.Context, expectedType);
+    }
+
+    /// <summary>
+    /// Asserts that the value is of the specified type (runtime Type parameter, for AndContinuation).
+    /// Example: await Assert.That(obj).IsEqualTo("foo").And.IsTypeOf(typeof(string));
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> IsTypeOf<TValue>(
+        this AndContinuation<TValue> source,
+        Type expectedType)
+    {
+        source.Context.ExpressionBuilder.Append($".IsTypeOf(typeof({expectedType.Name}))");
+        var newAssertion = new IsTypeOfRuntimeAssertion<TValue>(source.Context, expectedType);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the value is of the specified type (runtime Type parameter, for OrContinuation).
+    /// Example: await Assert.That(obj).IsEqualTo("foo").Or.IsTypeOf(typeof(string));
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> IsTypeOf<TValue>(
+        this OrContinuation<TValue> source,
+        Type expectedType)
+    {
+        source.Context.ExpressionBuilder.Append($".IsTypeOf(typeof({expectedType.Name}))");
+        var newAssertion = new IsTypeOfRuntimeAssertion<TValue>(source.Context, expectedType);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the value is of the specified type (two type parameter overload).
+    /// Returns an assertion typed to TExpected, enabling type-safe chaining!
+    /// Example: await Assert.That(obj).IsTypeOf&lt;string, object&gt;();
+    /// </summary>
+    public static TypeOfAssertion<TValue, TExpected> IsTypeOf<TExpected, TValue>(
+        this IAssertionSource<TValue> source)
+    {
+        source.Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
+        return new TypeOfAssertion<TValue, TExpected>(source.Context);
+    }
+
+
+
+    /// <summary>
+    /// Asserts that the value's type is assignable to the specified type (is the type or a derived type).
+    /// Specific overload for object to avoid Polyfill package conflicts.
+    /// Example: await Assert.That((object)myDog).IsAssignableTo&lt;Animal&gt;();
+    /// </summary>
+    public static IsAssignableToAssertion<object, TTarget> IsAssignableTo<TTarget>(
+        this IAssertionSource<object> source)
+    {
+        source.Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsAssignableToAssertion<object, TTarget>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the value's type is assignable to the specified type (is the type or a derived type).
+    /// Example: await Assert.That(myDog).IsAssignableTo&lt;Animal&gt;();
+    /// </summary>
+    public static IsAssignableToAssertion<TValue, TTarget> IsAssignableTo<TTarget, TValue>(
+        this IAssertionSource<TValue> source)
+    {
+        source.Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsAssignableToAssertion<TValue, TTarget>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the value's type is NOT assignable to the specified type.
+    /// Specific overload for object to avoid Polyfill package conflicts.
+    /// Example: await Assert.That((object)myDog).IsNotAssignableTo&lt;Cat&gt;();
+    /// </summary>
+    public static IsNotAssignableToAssertion<object, TTarget> IsNotAssignableTo<TTarget>(
+        this IAssertionSource<object> source)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableToAssertion<object, TTarget>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the value's type is NOT assignable to the specified type.
+    /// Example: await Assert.That(myDog).IsNotAssignableTo&lt;Cat&gt;();
+    /// </summary>
+    public static IsNotAssignableToAssertion<TValue, TTarget> IsNotAssignableTo<TTarget, TValue>(
+        this IAssertionSource<TValue> source)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableToAssertion<TValue, TTarget>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts on a member of an object using a lambda selector.
+    /// Returns an assertion on the member value for further chaining.
+    /// Example: await Assert.That(myObject).HasMember(x => x.PropertyName).IsEqualTo(expectedValue);
+    /// </summary>
+    public static MemberAssertion<TObject, TMember> HasMember<TObject, TMember>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, TMember>> memberSelector)
+    {
+        return new MemberAssertion<TObject, TMember>(source.Context, memberSelector);
+    }
+
+    // ============ REFERENCE EQUALITY ============
+
+    /// <summary>
+    /// Asserts that the value is the same reference as the expected object.
+    /// Example: await Assert.That(obj1).IsSameReferenceAs(obj2);
+    /// </summary>
+    public static SameReferenceAssertion<TValue> IsSameReferenceAs<TValue>(
+        this IAssertionSource<TValue> source,
+        object? expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsSameReferenceAs({expression})");
+        return new SameReferenceAssertion<TValue>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the value is NOT the same reference as the expected object.
+    /// Example: await Assert.That(obj1).IsNotSameReferenceAs(obj2);
+    /// </summary>
+    public static NotSameReferenceAssertion<TValue> IsNotSameReferenceAs<TValue>(
+        this IAssertionSource<TValue> source,
+        object? expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotSameReferenceAs({expression})");
+        return new NotSameReferenceAssertion<TValue>(source.Context, expected);
+    }
+
+    // ============ STRING ASSERTIONS ============
+
+    /// <summary>
+    /// Asserts that the string contains the expected substring.
+    /// </summary>
+    public static StringContainsAssertion Contains(
+        this IAssertionSource<string> source,
+        string expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new StringContainsAssertion(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the string does NOT contain the expected substring.
+    /// </summary>
+    public static StringDoesNotContainAssertion DoesNotContain(
+        this IAssertionSource<string> source,
+        string expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
+        return new StringDoesNotContainAssertion(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the string starts with the expected substring.
+    /// </summary>
+    public static StringStartsWithAssertion StartsWith(
+        this IAssertionSource<string> source,
+        string expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".StartsWith({expression})");
+        return new StringStartsWithAssertion(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the string ends with the expected substring.
+    /// </summary>
+    public static StringEndsWithAssertion EndsWith(
+        this IAssertionSource<string> source,
+        string expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".EndsWith({expression})");
+        return new StringEndsWithAssertion(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the string is not empty or whitespace.
+    /// </summary>
+    public static StringIsNotEmptyAssertion IsNotEmpty(
+        this IAssertionSource<string> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotEmpty()");
+        return new StringIsNotEmptyAssertion(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the string is empty or whitespace.
+    /// </summary>
+    public static StringIsEmptyAssertion IsEmpty(
+        this IAssertionSource<string> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsEmpty()");
+        return new StringIsEmptyAssertion(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the string is null or empty.
+    /// </summary>
+    public static StringIsNullOrEmptyAssertion IsNullOrEmpty(
+        this IAssertionSource<string> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNullOrEmpty()");
+        return new StringIsNullOrEmptyAssertion(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the string is NOT null or empty.
+    /// </summary>
+    public static StringIsNotNullOrEmptyAssertion IsNotNullOrEmpty(
+        this IAssertionSource<string> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotNullOrEmpty()");
+        return new StringIsNotNullOrEmptyAssertion(source.Context);
+    }
+
+    /// <summary>
+    /// Returns a wrapper for string length assertions.
+    /// Example: await Assert.That(str).HasLength().EqualTo(5);
+    /// </summary>
+    public static LengthWrapper HasLength(
+        this IAssertionSource<string> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasLength()");
+        return new LengthWrapper(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the string has a specific length.
+    /// Example: await Assert.That(str).HasLength(5);
+    /// </summary>
+    public static StringLengthAssertion HasLength(
+        this IAssertionSource<string> source,
+        int expectedLength,
+        [CallerArgumentExpression(nameof(expectedLength))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".HasLength({expression})");
+        return new StringLengthAssertion(source.Context, expectedLength);
+    }
+
+    /// <summary>
+    /// Asserts that the string is null, empty, or whitespace.
+    /// </summary>
+    public static StringIsNullOrWhitespaceAssertion IsNullOrWhitespace(
+        this IAssertionSource<string> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNullOrWhitespace()");
+        return new StringIsNullOrWhitespaceAssertion(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the string matches a regular expression pattern.
+    /// </summary>
+    public static StringMatchesAssertion Matches(
+        this IAssertionSource<string> source,
+        string pattern,
+        [CallerArgumentExpression(nameof(pattern))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".Matches({expression})");
+        return new StringMatchesAssertion(source.Context, pattern);
+    }
+
+    /// <summary>
+    /// Asserts that the string matches a regular expression.
+    /// </summary>
+    public static StringMatchesAssertion Matches(
+        this IAssertionSource<string> source,
+        Regex regex,
+        [CallerArgumentExpression(nameof(regex))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".Matches({expression})");
+        return new StringMatchesAssertion(source.Context, regex);
+    }
+
+    /// <summary>
+    /// Asserts that the string does NOT match a regular expression pattern.
+    /// </summary>
+    public static StringDoesNotMatchAssertion DoesNotMatch(
+        this IAssertionSource<string> source,
+        string pattern,
+        [CallerArgumentExpression(nameof(pattern))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".DoesNotMatch({expression})");
+        return new StringDoesNotMatchAssertion(source.Context, pattern);
+    }
+
+    /// <summary>
+    /// Asserts that the string does NOT match a regular expression.
+    /// </summary>
+    public static StringDoesNotMatchAssertion DoesNotMatch(
+        this IAssertionSource<string> source,
+        Regex regex,
+        [CallerArgumentExpression(nameof(regex))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".DoesNotMatch({expression})");
+        return new StringDoesNotMatchAssertion(source.Context, regex);
+    }
+
+    // ============ DICTIONARY ASSERTIONS ============
+
+    /// <summary>
+    /// Asserts that the dictionary contains the specified key.
+    /// Example: await Assert.That(dict).ContainsKey("key");
+    /// </summary>
+    public static DictionaryContainsKeyAssertion<TKey, TValue> ContainsKey<TKey, TValue>(
+        this IAssertionSource<IReadOnlyDictionary<TKey, TValue>> source,
+        TKey key,
+        [CallerArgumentExpression(nameof(key))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".ContainsKey({expression})");
+        return new DictionaryContainsKeyAssertion<TKey, TValue>(source.Context, key);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary contains the specified key.
+    /// This overload works with custom dictionary types.
+    /// Example: await Assert.That(customDict).ContainsKey("key");
+    /// </summary>
+    public static DictionaryContainsKeyAssertion<TKey, TValue> ContainsKey<TDictionary, TKey, TValue>(
+        this IAssertionSource<TDictionary> source,
+        TKey key,
+        [CallerArgumentExpression(nameof(key))] string? expression = null)
+        where TDictionary : IReadOnlyDictionary<TKey, TValue>
+    {
+        source.Context.ExpressionBuilder.Append($".ContainsKey({expression})");
+        var mappedContext = source.Context.Map<IReadOnlyDictionary<TKey, TValue>>(dict => dict);
+        return new DictionaryContainsKeyAssertion<TKey, TValue>(mappedContext, key);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary contains the specified key using the specified comparer.
+    /// Example: await Assert.That(dict).ContainsKey("key", StringComparer.OrdinalIgnoreCase);
+    /// </summary>
+    public static DictionaryContainsKeyAssertion<TKey, TValue> ContainsKey<TKey, TValue>(
+        this IAssertionSource<IReadOnlyDictionary<TKey, TValue>> source,
+        TKey key,
+        IEqualityComparer<TKey> comparer,
+        [CallerArgumentExpression(nameof(key))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".ContainsKey({expression}, comparer)");
+        return new DictionaryContainsKeyAssertion<TKey, TValue>(source.Context, key,  comparer);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary contains the specified key using the specified comparer.
+    /// This overload works with custom dictionary types.
+    /// </summary>
+    public static DictionaryContainsKeyAssertion<TKey, TValue> ContainsKey<TDictionary, TKey, TValue>(
+        this IAssertionSource<TDictionary> source,
+        TKey key,
+        IEqualityComparer<TKey> comparer,
+        [CallerArgumentExpression(nameof(key))] string? expression = null)
+        where TDictionary : IReadOnlyDictionary<TKey, TValue>
+    {
+        source.Context.ExpressionBuilder.Append($".ContainsKey({expression}, comparer)");
+        var mappedContext = source.Context.Map<IReadOnlyDictionary<TKey, TValue>>(dict => dict);
+        return new DictionaryContainsKeyAssertion<TKey, TValue>(mappedContext, key,  comparer);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary does NOT contain the specified key.
+    /// Example: await Assert.That(dict).DoesNotContainKey("key");
+    /// </summary>
+    public static DictionaryDoesNotContainKeyAssertion<TKey, TValue> DoesNotContainKey<TKey, TValue>(
+        this IAssertionSource<IReadOnlyDictionary<TKey, TValue>> source,
+        TKey key,
+        [CallerArgumentExpression(nameof(key))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".DoesNotContainKey({expression})");
+        return new DictionaryDoesNotContainKeyAssertion<TKey, TValue>(source.Context, key);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary does NOT contain the specified key.
+    /// This overload works with custom dictionary types.
+    /// Example: await Assert.That(customDict).DoesNotContainKey("key");
+    /// </summary>
+    public static DictionaryDoesNotContainKeyAssertion<TKey, TValue> DoesNotContainKey<TDictionary, TKey, TValue>(
+        this IAssertionSource<TDictionary> source,
+        TKey key,
+        [CallerArgumentExpression(nameof(key))] string? expression = null)
+        where TDictionary : IReadOnlyDictionary<TKey, TValue>
+    {
+        source.Context.ExpressionBuilder.Append($".DoesNotContainKey({expression})");
+        var mappedContext = source.Context.Map<IReadOnlyDictionary<TKey, TValue>>(dict => dict);
+        return new DictionaryDoesNotContainKeyAssertion<TKey, TValue>(mappedContext, key);
+    }
+
+    // ============ COLLECTION ASSERTIONS ============
+
+    /// <summary>
+    /// Asserts that the collection is empty.
+    /// </summary>
+    public static CollectionIsEmptyAssertion<TValue> IsEmpty<TValue>(
+        this IAssertionSource<TValue> source)
+        where TValue : IEnumerable
+    {
+        source.Context.ExpressionBuilder.Append(".IsEmpty()");
+        return new CollectionIsEmptyAssertion<TValue>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is NOT empty.
+    /// </summary>
+    public static CollectionIsNotEmptyAssertion<TValue> IsNotEmpty<TValue>(
+        this IAssertionSource<TValue> source)
+        where TValue : IEnumerable
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotEmpty()");
+        return new CollectionIsNotEmptyAssertion<TValue>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains the expected item.
+    /// </summary>
+    public static CollectionContainsAssertion<TCollection, TItem> Contains<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        TItem expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsAssertion<TCollection, TItem>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains an item matching the predicate.
+    /// </summary>
+    public static CollectionContainsPredicateAssertion<TCollection, TItem> Contains<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsPredicateAssertion<TCollection, TItem>(source.Context, predicate);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains the expected item.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static CollectionContainsAssertion<IEnumerable<TItem>, TItem> Contains<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        TItem expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsAssertion<IEnumerable<TItem>, TItem>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains an item matching the predicate.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static CollectionContainsPredicateAssertion<IEnumerable<TItem>, TItem> Contains<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsPredicateAssertion<IEnumerable<TItem>, TItem>(source.Context, predicate);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains the expected item (And continuation overload).
+    /// Returns AndAssertion to enable And chaining and prevent mixing with Or.
+    /// </summary>
+    public static Chaining.AndAssertion<TCollection> Contains<TCollection, TItem>(
+        this AndContinuation<TCollection> source,
+        TItem expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        var newAssertion = new CollectionContainsAssertion<TCollection, TItem>(source.Context, expected);
+        return new Chaining.AndAssertion<TCollection>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains the expected item (Or continuation overload).
+    /// Returns OrAssertion to enable Or chaining and prevent mixing with And.
+    /// </summary>
+    public static Chaining.OrAssertion<TCollection> Contains<TCollection, TItem>(
+        this OrContinuation<TCollection> source,
+        TItem expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        var newAssertion = new CollectionContainsAssertion<TCollection, TItem>(source.Context, expected);
+        return new Chaining.OrAssertion<TCollection>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the collection does NOT contain the expected item.
+    /// </summary>
+    public static CollectionDoesNotContainAssertion<TCollection, TItem> DoesNotContain<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        TItem expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
+        return new CollectionDoesNotContainAssertion<TCollection, TItem>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the collection does NOT contain any item matching the predicate.
+    /// </summary>
+    public static CollectionDoesNotContainPredicateAssertion<TCollection, TItem> DoesNotContain<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
+        return new CollectionDoesNotContainPredicateAssertion<TCollection, TItem>(source.Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that the collection does NOT contain the expected item.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static CollectionDoesNotContainAssertion<IEnumerable<TItem>, TItem> DoesNotContain<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        TItem expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
+        return new CollectionDoesNotContainAssertion<IEnumerable<TItem>, TItem>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the collection does NOT contain any item matching the predicate.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static CollectionDoesNotContainPredicateAssertion<IEnumerable<TItem>, TItem> DoesNotContain<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
+        return new CollectionDoesNotContainPredicateAssertion<IEnumerable<TItem>, TItem>(source.Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains ONLY items matching the predicate (all items satisfy the predicate).
+    /// </summary>
+    public static CollectionAllAssertion<TCollection, TItem> ContainsOnly<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".ContainsOnly({expression})");
+        return new CollectionAllAssertion<TCollection, TItem>(source.Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains ONLY items matching the predicate (all items satisfy the predicate).
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static CollectionAllAssertion<IEnumerable<TItem>, TItem> ContainsOnly<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".ContainsOnly({expression})");
+        return new CollectionAllAssertion<IEnumerable<TItem>, TItem>(source.Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that the collection is in ascending order.
+    /// </summary>
+    public static CollectionIsInOrderAssertion<TCollection, TItem> IsInOrder<TCollection, TItem>(
+        this IAssertionSource<TCollection> source)
+        where TCollection : IEnumerable<TItem>
+        where TItem : IComparable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append(".IsInOrder()");
+        return new CollectionIsInOrderAssertion<TCollection, TItem>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is in ascending order.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static CollectionIsInOrderAssertion<IEnumerable<TItem>, TItem> IsInOrder<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source)
+        where TItem : IComparable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append(".IsInOrder()");
+        return new CollectionIsInOrderAssertion<IEnumerable<TItem>, TItem>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is in descending order.
+    /// </summary>
+    public static CollectionIsInDescendingOrderAssertion<TCollection, TItem> IsInDescendingOrder<TCollection, TItem>(
+        this IAssertionSource<TCollection> source)
+        where TCollection : IEnumerable<TItem>
+        where TItem : IComparable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append(".IsInDescendingOrder()");
+        return new CollectionIsInDescendingOrderAssertion<TCollection, TItem>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is in descending order.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static CollectionIsInDescendingOrderAssertion<IEnumerable<TItem>, TItem> IsInDescendingOrder<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source)
+        where TItem : IComparable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append(".IsInDescendingOrder()");
+        return new CollectionIsInDescendingOrderAssertion<IEnumerable<TItem>, TItem>(source.Context);
+    }
+
+    /// <summary>
+    /// Returns a wrapper for collection count assertions.
+    /// Example: await Assert.That(list).HasCount().EqualTo(5);
+    /// </summary>
+    public static CountWrapper<TValue> HasCount<TValue>(
+        this IAssertionSource<TValue> source)
+        where TValue : IEnumerable
+    {
+        source.Context.ExpressionBuilder.Append(".HasCount()");
+        return new CountWrapper<TValue>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection has the expected count.
+    /// Example: await Assert.That(list).HasCount(5);
+    /// </summary>
+    public static CollectionCountAssertion<TValue> HasCount<TValue>(
+        this IAssertionSource<TValue> source,
+        int expectedCount,
+        [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
+        where TValue : IEnumerable
+    {
+        source.Context.ExpressionBuilder.Append($".HasCount({expression})");
+        return new CollectionCountAssertion<TValue>(source.Context, expectedCount);
+    }
+
+    /// <summary>
+    /// Creates a helper for asserting that all items in the collection satisfy custom assertions.
+    /// Example: await Assert.That(list).All().Satisfy(item => item.IsNotNull());
+    /// </summary>
+    public static CollectionAllSatisfyHelper<TCollection, TItem> All<TCollection, TItem>(
+        this IAssertionSource<TCollection> source)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append(".All()");
+        return new CollectionAllSatisfyHelper<TCollection, TItem>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that all items in the collection satisfy the predicate.
+    /// </summary>
+    public static CollectionAllAssertion<TCollection, TItem> All<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".All({expression})");
+        return new CollectionAllAssertion<TCollection, TItem>(source.Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Creates a helper for asserting that all items in the collection satisfy custom assertions.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// Example: await Assert.That(list).All().Satisfy(item => item.IsNotNull());
+    /// </summary>
+    public static CollectionAllSatisfyHelper<IEnumerable<TItem>, TItem> All<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source)
+    {
+        source.Context.ExpressionBuilder.Append(".All()");
+        return new CollectionAllSatisfyHelper<IEnumerable<TItem>, TItem>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that all items in the collection satisfy the predicate.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static CollectionAllAssertion<IEnumerable<TItem>, TItem> All<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".All({expression})");
+        return new CollectionAllAssertion<IEnumerable<TItem>, TItem>(source.Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that at least one item in the collection satisfies the predicate.
+    /// </summary>
+    public static CollectionAnyAssertion<TCollection, TItem> Any<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".Any({expression})");
+        return new CollectionAnyAssertion<TCollection, TItem>(source.Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains exactly one item.
+    /// </summary>
+    public static HasSingleItemAssertion<TValue> HasSingleItem<TValue>(
+        this IAssertionSource<TValue> source)
+        where TValue : IEnumerable
+    {
+        source.Context.ExpressionBuilder.Append(".HasSingleItem()");
+        return new HasSingleItemAssertion<TValue>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains only distinct (unique) items.
+    /// </summary>
+    public static HasDistinctItemsAssertion<TValue> HasDistinctItems<TValue>(
+        this IAssertionSource<TValue> source)
+        where TValue : IEnumerable
+    {
+        source.Context.ExpressionBuilder.Append(".HasDistinctItems()");
+        return new HasDistinctItemsAssertion<TValue>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is equivalent to the expected collection.
+    /// Two collections are equivalent if they contain the same elements, regardless of order.
+    /// </summary>
+    public static IsEquivalentToAssertion<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        IEnumerable<TItem> expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".IsEquivalentTo({expression})");
+        return new IsEquivalentToAssertion<TCollection, TItem>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is equivalent to the expected collection using the specified comparer.
+    /// Two collections are equivalent if they contain the same elements, regardless of order.
+    /// </summary>
+    public static IsEquivalentToAssertion<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        IEnumerable<TItem> expected,
+        IEqualityComparer<TItem> comparer,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".IsEquivalentTo({expression}, comparer)");
+        return new IsEquivalentToAssertion<TCollection, TItem>(source.Context, expected).Using(comparer);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is equivalent to the expected collection with the specified ordering requirement.
+    /// </summary>
+    public static IsEquivalentToAssertion<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        IEnumerable<TItem> expected,
+        Enums.CollectionOrdering ordering,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".IsEquivalentTo({expression}, CollectionOrdering.{ordering})");
+        return new IsEquivalentToAssertion<TCollection, TItem>(source.Context, expected,  ordering);
+    }
+
+    /// <summary>
+    /// Asserts that the value is structurally equivalent to the expected value.
+    /// Performs deep comparison of properties and fields.
+    /// Supports .WithPartialEquivalency() and .IgnoringMember() for advanced scenarios.
+    /// </summary>
+    public static StructuralEquivalencyAssertion<TValue> IsEquivalentTo<TValue>(
+        this IAssertionSource<TValue> source,
+        object? expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEquivalentTo({expression})");
+        return new StructuralEquivalencyAssertion<TValue>(source.Context, expected, expression);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is NOT equivalent to the expected collection.
+    /// Two collections are NOT equivalent if they differ in elements or order.
+    /// </summary>
+    public static NotEquivalentToAssertion<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        IEnumerable<TItem> expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotEquivalentTo({expression})");
+        return new NotEquivalentToAssertion<TCollection, TItem>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is NOT equivalent to the expected collection using the specified comparer.
+    /// </summary>
+    public static NotEquivalentToAssertion<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        IEnumerable<TItem> expected,
+        IEqualityComparer<TItem> comparer,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotEquivalentTo({expression}, comparer)");
+        return new NotEquivalentToAssertion<TCollection, TItem>(source.Context, expected).Using(comparer);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is NOT equivalent to the expected collection with the specified ordering requirement.
+    /// </summary>
+    public static NotEquivalentToAssertion<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        IEnumerable<TItem> expected,
+        Enums.CollectionOrdering ordering,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotEquivalentTo({expression}, CollectionOrdering.{ordering})");
+        return new NotEquivalentToAssertion<TCollection, TItem>(source.Context, expected,  ordering);
+    }
+
+    /// <summary>
+    /// Asserts that the value is NOT structurally equivalent to the expected value.
+    /// Performs deep comparison of properties and fields.
+    /// Supports .WithPartialEquivalency() and .IgnoringMember() for advanced scenarios.
+    /// </summary>
+    public static NotStructuralEquivalencyAssertion<TValue> IsNotEquivalentTo<TValue>(
+        this IAssertionSource<TValue> source,
+        object? expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotEquivalentTo({expression})");
+        return new NotStructuralEquivalencyAssertion<TValue>(source.Context, expected, expression);
+    }
+
+    // ============ PREDICATE CHECKS ============
+
+    /// <summary>
+    /// Asserts that the value satisfies the specified predicate.
+    /// Example: await Assert.That(x).Satisfies(v => v > 0 && v < 100);
+    /// </summary>
+    public static SatisfiesAssertion<TValue> Satisfies<TValue>(
+        this IAssertionSource<TValue> source,
+        Func<TValue?, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".Satisfies({expression})");
+        return new SatisfiesAssertion<TValue>(source.Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that a mapped value satisfies custom assertions.
+    /// Maps the source value using a selector, then runs assertions on the mapped value.
+    /// Example: await Assert.That(model).Satisfies(m => m.Name, assert => assert.IsEqualTo("John"));
+    /// </summary>
+    public static MappedSatisfiesAssertion<TValue, TMapped> Satisfies<TValue, TMapped>(
+        this IAssertionSource<TValue> source,
+        Func<TValue?, TMapped> selector,
+        Func<ValueAssertion<TMapped>, Assertion<TMapped>?> assertions,
+        [CallerArgumentExpression(nameof(selector))] string? selectorExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".Satisfies({selectorExpression}, ...)");
+        return new MappedSatisfiesAssertion<TValue, TMapped>(
+            source.Context,
+            selector,
+            assertions,
+            selectorExpression ?? "selector");
+    }
+
+    /// <summary>
+    /// Asserts that an async-mapped value satisfies custom assertions.
+    /// Maps the source value using an async selector, then runs assertions on the mapped value.
+    /// Example: await Assert.That(model).Satisfies(m => m.GetNameAsync(), assert => assert.IsEqualTo("John"));
+    /// </summary>
+    public static AsyncMappedSatisfiesAssertion<TValue, TMapped> Satisfies<TValue, TMapped>(
+        this IAssertionSource<TValue> source,
+        Func<TValue?, Task<TMapped>> selector,
+        Func<ValueAssertion<TMapped>, Assertion<TMapped>?> assertions,
+        [CallerArgumentExpression(nameof(selector))] string? selectorExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".Satisfies({selectorExpression}, ...)");
+        return new AsyncMappedSatisfiesAssertion<TValue, TMapped>(
+            source.Context,
+            selector,
+            assertions,
+            selectorExpression ?? "selector");
+    }
+
+    /// <summary>
+    /// Asserts that the value is equal to the expected value using IEquatable or default equality.
+    /// Optimized for types that implement IEquatable.
+    /// Example: await Assert.That(obj).IsEquatableOrEqualTo(expected);
+    /// </summary>
+    public static IsEquatableOrEqualToAssertion<TValue> IsEquatableOrEqualTo<TValue>(
+        this IAssertionSource<TValue> source,
+        TValue expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEquatableOrEqualTo({expression})");
+        return new IsEquatableOrEqualToAssertion<TValue>(source.Context, expected);
+    }
+
+    // ============ MEMBERSHIP CHECKS ============
+
+    /// <summary>
+    /// Asserts that the value is in the specified collection.
+    /// Example: await Assert.That(5).IsIn(new[] { 1, 3, 5, 7, 9 });
+    /// </summary>
+    public static IsInAssertion<TValue> IsIn<TValue>(
+        this IAssertionSource<TValue> source,
+        IEnumerable<TValue> collection,
+        [CallerArgumentExpression(nameof(collection))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsIn({expression})");
+        return new IsInAssertion<TValue>(source.Context, collection);
+    }
+
+    /// <summary>
+    /// Asserts that the value is in the specified collection (params array).
+    /// Example: await Assert.That(5).IsIn(1, 3, 5, 7, 9);
+    /// </summary>
+    public static IsInAssertion<TValue> IsIn<TValue>(
+        this IAssertionSource<TValue> source,
+        params TValue[] collection)
+    {
+        source.Context.ExpressionBuilder.Append($".IsIn({string.Join(", ", collection)})");
+        return new IsInAssertion<TValue>(source.Context, collection);
+    }
+
+    /// <summary>
+    /// Asserts that the value is NOT in the specified collection.
+    /// Example: await Assert.That(4).IsNotIn(new[] { 1, 3, 5, 7, 9 });
+    /// </summary>
+    public static IsNotInAssertion<TValue> IsNotIn<TValue>(
+        this IAssertionSource<TValue> source,
+        IEnumerable<TValue> collection,
+        [CallerArgumentExpression(nameof(collection))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotIn({expression})");
+        return new IsNotInAssertion<TValue>(source.Context, collection);
+    }
+
+    /// <summary>
+    /// Asserts that the value is NOT in the specified collection (params array).
+    /// Example: await Assert.That(4).IsNotIn(1, 3, 5, 7, 9);
+    /// </summary>
+    public static IsNotInAssertion<TValue> IsNotIn<TValue>(
+        this IAssertionSource<TValue> source,
+        params TValue[] collection)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotIn({string.Join(", ", collection)})");
+        return new IsNotInAssertion<TValue>(source.Context, collection);
+    }
+
+    // ============ EXCEPTION CHECKS ============
+
+    /// <summary>
+    /// Asserts that the delegate throws the specified exception type (or subclass).
+    /// Only available on delegate-based assertions for type safety.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;InvalidOperationException&gt;();
+    /// </summary>
+    public static ThrowsAssertion<TException> Throws<TException, TValue>(
+        this IDelegateAssertionSource<TValue> source)
+        where TException : Exception
+    {
+        source.Context.ExpressionBuilder.Append($".Throws<{typeof(TException).Name}>()");
+        // Map the context to object? since we only care about the exception
+        var mappedContext = source.Context.Map<object?>(_ => null);
+        return new ThrowsAssertion<TException>(mappedContext);
+    }
+
+    /// <summary>
+    /// Alias for Throws - asserts that the delegate throws the specified exception type.
+    /// Only available on delegate-based assertions for type safety.
+    /// Example: await Assert.That(() => ThrowingMethod()).ThrowsException&lt;InvalidOperationException&gt;();
+    /// </summary>
+    public static ThrowsAssertion<TException> ThrowsException<TException, TValue>(
+        this IDelegateAssertionSource<TValue> source)
+        where TException : Exception
+    {
+        source.Context.ExpressionBuilder.Append($".ThrowsException<{typeof(TException).Name}>()");
+        var mappedContext = source.Context.Map<object?>(_ => null);
+        return new ThrowsAssertion<TException>(mappedContext);
+    }
+
+    /// <summary>
+    /// Asserts that the delegate throws any exception.
+    /// Only available on delegate-based assertions for type safety.
+    /// Example: await Assert.That(() => ThrowingMethod()).ThrowsException();
+    /// </summary>
+    public static ThrowsAssertion<Exception> ThrowsException<TValue>(
+        this IDelegateAssertionSource<TValue> source)
+    {
+        source.Context.ExpressionBuilder.Append(".ThrowsException()");
+        var mappedContext = source.Context.Map<object?>(_ => null);
+        return new ThrowsAssertion<Exception>(mappedContext);
+    }
+
+    /// <summary>
+    /// Asserts that the async delegate throws the specified exception type (or subclass).
+    /// Only available on delegate-based assertions for type safety.
+    /// Example: await Assert.That(async () => await ThrowingMethodAsync()).ThrowsAsync&lt;InvalidOperationException&gt;();
+    /// </summary>
+    public static ThrowsAssertion<TException> ThrowsAsync<TValue, TException>(
+        this IDelegateAssertionSource<TValue> source)
+        where TException : Exception
+    {
+        source.Context.ExpressionBuilder.Append($".ThrowsAsync<{typeof(TException).Name}>()");
+        // Map the context to object? since we only care about the exception
+        var mappedContext = source.Context.Map<object?>(_ => null);
+        return new ThrowsAssertion<TException>(mappedContext);
+    }
+
+    /// <summary>
+    /// Asserts that the delegate throws exactly the specified exception type (not subclasses).
+    /// Only available on delegate-based assertions for type safety.
+    /// Example: await Assert.That(() => ThrowingMethod()).ThrowsExactly&lt;InvalidOperationException&gt;();
+    /// </summary>
+    public static ThrowsExactlyAssertion<TException> ThrowsExactly<TException, TValue>(
+        this IDelegateAssertionSource<TValue> source)
+        where TException : Exception
+    {
+        source.Context.ExpressionBuilder.Append($".ThrowsExactly<{typeof(TException).Name}>()");
+        // Map the context to object? since we only care about the exception
+        var mappedContext = source.Context.Map<object?>(_ => null);
+        return new ThrowsExactlyAssertion<TException>(mappedContext);
+    }
+
+    /// <summary>
+    /// Asserts that the delegate does not throw any exception and returns the actual value.
+    /// Only available on delegate-based assertions for type safety.
+    /// Example: await Assert.That(() => SafeMethod()).ThrowsNothing();
+    /// </summary>
+    public static ThrowsNothingAssertion<TValue> ThrowsNothing<TValue>(
+        this IDelegateAssertionSource<TValue> source)
+    {
+        source.Context.ExpressionBuilder.Append(".ThrowsNothing()");
+        // Preserve the value so it can be returned after the assertion
+        return new ThrowsNothingAssertion<TValue>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the exception message contains the specified substring.
+    /// Works on AndContinuation after Throws assertions.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.HasMessageContaining("error");
+    /// </summary>
+    public static ExceptionMessageAssertion HasMessageContaining<TValue>(
+        this IAssertionSource<TValue> source,
+        string expectedSubstring)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageContaining(\"{expectedSubstring}\")");
+        // Map the context to object? for ExceptionMessageAssertion
+        var mappedContext = source.Context.Map<object?>(v => v);
+        return new ExceptionMessageAssertion(mappedContext, expectedSubstring);
+    }
+
+    /// <summary>
+    /// Asserts that the exception message contains the specified substring using the specified comparison.
+    /// Works on AndContinuation after Throws assertions.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.HasMessageContaining("error", StringComparison.OrdinalIgnoreCase);
+    /// </summary>
+    public static ExceptionMessageAssertion HasMessageContaining<TValue>(
+        this IAssertionSource<TValue> source,
+        string expectedSubstring,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        // Map the context to object? for ExceptionMessageAssertion
+        var mappedContext = source.Context.Map<object?>(v => v);
+        return new ExceptionMessageAssertion(mappedContext, expectedSubstring,  comparison);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property contains the expected substring (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> HasMessageContaining<TValue>(
+        this AndContinuation<TValue> source,
+        string expectedSubstring)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageContaining(\"{expectedSubstring}\")");
+        var newAssertion = new HasMessageContainingAssertion<TValue>(source.Context, expectedSubstring);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property contains the expected substring (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> HasMessageContaining<TValue>(
+        this OrContinuation<TValue> source,
+        string expectedSubstring)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageContaining(\"{expectedSubstring}\")");
+        var newAssertion = new HasMessageContainingAssertion<TValue>(source.Context, expectedSubstring);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property contains the expected substring using the specified comparison (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> HasMessageContaining<TValue>(
+        this AndContinuation<TValue> source,
+        string expectedSubstring,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        var newAssertion = new HasMessageContainingAssertion<TValue>(source.Context, expectedSubstring, comparison);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property contains the expected substring using the specified comparison (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> HasMessageContaining<TValue>(
+        this OrContinuation<TValue> source,
+        string expectedSubstring,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        var newAssertion = new HasMessageContainingAssertion<TValue>(source.Context, expectedSubstring, comparison);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the exception message contains the specified substring.
+    /// Alias for HasMessageContaining.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.WithMessageContaining("error");
+    /// </summary>
+    public static ExceptionMessageAssertion WithMessageContaining(
+        this IAssertionSource<object?> source,
+        string expectedSubstring)
+    {
+        source.Context.ExpressionBuilder.Append($".WithMessageContaining(\"{expectedSubstring}\")");
+        return new ExceptionMessageAssertion(source.Context, expectedSubstring);
+    }
+
+    /// <summary>
+    /// Asserts that the exception message contains the specified substring using the specified comparison.
+    /// Alias for HasMessageContaining.
+    /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.WithMessageContaining("error", StringComparison.OrdinalIgnoreCase);
+    /// </summary>
+    public static ExceptionMessageAssertion WithMessageContaining(
+        this IAssertionSource<object?> source,
+        string expectedSubstring,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".WithMessageContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        return new ExceptionMessageAssertion(source.Context, expectedSubstring,  comparison);
+    }
+
+    // Specific overloads for delegate types where TValue is always object?
+    public static ThrowsAssertion<TException> Throws<TException>(this DelegateAssertion source) where TException : Exception
+    {
+        var iface = (IAssertionSource<object?>)source;
+        iface.Context.ExpressionBuilder.Append($".Throws<{typeof(TException).Name}>()");
+        var mappedContext = iface.Context.Map<object?>(_ => null);
+        return new ThrowsAssertion<TException>(mappedContext);
+    }
+
+    public static ThrowsExactlyAssertion<TException> ThrowsExactly<TException>(this DelegateAssertion source) where TException : Exception
+    {
+        var iface = (IAssertionSource<object?>)source;
+        iface.Context.ExpressionBuilder.Append($".ThrowsExactly<{typeof(TException).Name}>()");
+        var mappedContext = iface.Context.Map<object?>(_ => null);
+        return new ThrowsExactlyAssertion<TException>(mappedContext);
+    }
+
+    public static ThrowsAssertion<TException> Throws<TException>(this AsyncDelegateAssertion source) where TException : Exception
+    {
+        var iface = (IAssertionSource<object?>)source;
+        iface.Context.ExpressionBuilder.Append($".Throws<{typeof(TException).Name}>()");
+        var mappedContext = iface.Context.Map<object?>(_ => null);
+        return new ThrowsAssertion<TException>(mappedContext);
+    }
+
+    public static ThrowsExactlyAssertion<TException> ThrowsExactly<TException>(this AsyncDelegateAssertion source) where TException : Exception
+    {
+        var iface = (IAssertionSource<object?>)source;
+        iface.Context.ExpressionBuilder.Append($".ThrowsExactly<{typeof(TException).Name}>()");
+        var mappedContext = iface.Context.Map<object?>(_ => null);
+        return new ThrowsExactlyAssertion<TException>(mappedContext);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property exactly equals the expected string.
+    /// Works with both direct exception assertions and chained exception assertions (via .And).
+    /// </summary>
+    public static HasMessageEqualToAssertion<TValue> HasMessageEqualTo<TValue>(
+        this IAssertionSource<TValue> source,
+        string expectedMessage)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\")");
+        return new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property exactly equals the expected string using the specified string comparison.
+    /// Works with both direct exception assertions and chained exception assertions (via .And).
+    /// </summary>
+    public static HasMessageEqualToAssertion<TValue> HasMessageEqualTo<TValue>(
+        this IAssertionSource<TValue> source,
+        string expectedMessage,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\", StringComparison.{comparison})");
+        return new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage,  comparison);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property exactly equals the expected string (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> HasMessageEqualTo<TValue>(
+        this AndContinuation<TValue> source,
+        string expectedMessage)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\")");
+        var newAssertion = new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property exactly equals the expected string (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> HasMessageEqualTo<TValue>(
+        this OrContinuation<TValue> source,
+        string expectedMessage)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\")");
+        var newAssertion = new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property exactly equals the expected string using the specified string comparison (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> HasMessageEqualTo<TValue>(
+        this AndContinuation<TValue> source,
+        string expectedMessage,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\", StringComparison.{comparison})");
+        var newAssertion = new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage, comparison);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property exactly equals the expected string using the specified string comparison (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> HasMessageEqualTo<TValue>(
+        this OrContinuation<TValue> source,
+        string expectedMessage,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\", StringComparison.{comparison})");
+        var newAssertion = new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage, comparison);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property starts with the expected string.
+    /// Works with both direct exception assertions and chained exception assertions (via .And).
+    /// </summary>
+    public static HasMessageStartingWithAssertion<TValue> HasMessageStartingWith<TValue>(
+        this IAssertionSource<TValue> source,
+        string expectedPrefix)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\")");
+        return new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property starts with the expected string using the specified string comparison.
+    /// Works with both direct exception assertions and chained exception assertions (via .And).
+    /// </summary>
+    public static HasMessageStartingWithAssertion<TValue> HasMessageStartingWith<TValue>(
+        this IAssertionSource<TValue> source,
+        string expectedPrefix,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\", StringComparison.{comparison})");
+        return new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix,  comparison);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property starts with the expected string (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> HasMessageStartingWith<TValue>(
+        this AndContinuation<TValue> source,
+        string expectedPrefix)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\")");
+        var newAssertion = new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property starts with the expected string (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> HasMessageStartingWith<TValue>(
+        this OrContinuation<TValue> source,
+        string expectedPrefix)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\")");
+        var newAssertion = new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property starts with the expected string using the specified string comparison (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> HasMessageStartingWith<TValue>(
+        this AndContinuation<TValue> source,
+        string expectedPrefix,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\", StringComparison.{comparison})");
+        var newAssertion = new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix, comparison);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property starts with the expected string using the specified string comparison (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> HasMessageStartingWith<TValue>(
+        this OrContinuation<TValue> source,
+        string expectedPrefix,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\", StringComparison.{comparison})");
+        var newAssertion = new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix, comparison);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the DateTime is after or equal to the expected DateTime.
+    /// Alias for IsGreaterThanOrEqualTo for better readability with dates.
+    /// </summary>
+    public static GreaterThanOrEqualAssertion<DateTime> IsAfterOrEqualTo(
+        this IAssertionSource<DateTime> source,
+        DateTime expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsAfterOrEqualTo({expression})");
+        return new GreaterThanOrEqualAssertion<DateTime>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the value is equal to its default value.
+    /// For reference types, this is null. For value types, this is the zero-initialized value.
+    /// </summary>
+    public static IsDefaultAssertion<TValue> IsDefault<TValue>(
+        this IAssertionSource<TValue> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsDefault()");
+        return new IsDefaultAssertion<TValue>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the value is not the default value for its type.
+    /// </summary>
+    public static IsNotDefaultAssertion<TValue> IsNotDefault<TValue>(
+        this IAssertionSource<TValue> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotDefault()");
+        return new IsNotDefaultAssertion<TValue>(source.Context);
+    }
+
+    // ============ TIMING ASSERTIONS ============
+
+    /// <summary>
+    /// Asserts that a synchronous delegate completes execution within the specified timeout.
+    /// If the delegate takes longer than the timeout, the assertion fails.
+    /// </summary>
+    public static CompletesWithinActionAssertion CompletesWithin(
+        this DelegateAssertion source,
+        TimeSpan timeout,
+        [CallerArgumentExpression(nameof(timeout))] string? expression = null)
+    {
+        var action = GetActionFromDelegate(source);
+        var assertionSource = (IAssertionSource<object?>)source;
+        assertionSource.Context.ExpressionBuilder.Append($".CompletesWithin({expression})");
+        return new CompletesWithinActionAssertion(action, timeout);
+    }
+
+    /// <summary>
+    /// Asserts that an asynchronous delegate completes execution within the specified timeout.
+    /// If the delegate takes longer than the timeout, the assertion fails.
+    /// </summary>
+    public static CompletesWithinAsyncAssertion CompletesWithin(
+        this AsyncDelegateAssertion source,
+        TimeSpan timeout,
+        [CallerArgumentExpression(nameof(timeout))] string? expression = null)
+    {
+        var asyncAction = GetFuncFromAsyncDelegate(source);
+        var assertionSource = (IAssertionSource<object?>)source;
+        assertionSource.Context.ExpressionBuilder.Append($".CompletesWithin({expression})");
+        return new CompletesWithinAsyncAssertion(asyncAction, timeout);
+    }
+
+    private static Action GetActionFromDelegate(DelegateAssertion source)
+    {
+        return source.Action;
+    }
+
+    private static Func<Task> GetFuncFromAsyncDelegate(AsyncDelegateAssertion source)
+    {
+        return source.AsyncAction;
+    }
+
+    // ============ PARSING ASSERTIONS ============
+
+    /// <summary>
+    /// Asserts that a string can be parsed into the specified type.
+    /// </summary>
+    public static Assertions.Strings.IsParsableIntoAssertion<T> IsParsableInto<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] T>(
+        this IAssertionSource<string> source)
+    {
+        source.Context.ExpressionBuilder.Append($".IsParsableInto<{typeof(T).Name}>()");
+        return new Assertions.Strings.IsParsableIntoAssertion<T>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that a string cannot be parsed into the specified type.
+    /// </summary>
+    public static Assertions.Strings.IsNotParsableIntoAssertion<T> IsNotParsableInto<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] T>(
+        this IAssertionSource<string> source)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotParsableInto<{typeof(T).Name}>()");
+        return new Assertions.Strings.IsNotParsableIntoAssertion<T>(source.Context);
+    }
+
+    /// <summary>
+    /// Parses a string into the specified type and returns an assertion on the parsed value.
+    /// This allows chaining assertions on the parsed result.
+    /// </summary>
+    public static Assertions.Strings.WhenParsedIntoAssertion<T> WhenParsedInto<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.Interfaces)] T>(
+        this IAssertionSource<string> source)
+    {
+        source.Context.ExpressionBuilder.Append($".WhenParsedInto<{typeof(T).Name}>()");
+        return new Assertions.Strings.WhenParsedIntoAssertion<T>(source.Context);
+    }
+
+    // ============ ENUM ASSERTIONS ============
+
+    /// <summary>
+    /// Asserts that a flags enum has the specified flag set.
+    /// </summary>
+    public static Assertions.Enums.HasFlagAssertion<TEnum> HasFlag<TEnum>(
+        this IAssertionSource<TEnum> source,
+        TEnum expectedFlag,
+        [CallerArgumentExpression(nameof(expectedFlag))] string? expression = null)
+        where TEnum : struct, Enum
+    {
+        source.Context.ExpressionBuilder.Append($".HasFlag({expression})");
+        return new Assertions.Enums.HasFlagAssertion<TEnum>(source.Context, expectedFlag);
+    }
+
+    /// <summary>
+    /// Asserts that a flags enum does NOT have the specified flag set.
+    /// </summary>
+    public static Assertions.Enums.DoesNotHaveFlagAssertion<TEnum> DoesNotHaveFlag<TEnum>(
+        this IAssertionSource<TEnum> source,
+        TEnum unexpectedFlag,
+        [CallerArgumentExpression(nameof(unexpectedFlag))] string? expression = null)
+        where TEnum : struct, Enum
+    {
+        source.Context.ExpressionBuilder.Append($".DoesNotHaveFlag({expression})");
+        return new Assertions.Enums.DoesNotHaveFlagAssertion<TEnum>(source.Context, unexpectedFlag);
+    }
+
+    /// <summary>
+    /// Asserts that an enum value is defined in its enum type.
+    /// </summary>
+    public static Assertions.Enums.IsDefinedAssertion<TEnum> IsDefined<TEnum>(
+        this IAssertionSource<TEnum> source)
+        where TEnum : struct, Enum
+    {
+        source.Context.ExpressionBuilder.Append(".IsDefined()");
+        return new Assertions.Enums.IsDefinedAssertion<TEnum>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that an enum value is NOT defined in its enum type.
+    /// </summary>
+    public static Assertions.Enums.IsNotDefinedAssertion<TEnum> IsNotDefined<TEnum>(
+        this IAssertionSource<TEnum> source)
+        where TEnum : struct, Enum
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotDefined()");
+        return new Assertions.Enums.IsNotDefinedAssertion<TEnum>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that two enum values have the same name.
+    /// </summary>
+    public static Assertions.Enums.HasSameNameAsAssertion<TEnum> HasSameNameAs<TEnum>(
+        this IAssertionSource<TEnum> source,
+        Enum otherEnumValue,
+        [CallerArgumentExpression(nameof(otherEnumValue))] string? expression = null)
+        where TEnum : struct, Enum
+    {
+        source.Context.ExpressionBuilder.Append($".HasSameNameAs({expression})");
+        return new Assertions.Enums.HasSameNameAsAssertion<TEnum>(source.Context, otherEnumValue);
+    }
+
+    /// <summary>
+    /// Asserts that two enum values have the same underlying value.
+    /// </summary>
+    public static Assertions.Enums.HasSameValueAsAssertion<TEnum> HasSameValueAs<TEnum>(
+        this IAssertionSource<TEnum> source,
+        Enum otherEnumValue,
+        [CallerArgumentExpression(nameof(otherEnumValue))] string? expression = null)
+        where TEnum : struct, Enum
+    {
+        source.Context.ExpressionBuilder.Append($".HasSameValueAs({expression})");
+        return new Assertions.Enums.HasSameValueAsAssertion<TEnum>(source.Context, otherEnumValue);
+    }
+
+    /// <summary>
+    /// Asserts that two enum values do NOT have the same name.
+    /// </summary>
+    public static Assertions.Enums.DoesNotHaveSameNameAsAssertion<TEnum> DoesNotHaveSameNameAs<TEnum>(
+        this IAssertionSource<TEnum> source,
+        Enum otherEnumValue,
+        [CallerArgumentExpression(nameof(otherEnumValue))] string? expression = null)
+        where TEnum : struct, Enum
+    {
+        source.Context.ExpressionBuilder.Append($".DoesNotHaveSameNameAs({expression})");
+        return new Assertions.Enums.DoesNotHaveSameNameAsAssertion<TEnum>(source.Context, otherEnumValue);
+    }
+
+    /// <summary>
+    /// Asserts that two enum values do NOT have the same underlying value.
+    /// </summary>
+    public static Assertions.Enums.DoesNotHaveSameValueAsAssertion<TEnum> DoesNotHaveSameValueAs<TEnum>(
+        this IAssertionSource<TEnum> source,
+        Enum otherEnumValue,
+        [CallerArgumentExpression(nameof(otherEnumValue))] string? expression = null)
+        where TEnum : struct, Enum
+    {
+        source.Context.ExpressionBuilder.Append($".DoesNotHaveSameValueAs({expression})");
+        return new Assertions.Enums.DoesNotHaveSameValueAsAssertion<TEnum>(source.Context, otherEnumValue);
+    }
+}

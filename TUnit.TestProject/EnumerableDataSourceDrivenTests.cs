@@ -9,14 +9,14 @@ public class EnumerableDataSourceDrivenTests
     [MethodDataSource(nameof(SomeMethod))]
     public async Task DataSource_Method(int value)
     {
-        await Assert.That(value).IsBetween(1, 5).WithInclusiveBounds();
+        await Assert.That(value).IsBetween(1, 5).Inclusive();
     }
 
     [Test]
     [MethodDataSource(nameof(SomeMethod))]
     public async Task DataSource_Method2(int value)
     {
-        await Assert.That(value).IsBetween(1, 5).WithInclusiveBounds();
+        await Assert.That(value).IsBetween(1, 5).Inclusive();
     }
 
     [Test]

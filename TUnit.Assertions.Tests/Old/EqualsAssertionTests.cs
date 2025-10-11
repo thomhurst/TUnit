@@ -11,7 +11,7 @@ public class EqualsAssertionTests
                 await TUnitAssert.That(one).IsEqualTo("2", StringComparison.Ordinal).And.IsNotEqualTo("1").And.IsTypeOf(typeof(string))
             ).ThrowsException()
             .And
-            .HasMessageContaining("Assert.That(one).IsEqualTo(\"2\", StringComparison.Ordinal).And.IsNotEqualTo(\"1\", StringComparison.Ord...");
+            .HasMessageContaining("Assert.That(one).IsEqualTo(\"2\", Ordinal)");
     }
 
     [Test]

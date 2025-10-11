@@ -6,105 +6,103 @@ sidebar_position: 1
 
 The TUnit Assertions can be easily extended so that you can create your own assertions.
 
-In TUnit, there are two types of things we can assert on:
-- Values
-- Delegates
+## Creating a Custom Assertion
 
-Values is what you'd guess, some return value, such as a `string` or `int` or even a complex class.
+To create a custom assertion, you need to:
 
-Delegates are bits of code that haven't executed yet - Instead they are passed into the assertion builder, and the TUnit assertion library will execute it. If it throws, then there will be an `Exception` object we can check in our assertion.
+1. **Create an Assertion Class** that inherits from `Assertion<TValue>`
+2. **Implement the required methods**
+3. **Create an extension method** on `IAssertionSource<T>`
 
-So to create a custom assertion:
+### Step 1: Create an Assertion Class
 
-1. There are multiple classes you can inherit from to simplify your needs:
-   1. If you want to assert a value has some expected data, then inherit from the `ExpectedValueAssertCondition<TActual, TExpected>`
-   2. If you want to assert a value meets some criteria (e.g. IsNull) then inherit from `ValueAssertCondition<TActual>`
-   3. If you want to assert a delegate threw or didn't throw an exception, inherit from `DelegateAssertCondition` or `ExpectedExceptionDelegateAssertCondition<TException>`
-   4. If those don't fit what you need, the most basic class to inherit from is `BaseAssertCondition<TActual>`
-2. For the generic types above, `TActual` will be the type of object that is being asserted. For example if I started with `Assert.That("Some text")` then `TActual` would be a `string` because that's what we're asserting on.
-
-   `TExpected` will be the data (if any) that you receive from your extension method, so you'll be responsible for passing this in. You must pass it to the base class via the base constructor: `base(expectedValue)`
-
-3. Override the method: 
-   `protected override Task<AssertionResult> GetResult(...)`
-
-   `AssertionResult` has static methods to represent a pass or a fail.
-
-   You will be passed relevant objects based on what you're asserting. These may or may not be null, so the logic is up to you.
-
-   Any `Exception` object will be populated if your assertion is a Delegate type and the delegate threw.
-
-   Any `TActual` object will be populated if a value was passed into `Assert.That(...)`, or a delegate with a return value was executed successfully.
-
-4. Override the `GetExpectation` method to return a message representing what would have been a success, in the format of "to [Your Expectation]".
-e.g. Expected [Actual Value] *to be equal to [Expected Value]*
-
-When you return an `AssertionResult.Fail` result, you supply a message. This is appended after the above statement with a `but {Your Message}`
-e.g. Expected [Actual Value] to be equal to [Expected Value] *but it was null*
-
-In your assertion class, that'd be set up like:
+Your assertion class should inherit from `Assertion<TValue>` where `TValue` is the type being asserted.
 
 ```csharp
-    protected override string GetExpectation()
-        => $"to be equal to {Format(expected).TruncateWithEllipsis(100)}";
+using TUnit.Assertions.Core;
 
-   protected override Task<AssertionResult> GetResult(string? actualValue, string? expectedValue)
-    {
-        if (actualValue is null)
-        {
-            return AssertionResult
-                .FailIf(
-                    () => expectedValue is not null,
-                    "it was null");
-        }
-
-        ...
-    }
-```
-
-
-1. Create the extension method!
-
-   You need to create an extension off of either `IValueSource<TActual>` or `IDelegateSource<TActual>` - Depending on what you're planning to write an assertion for. By extending off of the relevant interface we make sure that it won't be shown where it doesn't make sense thanks to the C# typing system.
-
-   Your return type for the extension method should be `InvokableValueAssertionBuilder<TActual>` or `InvokableDelegateAssertionBuilder<TActual>` depending on what type your assertion is.
-
-   And then finally, you call `source.RegisterAssertion(assertCondition, [...callerExpressions])` - passing in your newed up your custom assert condition class. 
-   The argument expression array allows you to pass in `[CallerArgumentExpression]` values so that your assertion errors show you the code executed to give clear exception messages.
-
-Here's a fully fledged assertion in action:
-
-```csharp
-public static InvokableValueAssertionBuilder<string> Contains(this IValueSource<string> valueSource, string expected, StringComparison stringComparison, [CallerArgumentExpression(nameof(expected))] string doNotPopulateThisValue1 = "", [CallerArgumentExpression(nameof(stringComparison))] string doNotPopulateThisValue2 = "")
-    {
-        return valueSource.RegisterAssertion(
-            assertCondition: new StringEqualsAssertCondition(expected, stringComparison),
-            argumentExpressions: [doNotPopulateThisValue1, doNotPopulateThisValue2]
-            );
-    }
-```
-
-```csharp
-public class StringEqualsExpectedValueAssertCondition(string expected, StringComparison stringComparison)
-    : ExpectedValueAssertCondition<string, string>(expected)
+public class StringContainsAssertion : Assertion<string>
 {
-    protected override string GetExpectation()
-        => $"to be equal to \"{expected}\"";
+    private readonly string _expected;
+    private readonly StringComparison _comparison;
 
-    protected override async ValueTask<AssertionResult> GetResult(string? actualValue, string? expectedValue)
+    public StringContainsAssertion(
+        EvaluationContext<string> context,
+        string expected,
+        StringBuilder expressionBuilder,
+        StringComparison comparison = StringComparison.Ordinal)
+        : base(context, expressionBuilder)
     {
-        if (actualValue is null)
-        {
-            return AssertionResult
-                .FailIf(
-                    expectedValue is not null,
-                    "it was null");
-        }
+        _expected = expected ?? throw new ArgumentNullException(nameof(expected));
+        _comparison = comparison;
+    }
 
-        return AssertionResult
-            .FailIf(
-                !string.Equals(actualValue, expectedValue, stringComparison),
-                $"found \"{actualValue}\"");
+    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    {
+        if (exception != null)
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+
+        if (value == null)
+            return Task.FromResult(AssertionResult.Failed("value was null"));
+
+        if (value.Contains(_expected, _comparison))
+            return Task.FromResult(AssertionResult.Passed);
+
+        return Task.FromResult(AssertionResult.Failed($"'{value}' does not contain '{_expected}'"));
+    }
+
+    protected override string GetExpectation()
+        => $"to contain \"{_expected}\"";
+}
+```
+
+### Step 2: Create an Extension Method
+
+Create an extension method on `IAssertionSource<T>` that returns your custom assertion:
+
+```csharp
+using System.Runtime.CompilerServices;
+using TUnit.Assertions.Core;
+
+public static class StringAssertionExtensions
+{
+    public static StringContainsAssertion ContainsIgnoreCase(
+        this IAssertionSource<string> source,
+        string expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.ExpressionBuilder.Append($".ContainsIgnoreCase({expression})");
+        return new StringContainsAssertion(
+            source.Context,
+            expected,
+            source.ExpressionBuilder,
+            StringComparison.OrdinalIgnoreCase);
     }
 }
 ```
+
+### Step 3: Use Your Custom Assertion
+
+```csharp
+await Assert.That("Hello World")
+    .ContainsIgnoreCase("WORLD");  // Uses your custom assertion!
+```
+
+## Chaining with And/Or
+
+Because your assertion returns an `Assertion<T>` type, it automatically supports chaining with `.And` and `.Or`:
+
+```csharp
+await Assert.That("Hello World")
+    .ContainsIgnoreCase("WORLD")
+    .And
+    .ContainsIgnoreCase("HELLO");
+```
+
+## Key Points
+
+- **Extension target**: Always extend `IAssertionSource<T>` so your method works on assertions, And, and Or continuations
+- **Append expression**: Call `source.ExpressionBuilder.Append(...)` to build helpful error messages
+- **Return your assertion**: Return a new instance of your custom `Assertion<T>` subclass
+- **Context sharing**: Pass `source.Context` and `source.ExpressionBuilder` to your assertion constructor
+- **CallerArgumentExpression**: Use this attribute to capture parameter expressions for better error messages

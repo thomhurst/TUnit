@@ -15,23 +15,13 @@ public class Tests2145
             }).Throws<AssertionException>()
             .WithMessage(
                 """
-                Expected val to be equal to "world"
-                
-                but found "hello" which differs at index 0:
-                    ↓
-                   "hello"
-                   "world"
-                    ↑
+                Expected to be equal to "world"
+                but found "hello"
 
                 at Assert.That(val).IsEqualTo("world")
 
-                Expected val to be equal to "World"
-                
-                but found "hello" which differs at index 0:
-                    ↓
-                   "hello"
-                   "World"
-                    ↑
+                Expected to be equal to "World"
+                but found "hello"
 
                 at Assert.That(val).IsEqualTo("World")
                 """

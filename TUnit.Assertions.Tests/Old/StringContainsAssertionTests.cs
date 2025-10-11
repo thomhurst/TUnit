@@ -50,7 +50,7 @@ public class StringContainsAssertionTests
         var value2 = "Foo! ";
 
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).Contains(value2).WithTrimming());
-        await TUnitAssert.That(exception!.Message).EndsWith("Assert.That(value1).Contains(value2, StringComparison.Ordinal).WithTrimming()");
+        await TUnitAssert.That(exception!.Message).EndsWith("Assert.That(value1).Contains(value2).WithTrimming()");
     }
 
     [Test]

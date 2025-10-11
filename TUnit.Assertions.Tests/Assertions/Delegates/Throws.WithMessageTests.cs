@@ -11,14 +11,9 @@ public partial class Throws
             var message1 = "foo";
             var message2 = "bar";
             var expectedMessage = """
-                                  Expected action to throw a CustomException which message equals "bar"
-                                  
-                                  but it differs at index 0:
-                                      ↓
-                                     "foo"
-                                     "bar"
-                                      ↑
-                                  
+                                  Expected to throw exactly CustomException with message "bar"
+                                  but exception message "foo" does not equal "bar"
+
                                   at Assert.That(action).ThrowsExactly<CustomException>().WithMessage(message2)
                                   """;
             Exception exception = CreateCustomException(message1);

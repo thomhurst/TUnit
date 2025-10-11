@@ -29,10 +29,9 @@ public class MemberTests
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(1));
         await TUnitAssert.That(exception).HasMessageEqualTo(
             """
-            Expected myClass MyClass.Number to be equal to 1
-            
-            but received 123
-            
+            Expected to be equal to 1
+            but found 123
+
             at Assert.That(myClass).HasMember(x => x.Number).EqualTo(1)
             """
             );
@@ -51,10 +50,9 @@ public class MemberTests
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Nested.Nested.Nested.Number).EqualTo(1));
         await TUnitAssert.That(exception).HasMessageEqualTo(
             """
-            Expected myClass MyClass.Number to be equal to 1
-            
-            but received 123
-            
+            Expected to be equal to 1
+            but found 123
+
             at Assert.That(myClass).HasMember(x => x.Nested.Nested.Nested.Number).EqualTo(1)
             """
         );
@@ -68,10 +66,9 @@ public class MemberTests
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(1));
         await TUnitAssert.That(exception).HasMessageEqualTo(
             """
-            Expected myClass MyClass.Number to be equal to 1
-            
-            but Object `MyClass` was null
-            
+            Expected to be equal to 1
+            but threw System.InvalidOperationException
+
             at Assert.That(myClass).HasMember(x => x.Number).EqualTo(1)
             """
         );

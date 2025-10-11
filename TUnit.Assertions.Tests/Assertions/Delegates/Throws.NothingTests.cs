@@ -8,11 +8,9 @@ public partial class Throws
         public async Task Fails_For_Code_With_Exceptions()
         {
             var expectedMessage = $"""
-                                    Expected action to throw nothing
-                                    
-                                    but a CustomException was thrown:
-                                    {nameof(Fails_For_Code_With_Exceptions)}
-                                    
+                                    Expected to not throw any exception
+                                    but threw TUnit.Assertions.Tests.Assertions.Delegates.Throws+CustomException: {nameof(Fails_For_Code_With_Exceptions)}
+
                                     at Assert.That(action).ThrowsNothing()
                                     """;
             Exception exception = CreateCustomException();

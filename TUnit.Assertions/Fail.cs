@@ -7,12 +7,23 @@ public static class Fail
 {
     /// <summary>
     /// Fails the current test.
+    /// If called within Assert.Multiple(), the failure will be accumulated instead of thrown immediately.
     /// </summary>
     /// <param name="reason">The reason why the test failed</param>
-    [DoesNotReturn]
     public static void Test(string reason)
     {
-        throw new AssertionException(reason);
+        var exception = new AssertionException(reason);
+        var currentScope = AssertionScope.GetCurrentAssertionScope();
+
+        if (currentScope != null)
+        {
+            // Within Assert.Multiple - accumulate exception instead of throwing
+            currentScope.AddException(exception);
+            return;
+        }
+
+        // No scope - throw immediately
+        throw exception;
     }
 
     /// <summary>

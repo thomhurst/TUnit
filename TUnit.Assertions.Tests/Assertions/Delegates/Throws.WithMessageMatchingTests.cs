@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using TUnit.Assertions.AssertConditions;
+
 namespace TUnit.Assertions.Tests.Assertions.Delegates;
 
 public partial class Throws
@@ -38,10 +38,9 @@ public partial class Throws
             var message1 = "foo";
             var message2 = "bar";
             var expectedMessage = """
-                                  Expected action to throw a CustomException which message matches "bar"
-                                  
-                                  but found "foo"
-                                  
+                                  Expected to throw exactly CustomException
+                                  but exception message "foo" does not match pattern "bar"
+
                                   at Assert.That(action).ThrowsExactly<CustomException>().WithMessageMatching(message2)
                                   """;
             Exception exception = CreateCustomException(message1);

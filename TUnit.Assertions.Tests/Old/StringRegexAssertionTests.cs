@@ -59,7 +59,6 @@ public partial class StringRegexAssertionTests
         await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text match pattern
-
              but The regex "^\d+$" does not match with "{text}"
 
              at Assert.That(text).Matches(pattern)
@@ -85,7 +84,6 @@ public partial class StringRegexAssertionTests
         await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text match pattern
-
              but The regex "^\d+$" does not match with "{text}"
 
              at Assert.That(text).Matches(pattern)
@@ -115,9 +113,8 @@ public partial class StringRegexAssertionTests
         await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text match regex
-             
              but The regex "^\d+$" does not match with "Hello123World"
-             
+
              at Assert.That(text).Matches(regex)
              """
         );
@@ -198,9 +195,8 @@ public partial class StringRegexAssertionTests
         await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text to not match with pattern
-             
              but The regex "^\d+$" matches with "{text}"
-             
+
              at Assert.That(text).DoesNotMatch(pattern)
              """
         );
@@ -224,9 +220,8 @@ public partial class StringRegexAssertionTests
         await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text to not match with pattern
-             
              but The regex "^\d+$" matches with "{text}"
-             
+
              at Assert.That(text).DoesNotMatch(pattern)
              """
         );
@@ -254,9 +249,8 @@ public partial class StringRegexAssertionTests
         await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text to not match with regex
-             
              but The regex "^\d+$" matches with "{text}"
-             
+
              at Assert.That(text).DoesNotMatch(regex)
              """
         );

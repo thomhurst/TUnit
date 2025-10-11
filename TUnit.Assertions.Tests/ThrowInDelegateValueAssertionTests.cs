@@ -14,13 +14,8 @@ public class ThrowInDelegateValueAssertionTests
         await Assert.That(assertion)
             .Throws<AssertionException>()
             .WithMessageContaining("""
-                         Expected () =>
-                                 {
-                                     throw new Exception("No");
-                                     return true;
-                                 } to be equal to True
-
-                         but An exception was thrown during the assertion: System.Exception: No
+                         Expected to be equal to True
+                         but threw System.Exception
                          """);
     }
 
@@ -67,7 +62,7 @@ public class ThrowInDelegateValueAssertionTests
 
         await Assert.That(finalAssertion)
             .Throws<AssertionException>()
-            .WithMessageContaining("which message does not contain \"error message\"");
+            .WithMessageContaining("should not contain \"error message\"");
     }
 
     [Test]
@@ -85,7 +80,7 @@ public class ThrowInDelegateValueAssertionTests
 
         await Assert.That(finalAssertion)
             .Throws<AssertionException>()
-            .WithMessageContaining("which message does not contain \"error message\"");
+            .WithMessageContaining("should not contain \"error message\"");
     }
 
     [Test]
