@@ -1,7 +1,9 @@
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
+[AssertionExtension("IsLetter")]
 public class IsLetterAssertion : Assertion<char>
 {
     public IsLetterAssertion(AssertionContext<char> context) : base(context) { }
@@ -14,6 +16,7 @@ public class IsLetterAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotLetter")]
 public class IsNotLetterAssertion : Assertion<char>
 {
     public IsNotLetterAssertion(AssertionContext<char> context) : base(context) { }
@@ -26,6 +29,7 @@ public class IsNotLetterAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsDigit")]
 public class IsDigitAssertion : Assertion<char>
 {
     public IsDigitAssertion(AssertionContext<char> context) : base(context) { }
@@ -38,6 +42,7 @@ public class IsDigitAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotDigit")]
 public class IsNotDigitAssertion : Assertion<char>
 {
     public IsNotDigitAssertion(AssertionContext<char> context) : base(context) { }
@@ -50,6 +55,7 @@ public class IsNotDigitAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsWhiteSpace")]
 public class IsWhiteSpaceAssertion : Assertion<char>
 {
     public IsWhiteSpaceAssertion(AssertionContext<char> context) : base(context) { }
@@ -62,6 +68,7 @@ public class IsWhiteSpaceAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotWhiteSpace")]
 public class IsNotWhiteSpaceAssertion : Assertion<char>
 {
     public IsNotWhiteSpaceAssertion(AssertionContext<char> context) : base(context) { }
@@ -74,6 +81,7 @@ public class IsNotWhiteSpaceAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsUpper")]
 public class IsUpperAssertion : Assertion<char>
 {
     public IsUpperAssertion(AssertionContext<char> context) : base(context) { }
@@ -86,6 +94,7 @@ public class IsUpperAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotUpper")]
 public class IsNotUpperAssertion : Assertion<char>
 {
     public IsNotUpperAssertion(AssertionContext<char> context) : base(context) { }
@@ -98,6 +107,7 @@ public class IsNotUpperAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsLower")]
 public class IsLowerAssertion : Assertion<char>
 {
     public IsLowerAssertion(AssertionContext<char> context) : base(context) { }
@@ -110,6 +120,7 @@ public class IsLowerAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotLower")]
 public class IsNotLowerAssertion : Assertion<char>
 {
     public IsNotLowerAssertion(AssertionContext<char> context) : base(context) { }
@@ -122,6 +133,7 @@ public class IsNotLowerAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsControl")]
 public class IsControlAssertion : Assertion<char>
 {
     public IsControlAssertion(AssertionContext<char> context) : base(context) { }
@@ -134,6 +146,7 @@ public class IsControlAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotControl")]
 public class IsNotControlAssertion : Assertion<char>
 {
     public IsNotControlAssertion(AssertionContext<char> context) : base(context) { }
@@ -146,6 +159,7 @@ public class IsNotControlAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsPunctuation")]
 public class IsPunctuationAssertion : Assertion<char>
 {
     public IsPunctuationAssertion(AssertionContext<char> context) : base(context) { }
@@ -158,6 +172,7 @@ public class IsPunctuationAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotPunctuation")]
 public class IsNotPunctuationAssertion : Assertion<char>
 {
     public IsNotPunctuationAssertion(AssertionContext<char> context) : base(context) { }
@@ -170,6 +185,7 @@ public class IsNotPunctuationAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsSymbol")]
 public class IsSymbolAssertion : Assertion<char>
 {
     public IsSymbolAssertion(AssertionContext<char> context) : base(context) { }
@@ -182,6 +198,7 @@ public class IsSymbolAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotSymbol")]
 public class IsNotSymbolAssertion : Assertion<char>
 {
     public IsNotSymbolAssertion(AssertionContext<char> context) : base(context) { }
@@ -194,6 +211,7 @@ public class IsNotSymbolAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNumber")]
 public class IsNumberAssertion : Assertion<char>
 {
     public IsNumberAssertion(AssertionContext<char> context) : base(context) { }
@@ -206,6 +224,7 @@ public class IsNumberAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotNumber")]
 public class IsNotNumberAssertion : Assertion<char>
 {
     public IsNotNumberAssertion(AssertionContext<char> context) : base(context) { }
@@ -218,6 +237,7 @@ public class IsNotNumberAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsSeparator")]
 public class IsSeparatorAssertion : Assertion<char>
 {
     public IsSeparatorAssertion(AssertionContext<char> context) : base(context) { }
@@ -230,6 +250,7 @@ public class IsSeparatorAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotSeparator")]
 public class IsNotSeparatorAssertion : Assertion<char>
 {
     public IsNotSeparatorAssertion(AssertionContext<char> context) : base(context) { }
@@ -242,6 +263,7 @@ public class IsNotSeparatorAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsSurrogate")]
 public class IsSurrogateAssertion : Assertion<char>
 {
     public IsSurrogateAssertion(AssertionContext<char> context) : base(context) { }
@@ -254,6 +276,7 @@ public class IsSurrogateAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotSurrogate")]
 public class IsNotSurrogateAssertion : Assertion<char>
 {
     public IsNotSurrogateAssertion(AssertionContext<char> context) : base(context) { }
@@ -266,6 +289,7 @@ public class IsNotSurrogateAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsHighSurrogate")]
 public class IsHighSurrogateAssertion : Assertion<char>
 {
     public IsHighSurrogateAssertion(AssertionContext<char> context) : base(context) { }
@@ -278,6 +302,7 @@ public class IsHighSurrogateAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotHighSurrogate")]
 public class IsNotHighSurrogateAssertion : Assertion<char>
 {
     public IsNotHighSurrogateAssertion(AssertionContext<char> context) : base(context) { }
@@ -290,6 +315,7 @@ public class IsNotHighSurrogateAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsLowSurrogate")]
 public class IsLowSurrogateAssertion : Assertion<char>
 {
     public IsLowSurrogateAssertion(AssertionContext<char> context) : base(context) { }
@@ -302,6 +328,7 @@ public class IsLowSurrogateAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotLowSurrogate")]
 public class IsNotLowSurrogateAssertion : Assertion<char>
 {
     public IsNotLowSurrogateAssertion(AssertionContext<char> context) : base(context) { }
@@ -314,6 +341,7 @@ public class IsNotLowSurrogateAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsLetterOrDigit")]
 public class IsLetterOrDigitAssertion : Assertion<char>
 {
     public IsLetterOrDigitAssertion(AssertionContext<char> context) : base(context) { }
@@ -326,6 +354,7 @@ public class IsLetterOrDigitAssertion : Assertion<char>
     }
 }
 
+[AssertionExtension("IsNotLetterOrDigit")]
 public class IsNotLetterOrDigitAssertion : Assertion<char>
 {
     public IsNotLetterOrDigitAssertion(AssertionContext<char> context) : base(context) { }

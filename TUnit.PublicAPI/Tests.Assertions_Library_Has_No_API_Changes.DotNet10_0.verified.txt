@@ -145,6 +145,13 @@ namespace .
 }
 namespace .Attributes
 {
+    [(.Class, AllowMultiple=false)]
+    public class AssertionExtensionAttribute : 
+    {
+        public AssertionExtensionAttribute(string methodName) { }
+        public string MethodName { get; }
+        public string? NegatedMethodName { get; set; }
+    }
     [(.Class, AllowMultiple=true)]
     public class CreateAssertionAttribute : 
     {
@@ -366,6 +373,7 @@ namespace .Conditions
         protected override string GetExpectation() { }
         public . Within( tolerance) { }
     }
+    [.("EqualsExact")]
     public class DateTimeEqualsExactAssertion : .<>
     {
         public DateTimeEqualsExactAssertion(.<> context,  expected) { }
@@ -563,6 +571,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsASCII")]
     public class IsASCIIEncodingAssertion : .<.Encoding>
     {
         public IsASCIIEncodingAssertion(.<.Encoding> context) { }
@@ -581,6 +590,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsBigEndianUnicode")]
     public class IsBigEndianUnicodeEncodingAssertion : .<.Encoding>
     {
         public IsBigEndianUnicodeEncodingAssertion(.<.Encoding> context) { }
@@ -605,12 +615,14 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.Assembly> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsControl")]
     public class IsControlAssertion : .<char>
     {
         public IsControlAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsDaylightSavingTime")]
     public class IsDaylightSavingTimeAssertion : .<>
     {
         public IsDaylightSavingTimeAssertion(.<> context) { }
@@ -635,6 +647,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsDigit")]
     public class IsDigitAssertion : .<char>
     {
         public IsDigitAssertion(.<char> context) { }
@@ -686,6 +699,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.Assembly> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsHighSurrogate")]
     public class IsHighSurrogateAssertion : .<char>
     {
         public IsHighSurrogateAssertion(.<char> context) { }
@@ -711,6 +725,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsLeapYear")]
     public class IsLeapYearAssertion : .<>
     {
         public IsLeapYearAssertion(.<> context) { }
@@ -723,24 +738,28 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsLetter")]
     public class IsLetterAssertion : .<char>
     {
         public IsLetterAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsLetterOrDigit")]
     public class IsLetterOrDigitAssertion : .<char>
     {
         public IsLetterOrDigitAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsLowSurrogate")]
     public class IsLowSurrogateAssertion : .<char>
     {
         public IsLowSurrogateAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsLower")]
     public class IsLowerAssertion : .<char>
     {
         public IsLowerAssertion(.<char> context) { }
@@ -783,12 +802,14 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.Assembly> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotControl")]
     public class IsNotControlAssertion : .<char>
     {
         public IsNotControlAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotDaylightSavingTime")]
     public class IsNotDaylightSavingTimeAssertion : .<>
     {
         public IsNotDaylightSavingTimeAssertion(.<> context) { }
@@ -801,6 +822,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotDigit")]
     public class IsNotDigitAssertion : .<char>
     {
         public IsNotDigitAssertion(.<char> context) { }
@@ -825,6 +847,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.Assembly> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotHighSurrogate")]
     public class IsNotHighSurrogateAssertion : .<char>
     {
         public IsNotHighSurrogateAssertion(.<char> context) { }
@@ -844,30 +867,35 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotLeapYear")]
     public class IsNotLeapYearAssertion : .<>
     {
         public IsNotLeapYearAssertion(.<> context) { }
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotLetter")]
     public class IsNotLetterAssertion : .<char>
     {
         public IsNotLetterAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotLetterOrDigit")]
     public class IsNotLetterOrDigitAssertion : .<char>
     {
         public IsNotLetterOrDigitAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotLowSurrogate")]
     public class IsNotLowSurrogateAssertion : .<char>
     {
         public IsNotLowSurrogateAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotLower")]
     public class IsNotLowerAssertion : .<char>
     {
         public IsNotLowerAssertion(.<char> context) { }
@@ -886,18 +914,21 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.CancellationToken> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotNumber")]
     public class IsNotNumberAssertion : .<char>
     {
         public IsNotNumberAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotPunctuation")]
     public class IsNotPunctuationAssertion : .<char>
     {
         public IsNotPunctuationAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotSeparator")]
     public class IsNotSeparatorAssertion : .<char>
     {
         public IsNotSeparatorAssertion(.<char> context) { }
@@ -910,6 +941,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.Assembly> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotSingleByte")]
     public class IsNotSingleByteEncodingAssertion : .<.Encoding>
     {
         public IsNotSingleByteEncodingAssertion(.<.Encoding> context) { }
@@ -922,54 +954,63 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.HttpStatusCode> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotSurrogate")]
     public class IsNotSurrogateAssertion : .<char>
     {
         public IsNotSurrogateAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotSymbol")]
     public class IsNotSymbolAssertion : .<char>
     {
         public IsNotSymbolAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotToday")]
     public class IsNotTodayAssertion : .<>
     {
         public IsNotTodayAssertion(.<> context) { }
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotUTF8")]
     public class IsNotUTF8EncodingAssertion : .<.Encoding>
     {
         public IsNotUTF8EncodingAssertion(.<.Encoding> context) { }
         protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotUpper")]
     public class IsNotUpperAssertion : .<char>
     {
         public IsNotUpperAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotUtc")]
     public class IsNotUtcAssertion : .<>
     {
         public IsNotUtcAssertion(.<> context) { }
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotWhiteSpace")]
     public class IsNotWhiteSpaceAssertion : .<char>
     {
         public IsNotWhiteSpaceAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNumber")]
     public class IsNumberAssertion : .<char>
     {
         public IsNumberAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsPunctuation")]
     public class IsPunctuationAssertion : .<char>
     {
         public IsPunctuationAssertion(.<char> context) { }
@@ -1000,6 +1041,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsSeparator")]
     public class IsSeparatorAssertion : .<char>
     {
         public IsSeparatorAssertion(.<char> context) { }
@@ -1018,6 +1060,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.Assembly> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsSingleByte")]
     public class IsSingleByteEncodingAssertion : .<.Encoding>
     {
         public IsSingleByteEncodingAssertion(.<.Encoding> context) { }
@@ -1030,18 +1073,21 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.HttpStatusCode> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsSurrogate")]
     public class IsSurrogateAssertion : .<char>
     {
         public IsSurrogateAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsSymbol")]
     public class IsSymbolAssertion : .<char>
     {
         public IsSymbolAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsToday")]
     public class IsTodayAssertion : .<>
     {
         public IsTodayAssertion(.<> context) { }
@@ -1054,30 +1100,35 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsUTF32")]
     public class IsUTF32EncodingAssertion : .<.Encoding>
     {
         public IsUTF32EncodingAssertion(.<.Encoding> context) { }
         protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsUTF8")]
     public class IsUTF8EncodingAssertion : .<.Encoding>
     {
         public IsUTF8EncodingAssertion(.<.Encoding> context) { }
         protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsUnicode")]
     public class IsUnicodeEncodingAssertion : .<.Encoding>
     {
         public IsUnicodeEncodingAssertion(.<.Encoding> context) { }
         protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsUpper")]
     public class IsUpperAssertion : .<char>
     {
         public IsUpperAssertion(.<char> context) { }
         protected override .<.> CheckAsync(.<char> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsUtc")]
     public class IsUtcAssertion : .<>
     {
         public IsUtcAssertion(.<> context) { }
@@ -1096,6 +1147,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsWhiteSpace")]
     public class IsWhiteSpaceAssertion : .<char>
     {
         public IsWhiteSpaceAssertion(.<char> context) { }
@@ -1468,6 +1520,16 @@ namespace .Enums
         Matching = 1,
     }
 }
+namespace .Examples
+{
+    [.("IsPositive")]
+    public class IsPositiveAssertion : .<int>
+    {
+        public IsPositiveAssertion(.<int> context) { }
+        protected override .<.> CheckAsync(.<int> metadata) { }
+        protected override string GetExpectation() { }
+    }
+}
 namespace .Exceptions
 {
     public class AssertionException : .
@@ -1492,19 +1554,6 @@ namespace .Exceptions
 }
 namespace .Extensions
 {
-    public static class AssemblyAssertionExtensions
-    {
-        public static . IsCollectible(this .<.Assembly> source) { }
-        public static . IsDebugBuild(this .<.Assembly> source) { }
-        public static . IsDynamic(this .<.Assembly> source) { }
-        public static . IsFullyTrusted(this .<.Assembly> source) { }
-        public static . IsNotCollectible(this .<.Assembly> source) { }
-        public static . IsNotDynamic(this .<.Assembly> source) { }
-        public static . IsNotFullyTrusted(this .<.Assembly> source) { }
-        public static . IsNotSigned(this .<.Assembly> source) { }
-        public static . IsReleaseBuild(this .<.Assembly> source) { }
-        public static . IsSigned(this .<.Assembly> source) { }
-    }
     public static class AssertionExtensions
     {
         public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source) { }
@@ -1723,121 +1772,189 @@ namespace .Extensions
         public static . WithMessageContaining(this .<object?> source, string expectedSubstring) { }
         public static . WithMessageContaining(this .<object?> source, string expectedSubstring,  comparison) { }
     }
-    public static class CancellationTokenAssertionExtensions
+    public static class DateTimeEqualsExactAssertionExtensions
     {
-        public static . CanBeCanceled(this .<.CancellationToken> source) { }
-        public static . CannotBeCanceled(this .<.CancellationToken> source) { }
-        public static . IsCancellationRequested(this .<.CancellationToken> source) { }
-        public static . IsNone(this .<.CancellationToken> source) { }
-        public static . IsNotCancellationRequested(this .<.CancellationToken> source) { }
-        public static . IsNotNone(this .<.CancellationToken> source) { }
+        public static . EqualsExact(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
     }
-    public static class CharAssertionExtensions
-    {
-        public static . IsControl(this .<char> source) { }
-        public static . IsDigit(this .<char> source) { }
-        public static . IsHighSurrogate(this .<char> source) { }
-        public static . IsLetter(this .<char> source) { }
-        public static . IsLetterOrDigit(this .<char> source) { }
-        public static . IsLowSurrogate(this .<char> source) { }
-        public static . IsLower(this .<char> source) { }
-        public static . IsNotControl(this .<char> source) { }
-        public static . IsNotDigit(this .<char> source) { }
-        public static . IsNotHighSurrogate(this .<char> source) { }
-        public static . IsNotLetter(this .<char> source) { }
-        public static . IsNotLetterOrDigit(this .<char> source) { }
-        public static . IsNotLowSurrogate(this .<char> source) { }
-        public static . IsNotLower(this .<char> source) { }
-        public static . IsNotNumber(this .<char> source) { }
-        public static . IsNotPunctuation(this .<char> source) { }
-        public static . IsNotSeparator(this .<char> source) { }
-        public static . IsNotSurrogate(this .<char> source) { }
-        public static . IsNotSymbol(this .<char> source) { }
-        public static . IsNotUpper(this .<char> source) { }
-        public static . IsNotWhiteSpace(this .<char> source) { }
-        public static . IsNumber(this .<char> source) { }
-        public static . IsPunctuation(this .<char> source) { }
-        public static . IsSeparator(this .<char> source) { }
-        public static . IsSurrogate(this .<char> source) { }
-        public static . IsSymbol(this .<char> source) { }
-        public static . IsUpper(this .<char> source) { }
-        public static . IsWhiteSpace(this .<char> source) { }
-    }
-    public static class CultureInfoAssertionExtensions
-    {
-        public static . IsEnglish(this .<.CultureInfo> source) { }
-        public static . IsInvariant(this .<.CultureInfo> source) { }
-        public static . IsLeftToRight(this .<.CultureInfo> source) { }
-        public static . IsNeutralCulture(this .<.CultureInfo> source) { }
-        public static . IsNotEnglish(this .<.CultureInfo> source) { }
-        public static . IsNotInvariant(this .<.CultureInfo> source) { }
-        public static . IsNotNeutralCulture(this .<.CultureInfo> source) { }
-        public static . IsReadOnly(this .<.CultureInfo> source) { }
-        public static . IsRightToLeft(this .<.CultureInfo> source) { }
-    }
-    public static class DateTimeAssertionExtensions
-    {
-        public static . EqualsExact(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static . IsDaylightSavingTime(this .<> source) { }
-        public static . IsLeapYear(this .<> source) { }
-        public static . IsNotDaylightSavingTime(this .<> source) { }
-        public static . IsNotLeapYear(this .<> source) { }
-        public static . IsNotToday(this .<> source) { }
-        public static . IsNotUtc(this .<> source) { }
-        public static . IsToday(this .<> source) { }
-        public static . IsUtc(this .<> source) { }
-    }
-    public static class EncodingAssertionExtensions
+    public static class IsASCIIEncodingAssertionExtensions
     {
         public static . IsASCII(this .<.Encoding> source) { }
+    }
+    public static class IsBigEndianUnicodeEncodingAssertionExtensions
+    {
         public static . IsBigEndianUnicode(this .<.Encoding> source) { }
+    }
+    public static class IsControlAssertionExtensions
+    {
+        public static . IsControl(this .<char> source) { }
+    }
+    public static class IsDaylightSavingTimeAssertionExtensions
+    {
+        public static . IsDaylightSavingTime(this .<> source) { }
+    }
+    public static class IsDigitAssertionExtensions
+    {
+        public static . IsDigit(this .<char> source) { }
+    }
+    public static class IsHighSurrogateAssertionExtensions
+    {
+        public static . IsHighSurrogate(this .<char> source) { }
+    }
+    public static class IsLeapYearAssertionExtensions
+    {
+        public static . IsLeapYear(this .<> source) { }
+    }
+    public static class IsLetterAssertionExtensions
+    {
+        public static . IsLetter(this .<char> source) { }
+    }
+    public static class IsLetterOrDigitAssertionExtensions
+    {
+        public static . IsLetterOrDigit(this .<char> source) { }
+    }
+    public static class IsLowSurrogateAssertionExtensions
+    {
+        public static . IsLowSurrogate(this .<char> source) { }
+    }
+    public static class IsLowerAssertionExtensions
+    {
+        public static . IsLower(this .<char> source) { }
+    }
+    public static class IsNotControlAssertionExtensions
+    {
+        public static . IsNotControl(this .<char> source) { }
+    }
+    public static class IsNotDaylightSavingTimeAssertionExtensions
+    {
+        public static . IsNotDaylightSavingTime(this .<> source) { }
+    }
+    public static class IsNotDigitAssertionExtensions
+    {
+        public static . IsNotDigit(this .<char> source) { }
+    }
+    public static class IsNotHighSurrogateAssertionExtensions
+    {
+        public static . IsNotHighSurrogate(this .<char> source) { }
+    }
+    public static class IsNotLeapYearAssertionExtensions
+    {
+        public static . IsNotLeapYear(this .<> source) { }
+    }
+    public static class IsNotLetterAssertionExtensions
+    {
+        public static . IsNotLetter(this .<char> source) { }
+    }
+    public static class IsNotLetterOrDigitAssertionExtensions
+    {
+        public static . IsNotLetterOrDigit(this .<char> source) { }
+    }
+    public static class IsNotLowSurrogateAssertionExtensions
+    {
+        public static . IsNotLowSurrogate(this .<char> source) { }
+    }
+    public static class IsNotLowerAssertionExtensions
+    {
+        public static . IsNotLower(this .<char> source) { }
+    }
+    public static class IsNotNumberAssertionExtensions
+    {
+        public static . IsNotNumber(this .<char> source) { }
+    }
+    public static class IsNotPunctuationAssertionExtensions
+    {
+        public static . IsNotPunctuation(this .<char> source) { }
+    }
+    public static class IsNotSeparatorAssertionExtensions
+    {
+        public static . IsNotSeparator(this .<char> source) { }
+    }
+    public static class IsNotSingleByteEncodingAssertionExtensions
+    {
         public static . IsNotSingleByte(this .<.Encoding> source) { }
+    }
+    public static class IsNotSurrogateAssertionExtensions
+    {
+        public static . IsNotSurrogate(this .<char> source) { }
+    }
+    public static class IsNotSymbolAssertionExtensions
+    {
+        public static . IsNotSymbol(this .<char> source) { }
+    }
+    public static class IsNotTodayAssertionExtensions
+    {
+        public static . IsNotToday(this .<> source) { }
+    }
+    public static class IsNotUTF8EncodingAssertionExtensions
+    {
         public static .8EncodingAssertion IsNotUTF8(this .<.Encoding> source) { }
+    }
+    public static class IsNotUpperAssertionExtensions
+    {
+        public static . IsNotUpper(this .<char> source) { }
+    }
+    public static class IsNotUtcAssertionExtensions
+    {
+        public static . IsNotUtc(this .<> source) { }
+    }
+    public static class IsNotWhiteSpaceAssertionExtensions
+    {
+        public static . IsNotWhiteSpace(this .<char> source) { }
+    }
+    public static class IsNumberAssertionExtensions
+    {
+        public static . IsNumber(this .<char> source) { }
+    }
+    public static class IsPositiveAssertionExtensions
+    {
+        public static . IsPositive(this .<int> source) { }
+    }
+    public static class IsPunctuationAssertionExtensions
+    {
+        public static . IsPunctuation(this .<char> source) { }
+    }
+    public static class IsSeparatorAssertionExtensions
+    {
+        public static . IsSeparator(this .<char> source) { }
+    }
+    public static class IsSingleByteEncodingAssertionExtensions
+    {
         public static . IsSingleByte(this .<.Encoding> source) { }
+    }
+    public static class IsSurrogateAssertionExtensions
+    {
+        public static . IsSurrogate(this .<char> source) { }
+    }
+    public static class IsSymbolAssertionExtensions
+    {
+        public static . IsSymbol(this .<char> source) { }
+    }
+    public static class IsTodayAssertionExtensions
+    {
+        public static . IsToday(this .<> source) { }
+    }
+    public static class IsUTF32EncodingAssertionExtensions
+    {
         public static .32EncodingAssertion IsUTF32(this .<.Encoding> source) { }
+    }
+    public static class IsUTF8EncodingAssertionExtensions
+    {
         public static .8EncodingAssertion IsUTF8(this .<.Encoding> source) { }
+    }
+    public static class IsUnicodeEncodingAssertionExtensions
+    {
         public static . IsUnicode(this .<.Encoding> source) { }
     }
-    public static class FileSystemAssertionExtensions
+    public static class IsUpperAssertionExtensions
     {
-        public static . DoesNotExist(this .<.DirectoryInfo> source) { }
-        public static . DoesNotExist(this .<.FileInfo> source) { }
-        public static . Exists(this .<.DirectoryInfo> source) { }
-        public static . Exists(this .<.FileInfo> source) { }
-        public static . HasFiles(this .<.DirectoryInfo> source) { }
-        public static . HasNoSubdirectories(this .<.DirectoryInfo> source) { }
-        public static . IsNotEmpty(this .<.DirectoryInfo> source) { }
-        public static . IsNotEmpty(this .<.FileInfo> source) { }
-        public static . IsNotExecutable(this .<.FileInfo> source) { }
-        public static . IsNotHidden(this .<.FileInfo> source) { }
-        public static . IsNotReadOnly(this .<.FileInfo> source) { }
-        public static . IsNotSystem(this .<.FileInfo> source) { }
+        public static . IsUpper(this .<char> source) { }
     }
-    public static class HttpStatusCodeAssertionExtensions
+    public static class IsUtcAssertionExtensions
     {
-        public static . IsClientError(this .<.HttpStatusCode> source) { }
-        public static . IsError(this .<.HttpStatusCode> source) { }
-        public static . IsInformational(this .<.HttpStatusCode> source) { }
-        public static . IsNotSuccess(this .<.HttpStatusCode> source) { }
-        public static . IsRedirection(this .<.HttpStatusCode> source) { }
-        public static . IsServerError(this .<.HttpStatusCode> source) { }
-        public static . IsSuccess(this .<.HttpStatusCode> source) { }
+        public static . IsUtc(this .<> source) { }
     }
-    public static class MiscellaneousAssertionExtensions
+    public static class IsWhiteSpaceAssertionExtensions
     {
-        public static . HasExcessCapacity(this .<.StringBuilder> source) { }
-        public static . HasInnerException(this .<> source) { }
-        public static . HasNoData(this .<> source) { }
-        public static . HasNoInnerException(this .<> source) { }
-        public static . HasStackTrace(this .<> source) { }
-        public static . IsAlive(this .<> source) { }
-        public static . IsDead(this .<> source) { }
-        public static . IsEmpty(this .<.StringBuilder> source) { }
-        public static . IsFriday(this .<> source) { }
-        public static . IsMonday(this .<> source) { }
-        public static . IsNotEmpty(this .<.StringBuilder> source) { }
-        public static . IsWeekday(this .<> source) { }
-        public static . IsWeekend(this .<> source) { }
+        public static . IsWhiteSpace(this .<char> source) { }
     }
 }
 namespace .Sources
