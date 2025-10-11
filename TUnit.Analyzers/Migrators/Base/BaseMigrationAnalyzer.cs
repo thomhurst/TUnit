@@ -150,6 +150,12 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 var attributeSyntax = attributeData.ApplicationSyntaxReference?.GetSyntax();
                 if (attributeSyntax != null)
                 {
+                    // Get the parent AttributeListSyntax to include the brackets [...]
+                    var attributeListSyntax = attributeSyntax.Parent;
+                    if (attributeListSyntax != null)
+                    {
+                        return attributeListSyntax.GetLocation();
+                    }
                     return attributeSyntax.GetLocation();
                 }
             }
