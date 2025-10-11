@@ -204,12 +204,51 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         var additionalParams = constructor.Parameters.Skip(1).ToArray();
 
         // Build generic type parameters string
+        // Use the assertion class's own type parameters if it has them
         var genericParams = new List<string>();
         var typeConstraints = new List<string>();
 
-        if (typeParam is ITypeParameterSymbol typeParamSymbol)
+        if (assertionType.IsGenericType && assertionType.TypeParameters.Length > 0)
         {
-            // Assertion is generic - extract type parameter
+            // The assertion class defines its own generic type parameters
+            // e.g., GreaterThanAssertion<TValue>
+            foreach (var typeParameter in assertionType.TypeParameters)
+            {
+                genericParams.Add(typeParameter.Name);
+
+                // Collect constraints for each type parameter
+                var constraints = new List<string>();
+                if (typeParameter.HasReferenceTypeConstraint)
+                {
+                    constraints.Add("class");
+                }
+                if (typeParameter.HasValueTypeConstraint)
+                {
+                    constraints.Add("struct");
+                }
+                if (typeParameter.HasNotNullConstraint)
+                {
+                    constraints.Add("notnull");
+                }
+                foreach (var constraintType in typeParameter.ConstraintTypes)
+                {
+                    constraints.Add(constraintType.ToDisplayString());
+                }
+                if (typeParameter.HasConstructorConstraint)
+                {
+                    constraints.Add("new()");
+                }
+
+                if (constraints.Count > 0)
+                {
+                    typeConstraints.Add($"where {typeParameter.Name} : {string.Join(", ", constraints)}");
+                }
+            }
+        }
+        else if (typeParam is ITypeParameterSymbol typeParamSymbol)
+        {
+            // The assertion class is not generic, but inherits from Assertion<T>
+            // where T is a type parameter from the base class
             genericParams.Add(typeParamSymbol.Name);
 
             // Collect constraints
@@ -265,6 +304,13 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         foreach (var param in additionalParams)
         {
             sourceBuilder.Append($", {param.Type.ToDisplayString()} {param.Name}");
+
+            // Add default value if present
+            if (param.HasExplicitDefaultValue)
+            {
+                var defaultValue = FormatDefaultValue(param.ExplicitDefaultValue, param.Type);
+                sourceBuilder.Append($" = {defaultValue}");
+            }
         }
 
         // Add CallerArgumentExpression parameters for better error messages
@@ -296,8 +342,8 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine(")\");");
 
         // Construct and return the assertion
-        sourceBuilder.Append($"        return new {assertionType.ToDisplayString()}");
-        if (assertionType.IsGenericType && genericParams.Count > 0)
+        sourceBuilder.Append($"        return new {assertionType.Name}");
+        if (genericParams.Count > 0)
         {
             sourceBuilder.Append($"<{string.Join(", ", genericParams)}>");
         }
@@ -310,6 +356,36 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 
         sourceBuilder.AppendLine(");");
         sourceBuilder.AppendLine("    }");
+    }
+
+    private static string FormatDefaultValue(object? defaultValue, ITypeSymbol type)
+    {
+        if (defaultValue == null)
+        {
+            return "null";
+        }
+
+        if (type.TypeKind == TypeKind.Enum)
+        {
+            return $"{type.ToDisplayString()}.{defaultValue}";
+        }
+
+        if (defaultValue is string str)
+        {
+            return $"\"{str.Replace("\"", "\\\"")}\"";
+        }
+
+        if (defaultValue is bool b)
+        {
+            return b ? "true" : "false";
+        }
+
+        if (defaultValue is char c)
+        {
+            return $"'{c}'";
+        }
+
+        return defaultValue.ToString() ?? "null";
     }
 
     private record AssertionExtensionData(

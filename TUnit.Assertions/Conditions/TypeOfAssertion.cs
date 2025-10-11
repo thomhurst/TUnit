@@ -50,6 +50,7 @@ public class TypeOfAssertion<TFrom, TTo> : Assertion<TTo>
 /// Asserts that a value's type is assignable to a specific type (is the type or a subtype).
 /// Works with both direct value assertions and exception assertions (via .And after Throws).
 /// </summary>
+[AssertionExtension("IsAssignableTo")]
 public class IsAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
 {
     private readonly Type _targetType;
@@ -100,6 +101,7 @@ public class IsAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
 /// Asserts that a value's type is NOT assignable to a specific type.
 /// Works with both direct value assertions and exception assertions (via .And after Throws).
 /// </summary>
+[AssertionExtension("IsNotAssignableTo")]
 public class IsNotAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
 {
     private readonly Type _targetType;
@@ -149,6 +151,7 @@ public class IsNotAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
 /// <summary>
 /// Asserts that a value is exactly of the specified type (using runtime Type parameter).
 /// </summary>
+[AssertionExtension("IsTypeOf")]
 public class IsTypeOfRuntimeAssertion<TValue> : Assertion<TValue>
 {
     private readonly Type _expectedType;

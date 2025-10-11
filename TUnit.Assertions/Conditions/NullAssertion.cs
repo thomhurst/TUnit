@@ -7,6 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a value is null.
 /// </summary>
+[AssertionExtension("IsNull")]
 public class NullAssertion<TValue> : Assertion<TValue>
 {
     public NullAssertion(
@@ -34,6 +35,7 @@ public class NullAssertion<TValue> : Assertion<TValue>
 /// <summary>
 /// Asserts that a value is not null.
 /// </summary>
+[AssertionExtension("IsNotNull")]
 public class NotNullAssertion<TValue> : Assertion<TValue>
 {
     public NotNullAssertion(
@@ -62,6 +64,7 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
 /// Asserts that a value is equal to the default value for its type.
 /// For reference types, this is null. For value types, this is the zero-initialized value.
 /// </summary>
+[AssertionExtension("IsDefault")]
 public class IsDefaultAssertion<TValue> : Assertion<TValue>
 {
     public IsDefaultAssertion(
@@ -94,6 +97,7 @@ public class IsDefaultAssertion<TValue> : Assertion<TValue>
 /// <summary>
 /// Asserts that a value is not the default value for its type.
 /// </summary>
+[AssertionExtension("IsNotDefault")]
 public class IsNotDefaultAssertion<TValue> : Assertion<TValue>
 {
     public IsNotDefaultAssertion(
