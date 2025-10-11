@@ -21,7 +21,7 @@ public class TrueAssertion : Assertion<bool>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
         if (value == true)
@@ -53,7 +53,7 @@ public class FalseAssertion : Assertion<bool>
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
         if (value == false)

@@ -24,6 +24,11 @@ public abstract class Assertion<TValue>
     protected readonly AssertionContext<TValue> Context;
 
     /// <summary>
+    /// Internal accessor for the context, used by And/OrAssertion to access context from assertion parameters.
+    /// </summary>
+    internal AssertionContext<TValue> InternalContext => Context;
+
+    /// <summary>
     /// Custom message added via .Because() to explain why the assertion should pass.
     /// </summary>
     private string? _becauseMessage;
@@ -54,12 +59,23 @@ public abstract class Assertion<TValue>
     protected abstract string GetExpectation();
 
     /// <summary>
+    /// Internal accessor for GetExpectation(), used by And/OrAssertion to build combined error messages.
+    /// </summary>
+    internal string InternalGetExpectation() => GetExpectation();
+
+    /// <summary>
+    /// Internal accessor for the because message, used by And/OrAssertion to build combined error messages.
+    /// </summary>
+    internal string? InternalBecauseMessage => _becauseMessage;
+
+    /// <summary>
     /// Adds a custom message explaining why this assertion should pass.
     /// This message will be included in the error message if the assertion fails.
     /// </summary>
     public Assertion<TValue> Because(string message)
     {
-        _becauseMessage = message;
+        // Trim whitespace from the message
+        _becauseMessage = message?.Trim();
         Context.ExpressionBuilder.Append($".Because(\"{message}\")");
         return this;
     }
@@ -107,13 +123,13 @@ public abstract class Assertion<TValue>
     /// Creates an And continuation for chaining additional assertions.
     /// All assertions in an And chain must pass.
     /// </summary>
-    public AndContinuation<TValue> And => new(Context);
+    public AndContinuation<TValue> And => new(Context, this);
 
     /// <summary>
     /// Creates an Or continuation for chaining alternative assertions.
     /// At least one assertion in an Or chain must pass.
     /// </summary>
-    public OrContinuation<TValue> Or => new(Context);
+    public OrContinuation<TValue> Or => new(Context, this);
 
     /// <summary>
     /// Creates an AssertionException with a formatted error message.
@@ -129,7 +145,11 @@ public abstract class Assertion<TValue>
 
         if (_becauseMessage != null)
         {
-            message += $"\n\nbecause {_becauseMessage}";
+            // Check if message already starts with "because" to avoid duplication
+            var becausePrefix = _becauseMessage.StartsWith("because ", StringComparison.OrdinalIgnoreCase)
+                ? _becauseMessage
+                : $"because {_becauseMessage}";
+            message += $"\n\n{becausePrefix}";
         }
 
         return new AssertionException(message);

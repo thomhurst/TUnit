@@ -344,6 +344,28 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that the boolean value is true (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<bool> IsTrue(
+        this AndContinuation<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsTrue()");
+        var newAssertion = new TrueAssertion(source.Context);
+        return new Chaining.AndAssertion<bool>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the boolean value is true (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<bool> IsTrue(
+        this OrContinuation<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsTrue()");
+        var newAssertion = new TrueAssertion(source.Context);
+        return new Chaining.OrAssertion<bool>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
     /// Asserts that the boolean value is false.
     /// </summary>
     public static FalseAssertion IsFalse(
@@ -351,6 +373,132 @@ public static class AssertionExtensions
     {
         source.Context.ExpressionBuilder.Append(".IsFalse()");
         return new FalseAssertion(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the boolean value is false (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<bool> IsFalse(
+        this AndContinuation<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsFalse()");
+        var newAssertion = new FalseAssertion(source.Context);
+        return new Chaining.AndAssertion<bool>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the boolean value is false (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<bool> IsFalse(
+        this OrContinuation<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsFalse()");
+        var newAssertion = new FalseAssertion(source.Context);
+        return new Chaining.OrAssertion<bool>(source.PreviousAssertion, newAssertion);
+    }
+
+    // ============ AND/OR CONTINUATION OVERLOADS FOR COMMON METHODS ============
+
+    /// <summary>
+    /// Asserts that the value is equal to the expected value (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> IsEqualTo<TValue>(
+        this AndContinuation<TValue> source,
+        TValue expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        var newAssertion = new EqualsAssertion<TValue>(source.Context, expected);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the value is equal to the expected value (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> IsEqualTo<TValue>(
+        this OrContinuation<TValue> source,
+        TValue expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        var newAssertion = new EqualsAssertion<TValue>(source.Context, expected);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the string is equal to the expected value using the specified comparison (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<string> IsEqualTo(
+        this AndContinuation<string> source,
+        string expected,
+        StringComparison comparison,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression}, StringComparison.{comparison})");
+        var newAssertion = new StringEqualsAssertion(source.Context, expected).WithComparison(comparison);
+        return new Chaining.AndAssertion<string>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the string is equal to the expected value using the specified comparison (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<string> IsEqualTo(
+        this OrContinuation<string> source,
+        string expected,
+        StringComparison comparison,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression}, StringComparison.{comparison})");
+        var newAssertion = new StringEqualsAssertion(source.Context, expected).WithComparison(comparison);
+        return new Chaining.OrAssertion<string>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the string is null or empty (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<string> IsNullOrEmpty(
+        this AndContinuation<string> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNullOrEmpty()");
+        var newAssertion = new StringIsNullOrEmptyAssertion(source.Context);
+        return new Chaining.AndAssertion<string>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the string is null or empty (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<string> IsNullOrEmpty(
+        this OrContinuation<string> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNullOrEmpty()");
+        var newAssertion = new StringIsNullOrEmptyAssertion(source.Context);
+        return new Chaining.OrAssertion<string>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the value is not equal to the expected value (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> IsNotEqualTo<TValue>(
+        this AndContinuation<TValue> source,
+        TValue expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotEqualTo({expression})");
+        var newAssertion = new NotEqualsAssertion<TValue>(source.Context, expected);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the value is not equal to the expected value (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> IsNotEqualTo<TValue>(
+        this OrContinuation<TValue> source,
+        TValue expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotEqualTo({expression})");
+        var newAssertion = new NotEqualsAssertion<TValue>(source.Context, expected);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
     }
 
     // ============ TYPE CHECKS ============
@@ -383,12 +531,26 @@ public static class AssertionExtensions
     /// Asserts that the value is of the specified type (runtime Type parameter, for AndContinuation).
     /// Example: await Assert.That(obj).IsEqualTo("foo").And.IsTypeOf(typeof(string));
     /// </summary>
-    public static Assertion<TValue> IsTypeOf<TValue>(
+    public static Chaining.AndAssertion<TValue> IsTypeOf<TValue>(
         this AndContinuation<TValue> source,
         Type expectedType)
     {
         source.Context.ExpressionBuilder.Append($".IsTypeOf(typeof({expectedType.Name}))");
-        return new IsTypeOfRuntimeAssertion<TValue>(source.Context, expectedType);
+        var newAssertion = new IsTypeOfRuntimeAssertion<TValue>(source.Context, expectedType);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the value is of the specified type (runtime Type parameter, for OrContinuation).
+    /// Example: await Assert.That(obj).IsEqualTo("foo").Or.IsTypeOf(typeof(string));
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> IsTypeOf<TValue>(
+        this OrContinuation<TValue> source,
+        Type expectedType)
+    {
+        source.Context.ExpressionBuilder.Append($".IsTypeOf(typeof({expectedType.Name}))");
+        var newAssertion = new IsTypeOfRuntimeAssertion<TValue>(source.Context, expectedType);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
     }
 
     /// <summary>
@@ -830,6 +992,36 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that the collection contains the expected item (And continuation overload).
+    /// Returns AndAssertion to enable And chaining and prevent mixing with Or.
+    /// </summary>
+    public static Chaining.AndAssertion<TCollection> Contains<TCollection, TItem>(
+        this AndContinuation<TCollection> source,
+        TItem expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        var newAssertion = new CollectionContainsAssertion<TCollection, TItem>(source.Context, expected);
+        return new Chaining.AndAssertion<TCollection>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains the expected item (Or continuation overload).
+    /// Returns OrAssertion to enable Or chaining and prevent mixing with And.
+    /// </summary>
+    public static Chaining.OrAssertion<TCollection> Contains<TCollection, TItem>(
+        this OrContinuation<TCollection> source,
+        TItem expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        var newAssertion = new CollectionContainsAssertion<TCollection, TItem>(source.Context, expected);
+        return new Chaining.OrAssertion<TCollection>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
     /// Asserts that the collection does NOT contain the expected item.
     /// </summary>
     public static CollectionDoesNotContainAssertion<TCollection, TItem> DoesNotContain<TCollection, TItem>(
@@ -1120,7 +1312,7 @@ public static class AssertionExtensions
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsEquivalentTo({expression})");
-        return new StructuralEquivalencyAssertion<TValue>(source.Context, expected);
+        return new StructuralEquivalencyAssertion<TValue>(source.Context, expected, expression);
     }
 
     /// <summary>
@@ -1176,7 +1368,7 @@ public static class AssertionExtensions
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsNotEquivalentTo({expression})");
-        return new NotStructuralEquivalencyAssertion<TValue>(source.Context, expected);
+        return new NotStructuralEquivalencyAssertion<TValue>(source.Context, expected, expression);
     }
 
     // ============ PREDICATE CHECKS ============
@@ -1417,6 +1609,56 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that an exception's Message property contains the expected substring (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> HasMessageContaining<TValue>(
+        this AndContinuation<TValue> source,
+        string expectedSubstring)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageContaining(\"{expectedSubstring}\")");
+        var newAssertion = new HasMessageContainingAssertion<TValue>(source.Context, expectedSubstring);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property contains the expected substring (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> HasMessageContaining<TValue>(
+        this OrContinuation<TValue> source,
+        string expectedSubstring)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageContaining(\"{expectedSubstring}\")");
+        var newAssertion = new HasMessageContainingAssertion<TValue>(source.Context, expectedSubstring);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property contains the expected substring using the specified comparison (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> HasMessageContaining<TValue>(
+        this AndContinuation<TValue> source,
+        string expectedSubstring,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        var newAssertion = new HasMessageContainingAssertion<TValue>(source.Context, expectedSubstring, comparison);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property contains the expected substring using the specified comparison (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> HasMessageContaining<TValue>(
+        this OrContinuation<TValue> source,
+        string expectedSubstring,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageContaining(\"{expectedSubstring}\", StringComparison.{comparison})");
+        var newAssertion = new HasMessageContainingAssertion<TValue>(source.Context, expectedSubstring, comparison);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
     /// Asserts that the exception message contains the specified substring.
     /// Alias for HasMessageContaining.
     /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;Exception&gt;().And.WithMessageContaining("error");
@@ -1502,6 +1744,56 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that an exception's Message property exactly equals the expected string (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> HasMessageEqualTo<TValue>(
+        this AndContinuation<TValue> source,
+        string expectedMessage)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\")");
+        var newAssertion = new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property exactly equals the expected string (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> HasMessageEqualTo<TValue>(
+        this OrContinuation<TValue> source,
+        string expectedMessage)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\")");
+        var newAssertion = new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property exactly equals the expected string using the specified string comparison (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> HasMessageEqualTo<TValue>(
+        this AndContinuation<TValue> source,
+        string expectedMessage,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\", StringComparison.{comparison})");
+        var newAssertion = new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage, comparison);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property exactly equals the expected string using the specified string comparison (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> HasMessageEqualTo<TValue>(
+        this OrContinuation<TValue> source,
+        string expectedMessage,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageEqualTo(\"{expectedMessage}\", StringComparison.{comparison})");
+        var newAssertion = new HasMessageEqualToAssertion<TValue>(source.Context, expectedMessage, comparison);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
     /// Asserts that an exception's Message property starts with the expected string.
     /// Works with both direct exception assertions and chained exception assertions (via .And).
     /// </summary>
@@ -1524,6 +1816,56 @@ public static class AssertionExtensions
     {
         source.Context.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\", StringComparison.{comparison})");
         return new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix,  comparison);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property starts with the expected string (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> HasMessageStartingWith<TValue>(
+        this AndContinuation<TValue> source,
+        string expectedPrefix)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\")");
+        var newAssertion = new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property starts with the expected string (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> HasMessageStartingWith<TValue>(
+        this OrContinuation<TValue> source,
+        string expectedPrefix)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\")");
+        var newAssertion = new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property starts with the expected string using the specified string comparison (And continuation overload).
+    /// </summary>
+    public static Chaining.AndAssertion<TValue> HasMessageStartingWith<TValue>(
+        this AndContinuation<TValue> source,
+        string expectedPrefix,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\", StringComparison.{comparison})");
+        var newAssertion = new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix, comparison);
+        return new Chaining.AndAssertion<TValue>(source.PreviousAssertion, newAssertion);
+    }
+
+    /// <summary>
+    /// Asserts that an exception's Message property starts with the expected string using the specified string comparison (Or continuation overload).
+    /// </summary>
+    public static Chaining.OrAssertion<TValue> HasMessageStartingWith<TValue>(
+        this OrContinuation<TValue> source,
+        string expectedPrefix,
+        StringComparison comparison)
+    {
+        source.Context.ExpressionBuilder.Append($".HasMessageStartingWith(\"{expectedPrefix}\", StringComparison.{comparison})");
+        var newAssertion = new HasMessageStartingWithAssertion<TValue>(source.Context, expectedPrefix, comparison);
+        return new Chaining.OrAssertion<TValue>(source.PreviousAssertion, newAssertion);
     }
 
     /// <summary>

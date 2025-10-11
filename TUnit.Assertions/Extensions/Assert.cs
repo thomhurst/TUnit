@@ -100,14 +100,15 @@ public static class Assert
 
     /// <summary>
     /// Creates an assertion for a non-generic IEnumerable.
-    /// Treats elements as objects for assertion purposes.
-    /// Example: await Assert.That(nonGenericCollection).HasCount(5);
+    /// Use ValueAssertion to preserve reference equality for IsSameReferenceAs checks.
+    /// For collection-specific assertions, cast to IEnumerable<object> first.
+    /// Example: await Assert.That(nonGenericCollection).IsSameReferenceAs(other);
     /// </summary>
-    public static CollectionAssertion<object> That(
+    public static ValueAssertion<System.Collections.IEnumerable> That(
         System.Collections.IEnumerable value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return new CollectionAssertion<object>(value.Cast<object>(), expression);
+        return new ValueAssertion<System.Collections.IEnumerable>(value, expression);
     }
 
     /// <summary>

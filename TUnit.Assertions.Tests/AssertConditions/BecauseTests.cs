@@ -54,10 +54,9 @@ public class BecauseTests
     public async Task Without_Because_Use_Empty_String()
     {
         var expectedMessage = """
-                              Expected variable to be equal to False
-                              
+                              Expected to be false
                               but found True
-                              
+
                               at Assert.That(variable).IsFalse()
                               """;
 
@@ -76,12 +75,11 @@ public class BecauseTests
     public async Task Apply_Because_Reasons_Only_On_Previous_Assertions()
     {
         var expectedMessage = """
-                              Expected variable to be equal to True, because we only apply it to previous assertions
-                               and to be equal to False
-                              
+                              Expected to be true, because we only apply it to previous assertions
+                              and to be false
                               but found True
-                              
-                              at Assert.That(variable).IsTrue().And.IsFalse()
+
+                              at Assert.That(variable).IsTrue().Because("we only apply it to previous assertions").And.IsFalse()
                               """;
         var because = "we only apply it to previous assertions";
         var variable = true;

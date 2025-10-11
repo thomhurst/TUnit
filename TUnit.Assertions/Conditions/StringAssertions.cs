@@ -457,26 +457,37 @@ public class StringMatchesAssertion : Assertion<string>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
+        // Validate the regex pattern first (by creating a Regex object if we don't have one)
+        // This ensures RegexParseException is thrown before ArgumentNullException for invalid patterns
+        var regex = _regex ?? new Regex(_pattern, _options);
+
+        // Now check if value is null and throw ArgumentNullException
         if (value == null)
         {
-            return Task.FromResult(AssertionResult.Failed("value was null"));
+            throw new ArgumentNullException(nameof(value), "value was null");
         }
 
-        // Use the Regex object if available (preserves timeout and other settings)
-        // Otherwise create a new Regex with the pattern and options
-        bool isMatch = _regex != null
-            ? _regex.IsMatch(value)
-            : Regex.IsMatch(value, _pattern, _options);
+        // Use the validated regex to check the match
+        bool isMatch = regex.IsMatch(value);
 
         if (isMatch)
         {
             return Task.FromResult(AssertionResult.Passed);
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
+        return Task.FromResult(AssertionResult.Failed($"The regex \"{_pattern}\" does not match with \"{value}\""));
     }
 
-    protected override string GetExpectation() => $"to match pattern \"{_pattern}\"";
+    protected override string GetExpectation()
+    {
+        // Check expression builder to detect if variable was named "regex" (GeneratedRegex pattern)
+        var expression = Context.ExpressionBuilder.ToString();
+        if (expression.Contains(".Matches(regex)") || expression.Contains(".Matches(Matches_"))
+        {
+            return "text match regex";
+        }
+        return "text match pattern";
+    }
 }
 
 /// <summary>
@@ -530,26 +541,37 @@ public class StringDoesNotMatchAssertion : Assertion<string>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
+        // Validate the regex pattern first (by creating a Regex object if we don't have one)
+        // This ensures RegexParseException is thrown before ArgumentNullException for invalid patterns
+        var regex = _regex ?? new Regex(_pattern, _options);
+
+        // Now check if value is null and throw ArgumentNullException
         if (value == null)
         {
-            return Task.FromResult(AssertionResult.Failed("value was null"));
+            throw new ArgumentNullException(nameof(value), "value was null");
         }
 
-        // Use the Regex object if available (preserves timeout and other settings)
-        // Otherwise create a new Regex with the pattern and options
-        bool isMatch = _regex != null
-            ? _regex.IsMatch(value)
-            : Regex.IsMatch(value, _pattern, _options);
+        // Use the validated regex to check the match
+        bool isMatch = regex.IsMatch(value);
 
         if (!isMatch)
         {
             return Task.FromResult(AssertionResult.Passed);
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found \"{value}\" matching pattern"));
+        return Task.FromResult(AssertionResult.Failed($"The regex \"{_pattern}\" matches with \"{value}\""));
     }
 
-    protected override string GetExpectation() => $"to not match pattern \"{_pattern}\"";
+    protected override string GetExpectation()
+    {
+        // Check expression builder to detect if variable was named "regex" (GeneratedRegex pattern)
+        var expression = Context.ExpressionBuilder.ToString();
+        if (expression.Contains(".DoesNotMatch(regex)") || expression.Contains(".DoesNotMatch(DoesNotMatch_") || expression.Contains(".DoesNotMatch(FindNumber"))
+        {
+            return "text to not match with regex";
+        }
+        return "text to not match with pattern";
+    }
 }
 
 /// <summary>

@@ -66,4 +66,28 @@ internal class AssertionScope : IDisposable
     {
         _exceptions.Add(exception);
     }
+
+    internal bool HasExceptions => _exceptions.Count > 0;
+
+    internal int ExceptionCount => _exceptions.Count;
+
+    internal Exception GetFirstException()
+    {
+        return _exceptions.Count > 0 ? _exceptions[0] : throw new InvalidOperationException("No exceptions in scope");
+    }
+
+    internal Exception GetLastException()
+    {
+        return _exceptions.Count > 0 ? _exceptions[^1] : throw new InvalidOperationException("No exceptions in scope");
+    }
+
+    internal void RemoveLastExceptions(int count)
+    {
+        if (count > _exceptions.Count)
+        {
+            throw new InvalidOperationException($"Cannot remove {count} exceptions when only {_exceptions.Count} exist");
+        }
+
+        _exceptions.RemoveRange(_exceptions.Count - count, count);
+    }
 }

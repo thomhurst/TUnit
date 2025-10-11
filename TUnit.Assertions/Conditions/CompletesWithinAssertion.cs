@@ -40,7 +40,7 @@ public class CompletesWithinActionAssertion : Assertion<object?>
 
             if (stopwatch.Elapsed > _timeout)
             {
-                return AssertionResult.Failed($"it took {stopwatch.Elapsed.TotalMilliseconds:F0} milliseconds to complete");
+                return AssertionResult.Failed("it took too long to complete");
             }
 
             return AssertionResult.Passed;
@@ -51,7 +51,7 @@ public class CompletesWithinActionAssertion : Assertion<object?>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed($"threw {ex.GetType().Name}: {ex.Message}");
+            return AssertionResult.Failed($"threw {ex.GetType().FullName}: {ex.Message}");
         }
     }
 
@@ -109,7 +109,7 @@ public class CompletesWithinAsyncAssertion : Assertion<object?>
         }
         catch (Exception ex)
         {
-            return AssertionResult.Failed($"threw {ex.GetType().Name}: {ex.Message}");
+            return AssertionResult.Failed($"threw {ex.GetType().FullName}: {ex.Message}");
         }
     }
 

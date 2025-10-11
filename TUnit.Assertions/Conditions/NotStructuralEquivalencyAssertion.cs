@@ -9,16 +9,19 @@ namespace TUnit.Assertions.Conditions;
 public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
 {
     private readonly object? _notExpected;
+    private readonly string? _notExpectedExpression;
     private bool _usePartialEquivalency;
     private readonly HashSet<string> _ignoredMembers = new();
     private readonly HashSet<Type> _ignoredTypes = new();
 
     public NotStructuralEquivalencyAssertion(
         AssertionContext<TValue> context,
-        object? notExpected)
+        object? notExpected,
+        string? notExpectedExpression = null)
         : base(context)
     {
         _notExpected = notExpected;
+        _notExpectedExpression = notExpectedExpression;
     }
 
     /// <summary>
@@ -102,5 +105,37 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         public int GetHashCode(object obj) => System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(obj);
     }
 
-    protected override string GetExpectation() => "to not be equivalent";
+    protected override string GetExpectation()
+    {
+        // Extract the source variable name from the expression builder
+        // Format: "Assert.That(variableName).IsNotEquivalentTo(...)"
+        var expressionString = Context.ExpressionBuilder.ToString();
+        var sourceVariable = ExtractSourceVariable(expressionString);
+        var notExpectedDesc = _notExpectedExpression ?? "expected value";
+
+        return $"{sourceVariable} to not be equivalent to {notExpectedDesc}";
+    }
+
+    private static string ExtractSourceVariable(string expression)
+    {
+        // Extract variable name from "Assert.That(variableName)" or similar
+        var thatIndex = expression.IndexOf(".That(");
+        if (thatIndex >= 0)
+        {
+            var startIndex = thatIndex + 6; // Length of ".That("
+            var endIndex = expression.IndexOf(')', startIndex);
+            if (endIndex > startIndex)
+            {
+                var variable = expression.Substring(startIndex, endIndex - startIndex);
+                // Handle lambda expressions like "async () => ..." by returning "value"
+                if (variable.Contains("=>") || variable.StartsWith("()"))
+                {
+                    return "value";
+                }
+                return variable;
+            }
+        }
+
+        return "value";
+    }
 }

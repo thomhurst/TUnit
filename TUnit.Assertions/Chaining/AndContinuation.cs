@@ -15,9 +15,15 @@ public class AndContinuation<TValue> : IAssertionSource<TValue>
     /// </summary>
     public AssertionContext<TValue> Context { get; }
 
-    internal AndContinuation(AssertionContext<TValue> context)
+    /// <summary>
+    /// The previous assertion in the chain that must also pass.
+    /// </summary>
+    public Assertion<TValue> PreviousAssertion { get; }
+
+    internal AndContinuation(AssertionContext<TValue> context, Assertion<TValue> previousAssertion)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
+        PreviousAssertion = previousAssertion ?? throw new ArgumentNullException(nameof(previousAssertion));
         Context.ExpressionBuilder.Append(".And");
     }
 }

@@ -13,16 +13,19 @@ namespace TUnit.Assertions.Conditions;
 public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
 {
     private readonly object? _expected;
+    private readonly string? _expectedExpression;
     private bool _usePartialEquivalency;
     private readonly HashSet<string> _ignoredMembers = new();
     private readonly HashSet<Type> _ignoredTypes = new();
 
     public StructuralEquivalencyAssertion(
         AssertionContext<TValue> context,
-        object? expected)
+        object? expected,
+        string? expectedExpression = null)
         : base(context)
     {
         _expected = expected;
+        _expectedExpression = expectedExpression;
     }
 
     /// <summary>
@@ -93,12 +96,12 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
 
         if (actual == null)
         {
-            return AssertionResult.Failed($"Property {path} did not match\nExpected: {expected}\nReceived: null");
+            return AssertionResult.Failed($"Property {path} did not match{Environment.NewLine}Expected: {expected}{Environment.NewLine}Received: null");
         }
 
         if (expected == null)
         {
-            return AssertionResult.Failed($"Property {path} did not match\nExpected: null\nReceived: {actual.GetType().Name}");
+            return AssertionResult.Failed($"Property {path} did not match{Environment.NewLine}Expected: null{Environment.NewLine}Received: {actual.GetType().Name}");
         }
 
         var actualType = actual.GetType();
@@ -109,7 +112,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         {
             if (!Equals(actual, expected))
             {
-                return AssertionResult.Failed($"Property {path} did not match\nExpected: {FormatValue(expected)}\nReceived: {FormatValue(actual)}");
+                return AssertionResult.Failed($"Property {path} did not match{Environment.NewLine}Expected: {FormatValue(expected)}{Environment.NewLine}Received: {FormatValue(actual)}");
             }
             return AssertionResult.Passed;
         }
@@ -129,14 +132,29 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
             var actualList = actualEnumerable.Cast<object?>().ToList();
             var expectedList = expectedEnumerable.Cast<object?>().ToList();
 
-            if (actualList.Count != expectedList.Count)
-            {
-                return AssertionResult.Failed($"{path}.[{actualList.Count}] did not match\nExpected: null\nReceived: {FormatValue(actualList[actualList.Count - 1])}");
-            }
+            var maxCount = Math.Max(actualList.Count, expectedList.Count);
 
-            for (int i = 0; i < actualList.Count; i++)
+            for (int i = 0; i < maxCount; i++)
             {
                 var itemPath = $"{path}.[{i}]";
+
+                // Skip if this index is ignored
+                if (_ignoredMembers.Contains(itemPath))
+                {
+                    continue;
+                }
+
+                // Check for size mismatch at this index
+                if (i >= actualList.Count)
+                {
+                    return AssertionResult.Failed($"{itemPath} did not match{Environment.NewLine}Expected: {FormatValue(expectedList[i])}{Environment.NewLine}Received: null");
+                }
+
+                if (i >= expectedList.Count)
+                {
+                    return AssertionResult.Failed($"{itemPath} did not match{Environment.NewLine}Expected: null{Environment.NewLine}Received: {FormatValue(actualList[i])}");
+                }
+
                 var result = CompareObjects(actualList[i], expectedList[i], itemPath, visited);
                 if (!result.IsPassed)
                 {
@@ -171,7 +189,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
                 _ => null
             };
 
-            if (memberType != null && _ignoredTypes.Contains(memberType))
+            if (memberType != null && ShouldIgnoreType(memberType))
             {
                 continue;
             }
@@ -198,7 +216,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
 #pragma warning restore IL2072
                 if (actualMember == null)
                 {
-                    return AssertionResult.Failed($"Property {memberPath} did not match\nExpected: {FormatValue(expectedValue)}\nReceived: null");
+                    return AssertionResult.Failed($"Property {memberPath} did not match{Environment.NewLine}Expected: {FormatValue(expectedValue)}{Environment.NewLine}Received: null");
                 }
                 actualValue = GetMemberValue(actual, actualMember);
             }
@@ -230,14 +248,21 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
                         _ => null
                     };
 
-                    if (memberType != null && _ignoredTypes.Contains(memberType))
+                    if (memberType != null && ShouldIgnoreType(memberType))
                     {
                         continue;
                     }
 
                     var memberPath = string.IsNullOrEmpty(path) ? member.Name : $"{path}.{member.Name}";
                     var actualValue = GetMemberValue(actual, member);
-                    return AssertionResult.Failed($"Property {memberPath} did not match\nExpected: null\nReceived: {actualValue?.GetType().Name ?? "null"}");
+
+                    // Skip properties with null values - they're equivalent to not having the property
+                    if (actualValue == null)
+                    {
+                        continue;
+                    }
+
+                    return AssertionResult.Failed($"Property {memberPath} did not match{Environment.NewLine}Expected: null{Environment.NewLine}Received: {actualValue.GetType().Name}");
                 }
             }
         }
@@ -250,6 +275,24 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         return type.IsPrimitive || type.IsEnum || type == typeof(string) || type == typeof(decimal)
                || type == typeof(DateTime) || type == typeof(DateTimeOffset) || type == typeof(TimeSpan)
                || type == typeof(Guid);
+    }
+
+    private bool ShouldIgnoreType(Type type)
+    {
+        // Check if the type itself should be ignored
+        if (_ignoredTypes.Contains(type))
+        {
+            return true;
+        }
+
+        // Check if the type is a nullable value type and its underlying type should be ignored
+        var underlyingType = Nullable.GetUnderlyingType(type);
+        if (underlyingType != null && _ignoredTypes.Contains(underlyingType))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private static List<MemberInfo> GetMembersToCompare([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields)] Type type)
@@ -297,7 +340,39 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         return value.ToString() ?? "null";
     }
 
-    protected override string GetExpectation() => "to be equivalent";
+    protected override string GetExpectation()
+    {
+        // Extract the source variable name from the expression builder
+        // Format: "Assert.That(variableName).IsEquivalentTo(...)"
+        var expressionString = Context.ExpressionBuilder.ToString();
+        var sourceVariable = ExtractSourceVariable(expressionString);
+        var expectedDesc = _expectedExpression ?? "expected value";
+
+        return $"{sourceVariable} to be equivalent to {expectedDesc}";
+    }
+
+    private static string ExtractSourceVariable(string expression)
+    {
+        // Extract variable name from "Assert.That(variableName)" or similar
+        var thatIndex = expression.IndexOf(".That(");
+        if (thatIndex >= 0)
+        {
+            var startIndex = thatIndex + 6; // Length of ".That("
+            var endIndex = expression.IndexOf(')', startIndex);
+            if (endIndex > startIndex)
+            {
+                var variable = expression.Substring(startIndex, endIndex - startIndex);
+                // Handle lambda expressions like "async () => ..." by returning "value"
+                if (variable.Contains("=>") || variable.StartsWith("()"))
+                {
+                    return "value";
+                }
+                return variable;
+            }
+        }
+
+        return "value";
+    }
 
     private sealed class ReferenceEqualityComparer : IEqualityComparer<object>
     {

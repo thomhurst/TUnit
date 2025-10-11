@@ -11,14 +11,9 @@ public partial class Throws
             var paramName1 = "foo";
             var paramName2 = "bar";
             var expectedMessage = """
-                                  Expected action to throw an ArgumentException which param name equals "bar"
-                                  
-                                  but it differs at index 0:
-                                      ↓
-                                     "foo"
-                                     "bar"
-                                      ↑
-                                  
+                                  Expected to throw exactly ArgumentException
+                                  but ArgumentException parameter name "foo" does not equal "bar"
+
                                   at Assert.That(action).ThrowsExactly<ArgumentException>().WithParameterName(paramName2)
                                   """;
             ArgumentException exception = new(string.Empty, paramName1);

@@ -151,16 +151,15 @@ public class StringEqualsAssertionTests
                      """.ReplaceLineEndings(" ");
 
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(value1).IsEqualTo(value2));
-        await TUnitAssert.That(exception!.Message).IsEqualTo("""
-                                                        Expected value1 to be equal to "Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se…
-                                                        
-                                                        but found "Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se… which differs at index 556:
-                                                                                    ↓
-                                                           "Consequat odio ea veniam. Amet enim in gubergren s…"
-                                                           "Consequat odio ea veniam! Amet enim in gubergren s…"
-                                                                                    ↑
-                                                        
-                                                        at Assert.That(value1).IsEqualTo(value2)
-                                                        """);
+
+        var expectedMessage = $"Expected to be equal to \"Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se…{Environment.NewLine}" +
+                              $"but found \"Lorem ipsum dolor sit amet diam duo amet sea rebum.  Et voluptua ex voluptua no praesent diam eu se… which differs at index 556:{Environment.NewLine}" +
+                              $"                            ↓{Environment.NewLine}" +
+                              $"   \"Consequat odio ea veniam. Amet enim in gubergren s…\"{Environment.NewLine}" +
+                              $"   \"Consequat odio ea veniam! Amet enim in gubergren s…\"{Environment.NewLine}" +
+                              $"                            ↑{Environment.NewLine}" +
+                              $"{Environment.NewLine}" +
+                              $"at Assert.That(value1).IsEqualTo(value2)";
+        await TUnitAssert.That(exception!.Message).IsEqualTo(expectedMessage);
     }
 }

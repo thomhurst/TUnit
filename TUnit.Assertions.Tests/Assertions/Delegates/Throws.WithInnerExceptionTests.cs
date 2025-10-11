@@ -11,14 +11,9 @@ public partial class Throws
             var outerMessage = "foo";
             var expectedInnerMessage = "bar";
             var expectedMessage = """
-                                  Expected action to throw an Exception which message equals "bar"
-                                  
-                                  but it differs at index 0:
-                                      ↓
-                                     "some different inner message"
-                                     "bar"
-                                      ↑
-                                  
+                                  Expected to throw Exception with message "bar"
+                                  but exception message "some different inner message" does not equal "bar"
+
                                   at Assert.That(action).ThrowsException().WithInnerException().WithMessage(expectedInnerMessage)
                                   """;
             Exception exception = CreateCustomException(outerMessage,
@@ -43,7 +38,7 @@ public partial class Throws
 
             var result = await Assert.That(action).Throws<CustomException>().WithInnerException();
 
-            await Assert.That(result).IsSameReferenceAs(exception);
+            await Assert.That(result).IsSameReferenceAs(exception.InnerException);
         }
 
         [Test]

@@ -9,10 +9,9 @@ public partial class Throws
         public async Task Fails_For_Code_With_Other_Exceptions()
         {
             var expectedMessage = """
-                                  Expected action to throw a CustomException
-                                  
-                                  but an OtherException was thrown
-                                  
+                                  Expected to throw CustomException
+                                  but wrong exception type: OtherException instead of CustomException
+
                                   at Assert.That(action).Throws<CustomException>()
                                   """;
             Exception exception = CreateOtherException();
@@ -29,10 +28,9 @@ public partial class Throws
         public async Task Fails_For_Code_With_Supertype_Exceptions()
         {
             var expectedMessage = """
-                                  Expected action to throw a SubCustomException
-                                  
-                                  but a CustomException was thrown
-                                  
+                                  Expected to throw SubCustomException
+                                  but wrong exception type: CustomException instead of SubCustomException
+
                                   at Assert.That(action).Throws<SubCustomException>()
                                   """;
             Exception exception = CreateCustomException();
@@ -49,10 +47,9 @@ public partial class Throws
         public async Task Fails_For_Code_Without_Exceptions()
         {
             var expectedMessage = """
-                                  Expected action to throw a CustomException
-                                  
-                                  but none was thrown
-                                  
+                                  Expected to throw CustomException
+                                  but no exception was thrown
+
                                   at Assert.That(action).Throws<CustomException>()
                                   """;
             var action = () => { };

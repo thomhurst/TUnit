@@ -10,10 +10,9 @@ public partial class Throws
         public async Task Fails_For_Code_Without_Exceptions()
         {
             var expectedMessage = """
-                                  Expected action to throw an exception
-                                  
-                                  but none was thrown
-                                  
+                                  Expected to throw Exception
+                                  but no exception was thrown
+
                                   at Assert.That(action).ThrowsException()
                                   """;
             var action = () => { };

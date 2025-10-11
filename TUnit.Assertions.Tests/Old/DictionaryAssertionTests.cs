@@ -13,7 +13,7 @@ public class DictionaryAssertionTests
             ["Blah"] = []
         };
 
-        await TUnitAssert.That((IReadOnlyDictionary<string, string>)dictionary).ContainsKey("Blah");
+        await TUnitAssert.That(dictionary).ContainsKey("Blah");
     }
 
     [Test]

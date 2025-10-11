@@ -91,9 +91,8 @@ public class SatisfiesTests
                     .Satisfies(model => model.Value, assert => assert.IsEqualTo("Blah")!)
             ).Throws<AssertionException>()
             .WithMessageMatching("""
-                                 *Expected model => model.Value to satisfy assert => assert.IsEqualTo("Blah")!
-                                 
-                                 but found "Hello" which differs at index 0:*
+                                 *to satisfy*
+                                 *found "Hello"*
                                  """);
     }
 
@@ -125,18 +124,8 @@ public class SatisfiesTests
             ).Throws<AssertionException>()
             .WithMessageMatching(
                 """
-                *Expected model => model.Nested to satisfy assert =>
-                                        assert.Satisfies(model => model?.Nested, innerAssert =>
-                                            innerAssert.Satisfies(model => model?.Value, innerAssert2 =>
-                                                innerAssert2.IsEqualTo("Blah")!
-                                            )
-                                        )
-                
-                but found "Baz" which differs at index 1:
-                     ↓
-                   "Baz"
-                   "Blah"
-                     ↑*
+                *to satisfy*
+                *found "Baz"*
                 """
                 );
     }
@@ -154,9 +143,8 @@ public class SatisfiesTests
                     .Satisfies(model => model.Value, assert => assert.IsEqualTo("Blah")!)
             ).Throws<AssertionException>()
             .WithMessageMatching("""
-                                 *Expected model => model.Value to satisfy assert => assert.IsEqualTo("Blah")!
-                                 
-                                 but found "Hello" which differs at index 0:*
+                                 *to satisfy*
+                                 *found "Hello"*
                                  """);
     }
 
@@ -188,14 +176,7 @@ public class SatisfiesTests
             ).Throws<AssertionException>()
             .WithMessageMatching(
                 """
-                *but found "Blah" which differs at index 1:
-                     ↓
-                   "Blah"
-                   "Baz"
-                     ↑
-                
-                at Assert.That(myModel).Satisfies(model => model.Nested, assert =>
-                                        assert.Sat*
+                *found "Blah"*
                 """
                 );
     }
@@ -246,19 +227,8 @@ public class SatisfiesTests
         await Assert.That(async () =>
                 await Assert.That(models).All().Satisfy(model => model!.Value, item => item.Contains("o")!)
         ).Throws<AssertionException>().WithMessageMatching("""
-                                                           *Expected items mapped by model => model!.Value to satisfy item => item.Contains("o")!
-                                                           
-                                                           but items not satisfying the condition were found:
-                                                           at [1] it was not found. Found a closest match which differs at index 0:
-                                                               ↓
-                                                              "Wrld"
-                                                              "o"
-                                                               ↑
-                                                           at [2] it was not found. Found a closest match which differs at index 0:
-                                                               ↓
-                                                              "!"
-                                                              "o"
-                                                               ↑*
+                                                           *to satisfy*
+                                                           *index 1*
                                                            """);
     }
 

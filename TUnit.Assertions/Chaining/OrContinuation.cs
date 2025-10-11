@@ -15,9 +15,15 @@ public class OrContinuation<TValue> : IAssertionSource<TValue>
     /// </summary>
     public AssertionContext<TValue> Context { get; }
 
-    internal OrContinuation(AssertionContext<TValue> context)
+    /// <summary>
+    /// The previous assertion in the chain that could also pass.
+    /// </summary>
+    public Assertion<TValue> PreviousAssertion { get; }
+
+    internal OrContinuation(AssertionContext<TValue> context, Assertion<TValue> previousAssertion)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
+        PreviousAssertion = previousAssertion ?? throw new ArgumentNullException(nameof(previousAssertion));
         Context.ExpressionBuilder.Append(".Or");
     }
 }

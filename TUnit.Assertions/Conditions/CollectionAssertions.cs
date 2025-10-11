@@ -330,7 +330,7 @@ public class CollectionAllSatisfyHelper<TCollection, TItem>
     /// Example: .All().Satisfy(item => item.IsNotNull())
     /// </summary>
     public CollectionAllSatisfyAssertion<TCollection, TItem> Satisfy(
-        Action<IAssertionSource<TItem>> assertion,
+        Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
     {
         _context.ExpressionBuilder.Append($".Satisfy({expression})");
@@ -556,12 +556,12 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Assertio
 public class CollectionAllSatisfyAssertion<TCollection, TItem> : Assertion<TCollection>
     where TCollection : IEnumerable<TItem>
 {
-    private readonly Action<IAssertionSource<TItem>> _assertion;
+    private readonly Func<IAssertionSource<TItem>, Assertion<TItem>?> _assertion;
     private readonly string _assertionDescription;
 
     public CollectionAllSatisfyAssertion(
         AssertionContext<TCollection> context,
-        Action<IAssertionSource<TItem>> assertion,
+        Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
         string assertionDescription)
         : base(context)
     {
@@ -569,19 +569,19 @@ public class CollectionAllSatisfyAssertion<TCollection, TItem> : Assertion<TColl
         _assertionDescription = assertionDescription;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return AssertionResult.Failed($"threw {exception.GetType().Name}");
         }
 
         if (value == null)
         {
-            return Task.FromResult(AssertionResult.Failed("collection was null"));
+            return AssertionResult.Failed("collection was null");
         }
 
         int index = 0;
@@ -590,16 +590,21 @@ public class CollectionAllSatisfyAssertion<TCollection, TItem> : Assertion<TColl
             var itemAssertion = new ValueAssertion<TItem>(item, $"item[{index}]");
             try
             {
-                _assertion(itemAssertion);
+                // Execute the assertion function and await the result
+                var assertion = _assertion(itemAssertion);
+                if (assertion != null)
+                {
+                    await assertion.AssertAsync();
+                }
             }
             catch (Exception ex)
             {
-                return Task.FromResult(AssertionResult.Failed($"item at index {index} failed assertion: {ex.Message}"));
+                return AssertionResult.Failed($"item at index {index} failed assertion: {ex.Message}");
             }
             index++;
         }
 
-        return Task.FromResult(AssertionResult.Passed);
+        return AssertionResult.Passed;
     }
 
     protected override string GetExpectation() => $"all items to satisfy {_assertionDescription}";
