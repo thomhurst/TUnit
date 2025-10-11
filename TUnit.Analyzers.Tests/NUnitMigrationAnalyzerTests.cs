@@ -138,11 +138,12 @@ public class NUnitMigrationAnalyzerTests
         await CodeFixer.VerifyCodeFixAsync(
             """
                 using NUnit.Framework;
+                using NUnit.Framework.Legacy;
 
                 {|#0:public class MyClass|}
                 {
                     [Test]
-                    public void MyMethod() 
+                    public void MyMethod()
                     {
                         ClassicAssert.AreEqual(5, 5);
                         ClassicAssert.IsTrue(true);
@@ -160,7 +161,7 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    public void MyMethod() 
+                    public void MyMethod()
                     {
                         await Assert.That(5).IsEqualTo(5);
                         await Assert.That(true).IsTrue();
@@ -260,16 +261,12 @@ public class NUnitMigrationAnalyzerTests
     
     private static void ConfigureNUnitTest(Verifier.Test test)
     {
-        var globalUsings = ("GlobalUsings.cs", SourceText.From("global using NUnit.Framework;"));
-        test.TestState.Sources.Add(globalUsings);
-        test.TestState.AdditionalReferences.Add(typeof(TestAttribute).Assembly);
+        test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
     }
-    
+
     private static void ConfigureNUnitTest(CodeFixer.Test test)
     {
-        var globalUsings = ("GlobalUsings.cs", SourceText.From("global using NUnit.Framework;"));
-        test.TestState.Sources.Add(globalUsings);
-        test.TestState.AdditionalReferences.Add(typeof(TestAttribute).Assembly);
-        test.FixedState.AdditionalReferences.Add(typeof(TestAttribute).Assembly);
+        test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
+        test.FixedState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
     }
 }

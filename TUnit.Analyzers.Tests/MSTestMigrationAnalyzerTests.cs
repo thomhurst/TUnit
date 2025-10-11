@@ -301,15 +301,11 @@ public class MSTestMigrationAnalyzerTests
     
     private static void ConfigureMSTestTest(Verifier.Test test)
     {
-        var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Microsoft.VisualStudio.TestTools.UnitTesting;"));
-        test.TestState.Sources.Add(globalUsings);
         test.TestState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);
     }
-    
+
     private static void ConfigureMSTestTest(CodeFixer.Test test)
     {
-        var globalUsings = ("GlobalUsings.cs", SourceText.From("global using Microsoft.VisualStudio.TestTools.UnitTesting;"));
-        test.TestState.Sources.Add(globalUsings);
         test.TestState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);
         test.FixedState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);
     }

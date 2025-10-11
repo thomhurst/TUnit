@@ -24,8 +24,19 @@ public class NUnitMigrationAnalyzer : BaseMigrationAnalyzer
         {
             return false;
         }
-        
-        return namespaceName == "NUnit.Framework" || 
+
+        return namespaceName == "NUnit.Framework" ||
                namespaceName.StartsWith("NUnit.Framework.");
+    }
+
+    protected override bool IsFrameworkTypeName(string typeName)
+    {
+        // Check for NUnit assertion types by name (fallback when semantic model doesn't resolve)
+        return typeName == "Assert" ||
+               typeName == "ClassicAssert" ||
+               typeName == "CollectionAssert" ||
+               typeName == "StringAssert" ||
+               typeName == "FileAssert" ||
+               typeName == "DirectoryAssert";
     }
 }

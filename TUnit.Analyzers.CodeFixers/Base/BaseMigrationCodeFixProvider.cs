@@ -48,29 +48,29 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
 
         try
         {
-            // Remove framework usings and add TUnit usings
-            compilationUnit = MigrationHelpers.RemoveFrameworkUsings(compilationUnit, FrameworkName);
-            compilationUnit = MigrationHelpers.AddTUnitUsings(compilationUnit);
-            
-            // Convert attributes
-            var attributeRewriter = CreateAttributeRewriter();
-            compilationUnit = (CompilationUnitSyntax)attributeRewriter.Visit(compilationUnit);
-            
-            // Convert assertions
+            // Convert assertions FIRST (while semantic model still matches the syntax tree)
             var assertionRewriter = CreateAssertionRewriter(semanticModel);
             compilationUnit = (CompilationUnitSyntax)assertionRewriter.Visit(compilationUnit);
-            
-            // Framework-specific conversions
+
+            // Framework-specific conversions (also use semantic model while it still matches)
             compilationUnit = ApplyFrameworkSpecificConversions(compilationUnit, semanticModel);
-            
+
             // Remove unnecessary base classes and interfaces
             var baseTypeRewriter = CreateBaseTypeRewriter(semanticModel);
             compilationUnit = (CompilationUnitSyntax)baseTypeRewriter.Visit(compilationUnit);
-            
+
             // Update lifecycle methods
             var lifecycleRewriter = CreateLifecycleRewriter();
             compilationUnit = (CompilationUnitSyntax)lifecycleRewriter.Visit(compilationUnit);
-            
+
+            // Convert attributes
+            var attributeRewriter = CreateAttributeRewriter();
+            compilationUnit = (CompilationUnitSyntax)attributeRewriter.Visit(compilationUnit);
+
+            // Remove framework usings and add TUnit usings (do this LAST)
+            compilationUnit = MigrationHelpers.RemoveFrameworkUsings(compilationUnit, FrameworkName);
+            compilationUnit = MigrationHelpers.AddTUnitUsings(compilationUnit);
+
             return document.WithSyntaxRoot(compilationUnit);
         }
         catch

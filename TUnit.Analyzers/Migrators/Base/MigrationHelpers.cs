@@ -159,7 +159,7 @@ public static class MigrationHelpers
         var namespacesToRemove = framework switch
         {
             "XUnit" => new[] { "Xunit", "Xunit.Abstractions" },
-            "NUnit" => new[] { "NUnit.Framework" },
+            "NUnit" => new[] { "NUnit.Framework", "NUnit.Framework.Legacy" },
             "MSTest" => new[] { "Microsoft.VisualStudio.TestTools.UnitTesting" },
             _ => Array.Empty<string>()
         };
@@ -168,7 +168,7 @@ public static class MigrationHelpers
             .Where(u =>
             {
                 var nameString = u.Name?.ToString() ?? "";
-                return !namespacesToRemove.Any(ns => 
+                return !namespacesToRemove.Any(ns =>
                     nameString == ns || nameString.StartsWith(ns + "."));
             })
             .ToArray();
@@ -179,22 +179,22 @@ public static class MigrationHelpers
     public static CompilationUnitSyntax AddTUnitUsings(CompilationUnitSyntax compilationUnit)
     {
         var tunitUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Core"));
-        var assertionsUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions"))
+        var assertionsUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Assert"))
             .WithStaticKeyword(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
         var extensionsUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Extensions"));
-        
+
         var existingUsings = compilationUnit.Usings.ToList();
-        
+
         if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Core"))
         {
             existingUsings.Add(tunitUsing);
         }
-        
-        if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Assertions" && u.StaticKeyword.IsKind(SyntaxKind.StaticKeyword)))
+
+        if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Assertions.Assert" && u.StaticKeyword.IsKind(SyntaxKind.StaticKeyword)))
         {
             existingUsings.Add(assertionsUsing);
         }
-        
+
         if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Assertions.Extensions"))
         {
             existingUsings.Add(extensionsUsing);

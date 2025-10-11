@@ -23,8 +23,16 @@ public class MSTestMigrationAnalyzer : BaseMigrationAnalyzer
         {
             return false;
         }
-        
-        return namespaceName == "Microsoft.VisualStudio.TestTools.UnitTesting" || 
+
+        return namespaceName == "Microsoft.VisualStudio.TestTools.UnitTesting" ||
                namespaceName.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting.");
+    }
+
+    protected override bool IsFrameworkTypeName(string typeName)
+    {
+        // Check for MSTest assertion types by name (fallback when semantic model doesn't resolve)
+        return typeName == "Assert" ||
+               typeName == "CollectionAssert" ||
+               typeName == "StringAssert";
     }
 }

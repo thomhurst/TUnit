@@ -138,9 +138,9 @@ public class NUnitAssertionRewriter : AssertionRewriter
             return ConvertAssertThat(invocation);
         }
         
-        // Handle classic assertions like Assert.AreEqual, Assert.IsTrue, etc.
+        // Handle classic assertions like Assert.AreEqual, ClassicAssert.AreEqual, etc.
         if (invocation.Expression is MemberAccessExpressionSyntax classicMemberAccess &&
-            classicMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" })
+            classicMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Assert" or "ClassicAssert" })
         {
             return ConvertClassicAssertion(invocation, classicMemberAccess.Name.Identifier.Text);
         }

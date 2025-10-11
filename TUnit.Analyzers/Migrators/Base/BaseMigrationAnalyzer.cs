@@ -1,8 +1,11 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Text;
 
 namespace TUnit.Analyzers.Migrators.Base;
 
@@ -39,12 +42,14 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
+            // Priority 1: Framework interfaces on the class
             if (HasFrameworkInterfaces(symbol))
             {
                 Flag(context, classDeclarationSyntax.GetLocation());
                 return;
             }
 
+            // Priority 2: Framework attributes on the class
             var classAttributeLocation = AnalyzeAttributes(context, symbol, classDeclarationSyntax);
             if (classAttributeLocation != null)
             {
@@ -52,6 +57,24 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
+            // Priority 3: Framework types in the class (e.g., Assert calls)
+            // Flag on the class declaration so the entire class can be migrated
+            if (HasFrameworkTypes(context, symbol, classDeclarationSyntax))
+            {
+                // Flag the class declaration line: from start of modifiers to end of class name
+                var classHeaderSpan = TextSpan.FromBounds(
+                    classDeclarationSyntax.SpanStart,
+                    classDeclarationSyntax.Identifier.Span.End);
+                var classHeaderLocation = Location.Create(
+                    classDeclarationSyntax.SyntaxTree,
+                    classHeaderSpan);
+                Flag(context, classHeaderLocation);
+                return;
+            }
+
+            // Priority 4: Framework attributes on methods
+            // Collect all methods with framework attributes
+            var methodsWithFrameworkAttributes = new List<(IMethodSymbol symbol, Location location)>();
             foreach (var methodSymbol in symbol.GetMembers().OfType<IMethodSymbol>())
             {
                 var syntaxReferences = methodSymbol.DeclaringSyntaxReferences;
@@ -64,21 +87,34 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 var methodAttributeLocation = AnalyzeAttributes(context, methodSymbol, methodSyntax);
                 if (methodAttributeLocation != null)
                 {
-                    Flag(context, methodAttributeLocation);
-                    return;
+                    methodsWithFrameworkAttributes.Add((methodSymbol, methodAttributeLocation));
                 }
             }
 
+            // If multiple methods have framework attributes, flag the class declaration
+            // If only one method has framework attributes, flag that specific attribute
+            if (methodsWithFrameworkAttributes.Count > 1)
+            {
+                var classHeaderSpan = TextSpan.FromBounds(
+                    classDeclarationSyntax.SpanStart,
+                    classDeclarationSyntax.Identifier.Span.End);
+                var classHeaderLocation = Location.Create(
+                    classDeclarationSyntax.SyntaxTree,
+                    classHeaderSpan);
+                Flag(context, classHeaderLocation);
+                return;
+            }
+            else if (methodsWithFrameworkAttributes.Count == 1)
+            {
+                Flag(context, methodsWithFrameworkAttributes[0].location);
+                return;
+            }
+
+            // Priority 5 (lowest): Using directives - only flag if nothing else was found
             var usingLocation = CheckUsingDirectives(classDeclarationSyntax);
             if (usingLocation != null)
             {
                 Flag(context, usingLocation);
-                return;
-            }
-
-            if (HasFrameworkTypes(symbol))
-            {
-                Flag(context, classDeclarationSyntax.GetLocation());
                 return;
             }
         }
@@ -110,10 +146,11 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
         return null;
     }
 
-    protected virtual bool HasFrameworkTypes(INamedTypeSymbol namedTypeSymbol)
+    protected virtual bool HasFrameworkTypes(SyntaxNodeAnalysisContext context, INamedTypeSymbol namedTypeSymbol, ClassDeclarationSyntax classDeclarationSyntax)
     {
         var members = namedTypeSymbol.GetMembers();
 
+        // Check properties, return types, and fields
         var types = members.OfType<IPropertySymbol>()
                 .Where(x => IsFrameworkType(x.Type))
                 .Select(x => x.Type)
@@ -125,7 +162,49 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 .Select(x => x.Type))
             .ToArray();
 
-        return types.Any();
+        if (types.Any())
+        {
+            return true;
+        }
+
+        // Check for framework type usage in method bodies (e.g., Assert.AreEqual(), CollectionAssert.Contains())
+        var invocationExpressions = classDeclarationSyntax
+            .DescendantNodes()
+            .OfType<InvocationExpressionSyntax>();
+
+        foreach (var invocation in invocationExpressions)
+        {
+            var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation);
+            if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+            {
+                // Check if the method belongs to a framework type
+                if (IsFrameworkType(methodSymbol.ContainingType))
+                {
+                    return true;
+                }
+            }
+            else if (symbolInfo.Symbol == null)
+            {
+                // Fallback: if symbol resolution fails completely, check the syntax directly
+                // This handles cases where the semantic model hasn't fully resolved types
+                if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
+                {
+                    var typeExpression = memberAccess.Expression.ToString();
+                    if (IsFrameworkTypeName(typeExpression))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    protected virtual bool IsFrameworkTypeName(string typeName)
+    {
+        // Override in derived classes to provide framework-specific type names
+        return false;
     }
 
     protected virtual bool IsFrameworkType(ITypeSymbol type)
@@ -151,10 +230,12 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
                 if (attributeSyntax != null)
                 {
                     // Get the parent AttributeListSyntax to include the brackets [...]
-                    var attributeListSyntax = attributeSyntax.Parent;
-                    if (attributeListSyntax != null)
+                    if (attributeSyntax.Parent is AttributeListSyntax attributeListSyntax)
                     {
-                        return attributeListSyntax.GetLocation();
+                        // Return the location including brackets but excluding leading trivia
+                        return Location.Create(
+                            attributeListSyntax.SyntaxTree,
+                            attributeListSyntax.Span);
                     }
                     return attributeSyntax.GetLocation();
                 }
