@@ -84,7 +84,7 @@
     <PackageVersion Include="TUnit" Version="0.67.19" />
     <PackageVersion Include="TUnit.Core" Version="0.67.19" />
     <PackageVersion Include="TUnit.Assertions" Version="0.67.19" />
-    <PackageVersion Include="Verify.TUnit" Version="30.20.1" />
+    <PackageVersion Include="Verify.TUnit" Version="31.0.1" />
     <PackageVersion Include="Vogen" Version="8.0.2" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />
