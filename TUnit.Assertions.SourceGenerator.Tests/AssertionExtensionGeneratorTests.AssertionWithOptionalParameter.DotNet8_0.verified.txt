@@ -1,0 +1,27 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated extension methods for NotEqualsAssertion.
+/// </summary>
+public static class NotEqualsAssertionExtensions
+{
+
+    /// <summary>
+    /// Extension method for NotEqualsAssertion.
+    /// </summary>
+    public static NotEqualsAssertion<TValue> IsNotEqualTo<TValue>(this IAssertionSource<TValue> source, TValue notExpected, System.Collections.Generic.IEqualityComparer<TValue>? comparer = null, [CallerArgumentExpression(nameof(notExpected))] string? notExpectedExpression = null, [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsNotEqualTo({notExpectedExpression}, {comparerExpression})");
+        return new NotEqualsAssertion<TValue>(source.Context, notExpected, comparer);
+    }
+}
+
+]

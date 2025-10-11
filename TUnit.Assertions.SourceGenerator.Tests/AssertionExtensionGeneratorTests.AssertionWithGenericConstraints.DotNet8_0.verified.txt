@@ -1,0 +1,28 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated extension methods for GreaterThanAssertion.
+/// </summary>
+public static class GreaterThanAssertionExtensions
+{
+
+    /// <summary>
+    /// Extension method for GreaterThanAssertion.
+    /// </summary>
+    public static GreaterThanAssertion<TValue> IsGreaterThan<TValue>(this IAssertionSource<TValue> source, TValue expected, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
+        where TValue : System.IComparable<TValue>
+    {
+        source.Context.ExpressionBuilder.Append($".IsGreaterThan({expectedExpression})");
+        return new GreaterThanAssertion<TValue>(source.Context, expected);
+    }
+}
+
+]

@@ -1,9 +1,11 @@
 using System.Net;
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
+[AssertionExtension("IsSuccessStatusCode")]
 public class IsSuccessStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsSuccessStatusCodeAssertion(
@@ -34,6 +36,7 @@ public class IsSuccessStatusCodeAssertion : Assertion<HttpStatusCode>
     protected override string GetExpectation() => "to be a success status code (2xx)";
 }
 
+[AssertionExtension("IsNotSuccessStatusCode")]
 public class IsNotSuccessStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsNotSuccessStatusCodeAssertion(
@@ -64,6 +67,7 @@ public class IsNotSuccessStatusCodeAssertion : Assertion<HttpStatusCode>
     protected override string GetExpectation() => "to not be a success status code";
 }
 
+[AssertionExtension("IsClientErrorStatusCode")]
 public class IsClientErrorStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsClientErrorStatusCodeAssertion(
@@ -94,6 +98,7 @@ public class IsClientErrorStatusCodeAssertion : Assertion<HttpStatusCode>
     protected override string GetExpectation() => "to be a client error status code (4xx)";
 }
 
+[AssertionExtension("IsServerErrorStatusCode")]
 public class IsServerErrorStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsServerErrorStatusCodeAssertion(
@@ -124,6 +129,7 @@ public class IsServerErrorStatusCodeAssertion : Assertion<HttpStatusCode>
     protected override string GetExpectation() => "to be a server error status code (5xx)";
 }
 
+[AssertionExtension("IsRedirectionStatusCode")]
 public class IsRedirectionStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsRedirectionStatusCodeAssertion(
@@ -154,6 +160,7 @@ public class IsRedirectionStatusCodeAssertion : Assertion<HttpStatusCode>
     protected override string GetExpectation() => "to be a redirection status code (3xx)";
 }
 
+[AssertionExtension("IsInformationalStatusCode")]
 public class IsInformationalStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsInformationalStatusCodeAssertion(
@@ -184,6 +191,7 @@ public class IsInformationalStatusCodeAssertion : Assertion<HttpStatusCode>
     protected override string GetExpectation() => "to be an informational status code (1xx)";
 }
 
+[AssertionExtension("IsErrorStatusCode")]
 public class IsErrorStatusCodeAssertion : Assertion<HttpStatusCode>
 {
     public IsErrorStatusCodeAssertion(

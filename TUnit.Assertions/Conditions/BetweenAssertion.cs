@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -7,6 +8,7 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a value is between a minimum and maximum.
 /// Demonstrates custom method for inclusive/exclusive bounds.
 /// </summary>
+[AssertionExtension("IsBetween")]
 public class BetweenAssertion<TValue> : Assertion<TValue>
     where TValue : IComparable<TValue>
 {

@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -7,6 +8,7 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a value is greater than a minimum value.
 /// Works for any comparable type.
 /// </summary>
+[AssertionExtension("IsGreaterThan")]
 public class GreaterThanAssertion<TValue> : Assertion<TValue>
     where TValue : IComparable<TValue>
 {
@@ -44,6 +46,7 @@ public class GreaterThanAssertion<TValue> : Assertion<TValue>
 /// <summary>
 /// Asserts that a value is greater than or equal to a minimum value.
 /// </summary>
+[AssertionExtension("IsGreaterThanOrEqualTo")]
 public class GreaterThanOrEqualAssertion<TValue> : Assertion<TValue>
     where TValue : IComparable<TValue>
 {

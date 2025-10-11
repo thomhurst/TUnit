@@ -1,7 +1,9 @@
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
+[AssertionExtension("CanBeCanceled")]
 public class CanBeCanceledAssertion : Assertion<CancellationToken>
 {
     public CanBeCanceledAssertion(AssertionContext<CancellationToken> context) : base(context) { }
@@ -14,6 +16,7 @@ public class CanBeCanceledAssertion : Assertion<CancellationToken>
     }
 }
 
+[AssertionExtension("CannotBeCanceled")]
 public class CannotBeCanceledAssertion : Assertion<CancellationToken>
 {
     public CannotBeCanceledAssertion(AssertionContext<CancellationToken> context) : base(context) { }
@@ -26,6 +29,7 @@ public class CannotBeCanceledAssertion : Assertion<CancellationToken>
     }
 }
 
+[AssertionExtension("IsCancellationRequested")]
 public class IsCancellationRequestedAssertion : Assertion<CancellationToken>
 {
     public IsCancellationRequestedAssertion(AssertionContext<CancellationToken> context) : base(context) { }
@@ -38,6 +42,7 @@ public class IsCancellationRequestedAssertion : Assertion<CancellationToken>
     }
 }
 
+[AssertionExtension("IsNotCancellationRequested")]
 public class IsNotCancellationRequestedAssertion : Assertion<CancellationToken>
 {
     public IsNotCancellationRequestedAssertion(AssertionContext<CancellationToken> context) : base(context) { }
@@ -50,6 +55,7 @@ public class IsNotCancellationRequestedAssertion : Assertion<CancellationToken>
     }
 }
 
+[AssertionExtension("IsNone")]
 public class IsNoneAssertion : Assertion<CancellationToken>
 {
     public IsNoneAssertion(AssertionContext<CancellationToken> context) : base(context) { }
@@ -62,6 +68,7 @@ public class IsNoneAssertion : Assertion<CancellationToken>
     }
 }
 
+[AssertionExtension("IsNotNone")]
 public class IsNotNoneAssertion : Assertion<CancellationToken>
 {
     public IsNotNoneAssertion(AssertionContext<CancellationToken> context) : base(context) { }

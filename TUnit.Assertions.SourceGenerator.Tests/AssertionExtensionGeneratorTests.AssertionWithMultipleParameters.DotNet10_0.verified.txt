@@ -1,0 +1,28 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated extension methods for BetweenAssertion.
+/// </summary>
+public static class BetweenAssertionExtensions
+{
+
+    /// <summary>
+    /// Extension method for BetweenAssertion.
+    /// </summary>
+    public static BetweenAssertion<TValue> IsBetween<TValue>(this IAssertionSource<TValue> source, TValue lowerBound, TValue upperBound, [CallerArgumentExpression(nameof(lowerBound))] string? lowerBoundExpression = null, [CallerArgumentExpression(nameof(upperBound))] string? upperBoundExpression = null)
+        where TValue : System.IComparable<TValue>
+    {
+        source.Context.ExpressionBuilder.Append($".IsBetween({lowerBoundExpression}, {upperBoundExpression})");
+        return new BetweenAssertion<TValue>(source.Context, lowerBound, upperBound);
+    }
+}
+
+]

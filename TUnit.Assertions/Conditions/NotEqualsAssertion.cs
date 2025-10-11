@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -8,6 +9,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a value is NOT equal to an expected value.
 /// </summary>
+[AssertionExtension("IsNotEqualTo")]
 public class NotEqualsAssertion<TValue> : Assertion<TValue>
 {
     private readonly TValue _notExpected;

@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -6,6 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a value is less than a maximum value.
 /// </summary>
+[AssertionExtension("IsLessThan")]
 public class LessThanAssertion<TValue> : Assertion<TValue>
     where TValue : IComparable<TValue>
 {
@@ -43,6 +45,7 @@ public class LessThanAssertion<TValue> : Assertion<TValue>
 /// <summary>
 /// Asserts that a value is less than or equal to a maximum value.
 /// </summary>
+[AssertionExtension("IsLessThanOrEqualTo")]
 public class LessThanOrEqualAssertion<TValue> : Assertion<TValue>
     where TValue : IComparable<TValue>
 {
