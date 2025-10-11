@@ -1520,16 +1520,6 @@ namespace .Enums
         Matching = 1,
     }
 }
-namespace .Examples
-{
-    [.("IsPositive")]
-    public class IsPositiveAssertion : .<int>
-    {
-        public IsPositiveAssertion(.<int> context) { }
-        protected override .<.> CheckAsync(.<int> metadata) { }
-        protected override string GetExpectation() { }
-    }
-}
 namespace .Exceptions
 {
     public class AssertionException : .
@@ -1903,10 +1893,6 @@ namespace .Extensions
     public static class IsNumberAssertionExtensions
     {
         public static . IsNumber(this .<char> source) { }
-    }
-    public static class IsPositiveAssertionExtensions
-    {
-        public static . IsPositive(this .<int> source) { }
     }
     public static class IsPunctuationAssertionExtensions
     {
