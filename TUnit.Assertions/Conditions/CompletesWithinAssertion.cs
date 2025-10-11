@@ -35,13 +35,16 @@ public class CompletesWithinActionAssertion : Assertion<object?>
 
         try
         {
-            await Task.Run(() => _action(), cts.Token);
-            stopwatch.Stop();
+            var task = Task.Run(() => _action());
+            var completedTask = await Task.WhenAny(task, Task.Delay(_timeout, cts.Token));
 
-            if (stopwatch.Elapsed > _timeout)
+            if (completedTask != task)
             {
                 return AssertionResult.Failed("it took too long to complete");
             }
+
+            await task; // Await to get any exceptions
+            stopwatch.Stop();
 
             return AssertionResult.Passed;
         }
