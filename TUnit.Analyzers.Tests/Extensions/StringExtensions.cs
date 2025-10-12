@@ -3,12 +3,12 @@
 public static class StringExtensions
 {
     /// <summary>
-    /// Normalizes line endings to the platform-native format.
-    /// This ensures test inputs match the platform-native line endings
-    /// that Roslyn code fixers generate.
+    /// Normalizes line endings to CRLF (Windows format).
+    /// This ensures test inputs match the CRLF line endings that Roslyn's
+    /// Formatter.FormatAsync() generates by default on all platforms.
     /// </summary>
     public static string NormalizeLineEndings(this string value)
     {
-        return value.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
+        return value.Replace("\r\n", "\n").Replace("\n", "\r\n");
     }
 }
