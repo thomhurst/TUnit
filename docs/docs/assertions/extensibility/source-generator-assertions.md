@@ -22,10 +22,12 @@ The `[GenerateAssertion]` attribute allows you to turn any method into a full as
 ### Basic Example
 
 ```csharp
+using System.ComponentModel;
 using TUnit.Assertions.Attributes;
 
 public static partial class IntAssertionExtensions
 {
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion]
     public static bool IsPositive(this int value)
     {
@@ -37,6 +39,8 @@ public static partial class IntAssertionExtensions
 await Assert.That(5).IsPositive();  // ✅ Passes
 await Assert.That(-3).IsPositive(); // ❌ Fails with clear message
 ```
+
+**Note:** The `[EditorBrowsable(EditorBrowsableState.Never)]` attribute hides the helper method from IntelliSense. Users will only see the generated assertion extension method `IsPositive()` on `Assert.That(...)`, not the underlying helper method on `int` values.
 
 ### What Gets Generated
 
@@ -251,9 +255,33 @@ For `[GenerateAssertion]`, your method must:
 - Have at least one parameter (the value to assert)
 - Return `bool`, `AssertionResult`, `Task<bool>`, or `Task<AssertionResult>`
 
+### Hiding Helper Methods from IntelliSense
+
+**Important:** Always use `[EditorBrowsable(EditorBrowsableState.Never)]` on your `[GenerateAssertion]` methods to prevent IntelliSense pollution.
+
+```csharp
+using System.ComponentModel;
+using TUnit.Assertions.Attributes;
+
+public static partial class StringAssertionExtensions
+{
+    // ✅ GOOD: Hidden from IntelliSense
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [GenerateAssertion]
+    public static bool IsEmptyString(this string value) => value.Length == 0;
+
+    // ❌ BAD: Will appear in IntelliSense when typing on string values
+    [GenerateAssertion]
+    public static bool IsEmptyString(this string value) => value.Length == 0;
+}
+```
+
+**Why?** Without `[EditorBrowsable]`, the helper method appears in IntelliSense when users type on the actual type (e.g., `myString.`). With the attribute, users only see the proper assertion method on `Assert.That(myString).`, which is cleaner and less confusing.
+
 ### Recommended Patterns
 
 ✅ **DO:**
+- **Always** use `[EditorBrowsable(EditorBrowsableState.Never)]` on `[GenerateAssertion]` methods
 - Use extension methods for cleaner syntax
 - Return `AssertionResult` when you need custom error messages
 - Use async when performing I/O or database operations
@@ -265,6 +293,7 @@ For `[GenerateAssertion]`, your method must:
 - Make assertions with side effects
 - Use `AssertionResult` with negation (it won't work as expected)
 - Forget to make the containing class `partial`
+- Skip the `[EditorBrowsable]` attribute (causes IntelliSense clutter)
 
 ---
 
@@ -315,12 +344,14 @@ The old attribute shows an obsolete warning but continues to work for backward c
 Here's a comprehensive example showing all features:
 
 ```csharp
+using System.ComponentModel;
 using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 public static partial class UserAssertionExtensions
 {
     // Simple bool
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion]
     public static bool HasValidId(this User user)
     {
@@ -328,6 +359,7 @@ public static partial class UserAssertionExtensions
     }
 
     // With parameters
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion]
     public static bool HasRole(this User user, string role)
     {
@@ -335,6 +367,7 @@ public static partial class UserAssertionExtensions
     }
 
     // Custom messages with AssertionResult
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion]
     public static AssertionResult HasValidEmail(this User user)
     {
@@ -348,6 +381,7 @@ public static partial class UserAssertionExtensions
     }
 
     // Async with database
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion]
     public static async Task<bool> ExistsInDatabaseAsync(this User user, DbContext db)
     {
@@ -379,4 +413,3 @@ public async Task ValidateUser()
 ## See Also
 
 - [Custom Assertions (Manual)](./custom-assertions.md) - For when you need full control
-- [Assertion Extension Attribute](./assertion-extension-attribute.md) - Generate extensions for existing assertion classes
