@@ -1,8 +1,10 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
+[AssertionExtension("IsUTF8")]
 public class IsUTF8EncodingAssertion : Assertion<Encoding>
 {
     public IsUTF8EncodingAssertion(
@@ -32,6 +34,7 @@ public class IsUTF8EncodingAssertion : Assertion<Encoding>
     protected override string GetExpectation() => "to be UTF-8 encoding";
 }
 
+[AssertionExtension("IsNotUTF8")]
 public class IsNotUTF8EncodingAssertion : Assertion<Encoding>
 {
     public IsNotUTF8EncodingAssertion(
@@ -61,6 +64,7 @@ public class IsNotUTF8EncodingAssertion : Assertion<Encoding>
     protected override string GetExpectation() => "to not be UTF-8 encoding";
 }
 
+[AssertionExtension("IsASCII")]
 public class IsASCIIEncodingAssertion : Assertion<Encoding>
 {
     public IsASCIIEncodingAssertion(
@@ -90,6 +94,7 @@ public class IsASCIIEncodingAssertion : Assertion<Encoding>
     protected override string GetExpectation() => "to be ASCII encoding";
 }
 
+[AssertionExtension("IsUnicode")]
 public class IsUnicodeEncodingAssertion : Assertion<Encoding>
 {
     public IsUnicodeEncodingAssertion(
@@ -119,6 +124,7 @@ public class IsUnicodeEncodingAssertion : Assertion<Encoding>
     protected override string GetExpectation() => "to be Unicode encoding";
 }
 
+[AssertionExtension("IsUTF32")]
 public class IsUTF32EncodingAssertion : Assertion<Encoding>
 {
     public IsUTF32EncodingAssertion(
@@ -148,6 +154,7 @@ public class IsUTF32EncodingAssertion : Assertion<Encoding>
     protected override string GetExpectation() => "to be UTF-32 encoding";
 }
 
+[AssertionExtension("IsBigEndianUnicode")]
 public class IsBigEndianUnicodeEncodingAssertion : Assertion<Encoding>
 {
     public IsBigEndianUnicodeEncodingAssertion(
@@ -177,6 +184,7 @@ public class IsBigEndianUnicodeEncodingAssertion : Assertion<Encoding>
     protected override string GetExpectation() => "to be big-endian Unicode encoding";
 }
 
+[AssertionExtension("IsSingleByte")]
 public class IsSingleByteEncodingAssertion : Assertion<Encoding>
 {
     public IsSingleByteEncodingAssertion(
@@ -206,6 +214,7 @@ public class IsSingleByteEncodingAssertion : Assertion<Encoding>
     protected override string GetExpectation() => "to be single-byte encoding";
 }
 
+[AssertionExtension("IsNotSingleByte")]
 public class IsNotSingleByteEncodingAssertion : Assertion<Encoding>
 {
     public IsNotSingleByteEncodingAssertion(

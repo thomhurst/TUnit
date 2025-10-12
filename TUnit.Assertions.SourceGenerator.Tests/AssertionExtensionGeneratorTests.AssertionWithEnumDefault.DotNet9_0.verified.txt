@@ -1,0 +1,27 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated extension methods for StringComparisonAssertion.
+/// </summary>
+public static class StringComparisonAssertionExtensions
+{
+
+    /// <summary>
+    /// Extension method for StringComparisonAssertion.
+    /// </summary>
+    public static StringComparisonAssertion IsEqualToWithComparison(this IAssertionSource<string> source, string expected, System.StringComparison comparison = System.StringComparison.4, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null, [CallerArgumentExpression(nameof(comparison))] string? comparisonExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualToWithComparison({expectedExpression}, {comparisonExpression})");
+        return new StringComparisonAssertion(source.Context, expected, comparison);
+    }
+}
+
+]

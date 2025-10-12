@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -49,7 +50,8 @@ public class TypeOfAssertion<TFrom, TTo> : Assertion<TTo>
 /// Asserts that a value's type is assignable to a specific type (is the type or a subtype).
 /// Works with both direct value assertions and exception assertions (via .And after Throws).
 /// </summary>
-public class IsAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
+[AssertionExtension("IsAssignableTo")]
+public class IsAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
 {
     private readonly Type _targetType;
 
@@ -99,7 +101,8 @@ public class IsAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
 /// Asserts that a value's type is NOT assignable to a specific type.
 /// Works with both direct value assertions and exception assertions (via .And after Throws).
 /// </summary>
-public class IsNotAssignableToAssertion<TValue, TTarget> : Assertion<TValue>
+[AssertionExtension("IsNotAssignableTo")]
+public class IsNotAssignableToAssertion<TTarget, TValue> : Assertion<TValue>
 {
     private readonly Type _targetType;
 

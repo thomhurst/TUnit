@@ -20,7 +20,7 @@ public class ExpectedArgumentTypeTests
     [Arguments((ulong)0, typeof(ulong))]
     [Arguments(0UL, typeof(ulong))]
     public async Task TypedArguments(object value, Type expectedType)
-        => await Assert.That(value).IsTypeOf(expectedType);
+        => await Assert.That(value).IsOfType(expectedType);
 
     [Test]
     [Arguments(ByteEnum.Default, typeof(ByteEnum), typeof(byte))]
@@ -33,7 +33,7 @@ public class ExpectedArgumentTypeTests
     [Arguments(UInt64Enum.Default, typeof(UInt64Enum), typeof(ulong))]
     public async Task EnumTypes(object value, Type expectedValueType, Type expectedEnumUnderlyingType)
     {
-        await Assert.That(value).IsTypeOf(expectedValueType);
+        await Assert.That(value).IsOfType(expectedValueType);
         await Assert.That(Enum.IsDefined(expectedValueType, value)).IsTrue();
         await Assert.That(Enum.GetUnderlyingType(expectedValueType)).IsEqualTo(expectedEnumUnderlyingType);
     }

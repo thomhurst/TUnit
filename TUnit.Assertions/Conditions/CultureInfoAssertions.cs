@@ -1,9 +1,11 @@
 using System.Globalization;
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
+[AssertionExtension("IsInvariant")]
 public class IsInvariantCultureAssertion : Assertion<CultureInfo>
 {
     public IsInvariantCultureAssertion(
@@ -33,6 +35,7 @@ public class IsInvariantCultureAssertion : Assertion<CultureInfo>
     protected override string GetExpectation() => "to be invariant culture";
 }
 
+[AssertionExtension("IsNotInvariant")]
 public class IsNotInvariantCultureAssertion : Assertion<CultureInfo>
 {
     public IsNotInvariantCultureAssertion(
@@ -62,6 +65,7 @@ public class IsNotInvariantCultureAssertion : Assertion<CultureInfo>
     protected override string GetExpectation() => "to not be invariant culture";
 }
 
+[AssertionExtension("IsNeutralCulture")]
 public class IsNeutralCultureAssertion : Assertion<CultureInfo>
 {
     public IsNeutralCultureAssertion(
@@ -91,6 +95,7 @@ public class IsNeutralCultureAssertion : Assertion<CultureInfo>
     protected override string GetExpectation() => "to be a neutral culture";
 }
 
+[AssertionExtension("IsNotNeutralCulture")]
 public class IsNotNeutralCultureAssertion : Assertion<CultureInfo>
 {
     public IsNotNeutralCultureAssertion(
@@ -120,6 +125,7 @@ public class IsNotNeutralCultureAssertion : Assertion<CultureInfo>
     protected override string GetExpectation() => "to not be a neutral culture";
 }
 
+[AssertionExtension("IsEnglish")]
 public class IsEnglishCultureAssertion : Assertion<CultureInfo>
 {
     public IsEnglishCultureAssertion(
@@ -149,6 +155,7 @@ public class IsEnglishCultureAssertion : Assertion<CultureInfo>
     protected override string GetExpectation() => "to be English culture";
 }
 
+[AssertionExtension("IsNotEnglish")]
 public class IsNotEnglishCultureAssertion : Assertion<CultureInfo>
 {
     public IsNotEnglishCultureAssertion(
@@ -178,6 +185,7 @@ public class IsNotEnglishCultureAssertion : Assertion<CultureInfo>
     protected override string GetExpectation() => "to not be English culture";
 }
 
+[AssertionExtension("IsRightToLeft")]
 public class IsRightToLeftCultureAssertion : Assertion<CultureInfo>
 {
     public IsRightToLeftCultureAssertion(
@@ -207,6 +215,7 @@ public class IsRightToLeftCultureAssertion : Assertion<CultureInfo>
     protected override string GetExpectation() => "to be right-to-left culture";
 }
 
+[AssertionExtension("IsLeftToRight")]
 public class IsLeftToRightCultureAssertion : Assertion<CultureInfo>
 {
     public IsLeftToRightCultureAssertion(
@@ -236,6 +245,7 @@ public class IsLeftToRightCultureAssertion : Assertion<CultureInfo>
     protected override string GetExpectation() => "to be left-to-right culture";
 }
 
+[AssertionExtension("IsReadOnly")]
 public class IsReadOnlyCultureAssertion : Assertion<CultureInfo>
 {
     public IsReadOnlyCultureAssertion(

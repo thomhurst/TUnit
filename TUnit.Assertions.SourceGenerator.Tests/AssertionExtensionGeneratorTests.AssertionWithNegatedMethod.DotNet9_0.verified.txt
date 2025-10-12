@@ -1,0 +1,36 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated extension methods for TrueAssertion.
+/// </summary>
+public static class TrueAssertionExtensions
+{
+
+    /// <summary>
+    /// Extension method for TrueAssertion.
+    /// </summary>
+    public static TrueAssertion IsTrue(this IAssertionSource<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append($".IsTrue()");
+        return new TrueAssertion(source.Context);
+    }
+
+    /// <summary>
+    /// Extension method for TrueAssertion.
+    /// </summary>
+    public static TrueAssertion IsFalse(this IAssertionSource<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append($".IsFalse()");
+        return new TrueAssertion(source.Context);
+    }
+}
+
+]

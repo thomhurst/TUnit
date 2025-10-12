@@ -1,3 +1,4 @@
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -5,6 +6,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that the DateTime represents today's date.
 /// </summary>
+[AssertionExtension("IsToday")]
 public class IsTodayAssertion : Assertion<DateTime>
 {
     public IsTodayAssertion(AssertionContext<DateTime> context) : base(context)
@@ -31,6 +33,7 @@ public class IsTodayAssertion : Assertion<DateTime>
 /// <summary>
 /// Asserts that the DateTime does not represent today's date.
 /// </summary>
+[AssertionExtension("IsNotToday")]
 public class IsNotTodayAssertion : Assertion<DateTime>
 {
     public IsNotTodayAssertion(AssertionContext<DateTime> context) : base(context)
@@ -57,6 +60,7 @@ public class IsNotTodayAssertion : Assertion<DateTime>
 /// <summary>
 /// Asserts that the DateTime is in UTC.
 /// </summary>
+[AssertionExtension("IsUtc")]
 public class IsUtcAssertion : Assertion<DateTime>
 {
     public IsUtcAssertion(AssertionContext<DateTime> context) : base(context)
@@ -80,6 +84,7 @@ public class IsUtcAssertion : Assertion<DateTime>
 /// <summary>
 /// Asserts that the DateTime is not in UTC.
 /// </summary>
+[AssertionExtension("IsNotUtc")]
 public class IsNotUtcAssertion : Assertion<DateTime>
 {
     public IsNotUtcAssertion(AssertionContext<DateTime> context) : base(context)
@@ -103,6 +108,7 @@ public class IsNotUtcAssertion : Assertion<DateTime>
 /// <summary>
 /// Asserts that the DateTime is in a leap year.
 /// </summary>
+[AssertionExtension("IsLeapYear")]
 public class IsLeapYearAssertion : Assertion<DateTime>
 {
     public IsLeapYearAssertion(AssertionContext<DateTime> context) : base(context)
@@ -126,6 +132,7 @@ public class IsLeapYearAssertion : Assertion<DateTime>
 /// <summary>
 /// Asserts that the DateTime is not in a leap year.
 /// </summary>
+[AssertionExtension("IsNotLeapYear")]
 public class IsNotLeapYearAssertion : Assertion<DateTime>
 {
     public IsNotLeapYearAssertion(AssertionContext<DateTime> context) : base(context)
@@ -149,6 +156,7 @@ public class IsNotLeapYearAssertion : Assertion<DateTime>
 /// <summary>
 /// Asserts that the DateTime is during daylight saving time.
 /// </summary>
+[AssertionExtension("IsDaylightSavingTime")]
 public class IsDaylightSavingTimeAssertion : Assertion<DateTime>
 {
     public IsDaylightSavingTimeAssertion(AssertionContext<DateTime> context) : base(context)
@@ -172,6 +180,7 @@ public class IsDaylightSavingTimeAssertion : Assertion<DateTime>
 /// <summary>
 /// Asserts that the DateTime is not during daylight saving time.
 /// </summary>
+[AssertionExtension("IsNotDaylightSavingTime")]
 public class IsNotDaylightSavingTimeAssertion : Assertion<DateTime>
 {
     public IsNotDaylightSavingTimeAssertion(AssertionContext<DateTime> context) : base(context)
@@ -195,6 +204,7 @@ public class IsNotDaylightSavingTimeAssertion : Assertion<DateTime>
 /// <summary>
 /// Asserts exact DateTime equality (including ticks).
 /// </summary>
+[AssertionExtension("EqualsExact")]
 public class DateTimeEqualsExactAssertion : Assertion<DateTime>
 {
     private readonly DateTime _expected;
