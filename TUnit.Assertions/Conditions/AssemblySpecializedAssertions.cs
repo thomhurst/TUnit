@@ -5,12 +5,6 @@ using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
-// NOTE: IsCollectible, IsNotCollectible, IsDynamic, IsNotDynamic, IsFullyTrusted, and IsNotFullyTrusted
-// have been migrated to source-generated assertions in AssemblyAssertionExtensions.cs
-
-// IsSigned, IsNotSigned, IsDebugBuild, and IsReleaseBuild remain here because they require
-// more complex logic beyond simple property access (GetName().GetPublicKeyToken() and GetCustomAttribute)
-
 [AssertionExtension("IsSigned")]
 public class IsSignedAssertion : Assertion<Assembly>
 {

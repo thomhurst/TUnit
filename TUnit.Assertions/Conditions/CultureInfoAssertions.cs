@@ -65,8 +65,6 @@ public class IsNotInvariantCultureAssertion : Assertion<CultureInfo>
     protected override string GetExpectation() => "to not be invariant culture";
 }
 
-// NOTE: IsNeutralCulture and IsNotNeutralCulture have been migrated to source-generated assertions in CultureInfoPropertyAssertions.cs
-
 [AssertionExtension("IsEnglish")]
 public class IsEnglishCultureAssertion : Assertion<CultureInfo>
 {
@@ -186,5 +184,3 @@ public class IsLeftToRightCultureAssertion : Assertion<CultureInfo>
 
     protected override string GetExpectation() => "to be left-to-right culture";
 }
-
-// NOTE: IsReadOnly has been migrated to source-generated assertions in CultureInfoPropertyAssertions.cs

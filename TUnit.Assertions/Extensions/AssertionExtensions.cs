@@ -327,8 +327,6 @@ public static class AssertionExtensions
         return new Chaining.OrAssertion<string>(source.PreviousAssertion, newAssertion);
     }
 
-    // NOTE: IsNullOrEmpty And/Or continuation overloads have been migrated to source-generated assertions in StringStaticMethodAssertions.cs
-
     /// <summary>
     /// Asserts that the value is not equal to the expected value (And continuation overload).
     /// </summary>

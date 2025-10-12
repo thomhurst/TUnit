@@ -183,5 +183,3 @@ public class IsBigEndianUnicodeEncodingAssertion : Assertion<Encoding>
 
     protected override string GetExpectation() => "to be big-endian Unicode encoding";
 }
-
-// NOTE: IsSingleByte and IsNotSingleByte have been migrated to source-generated assertions in EncodingPropertyAssertions.cs

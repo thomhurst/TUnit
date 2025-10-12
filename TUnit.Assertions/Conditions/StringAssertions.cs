@@ -381,8 +381,6 @@ public class StringLengthAssertion : Assertion<string>
     protected override string GetExpectation() => $"to have length {_expectedLength}";
 }
 
-// NOTE: IsNullOrWhitespace has been migrated to source-generated assertions in StringStaticMethodAssertions.cs
-
 /// <summary>
 /// Asserts that a string matches a regular expression pattern.
 /// </summary>
@@ -552,5 +550,3 @@ public class StringDoesNotMatchAssertion : Assertion<string>
         return "text to not match with pattern";
     }
 }
-
-// NOTE: IsNullOrEmpty and IsNotNullOrEmpty have been migrated to source-generated assertions in StringStaticMethodAssertions.cs
