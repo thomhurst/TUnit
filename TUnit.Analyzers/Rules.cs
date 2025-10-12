@@ -129,6 +129,12 @@ public static class Rules
     public static readonly DiagnosticDescriptor XunitMigration =
         CreateDescriptor("TUXU0001", UsageCategory, DiagnosticSeverity.Info);
 
+    public static readonly DiagnosticDescriptor NUnitMigration =
+        CreateDescriptor("TUNU0001", UsageCategory, DiagnosticSeverity.Info);
+
+    public static readonly DiagnosticDescriptor MSTestMigration =
+        CreateDescriptor("TUMS0001", UsageCategory, DiagnosticSeverity.Info);
+
     public static readonly DiagnosticDescriptor OverwriteConsole =
         CreateDescriptor("TUnit0055", UsageCategory, DiagnosticSeverity.Warning);
 

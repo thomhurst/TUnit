@@ -10,7 +10,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     where TAnalyzer : DiagnosticAnalyzer, new()
     where TCodeFix : CodeFixProvider, new()
 {
-    public class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
+    public class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, LineEndingNormalizingVerifier>
     {
         public Test()
         {
