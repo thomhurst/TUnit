@@ -86,7 +86,7 @@ public sealed class Int_IsGreaterThanAsync_Int_Assertion : Assertion<int>
     }
 }
 
-public static partial class AsyncBoolAssertionExtensions_GeneratedAssertionExtensions
+public static partial class AsyncBoolAssertionExtensions
 {
     /// <summary>
     /// Generated extension method for IsPositiveAsync

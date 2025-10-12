@@ -1,0 +1,122 @@
+﻿[  
+// This file is generated to verify the MethodAssertionGenerator is running.
+// If you see this file, the generator executed successfully.
+namespace TUnit.Assertions.Diagnostics
+{
+    internal static class MethodAssertionGeneratorDiagnostic
+    {
+        public const string Message = "MethodAssertionGenerator is running";
+    }
+}
+
+  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+/// <summary>
+/// Generated assertion for IsValueCreated
+/// </summary>
+[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+public sealed class LazyT_IsValueCreated_Assertion<T> : Assertion<System.Lazy<T>>
+{
+    public LazyT_IsValueCreated_Assertion(AssertionContext<System.Lazy<T>> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Lazy<T>> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsValueCreated();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have its value created";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsValueNotCreated
+/// </summary>
+[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+public sealed class LazyT_IsValueNotCreated_Assertion<T> : Assertion<System.Lazy<T>>
+{
+    public LazyT_IsValueNotCreated_Assertion(AssertionContext<System.Lazy<T>> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Lazy<T>> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsValueNotCreated();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not have its value created";
+    }
+}
+
+public static partial class LazyAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsValueCreated
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+    public static LazyT_IsValueCreated_Assertion<T> IsValueCreated<T>(this IAssertionSource<System.Lazy<T>> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsValueCreated()");
+        return new LazyT_IsValueCreated_Assertion<T>(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsValueNotCreated
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+    public static LazyT_IsValueNotCreated_Assertion<T> IsValueNotCreated<T>(this IAssertionSource<System.Lazy<T>> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsValueNotCreated()");
+        return new LazyT_IsValueNotCreated_Assertion<T>(source.Context);
+    }
+
+}
+
+]

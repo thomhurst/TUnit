@@ -1,0 +1,108 @@
+﻿[  
+// This file is generated to verify the MethodAssertionGenerator is running.
+// If you see this file, the generator executed successfully.
+namespace TUnit.Assertions.Diagnostics
+{
+    internal static class MethodAssertionGeneratorDiagnostic
+    {
+        public const string Message = "MethodAssertionGenerator is running";
+    }
+}
+
+  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+/// <summary>
+/// Generated assertion for IsNone
+/// </summary>
+public sealed class CancellationToken_IsNone_Assertion : Assertion<System.Threading.CancellationToken>
+{
+    public CancellationToken_IsNone_Assertion(AssertionContext<System.Threading.CancellationToken> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.CancellationToken> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsNone();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be CancellationToken.None";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotNone
+/// </summary>
+public sealed class CancellationToken_IsNotNone_Assertion : Assertion<System.Threading.CancellationToken>
+{
+    public CancellationToken_IsNotNone_Assertion(AssertionContext<System.Threading.CancellationToken> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.CancellationToken> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsNotNone();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be CancellationToken.None";
+    }
+}
+
+public static partial class CancellationTokenAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsNone
+    /// </summary>
+    public static CancellationToken_IsNone_Assertion IsNone(this IAssertionSource<System.Threading.CancellationToken> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNone()");
+        return new CancellationToken_IsNone_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotNone
+    /// </summary>
+    public static CancellationToken_IsNotNone_Assertion IsNotNone(this IAssertionSource<System.Threading.CancellationToken> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotNone()");
+        return new CancellationToken_IsNotNone_Assertion(source.Context);
+    }
+
+}
+
+]

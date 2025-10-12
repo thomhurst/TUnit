@@ -1,0 +1,63 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+public class TimeZoneInfoSupportsDaylightSavingTimeAssertion : Assertion<System.TimeZoneInfo>
+{
+    private readonly bool _negated;
+
+    public TimeZoneInfoSupportsDaylightSavingTimeAssertion(AssertionContext<System.TimeZoneInfo> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.TimeZoneInfo> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.SupportsDaylightSavingTime;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy SupportsDaylightSavingTime"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} support daylight saving time";
+    }
+}
+
+public static partial class TimeZoneInfoAssertionExtensions
+{
+    public static TimeZoneInfoSupportsDaylightSavingTimeAssertion SupportsDaylightSavingTime(this IAssertionSource<System.TimeZoneInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".SupportsDaylightSavingTime()");
+        return new TimeZoneInfoSupportsDaylightSavingTimeAssertion(source.Context, false);
+    }
+
+    public static TimeZoneInfoSupportsDaylightSavingTimeAssertion DoesNotSupportDaylightSavingTime(this IAssertionSource<System.TimeZoneInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".DoesNotSupportDaylightSavingTime()");
+        return new TimeZoneInfoSupportsDaylightSavingTimeAssertion(source.Context, true);
+    }
+
+}
+
+]

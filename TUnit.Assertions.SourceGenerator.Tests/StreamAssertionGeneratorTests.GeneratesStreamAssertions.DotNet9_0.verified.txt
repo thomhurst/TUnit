@@ -1,0 +1,210 @@
+﻿[  
+// This file is generated to verify the MethodAssertionGenerator is running.
+// If you see this file, the generator executed successfully.
+namespace TUnit.Assertions.Diagnostics
+{
+    internal static class MethodAssertionGeneratorDiagnostic
+    {
+        public const string Message = "MethodAssertionGenerator is running";
+    }
+}
+
+  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+/// <summary>
+/// Generated assertion for IsAtStart
+/// </summary>
+public sealed class Stream_IsAtStart_Assertion : Assertion<System.IO.Stream>
+{
+    public Stream_IsAtStart_Assertion(AssertionContext<System.IO.Stream> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.Stream> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsAtStart();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be at the start";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsAtEnd
+/// </summary>
+public sealed class Stream_IsAtEnd_Assertion : Assertion<System.IO.Stream>
+{
+    public Stream_IsAtEnd_Assertion(AssertionContext<System.IO.Stream> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.Stream> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsAtEnd();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be at the end";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsEmpty
+/// </summary>
+public sealed class Stream_IsEmpty_Assertion : Assertion<System.IO.Stream>
+{
+    public Stream_IsEmpty_Assertion(AssertionContext<System.IO.Stream> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.Stream> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsEmpty();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be empty";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotEmpty
+/// </summary>
+public sealed class Stream_IsNotEmpty_Assertion : Assertion<System.IO.Stream>
+{
+    public Stream_IsNotEmpty_Assertion(AssertionContext<System.IO.Stream> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.Stream> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsNotEmpty();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be empty";
+    }
+}
+
+public static partial class StreamAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsAtStart
+    /// </summary>
+    public static Stream_IsAtStart_Assertion IsAtStart(this IAssertionSource<System.IO.Stream> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsAtStart()");
+        return new Stream_IsAtStart_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsAtEnd
+    /// </summary>
+    public static Stream_IsAtEnd_Assertion IsAtEnd(this IAssertionSource<System.IO.Stream> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsAtEnd()");
+        return new Stream_IsAtEnd_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsEmpty
+    /// </summary>
+    public static Stream_IsEmpty_Assertion IsEmpty(this IAssertionSource<System.IO.Stream> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsEmpty()");
+        return new Stream_IsEmpty_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotEmpty
+    /// </summary>
+    public static Stream_IsNotEmpty_Assertion IsNotEmpty(this IAssertionSource<System.IO.Stream> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotEmpty()");
+        return new Stream_IsNotEmpty_Assertion(source.Context);
+    }
+
+}
+
+]

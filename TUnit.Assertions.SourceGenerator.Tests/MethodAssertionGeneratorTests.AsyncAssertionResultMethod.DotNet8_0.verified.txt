@@ -82,7 +82,7 @@ public sealed class Int_IsBetweenAsync_Int_Int_Assertion : Assertion<int>
     }
 }
 
-public static partial class AsyncAssertionResultExtensions_GeneratedAssertionExtensions
+public static partial class AsyncAssertionResultExtensions
 {
     /// <summary>
     /// Generated extension method for IsEvenAsync

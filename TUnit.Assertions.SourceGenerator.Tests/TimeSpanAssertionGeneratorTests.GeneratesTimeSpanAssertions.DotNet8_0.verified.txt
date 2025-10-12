@@ -1,0 +1,272 @@
+﻿[  
+// This file is generated to verify the MethodAssertionGenerator is running.
+// If you see this file, the generator executed successfully.
+namespace TUnit.Assertions.Diagnostics
+{
+    internal static class MethodAssertionGeneratorDiagnostic
+    {
+        public const string Message = "MethodAssertionGenerator is running";
+    }
+}
+
+  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+/// <summary>
+/// Generated assertion for IsZero
+/// </summary>
+public sealed class TimeSpan_IsZero_Assertion : Assertion<System.TimeSpan>
+{
+    public TimeSpan_IsZero_Assertion(AssertionContext<System.TimeSpan> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.TimeSpan> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsZero();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be zero";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotZero
+/// </summary>
+public sealed class TimeSpan_IsNotZero_Assertion : Assertion<System.TimeSpan>
+{
+    public TimeSpan_IsNotZero_Assertion(AssertionContext<System.TimeSpan> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.TimeSpan> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsNotZero();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be zero";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsPositive
+/// </summary>
+public sealed class TimeSpan_IsPositive_Assertion : Assertion<System.TimeSpan>
+{
+    public TimeSpan_IsPositive_Assertion(AssertionContext<System.TimeSpan> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.TimeSpan> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsPositive();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be positive";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNegative
+/// </summary>
+public sealed class TimeSpan_IsNegative_Assertion : Assertion<System.TimeSpan>
+{
+    public TimeSpan_IsNegative_Assertion(AssertionContext<System.TimeSpan> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.TimeSpan> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsNegative();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be negative";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNonNegative
+/// </summary>
+public sealed class TimeSpan_IsNonNegative_Assertion : Assertion<System.TimeSpan>
+{
+    public TimeSpan_IsNonNegative_Assertion(AssertionContext<System.TimeSpan> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.TimeSpan> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsNonNegative();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be non-negative";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNonPositive
+/// </summary>
+public sealed class TimeSpan_IsNonPositive_Assertion : Assertion<System.TimeSpan>
+{
+    public TimeSpan_IsNonPositive_Assertion(AssertionContext<System.TimeSpan> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.TimeSpan> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsNonPositive();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be non-positive";
+    }
+}
+
+public static partial class TimeSpanAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsZero
+    /// </summary>
+    public static TimeSpan_IsZero_Assertion IsZero(this IAssertionSource<System.TimeSpan> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsZero()");
+        return new TimeSpan_IsZero_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotZero
+    /// </summary>
+    public static TimeSpan_IsNotZero_Assertion IsNotZero(this IAssertionSource<System.TimeSpan> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotZero()");
+        return new TimeSpan_IsNotZero_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsPositive
+    /// </summary>
+    public static TimeSpan_IsPositive_Assertion IsPositive(this IAssertionSource<System.TimeSpan> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsPositive()");
+        return new TimeSpan_IsPositive_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNegative
+    /// </summary>
+    public static TimeSpan_IsNegative_Assertion IsNegative(this IAssertionSource<System.TimeSpan> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNegative()");
+        return new TimeSpan_IsNegative_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNonNegative
+    /// </summary>
+    public static TimeSpan_IsNonNegative_Assertion IsNonNegative(this IAssertionSource<System.TimeSpan> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNonNegative()");
+        return new TimeSpan_IsNonNegative_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNonPositive
+    /// </summary>
+    public static TimeSpan_IsNonPositive_Assertion IsNonPositive(this IAssertionSource<System.TimeSpan> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNonPositive()");
+        return new TimeSpan_IsNonPositive_Assertion(source.Context);
+    }
+
+}
+
+]

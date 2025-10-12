@@ -1,0 +1,210 @@
+﻿[  
+// This file is generated to verify the MethodAssertionGenerator is running.
+// If you see this file, the generator executed successfully.
+namespace TUnit.Assertions.Diagnostics
+{
+    internal static class MethodAssertionGeneratorDiagnostic
+    {
+        public const string Message = "MethodAssertionGenerator is running";
+    }
+}
+
+  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+/// <summary>
+/// Generated assertion for IsSigned
+/// </summary>
+public sealed class Assembly_IsSigned_Assertion : Assertion<System.Reflection.Assembly>
+{
+    public Assembly_IsSigned_Assertion(AssertionContext<System.Reflection.Assembly> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Reflection.Assembly> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsSigned();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be signed";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotSigned
+/// </summary>
+public sealed class Assembly_IsNotSigned_Assertion : Assertion<System.Reflection.Assembly>
+{
+    public Assembly_IsNotSigned_Assertion(AssertionContext<System.Reflection.Assembly> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Reflection.Assembly> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsNotSigned();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be signed";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsDebugBuild
+/// </summary>
+public sealed class Assembly_IsDebugBuild_Assertion : Assertion<System.Reflection.Assembly>
+{
+    public Assembly_IsDebugBuild_Assertion(AssertionContext<System.Reflection.Assembly> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Reflection.Assembly> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsDebugBuild();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be a debug build";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsReleaseBuild
+/// </summary>
+public sealed class Assembly_IsReleaseBuild_Assertion : Assertion<System.Reflection.Assembly>
+{
+    public Assembly_IsReleaseBuild_Assertion(AssertionContext<System.Reflection.Assembly> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Reflection.Assembly> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsReleaseBuild();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be a release build";
+    }
+}
+
+public static partial class AssemblyAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsSigned
+    /// </summary>
+    public static Assembly_IsSigned_Assertion IsSigned(this IAssertionSource<System.Reflection.Assembly> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsSigned()");
+        return new Assembly_IsSigned_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotSigned
+    /// </summary>
+    public static Assembly_IsNotSigned_Assertion IsNotSigned(this IAssertionSource<System.Reflection.Assembly> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotSigned()");
+        return new Assembly_IsNotSigned_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsDebugBuild
+    /// </summary>
+    public static Assembly_IsDebugBuild_Assertion IsDebugBuild(this IAssertionSource<System.Reflection.Assembly> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsDebugBuild()");
+        return new Assembly_IsDebugBuild_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsReleaseBuild
+    /// </summary>
+    public static Assembly_IsReleaseBuild_Assertion IsReleaseBuild(this IAssertionSource<System.Reflection.Assembly> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsReleaseBuild()");
+        return new Assembly_IsReleaseBuild_Assertion(source.Context);
+    }
+
+}
+
+]

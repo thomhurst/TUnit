@@ -1,0 +1,190 @@
+﻿[  
+// This file is generated to verify the MethodAssertionGenerator is running.
+// If you see this file, the generator executed successfully.
+namespace TUnit.Assertions.Diagnostics
+{
+    internal static class MethodAssertionGeneratorDiagnostic
+    {
+        public const string Message = "MethodAssertionGenerator is running";
+    }
+}
+
+  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+/// <summary>
+/// Generated assertion for IsWeekend
+/// </summary>
+public sealed class DayOfWeek_IsWeekend_Assertion : Assertion<System.DayOfWeek>
+{
+    public DayOfWeek_IsWeekend_Assertion(AssertionContext<System.DayOfWeek> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DayOfWeek> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsWeekend();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be a weekend day";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsWeekday
+/// </summary>
+public sealed class DayOfWeek_IsWeekday_Assertion : Assertion<System.DayOfWeek>
+{
+    public DayOfWeek_IsWeekday_Assertion(AssertionContext<System.DayOfWeek> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DayOfWeek> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsWeekday();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be a weekday";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsMonday
+/// </summary>
+public sealed class DayOfWeek_IsMonday_Assertion : Assertion<System.DayOfWeek>
+{
+    public DayOfWeek_IsMonday_Assertion(AssertionContext<System.DayOfWeek> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DayOfWeek> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsMonday();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be Monday";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsFriday
+/// </summary>
+public sealed class DayOfWeek_IsFriday_Assertion : Assertion<System.DayOfWeek>
+{
+    public DayOfWeek_IsFriday_Assertion(AssertionContext<System.DayOfWeek> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DayOfWeek> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsFriday();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be Friday";
+    }
+}
+
+public static partial class DayOfWeekAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsWeekend
+    /// </summary>
+    public static DayOfWeek_IsWeekend_Assertion IsWeekend(this IAssertionSource<System.DayOfWeek> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsWeekend()");
+        return new DayOfWeek_IsWeekend_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsWeekday
+    /// </summary>
+    public static DayOfWeek_IsWeekday_Assertion IsWeekday(this IAssertionSource<System.DayOfWeek> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsWeekday()");
+        return new DayOfWeek_IsWeekday_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsMonday
+    /// </summary>
+    public static DayOfWeek_IsMonday_Assertion IsMonday(this IAssertionSource<System.DayOfWeek> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsMonday()");
+        return new DayOfWeek_IsMonday_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsFriday
+    /// </summary>
+    public static DayOfWeek_IsFriday_Assertion IsFriday(this IAssertionSource<System.DayOfWeek> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsFriday()");
+        return new DayOfWeek_IsFriday_Assertion(source.Context);
+    }
+
+}
+
+]

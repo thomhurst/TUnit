@@ -1,0 +1,617 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+public class CharIsLetterWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsLetterWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsLetter(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsLetter"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a letter";
+    }
+}
+
+public class CharIsDigitWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsDigitWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsDigit(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsDigit"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a digit";
+    }
+}
+
+public class CharIsWhiteSpaceWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsWhiteSpaceWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsWhiteSpace(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsWhiteSpace"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be whitespace";
+    }
+}
+
+public class CharIsUpperWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsUpperWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsUpper(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsUpper"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be uppercase";
+    }
+}
+
+public class CharIsLowerWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsLowerWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsLower(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsLower"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be lowercase";
+    }
+}
+
+public class CharIsControlWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsControlWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsControl(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsControl"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a control character";
+    }
+}
+
+public class CharIsPunctuationWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsPunctuationWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsPunctuation(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsPunctuation"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be punctuation";
+    }
+}
+
+public class CharIsSymbolWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsSymbolWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsSymbol(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsSymbol"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a symbol";
+    }
+}
+
+public class CharIsNumberWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsNumberWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsNumber(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsNumber"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a number";
+    }
+}
+
+public class CharIsSeparatorWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsSeparatorWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsSeparator(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsSeparator"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a separator";
+    }
+}
+
+public class CharIsSurrogateWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsSurrogateWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsSurrogate(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsSurrogate"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a surrogate";
+    }
+}
+
+public class CharIsHighSurrogateWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsHighSurrogateWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsHighSurrogate(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsHighSurrogate"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a high surrogate";
+    }
+}
+
+public class CharIsLowSurrogateWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsLowSurrogateWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsLowSurrogate(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsLowSurrogate"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a low surrogate";
+    }
+}
+
+public class CharIsLetterOrDigitWithCharAssertion : Assertion<char>
+{
+    private readonly bool _negated;
+
+    public CharIsLetterOrDigitWithCharAssertion(AssertionContext<char> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<char> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = char.IsLetterOrDigit(actualValue);
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsLetterOrDigit"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a letter or digit";
+    }
+}
+
+public static partial class CharAssertionExtensions
+{
+    public static CharIsLetterWithCharAssertion IsLetter(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsLetter()");
+        return new CharIsLetterWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsLetterWithCharAssertion IsNotLetter(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotLetter()");
+        return new CharIsLetterWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsDigitWithCharAssertion IsDigit(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsDigit()");
+        return new CharIsDigitWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsDigitWithCharAssertion IsNotDigit(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotDigit()");
+        return new CharIsDigitWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsWhiteSpaceWithCharAssertion IsWhiteSpace(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsWhiteSpace()");
+        return new CharIsWhiteSpaceWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsWhiteSpaceWithCharAssertion IsNotWhiteSpace(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotWhiteSpace()");
+        return new CharIsWhiteSpaceWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsUpperWithCharAssertion IsUpper(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsUpper()");
+        return new CharIsUpperWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsUpperWithCharAssertion IsNotUpper(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotUpper()");
+        return new CharIsUpperWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsLowerWithCharAssertion IsLower(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsLower()");
+        return new CharIsLowerWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsLowerWithCharAssertion IsNotLower(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotLower()");
+        return new CharIsLowerWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsControlWithCharAssertion IsControl(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsControl()");
+        return new CharIsControlWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsControlWithCharAssertion IsNotControl(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotControl()");
+        return new CharIsControlWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsPunctuationWithCharAssertion IsPunctuation(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsPunctuation()");
+        return new CharIsPunctuationWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsPunctuationWithCharAssertion IsNotPunctuation(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotPunctuation()");
+        return new CharIsPunctuationWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsSymbolWithCharAssertion IsSymbol(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsSymbol()");
+        return new CharIsSymbolWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsSymbolWithCharAssertion IsNotSymbol(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotSymbol()");
+        return new CharIsSymbolWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsNumberWithCharAssertion IsNumber(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNumber()");
+        return new CharIsNumberWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsNumberWithCharAssertion IsNotNumber(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotNumber()");
+        return new CharIsNumberWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsSeparatorWithCharAssertion IsSeparator(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsSeparator()");
+        return new CharIsSeparatorWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsSeparatorWithCharAssertion IsNotSeparator(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotSeparator()");
+        return new CharIsSeparatorWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsSurrogateWithCharAssertion IsSurrogate(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsSurrogate()");
+        return new CharIsSurrogateWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsSurrogateWithCharAssertion IsNotSurrogate(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotSurrogate()");
+        return new CharIsSurrogateWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsHighSurrogateWithCharAssertion IsHighSurrogate(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsHighSurrogate()");
+        return new CharIsHighSurrogateWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsHighSurrogateWithCharAssertion IsNotHighSurrogate(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotHighSurrogate()");
+        return new CharIsHighSurrogateWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsLowSurrogateWithCharAssertion IsLowSurrogate(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsLowSurrogate()");
+        return new CharIsLowSurrogateWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsLowSurrogateWithCharAssertion IsNotLowSurrogate(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotLowSurrogate()");
+        return new CharIsLowSurrogateWithCharAssertion(source.Context, true);
+    }
+
+    public static CharIsLetterOrDigitWithCharAssertion IsLetterOrDigit(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsLetterOrDigit()");
+        return new CharIsLetterOrDigitWithCharAssertion(source.Context, false);
+    }
+
+    public static CharIsLetterOrDigitWithCharAssertion IsNotLetterOrDigit(this IAssertionSource<char> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotLetterOrDigit()");
+        return new CharIsLetterOrDigitWithCharAssertion(source.Context, true);
+    }
+
+}
+
+]

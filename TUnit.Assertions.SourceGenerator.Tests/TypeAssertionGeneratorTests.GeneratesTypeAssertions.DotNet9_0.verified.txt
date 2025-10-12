@@ -1,0 +1,1119 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+public class TypeIsClassAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsClassAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsClass;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsClass"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a class";
+    }
+}
+
+public class TypeIsInterfaceAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsInterfaceAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsInterface;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsInterface"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be an interface";
+    }
+}
+
+public class TypeIsAbstractAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsAbstractAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsAbstract;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsAbstract"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be abstract";
+    }
+}
+
+public class TypeIsSealedAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsSealedAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsSealed;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsSealed"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be sealed";
+    }
+}
+
+public class TypeIsValueTypeAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsValueTypeAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsValueType;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsValueType"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a value type";
+    }
+}
+
+public class TypeIsEnumAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsEnumAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsEnum;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsEnum"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be an enum";
+    }
+}
+
+public class TypeIsPrimitiveAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsPrimitiveAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsPrimitive;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsPrimitive"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a primitive type";
+    }
+}
+
+public class TypeIsPublicAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsPublicAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsPublic;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsPublic"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be public";
+    }
+}
+
+public class TypeIsGenericTypeAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsGenericTypeAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsGenericType;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsGenericType"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a generic type";
+    }
+}
+
+public class TypeIsGenericTypeDefinitionAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsGenericTypeDefinitionAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsGenericTypeDefinition;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsGenericTypeDefinition"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a generic type definition";
+    }
+}
+
+public class TypeIsArrayAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsArrayAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsArray;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsArray"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be an array";
+    }
+}
+
+public class TypeIsByRefAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsByRefAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsByRef;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsByRef"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a by-ref type";
+    }
+}
+
+public class TypeIsPointerAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsPointerAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsPointer;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsPointer"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a pointer type";
+    }
+}
+
+public class TypeIsNestedAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsNestedAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsNested;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsNested"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a nested type";
+    }
+}
+
+public class TypeIsNestedPublicAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsNestedPublicAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsNestedPublic;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsNestedPublic"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a nested public type";
+    }
+}
+
+public class TypeIsNestedPrivateAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsNestedPrivateAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsNestedPrivate;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsNestedPrivate"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a nested private type";
+    }
+}
+
+public class TypeIsNestedAssemblyAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsNestedAssemblyAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsNestedAssembly;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsNestedAssembly"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a nested assembly type";
+    }
+}
+
+public class TypeIsNestedFamilyAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsNestedFamilyAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsNestedFamily;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsNestedFamily"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a nested family type";
+    }
+}
+
+public class TypeIsVisibleAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsVisibleAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsVisible;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsVisible"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be visible";
+    }
+}
+
+public class TypeIsConstructedGenericTypeAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsConstructedGenericTypeAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsConstructedGenericType;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsConstructedGenericType"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a constructed generic type";
+    }
+}
+
+public class TypeContainsGenericParametersAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeContainsGenericParametersAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.ContainsGenericParameters;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy ContainsGenericParameters"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} contain generic parameters";
+    }
+}
+
+public class TypeIsSerializableAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsSerializableAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsSerializable;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsSerializable"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be serializable";
+    }
+}
+
+public class TypeIsCOMObjectAssertion : Assertion<System.Type>
+{
+    private readonly bool _negated;
+
+    public TypeIsCOMObjectAssertion(AssertionContext<System.Type> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Type> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsCOMObject;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsCOMObject"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a COM object";
+    }
+}
+
+public static partial class TypeAssertionExtensions
+{
+    public static TypeIsClassAssertion IsClass(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsClass()");
+        return new TypeIsClassAssertion(source.Context, false);
+    }
+
+    public static TypeIsClassAssertion IsNotClass(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotClass()");
+        return new TypeIsClassAssertion(source.Context, true);
+    }
+
+    public static TypeIsInterfaceAssertion IsInterface(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsInterface()");
+        return new TypeIsInterfaceAssertion(source.Context, false);
+    }
+
+    public static TypeIsInterfaceAssertion IsNotInterface(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotInterface()");
+        return new TypeIsInterfaceAssertion(source.Context, true);
+    }
+
+    public static TypeIsAbstractAssertion IsAbstract(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsAbstract()");
+        return new TypeIsAbstractAssertion(source.Context, false);
+    }
+
+    public static TypeIsAbstractAssertion IsNotAbstract(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotAbstract()");
+        return new TypeIsAbstractAssertion(source.Context, true);
+    }
+
+    public static TypeIsSealedAssertion IsSealed(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsSealed()");
+        return new TypeIsSealedAssertion(source.Context, false);
+    }
+
+    public static TypeIsSealedAssertion IsNotSealed(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotSealed()");
+        return new TypeIsSealedAssertion(source.Context, true);
+    }
+
+    public static TypeIsValueTypeAssertion IsValueType(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsValueType()");
+        return new TypeIsValueTypeAssertion(source.Context, false);
+    }
+
+    public static TypeIsValueTypeAssertion IsNotValueType(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotValueType()");
+        return new TypeIsValueTypeAssertion(source.Context, true);
+    }
+
+    public static TypeIsEnumAssertion IsEnum(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsEnum()");
+        return new TypeIsEnumAssertion(source.Context, false);
+    }
+
+    public static TypeIsEnumAssertion IsNotEnum(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotEnum()");
+        return new TypeIsEnumAssertion(source.Context, true);
+    }
+
+    public static TypeIsPrimitiveAssertion IsPrimitive(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsPrimitive()");
+        return new TypeIsPrimitiveAssertion(source.Context, false);
+    }
+
+    public static TypeIsPrimitiveAssertion IsNotPrimitive(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotPrimitive()");
+        return new TypeIsPrimitiveAssertion(source.Context, true);
+    }
+
+    public static TypeIsPublicAssertion IsPublic(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsPublic()");
+        return new TypeIsPublicAssertion(source.Context, false);
+    }
+
+    public static TypeIsPublicAssertion IsNotPublic(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotPublic()");
+        return new TypeIsPublicAssertion(source.Context, true);
+    }
+
+    public static TypeIsGenericTypeAssertion IsGenericType(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsGenericType()");
+        return new TypeIsGenericTypeAssertion(source.Context, false);
+    }
+
+    public static TypeIsGenericTypeAssertion IsNotGenericType(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotGenericType()");
+        return new TypeIsGenericTypeAssertion(source.Context, true);
+    }
+
+    public static TypeIsGenericTypeDefinitionAssertion IsGenericTypeDefinition(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsGenericTypeDefinition()");
+        return new TypeIsGenericTypeDefinitionAssertion(source.Context, false);
+    }
+
+    public static TypeIsGenericTypeDefinitionAssertion IsNotGenericTypeDefinition(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotGenericTypeDefinition()");
+        return new TypeIsGenericTypeDefinitionAssertion(source.Context, true);
+    }
+
+    public static TypeIsArrayAssertion IsArray(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsArray()");
+        return new TypeIsArrayAssertion(source.Context, false);
+    }
+
+    public static TypeIsArrayAssertion IsNotArray(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotArray()");
+        return new TypeIsArrayAssertion(source.Context, true);
+    }
+
+    public static TypeIsByRefAssertion IsByRef(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsByRef()");
+        return new TypeIsByRefAssertion(source.Context, false);
+    }
+
+    public static TypeIsByRefAssertion IsNotByRef(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotByRef()");
+        return new TypeIsByRefAssertion(source.Context, true);
+    }
+
+    public static TypeIsPointerAssertion IsPointer(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsPointer()");
+        return new TypeIsPointerAssertion(source.Context, false);
+    }
+
+    public static TypeIsPointerAssertion IsNotPointer(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotPointer()");
+        return new TypeIsPointerAssertion(source.Context, true);
+    }
+
+    public static TypeIsNestedAssertion IsNested(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNested()");
+        return new TypeIsNestedAssertion(source.Context, false);
+    }
+
+    public static TypeIsNestedAssertion IsNotNested(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotNested()");
+        return new TypeIsNestedAssertion(source.Context, true);
+    }
+
+    public static TypeIsNestedPublicAssertion IsNestedPublic(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNestedPublic()");
+        return new TypeIsNestedPublicAssertion(source.Context, false);
+    }
+
+    public static TypeIsNestedPublicAssertion IsNotNestedPublic(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotNestedPublic()");
+        return new TypeIsNestedPublicAssertion(source.Context, true);
+    }
+
+    public static TypeIsNestedPrivateAssertion IsNestedPrivate(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNestedPrivate()");
+        return new TypeIsNestedPrivateAssertion(source.Context, false);
+    }
+
+    public static TypeIsNestedPrivateAssertion IsNotNestedPrivate(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotNestedPrivate()");
+        return new TypeIsNestedPrivateAssertion(source.Context, true);
+    }
+
+    public static TypeIsNestedAssemblyAssertion IsNestedAssembly(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNestedAssembly()");
+        return new TypeIsNestedAssemblyAssertion(source.Context, false);
+    }
+
+    public static TypeIsNestedAssemblyAssertion IsNotNestedAssembly(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotNestedAssembly()");
+        return new TypeIsNestedAssemblyAssertion(source.Context, true);
+    }
+
+    public static TypeIsNestedFamilyAssertion IsNestedFamily(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNestedFamily()");
+        return new TypeIsNestedFamilyAssertion(source.Context, false);
+    }
+
+    public static TypeIsNestedFamilyAssertion IsNotNestedFamily(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotNestedFamily()");
+        return new TypeIsNestedFamilyAssertion(source.Context, true);
+    }
+
+    public static TypeIsVisibleAssertion IsVisible(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsVisible()");
+        return new TypeIsVisibleAssertion(source.Context, false);
+    }
+
+    public static TypeIsVisibleAssertion IsNotVisible(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotVisible()");
+        return new TypeIsVisibleAssertion(source.Context, true);
+    }
+
+    public static TypeIsConstructedGenericTypeAssertion IsConstructedGenericType(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsConstructedGenericType()");
+        return new TypeIsConstructedGenericTypeAssertion(source.Context, false);
+    }
+
+    public static TypeIsConstructedGenericTypeAssertion IsNotConstructedGenericType(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotConstructedGenericType()");
+        return new TypeIsConstructedGenericTypeAssertion(source.Context, true);
+    }
+
+    public static TypeContainsGenericParametersAssertion ContainsGenericParameters(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".ContainsGenericParameters()");
+        return new TypeContainsGenericParametersAssertion(source.Context, false);
+    }
+
+    public static TypeContainsGenericParametersAssertion DoesNotContainGenericParameters(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".DoesNotContainGenericParameters()");
+        return new TypeContainsGenericParametersAssertion(source.Context, true);
+    }
+
+    public static TypeIsSerializableAssertion IsSerializable(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsSerializable()");
+        return new TypeIsSerializableAssertion(source.Context, false);
+    }
+
+    public static TypeIsSerializableAssertion IsNotSerializable(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotSerializable()");
+        return new TypeIsSerializableAssertion(source.Context, true);
+    }
+
+    public static TypeIsCOMObjectAssertion IsCOMObject(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsCOMObject()");
+        return new TypeIsCOMObjectAssertion(source.Context, false);
+    }
+
+    public static TypeIsCOMObjectAssertion IsNotCOMObject(this IAssertionSource<System.Type> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotCOMObject()");
+        return new TypeIsCOMObjectAssertion(source.Context, true);
+    }
+
+}
+
+]

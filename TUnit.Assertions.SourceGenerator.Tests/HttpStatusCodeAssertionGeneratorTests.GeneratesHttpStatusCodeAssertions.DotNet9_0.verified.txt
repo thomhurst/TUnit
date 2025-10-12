@@ -1,0 +1,348 @@
+﻿[  
+// This file is generated to verify the MethodAssertionGenerator is running.
+// If you see this file, the generator executed successfully.
+namespace TUnit.Assertions.Diagnostics
+{
+    internal static class MethodAssertionGeneratorDiagnostic
+    {
+        public const string Message = "MethodAssertionGenerator is running";
+    }
+}
+
+  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+/// <summary>
+/// Generated assertion for IsSuccess
+/// </summary>
+public sealed class HttpStatusCode_IsSuccess_Assertion : Assertion<HttpStatusCode>
+{
+    public HttpStatusCode_IsSuccess_Assertion(AssertionContext<HttpStatusCode> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsSuccess();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be a success status code (2xx)";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotSuccess
+/// </summary>
+public sealed class HttpStatusCode_IsNotSuccess_Assertion : Assertion<HttpStatusCode>
+{
+    public HttpStatusCode_IsNotSuccess_Assertion(AssertionContext<HttpStatusCode> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsNotSuccess();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be a success status code";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsClientError
+/// </summary>
+public sealed class HttpStatusCode_IsClientError_Assertion : Assertion<HttpStatusCode>
+{
+    public HttpStatusCode_IsClientError_Assertion(AssertionContext<HttpStatusCode> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsClientError();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be a client error status code (4xx)";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsServerError
+/// </summary>
+public sealed class HttpStatusCode_IsServerError_Assertion : Assertion<HttpStatusCode>
+{
+    public HttpStatusCode_IsServerError_Assertion(AssertionContext<HttpStatusCode> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsServerError();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be a server error status code (5xx)";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsRedirection
+/// </summary>
+public sealed class HttpStatusCode_IsRedirection_Assertion : Assertion<HttpStatusCode>
+{
+    public HttpStatusCode_IsRedirection_Assertion(AssertionContext<HttpStatusCode> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsRedirection();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be a redirection status code (3xx)";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsInformational
+/// </summary>
+public sealed class HttpStatusCode_IsInformational_Assertion : Assertion<HttpStatusCode>
+{
+    public HttpStatusCode_IsInformational_Assertion(AssertionContext<HttpStatusCode> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsInformational();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be an informational status code (1xx)";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsError
+/// </summary>
+public sealed class HttpStatusCode_IsError_Assertion : Assertion<HttpStatusCode>
+{
+    public HttpStatusCode_IsError_Assertion(AssertionContext<HttpStatusCode> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<HttpStatusCode> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsError();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be an error status code (4xx or 5xx)";
+    }
+}
+
+public static partial class HttpStatusCodeAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsSuccess
+    /// </summary>
+    public static HttpStatusCode_IsSuccess_Assertion IsSuccess(this IAssertionSource<HttpStatusCode> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsSuccess()");
+        return new HttpStatusCode_IsSuccess_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotSuccess
+    /// </summary>
+    public static HttpStatusCode_IsNotSuccess_Assertion IsNotSuccess(this IAssertionSource<HttpStatusCode> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotSuccess()");
+        return new HttpStatusCode_IsNotSuccess_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsClientError
+    /// </summary>
+    public static HttpStatusCode_IsClientError_Assertion IsClientError(this IAssertionSource<HttpStatusCode> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsClientError()");
+        return new HttpStatusCode_IsClientError_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsServerError
+    /// </summary>
+    public static HttpStatusCode_IsServerError_Assertion IsServerError(this IAssertionSource<HttpStatusCode> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsServerError()");
+        return new HttpStatusCode_IsServerError_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsRedirection
+    /// </summary>
+    public static HttpStatusCode_IsRedirection_Assertion IsRedirection(this IAssertionSource<HttpStatusCode> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsRedirection()");
+        return new HttpStatusCode_IsRedirection_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsInformational
+    /// </summary>
+    public static HttpStatusCode_IsInformational_Assertion IsInformational(this IAssertionSource<HttpStatusCode> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsInformational()");
+        return new HttpStatusCode_IsInformational_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsError
+    /// </summary>
+    public static HttpStatusCode_IsError_Assertion IsError(this IAssertionSource<HttpStatusCode> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsError()");
+        return new HttpStatusCode_IsError_Assertion(source.Context);
+    }
+
+}
+
+]

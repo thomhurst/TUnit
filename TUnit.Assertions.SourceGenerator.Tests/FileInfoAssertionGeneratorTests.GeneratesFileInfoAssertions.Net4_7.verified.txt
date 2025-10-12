@@ -1,0 +1,394 @@
+﻿[  
+// This file is generated to verify the MethodAssertionGenerator is running.
+// If you see this file, the generator executed successfully.
+namespace TUnit.Assertions.Diagnostics
+{
+    internal static class MethodAssertionGeneratorDiagnostic
+    {
+        public const string Message = "MethodAssertionGenerator is running";
+    }
+}
+
+  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+/// <summary>
+/// Generated assertion for HasExtension
+/// </summary>
+public sealed class FileInfo_HasExtension_Assertion : Assertion<System.IO.FileInfo>
+{
+    public FileInfo_HasExtension_Assertion(AssertionContext<System.IO.FileInfo> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.FileInfo> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasExtension();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have an extension";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasNoExtension
+/// </summary>
+public sealed class FileInfo_HasNoExtension_Assertion : Assertion<System.IO.FileInfo>
+{
+    public FileInfo_HasNoExtension_Assertion(AssertionContext<System.IO.FileInfo> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.FileInfo> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasNoExtension();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not have an extension";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsHidden
+/// </summary>
+public sealed class FileInfo_IsHidden_Assertion : Assertion<System.IO.FileInfo>
+{
+    public FileInfo_IsHidden_Assertion(AssertionContext<System.IO.FileInfo> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.FileInfo> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsHidden();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be hidden";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotHidden
+/// </summary>
+public sealed class FileInfo_IsNotHidden_Assertion : Assertion<System.IO.FileInfo>
+{
+    public FileInfo_IsNotHidden_Assertion(AssertionContext<System.IO.FileInfo> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.FileInfo> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsNotHidden();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be hidden";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsEmpty
+/// </summary>
+public sealed class FileInfo_IsEmpty_Assertion : Assertion<System.IO.FileInfo>
+{
+    public FileInfo_IsEmpty_Assertion(AssertionContext<System.IO.FileInfo> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.FileInfo> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsEmpty();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be empty";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotEmpty
+/// </summary>
+public sealed class FileInfo_IsNotEmpty_Assertion : Assertion<System.IO.FileInfo>
+{
+    public FileInfo_IsNotEmpty_Assertion(AssertionContext<System.IO.FileInfo> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.FileInfo> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsNotEmpty();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be empty";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsSystemFile
+/// </summary>
+public sealed class FileInfo_IsSystemFile_Assertion : Assertion<System.IO.FileInfo>
+{
+    public FileInfo_IsSystemFile_Assertion(AssertionContext<System.IO.FileInfo> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.FileInfo> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsSystemFile();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be a system file";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsArchived
+/// </summary>
+public sealed class FileInfo_IsArchived_Assertion : Assertion<System.IO.FileInfo>
+{
+    public FileInfo_IsArchived_Assertion(AssertionContext<System.IO.FileInfo> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.FileInfo> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsArchived();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be archived";
+    }
+}
+
+public static partial class FileInfoAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for HasExtension
+    /// </summary>
+    public static FileInfo_HasExtension_Assertion HasExtension(this IAssertionSource<System.IO.FileInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasExtension()");
+        return new FileInfo_HasExtension_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasNoExtension
+    /// </summary>
+    public static FileInfo_HasNoExtension_Assertion HasNoExtension(this IAssertionSource<System.IO.FileInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasNoExtension()");
+        return new FileInfo_HasNoExtension_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsHidden
+    /// </summary>
+    public static FileInfo_IsHidden_Assertion IsHidden(this IAssertionSource<System.IO.FileInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsHidden()");
+        return new FileInfo_IsHidden_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotHidden
+    /// </summary>
+    public static FileInfo_IsNotHidden_Assertion IsNotHidden(this IAssertionSource<System.IO.FileInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotHidden()");
+        return new FileInfo_IsNotHidden_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsEmpty
+    /// </summary>
+    public static FileInfo_IsEmpty_Assertion IsEmpty(this IAssertionSource<System.IO.FileInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsEmpty()");
+        return new FileInfo_IsEmpty_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotEmpty
+    /// </summary>
+    public static FileInfo_IsNotEmpty_Assertion IsNotEmpty(this IAssertionSource<System.IO.FileInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotEmpty()");
+        return new FileInfo_IsNotEmpty_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsSystemFile
+    /// </summary>
+    public static FileInfo_IsSystemFile_Assertion IsSystemFile(this IAssertionSource<System.IO.FileInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsSystemFile()");
+        return new FileInfo_IsSystemFile_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsArchived
+    /// </summary>
+    public static FileInfo_IsArchived_Assertion IsArchived(this IAssertionSource<System.IO.FileInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsArchived()");
+        return new FileInfo_IsArchived_Assertion(source.Context);
+    }
+
+}
+
+]

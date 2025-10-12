@@ -1,0 +1,159 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+public class TaskIsCompletedAssertion : Assertion<System.Threading.Tasks.Task>
+{
+    private readonly bool _negated;
+
+    public TaskIsCompletedAssertion(AssertionContext<System.Threading.Tasks.Task> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.Tasks.Task> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsCompleted;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsCompleted"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be completed";
+    }
+}
+
+public class TaskIsCanceledAssertion : Assertion<System.Threading.Tasks.Task>
+{
+    private readonly bool _negated;
+
+    public TaskIsCanceledAssertion(AssertionContext<System.Threading.Tasks.Task> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.Tasks.Task> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsCanceled;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsCanceled"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be canceled";
+    }
+}
+
+public class TaskIsFaultedAssertion : Assertion<System.Threading.Tasks.Task>
+{
+    private readonly bool _negated;
+
+    public TaskIsFaultedAssertion(AssertionContext<System.Threading.Tasks.Task> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.Tasks.Task> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsFaulted;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsFaulted"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be faulted";
+    }
+}
+
+public static partial class TaskAssertionExtensions
+{
+    public static TaskIsCompletedAssertion IsCompleted(this IAssertionSource<System.Threading.Tasks.Task> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsCompleted()");
+        return new TaskIsCompletedAssertion(source.Context, false);
+    }
+
+    public static TaskIsCompletedAssertion IsNotCompleted(this IAssertionSource<System.Threading.Tasks.Task> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotCompleted()");
+        return new TaskIsCompletedAssertion(source.Context, true);
+    }
+
+    public static TaskIsCanceledAssertion IsCanceled(this IAssertionSource<System.Threading.Tasks.Task> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsCanceled()");
+        return new TaskIsCanceledAssertion(source.Context, false);
+    }
+
+    public static TaskIsCanceledAssertion IsNotCanceled(this IAssertionSource<System.Threading.Tasks.Task> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotCanceled()");
+        return new TaskIsCanceledAssertion(source.Context, true);
+    }
+
+    public static TaskIsFaultedAssertion IsFaulted(this IAssertionSource<System.Threading.Tasks.Task> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsFaulted()");
+        return new TaskIsFaultedAssertion(source.Context, false);
+    }
+
+    public static TaskIsFaultedAssertion IsNotFaulted(this IAssertionSource<System.Threading.Tasks.Task> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotFaulted()");
+        return new TaskIsFaultedAssertion(source.Context, true);
+    }
+
+}
+
+]

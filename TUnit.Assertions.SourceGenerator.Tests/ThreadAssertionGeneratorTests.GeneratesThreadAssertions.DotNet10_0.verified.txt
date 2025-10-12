@@ -1,0 +1,159 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+public class ThreadIsAliveAssertion : Assertion<System.Threading.Thread>
+{
+    private readonly bool _negated;
+
+    public ThreadIsAliveAssertion(AssertionContext<System.Threading.Thread> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.Thread> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsAlive;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsAlive"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be alive";
+    }
+}
+
+public class ThreadIsBackgroundAssertion : Assertion<System.Threading.Thread>
+{
+    private readonly bool _negated;
+
+    public ThreadIsBackgroundAssertion(AssertionContext<System.Threading.Thread> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.Thread> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsBackground;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsBackground"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a background thread";
+    }
+}
+
+public class ThreadIsThreadPoolThreadAssertion : Assertion<System.Threading.Thread>
+{
+    private readonly bool _negated;
+
+    public ThreadIsThreadPoolThreadAssertion(AssertionContext<System.Threading.Thread> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.Thread> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsThreadPoolThread;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsThreadPoolThread"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a thread pool thread";
+    }
+}
+
+public static partial class ThreadAssertionExtensions
+{
+    public static ThreadIsAliveAssertion IsAlive(this IAssertionSource<System.Threading.Thread> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsAlive()");
+        return new ThreadIsAliveAssertion(source.Context, false);
+    }
+
+    public static ThreadIsAliveAssertion IsNotAlive(this IAssertionSource<System.Threading.Thread> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotAlive()");
+        return new ThreadIsAliveAssertion(source.Context, true);
+    }
+
+    public static ThreadIsBackgroundAssertion IsBackground(this IAssertionSource<System.Threading.Thread> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsBackground()");
+        return new ThreadIsBackgroundAssertion(source.Context, false);
+    }
+
+    public static ThreadIsBackgroundAssertion IsNotBackground(this IAssertionSource<System.Threading.Thread> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotBackground()");
+        return new ThreadIsBackgroundAssertion(source.Context, true);
+    }
+
+    public static ThreadIsThreadPoolThreadAssertion IsThreadPoolThread(this IAssertionSource<System.Threading.Thread> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsThreadPoolThread()");
+        return new ThreadIsThreadPoolThreadAssertion(source.Context, false);
+    }
+
+    public static ThreadIsThreadPoolThreadAssertion IsNotThreadPoolThread(this IAssertionSource<System.Threading.Thread> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotThreadPoolThread()");
+        return new ThreadIsThreadPoolThreadAssertion(source.Context, true);
+    }
+
+}
+
+]

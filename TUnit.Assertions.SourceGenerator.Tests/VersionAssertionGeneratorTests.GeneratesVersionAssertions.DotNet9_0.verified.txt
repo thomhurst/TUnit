@@ -1,0 +1,302 @@
+﻿[  
+// This file is generated to verify the MethodAssertionGenerator is running.
+// If you see this file, the generator executed successfully.
+namespace TUnit.Assertions.Diagnostics
+{
+    internal static class MethodAssertionGeneratorDiagnostic
+    {
+        public const string Message = "MethodAssertionGenerator is running";
+    }
+}
+
+  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+/// <summary>
+/// Generated assertion for IsMajorVersion
+/// </summary>
+public sealed class Version_IsMajorVersion_Assertion : Assertion<System.Version>
+{
+    public Version_IsMajorVersion_Assertion(AssertionContext<System.Version> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Version> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsMajorVersion();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be a major version (x.0.0.0)";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotMajorVersion
+/// </summary>
+public sealed class Version_IsNotMajorVersion_Assertion : Assertion<System.Version>
+{
+    public Version_IsNotMajorVersion_Assertion(AssertionContext<System.Version> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Version> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsNotMajorVersion();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be a major version";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasBuildNumber
+/// </summary>
+public sealed class Version_HasBuildNumber_Assertion : Assertion<System.Version>
+{
+    public Version_HasBuildNumber_Assertion(AssertionContext<System.Version> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Version> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasBuildNumber();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have a build number";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasNoBuildNumber
+/// </summary>
+public sealed class Version_HasNoBuildNumber_Assertion : Assertion<System.Version>
+{
+    public Version_HasNoBuildNumber_Assertion(AssertionContext<System.Version> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Version> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasNoBuildNumber();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not have a build number";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasRevisionNumber
+/// </summary>
+public sealed class Version_HasRevisionNumber_Assertion : Assertion<System.Version>
+{
+    public Version_HasRevisionNumber_Assertion(AssertionContext<System.Version> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Version> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasRevisionNumber();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have a revision number";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasNoRevisionNumber
+/// </summary>
+public sealed class Version_HasNoRevisionNumber_Assertion : Assertion<System.Version>
+{
+    public Version_HasNoRevisionNumber_Assertion(AssertionContext<System.Version> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Version> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasNoRevisionNumber();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not have a revision number";
+    }
+}
+
+public static partial class VersionAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsMajorVersion
+    /// </summary>
+    public static Version_IsMajorVersion_Assertion IsMajorVersion(this IAssertionSource<System.Version> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsMajorVersion()");
+        return new Version_IsMajorVersion_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotMajorVersion
+    /// </summary>
+    public static Version_IsNotMajorVersion_Assertion IsNotMajorVersion(this IAssertionSource<System.Version> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotMajorVersion()");
+        return new Version_IsNotMajorVersion_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasBuildNumber
+    /// </summary>
+    public static Version_HasBuildNumber_Assertion HasBuildNumber(this IAssertionSource<System.Version> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasBuildNumber()");
+        return new Version_HasBuildNumber_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasNoBuildNumber
+    /// </summary>
+    public static Version_HasNoBuildNumber_Assertion HasNoBuildNumber(this IAssertionSource<System.Version> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasNoBuildNumber()");
+        return new Version_HasNoBuildNumber_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasRevisionNumber
+    /// </summary>
+    public static Version_HasRevisionNumber_Assertion HasRevisionNumber(this IAssertionSource<System.Version> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasRevisionNumber()");
+        return new Version_HasRevisionNumber_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasNoRevisionNumber
+    /// </summary>
+    public static Version_HasNoRevisionNumber_Assertion HasNoRevisionNumber(this IAssertionSource<System.Version> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasNoRevisionNumber()");
+        return new Version_HasNoRevisionNumber_Assertion(source.Context);
+    }
+
+}
+
+]
