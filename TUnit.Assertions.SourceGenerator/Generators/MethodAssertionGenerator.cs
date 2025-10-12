@@ -261,15 +261,19 @@ namespace TUnit.Assertions.Diagnostics
         sb.AppendLine("    }");
         sb.AppendLine();
 
-        // CheckAsync method
-        sb.AppendLine($"    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<{targetTypeName}> metadata)");
+        // CheckAsync method - only async if we need await
+        var needsAsync = data.ReturnTypeInfo.Kind == ReturnTypeKind.TaskBool ||
+                        data.ReturnTypeInfo.Kind == ReturnTypeKind.TaskAssertionResult;
+        var asyncKeyword = needsAsync ? "async " : "";
+
+        sb.AppendLine($"    protected override {asyncKeyword}Task<AssertionResult> CheckAsync(EvaluationMetadata<{targetTypeName}> metadata)");
         sb.AppendLine("    {");
         sb.AppendLine("        var value = metadata.Value;");
         sb.AppendLine("        var exception = metadata.Exception;");
         sb.AppendLine();
         sb.AppendLine("        if (exception != null)");
         sb.AppendLine("        {");
-        sb.AppendLine("            return AssertionResult.Failed($\"threw {exception.GetType().FullName}\");");
+        sb.AppendLine($"            return {(needsAsync ? "" : "Task.FromResult(")}AssertionResult.Failed($\"threw {{exception.GetType().FullName}}\"){(needsAsync ? "" : ")")};");
         sb.AppendLine("        }");
         sb.AppendLine();
 
@@ -278,7 +282,7 @@ namespace TUnit.Assertions.Diagnostics
         {
             sb.AppendLine("        if (value is null)");
             sb.AppendLine("        {");
-            sb.AppendLine("            return AssertionResult.Failed(\"Actual value is null\");");
+            sb.AppendLine($"            return {(needsAsync ? "" : "Task.FromResult(")}AssertionResult.Failed(\"Actual value is null\"){(needsAsync ? "" : ")")};");
             sb.AppendLine("        }");
             sb.AppendLine();
         }
@@ -336,13 +340,13 @@ namespace TUnit.Assertions.Diagnostics
         {
             case ReturnTypeKind.Bool:
                 sb.AppendLine($"        var result = {methodCall};");
-                sb.AppendLine("        return result");
+                sb.AppendLine("        return Task.FromResult(result");
                 sb.AppendLine("            ? AssertionResult.Passed");
-                sb.AppendLine("            : AssertionResult.Failed($\"found {value}\");");
+                sb.AppendLine("            : AssertionResult.Failed($\"found {value}\"));");
                 break;
 
             case ReturnTypeKind.AssertionResult:
-                sb.AppendLine($"        return {methodCall};");
+                sb.AppendLine($"        return Task.FromResult({methodCall});");
                 break;
 
             case ReturnTypeKind.TaskBool:
