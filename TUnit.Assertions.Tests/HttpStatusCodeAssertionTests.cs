@@ -1,7 +1,7 @@
 using System.Net;
 using TUnit.Assertions.Extensions;
 
-namespace TUnit.TestProject;
+namespace TUnit.Assertions.Tests;
 
 public class HttpStatusCodeAssertionTests
 {

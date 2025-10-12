@@ -1,7 +1,7 @@
 #if NET6_0_OR_GREATER
 using TUnit.Assertions.Extensions;
 
-namespace TUnit.TestProject;
+namespace TUnit.Assertions.Tests;
 
 public class TimeOnlyAssertionTests
 {

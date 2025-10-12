@@ -1,7 +1,7 @@
 using System.Globalization;
 using TUnit.Assertions.Extensions;
 
-namespace TUnit.TestProject;
+namespace TUnit.Assertions.Tests;
 
 public class CultureInfoAssertionTests
 {
