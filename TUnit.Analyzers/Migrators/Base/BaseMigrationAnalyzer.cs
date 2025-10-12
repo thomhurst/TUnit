@@ -199,12 +199,25 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
             {
                 // Fallback: if symbol resolution fails completely, check the syntax directly
                 // This handles cases where the semantic model hasn't fully resolved types
+                // BUT: Don't apply this fallback if TUnit using directives are present (already converted code)
                 if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
                 {
-                    var typeExpression = memberAccess.Expression.ToString();
-                    if (IsFrameworkTypeName(typeExpression))
+                    // Check if TUnit using directives are present
+                    var usings = classDeclarationSyntax.SyntaxTree.GetCompilationUnitRoot().Usings;
+                    var hasTUnitUsings = usings.Any(u =>
                     {
-                        return true;
+                        var name = u.Name?.ToString() ?? "";
+                        return name == "TUnit.Core" || name == "TUnit.Assertions" || name.StartsWith("TUnit.");
+                    });
+
+                    // If TUnit usings are present, don't apply fallback detection
+                    if (!hasTUnitUsings)
+                    {
+                        var typeExpression = memberAccess.Expression.ToString();
+                        if (IsFrameworkTypeName(typeExpression))
+                        {
+                            return true;
+                        }
                     }
                 }
             }

@@ -179,7 +179,9 @@ public static class MigrationHelpers
     public static CompilationUnitSyntax AddTUnitUsings(CompilationUnitSyntax compilationUnit)
     {
         var tunitUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Core"));
-        var assertionsUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Assert"))
+        // Add namespace using so Assert type name is available for Assert.That(...) syntax
+        var assertionsNamespaceUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions"));
+        var assertionsStaticUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Assert"))
             .WithStaticKeyword(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
         var extensionsUsing = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("TUnit.Assertions.Extensions"));
 
@@ -190,9 +192,15 @@ public static class MigrationHelpers
             existingUsings.Add(tunitUsing);
         }
 
+        // Add namespace using so Assert type name is resolvable
+        if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Assertions" && !u.StaticKeyword.IsKind(SyntaxKind.StaticKeyword)))
+        {
+            existingUsings.Add(assertionsNamespaceUsing);
+        }
+
         if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Assertions.Assert" && u.StaticKeyword.IsKind(SyntaxKind.StaticKeyword)))
         {
-            existingUsings.Add(assertionsUsing);
+            existingUsings.Add(assertionsStaticUsing);
         }
 
         if (!existingUsings.Any(u => u.Name?.ToString() == "TUnit.Assertions.Extensions"))

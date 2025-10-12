@@ -50,6 +50,7 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             $$"""
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -80,6 +81,7 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -114,6 +116,7 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -155,6 +158,7 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -206,6 +210,7 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -240,6 +245,7 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -247,8 +253,10 @@ public class NUnitMigrationAnalyzerTests
                 {
                     [Before(HookType.Test)]
                     public void Setup() { }
+
                     [After(HookType.Test)]
                     public void Teardown() { }
+
                     [Test]
                     public void MyMethod() { }
                 }
@@ -285,6 +293,7 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -330,6 +339,7 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -371,6 +381,7 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -381,7 +392,7 @@ public class NUnitMigrationAnalyzerTests
                     {
                         await Assert.That(10).IsGreaterThan(5);
                         await Assert.That(3).IsLessThan(10);
-                        await Assert.That("hello").IsEqualTo(Is.Not.Null);
+                        await Assert.That("hello").IsNotNull();
                         await Assert.That("test").Contains("es");
                         await Assert.That("world").StartsWith("wor");
                         await Assert.That("hello").EndsWith("llo");
@@ -460,6 +471,7 @@ public class NUnitMigrationAnalyzerTests
             """
                 using System;
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -488,7 +500,6 @@ public class NUnitMigrationAnalyzerTests
 
                     [Arguments(1, 2, 3)]
                     [Arguments(5, 5, 10)]
-                    [Test]
                     public void AdditionTest(int a, int b, int expected)
                     {
                         var result = a + b;
@@ -496,10 +507,9 @@ public class NUnitMigrationAnalyzerTests
                     }
 
                     [MethodDataSource(nameof(GetTestData))]
-                    [Test]
                     public void DataDrivenTest(string input)
                     {
-                        await Assert.That(input).IsEqualTo(Is.Not.Null);
+                        await Assert.That(input).IsNotNull();
                     }
 
                     public static object[] GetTestData()
@@ -549,6 +559,7 @@ public class NUnitMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.NUnitMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -558,7 +569,7 @@ public class NUnitMigrationAnalyzerTests
                     public void TestMultipleAssertions()
                     {
                         var value = 42;
-                        await Assert.That(value).IsEqualTo(Is.Not.Null);
+                        await Assert.That(value).IsNotNull();
                         ClassicAssert.IsNotNull(value);
                         ClassicAssert.AreEqual(42, value);
                         await Assert.That(value).IsGreaterThan(0);
@@ -578,7 +589,8 @@ public class NUnitMigrationAnalyzerTests
     private static void ConfigureNUnitTest(CodeFixer.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
-        test.FixedState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
+        test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.Legacy.ClassicAssert).Assembly);
+        // FixedState should only have TUnit assemblies, not NUnit
         test.FixedState.AdditionalReferences.Add(typeof(TUnit.Core.TestAttribute).Assembly);
         test.FixedState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
     }

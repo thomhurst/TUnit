@@ -48,6 +48,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             $$"""
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -78,6 +79,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -113,6 +115,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -164,6 +167,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -187,10 +191,10 @@ public class MSTestMigrationAnalyzerTests
                 {
                     [TestInitialize]
                     public void Setup() { }
-                    
+
                     [TestCleanup]
                     public void Teardown() { }
-                    
+
                     [TestMethod]
                     public void MyMethod() { }
                 }
@@ -198,6 +202,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -205,8 +210,10 @@ public class MSTestMigrationAnalyzerTests
                 {
                     [Before(HookType.Test)]
                     public void Setup() { }
+
                     [After(HookType.Test)]
                     public void Teardown() { }
+
                     [Test]
                     public void MyMethod() { }
                 }
@@ -226,10 +233,10 @@ public class MSTestMigrationAnalyzerTests
                 {
                     [ClassInitialize]
                     public static void ClassSetup(TestContext context) { }
-                    
+
                     [ClassCleanup]
                     public static void ClassTeardown() { }
-                    
+
                     [TestMethod]
                     public void MyMethod() { }
                 }
@@ -237,6 +244,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -244,8 +252,10 @@ public class MSTestMigrationAnalyzerTests
                 {
                     [Before(HookType.Class)]
                     public static void ClassSetup() { }
+
                     [After(HookType.Class)]
                     public static void ClassTeardown() { }
+
                     [Test]
                     public void MyMethod() { }
                 }
@@ -276,6 +286,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -316,6 +327,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -362,6 +374,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -407,6 +420,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -495,6 +509,7 @@ public class MSTestMigrationAnalyzerTests
             """
                 using System;
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -594,6 +609,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -643,6 +659,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0),
             """
                 using TUnit.Core;
+                using TUnit.Assertions;
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
@@ -654,7 +671,6 @@ public class MSTestMigrationAnalyzerTests
                         var obj1 = new object();
                         var obj2 = obj1;
                         var obj3 = new object();
-
                         await Assert.That(obj2).IsSameReference(obj1);
                         await Assert.That(obj3).IsNotSameReference(obj1);
                     }
@@ -672,7 +688,7 @@ public class MSTestMigrationAnalyzerTests
     private static void ConfigureMSTestTest(CodeFixer.Test test)
     {
         test.TestState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);
-        test.FixedState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);
+        // FixedState should only have TUnit assemblies, not MSTest
         test.FixedState.AdditionalReferences.Add(typeof(TUnit.Core.TestAttribute).Assembly);
         test.FixedState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
     }

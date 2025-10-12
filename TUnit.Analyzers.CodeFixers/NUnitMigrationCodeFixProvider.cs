@@ -120,7 +120,9 @@ public class NUnitAssertionRewriter : AssertionRewriter
     
     protected override bool IsFrameworkAssertionNamespace(string namespaceName)
     {
-        return namespaceName == "NUnit.Framework" || namespaceName.StartsWith("NUnit.Framework.");
+        // Exclude NUnit.Framework.Legacy - ClassicAssert should not be converted
+        return (namespaceName == "NUnit.Framework" || namespaceName.StartsWith("NUnit.Framework."))
+               && namespaceName != "NUnit.Framework.Legacy";
     }
     
     protected override ExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation)
@@ -173,7 +175,19 @@ public class NUnitAssertionRewriter : AssertionRewriter
         if (constraint.Expression is MemberAccessExpressionSyntax memberAccess)
         {
             var methodName = memberAccess.Name.Identifier.Text;
-            
+
+            // Handle Does.StartWith, Does.EndWith, Contains.Substring
+            if (memberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Does" or "Contains" })
+            {
+                return methodName switch
+                {
+                    "StartWith" => CreateTUnitAssertion("StartsWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "EndWith" => CreateTUnitAssertion("EndsWith", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    "Substring" => CreateTUnitAssertion("Contains", actualValue, constraint.ArgumentList.Arguments.ToArray()),
+                    _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
+                };
+            }
+
             return methodName switch
             {
                 "EqualTo" => CreateTUnitAssertion("IsEqualTo", actualValue, constraint.ArgumentList.Arguments.ToArray()),
@@ -185,14 +199,27 @@ public class NUnitAssertionRewriter : AssertionRewriter
                 _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
             };
         }
-        
+
         return CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint));
     }
     
     private ExpressionSyntax ConvertConstraintMemberToTUnit(ExpressionSyntax actualValue, MemberAccessExpressionSyntax constraint)
     {
         var memberName = constraint.Name.Identifier.Text;
-        
+
+        // Handle Is.Not.X patterns
+        if (constraint.Expression is MemberAccessExpressionSyntax innerMemberAccess &&
+            innerMemberAccess.Expression is IdentifierNameSyntax { Identifier.Text: "Is" } &&
+            innerMemberAccess.Name.Identifier.Text == "Not")
+        {
+            return memberName switch
+            {
+                "Null" => CreateTUnitAssertion("IsNotNull", actualValue),
+                "Empty" => CreateTUnitAssertion("IsNotEmpty", actualValue),
+                _ => CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint))
+            };
+        }
+
         return memberName switch
         {
             "True" => CreateTUnitAssertion("IsTrue", actualValue),

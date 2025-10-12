@@ -94,33 +94,37 @@ public abstract class AttributeRewriter : CSharpSyntaxRewriter
     public override SyntaxNode? VisitAttributeList(AttributeListSyntax node)
     {
         var attributes = new List<AttributeSyntax>();
-        
+
         foreach (var attribute in node.Attributes)
         {
             var attributeName = MigrationHelpers.GetAttributeName(attribute);
-            
+
             if (MigrationHelpers.ShouldRemoveAttribute(attributeName, FrameworkName))
             {
                 continue;
             }
-            
+
             if (MigrationHelpers.IsHookAttribute(attributeName, FrameworkName))
             {
                 var hookAttributeList = MigrationHelpers.ConvertHookAttribute(attribute, FrameworkName);
                 if (hookAttributeList != null)
                 {
-                    return hookAttributeList;
+                    // Preserve only the leading trivia (indentation) from the original node
+                    // and strip any trailing trivia to prevent extra blank lines
+                    return hookAttributeList
+                        .WithLeadingTrivia(node.GetLeadingTrivia())
+                        .WithTrailingTrivia(node.GetTrailingTrivia());
                 }
             }
-            
+
             var convertedAttribute = ConvertAttribute(attribute);
             if (convertedAttribute != null)
             {
                 attributes.Add(convertedAttribute);
             }
         }
-        
-        return attributes.Count > 0 
+
+        return attributes.Count > 0
             ? node.WithAttributes(SyntaxFactory.SeparatedList(attributes))
             : null;
     }
