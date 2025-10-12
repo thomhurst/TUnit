@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Formatting;
 using TUnit.Analyzers.Migrators.Base;
 
 namespace TUnit.Analyzers.CodeFixers.Base;
@@ -71,7 +72,9 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             compilationUnit = MigrationHelpers.RemoveFrameworkUsings(compilationUnit, FrameworkName);
             compilationUnit = MigrationHelpers.AddTUnitUsings(compilationUnit);
 
-            return document.WithSyntaxRoot(compilationUnit);
+            // Format the entire document to ensure consistent line endings
+            var formattedDocument = document.WithSyntaxRoot(compilationUnit);
+            return await Formatter.FormatAsync(formattedDocument, options: null, cancellationToken).ConfigureAwait(false);
         }
         catch
         {
