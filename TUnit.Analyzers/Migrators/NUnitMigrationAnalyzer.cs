@@ -32,8 +32,8 @@ public class NUnitMigrationAnalyzer : BaseMigrationAnalyzer
     protected override bool IsFrameworkTypeName(string typeName)
     {
         // Check for NUnit assertion types by name (fallback when semantic model doesn't resolve)
+        // Note: ClassicAssert is intentionally excluded because it's not fully converted by the code fixer
         return typeName == "Assert" ||
-               typeName == "ClassicAssert" ||
                typeName == "CollectionAssert" ||
                typeName == "StringAssert" ||
                typeName == "FileAssert" ||

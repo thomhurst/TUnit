@@ -579,5 +579,7 @@ public class NUnitMigrationAnalyzerTests
     {
         test.TestState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
         test.FixedState.AdditionalReferences.Add(typeof(NUnit.Framework.TestAttribute).Assembly);
+        test.FixedState.AdditionalReferences.Add(typeof(TUnit.Core.TestAttribute).Assembly);
+        test.FixedState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
     }
 }

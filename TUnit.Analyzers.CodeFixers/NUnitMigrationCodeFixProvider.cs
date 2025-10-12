@@ -148,7 +148,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
         return null;
     }
     
-    private InvocationExpressionSyntax ConvertAssertThat(InvocationExpressionSyntax invocation)
+    private ExpressionSyntax ConvertAssertThat(InvocationExpressionSyntax invocation)
     {
         var arguments = invocation.ArgumentList.Arguments;
         var actualValue = arguments[0].Expression;
@@ -168,7 +168,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
         return CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint));
     }
     
-    private InvocationExpressionSyntax ConvertConstraintToTUnit(ExpressionSyntax actualValue, InvocationExpressionSyntax constraint)
+    private ExpressionSyntax ConvertConstraintToTUnit(ExpressionSyntax actualValue, InvocationExpressionSyntax constraint)
     {
         if (constraint.Expression is MemberAccessExpressionSyntax memberAccess)
         {
@@ -189,7 +189,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
         return CreateTUnitAssertion("IsEqualTo", actualValue, SyntaxFactory.Argument(constraint));
     }
     
-    private InvocationExpressionSyntax ConvertConstraintMemberToTUnit(ExpressionSyntax actualValue, MemberAccessExpressionSyntax constraint)
+    private ExpressionSyntax ConvertConstraintMemberToTUnit(ExpressionSyntax actualValue, MemberAccessExpressionSyntax constraint)
     {
         var memberName = constraint.Name.Identifier.Text;
         
@@ -203,7 +203,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
         };
     }
     
-    private InvocationExpressionSyntax? ConvertClassicAssertion(InvocationExpressionSyntax invocation, string methodName)
+    private ExpressionSyntax? ConvertClassicAssertion(InvocationExpressionSyntax invocation, string methodName)
     {
         var arguments = invocation.ArgumentList.Arguments;
         

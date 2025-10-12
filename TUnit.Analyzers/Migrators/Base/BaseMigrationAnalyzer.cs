@@ -177,6 +177,18 @@ public abstract class BaseMigrationAnalyzer : ConcurrentDiagnosticAnalyzer
             var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation);
             if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
             {
+                var namespaceName = methodSymbol.ContainingNamespace?.ToDisplayString();
+
+                // Explicitly exclude TUnit types (already converted code)
+                if (namespaceName != null &&
+                    (namespaceName == "TUnit.Assertions" ||
+                     namespaceName.StartsWith("TUnit.Assertions.") ||
+                     namespaceName == "TUnit.Core" ||
+                     namespaceName.StartsWith("TUnit.Core.")))
+                {
+                    continue; // Skip TUnit types - they're not framework types to migrate
+                }
+
                 // Check if the method belongs to a framework type
                 if (IsFrameworkType(methodSymbol.ContainingType))
                 {

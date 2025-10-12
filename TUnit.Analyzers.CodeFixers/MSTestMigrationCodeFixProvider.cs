@@ -214,7 +214,7 @@ public class MSTestAssertionRewriter : AssertionRewriter
         return null;
     }
     
-    private InvocationExpressionSyntax? ConvertMSTestAssertion(InvocationExpressionSyntax invocation, string methodName)
+    private ExpressionSyntax? ConvertMSTestAssertion(InvocationExpressionSyntax invocation, string methodName)
     {
         var arguments = invocation.ArgumentList.Arguments;
         
@@ -249,7 +249,7 @@ public class MSTestAssertionRewriter : AssertionRewriter
         };
     }
     
-    private InvocationExpressionSyntax? ConvertCollectionAssertion(InvocationExpressionSyntax invocation, string methodName)
+    private ExpressionSyntax? ConvertCollectionAssertion(InvocationExpressionSyntax invocation, string methodName)
     {
         var arguments = invocation.ArgumentList.Arguments;
         
@@ -279,7 +279,7 @@ public class MSTestAssertionRewriter : AssertionRewriter
         };
     }
     
-    private InvocationExpressionSyntax? ConvertStringAssertion(InvocationExpressionSyntax invocation, string methodName)
+    private ExpressionSyntax? ConvertStringAssertion(InvocationExpressionSyntax invocation, string methodName)
     {
         var arguments = invocation.ArgumentList.Arguments;
         
@@ -299,7 +299,7 @@ public class MSTestAssertionRewriter : AssertionRewriter
         };
     }
     
-    private InvocationExpressionSyntax CreateThrowsAssertion(InvocationExpressionSyntax invocation)
+    private ExpressionSyntax CreateThrowsAssertion(InvocationExpressionSyntax invocation)
     {
         // Convert Assert.ThrowsException<T>(action) to await Assert.ThrowsAsync<T>(action)
         if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
@@ -307,8 +307,8 @@ public class MSTestAssertionRewriter : AssertionRewriter
         {
             var exceptionType = genericName.TypeArgumentList.Arguments[0];
             var action = invocation.ArgumentList.Arguments[0].Expression;
-            
-            return SyntaxFactory.InvocationExpression(
+
+            var invocationExpression = SyntaxFactory.InvocationExpression(
                 SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     SyntaxFactory.IdentifierName("Assert"),
@@ -325,32 +325,34 @@ public class MSTestAssertionRewriter : AssertionRewriter
                     )
                 )
             );
+
+            return SyntaxFactory.AwaitExpression(invocationExpression);
         }
-        
+
         return CreateTUnitAssertion("Throws", invocation.ArgumentList.Arguments[0].Expression);
     }
     
-    private InvocationExpressionSyntax CreateThrowsAsyncAssertion(InvocationExpressionSyntax invocation)
+    private ExpressionSyntax CreateThrowsAsyncAssertion(InvocationExpressionSyntax invocation)
     {
         // Similar to CreateThrowsAssertion but for async
         return CreateThrowsAssertion(invocation);
     }
     
-    private InvocationExpressionSyntax CreateFailAssertion(SeparatedSyntaxList<ArgumentSyntax> arguments)
+    private ExpressionSyntax CreateFailAssertion(SeparatedSyntaxList<ArgumentSyntax> arguments)
     {
-        // Convert Assert.Fail(message) to Assert.Fail(message)
+        // Convert Assert.Fail(message) to await Assert.Fail(message)
         var failInvocation = SyntaxFactory.InvocationExpression(
             SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 SyntaxFactory.IdentifierName("Assert"),
                 SyntaxFactory.IdentifierName("Fail")
             ),
-            arguments.Count > 0 
+            arguments.Count > 0
                 ? SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(arguments[0]))
                 : SyntaxFactory.ArgumentList()
         );
-        
-        return failInvocation;
+
+        return SyntaxFactory.AwaitExpression(failInvocation);
     }
 }
 

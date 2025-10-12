@@ -673,5 +673,7 @@ public class MSTestMigrationAnalyzerTests
     {
         test.TestState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);
         test.FixedState.AdditionalReferences.Add(typeof(TestMethodAttribute).Assembly);
+        test.FixedState.AdditionalReferences.Add(typeof(TUnit.Core.TestAttribute).Assembly);
+        test.FixedState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
     }
 }
