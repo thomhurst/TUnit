@@ -25,39 +25,42 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
         return base.VisitInvocationExpression(node);
     }
     
-    protected abstract InvocationExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation);
-    
-    protected InvocationExpressionSyntax CreateTUnitAssertion(
+    protected abstract ExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation);
+
+    protected ExpressionSyntax CreateTUnitAssertion(
         string methodName,
         ExpressionSyntax actualValue,
         params ArgumentSyntax[] additionalArguments)
     {
-        var awaitExpression = SyntaxFactory.AwaitExpression(
-            SyntaxFactory.InvocationExpression(
-                SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.IdentifierName("Assert"),
-                    SyntaxFactory.IdentifierName("That")
-                ),
-                SyntaxFactory.ArgumentList(
-                    SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.Argument(actualValue)
-                    )
+        // Create Assert.That(actualValue)
+        var assertThatInvocation = SyntaxFactory.InvocationExpression(
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Assert"),
+                SyntaxFactory.IdentifierName("That")
+            ),
+            SyntaxFactory.ArgumentList(
+                SyntaxFactory.SingletonSeparatedList(
+                    SyntaxFactory.Argument(actualValue)
                 )
             )
         );
-        
+
+        // Create Assert.That(actualValue).MethodName(args)
         var methodAccess = SyntaxFactory.MemberAccessExpression(
             SyntaxKind.SimpleMemberAccessExpression,
-            awaitExpression,
+            assertThatInvocation,
             SyntaxFactory.IdentifierName(methodName)
         );
-        
+
         var arguments = additionalArguments.Length > 0
             ? SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList(additionalArguments))
             : SyntaxFactory.ArgumentList();
-        
-        return SyntaxFactory.InvocationExpression(methodAccess, arguments);
+
+        var fullInvocation = SyntaxFactory.InvocationExpression(methodAccess, arguments);
+
+        // Now wrap the entire thing in await: await Assert.That(actualValue).MethodName(args)
+        return SyntaxFactory.AwaitExpression(fullInvocation);
     }
     
     protected bool IsFrameworkAssertion(InvocationExpressionSyntax invocation)

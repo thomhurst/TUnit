@@ -123,7 +123,7 @@ public class NUnitAssertionRewriter : AssertionRewriter
         return namespaceName == "NUnit.Framework" || namespaceName.StartsWith("NUnit.Framework.");
     }
     
-    protected override InvocationExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation)
+    protected override ExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation)
     {
         if (!IsFrameworkAssertion(invocation))
         {

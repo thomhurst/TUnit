@@ -184,7 +184,7 @@ public class MSTestAssertionRewriter : AssertionRewriter
                namespaceName.StartsWith("Microsoft.VisualStudio.TestTools.UnitTesting.");
     }
     
-    protected override InvocationExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation)
+    protected override ExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation)
     {
         if (!IsFrameworkAssertion(invocation))
         {
@@ -367,16 +367,16 @@ public class MSTestLifecycleRewriter : CSharpSyntaxRewriter
 {
     public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
-        // Handle ClassInitialize and ClassCleanup - remove TestContext parameter
-        var hasClassLifecycleAttribute = node.AttributeLists
+        // Handle ClassInitialize, ClassCleanup, TestInitialize, TestCleanup - remove TestContext parameter where applicable
+        var lifecycleAttributes = node.AttributeLists
             .SelectMany(al => al.Attributes)
-            .Any(a => 
-            {
-                var name = a.Name.ToString();
-                return name == "Before" || name == "After";
-            });
-        
-        if (hasClassLifecycleAttribute)
+            .Select(a => MigrationHelpers.GetAttributeName(a))
+            .ToList();
+
+        var hasClassLifecycle = lifecycleAttributes.Any(name => name is "ClassInitialize" or "ClassCleanup");
+        var hasTestLifecycle = lifecycleAttributes.Any(name => name is "TestInitialize" or "TestCleanup");
+
+        if (hasClassLifecycle || hasTestLifecycle)
         {
             // Remove TestContext parameter if present
             var parameters = node.ParameterList?.Parameters ?? default;
@@ -384,25 +384,20 @@ public class MSTestLifecycleRewriter : CSharpSyntaxRewriter
             {
                 node = node.WithParameterList(SyntaxFactory.ParameterList());
             }
-            
+
             // Make sure method is public
             if (!node.Modifiers.Any(SyntaxKind.PublicKeyword))
             {
                 node = node.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
             }
-            
+
             // Make sure ClassInitialize/ClassCleanup are static
-            var isClassLevel = node.AttributeLists
-                .SelectMany(al => al.Attributes)
-                .Any(a => a.ArgumentList?.Arguments.Any(arg => 
-                    arg.Expression.ToString().Contains("Class")) == true);
-            
-            if (isClassLevel && !node.Modifiers.Any(SyntaxKind.StaticKeyword))
+            if (hasClassLifecycle && !node.Modifiers.Any(SyntaxKind.StaticKeyword))
             {
                 node = node.AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
             }
         }
-        
+
         return base.VisitMethodDeclaration(node);
     }
 }
