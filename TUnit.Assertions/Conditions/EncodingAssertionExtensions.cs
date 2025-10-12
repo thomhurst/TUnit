@@ -4,10 +4,12 @@ using TUnit.Assertions.Attributes;
 namespace TUnit.Assertions.Conditions;
 
 /// <summary>
-/// Source-generated assertions for Encoding type using [GenerateAssertion] attributes.
-/// These wrap encoding equality checks as extension methods.
+/// Source-generated assertions for Encoding type using [GenerateAssertion] and [AssertionFrom&lt;Encoding&gt;] attributes.
+/// These wrap encoding equality checks and properties as extension methods.
 /// </summary>
-public static class EncodingAssertionExtensions
+[AssertionFrom<Encoding>(nameof(Encoding.IsSingleByte), ExpectationMessage = "be single-byte encoding")]
+[AssertionFrom<Encoding>(nameof(Encoding.IsSingleByte), CustomName = "IsNotSingleByte", NegateLogic = true, ExpectationMessage = "be single-byte encoding")]
+public static partial class EncodingAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be UTF-8 encoding")]
     public static bool IsUTF8(this Encoding value) => value?.Equals(Encoding.UTF8) == true;

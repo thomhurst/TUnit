@@ -4,10 +4,14 @@ using TUnit.Assertions.Attributes;
 namespace TUnit.Assertions.Conditions;
 
 /// <summary>
-/// Source-generated assertions for CultureInfo type using [GenerateAssertion] attributes.
-/// These wrap culture equality and property checks as extension methods.
+/// Source-generated assertions for CultureInfo type using [GenerateAssertion] and [AssertionFrom&lt;CultureInfo&gt;] attributes.
+/// These wrap culture equality, property checks, and instance properties as extension methods.
 /// </summary>
-public static class CultureInfoAssertionExtensions
+[AssertionFrom<CultureInfo>(nameof(CultureInfo.IsNeutralCulture), ExpectationMessage = "be a neutral culture")]
+[AssertionFrom<CultureInfo>(nameof(CultureInfo.IsNeutralCulture), CustomName = "IsNotNeutralCulture", NegateLogic = true, ExpectationMessage = "be a neutral culture")]
+
+[AssertionFrom<CultureInfo>(nameof(CultureInfo.IsReadOnly), ExpectationMessage = "be read-only culture")]
+public static partial class CultureInfoAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be invariant culture")]
     public static bool IsInvariant(this CultureInfo value) => value?.Equals(CultureInfo.InvariantCulture) == true;

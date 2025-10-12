@@ -3,10 +3,12 @@ using TUnit.Assertions.Attributes;
 namespace TUnit.Assertions.Conditions;
 
 /// <summary>
-/// Source-generated assertions for DateTime type using [GenerateAssertion] attributes.
+/// Source-generated assertions for DateTime type using [GenerateAssertion] and [AssertionFrom&lt;DateTime&gt;] attributes.
 /// These wrap DateTime property and method checks as extension methods.
 /// </summary>
-public static class DateTimeAssertionExtensions
+[AssertionFrom<DateTime>(nameof(DateTime.IsDaylightSavingTime), ExpectationMessage = "be during daylight saving time")]
+[AssertionFrom<DateTime>(nameof(DateTime.IsDaylightSavingTime), CustomName = "IsNotDaylightSavingTime", NegateLogic = true, ExpectationMessage = "be during daylight saving time")]
+public static partial class DateTimeAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be today")]
     public static bool IsToday(this DateTime value) => value.Date == DateTime.Today;
