@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -6,6 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a value is in a collection.
 /// </summary>
+[AssertionExtension("IsIn")]
 public class IsInAssertion<TValue> : Assertion<TValue>
 {
     private readonly IEnumerable<TValue> _collection;
@@ -55,6 +57,7 @@ public class IsInAssertion<TValue> : Assertion<TValue>
 /// <summary>
 /// Asserts that a value is NOT in a collection.
 /// </summary>
+[AssertionExtension("IsNotIn")]
 public class IsNotInAssertion<TValue> : Assertion<TValue>
 {
     private readonly IEnumerable<TValue> _collection;

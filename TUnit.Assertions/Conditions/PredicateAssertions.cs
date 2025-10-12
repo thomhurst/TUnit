@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -46,6 +47,7 @@ public class SatisfiesAssertion<TValue> : Assertion<TValue>
 /// Asserts that a value is equal to the expected value using either IEquatable or default equality.
 /// This is useful for types that implement IEquatable for better performance.
 /// </summary>
+[AssertionExtension("IsEquatableOrEqualTo")]
 public class IsEquatableOrEqualToAssertion<TValue> : Assertion<TValue>
 {
     private readonly TValue _expected;
