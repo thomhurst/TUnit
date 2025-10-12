@@ -27,4 +27,22 @@ public static partial class DateTimeAssertionExtensions
 
     [GenerateAssertion(ExpectationMessage = "to not be in a leap year")]
     public static bool IsNotLeapYear(this DateTime value) => !DateTime.IsLeapYear(value.Year);
+
+    [GenerateAssertion(ExpectationMessage = "to be in the future")]
+    public static bool IsInFuture(this DateTime value) => value > DateTime.Now;
+
+    [GenerateAssertion(ExpectationMessage = "to be in the past")]
+    public static bool IsInPast(this DateTime value) => value < DateTime.Now;
+
+    [GenerateAssertion(ExpectationMessage = "to be in the future (UTC)")]
+    public static bool IsInFutureUtc(this DateTime value) => value > DateTime.UtcNow;
+
+    [GenerateAssertion(ExpectationMessage = "to be in the past (UTC)")]
+    public static bool IsInPastUtc(this DateTime value) => value < DateTime.UtcNow;
+
+    [GenerateAssertion(ExpectationMessage = "to be on a weekend")]
+    public static bool IsOnWeekend(this DateTime value) => value.DayOfWeek == DayOfWeek.Saturday || value.DayOfWeek == DayOfWeek.Sunday;
+
+    [GenerateAssertion(ExpectationMessage = "to be on a weekday")]
+    public static bool IsOnWeekday(this DateTime value) => value.DayOfWeek != DayOfWeek.Saturday && value.DayOfWeek != DayOfWeek.Sunday;
 }

@@ -234,7 +234,7 @@ public static class AssertionExtensions
         this AndContinuation<bool> source)
     {
         source.Context.ExpressionBuilder.Append(".IsTrue()");
-        var newAssertion = new IsTrue_Assertion(source.Context);
+        var newAssertion = new Bool_IsTrue_Assertion(source.Context);
         return new Chaining.AndAssertion<bool>(source.PreviousAssertion, newAssertion);
     }
 
@@ -245,7 +245,7 @@ public static class AssertionExtensions
         this OrContinuation<bool> source)
     {
         source.Context.ExpressionBuilder.Append(".IsTrue()");
-        var newAssertion = new IsTrue_Assertion(source.Context);
+        var newAssertion = new Bool_IsTrue_Assertion(source.Context);
         return new Chaining.OrAssertion<bool>(source.PreviousAssertion, newAssertion);
     }
 
@@ -256,7 +256,7 @@ public static class AssertionExtensions
         this AndContinuation<bool> source)
     {
         source.Context.ExpressionBuilder.Append(".IsFalse()");
-        var newAssertion = new IsFalse_Assertion(source.Context);
+        var newAssertion = new Bool_IsFalse_Assertion(source.Context);
         return new Chaining.AndAssertion<bool>(source.PreviousAssertion, newAssertion);
     }
 
@@ -267,7 +267,7 @@ public static class AssertionExtensions
         this OrContinuation<bool> source)
     {
         source.Context.ExpressionBuilder.Append(".IsFalse()");
-        var newAssertion = new IsFalse_Assertion(source.Context);
+        var newAssertion = new Bool_IsFalse_Assertion(source.Context);
         return new Chaining.OrAssertion<bool>(source.PreviousAssertion, newAssertion);
     }
 

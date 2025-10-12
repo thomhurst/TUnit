@@ -225,13 +225,22 @@ namespace TUnit.Assertions.Diagnostics
     {
         var className = GenerateClassName(data);
         var targetTypeName = data.TargetType.ToDisplayString();
+        var genericParams = GetGenericTypeParameters(data.TargetType);
+        var genericDeclaration = genericParams.Length > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
         var isNullable = data.TargetType.IsReferenceType || data.TargetType.NullableAnnotation == NullableAnnotation.Annotated;
 
         // Class declaration
         sb.AppendLine($"/// <summary>");
         sb.AppendLine($"/// Generated assertion for {data.Method.Name}");
         sb.AppendLine($"/// </summary>");
-        sb.AppendLine($"public sealed class {className} : Assertion<{targetTypeName}>");
+
+        // Add suppression for generic types to avoid trimming warnings
+        if (genericParams.Length > 0)
+        {
+            sb.AppendLine($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"IL2091\", Justification = \"Generic type parameter is only used for property access, not instantiation\")]");
+        }
+
+        sb.AppendLine($"public sealed class {className}{genericDeclaration} : Assertion<{targetTypeName}>");
         sb.AppendLine("{");
 
         // Private fields for additional parameters
@@ -397,14 +406,22 @@ namespace TUnit.Assertions.Diagnostics
         var className = GenerateClassName(data);
         var targetTypeName = data.TargetType.ToDisplayString();
         var methodName = data.Method.Name;
+        var genericParams = GetGenericTypeParameters(data.TargetType);
+        var genericDeclaration = genericParams.Length > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
 
         // XML documentation
         sb.AppendLine("    /// <summary>");
         sb.AppendLine($"    /// Generated extension method for {methodName}");
         sb.AppendLine("    /// </summary>");
 
+        // Add suppression for generic types to avoid trimming warnings
+        if (genericParams.Length > 0)
+        {
+            sb.AppendLine($"    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"IL2091\", Justification = \"Generic type parameter is only used for property access, not instantiation\")]");
+        }
+
         // Method signature
-        sb.Append($"    public static {className} {methodName}(");
+        sb.Append($"    public static {className}{genericDeclaration} {methodName}{genericDeclaration}(");
         sb.Append($"this IAssertionSource<{targetTypeName}> source");
 
         // Additional parameters
@@ -435,7 +452,7 @@ namespace TUnit.Assertions.Diagnostics
         }
 
         // Construct and return assertion
-        sb.Append($"        return new {className}(source.Context");
+        sb.Append($"        return new {className}{genericDeclaration}(source.Context");
         foreach (var param in data.AdditionalParameters)
         {
             sb.Append($", {param.Name}");
@@ -448,20 +465,35 @@ namespace TUnit.Assertions.Diagnostics
     private static string GenerateClassName(AssertionMethodData data)
     {
         var methodName = data.Method.Name;
+        var targetTypeName = GetSimpleTypeName(data.TargetType);
 
         if (data.AdditionalParameters.Length == 0)
         {
-            return $"{methodName}_Assertion";
+            return $"{targetTypeName}_{methodName}_Assertion";
         }
 
         // Include parameter types to distinguish overloads
         var paramTypes = string.Join("_", data.AdditionalParameters.Select(p => GetSimpleTypeName(p.Type)));
-        return $"{methodName}_{paramTypes}_Assertion";
+        return $"{targetTypeName}_{methodName}_{paramTypes}_Assertion";
+    }
+
+    private static string[] GetGenericTypeParameters(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            return namedType.TypeArguments
+                .OfType<ITypeParameterSymbol>()
+                .Select(t => t.Name)
+                .ToArray();
+        }
+
+        return [];
     }
 
     private static string GetSimpleTypeName(ITypeSymbol type)
     {
-        return type.SpecialType switch
+        // Handle special types first
+        var simpleName = type.SpecialType switch
         {
             SpecialType.System_Boolean => "Bool",
             SpecialType.System_Char => "Char",
@@ -473,6 +505,24 @@ namespace TUnit.Assertions.Diagnostics
             SpecialType.System_Decimal => "Decimal",
             _ => type.Name
         };
+
+        // Handle generic types: Lazy<T> becomes LazyT
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            var typeParams = string.Join("", namedType.TypeArguments.Select(t =>
+            {
+                // For generic type parameters like T, just use the name
+                if (t is ITypeParameterSymbol)
+                {
+                    return t.Name;
+                }
+                // For concrete types, get their simple name recursively
+                return GetSimpleTypeName(t);
+            }));
+            return $"{simpleName}{typeParams}";
+        }
+
+        return simpleName;
     }
 
     private enum ReturnTypeKind
