@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -225,7 +226,7 @@ namespace TUnit.Assertions.Diagnostics
     {
         var className = GenerateClassName(data);
         var targetTypeName = data.TargetType.ToDisplayString();
-        var genericParams = GetGenericTypeParameters(data.TargetType);
+        var genericParams = GetGenericTypeParameters(data.TargetType, data.Method);
         var genericDeclaration = genericParams.Length > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
         var isNullable = data.TargetType.IsReferenceType || data.TargetType.NullableAnnotation == NullableAnnotation.Annotated;
 
@@ -406,7 +407,7 @@ namespace TUnit.Assertions.Diagnostics
         var className = GenerateClassName(data);
         var targetTypeName = data.TargetType.ToDisplayString();
         var methodName = data.Method.Name;
-        var genericParams = GetGenericTypeParameters(data.TargetType);
+        var genericParams = GetGenericTypeParameters(data.TargetType, data.Method);
         var genericDeclaration = genericParams.Length > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
 
         // XML documentation
@@ -477,8 +478,16 @@ namespace TUnit.Assertions.Diagnostics
         return $"{targetTypeName}_{methodName}_{paramTypes}_Assertion";
     }
 
-    private static string[] GetGenericTypeParameters(ITypeSymbol type)
+    private static string[] GetGenericTypeParameters(ITypeSymbol type, IMethodSymbol method)
     {
+        // For extension methods, if the method has generic parameters, those define ALL the type parameters
+        // (including any used in the target type like Lazy<T> or T[])
+        if (method != null && method.IsGenericMethod)
+        {
+            return method.TypeParameters.Select(t => t.Name).ToArray();
+        }
+
+        // If the method is not generic, check if the type itself has unbound generic parameters
         if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
         {
             return namedType.TypeArguments
@@ -487,7 +496,7 @@ namespace TUnit.Assertions.Diagnostics
                 .ToArray();
         }
 
-        return [];
+        return Array.Empty<string>();
     }
 
     private static string GetSimpleTypeName(ITypeSymbol type)

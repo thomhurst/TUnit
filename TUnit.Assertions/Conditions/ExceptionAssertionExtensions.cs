@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Conditions;
@@ -19,4 +20,24 @@ public static class ExceptionAssertionExtensions
 
     [GenerateAssertion(ExpectationMessage = "to have no data")]
     public static bool HasNoData(this Exception value) => value?.Data.Count == 0;
+
+    [GenerateAssertion(ExpectationMessage = "to have a help link")]
+    public static bool HasHelpLink(this Exception value) => !string.IsNullOrWhiteSpace(value?.HelpLink);
+
+    [GenerateAssertion(ExpectationMessage = "to have no help link")]
+    public static bool HasNoHelpLink(this Exception value) => string.IsNullOrWhiteSpace(value?.HelpLink);
+
+    [GenerateAssertion(ExpectationMessage = "to have a source")]
+    public static bool HasSource(this Exception value) => !string.IsNullOrWhiteSpace(value?.Source);
+
+    [GenerateAssertion(ExpectationMessage = "to have no source")]
+    public static bool HasNoSource(this Exception value) => string.IsNullOrWhiteSpace(value?.Source);
+
+    [GenerateAssertion(ExpectationMessage = "to have a target site")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "TargetSite is used for assertion purposes only, not for reflection-based operations")]
+    public static bool HasTargetSite(this Exception value) => value?.TargetSite != null;
+
+    [GenerateAssertion(ExpectationMessage = "to have no target site")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "TargetSite is used for assertion purposes only, not for reflection-based operations")]
+    public static bool HasNoTargetSite(this Exception value) => value?.TargetSite == null;
 }

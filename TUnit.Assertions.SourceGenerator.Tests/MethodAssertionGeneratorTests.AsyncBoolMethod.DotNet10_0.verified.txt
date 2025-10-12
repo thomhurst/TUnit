@@ -22,9 +22,9 @@ namespace TUnit.Assertions.Tests.TestData;
 /// <summary>
 /// Generated assertion for IsPositiveAsync
 /// </summary>
-public sealed class IsPositiveAsync_Assertion : Assertion<int>
+public sealed class Int_IsPositiveAsync_Assertion : Assertion<int>
 {
-    public IsPositiveAsync_Assertion(AssertionContext<int> context)
+    public Int_IsPositiveAsync_Assertion(AssertionContext<int> context)
         : base(context)
     {
     }
@@ -54,11 +54,11 @@ public sealed class IsPositiveAsync_Assertion : Assertion<int>
 /// <summary>
 /// Generated assertion for IsGreaterThanAsync
 /// </summary>
-public sealed class IsGreaterThanAsync_Int_Assertion : Assertion<int>
+public sealed class Int_IsGreaterThanAsync_Int_Assertion : Assertion<int>
 {
     private readonly int _threshold;
 
-    public IsGreaterThanAsync_Int_Assertion(AssertionContext<int> context, int threshold)
+    public Int_IsGreaterThanAsync_Int_Assertion(AssertionContext<int> context, int threshold)
         : base(context)
     {
         _threshold = threshold;
@@ -91,19 +91,19 @@ public static partial class AsyncBoolAssertionExtensions_GeneratedAssertionExten
     /// <summary>
     /// Generated extension method for IsPositiveAsync
     /// </summary>
-    public static IsPositiveAsync_Assertion IsPositiveAsync(this IAssertionSource<int> source)
+    public static Int_IsPositiveAsync_Assertion IsPositiveAsync(this IAssertionSource<int> source)
     {
         source.Context.ExpressionBuilder.Append(".IsPositiveAsync()");
-        return new IsPositiveAsync_Assertion(source.Context);
+        return new Int_IsPositiveAsync_Assertion(source.Context);
     }
 
     /// <summary>
     /// Generated extension method for IsGreaterThanAsync
     /// </summary>
-    public static IsGreaterThanAsync_Int_Assertion IsGreaterThanAsync(this IAssertionSource<int> source, int threshold, [CallerArgumentExpression(nameof(threshold))] string? thresholdExpression = null)
+    public static Int_IsGreaterThanAsync_Int_Assertion IsGreaterThanAsync(this IAssertionSource<int> source, int threshold, [CallerArgumentExpression(nameof(threshold))] string? thresholdExpression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsGreaterThanAsync({thresholdExpression})");
-        return new IsGreaterThanAsync_Int_Assertion(source.Context, threshold);
+        return new Int_IsGreaterThanAsync_Int_Assertion(source.Context, threshold);
     }
 
 }

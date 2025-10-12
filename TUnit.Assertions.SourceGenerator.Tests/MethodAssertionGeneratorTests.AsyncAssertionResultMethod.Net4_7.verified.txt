@@ -22,9 +22,9 @@ namespace TUnit.Assertions.Tests.TestData;
 /// <summary>
 /// Generated assertion for IsEvenAsync
 /// </summary>
-public sealed class IsEvenAsync_Assertion : Assertion<int>
+public sealed class Int_IsEvenAsync_Assertion : Assertion<int>
 {
-    public IsEvenAsync_Assertion(AssertionContext<int> context)
+    public Int_IsEvenAsync_Assertion(AssertionContext<int> context)
         : base(context)
     {
     }
@@ -51,12 +51,12 @@ public sealed class IsEvenAsync_Assertion : Assertion<int>
 /// <summary>
 /// Generated assertion for IsBetweenAsync
 /// </summary>
-public sealed class IsBetweenAsync_Int_Int_Assertion : Assertion<int>
+public sealed class Int_IsBetweenAsync_Int_Int_Assertion : Assertion<int>
 {
     private readonly int _min;
     private readonly int _max;
 
-    public IsBetweenAsync_Int_Int_Assertion(AssertionContext<int> context, int min, int max)
+    public Int_IsBetweenAsync_Int_Int_Assertion(AssertionContext<int> context, int min, int max)
         : base(context)
     {
         _min = min;
@@ -87,19 +87,19 @@ public static partial class AsyncAssertionResultExtensions_GeneratedAssertionExt
     /// <summary>
     /// Generated extension method for IsEvenAsync
     /// </summary>
-    public static IsEvenAsync_Assertion IsEvenAsync(this IAssertionSource<int> source)
+    public static Int_IsEvenAsync_Assertion IsEvenAsync(this IAssertionSource<int> source)
     {
         source.Context.ExpressionBuilder.Append(".IsEvenAsync()");
-        return new IsEvenAsync_Assertion(source.Context);
+        return new Int_IsEvenAsync_Assertion(source.Context);
     }
 
     /// <summary>
     /// Generated extension method for IsBetweenAsync
     /// </summary>
-    public static IsBetweenAsync_Int_Int_Assertion IsBetweenAsync(this IAssertionSource<int> source, int min, int max, [CallerArgumentExpression(nameof(min))] string? minExpression = null, [CallerArgumentExpression(nameof(max))] string? maxExpression = null)
+    public static Int_IsBetweenAsync_Int_Int_Assertion IsBetweenAsync(this IAssertionSource<int> source, int min, int max, [CallerArgumentExpression(nameof(min))] string? minExpression = null, [CallerArgumentExpression(nameof(max))] string? maxExpression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsBetweenAsync({minExpression}, {maxExpression})");
-        return new IsBetweenAsync_Int_Int_Assertion(source.Context, min, max);
+        return new Int_IsBetweenAsync_Int_Int_Assertion(source.Context, min, max);
     }
 
 }
