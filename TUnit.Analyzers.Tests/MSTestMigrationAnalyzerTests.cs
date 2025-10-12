@@ -16,7 +16,7 @@ public class MSTestMigrationAnalyzerTests
             $$"""
                 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-                public class MyClass 
+                public class MyClass
                 {
                     {|#0:[{{attribute}}]|}
                     public void MyMethod() { }
@@ -26,7 +26,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0)
         );
     }
-    
+
     [Test]
     [Arguments("Microsoft.VisualStudio.TestTools.UnitTesting.TestMethod", "Test")]
     [Arguments("Microsoft.VisualStudio.TestTools.UnitTesting.DataRow(1, 2, 3)", "Arguments(1, 2, 3)")]
@@ -39,7 +39,7 @@ public class MSTestMigrationAnalyzerTests
             $$"""
                 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-                public class MyClass 
+                public class MyClass
                 {
                     {|#0:[{{attribute}}]|}
                     public void MyMethod() { }
@@ -52,7 +52,7 @@ public class MSTestMigrationAnalyzerTests
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
-                public class MyClass 
+                public class MyClass
                 {
                     [{{expected}}]
                     public void MyMethod() { }
@@ -61,7 +61,7 @@ public class MSTestMigrationAnalyzerTests
             ConfigureMSTestTest
         );
     }
-    
+
     [Test]
     public async Task MSTest_TestClass_Attribute_Removed()
     {
@@ -70,7 +70,7 @@ public class MSTestMigrationAnalyzerTests
                 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
                 {|#0:[TestClass]|}
-                public class MyClass 
+                public class MyClass
                 {
                     [TestMethod]
                     public void MyMethod() { }
@@ -83,7 +83,7 @@ public class MSTestMigrationAnalyzerTests
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
-                public class MyClass 
+                public class MyClass
                 {
                     [Test]
                     public void MyMethod() { }
@@ -92,7 +92,7 @@ public class MSTestMigrationAnalyzerTests
             ConfigureMSTestTest
         );
     }
-    
+
     [Test]
     public async Task MSTest_Assertions_Converted()
     {
@@ -103,7 +103,7 @@ public class MSTestMigrationAnalyzerTests
                 {|#0:public class MyClass|}
                 {
                     [TestMethod]
-                    public void MyMethod() 
+                    public void MyMethod()
                     {
                         Assert.AreEqual(5, 5);
                         Assert.IsTrue(true);
@@ -122,7 +122,7 @@ public class MSTestMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    public void MyMethod() 
+                    public void MyMethod()
                     {
                         await Assert.That(5).IsEqualTo(5);
                         await Assert.That(true).IsTrue();
@@ -134,7 +134,7 @@ public class MSTestMigrationAnalyzerTests
             ConfigureMSTestTest
         );
     }
-    
+
     [Test]
     public async Task MSTest_Directive_Flagged()
     {
@@ -142,7 +142,7 @@ public class MSTestMigrationAnalyzerTests
             """
                 {|#0:using Microsoft.VisualStudio.TestTools.UnitTesting;|}
 
-                public class MyClass 
+                public class MyClass
                 {
                     public void MyMethod() { }
                 }
@@ -151,7 +151,7 @@ public class MSTestMigrationAnalyzerTests
             Verifier.Diagnostic(Rules.MSTestMigration).WithLocation(0)
         );
     }
-    
+
     [Test]
     public async Task MSTest_Directive_Can_Be_Removed()
     {
@@ -159,7 +159,7 @@ public class MSTestMigrationAnalyzerTests
             """
                 {|#0:using Microsoft.VisualStudio.TestTools.UnitTesting;|}
 
-                public class MyClass 
+                public class MyClass
                 {
                     public void MyMethod() { }
                 }
@@ -171,7 +171,7 @@ public class MSTestMigrationAnalyzerTests
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
-                public class MyClass 
+                public class MyClass
                 {
                     public void MyMethod() { }
                 }
@@ -179,7 +179,7 @@ public class MSTestMigrationAnalyzerTests
             ConfigureMSTestTest
         );
     }
-    
+
     [Test]
     public async Task MSTest_TestInitialize_TestCleanup_Converted()
     {
@@ -221,7 +221,7 @@ public class MSTestMigrationAnalyzerTests
             ConfigureMSTestTest
         );
     }
-    
+
     [Test]
     public async Task MSTest_ClassInitialize_ClassCleanup_Converted()
     {
@@ -263,7 +263,7 @@ public class MSTestMigrationAnalyzerTests
             ConfigureMSTestTest
         );
     }
-    
+
     [Test]
     public async Task MSTest_CollectionAssert_Converted()
     {
