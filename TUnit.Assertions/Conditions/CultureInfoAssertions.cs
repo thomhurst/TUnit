@@ -65,65 +65,7 @@ public class IsNotInvariantCultureAssertion : Assertion<CultureInfo>
     protected override string GetExpectation() => "to not be invariant culture";
 }
 
-[AssertionExtension("IsNeutralCulture")]
-public class IsNeutralCultureAssertion : Assertion<CultureInfo>
-{
-    public IsNeutralCultureAssertion(
-        AssertionContext<CultureInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<CultureInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
-        }
-
-        if (value == null || !value.IsNeutralCulture)
-        {
-            return Task.FromResult(AssertionResult.Failed($"culture {value?.Name ?? "null"} is not neutral"));
-        }
-
-        return Task.FromResult(AssertionResult.Passed);
-    }
-
-    protected override string GetExpectation() => "to be a neutral culture";
-}
-
-[AssertionExtension("IsNotNeutralCulture")]
-public class IsNotNeutralCultureAssertion : Assertion<CultureInfo>
-{
-    public IsNotNeutralCultureAssertion(
-        AssertionContext<CultureInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<CultureInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
-        }
-
-        if (value != null && value.IsNeutralCulture)
-        {
-            return Task.FromResult(AssertionResult.Failed($"culture {value.Name} is neutral"));
-        }
-
-        return Task.FromResult(AssertionResult.Passed);
-    }
-
-    protected override string GetExpectation() => "to not be a neutral culture";
-}
+// NOTE: IsNeutralCulture and IsNotNeutralCulture have been migrated to source-generated assertions in CultureInfoPropertyAssertions.cs
 
 [AssertionExtension("IsEnglish")]
 public class IsEnglishCultureAssertion : Assertion<CultureInfo>
@@ -245,32 +187,4 @@ public class IsLeftToRightCultureAssertion : Assertion<CultureInfo>
     protected override string GetExpectation() => "to be left-to-right culture";
 }
 
-[AssertionExtension("IsReadOnly")]
-public class IsReadOnlyCultureAssertion : Assertion<CultureInfo>
-{
-    public IsReadOnlyCultureAssertion(
-        AssertionContext<CultureInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<CultureInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
-        }
-
-        if (value == null || !value.IsReadOnly)
-        {
-            return Task.FromResult(AssertionResult.Failed($"culture {value?.Name ?? "null"} is not read-only"));
-        }
-
-        return Task.FromResult(AssertionResult.Passed);
-    }
-
-    protected override string GetExpectation() => "to be read-only culture";
-}
+// NOTE: IsReadOnly has been migrated to source-generated assertions in CultureInfoPropertyAssertions.cs

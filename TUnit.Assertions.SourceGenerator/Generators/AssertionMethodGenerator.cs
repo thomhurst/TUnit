@@ -584,7 +584,17 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             metadataType = $"EvaluationMetadata<{targetTypeName}>";
         }
 
-        sourceBuilder.AppendLine($"    protected override async Task<AssertionResult> CheckAsync({metadataType} metadata)");
+        // Determine return type to decide if we need async
+        if (!IsValidReturnType(staticMethod.ReturnType, out var methodReturnTypeKind))
+        {
+            methodReturnTypeKind = ReturnTypeKind.Bool;
+        }
+
+        // Only add async for Task<T> return types
+        var needsAsync = methodReturnTypeKind == ReturnTypeKind.TaskBool || methodReturnTypeKind == ReturnTypeKind.TaskAssertionResult;
+        var asyncKeyword = needsAsync ? "async " : "";
+
+        sourceBuilder.AppendLine($"    protected override {asyncKeyword}Task<AssertionResult> CheckAsync({metadataType} metadata)");
         sourceBuilder.AppendLine("    {");
         sourceBuilder.AppendLine("        var actualValue = metadata.Value;");
         sourceBuilder.AppendLine("        var exception = metadata.Exception;");
@@ -592,7 +602,14 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
         sourceBuilder.AppendLine("        if (exception != null)");
         sourceBuilder.AppendLine("        {");
-        sourceBuilder.AppendLine("            return AssertionResult.Failed($\"threw {exception.GetType().FullName}\");");
+        if (needsAsync)
+        {
+            sourceBuilder.AppendLine("            return AssertionResult.Failed($\"threw {exception.GetType().FullName}\");");
+        }
+        else
+        {
+            sourceBuilder.AppendLine("            return Task.FromResult(AssertionResult.Failed($\"threw {exception.GetType().FullName}\"));");
+        }
         sourceBuilder.AppendLine("        }");
         sourceBuilder.AppendLine();
 
@@ -600,7 +617,14 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         {
             sourceBuilder.AppendLine("        if (actualValue is null)");
             sourceBuilder.AppendLine("        {");
-            sourceBuilder.AppendLine("            return AssertionResult.Failed(\"Actual value is null\");");
+            if (needsAsync)
+            {
+                sourceBuilder.AppendLine("            return AssertionResult.Failed(\"Actual value is null\");");
+            }
+            else
+            {
+                sourceBuilder.AppendLine("            return Task.FromResult(AssertionResult.Failed(\"Actual value is null\"));");
+            }
             sourceBuilder.AppendLine("        }");
             sourceBuilder.AppendLine();
         }
@@ -703,30 +727,24 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             }
         }
 
-        // Detect return type and generate appropriate result handling
-        if (!IsValidReturnType(staticMethod.ReturnType, out var returnTypeKind))
-        {
-            returnTypeKind = ReturnTypeKind.Bool; // Default fallback
-        }
-
-        // Generate result handling based on return type
-        switch (returnTypeKind)
+        // Generate result handling based on return type (use cached value from earlier)
+        switch (methodReturnTypeKind)
         {
             case ReturnTypeKind.Bool:
-                // For bool: negate if needed, then wrap in AssertionResult
+                // For bool: negate if needed, then wrap in AssertionResult and Task
                 sourceBuilder.AppendLine("        var condition = _negated ? result : !result;");
-                sourceBuilder.Append("        return AssertionResult.FailIf(condition, ");
+                sourceBuilder.Append("        return Task.FromResult(AssertionResult.FailIf(condition, ");
                 sourceBuilder.Append($"$\"'{{actualValue}}' was expected {{(_negated ? \"not \" : \"\")}}to satisfy {methodName}");
                 if (parameters.Any())
                 {
                     sourceBuilder.Append($"({string.Join(", ", parameters.Select(p => $"{{_{p.Name}}}"))})");
                 }
-                sourceBuilder.AppendLine("\");");
+                sourceBuilder.AppendLine("\"));");
                 break;
 
             case ReturnTypeKind.AssertionResult:
-                // For AssertionResult: return directly (no negation support)
-                sourceBuilder.AppendLine("        return result;");
+                // For AssertionResult: wrap in Task.FromResult (no negation support)
+                sourceBuilder.AppendLine("        return Task.FromResult(result);");
                 break;
 
             case ReturnTypeKind.TaskBool:
@@ -750,7 +768,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
         sourceBuilder.AppendLine("    }");
         sourceBuilder.AppendLine();
-        sourceBuilder.AppendLine("    protected internal override string GetExpectation()");
+        sourceBuilder.AppendLine("    protected override string GetExpectation()");
         sourceBuilder.AppendLine("    {");
 
         if (!string.IsNullOrEmpty(attributeData.ExpectationMessage))

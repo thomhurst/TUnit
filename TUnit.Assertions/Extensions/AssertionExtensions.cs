@@ -327,27 +327,7 @@ public static class AssertionExtensions
         return new Chaining.OrAssertion<string>(source.PreviousAssertion, newAssertion);
     }
 
-    /// <summary>
-    /// Asserts that the string is null or empty (And continuation overload).
-    /// </summary>
-    public static Chaining.AndAssertion<string> IsNullOrEmpty(
-        this AndContinuation<string> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsNullOrEmpty()");
-        var newAssertion = new StringIsNullOrEmptyAssertion(source.Context);
-        return new Chaining.AndAssertion<string>(source.PreviousAssertion, newAssertion);
-    }
-
-    /// <summary>
-    /// Asserts that the string is null or empty (Or continuation overload).
-    /// </summary>
-    public static Chaining.OrAssertion<string> IsNullOrEmpty(
-        this OrContinuation<string> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsNullOrEmpty()");
-        var newAssertion = new StringIsNullOrEmptyAssertion(source.Context);
-        return new Chaining.OrAssertion<string>(source.PreviousAssertion, newAssertion);
-    }
+    // NOTE: IsNullOrEmpty And/Or continuation overloads have been migrated to source-generated assertions in StringStaticMethodAssertions.cs
 
     /// <summary>
     /// Asserts that the value is not equal to the expected value (And continuation overload).

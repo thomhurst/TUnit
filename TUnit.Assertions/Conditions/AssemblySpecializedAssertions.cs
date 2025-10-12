@@ -5,95 +5,11 @@ using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
-[AssertionExtension("IsCollectible")]
-public class IsCollectibleAssertion : Assertion<Assembly>
-{
-    public IsCollectibleAssertion(AssertionContext<Assembly> context) : base(context) { }
-    protected override string GetExpectation() => "to be collectible";
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Assembly> metadata)
-    {
-#if NETSTANDARD2_0
-        return Task.FromResult(AssertionResult.Failed("IsCollectible is not supported in .NET Standard 2.0"));
-#else
-        if (metadata.Value!.IsCollectible)
-            return Task.FromResult(AssertionResult.Passed);
-        return Task.FromResult(AssertionResult.Failed($"Expected {Context.ExpressionBuilder} to be collectible, but it was not"));
-#endif
-    }
-}
+// NOTE: IsCollectible, IsNotCollectible, IsDynamic, IsNotDynamic, IsFullyTrusted, and IsNotFullyTrusted
+// have been migrated to source-generated assertions in AssemblyAssertionExtensions.cs
 
-[AssertionExtension("IsNotCollectible")]
-public class IsNotCollectibleAssertion : Assertion<Assembly>
-{
-    public IsNotCollectibleAssertion(AssertionContext<Assembly> context) : base(context) { }
-    protected override string GetExpectation() => "to not be collectible";
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Assembly> metadata)
-    {
-#if NETSTANDARD2_0
-        return Task.FromResult(AssertionResult.Failed("IsCollectible is not supported in .NET Standard 2.0"));
-#else
-        if (!metadata.Value!.IsCollectible)
-            return Task.FromResult(AssertionResult.Passed);
-        return Task.FromResult(AssertionResult.Failed($"Expected {Context.ExpressionBuilder} to not be collectible, but it was"));
-#endif
-    }
-}
-
-[AssertionExtension("IsDynamic")]
-public class IsDynamicAssertion : Assertion<Assembly>
-{
-    public IsDynamicAssertion(AssertionContext<Assembly> context) : base(context) { }
-    protected override string GetExpectation() => "to be dynamic";
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Assembly> metadata)
-    {
-        if (metadata.Value!.IsDynamic)
-            return Task.FromResult(AssertionResult.Passed);
-        return Task.FromResult(AssertionResult.Failed($"Expected {Context.ExpressionBuilder} to be dynamic, but it was not"));
-    }
-}
-
-[AssertionExtension("IsNotDynamic")]
-public class IsNotDynamicAssertion : Assertion<Assembly>
-{
-    public IsNotDynamicAssertion(AssertionContext<Assembly> context) : base(context) { }
-    protected override string GetExpectation() => "to not be dynamic";
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Assembly> metadata)
-    {
-        if (!metadata.Value!.IsDynamic)
-            return Task.FromResult(AssertionResult.Passed);
-        return Task.FromResult(AssertionResult.Failed($"Expected {Context.ExpressionBuilder} to not be dynamic, but it was"));
-    }
-}
-
-[AssertionExtension("IsFullyTrusted")]
-public class IsFullyTrustedAssertion : Assertion<Assembly>
-{
-    public IsFullyTrustedAssertion(AssertionContext<Assembly> context) : base(context) { }
-    protected override string GetExpectation() => "to be fully trusted";
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Assembly> metadata)
-    {
-#pragma warning disable SYSLIB0003 // IsFullyTrusted is obsolete
-        if (metadata.Value!.IsFullyTrusted)
-            return Task.FromResult(AssertionResult.Passed);
-        return Task.FromResult(AssertionResult.Failed($"Expected {Context.ExpressionBuilder} to be fully trusted, but it was not"));
-#pragma warning restore SYSLIB0003
-    }
-}
-
-[AssertionExtension("IsNotFullyTrusted")]
-public class IsNotFullyTrustedAssertion : Assertion<Assembly>
-{
-    public IsNotFullyTrustedAssertion(AssertionContext<Assembly> context) : base(context) { }
-    protected override string GetExpectation() => "to not be fully trusted";
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<Assembly> metadata)
-    {
-#pragma warning disable SYSLIB0003 // IsFullyTrusted is obsolete
-        if (!metadata.Value!.IsFullyTrusted)
-            return Task.FromResult(AssertionResult.Passed);
-        return Task.FromResult(AssertionResult.Failed($"Expected {Context.ExpressionBuilder} to not be fully trusted, but it was"));
-#pragma warning restore SYSLIB0003
-    }
-}
+// IsSigned, IsNotSigned, IsDebugBuild, and IsReleaseBuild remain here because they require
+// more complex logic beyond simple property access (GetName().GetPublicKeyToken() and GetCustomAttribute)
 
 [AssertionExtension("IsSigned")]
 public class IsSignedAssertion : Assertion<Assembly>

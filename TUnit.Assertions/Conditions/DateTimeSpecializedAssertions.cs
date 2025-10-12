@@ -152,55 +152,6 @@ public class IsNotLeapYearAssertion : Assertion<DateTime>
             $"Expected {Context.ExpressionBuilder} to not be in a leap year, but {metadata.Value.Year} is a leap year"));
     }
 }
-
-/// <summary>
-/// Asserts that the DateTime is during daylight saving time.
-/// </summary>
-[AssertionExtension("IsDaylightSavingTime")]
-public class IsDaylightSavingTimeAssertion : Assertion<DateTime>
-{
-    public IsDaylightSavingTimeAssertion(AssertionContext<DateTime> context) : base(context)
-    {
-    }
-
-    protected override string GetExpectation() => "to be during daylight saving time";
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DateTime> metadata)
-    {
-        if (metadata.Value.IsDaylightSavingTime())
-        {
-            return Task.FromResult(AssertionResult.Passed);
-        }
-
-        return Task.FromResult(AssertionResult.Failed(
-            $"Expected {Context.ExpressionBuilder} to be during daylight saving time, but it was not"));
-    }
-}
-
-/// <summary>
-/// Asserts that the DateTime is not during daylight saving time.
-/// </summary>
-[AssertionExtension("IsNotDaylightSavingTime")]
-public class IsNotDaylightSavingTimeAssertion : Assertion<DateTime>
-{
-    public IsNotDaylightSavingTimeAssertion(AssertionContext<DateTime> context) : base(context)
-    {
-    }
-
-    protected override string GetExpectation() => "to not be during daylight saving time";
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DateTime> metadata)
-    {
-        if (!metadata.Value.IsDaylightSavingTime())
-        {
-            return Task.FromResult(AssertionResult.Passed);
-        }
-
-        return Task.FromResult(AssertionResult.Failed(
-            $"Expected {Context.ExpressionBuilder} to not be during daylight saving time, but it was"));
-    }
-}
-
 /// <summary>
 /// Asserts exact DateTime equality (including ticks).
 /// </summary>
