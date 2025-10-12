@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics;
-using TUnit.Assertions.AssertConditions;
-using TUnit.Assertions.Assertions.Delegates;
 
 namespace TUnit.Assertions.Tests;
 
@@ -29,7 +27,7 @@ public class ExecutionTimeTests
 
         var duration = stopwatch.Elapsed;
 
-        await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(9));
+        await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(1));
     }
 
     [Test]
@@ -54,6 +52,6 @@ public class ExecutionTimeTests
 
         var duration = stopwatch.Elapsed;
 
-        await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(9));
+        await Assert.That(duration).IsLessThan(TimeSpan.FromSeconds(1));
     }
 }

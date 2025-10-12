@@ -21,7 +21,7 @@ public class AssertMultipleTests
 
                 await Assert.That(3).IsEqualTo(6);
             }
-        }).Throws<Exception>().And.HasMessageContaining("Hello World");
+        }).Throws<Exception>().And.HasMessageContaining("Expected to be equal to 2");
     }
 
     [Test]
@@ -51,7 +51,7 @@ public class AssertMultipleTests
         }).Throws<Exception>();
 
         await Assert.That(exception!.Message)
-            .Contains("(This exception may or may not have been caught) System.Exception: Hello World");
+            .Contains("Expected to be equal to 2");
     }
 
     [Test]

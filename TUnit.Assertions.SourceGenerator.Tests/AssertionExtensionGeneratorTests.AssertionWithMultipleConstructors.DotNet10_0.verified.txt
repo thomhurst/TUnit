@@ -1,0 +1,36 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated extension methods for EqualsAssertion.
+/// </summary>
+public static class EqualsAssertionExtensions
+{
+
+    /// <summary>
+    /// Extension method for EqualsAssertion.
+    /// </summary>
+    public static EqualsAssertion<TValue> IsEqualTo<TValue>(this IAssertionSource<TValue> source, TValue expected, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expectedExpression})");
+        return new EqualsAssertion<TValue>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Extension method for EqualsAssertion.
+    /// </summary>
+    public static EqualsAssertion<TValue> IsEqualTo<TValue>(this IAssertionSource<TValue> source, TValue expected, System.Collections.Generic.IEqualityComparer<TValue> comparer, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null, [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expectedExpression}, {comparerExpression})");
+        return new EqualsAssertion<TValue>(source.Context, expected, comparer);
+    }
+}
+
+]

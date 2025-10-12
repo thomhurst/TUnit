@@ -27,7 +27,6 @@ public class EnumerableTests
         int[] array = [1, 2, 3];
 
         var item = await Assert.That(array).Contains(x => x == 1);
-
         await Assert.That(item).IsEqualTo(1);
     }
 
@@ -136,7 +135,7 @@ public class EnumerableTests
     {
         int[] array = [1, 2, 3];
 
-        IEnumerable enumerable = array;
+        IEnumerable<int> enumerable = array;
 
         await Assert.That(enumerable).IsInOrder();
     }
@@ -148,7 +147,7 @@ public class EnumerableTests
 
         IEnumerable enumerable = array;
 
-        await Assert.That(enumerable).IsEqualTo(enumerable);
+        await Assert.That(enumerable).IsSameReferenceAs(enumerable);
     }
 
     [Test]

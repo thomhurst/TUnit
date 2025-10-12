@@ -1,0 +1,27 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated extension methods for DefaultValuesAssertion.
+/// </summary>
+public static class DefaultValuesAssertionExtensions
+{
+
+    /// <summary>
+    /// Extension method for DefaultValuesAssertion.
+    /// </summary>
+    public static DefaultValuesAssertion<TValue> HasDefaultValues<TValue>(this IAssertionSource<TValue> source, bool boolValue = true, int intValue = 0, string stringValue = "default", [CallerArgumentExpression(nameof(boolValue))] string? boolValueExpression = null, [CallerArgumentExpression(nameof(intValue))] string? intValueExpression = null, [CallerArgumentExpression(nameof(stringValue))] string? stringValueExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".HasDefaultValues({boolValueExpression}, {intValueExpression}, {stringValueExpression})");
+        return new DefaultValuesAssertion<TValue>(source.Context, boolValue, intValue, stringValue);
+    }
+}
+
+]

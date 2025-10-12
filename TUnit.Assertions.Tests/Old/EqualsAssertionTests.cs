@@ -8,10 +8,10 @@ public class EqualsAssertionTests
         var one = "1";
 
         await TUnitAssert.That(async () =>
-                await TUnitAssert.That(one).IsEqualTo("2", StringComparison.Ordinal).And.IsNotEqualTo("1").And.IsTypeOf(typeof(string))
+                await TUnitAssert.That(one).IsEqualTo("2", StringComparison.Ordinal).And.IsNotEqualTo("1").And.IsOfType(typeof(string))
             ).ThrowsException()
             .And
-            .HasMessageContaining("Assert.That(one).IsEqualTo(\"2\", StringComparison.Ordinal).And.IsNotEqualTo(\"1\", StringComparison.Ord...");
+            .HasMessageContaining("Assert.That(one).IsEqualTo(\"2\", Ordinal)");
     }
 
     [Test]

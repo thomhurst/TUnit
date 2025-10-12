@@ -4,6 +4,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\TUnit\TUnit.csproj" />
+    <ProjectReference Include="..\TUnit.Assertions.SourceGenerator\TUnit.Assertions.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   
   <ItemGroup>

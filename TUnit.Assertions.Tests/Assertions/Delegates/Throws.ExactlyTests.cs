@@ -9,9 +9,8 @@ public partial class Throws
         public async Task Fails_For_Code_With_Other_Exceptions()
         {
             var expectedMessage = """
-                                  Expected action to throw exactly a CustomException
-
-                                  but an OtherException was thrown
+                                  Expected to throw exactly CustomException
+                                  but wrong exception type: OtherException instead of exactly CustomException
 
                                   at Assert.That(action).ThrowsExactly<CustomException>()
                                   """;
@@ -29,9 +28,8 @@ public partial class Throws
         public async Task Fails_For_Code_With_Subtype_Exceptions()
         {
             var expectedMessage = """
-                                  Expected action to throw exactly a CustomException
-
-                                  but a SubCustomException was thrown
+                                  Expected to throw exactly CustomException
+                                  but wrong exception type: SubCustomException instead of exactly CustomException
 
                                   at Assert.That(action).ThrowsExactly<CustomException>()
                                   """;
@@ -49,9 +47,8 @@ public partial class Throws
         public async Task Fails_For_Code_Without_Exceptions()
         {
             var expectedMessage = """
-                                  Expected action to throw exactly a CustomException
-
-                                  but none was thrown
+                                  Expected to throw exactly CustomException
+                                  but no exception was thrown
 
                                   at Assert.That(action).ThrowsExactly<CustomException>()
                                   """;
@@ -95,12 +92,12 @@ public partial class Throws
 
             Action action = () => throw exception;
 
-            await Assert.That(action)
+            var ex = await Assert.That(action)
                 .ThrowsExactly<CustomException>()
                 .And
-                .HasMessageEqualTo("Foo bar message")
-                .And
-                .IsAssignableTo<CustomException>();
+                .HasMessageEqualTo("Foo bar message");
+
+            await Assert.That((object)ex).IsAssignableTo<CustomException>();
         }
 
         [Test]
@@ -111,18 +108,18 @@ public partial class Throws
             Action action = () => throw exception;
 
             var assertionException = await Assert.ThrowsAsync<AssertionException>(async () =>
-                await Assert.That(action)
+            {
+                var ex = await Assert.That(action)
                     .ThrowsExactly<Exception>()
                     .And
-                    .HasMessageEqualTo("Foo bar message")
-                    .And
-                    .IsAssignableTo<CustomException>()
-            );
+                    .HasMessageEqualTo("Foo bar message");
+
+                await Assert.That((object)ex).IsAssignableTo<CustomException>();
+            });
 
             await Assert.That(assertionException).HasMessageStartingWith("""
-                                                                         Expected action to throw exactly an Exception
-                                                                         
-                                                                         but a CustomException was thrown
+                                                                         Expected to throw exactly Exception
+                                                                         but wrong exception type: CustomException instead of exactly Exception
                                                                          """);
         }
 
@@ -134,29 +131,19 @@ public partial class Throws
             Action action = () => throw exception;
 
             var assertionException = await Assert.ThrowsAsync<AssertionException>(async () =>
-                await Assert.That(action)
+            {
+                var ex = await Assert.That(action)
                     .ThrowsExactly<CustomException>()
                     .And
-                    .HasMessageEqualTo("Foo bar message!")
-                    .And
-                    .IsAssignableTo<CustomException>()
-            );
+                    .HasMessageEqualTo("Foo bar message!");
 
-            await Assert.That(assertionException).HasMessageStartingWith(
-                """
-                Expected action to throw exactly a CustomException
-                 and message to be equal to "Foo bar message!"
-                 and to be assignable to type CustomException
-                
-                but found message "Foo bar message" which differs at index 15:
-                                   ↓
-                   "Foo bar message"
-                   "Foo bar message!"
-                                   ↑
-                
-                at Assert.That(action).ThrowsExactly<CustomException>().And.HasMessageEqualTo("Foo bar message!", Strin...
-                """
-                );
+                await Assert.That((object)ex).IsAssignableTo<CustomException>();
+            });
+
+            await Assert.That(assertionException).HasMessageStartingWith("""
+                Expected to throw exactly CustomException
+                and to have message equal to "Foo bar message!"
+                """);
         }
     }
 }

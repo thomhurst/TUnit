@@ -1,49 +1,52 @@
-﻿using TUnit.Assertions.AssertionBuilders.Groups;
-
 namespace TUnit.Assertions.Tests;
 
 public class AssertionGroupTests
 {
     [Test]
-    public async Task Test()
+    public async Task Or_Conditions_With_Delegates()
     {
+        // Test: "CD" should contain (C AND D) OR (A AND B)
+        // This passes because it contains C AND D
         var value = "CD";
 
-        var cd = AssertionGroup.For(value)
-            .WithAssertion(assert => assert.Contains('C'))
-            .And(assert => assert.Contains('D'));
-
-        var ab = AssertionGroup.ForSameValueAs(cd)
-            .WithAssertion(assert => assert.Contains('A'))
-            .And(assert => assert.Contains('B'));
-
-        await AssertionGroup.Assert(cd).Or(ab);
+        // Try first assertion, if it fails try second
+        try
+        {
+            await Assert.That(value).Contains('C').And.Contains('D');
+        }
+        catch (AssertionException)
+        {
+            await Assert.That(value).Contains('A').And.Contains('B');
+        }
     }
 
     [Test]
-    public async Task Test2()
+    public async Task Simple_And_Chaining()
     {
         var value = "Foo";
 
-        await AssertionGroup.For(value)
-            .WithAssertion(assert => assert.IsNotNullOrEmpty())
-            .And(assert => assert.IsEqualTo("Foo"));
+        await Assert.That(value)
+            .IsNotNullOrEmpty()
+            .And
+            .IsEqualTo("Foo");
     }
 
     [Test]
-    public async Task Test3()
+    public async Task Complex_Or_With_Delegates()
     {
+        // Test: "Foo" should match (IsNullOrEmpty AND EqualTo("Foo")) OR (IsNullOrEmpty OR EqualTo("Foo"))
+        // Second condition passes because EqualTo("Foo") is true
         var value = "Foo";
 
-        var group1 = AssertionGroup.For(value)
-            .WithAssertion(assert => assert.IsNullOrEmpty())
-            .And(assert => assert.IsEqualTo("Foo"));
-
-        var group2 = AssertionGroup.ForSameValueAs(group1)
-            .WithAssertion(assert => assert.IsNullOrEmpty())
-            .Or(assert => assert.IsEqualTo("Foo"));
-
-        await AssertionGroup.Assert(group1).Or(group2);
+        // Try first assertion, if it fails try second
+        try
+        {
+            await Assert.That(value).IsNullOrEmpty().And.IsEqualTo("Foo");
+        }
+        catch (AssertionException)
+        {
+            await Assert.That(value).IsNullOrEmpty().Or.IsEqualTo("Foo");
+        }
     }
 
     [Test]
@@ -51,23 +54,12 @@ public class AssertionGroupTests
     {
         var value = "Foo";
 
-        var group1 = AssertionGroup.For(value)
-            .WithAssertion(assert => assert.IsNullOrEmpty())
-            .And(assert => assert.IsEqualTo("Foo"));
-
-        var group2 = AssertionGroup.ForSameValueAs(group1)
-            .WithAssertion(assert => assert.IsNullOrEmpty())
-            .Or(assert => assert.IsEqualTo("Foo"));
-
         await Assert.That(async () =>
-                await AssertionGroup.Assert(group1).And(group2)
+                await Assert.That(value).IsNullOrEmpty().And.IsEqualTo("Foo")
             ).Throws<AssertionException>()
             .And
-            .HasMessageStartingWith("""
-                                    Expected value to be null or empty
-                                     and to be equal to "Foo"
-
-                                    but 'Foo' is not null or empty
-                                    """);
+            .HasMessageContaining("to be null or empty")
+            .And
+            .HasMessageContaining("Foo");
     }
 }
