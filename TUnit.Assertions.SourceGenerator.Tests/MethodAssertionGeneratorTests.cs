@@ -17,9 +17,9 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
 
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsPositive_Assertion"));
             await Assert.That(mainFile).IsNotNull();
-            await Assert.That(mainFile!).Contains("IsPositive_Assertion");
-            await Assert.That(mainFile!).Contains("IsGreaterThan_Int_Assertion");
-            await Assert.That(mainFile!).Contains("public static IsPositive_Assertion IsPositive");
+            await Assert.That(mainFile!).Contains("Int_IsPositive_Assertion");
+            await Assert.That(mainFile!).Contains("Int_IsGreaterThan_Int_Assertion");
+            await Assert.That(mainFile!).Contains("public static Int_IsPositive_Assertion IsPositive");
         });
 
     [Test]
@@ -34,9 +34,9 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
 
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsEven_Assertion"));
             await Assert.That(mainFile).IsNotNull();
-            await Assert.That(mainFile!).Contains("IsEven_Assertion");
-            await Assert.That(mainFile!).Contains("IsBetween_Int_Int_Assertion");
-            await Assert.That(mainFile!).Contains("return value."); // Direct return for AssertionResult
+            await Assert.That(mainFile!).Contains("Int_IsEven_Assertion");
+            await Assert.That(mainFile!).Contains("Int_IsBetween_Int_Int_Assertion");
+            await Assert.That(mainFile!).Contains("return Task.FromResult(value.IsEven())"); // AssertionResult wrapped in Task
         });
 
     [Test]
