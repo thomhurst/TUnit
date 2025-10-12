@@ -1,0 +1,64 @@
+#if NET6_0_OR_GREATER
+using TUnit.Assertions.Extensions;
+
+namespace TUnit.TestProject;
+
+public class RangeAssertionTests
+{
+    [Test]
+    public async Task Test_Range_HasBothIndicesFromEnd()
+    {
+        Range range = ^5..^1; // Last 5 to last 1
+        await Assert.That(range).HasBothIndicesFromEnd();
+    }
+
+    [Test]
+    public async Task Test_Range_HasBothIndicesFromEnd_Explicit()
+    {
+        var range = new Range(Index.FromEnd(10), Index.FromEnd(5));
+        await Assert.That(range).HasBothIndicesFromEnd();
+    }
+
+    [Test]
+    public async Task Test_Range_HasStartFromBeginning()
+    {
+        Range range = 0..5; // From start to index 5
+        await Assert.That(range).HasStartFromBeginning();
+    }
+
+    [Test]
+    public async Task Test_Range_HasStartFromBeginning_Mixed()
+    {
+        Range range = 1..^1; // From index 1 to last element
+        await Assert.That(range).HasStartFromBeginning();
+    }
+
+    [Test]
+    public async Task Test_Range_HasEndFromBeginning()
+    {
+        Range range = 0..10; // From start to index 10
+        await Assert.That(range).HasEndFromBeginning();
+    }
+
+    [Test]
+    public async Task Test_Range_HasEndFromBeginning_Mixed()
+    {
+        Range range = ^5..10; // From 5th from end to index 10
+        await Assert.That(range).HasEndFromBeginning();
+    }
+
+    [Test]
+    public async Task Test_Range_IsAll()
+    {
+        Range range = ..; // All elements
+        await Assert.That(range).IsAll();
+    }
+
+    [Test]
+    public async Task Test_Range_IsAll_Explicit()
+    {
+        var range = Range.All;
+        await Assert.That(range).IsAll();
+    }
+}
+#endif

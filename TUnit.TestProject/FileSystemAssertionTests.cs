@@ -109,4 +109,95 @@ public class FileSystemAssertionTests
         var file = new FileInfo(_testFile);
         await Assert.That(file).IsNotExecutable();
     }
+
+    [Test]
+    public async Task Test_FileInfo_HasExtension()
+    {
+        var file = new FileInfo(_testFile);
+        await Assert.That(file).HasExtension();
+    }
+
+    [Test]
+    public async Task Test_FileInfo_HasNoExtension()
+    {
+        var fileWithoutExtension = Path.Combine(_testDirectory, "noext");
+        File.WriteAllText(fileWithoutExtension, "content");
+        var file = new FileInfo(fileWithoutExtension);
+        await Assert.That(file).HasNoExtension();
+    }
+
+    [Test]
+    public async Task Test_FileInfo_IsEmpty()
+    {
+        var emptyFile = Path.Combine(_testDirectory, "empty.txt");
+        File.WriteAllText(emptyFile, string.Empty);
+        var file = new FileInfo(emptyFile);
+        await Assert.That(file).IsEmpty();
+    }
+
+    [Test]
+    public async Task Test_FileInfo_IsArchived()
+    {
+        var file = new FileInfo(_testFile);
+        file.Attributes |= FileAttributes.Archive;
+        await Assert.That(file).IsArchived();
+    }
+
+    [Test]
+    public async Task Test_FileInfo_IsSystemFile()
+    {
+        var file = new FileInfo(_testFile);
+        file.Attributes |= FileAttributes.System;
+        file.Refresh();
+        await Assert.That(file).IsSystemFile();
+    }
+
+    [Test]
+    public async Task Test_DirectoryInfo_IsEmpty()
+    {
+        var emptyDir = Path.Combine(_testDirectory, "empty");
+        Directory.CreateDirectory(emptyDir);
+        var directory = new DirectoryInfo(emptyDir);
+        await Assert.That(directory).IsEmpty();
+    }
+
+    [Test]
+    public async Task Test_DirectoryInfo_IsNotRoot()
+    {
+        var directory = new DirectoryInfo(_testDirectory);
+        await Assert.That(directory).IsNotRoot();
+    }
+
+    [Test]
+    public async Task Test_DirectoryInfo_IsRoot()
+    {
+        var root = new DirectoryInfo(Path.GetPathRoot(_testDirectory)!);
+        await Assert.That(root).IsRoot();
+    }
+
+    [Test]
+    public async Task Test_DirectoryInfo_IsNotHidden()
+    {
+        var directory = new DirectoryInfo(_testDirectory);
+        await Assert.That(directory).IsNotHidden();
+    }
+
+    [Test]
+    public async Task Test_DirectoryInfo_IsHidden()
+    {
+        var hiddenDir = Path.Combine(_testDirectory, "hidden");
+        var directory = Directory.CreateDirectory(hiddenDir);
+        directory.Attributes |= FileAttributes.Hidden;
+        await Assert.That(directory).IsHidden();
+    }
+
+    [Test]
+    public async Task Test_DirectoryInfo_IsSystemDirectory()
+    {
+        var sysDir = Path.Combine(_testDirectory, "system");
+        var directory = Directory.CreateDirectory(sysDir);
+        directory.Attributes |= FileAttributes.System;
+        directory.Refresh();
+        await Assert.That(directory).IsSystemDirectory();
+    }
 }
