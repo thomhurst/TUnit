@@ -5,7 +5,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Source-generated assertions for Guid type using [GenerateAssertion] attributes.
 /// </summary>
-public static class GuidAssertionExtensions
+public static partial class GuidAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be an empty GUID")]
     public static bool IsEmptyGuid(this Guid value) => value == Guid.Empty;

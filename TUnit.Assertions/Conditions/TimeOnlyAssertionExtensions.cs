@@ -7,7 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// Source-generated assertions for TimeOnly type using [GenerateAssertion] attributes.
 /// These wrap TimeOnly checks as extension methods.
 /// </summary>
-public static class TimeOnlyAssertionExtensions
+public static partial class TimeOnlyAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be midnight")]
     public static bool IsMidnight(this TimeOnly value) => value == TimeOnly.MinValue;

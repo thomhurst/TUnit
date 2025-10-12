@@ -7,7 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// Source-generated assertions for Range type using [GenerateAssertion] attributes.
 /// These wrap range checks as extension methods.
 /// </summary>
-public static class RangeAssertionExtensions
+public static partial class RangeAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to have both indices from the end")]
     public static bool HasBothIndicesFromEnd(this Range value) => value.Start.IsFromEnd && value.End.IsFromEnd;

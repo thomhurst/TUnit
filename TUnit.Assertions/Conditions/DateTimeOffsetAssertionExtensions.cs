@@ -6,7 +6,7 @@ namespace TUnit.Assertions.Conditions;
 /// Source-generated assertions for DateTimeOffset type using [GenerateAssertion] attributes.
 /// These wrap DateTimeOffset property and method checks as extension methods.
 /// </summary>
-public static class DateTimeOffsetAssertionExtensions
+public static partial class DateTimeOffsetAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be today")]
     public static bool IsToday(this DateTimeOffset value) => value.Date == DateTimeOffset.Now.Date;

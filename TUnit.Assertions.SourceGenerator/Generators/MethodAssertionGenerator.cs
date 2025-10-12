@@ -204,7 +204,7 @@ namespace TUnit.Assertions.Diagnostics
             }
 
             // Generate extension methods in a partial class
-            var extensionClassName = $"{containingType.Name}_GeneratedAssertionExtensions";
+            var extensionClassName = containingType.Name;
             sourceBuilder.AppendLine($"public static partial class {extensionClassName}");
             sourceBuilder.AppendLine("{");
 

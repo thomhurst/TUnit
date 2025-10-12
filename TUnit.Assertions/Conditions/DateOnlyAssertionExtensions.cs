@@ -7,7 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// Source-generated assertions for DateOnly type using [GenerateAssertion] attributes.
 /// These wrap DateOnly checks as extension methods.
 /// </summary>
-public static class DateOnlyAssertionExtensions
+public static partial class DateOnlyAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be today")]
     public static bool IsToday(this DateOnly value) => value == DateOnly.FromDateTime(DateTime.Today);

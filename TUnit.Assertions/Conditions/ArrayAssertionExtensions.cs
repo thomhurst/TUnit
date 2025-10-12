@@ -6,7 +6,7 @@ namespace TUnit.Assertions.Conditions;
 /// Source-generated assertions for Array type using [GenerateAssertion] attributes.
 /// These wrap array checks as extension methods.
 /// </summary>
-public static class ArrayAssertionExtensions
+public static partial class ArrayAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be an empty array")]
     public static bool IsEmpty<T>(this T[] value) => value?.Length == 0;

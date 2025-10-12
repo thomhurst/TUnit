@@ -6,7 +6,7 @@ namespace TUnit.Assertions.Conditions;
 /// Source-generated assertions for Version type using [GenerateAssertion] attributes.
 /// These wrap version number checks as extension methods.
 /// </summary>
-public static class VersionAssertionExtensions
+public static partial class VersionAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be a major version (x.0.0.0)")]
     public static bool IsMajorVersion(this Version value) =>

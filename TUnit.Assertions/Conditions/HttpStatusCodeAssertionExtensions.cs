@@ -7,7 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// Source-generated assertions for HttpStatusCode type using [GenerateAssertion] attributes.
 /// These wrap HTTP status code range checks as extension methods.
 /// </summary>
-public static class HttpStatusCodeAssertionExtensions
+public static partial class HttpStatusCodeAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be a success status code (2xx)")]
     public static bool IsSuccess(this HttpStatusCode value)

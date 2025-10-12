@@ -6,7 +6,7 @@ namespace TUnit.Assertions.Conditions;
 /// Source-generated assertions for DayOfWeek type using [GenerateAssertion] attributes.
 /// These wrap day-of-week checks as extension methods.
 /// </summary>
-public static class DayOfWeekAssertionExtensions
+public static partial class DayOfWeekAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be a weekend day")]
     public static bool IsWeekend(this DayOfWeek value) =>

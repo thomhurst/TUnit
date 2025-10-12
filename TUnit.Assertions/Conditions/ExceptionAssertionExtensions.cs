@@ -7,7 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// Source-generated assertions for Exception type using [GenerateAssertion] attributes.
 /// These wrap exception property checks as extension methods.
 /// </summary>
-public static class ExceptionAssertionExtensions
+public static partial class ExceptionAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to have an inner exception")]
     public static bool HasInnerException(this Exception value) => value?.InnerException != null;

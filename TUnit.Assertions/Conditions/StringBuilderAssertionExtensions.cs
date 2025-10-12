@@ -7,7 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// Source-generated assertions for StringBuilder type using [GenerateAssertion] attributes.
 /// These wrap StringBuilder property checks as extension methods.
 /// </summary>
-public static class StringBuilderAssertionExtensions
+public static partial class StringBuilderAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be empty")]
     public static bool IsEmpty(this StringBuilder value) => value?.Length == 0;

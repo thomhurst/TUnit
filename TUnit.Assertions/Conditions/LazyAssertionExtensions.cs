@@ -7,7 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// Source-generated assertions for Lazy&lt;T&gt; type using [GenerateAssertion] attributes.
 /// These wrap lazy initialization checks as extension methods.
 /// </summary>
-public static class LazyAssertionExtensions
+public static partial class LazyAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to have its value created")]
     [UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Only checking IsValueCreated property, not creating instances")]

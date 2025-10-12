@@ -5,7 +5,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Source-generated assertions for TimeSpan type using [GenerateAssertion] attributes.
 /// </summary>
-public static class TimeSpanAssertionExtensions
+public static partial class TimeSpanAssertionExtensions
 {
     [GenerateAssertion(ExpectationMessage = "to be zero")]
     public static bool IsZero(this TimeSpan value) => value == TimeSpan.Zero;
