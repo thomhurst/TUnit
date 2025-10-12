@@ -340,10 +340,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("using System;");
         sourceBuilder.AppendLine("using System.Runtime.CompilerServices;");
         sourceBuilder.AppendLine("using System.Threading.Tasks;");
-        sourceBuilder.AppendLine("using TUnit.Assertions.AssertConditions;");
-        sourceBuilder.AppendLine("using TUnit.Assertions.AssertConditions.Interfaces;");
-        sourceBuilder.AppendLine("using TUnit.Assertions.AssertionBuilders;");
-        sourceBuilder.AppendLine("using TUnit.Assertions.Extensions;");
+        sourceBuilder.AppendLine("using TUnit.Assertions.Core;");
         sourceBuilder.AppendLine();
 
         if (!string.IsNullOrEmpty(namespaceName))
@@ -514,13 +511,13 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         // For Enum.IsDefined, we need to use a generic type parameter instead of the concrete Enum type
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
-            // Generate: public class EnumIsDefinedAssertCondition<T> : BaseAssertCondition<T> where T : Enum
-            sourceBuilder.AppendLine($"public class {className}<T> : BaseAssertCondition<T>");
+            // Generate: public class EnumIsDefinedAssertion<T> : Assertion<T> where T : Enum
+            sourceBuilder.AppendLine($"public class {className}<T> : Assertion<T>");
             sourceBuilder.AppendLine($"    where T : Enum");
         }
         else
         {
-            sourceBuilder.AppendLine($"public class {className} : BaseAssertCondition<{targetTypeName}>");
+            sourceBuilder.AppendLine($"public class {className} : Assertion<{targetTypeName}>");
         }
         sourceBuilder.AppendLine("{");
 
@@ -530,17 +527,28 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         }
         sourceBuilder.AppendLine("    private readonly bool _negated;");
         sourceBuilder.AppendLine();
+
         // Constructor name should not include generic type parameter
         var constructorName = className;
-        sourceBuilder.Append($"    public {constructorName}(");
-        var constructorParams = new List<string>();
+
+        // Determine the AssertionContext type
+        string contextType;
+        if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
+        {
+            contextType = "AssertionContext<T>";
+        }
+        else
+        {
+            contextType = $"AssertionContext<{targetTypeName}>";
+        }
+
+        sourceBuilder.Append($"    public {constructorName}({contextType} context");
         foreach (var param in parameters)
         {
-            constructorParams.Add($"{param.Type.ToDisplayString()} {param.Name}");
+            sourceBuilder.Append($", {param.Type.ToDisplayString()} {param.Name}");
         }
-        constructorParams.Add("bool negated = false");
-        sourceBuilder.Append(string.Join(", ", constructorParams));
-        sourceBuilder.AppendLine(")");
+        sourceBuilder.AppendLine(", bool negated = false)");
+        sourceBuilder.AppendLine("        : base(context)");
         sourceBuilder.AppendLine("    {");
 
         foreach (var param in parameters)
@@ -551,23 +559,34 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("    }");
         sourceBuilder.AppendLine();
 
-        string parameterType;
+        // Generate CheckAsync method
+        string metadataType;
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
-            parameterType = "T?"; // Generic enum parameter
+            metadataType = "EvaluationMetadata<T>";
         }
         else
         {
-            parameterType = attributeData.TargetType.IsValueType ? targetTypeName : $"{targetTypeName}?";
+            metadataType = $"EvaluationMetadata<{targetTypeName}>";
         }
-        sourceBuilder.AppendLine($"    protected override ValueTask<AssertionResult> GetResult({parameterType} actualValue, Exception? exception, AssertionMetadata assertionMetadata)");
+
+        sourceBuilder.AppendLine($"    protected override async Task<AssertionResult> CheckAsync({metadataType} metadata)");
         sourceBuilder.AppendLine("    {");
+        sourceBuilder.AppendLine("        var actualValue = metadata.Value;");
+        sourceBuilder.AppendLine("        var exception = metadata.Exception;");
+        sourceBuilder.AppendLine();
+
+        sourceBuilder.AppendLine("        if (exception != null)");
+        sourceBuilder.AppendLine("        {");
+        sourceBuilder.AppendLine("            return AssertionResult.Failed($\"threw {exception.GetType().FullName}\");");
+        sourceBuilder.AppendLine("        }");
+        sourceBuilder.AppendLine();
 
         if (!attributeData.TargetType.IsValueType)
         {
             sourceBuilder.AppendLine("        if (actualValue is null)");
             sourceBuilder.AppendLine("        {");
-            sourceBuilder.AppendLine("            return AssertionResult.Fail(\"Actual value is null\");");
+            sourceBuilder.AppendLine("            return AssertionResult.Failed(\"Actual value is null\");");
             sourceBuilder.AppendLine("        }");
             sourceBuilder.AppendLine();
         }
@@ -757,7 +776,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             }
         }
 
-        return $"{targetTypeName}{containingTypeName}{methodName}{parameterSuffix}AssertCondition";
+        return $"{targetTypeName}{containingTypeName}{methodName}{parameterSuffix}Assertion";
     }
 
     private static string GetSimpleTypeName(INamedTypeSymbol type)
@@ -830,16 +849,14 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 : parameters.Skip(1) // Static: Skip just the actual value parameter
             : parameters;             // Instance: All parameters are additional
 
-        string extensionTargetType;
+        // Generate the extension method using the modern IAssertionSource<T> pattern
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
-            extensionTargetType = "T";
-            sourceBuilder.Append($"    public static InvokableValueAssertionBuilder<T> {generatedMethodName}<T>(this IValueSource<T> valueSource");
+            sourceBuilder.Append($"    public static {assertConditionClassName}<T> {generatedMethodName}<T>(this IAssertionSource<T> source");
         }
         else
         {
-            extensionTargetType = targetTypeName;
-            sourceBuilder.Append($"    public static InvokableValueAssertionBuilder<{targetTypeName}> {generatedMethodName}(this IValueSource<{targetTypeName}> valueSource");
+            sourceBuilder.Append($"    public static {assertConditionClassName} {generatedMethodName}(this IAssertionSource<{targetTypeName}> source");
         }
 
         foreach (var param in additionalParameters)
@@ -851,50 +868,49 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         var additionalParametersArray = additionalParameters.ToArray();
         for (var i = 0; i < additionalParametersArray.Length; i++)
         {
-            sourceBuilder.Append($", [CallerArgumentExpression(nameof({additionalParametersArray[i].Name}))] string? doNotPopulateThisValue{i + 1} = null");
+            sourceBuilder.Append($", [CallerArgumentExpression(nameof({additionalParametersArray[i].Name}))] string? {additionalParametersArray[i].Name}Expression = null");
         }
 
         sourceBuilder.Append(")");
 
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
-            sourceBuilder.AppendLine()
-                         .Append("        where T : Enum");
+            sourceBuilder.AppendLine();
+            sourceBuilder.Append("        where T : Enum");
         }
 
         sourceBuilder.AppendLine();
         sourceBuilder.AppendLine("    {");
 
-        sourceBuilder.AppendLine($"        return valueSource.RegisterAssertion(");
-
-        string constructorCall;
-        if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
+        // Build the expression for ExpressionBuilder.Append()
+        if (additionalParametersArray.Length > 0)
         {
-            constructorCall = $"new {assertConditionClassName}<T>(";
+            var exprList = string.Join(", ", additionalParametersArray.Select(p => $"{{{p.Name}Expression}}"));
+            sourceBuilder.AppendLine($"        source.Context.ExpressionBuilder.Append($\".{generatedMethodName}({exprList})\");");
         }
         else
         {
-            constructorCall = $"new {assertConditionClassName}(";
+            sourceBuilder.AppendLine($"        source.Context.ExpressionBuilder.Append(\".{generatedMethodName}()\");");
         }
-        sourceBuilder.Append($"            {constructorCall}");
 
-        var constructorArgs = new List<string>();
+        // Construct and return the assertion directly (modern pattern)
+        if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
+        {
+            sourceBuilder.Append($"        return new {assertConditionClassName}<T>(source.Context");
+        }
+        else
+        {
+            sourceBuilder.Append($"        return new {assertConditionClassName}(source.Context");
+        }
+
         foreach (var param in additionalParameters)
         {
-            constructorArgs.Add(param.Name);
+            sourceBuilder.Append($", {param.Name}");
         }
-        constructorArgs.Add(negated.ToString().ToLowerInvariant());
 
-        sourceBuilder.Append(string.Join(", ", constructorArgs));
-        sourceBuilder.AppendLine("),");
+        sourceBuilder.Append($", {negated.ToString().ToLowerInvariant()}");
+        sourceBuilder.AppendLine(");");
 
-        // Generate the array of CallerArgumentExpression parameters
-        var callerArgParams = new List<string>();
-        for (var i = 0; i < additionalParametersArray.Length; i++)
-        {
-            callerArgParams.Add($"doNotPopulateThisValue{i + 1}");
-        }
-        sourceBuilder.AppendLine($"            [{string.Join(", ", callerArgParams)}]);");
         sourceBuilder.AppendLine("    }");
         sourceBuilder.AppendLine();
     }
