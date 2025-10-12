@@ -16,7 +16,7 @@ public class NUnitMigrationAnalyzerTests
             $$"""
                 using NUnit.Framework;
 
-                public class MyClass 
+                public class MyClass
                 {
                     {|#0:[{{attribute}}]|}
                     public void MyMethod() { }
@@ -41,7 +41,7 @@ public class NUnitMigrationAnalyzerTests
             $$"""
                 using NUnit.Framework;
 
-                public class MyClass 
+                public class MyClass
                 {
                     {|#0:[{{attribute}}]|}
                     public void MyMethod() { }
@@ -54,7 +54,7 @@ public class NUnitMigrationAnalyzerTests
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
-                public class MyClass 
+                public class MyClass
                 {
                     [{{expected}}]
                     public void MyMethod() { }
@@ -72,7 +72,7 @@ public class NUnitMigrationAnalyzerTests
                 using NUnit.Framework;
 
                 {|#0:[TestFixture]|}
-                public class MyClass 
+                public class MyClass
                 {
                     [Test]
                     public void MyMethod() { }
@@ -85,7 +85,7 @@ public class NUnitMigrationAnalyzerTests
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
-                public class MyClass 
+                public class MyClass
                 {
                     [Test]
                     public void MyMethod() { }
@@ -105,7 +105,7 @@ public class NUnitMigrationAnalyzerTests
                 {|#0:public class MyClass|}
                 {
                     [Test]
-                    public void MyMethod() 
+                    public void MyMethod()
                     {
                         Assert.That(5, Is.EqualTo(5));
                         Assert.That(true, Is.True);
@@ -123,7 +123,7 @@ public class NUnitMigrationAnalyzerTests
                 public class MyClass
                 {
                     [Test]
-                    public void MyMethod() 
+                    public void MyMethod()
                     {
                         await Assert.That(5).IsEqualTo(5);
                         await Assert.That(true).IsTrue();
@@ -185,7 +185,7 @@ public class NUnitMigrationAnalyzerTests
             """
                 {|#0:using NUnit.Framework;|}
 
-                public class MyClass 
+                public class MyClass
                 {
                     public void MyMethod() { }
                 }
@@ -202,7 +202,7 @@ public class NUnitMigrationAnalyzerTests
             """
                 {|#0:using NUnit.Framework;|}
 
-                public class MyClass 
+                public class MyClass
                 {
                     public void MyMethod() { }
                 }
@@ -214,7 +214,7 @@ public class NUnitMigrationAnalyzerTests
                 using static TUnit.Assertions.Assert;
                 using TUnit.Assertions.Extensions;
 
-                public class MyClass 
+                public class MyClass
                 {
                     public void MyMethod() { }
                 }
