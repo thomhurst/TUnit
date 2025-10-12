@@ -1,9 +1,8 @@
-using TUnit.Assertions.SourceGenerator.Generators;
 using TUnit.Assertions.SourceGenerator.Tests.Options;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
-internal class EncodingAssertionGeneratorTests : TestsBase<MethodAssertionGenerator>
+internal class EncodingAssertionGeneratorTests : TestsBase
 {
     [Test]
     public Task GeneratesEncodingAssertions() => RunTest(

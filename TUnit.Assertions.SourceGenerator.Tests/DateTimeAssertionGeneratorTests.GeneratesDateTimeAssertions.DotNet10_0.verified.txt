@@ -1,15 +1,4 @@
 ﻿[  
-// This file is generated to verify the MethodAssertionGenerator is running.
-// If you see this file, the generator executed successfully.
-namespace TUnit.Assertions.Diagnostics
-{
-    internal static class MethodAssertionGeneratorDiagnostic
-    {
-        public const string Message = "MethodAssertionGenerator is running";
-    }
-}
-
-  
 #nullable enable
 
 using System;
@@ -19,19 +8,19 @@ using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
-/// <summary>
-/// Generated assertion for IsToday
-/// </summary>
-public sealed class DateTime_IsToday_Assertion : Assertion<System.DateTime>
+public class DateTimeIsDaylightSavingTimeAssertion : Assertion<System.DateTime>
 {
-    public DateTime_IsToday_Assertion(AssertionContext<System.DateTime> context)
+    private readonly bool _negated;
+
+    public DateTimeIsDaylightSavingTimeAssertion(AssertionContext<System.DateTime> context, bool negated = false)
         : base(context)
     {
+        _negated = negated;
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
     {
-        var value = metadata.Value;
+        var actualValue = metadata.Value;
         var exception = metadata.Exception;
 
         if (exception != null)
@@ -39,478 +28,29 @@ public sealed class DateTime_IsToday_Assertion : Assertion<System.DateTime>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsToday();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        var result = actualValue.IsDaylightSavingTime();
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsDaylightSavingTime"));
     }
 
     protected override string GetExpectation()
     {
-        return "to be today";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsNotToday
-/// </summary>
-public sealed class DateTime_IsNotToday_Assertion : Assertion<System.DateTime>
-{
-    public DateTime_IsNotToday_Assertion(AssertionContext<System.DateTime> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        var result = value.IsNotToday();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to not be today";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsUtc
-/// </summary>
-public sealed class DateTime_IsUtc_Assertion : Assertion<System.DateTime>
-{
-    public DateTime_IsUtc_Assertion(AssertionContext<System.DateTime> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        var result = value.IsUtc();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be UTC";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsNotUtc
-/// </summary>
-public sealed class DateTime_IsNotUtc_Assertion : Assertion<System.DateTime>
-{
-    public DateTime_IsNotUtc_Assertion(AssertionContext<System.DateTime> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        var result = value.IsNotUtc();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to not be UTC";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsLeapYear
-/// </summary>
-public sealed class DateTime_IsLeapYear_Assertion : Assertion<System.DateTime>
-{
-    public DateTime_IsLeapYear_Assertion(AssertionContext<System.DateTime> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        var result = value.IsLeapYear();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be in a leap year";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsNotLeapYear
-/// </summary>
-public sealed class DateTime_IsNotLeapYear_Assertion : Assertion<System.DateTime>
-{
-    public DateTime_IsNotLeapYear_Assertion(AssertionContext<System.DateTime> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        var result = value.IsNotLeapYear();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to not be in a leap year";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsInFuture
-/// </summary>
-public sealed class DateTime_IsInFuture_Assertion : Assertion<System.DateTime>
-{
-    public DateTime_IsInFuture_Assertion(AssertionContext<System.DateTime> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        var result = value.IsInFuture();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be in the future";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsInPast
-/// </summary>
-public sealed class DateTime_IsInPast_Assertion : Assertion<System.DateTime>
-{
-    public DateTime_IsInPast_Assertion(AssertionContext<System.DateTime> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        var result = value.IsInPast();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be in the past";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsInFutureUtc
-/// </summary>
-public sealed class DateTime_IsInFutureUtc_Assertion : Assertion<System.DateTime>
-{
-    public DateTime_IsInFutureUtc_Assertion(AssertionContext<System.DateTime> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        var result = value.IsInFutureUtc();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be in the future (UTC)";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsInPastUtc
-/// </summary>
-public sealed class DateTime_IsInPastUtc_Assertion : Assertion<System.DateTime>
-{
-    public DateTime_IsInPastUtc_Assertion(AssertionContext<System.DateTime> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        var result = value.IsInPastUtc();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be in the past (UTC)";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsOnWeekend
-/// </summary>
-public sealed class DateTime_IsOnWeekend_Assertion : Assertion<System.DateTime>
-{
-    public DateTime_IsOnWeekend_Assertion(AssertionContext<System.DateTime> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        var result = value.IsOnWeekend();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be on a weekend";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsOnWeekday
-/// </summary>
-public sealed class DateTime_IsOnWeekday_Assertion : Assertion<System.DateTime>
-{
-    public DateTime_IsOnWeekday_Assertion(AssertionContext<System.DateTime> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        var result = value.IsOnWeekday();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be on a weekday";
+        return $"{(_negated ? "not " : "")} be during daylight saving time";
     }
 }
 
 public static partial class DateTimeAssertionExtensions
 {
-    /// <summary>
-    /// Generated extension method for IsToday
-    /// </summary>
-    public static DateTime_IsToday_Assertion IsToday(this IAssertionSource<System.DateTime> source)
+    public static DateTimeIsDaylightSavingTimeAssertion IsDaylightSavingTime(this IAssertionSource<System.DateTime> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsToday()");
-        return new DateTime_IsToday_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".IsDaylightSavingTime()");
+        return new DateTimeIsDaylightSavingTimeAssertion(source.Context, false);
     }
 
-    /// <summary>
-    /// Generated extension method for IsNotToday
-    /// </summary>
-    public static DateTime_IsNotToday_Assertion IsNotToday(this IAssertionSource<System.DateTime> source)
+    public static DateTimeIsDaylightSavingTimeAssertion IsNotDaylightSavingTime(this IAssertionSource<System.DateTime> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsNotToday()");
-        return new DateTime_IsNotToday_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsUtc
-    /// </summary>
-    public static DateTime_IsUtc_Assertion IsUtc(this IAssertionSource<System.DateTime> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsUtc()");
-        return new DateTime_IsUtc_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsNotUtc
-    /// </summary>
-    public static DateTime_IsNotUtc_Assertion IsNotUtc(this IAssertionSource<System.DateTime> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsNotUtc()");
-        return new DateTime_IsNotUtc_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsLeapYear
-    /// </summary>
-    public static DateTime_IsLeapYear_Assertion IsLeapYear(this IAssertionSource<System.DateTime> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsLeapYear()");
-        return new DateTime_IsLeapYear_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsNotLeapYear
-    /// </summary>
-    public static DateTime_IsNotLeapYear_Assertion IsNotLeapYear(this IAssertionSource<System.DateTime> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsNotLeapYear()");
-        return new DateTime_IsNotLeapYear_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsInFuture
-    /// </summary>
-    public static DateTime_IsInFuture_Assertion IsInFuture(this IAssertionSource<System.DateTime> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsInFuture()");
-        return new DateTime_IsInFuture_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsInPast
-    /// </summary>
-    public static DateTime_IsInPast_Assertion IsInPast(this IAssertionSource<System.DateTime> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsInPast()");
-        return new DateTime_IsInPast_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsInFutureUtc
-    /// </summary>
-    public static DateTime_IsInFutureUtc_Assertion IsInFutureUtc(this IAssertionSource<System.DateTime> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsInFutureUtc()");
-        return new DateTime_IsInFutureUtc_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsInPastUtc
-    /// </summary>
-    public static DateTime_IsInPastUtc_Assertion IsInPastUtc(this IAssertionSource<System.DateTime> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsInPastUtc()");
-        return new DateTime_IsInPastUtc_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsOnWeekend
-    /// </summary>
-    public static DateTime_IsOnWeekend_Assertion IsOnWeekend(this IAssertionSource<System.DateTime> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsOnWeekend()");
-        return new DateTime_IsOnWeekend_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsOnWeekday
-    /// </summary>
-    public static DateTime_IsOnWeekday_Assertion IsOnWeekday(this IAssertionSource<System.DateTime> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsOnWeekday()");
-        return new DateTime_IsOnWeekday_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".IsNotDaylightSavingTime()");
+        return new DateTimeIsDaylightSavingTimeAssertion(source.Context, true);
     }
 
 }

@@ -1,9 +1,8 @@
-using TUnit.Assertions.SourceGenerator.Generators;
 using TUnit.Assertions.SourceGenerator.Tests.Options;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
-internal class DirectoryInfoAssertionGeneratorTests : TestsBase<MethodAssertionGenerator>
+internal class DirectoryInfoAssertionGeneratorTests : TestsBase
 {
     [Test]
     public Task GeneratesDirectoryInfoAssertions() => RunTest(

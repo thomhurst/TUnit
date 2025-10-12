@@ -1,15 +1,4 @@
 ﻿[  
-// This file is generated to verify the MethodAssertionGenerator is running.
-// If you see this file, the generator executed successfully.
-namespace TUnit.Assertions.Diagnostics
-{
-    internal static class MethodAssertionGeneratorDiagnostic
-    {
-        public const string Message = "MethodAssertionGenerator is running";
-    }
-}
-
-  
 #nullable enable
 
 using System;
@@ -19,19 +8,19 @@ using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
-/// <summary>
-/// Generated assertion for IsEmpty
-/// </summary>
-public sealed class DirectoryInfo_IsEmpty_Assertion : Assertion<System.IO.DirectoryInfo>
+public class DirectoryInfoExistsAssertion : Assertion<System.IO.DirectoryInfo>
 {
-    public DirectoryInfo_IsEmpty_Assertion(AssertionContext<System.IO.DirectoryInfo> context)
+    private readonly bool _negated;
+
+    public DirectoryInfoExistsAssertion(AssertionContext<System.IO.DirectoryInfo> context, bool negated = false)
         : base(context)
     {
+        _negated = negated;
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.DirectoryInfo> metadata)
     {
-        var value = metadata.Value;
+        var actualValue = metadata.Value;
         var exception = metadata.Exception;
 
         if (exception != null)
@@ -39,308 +28,34 @@ public sealed class DirectoryInfo_IsEmpty_Assertion : Assertion<System.IO.Direct
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
+        if (actualValue is null)
         {
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsEmpty();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        var result = actualValue.Exists;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy Exists"));
     }
 
     protected override string GetExpectation()
     {
-        return "to be empty";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsNotEmpty
-/// </summary>
-public sealed class DirectoryInfo_IsNotEmpty_Assertion : Assertion<System.IO.DirectoryInfo>
-{
-    public DirectoryInfo_IsNotEmpty_Assertion(AssertionContext<System.IO.DirectoryInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.DirectoryInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsNotEmpty();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to not be empty";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsRoot
-/// </summary>
-public sealed class DirectoryInfo_IsRoot_Assertion : Assertion<System.IO.DirectoryInfo>
-{
-    public DirectoryInfo_IsRoot_Assertion(AssertionContext<System.IO.DirectoryInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.DirectoryInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsRoot();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be a root directory";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsNotRoot
-/// </summary>
-public sealed class DirectoryInfo_IsNotRoot_Assertion : Assertion<System.IO.DirectoryInfo>
-{
-    public DirectoryInfo_IsNotRoot_Assertion(AssertionContext<System.IO.DirectoryInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.DirectoryInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsNotRoot();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to not be a root directory";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsHidden
-/// </summary>
-public sealed class DirectoryInfo_IsHidden_Assertion : Assertion<System.IO.DirectoryInfo>
-{
-    public DirectoryInfo_IsHidden_Assertion(AssertionContext<System.IO.DirectoryInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.DirectoryInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsHidden();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be hidden";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsNotHidden
-/// </summary>
-public sealed class DirectoryInfo_IsNotHidden_Assertion : Assertion<System.IO.DirectoryInfo>
-{
-    public DirectoryInfo_IsNotHidden_Assertion(AssertionContext<System.IO.DirectoryInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.DirectoryInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsNotHidden();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to not be hidden";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsSystemDirectory
-/// </summary>
-public sealed class DirectoryInfo_IsSystemDirectory_Assertion : Assertion<System.IO.DirectoryInfo>
-{
-    public DirectoryInfo_IsSystemDirectory_Assertion(AssertionContext<System.IO.DirectoryInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.DirectoryInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsSystemDirectory();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be a system directory";
+        return $"{(_negated ? "not " : "")} exist";
     }
 }
 
 public static partial class DirectoryInfoAssertionExtensions
 {
-    /// <summary>
-    /// Generated extension method for IsEmpty
-    /// </summary>
-    public static DirectoryInfo_IsEmpty_Assertion IsEmpty(this IAssertionSource<System.IO.DirectoryInfo> source)
+    public static DirectoryInfoExistsAssertion Exists(this IAssertionSource<System.IO.DirectoryInfo> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsEmpty()");
-        return new DirectoryInfo_IsEmpty_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".Exists()");
+        return new DirectoryInfoExistsAssertion(source.Context, false);
     }
 
-    /// <summary>
-    /// Generated extension method for IsNotEmpty
-    /// </summary>
-    public static DirectoryInfo_IsNotEmpty_Assertion IsNotEmpty(this IAssertionSource<System.IO.DirectoryInfo> source)
+    public static DirectoryInfoExistsAssertion DoesNotExist(this IAssertionSource<System.IO.DirectoryInfo> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsNotEmpty()");
-        return new DirectoryInfo_IsNotEmpty_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsRoot
-    /// </summary>
-    public static DirectoryInfo_IsRoot_Assertion IsRoot(this IAssertionSource<System.IO.DirectoryInfo> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsRoot()");
-        return new DirectoryInfo_IsRoot_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsNotRoot
-    /// </summary>
-    public static DirectoryInfo_IsNotRoot_Assertion IsNotRoot(this IAssertionSource<System.IO.DirectoryInfo> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsNotRoot()");
-        return new DirectoryInfo_IsNotRoot_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsHidden
-    /// </summary>
-    public static DirectoryInfo_IsHidden_Assertion IsHidden(this IAssertionSource<System.IO.DirectoryInfo> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsHidden()");
-        return new DirectoryInfo_IsHidden_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsNotHidden
-    /// </summary>
-    public static DirectoryInfo_IsNotHidden_Assertion IsNotHidden(this IAssertionSource<System.IO.DirectoryInfo> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsNotHidden()");
-        return new DirectoryInfo_IsNotHidden_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsSystemDirectory
-    /// </summary>
-    public static DirectoryInfo_IsSystemDirectory_Assertion IsSystemDirectory(this IAssertionSource<System.IO.DirectoryInfo> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsSystemDirectory()");
-        return new DirectoryInfo_IsSystemDirectory_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".DoesNotExist()");
+        return new DirectoryInfoExistsAssertion(source.Context, true);
     }
 
 }

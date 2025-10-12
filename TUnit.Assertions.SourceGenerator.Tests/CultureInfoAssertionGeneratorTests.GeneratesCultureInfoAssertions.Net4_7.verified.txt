@@ -1,15 +1,4 @@
 ﻿[  
-// This file is generated to verify the MethodAssertionGenerator is running.
-// If you see this file, the generator executed successfully.
-namespace TUnit.Assertions.Diagnostics
-{
-    internal static class MethodAssertionGeneratorDiagnostic
-    {
-        public const string Message = "MethodAssertionGenerator is running";
-    }
-}
-
-  
 #nullable enable
 
 using System;
@@ -19,19 +8,19 @@ using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
-/// <summary>
-/// Generated assertion for IsInvariant
-/// </summary>
-public sealed class CultureInfo_IsInvariant_Assertion : Assertion<System.Globalization.CultureInfo>
+public class CultureInfoIsNeutralCultureAssertion : Assertion<System.Globalization.CultureInfo>
 {
-    public CultureInfo_IsInvariant_Assertion(AssertionContext<System.Globalization.CultureInfo> context)
+    private readonly bool _negated;
+
+    public CultureInfoIsNeutralCultureAssertion(AssertionContext<System.Globalization.CultureInfo> context, bool negated = false)
         : base(context)
     {
+        _negated = negated;
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Globalization.CultureInfo> metadata)
     {
-        var value = metadata.Value;
+        var actualValue = metadata.Value;
         var exception = metadata.Exception;
 
         if (exception != null)
@@ -39,36 +28,35 @@ public sealed class CultureInfo_IsInvariant_Assertion : Assertion<System.Globali
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
+        if (actualValue is null)
         {
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsInvariant();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        var result = actualValue.IsNeutralCulture;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsNeutralCulture"));
     }
 
     protected override string GetExpectation()
     {
-        return "to be invariant culture";
+        return $"{(_negated ? "not " : "")} be a neutral culture";
     }
 }
 
-/// <summary>
-/// Generated assertion for IsNotInvariant
-/// </summary>
-public sealed class CultureInfo_IsNotInvariant_Assertion : Assertion<System.Globalization.CultureInfo>
+public class CultureInfoIsReadOnlyAssertion : Assertion<System.Globalization.CultureInfo>
 {
-    public CultureInfo_IsNotInvariant_Assertion(AssertionContext<System.Globalization.CultureInfo> context)
+    private readonly bool _negated;
+
+    public CultureInfoIsReadOnlyAssertion(AssertionContext<System.Globalization.CultureInfo> context, bool negated = false)
         : base(context)
     {
+        _negated = negated;
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Globalization.CultureInfo> metadata)
     {
-        var value = metadata.Value;
+        var actualValue = metadata.Value;
         var exception = metadata.Exception;
 
         if (exception != null)
@@ -76,225 +64,40 @@ public sealed class CultureInfo_IsNotInvariant_Assertion : Assertion<System.Glob
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
+        if (actualValue is null)
         {
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsNotInvariant();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        var result = actualValue.IsReadOnly;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsReadOnly"));
     }
 
     protected override string GetExpectation()
     {
-        return "to not be invariant culture";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsEnglish
-/// </summary>
-public sealed class CultureInfo_IsEnglish_Assertion : Assertion<System.Globalization.CultureInfo>
-{
-    public CultureInfo_IsEnglish_Assertion(AssertionContext<System.Globalization.CultureInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Globalization.CultureInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsEnglish();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be English culture";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsNotEnglish
-/// </summary>
-public sealed class CultureInfo_IsNotEnglish_Assertion : Assertion<System.Globalization.CultureInfo>
-{
-    public CultureInfo_IsNotEnglish_Assertion(AssertionContext<System.Globalization.CultureInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Globalization.CultureInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsNotEnglish();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to not be English culture";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsRightToLeft
-/// </summary>
-public sealed class CultureInfo_IsRightToLeft_Assertion : Assertion<System.Globalization.CultureInfo>
-{
-    public CultureInfo_IsRightToLeft_Assertion(AssertionContext<System.Globalization.CultureInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Globalization.CultureInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsRightToLeft();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be right-to-left culture";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsLeftToRight
-/// </summary>
-public sealed class CultureInfo_IsLeftToRight_Assertion : Assertion<System.Globalization.CultureInfo>
-{
-    public CultureInfo_IsLeftToRight_Assertion(AssertionContext<System.Globalization.CultureInfo> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Globalization.CultureInfo> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsLeftToRight();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be left-to-right culture";
+        return $"{(_negated ? "not " : "")} be read-only culture";
     }
 }
 
 public static partial class CultureInfoAssertionExtensions
 {
-    /// <summary>
-    /// Generated extension method for IsInvariant
-    /// </summary>
-    public static CultureInfo_IsInvariant_Assertion IsInvariant(this IAssertionSource<System.Globalization.CultureInfo> source)
+    public static CultureInfoIsNeutralCultureAssertion IsNeutralCulture(this IAssertionSource<System.Globalization.CultureInfo> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsInvariant()");
-        return new CultureInfo_IsInvariant_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".IsNeutralCulture()");
+        return new CultureInfoIsNeutralCultureAssertion(source.Context, false);
     }
 
-    /// <summary>
-    /// Generated extension method for IsNotInvariant
-    /// </summary>
-    public static CultureInfo_IsNotInvariant_Assertion IsNotInvariant(this IAssertionSource<System.Globalization.CultureInfo> source)
+    public static CultureInfoIsNeutralCultureAssertion IsNotNeutralCulture(this IAssertionSource<System.Globalization.CultureInfo> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsNotInvariant()");
-        return new CultureInfo_IsNotInvariant_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".IsNotNeutralCulture()");
+        return new CultureInfoIsNeutralCultureAssertion(source.Context, true);
     }
 
-    /// <summary>
-    /// Generated extension method for IsEnglish
-    /// </summary>
-    public static CultureInfo_IsEnglish_Assertion IsEnglish(this IAssertionSource<System.Globalization.CultureInfo> source)
+    public static CultureInfoIsReadOnlyAssertion IsReadOnly(this IAssertionSource<System.Globalization.CultureInfo> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsEnglish()");
-        return new CultureInfo_IsEnglish_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsNotEnglish
-    /// </summary>
-    public static CultureInfo_IsNotEnglish_Assertion IsNotEnglish(this IAssertionSource<System.Globalization.CultureInfo> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsNotEnglish()");
-        return new CultureInfo_IsNotEnglish_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsRightToLeft
-    /// </summary>
-    public static CultureInfo_IsRightToLeft_Assertion IsRightToLeft(this IAssertionSource<System.Globalization.CultureInfo> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsRightToLeft()");
-        return new CultureInfo_IsRightToLeft_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsLeftToRight
-    /// </summary>
-    public static CultureInfo_IsLeftToRight_Assertion IsLeftToRight(this IAssertionSource<System.Globalization.CultureInfo> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsLeftToRight()");
-        return new CultureInfo_IsLeftToRight_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".IsReadOnly()");
+        return new CultureInfoIsReadOnlyAssertion(source.Context, false);
     }
 
 }

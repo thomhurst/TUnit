@@ -1,9 +1,8 @@
-using TUnit.Assertions.SourceGenerator.Generators;
 using TUnit.Assertions.SourceGenerator.Tests.Options;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
-internal class CultureInfoAssertionGeneratorTests : TestsBase<MethodAssertionGenerator>
+internal class CultureInfoAssertionGeneratorTests : TestsBase
 {
     [Test]
     public Task GeneratesCultureInfoAssertions() => RunTest(

@@ -1,9 +1,8 @@
-using TUnit.Assertions.SourceGenerator.Generators;
 using TUnit.Assertions.SourceGenerator.Tests.Options;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
-internal class CancellationTokenAssertionGeneratorTests : TestsBase<MethodAssertionGenerator>
+internal class CancellationTokenAssertionGeneratorTests : TestsBase
 {
     [Test]
     public Task GeneratesCancellationTokenAssertions() => RunTest(

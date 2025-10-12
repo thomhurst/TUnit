@@ -1,9 +1,8 @@
-using TUnit.Assertions.SourceGenerator.Generators;
 using TUnit.Assertions.SourceGenerator.Tests.Options;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
-internal class FileInfoAssertionGeneratorTests : TestsBase<MethodAssertionGenerator>
+internal class FileInfoAssertionGeneratorTests : TestsBase
 {
     [Test]
     public Task GeneratesFileInfoAssertions() => RunTest(

@@ -1,15 +1,4 @@
 ﻿[  
-// This file is generated to verify the MethodAssertionGenerator is running.
-// If you see this file, the generator executed successfully.
-namespace TUnit.Assertions.Diagnostics
-{
-    internal static class MethodAssertionGeneratorDiagnostic
-    {
-        public const string Message = "MethodAssertionGenerator is running";
-    }
-}
-
-  
 #nullable enable
 
 using System;
@@ -19,19 +8,19 @@ using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
-/// <summary>
-/// Generated assertion for IsNone
-/// </summary>
-public sealed class CancellationToken_IsNone_Assertion : Assertion<System.Threading.CancellationToken>
+public class CancellationTokenCanBeCanceledAssertion : Assertion<System.Threading.CancellationToken>
 {
-    public CancellationToken_IsNone_Assertion(AssertionContext<System.Threading.CancellationToken> context)
+    private readonly bool _negated;
+
+    public CancellationTokenCanBeCanceledAssertion(AssertionContext<System.Threading.CancellationToken> context, bool negated = false)
         : base(context)
     {
+        _negated = negated;
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.CancellationToken> metadata)
     {
-        var value = metadata.Value;
+        var actualValue = metadata.Value;
         var exception = metadata.Exception;
 
         if (exception != null)
@@ -39,31 +28,30 @@ public sealed class CancellationToken_IsNone_Assertion : Assertion<System.Thread
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsNone();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        var result = actualValue.CanBeCanceled;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy CanBeCanceled"));
     }
 
     protected override string GetExpectation()
     {
-        return "to be CancellationToken.None";
+        return $"{(_negated ? "not " : "")} be cancellable";
     }
 }
 
-/// <summary>
-/// Generated assertion for IsNotNone
-/// </summary>
-public sealed class CancellationToken_IsNotNone_Assertion : Assertion<System.Threading.CancellationToken>
+public class CancellationTokenIsCancellationRequestedAssertion : Assertion<System.Threading.CancellationToken>
 {
-    public CancellationToken_IsNotNone_Assertion(AssertionContext<System.Threading.CancellationToken> context)
+    private readonly bool _negated;
+
+    public CancellationTokenIsCancellationRequestedAssertion(AssertionContext<System.Threading.CancellationToken> context, bool negated = false)
         : base(context)
     {
+        _negated = negated;
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.CancellationToken> metadata)
     {
-        var value = metadata.Value;
+        var actualValue = metadata.Value;
         var exception = metadata.Exception;
 
         if (exception != null)
@@ -71,36 +59,41 @@ public sealed class CancellationToken_IsNotNone_Assertion : Assertion<System.Thr
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsNotNone();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        var result = actualValue.IsCancellationRequested;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsCancellationRequested"));
     }
 
     protected override string GetExpectation()
     {
-        return "to not be CancellationToken.None";
+        return $"{(_negated ? "not " : "")} have cancellation requested";
     }
 }
 
 public static partial class CancellationTokenAssertionExtensions
 {
-    /// <summary>
-    /// Generated extension method for IsNone
-    /// </summary>
-    public static CancellationToken_IsNone_Assertion IsNone(this IAssertionSource<System.Threading.CancellationToken> source)
+    public static CancellationTokenCanBeCanceledAssertion CanBeCanceled(this IAssertionSource<System.Threading.CancellationToken> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsNone()");
-        return new CancellationToken_IsNone_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".CanBeCanceled()");
+        return new CancellationTokenCanBeCanceledAssertion(source.Context, false);
     }
 
-    /// <summary>
-    /// Generated extension method for IsNotNone
-    /// </summary>
-    public static CancellationToken_IsNotNone_Assertion IsNotNone(this IAssertionSource<System.Threading.CancellationToken> source)
+    public static CancellationTokenCanBeCanceledAssertion CannotBeCanceled(this IAssertionSource<System.Threading.CancellationToken> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsNotNone()");
-        return new CancellationToken_IsNotNone_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".CannotBeCanceled()");
+        return new CancellationTokenCanBeCanceledAssertion(source.Context, true);
+    }
+
+    public static CancellationTokenIsCancellationRequestedAssertion IsCancellationRequested(this IAssertionSource<System.Threading.CancellationToken> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsCancellationRequested()");
+        return new CancellationTokenIsCancellationRequestedAssertion(source.Context, false);
+    }
+
+    public static CancellationTokenIsCancellationRequestedAssertion IsNotCancellationRequested(this IAssertionSource<System.Threading.CancellationToken> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotCancellationRequested()");
+        return new CancellationTokenIsCancellationRequestedAssertion(source.Context, true);
     }
 
 }

@@ -1,15 +1,4 @@
 ﻿[  
-// This file is generated to verify the MethodAssertionGenerator is running.
-// If you see this file, the generator executed successfully.
-namespace TUnit.Assertions.Diagnostics
-{
-    internal static class MethodAssertionGeneratorDiagnostic
-    {
-        public const string Message = "MethodAssertionGenerator is running";
-    }
-}
-
-  
 #nullable enable
 
 using System;
@@ -19,19 +8,19 @@ using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
-/// <summary>
-/// Generated assertion for IsSigned
-/// </summary>
-public sealed class Assembly_IsSigned_Assertion : Assertion<System.Reflection.Assembly>
+public class AssemblyIsCollectibleAssertion : Assertion<System.Reflection.Assembly>
 {
-    public Assembly_IsSigned_Assertion(AssertionContext<System.Reflection.Assembly> context)
+    private readonly bool _negated;
+
+    public AssemblyIsCollectibleAssertion(AssertionContext<System.Reflection.Assembly> context, bool negated = false)
         : base(context)
     {
+        _negated = negated;
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Reflection.Assembly> metadata)
     {
-        var value = metadata.Value;
+        var actualValue = metadata.Value;
         var exception = metadata.Exception;
 
         if (exception != null)
@@ -39,36 +28,35 @@ public sealed class Assembly_IsSigned_Assertion : Assertion<System.Reflection.As
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
+        if (actualValue is null)
         {
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsSigned();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        var result = actualValue.IsCollectible;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsCollectible"));
     }
 
     protected override string GetExpectation()
     {
-        return "to be signed";
+        return $"{(_negated ? "not " : "")} be collectible";
     }
 }
 
-/// <summary>
-/// Generated assertion for IsNotSigned
-/// </summary>
-public sealed class Assembly_IsNotSigned_Assertion : Assertion<System.Reflection.Assembly>
+public class AssemblyIsDynamicAssertion : Assertion<System.Reflection.Assembly>
 {
-    public Assembly_IsNotSigned_Assertion(AssertionContext<System.Reflection.Assembly> context)
+    private readonly bool _negated;
+
+    public AssemblyIsDynamicAssertion(AssertionContext<System.Reflection.Assembly> context, bool negated = false)
         : base(context)
     {
+        _negated = negated;
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Reflection.Assembly> metadata)
     {
-        var value = metadata.Value;
+        var actualValue = metadata.Value;
         var exception = metadata.Exception;
 
         if (exception != null)
@@ -76,36 +64,35 @@ public sealed class Assembly_IsNotSigned_Assertion : Assertion<System.Reflection
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
+        if (actualValue is null)
         {
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsNotSigned();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        var result = actualValue.IsDynamic;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsDynamic"));
     }
 
     protected override string GetExpectation()
     {
-        return "to not be signed";
+        return $"{(_negated ? "not " : "")} be dynamic";
     }
 }
 
-/// <summary>
-/// Generated assertion for IsDebugBuild
-/// </summary>
-public sealed class Assembly_IsDebugBuild_Assertion : Assertion<System.Reflection.Assembly>
+public class AssemblyIsFullyTrustedAssertion : Assertion<System.Reflection.Assembly>
 {
-    public Assembly_IsDebugBuild_Assertion(AssertionContext<System.Reflection.Assembly> context)
+    private readonly bool _negated;
+
+    public AssemblyIsFullyTrustedAssertion(AssertionContext<System.Reflection.Assembly> context, bool negated = false)
         : base(context)
     {
+        _negated = negated;
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Reflection.Assembly> metadata)
     {
-        var value = metadata.Value;
+        var actualValue = metadata.Value;
         var exception = metadata.Exception;
 
         if (exception != null)
@@ -113,96 +100,58 @@ public sealed class Assembly_IsDebugBuild_Assertion : Assertion<System.Reflectio
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
+        if (actualValue is null)
         {
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsDebugBuild();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        var result = actualValue.IsFullyTrusted;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsFullyTrusted"));
     }
 
     protected override string GetExpectation()
     {
-        return "to be a debug build";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsReleaseBuild
-/// </summary>
-public sealed class Assembly_IsReleaseBuild_Assertion : Assertion<System.Reflection.Assembly>
-{
-    public Assembly_IsReleaseBuild_Assertion(AssertionContext<System.Reflection.Assembly> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Reflection.Assembly> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsReleaseBuild();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be a release build";
+        return $"{(_negated ? "not " : "")} be fully trusted";
     }
 }
 
 public static partial class AssemblyAssertionExtensions
 {
-    /// <summary>
-    /// Generated extension method for IsSigned
-    /// </summary>
-    public static Assembly_IsSigned_Assertion IsSigned(this IAssertionSource<System.Reflection.Assembly> source)
+    public static AssemblyIsCollectibleAssertion IsCollectible(this IAssertionSource<System.Reflection.Assembly> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsSigned()");
-        return new Assembly_IsSigned_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".IsCollectible()");
+        return new AssemblyIsCollectibleAssertion(source.Context, false);
     }
 
-    /// <summary>
-    /// Generated extension method for IsNotSigned
-    /// </summary>
-    public static Assembly_IsNotSigned_Assertion IsNotSigned(this IAssertionSource<System.Reflection.Assembly> source)
+    public static AssemblyIsCollectibleAssertion IsNotCollectible(this IAssertionSource<System.Reflection.Assembly> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsNotSigned()");
-        return new Assembly_IsNotSigned_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".IsNotCollectible()");
+        return new AssemblyIsCollectibleAssertion(source.Context, true);
     }
 
-    /// <summary>
-    /// Generated extension method for IsDebugBuild
-    /// </summary>
-    public static Assembly_IsDebugBuild_Assertion IsDebugBuild(this IAssertionSource<System.Reflection.Assembly> source)
+    public static AssemblyIsDynamicAssertion IsDynamic(this IAssertionSource<System.Reflection.Assembly> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsDebugBuild()");
-        return new Assembly_IsDebugBuild_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".IsDynamic()");
+        return new AssemblyIsDynamicAssertion(source.Context, false);
     }
 
-    /// <summary>
-    /// Generated extension method for IsReleaseBuild
-    /// </summary>
-    public static Assembly_IsReleaseBuild_Assertion IsReleaseBuild(this IAssertionSource<System.Reflection.Assembly> source)
+    public static AssemblyIsDynamicAssertion IsNotDynamic(this IAssertionSource<System.Reflection.Assembly> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsReleaseBuild()");
-        return new Assembly_IsReleaseBuild_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".IsNotDynamic()");
+        return new AssemblyIsDynamicAssertion(source.Context, true);
+    }
+
+    public static AssemblyIsFullyTrustedAssertion IsFullyTrusted(this IAssertionSource<System.Reflection.Assembly> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsFullyTrusted()");
+        return new AssemblyIsFullyTrustedAssertion(source.Context, false);
+    }
+
+    public static AssemblyIsFullyTrustedAssertion IsNotFullyTrusted(this IAssertionSource<System.Reflection.Assembly> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotFullyTrusted()");
+        return new AssemblyIsFullyTrustedAssertion(source.Context, true);
     }
 
 }

@@ -1,9 +1,8 @@
-using TUnit.Assertions.SourceGenerator.Generators;
 using TUnit.Assertions.SourceGenerator.Tests.Options;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
-internal class DateTimeAssertionGeneratorTests : TestsBase<MethodAssertionGenerator>
+internal class DateTimeAssertionGeneratorTests : TestsBase
 {
     [Test]
     public Task GeneratesDateTimeAssertions() => RunTest(

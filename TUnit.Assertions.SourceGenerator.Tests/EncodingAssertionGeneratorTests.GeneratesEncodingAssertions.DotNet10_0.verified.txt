@@ -1,15 +1,4 @@
 ﻿[  
-// This file is generated to verify the MethodAssertionGenerator is running.
-// If you see this file, the generator executed successfully.
-namespace TUnit.Assertions.Diagnostics
-{
-    internal static class MethodAssertionGeneratorDiagnostic
-    {
-        public const string Message = "MethodAssertionGenerator is running";
-    }
-}
-
-  
 #nullable enable
 
 using System;
@@ -19,19 +8,19 @@ using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
 
-/// <summary>
-/// Generated assertion for IsUTF8
-/// </summary>
-public sealed class Encoding_IsUTF8_Assertion : Assertion<System.Text.Encoding>
+public class EncodingIsSingleByteAssertion : Assertion<System.Text.Encoding>
 {
-    public Encoding_IsUTF8_Assertion(AssertionContext<System.Text.Encoding> context)
+    private readonly bool _negated;
+
+    public EncodingIsSingleByteAssertion(AssertionContext<System.Text.Encoding> context, bool negated = false)
         : base(context)
     {
+        _negated = negated;
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Text.Encoding> metadata)
     {
-        var value = metadata.Value;
+        var actualValue = metadata.Value;
         var exception = metadata.Exception;
 
         if (exception != null)
@@ -39,262 +28,34 @@ public sealed class Encoding_IsUTF8_Assertion : Assertion<System.Text.Encoding>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        if (value is null)
+        if (actualValue is null)
         {
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsUTF8();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
+        var result = actualValue.IsSingleByte;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsSingleByte"));
     }
 
     protected override string GetExpectation()
     {
-        return "to be UTF-8 encoding";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsNotUTF8
-/// </summary>
-public sealed class Encoding_IsNotUTF8_Assertion : Assertion<System.Text.Encoding>
-{
-    public Encoding_IsNotUTF8_Assertion(AssertionContext<System.Text.Encoding> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Text.Encoding> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsNotUTF8();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to not be UTF-8 encoding";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsASCII
-/// </summary>
-public sealed class Encoding_IsASCII_Assertion : Assertion<System.Text.Encoding>
-{
-    public Encoding_IsASCII_Assertion(AssertionContext<System.Text.Encoding> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Text.Encoding> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsASCII();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be ASCII encoding";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsUnicode
-/// </summary>
-public sealed class Encoding_IsUnicode_Assertion : Assertion<System.Text.Encoding>
-{
-    public Encoding_IsUnicode_Assertion(AssertionContext<System.Text.Encoding> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Text.Encoding> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsUnicode();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be Unicode encoding";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsUTF32
-/// </summary>
-public sealed class Encoding_IsUTF32_Assertion : Assertion<System.Text.Encoding>
-{
-    public Encoding_IsUTF32_Assertion(AssertionContext<System.Text.Encoding> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Text.Encoding> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsUTF32();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be UTF-32 encoding";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsBigEndianUnicode
-/// </summary>
-public sealed class Encoding_IsBigEndianUnicode_Assertion : Assertion<System.Text.Encoding>
-{
-    public Encoding_IsBigEndianUnicode_Assertion(AssertionContext<System.Text.Encoding> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Text.Encoding> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value.IsBigEndianUnicode();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be big-endian Unicode encoding";
+        return $"{(_negated ? "not " : "")} be single-byte encoding";
     }
 }
 
 public static partial class EncodingAssertionExtensions
 {
-    /// <summary>
-    /// Generated extension method for IsUTF8
-    /// </summary>
-    public static Encoding_IsUTF8_Assertion IsUTF8(this IAssertionSource<System.Text.Encoding> source)
+    public static EncodingIsSingleByteAssertion IsSingleByte(this IAssertionSource<System.Text.Encoding> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsUTF8()");
-        return new Encoding_IsUTF8_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".IsSingleByte()");
+        return new EncodingIsSingleByteAssertion(source.Context, false);
     }
 
-    /// <summary>
-    /// Generated extension method for IsNotUTF8
-    /// </summary>
-    public static Encoding_IsNotUTF8_Assertion IsNotUTF8(this IAssertionSource<System.Text.Encoding> source)
+    public static EncodingIsSingleByteAssertion IsNotSingleByte(this IAssertionSource<System.Text.Encoding> source)
     {
-        source.Context.ExpressionBuilder.Append(".IsNotUTF8()");
-        return new Encoding_IsNotUTF8_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsASCII
-    /// </summary>
-    public static Encoding_IsASCII_Assertion IsASCII(this IAssertionSource<System.Text.Encoding> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsASCII()");
-        return new Encoding_IsASCII_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsUnicode
-    /// </summary>
-    public static Encoding_IsUnicode_Assertion IsUnicode(this IAssertionSource<System.Text.Encoding> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsUnicode()");
-        return new Encoding_IsUnicode_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsUTF32
-    /// </summary>
-    public static Encoding_IsUTF32_Assertion IsUTF32(this IAssertionSource<System.Text.Encoding> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsUTF32()");
-        return new Encoding_IsUTF32_Assertion(source.Context);
-    }
-
-    /// <summary>
-    /// Generated extension method for IsBigEndianUnicode
-    /// </summary>
-    public static Encoding_IsBigEndianUnicode_Assertion IsBigEndianUnicode(this IAssertionSource<System.Text.Encoding> source)
-    {
-        source.Context.ExpressionBuilder.Append(".IsBigEndianUnicode()");
-        return new Encoding_IsBigEndianUnicode_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append(".IsNotSingleByte()");
+        return new EncodingIsSingleByteAssertion(source.Context, true);
     }
 
 }

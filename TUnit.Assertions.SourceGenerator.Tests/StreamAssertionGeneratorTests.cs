@@ -1,9 +1,8 @@
-using TUnit.Assertions.SourceGenerator.Generators;
 using TUnit.Assertions.SourceGenerator.Tests.Options;
 
 namespace TUnit.Assertions.SourceGenerator.Tests;
 
-internal class StreamAssertionGeneratorTests : TestsBase<MethodAssertionGenerator>
+internal class StreamAssertionGeneratorTests : TestsBase
 {
     [Test]
     public Task GeneratesStreamAssertions() => RunTest(
