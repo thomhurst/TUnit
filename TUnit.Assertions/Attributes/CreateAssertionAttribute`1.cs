@@ -3,10 +3,11 @@ using System;
 namespace TUnit.Assertions.Attributes;
 
 /// <summary>
-/// Generic version of CreateAssertionAttribute that provides better type safety and cleaner syntax.
-/// Use like: [CreateAssertion&lt;char&gt;("IsDigit")]
+/// DEPRECATED: Use <see cref="AssertionFromAttribute{TTarget}"/> instead.
+/// This attribute has been renamed for better clarity.
 /// </summary>
 /// <typeparam name="TTarget">The target type for the assertion</typeparam>
+[Obsolete("Use AssertionFromAttribute<T> instead. This attribute will be removed in a future version.")]
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class CreateAssertionAttribute<TTarget> : Attribute
 {

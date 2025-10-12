@@ -12,29 +12,49 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // Handle non-generic CreateAssertionAttribute
-        var nonGenericAttributeData = context.SyntaxProvider
+        // Handle non-generic CreateAssertionAttribute (deprecated)
+        var nonGenericCreateAttributeData = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Assertions.Attributes.CreateAssertionAttribute",
                 predicate: (node, _) => true,
                 transform: (ctx, _) => GetCreateAssertionAttributeData(ctx))
             .Where(x => x != null);
 
-        // Handle generic CreateAssertionAttribute<T>
-        var genericAttributeData = context.SyntaxProvider
+        // Handle non-generic AssertionFromAttribute (new)
+        var nonGenericAssertionFromData = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                "TUnit.Assertions.Attributes.AssertionFromAttribute",
+                predicate: (node, _) => true,
+                transform: (ctx, _) => GetCreateAssertionAttributeData(ctx))
+            .Where(x => x != null);
+
+        // Handle generic CreateAssertionAttribute<T> (deprecated)
+        var genericCreateAttributeData = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: (node, _) => node is ClassDeclarationSyntax,
-                transform: (ctx, _) => GetGenericCreateAssertionAttributeData(ctx))
+                transform: (ctx, _) => GetGenericCreateAssertionAttributeData(ctx, "CreateAssertionAttribute"))
             .Where(x => x != null)
             .SelectMany((x, _) => x!.ToImmutableArray());
 
-        // Combine both sources
-        var allAttributeData = nonGenericAttributeData.Collect()
-            .Combine(genericAttributeData.Collect())
-            .Select((data, _) => 
+        // Handle generic AssertionFromAttribute<T> (new)
+        var genericAssertionFromData = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: (node, _) => node is ClassDeclarationSyntax,
+                transform: (ctx, _) => GetGenericCreateAssertionAttributeData(ctx, "AssertionFromAttribute"))
+            .Where(x => x != null)
+            .SelectMany((x, _) => x!.ToImmutableArray());
+
+        // Combine all sources
+        var allAttributeData = nonGenericCreateAttributeData.Collect()
+            .Combine(nonGenericAssertionFromData.Collect())
+            .Combine(genericCreateAttributeData.Collect())
+            .Combine(genericAssertionFromData.Collect())
+            .Select((data, _) =>
             {
                 var result = new List<AttributeWithClassData>();
-                result.AddRange(data.Left.Where(x => x != null).SelectMany(x => x!));
+                result.AddRange(data.Left.Left.Left.Where(x => x != null).SelectMany(x => x!));
+                result.AddRange(data.Left.Left.Right.Where(x => x != null).SelectMany(x => x!));
+                result.AddRange(data.Left.Right);
                 result.AddRange(data.Right);
                 return result.AsEnumerable();
             });
@@ -124,7 +144,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         return attributeDataList.Count > 0 ? attributeDataList : null;
     }
 
-    private static IEnumerable<AttributeWithClassData>? GetGenericCreateAssertionAttributeData(GeneratorSyntaxContext context)
+    private static IEnumerable<AttributeWithClassData>? GetGenericCreateAssertionAttributeData(GeneratorSyntaxContext context, string attributeName)
     {
         if (context.Node is not ClassDeclarationSyntax classDeclaration)
         {
@@ -149,9 +169,9 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 continue;
             }
 
-            // Check if it's CreateAssertionAttribute<T>
+            // Check if it's the specified attribute type<T>
             var unboundType = attributeClass.ConstructedFrom;
-            if (unboundType.Name != "CreateAssertionAttribute" || 
+            if (unboundType.Name != attributeName ||
                 unboundType.TypeArguments.Length != 1 ||
                 unboundType.ContainingNamespace?.ToDisplayString() != "TUnit.Assertions.Attributes")
             {
@@ -231,6 +251,63 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         return attributeDataList.Count > 0 ? attributeDataList : null;
     }
 
+    private static bool IsValidReturnType(ITypeSymbol returnType, out ReturnTypeKind kind)
+    {
+        // Handle Task<T>
+        if (returnType is INamedTypeSymbol namedType)
+        {
+            if (namedType.Name == "Task" &&
+                namedType.ContainingNamespace?.ToDisplayString() == "System.Threading.Tasks")
+            {
+                if (namedType.TypeArguments.Length == 1)
+                {
+                    var innerType = namedType.TypeArguments[0];
+
+                    // Task<bool>
+                    if (innerType.SpecialType == SpecialType.System_Boolean)
+                    {
+                        kind = ReturnTypeKind.TaskBool;
+                        return true;
+                    }
+
+                    // Task<AssertionResult>
+                    if (innerType.Name == "AssertionResult" &&
+                        innerType.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core")
+                    {
+                        kind = ReturnTypeKind.TaskAssertionResult;
+                        return true;
+                    }
+                }
+            }
+
+            // AssertionResult
+            if (namedType.Name == "AssertionResult" &&
+                namedType.ContainingNamespace?.ToDisplayString() == "TUnit.Assertions.Core")
+            {
+                kind = ReturnTypeKind.AssertionResult;
+                return true;
+            }
+        }
+
+        // bool
+        if (returnType.SpecialType == SpecialType.System_Boolean)
+        {
+            kind = ReturnTypeKind.Bool;
+            return true;
+        }
+
+        kind = ReturnTypeKind.Bool;
+        return false;
+    }
+
+    private enum ReturnTypeKind
+    {
+        Bool,
+        AssertionResult,
+        TaskBool,
+        TaskAssertionResult
+    }
+
     private static void GenerateAssertionsForClass(SourceProductionContext context, IEnumerable<AttributeWithClassData> classAttributeData)
     {
         var allData = classAttributeData.ToArray();
@@ -283,7 +360,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             // First try to find methods
             var methodMembers = attributeData.ContainingType.GetMembers(attributeData.MethodName)
                 .OfType<IMethodSymbol>()
-                .Where(m => m.ReturnType.SpecialType == SpecialType.System_Boolean &&
+                .Where(m => IsValidReturnType(m.ReturnType, out _) &&
                            (attributeData.TreatAsInstance ?
                                // If treating as instance and containing type is different, look for static methods that take target as first param
                                (!SymbolEqualityComparer.Default.Equals(attributeData.ContainingType, attributeData.TargetType) ?
@@ -361,7 +438,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             // Try to find methods first
             var methodMembers = attributeData.ContainingType.GetMembers(attributeData.MethodName)
                 .OfType<IMethodSymbol>()
-                .Where(m => m.ReturnType.SpecialType == SpecialType.System_Boolean &&
+                .Where(m => IsValidReturnType(m.ReturnType, out _) &&
                            (m.IsStatic ?
                                m.Parameters.Length > 0 &&
                                (attributeData.RequiresGenericTypeParameter ?
@@ -593,15 +670,50 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             }
         }
 
-        sourceBuilder.AppendLine("        var condition = _negated ? result : !result;");
-
-        sourceBuilder.Append("        return AssertionResult.FailIf(condition, ");
-        sourceBuilder.Append($"$\"'{{actualValue}}' was expected {{(_negated ? \"not \" : \"\")}}to satisfy {methodName}");
-        if (parameters.Any())
+        // Detect return type and generate appropriate result handling
+        if (!IsValidReturnType(staticMethod.ReturnType, out var returnTypeKind))
         {
-            sourceBuilder.Append($"({string.Join(", ", parameters.Select(p => $"{{_{p.Name}}}"))})");
+            returnTypeKind = ReturnTypeKind.Bool; // Default fallback
         }
-        sourceBuilder.AppendLine("\");");
+
+        // Generate result handling based on return type
+        switch (returnTypeKind)
+        {
+            case ReturnTypeKind.Bool:
+                // For bool: negate if needed, then wrap in AssertionResult
+                sourceBuilder.AppendLine("        var condition = _negated ? result : !result;");
+                sourceBuilder.Append("        return AssertionResult.FailIf(condition, ");
+                sourceBuilder.Append($"$\"'{{actualValue}}' was expected {{(_negated ? \"not \" : \"\")}}to satisfy {methodName}");
+                if (parameters.Any())
+                {
+                    sourceBuilder.Append($"({string.Join(", ", parameters.Select(p => $"{{_{p.Name}}}"))})");
+                }
+                sourceBuilder.AppendLine("\");");
+                break;
+
+            case ReturnTypeKind.AssertionResult:
+                // For AssertionResult: return directly (no negation support)
+                sourceBuilder.AppendLine("        return result;");
+                break;
+
+            case ReturnTypeKind.TaskBool:
+                // For Task<bool>: await, then negate if needed
+                sourceBuilder.AppendLine("        var boolResult = await result;");
+                sourceBuilder.AppendLine("        var condition = _negated ? boolResult : !boolResult;");
+                sourceBuilder.Append("        return AssertionResult.FailIf(condition, ");
+                sourceBuilder.Append($"$\"'{{actualValue}}' was expected {{(_negated ? \"not \" : \"\")}}to satisfy {methodName}");
+                if (parameters.Any())
+                {
+                    sourceBuilder.Append($"({string.Join(", ", parameters.Select(p => $"{{_{p.Name}}}"))})");
+                }
+                sourceBuilder.AppendLine("\");");
+                break;
+
+            case ReturnTypeKind.TaskAssertionResult:
+                // For Task<AssertionResult>: await and return
+                sourceBuilder.AppendLine("        return await result;");
+                break;
+        }
 
         sourceBuilder.AppendLine("    }");
         sourceBuilder.AppendLine();

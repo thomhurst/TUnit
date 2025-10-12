@@ -1,0 +1,111 @@
+﻿[  
+// This file is generated to verify the MethodAssertionGenerator is running.
+// If you see this file, the generator executed successfully.
+namespace TUnit.Assertions.Diagnostics
+{
+    internal static class MethodAssertionGeneratorDiagnostic
+    {
+        public const string Message = "MethodAssertionGenerator is running";
+    }
+}
+
+  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Tests.TestData;
+
+/// <summary>
+/// Generated assertion for IsPositive
+/// </summary>
+public sealed class IsPositive_Assertion : Assertion<int>
+{
+    public IsPositive_Assertion(AssertionContext<int> context)
+        : base(context)
+    {
+    }
+
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return AssertionResult.Failed($"threw {exception.GetType().FullName}");
+        }
+
+        var result = value.IsPositive();
+        return result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}");
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to satisfy IsPositive";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsGreaterThan
+/// </summary>
+public sealed class IsGreaterThan_Int_Assertion : Assertion<int>
+{
+    private readonly int _threshold;
+
+    public IsGreaterThan_Int_Assertion(AssertionContext<int> context, int threshold)
+        : base(context)
+    {
+        _threshold = threshold;
+    }
+
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return AssertionResult.Failed($"threw {exception.GetType().FullName}");
+        }
+
+        var result = value.IsGreaterThan(_threshold);
+        return result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}");
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"to satisfy IsGreaterThan({_threshold})";
+    }
+}
+
+public static partial class BoolMethodAssertionExtensions_GeneratedAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsPositive
+    /// </summary>
+    public static IsPositive_Assertion IsPositive(this IAssertionSource<int> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsPositive()");
+        return new IsPositive_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsGreaterThan
+    /// </summary>
+    public static IsGreaterThan_Int_Assertion IsGreaterThan(this IAssertionSource<int> source, int threshold, [CallerArgumentExpression(nameof(threshold))] string? thresholdExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsGreaterThan({thresholdExpression})");
+        return new IsGreaterThan_Int_Assertion(source.Context, threshold);
+    }
+
+}
+
+]

@@ -105,4 +105,40 @@
     <data name="TUnitAssertions0009Title" xml:space="preserve">
         <value>xUnit assertion can be converted to TUnit assertion</value>
     </data>
+    <data name="TUnitAssertions0010Description" xml:space="preserve">
+        <value>Methods decorated with [GenerateAssertion] must be static to be used as assertion methods.</value>
+    </data>
+    <data name="TUnitAssertions0010MessageFormat" xml:space="preserve">
+        <value>Method '{0}' decorated with [GenerateAssertion] must be static</value>
+    </data>
+    <data name="TUnitAssertions0010Title" xml:space="preserve">
+        <value>[GenerateAssertion] method must be static</value>
+    </data>
+    <data name="TUnitAssertions0011Description" xml:space="preserve">
+        <value>Methods decorated with [GenerateAssertion] must have at least one parameter (the value to assert on).</value>
+    </data>
+    <data name="TUnitAssertions0011MessageFormat" xml:space="preserve">
+        <value>Method '{0}' decorated with [GenerateAssertion] must have at least one parameter</value>
+    </data>
+    <data name="TUnitAssertions0011Title" xml:space="preserve">
+        <value>[GenerateAssertion] method must have at least one parameter</value>
+    </data>
+    <data name="TUnitAssertions0012Description" xml:space="preserve">
+        <value>Methods decorated with [GenerateAssertion] must return bool, AssertionResult, Task&lt;bool&gt;, or Task&lt;AssertionResult&gt;.</value>
+    </data>
+    <data name="TUnitAssertions0012MessageFormat" xml:space="preserve">
+        <value>Method '{0}' decorated with [GenerateAssertion] must return bool, AssertionResult, Task&lt;bool&gt;, or Task&lt;AssertionResult&gt;</value>
+    </data>
+    <data name="TUnitAssertions0012Title" xml:space="preserve">
+        <value>[GenerateAssertion] method has invalid return type</value>
+    </data>
+    <data name="TUnitAssertions0013Description" xml:space="preserve">
+        <value>Methods decorated with [GenerateAssertion] should use extension method syntax (first parameter with 'this') for better usability.</value>
+    </data>
+    <data name="TUnitAssertions0013MessageFormat" xml:space="preserve">
+        <value>Method '{0}' decorated with [GenerateAssertion] should use extension method syntax (add 'this' to first parameter)</value>
+    </data>
+    <data name="TUnitAssertions0013Title" xml:space="preserve">
+        <value>[GenerateAssertion] method should be an extension method</value>
+    </data>
 </root>
