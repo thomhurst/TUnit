@@ -127,6 +127,14 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                         .Value.Value ?? false);
                 }
 
+                string? expectationMessage = null;
+                if (attributeData.NamedArguments.Any(na => na.Key == "ExpectationMessage"))
+                {
+                    expectationMessage = attributeData.NamedArguments
+                        .FirstOrDefault(na => na.Key == "ExpectationMessage")
+                        .Value.Value?.ToString();
+                }
+
                 var createAssertionAttributeData = new CreateAssertionAttributeData(
                     targetType,
                     containingType,
@@ -134,7 +142,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     customName,
                     negateLogic,
                     requiresGenericTypeParameter,
-                    treatAsInstance
+                    treatAsInstance,
+                    expectationMessage
                 );
 
                 attributeDataList.Add(new AttributeWithClassData(classSymbol, createAssertionAttributeData));
@@ -214,6 +223,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 bool negateLogic = false;
                 bool requiresGenericTypeParameter = false;
                 bool treatAsInstance = false;
+                string? expectationMessage = null;
 
                 foreach (var namedArgument in attributeData.NamedArguments)
                 {
@@ -231,6 +241,9 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                         case "TreatAsInstance":
                             treatAsInstance = namedArgument.Value.Value is true;
                             break;
+                        case "ExpectationMessage":
+                            expectationMessage = namedArgument.Value.Value?.ToString();
+                            break;
                     }
                 }
 
@@ -241,7 +254,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     customName,
                     negateLogic,
                     requiresGenericTypeParameter,
-                    treatAsInstance
+                    treatAsInstance,
+                    expectationMessage
                 );
 
                 attributeDataList.Add(new AttributeWithClassData(classSymbol, createAssertionAttributeData));
@@ -738,12 +752,33 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine();
         sourceBuilder.AppendLine("    protected internal override string GetExpectation()");
         sourceBuilder.AppendLine("    {");
-        sourceBuilder.Append($"        return $\"{{(_negated ? \"not \" : \"\")}}to satisfy {methodName}");
-        if (parameters.Any())
+
+        if (!string.IsNullOrEmpty(attributeData.ExpectationMessage))
         {
-            sourceBuilder.Append($"({string.Join(", ", parameters.Select(p => $"{{_{p.Name}}}"))})");
+            // Use custom expectation message
+            var expectation = attributeData.ExpectationMessage;
+            if (parameters.Any())
+            {
+                // Use interpolated string for parameter substitution
+                sourceBuilder.AppendLine($"        return $\"{{(_negated ? \"not \" : \"\")}} {expectation}\";");
+            }
+            else
+            {
+                // No parameters, just return the literal string with negation support
+                sourceBuilder.AppendLine($"        return $\"{{(_negated ? \"not \" : \"\")}} {expectation}\";");
+            }
         }
-        sourceBuilder.AppendLine("\";");
+        else
+        {
+            // Use default expectation message
+            sourceBuilder.Append($"        return $\"{{(_negated ? \"not \" : \"\")}}to satisfy {methodName}");
+            if (parameters.Any())
+            {
+                sourceBuilder.Append($"({string.Join(", ", parameters.Select(p => $"{{_{p.Name}}}"))})");
+            }
+            sourceBuilder.AppendLine("\";");
+        }
+
         sourceBuilder.AppendLine("    }");
         sourceBuilder.AppendLine("}");
         sourceBuilder.AppendLine();
@@ -927,6 +962,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         string? CustomName,
         bool NegateLogic,
         bool RequiresGenericTypeParameter,
-        bool TreatAsInstance
+        bool TreatAsInstance,
+        string? ExpectationMessage
     );
 }

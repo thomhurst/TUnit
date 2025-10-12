@@ -119,4 +119,25 @@ public sealed class AssertionFromAttribute<TTarget> : Attribute
     /// When false (default), the generator automatically determines the pattern.
     /// </summary>
     public bool TreatAsInstance { get; set; }
+
+    /// <summary>
+    /// Optional custom expectation message for the assertion.
+    /// If not specified, a default message will be generated based on the method name and parameters.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The expectation message is used in error messages when the assertion fails.
+    /// It appears as: "Expected {value} to {expectation} but {actual_result}".
+    /// </para>
+    /// <para>
+    /// You can use parameter placeholders like {param1}, {param2} which will be replaced with actual values.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// [AssertionFrom&lt;string&gt;("StartsWith", ExpectationMessage = "start with {value}")]
+    /// // Error message: "Expected 'hello' to start with 'xyz' but..."
+    /// </code>
+    /// </example>
+    public string? ExpectationMessage { get; set; }
 }

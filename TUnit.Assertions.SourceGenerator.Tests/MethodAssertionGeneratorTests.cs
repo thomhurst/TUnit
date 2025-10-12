@@ -36,7 +36,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).IsNotNull();
             await Assert.That(mainFile!).Contains("IsEven_Assertion");
             await Assert.That(mainFile!).Contains("IsBetween_Int_Int_Assertion");
-            await Assert.That(mainFile!).Contains("return result;"); // Direct return for AssertionResult
+            await Assert.That(mainFile!).Contains("return value."); // Direct return for AssertionResult
         });
 
     [Test]

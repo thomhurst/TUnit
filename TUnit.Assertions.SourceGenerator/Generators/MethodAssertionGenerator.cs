@@ -90,12 +90,28 @@ namespace TUnit.Assertions.Diagnostics
         var isExtensionMethod = methodSymbol.IsExtensionMethod ||
                                (methodSymbol.Parameters.Length > 0 && methodSymbol.Parameters[0].IsThis);
 
+        // Extract custom expectation message if provided
+        string? customExpectation = null;
+        var attribute = context.Attributes.FirstOrDefault();
+        if (attribute != null)
+        {
+            foreach (var namedArg in attribute.NamedArguments)
+            {
+                if (namedArg.Key == "ExpectationMessage" && namedArg.Value.Value is string expectation)
+                {
+                    customExpectation = expectation;
+                    break;
+                }
+            }
+        }
+
         return new AssertionMethodData(
             methodSymbol,
             targetType,
             additionalParameters,
             returnTypeInfo.Value,
-            isExtensionMethod
+            isExtensionMethod,
+            customExpectation
         );
     }
 
@@ -276,15 +292,37 @@ namespace TUnit.Assertions.Diagnostics
         // GetExpectation method
         sb.AppendLine("    protected override string GetExpectation()");
         sb.AppendLine("    {");
-        if (data.AdditionalParameters.Length > 0)
+
+        if (!string.IsNullOrEmpty(data.CustomExpectation))
         {
-            var paramList = string.Join(", ", data.AdditionalParameters.Select(p => $"{{_{p.Name}}}"));
-            sb.AppendLine($"        return $\"to satisfy {data.Method.Name}({paramList})\";");
+            // Use custom expectation message
+            // Replace parameter placeholders like {param} with actual parameter values
+            var expectation = data.CustomExpectation;
+            if (data.AdditionalParameters.Length > 0)
+            {
+                // Use interpolated string for parameter substitution
+                sb.AppendLine($"        return $\"{expectation}\";");
+            }
+            else
+            {
+                // No parameters, just return the literal string
+                sb.AppendLine($"        return \"{expectation}\";");
+            }
         }
         else
         {
-            sb.AppendLine($"        return \"to satisfy {data.Method.Name}\";");
+            // Use default expectation message
+            if (data.AdditionalParameters.Length > 0)
+            {
+                var paramList = string.Join(", ", data.AdditionalParameters.Select(p => $"{{_{p.Name}}}"));
+                sb.AppendLine($"        return $\"to satisfy {data.Method.Name}({paramList})\";");
+            }
+            else
+            {
+                sb.AppendLine($"        return \"to satisfy {data.Method.Name}\";");
+            }
         }
+
         sb.AppendLine("    }");
 
         sb.AppendLine("}");
@@ -439,6 +477,7 @@ namespace TUnit.Assertions.Diagnostics
         ITypeSymbol TargetType,
         ImmutableArray<IParameterSymbol> AdditionalParameters,
         ReturnTypeInfo ReturnTypeInfo,
-        bool IsExtensionMethod
+        bool IsExtensionMethod,
+        string? CustomExpectation
     );
 }

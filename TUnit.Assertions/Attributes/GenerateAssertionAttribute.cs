@@ -75,4 +75,27 @@ namespace TUnit.Assertions.Attributes;
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
 public sealed class GenerateAssertionAttribute : Attribute
 {
+    /// <summary>
+    /// Optional custom expectation message for the assertion.
+    /// If not specified, a default message will be generated based on the method name and parameters.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The expectation message is used in error messages when the assertion fails.
+    /// It appears as: "Expected {value} to {expectation} but {actual_result}".
+    /// </para>
+    /// <para>
+    /// You can use parameter placeholders like {param1}, {param2} which will be replaced with actual values.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// [GenerateAssertion(ExpectationMessage = "be greater than {threshold}")]
+    /// public static bool IsGreaterThan(this int value, int threshold)
+    ///     => value > threshold;
+    ///
+    /// // Error message: "Expected 3 to be greater than 5 but found 3"
+    /// </code>
+    /// </example>
+    public string? ExpectationMessage { get; set; }
 }
