@@ -72,9 +72,16 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             compilationUnit = MigrationHelpers.RemoveFrameworkUsings(compilationUnit, FrameworkName);
             compilationUnit = MigrationHelpers.AddTUnitUsings(compilationUnit);
 
-            // Format the entire document to ensure consistent line endings
-            var formattedDocument = document.WithSyntaxRoot(compilationUnit);
-            return await Formatter.FormatAsync(formattedDocument, options: null, cancellationToken).ConfigureAwait(false);
+            // Format the document first
+            var documentWithNewRoot = document.WithSyntaxRoot(compilationUnit);
+            var formattedDocument = await Formatter.FormatAsync(documentWithNewRoot, options: null, cancellationToken).ConfigureAwait(false);
+
+            // Normalize all line endings to CRLF for cross-platform consistency
+            var text = await formattedDocument.GetTextAsync(cancellationToken).ConfigureAwait(false);
+            var normalizedContent = text.ToString().Replace("\r\n", "\n").Replace("\n", "\r\n");
+            var normalizedText = Microsoft.CodeAnalysis.Text.SourceText.From(normalizedContent, text.Encoding);
+
+            return formattedDocument.WithText(normalizedText);
         }
         catch
         {
