@@ -343,7 +343,6 @@ public class StringIsEmptyAssertion : Assertion<string>
 /// <summary>
 /// Asserts that a string has a specific length.
 /// </summary>
-[AssertionExtension("HasLength")]
 public class StringLengthAssertion : Assertion<string>
 {
     private readonly int _expectedLength;

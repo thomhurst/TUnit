@@ -20,17 +20,33 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        // DIAGNOSTIC: Always generate a test file to verify generator is running
+        context.RegisterPostInitializationOutput(ctx =>
+        {
+            ctx.AddSource("_DiagnosticTest.g.cs", @"
+// This file is generated to verify the AssertionExtensionGenerator is running.
+// If you see this file, the generator executed successfully.
+namespace TUnit.Assertions.Diagnostics
+{
+    internal static class GeneratorDiagnostic
+    {
+        public const string Message = ""AssertionExtensionGenerator is running"";
+    }
+}
+");
+        });
+
         // Find all classes decorated with [AssertionExtension]
         var assertionClasses = context.SyntaxProvider
-            .ForAttributeWithMetadataName<AssertionExtensionData?>(
+            .ForAttributeWithMetadataName(
                 "TUnit.Assertions.Attributes.AssertionExtensionAttribute",
-                predicate: (node, _) => node is ClassDeclarationSyntax,
-                transform: GetAssertionExtensionData)
-            .Where(x => x != null)
-            .Select((x, _) => x!);
+                predicate: static (node, _) => node is ClassDeclarationSyntax,
+                transform: static (ctx, ct) => GetAssertionExtensionData(ctx, ct))
+            .Where(static x => x != null)
+            .Select(static (x, _) => x!);
 
         // Generate extension methods for each assertion class
-        context.RegisterSourceOutput(assertionClasses, (context, data) => GenerateExtensionMethods(context, data));
+        context.RegisterSourceOutput(assertionClasses, static (context, data) => GenerateExtensionMethods(context, data));
     }
 
     private static AssertionExtensionData? GetAssertionExtensionData(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
