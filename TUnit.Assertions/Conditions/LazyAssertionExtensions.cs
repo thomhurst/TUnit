@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.Attributes;
 
@@ -9,10 +10,12 @@ namespace TUnit.Assertions.Conditions;
 /// </summary>
 public static partial class LazyAssertionExtensions
 {
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to have its value created")]
     [UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Only checking IsValueCreated property, not creating instances")]
     public static bool IsValueCreated<T>(this Lazy<T> value) => value?.IsValueCreated == true;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to not have its value created")]
     [UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Only checking IsValueCreated property, not creating instances")]
     public static bool IsValueNotCreated<T>(this Lazy<T> value) => value?.IsValueCreated == false;

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Conditions;
@@ -12,9 +13,11 @@ namespace TUnit.Assertions.Conditions;
 [AssertionFrom<CancellationToken>(nameof(CancellationToken.IsCancellationRequested), CustomName = "IsNotCancellationRequested", NegateLogic = true, ExpectationMessage = "have cancellation requested")]
 public static partial class CancellationTokenAssertionExtensions
 {
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be CancellationToken.None")]
     public static bool IsNone(this CancellationToken value) => value.Equals(CancellationToken.None);
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to not be CancellationToken.None")]
     public static bool IsNotNone(this CancellationToken value) => !value.Equals(CancellationToken.None);
 }

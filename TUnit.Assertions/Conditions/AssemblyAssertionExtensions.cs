@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 using TUnit.Assertions.Attributes;
@@ -19,6 +20,7 @@ namespace TUnit.Assertions.Conditions;
 [AssertionFrom<Assembly>(nameof(Assembly.IsFullyTrusted), CustomName = "IsNotFullyTrusted", NegateLogic = true, ExpectationMessage = "be fully trusted")]
 public static partial class AssemblyAssertionExtensions
 {
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be signed")]
     public static bool IsSigned(this Assembly value)
     {
@@ -26,6 +28,7 @@ public static partial class AssemblyAssertionExtensions
         return publicKeyToken != null && publicKeyToken.Length > 0;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to not be signed")]
     public static bool IsNotSigned(this Assembly value)
     {
@@ -33,6 +36,7 @@ public static partial class AssemblyAssertionExtensions
         return publicKeyToken == null || publicKeyToken.Length == 0;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be a debug build")]
     public static bool IsDebugBuild(this Assembly value)
     {
@@ -40,6 +44,7 @@ public static partial class AssemblyAssertionExtensions
         return debuggableAttribute != null && debuggableAttribute.IsJITTrackingEnabled;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be a release build")]
     public static bool IsReleaseBuild(this Assembly value)
     {

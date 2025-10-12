@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Conditions;
@@ -7,21 +8,27 @@ namespace TUnit.Assertions.Conditions;
 /// </summary>
 public static partial class TimeSpanAssertionExtensions
 {
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be zero")]
     public static bool IsZero(this TimeSpan value) => value == TimeSpan.Zero;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to not be zero")]
     public static bool IsNotZero(this TimeSpan value) => value != TimeSpan.Zero;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be positive")]
     public static bool IsPositive(this TimeSpan value) => value > TimeSpan.Zero;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be negative")]
     public static bool IsNegative(this TimeSpan value) => value < TimeSpan.Zero;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be non-negative")]
     public static bool IsNonNegative(this TimeSpan value) => value >= TimeSpan.Zero;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be non-positive")]
     public static bool IsNonPositive(this TimeSpan value) => value <= TimeSpan.Zero;
 }

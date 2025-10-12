@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text;
 using TUnit.Assertions.Attributes;
 
@@ -9,12 +10,15 @@ namespace TUnit.Assertions.Conditions;
 /// </summary>
 public static partial class StringBuilderAssertionExtensions
 {
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be empty")]
     public static bool IsEmpty(this StringBuilder value) => value?.Length == 0;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to not be empty")]
     public static bool IsNotEmpty(this StringBuilder value) => value?.Length > 0;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to have excess capacity")]
     public static bool HasExcessCapacity(this StringBuilder value) => value != null && value.Capacity > value.Length;
 }
