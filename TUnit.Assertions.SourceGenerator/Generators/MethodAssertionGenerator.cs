@@ -300,10 +300,19 @@ namespace TUnit.Assertions.Diagnostics
         if (!string.IsNullOrEmpty(data.CustomExpectation))
         {
             // Use custom expectation message
-            // Replace parameter placeholders like {param} with actual parameter values
+            // Replace parameter placeholders like {param} with {_param} (field references)
             var expectation = data.CustomExpectation;
             if (data.AdditionalParameters.Length > 0)
             {
+                // Replace each parameter placeholder {paramName} with {_paramName}
+                foreach (var param in data.AdditionalParameters)
+                {
+                    var paramName = param.Name;
+                    if (!string.IsNullOrEmpty(paramName))
+                    {
+                        expectation = expectation!.Replace($"{{{paramName}}}", $"{{_{paramName}}}");
+                    }
+                }
                 // Use interpolated string for parameter substitution
                 sb.AppendLine($"        return $\"{expectation}\";");
             }
