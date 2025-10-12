@@ -1,3 +1,4 @@
+using TUnit.Assertions.Extensions;
 using System.Reflection;
 using TUnit.Assertions.Extensions;
 
