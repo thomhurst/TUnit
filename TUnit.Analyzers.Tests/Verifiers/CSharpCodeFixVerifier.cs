@@ -10,7 +10,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     where TAnalyzer : DiagnosticAnalyzer, new()
     where TCodeFix : CodeFixProvider, new()
 {
-    public class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
+    public class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, LineEndingNormalizingVerifier>
     {
         public Test()
         {
@@ -39,36 +39,6 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
 
                 solution = solution.WithProjectCompilationOptions(projectId, compilationOptions)
                     .WithProjectParseOptions(projectId, parseOptions.WithLanguageVersion(LanguageVersion.Preview));
-
-                return solution;
-            });
-
-            // Normalize line endings after code fix to ensure cross-platform compatibility
-            SolutionTransforms.Add((solution, projectId) =>
-            {
-                var project = solution.GetProject(projectId);
-                if (project is null)
-                {
-                    return solution;
-                }
-
-                foreach (var documentId in project.DocumentIds)
-                {
-                    var document = project.GetDocument(documentId);
-                    if (document is null)
-                    {
-                        continue;
-                    }
-
-                    // GetTextAsync is safe to call synchronously in test context
-                    var text = document.GetTextAsync().GetAwaiter().GetResult();
-                    var normalizedText = Microsoft.CodeAnalysis.Text.SourceText.From(
-                        text.ToString().Replace("\r\n", "\n").Replace("\n", "\r\n"),
-                        text.Encoding,
-                        text.ChecksumAlgorithm);
-
-                    solution = solution.WithDocumentText(documentId, normalizedText);
-                }
 
                 return solution;
             });
