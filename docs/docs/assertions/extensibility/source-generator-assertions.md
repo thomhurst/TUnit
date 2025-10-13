@@ -28,7 +28,7 @@ using TUnit.Assertions.Attributes;
 public static partial class IntAssertionExtensions
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion]
+    [GenerateAssertion(ExpectationMessage = "to be positive")]
     public static bool IsPositive(this int value)
     {
         return value > 0;
@@ -37,7 +37,7 @@ public static partial class IntAssertionExtensions
 
 // Usage in tests:
 await Assert.That(5).IsPositive();  // ✅ Passes
-await Assert.That(-3).IsPositive(); // ❌ Fails with clear message
+await Assert.That(-3).IsPositive(); // ❌ Fails: "Expected to be positive but found -3"
 ```
 
 **Note:** The `[EditorBrowsable(EditorBrowsableState.Never)]` attribute hides the helper method from IntelliSense. Users will only see the generated assertion extension method `IsPositive()` on `Assert.That(...)`, not the underlying helper method on `int` values.
@@ -59,7 +59,7 @@ public sealed class IsPositive_Assertion : Assertion<int>
         return result ? AssertionResult.Passed : AssertionResult.Failed($"found {metadata.Value}");
     }
 
-    protected override string GetExpectation() => "to satisfy IsPositive";
+    protected override string GetExpectation() => "to be positive";
 }
 
 public static IsPositive_Assertion IsPositive(this IAssertionSource<int> source)
@@ -71,19 +71,56 @@ public static IsPositive_Assertion IsPositive(this IAssertionSource<int> source)
 
 ---
 
+## Custom Expectation Messages
+
+Use the `ExpectationMessage` property to provide clear, readable error messages:
+
+```csharp
+[EditorBrowsable(EditorBrowsableState.Never)]
+[GenerateAssertion(ExpectationMessage = "to be positive")]
+public static bool IsPositive(this int value) => value > 0;
+
+// Error message: "Expected to be positive but found -3"
+```
+
+### Using Parameters in Messages
+
+You can reference method parameters in your expectation message using `{paramName}`:
+
+```csharp
+[EditorBrowsable(EditorBrowsableState.Never)]
+[GenerateAssertion(ExpectationMessage = "to be between {min} and {max}")]
+public static bool IsBetween(this int value, int min, int max)
+{
+    return value >= min && value <= max;
+}
+
+// Error message: "Expected to be between 1 and 10 but found 15"
+```
+
+**Without ExpectationMessage:**
+- Default: `"Expected to satisfy IsBetween but found 15"`
+
+**With ExpectationMessage:**
+- Clear: `"Expected to be between 1 and 10 but found 15"`
+
+---
+
 ## Supported Return Types
 
 ### 1. `bool` - Simple Pass/Fail
 
 ```csharp
-[GenerateAssertion]
+[EditorBrowsable(EditorBrowsableState.Never)]
+[GenerateAssertion(ExpectationMessage = "to be even")]
 public static bool IsEven(this int value)
 {
     return value % 2 == 0;
 }
 
 // Usage:
-await Assert.That(4).IsEven();
+await Assert.That(4).IsEven();  // ✅ Passes
+await Assert.That(3).IsEven();  // ❌ Fails: "Expected to be even but found 3"
 ```
 
 ### 2. `AssertionResult` - Custom Messages
@@ -91,7 +128,8 @@ await Assert.That(4).IsEven();
 When you need more control over error messages, return `AssertionResult`:
 
 ```csharp
-[GenerateAssertion]
+[EditorBrowsable(EditorBrowsableState.Never)]
+[GenerateAssertion(ExpectationMessage = "to be prime")]
 public static AssertionResult IsPrime(this int value)
 {
     if (value < 2)
@@ -107,14 +145,15 @@ public static AssertionResult IsPrime(this int value)
 }
 
 // Usage:
-await Assert.That(17).IsPrime();
-// If fails: "Expected to satisfy IsPrime but 15 is divisible by 3"
+await Assert.That(17).IsPrime();  // ✅ Passes
+await Assert.That(15).IsPrime();  // ❌ Fails: "Expected to be prime but 15 is divisible by 3"
 ```
 
 ### 3. `Task<bool>` - Async Operations
 
 ```csharp
-[GenerateAssertion]
+[EditorBrowsable(EditorBrowsableState.Never)]
+[GenerateAssertion(ExpectationMessage = "to exist in database")]
 public static async Task<bool> ExistsInDatabaseAsync(this int userId, DbContext db)
 {
     return await db.Users.AnyAsync(u => u.Id == userId);
@@ -122,12 +161,14 @@ public static async Task<bool> ExistsInDatabaseAsync(this int userId, DbContext 
 
 // Usage:
 await Assert.That(userId).ExistsInDatabaseAsync(dbContext);
+// If fails: "Expected to exist in database but found 123"
 ```
 
 ### 4. `Task<AssertionResult>` - Async with Custom Messages
 
 ```csharp
-[GenerateAssertion]
+[EditorBrowsable(EditorBrowsableState.Never)]
+[GenerateAssertion(ExpectationMessage = "to have valid email")]
 public static async Task<AssertionResult> HasValidEmailAsync(this int userId, DbContext db)
 {
     var user = await db.Users.FindAsync(userId);
@@ -143,6 +184,7 @@ public static async Task<AssertionResult> HasValidEmailAsync(this int userId, Db
 
 // Usage:
 await Assert.That(123).HasValidEmailAsync(dbContext);
+// If fails: "Expected to have valid email but User 123 not found"
 ```
 
 ---
@@ -152,27 +194,33 @@ await Assert.That(123).HasValidEmailAsync(dbContext);
 Add parameters to make your assertions flexible:
 
 ```csharp
-[GenerateAssertion]
+[EditorBrowsable(EditorBrowsableState.Never)]
+[GenerateAssertion(ExpectationMessage = "to be greater than {threshold}")]
 public static bool IsGreaterThan(this int value, int threshold)
 {
     return value > threshold;
 }
 
-[GenerateAssertion]
+[EditorBrowsable(EditorBrowsableState.Never)]
+[GenerateAssertion(ExpectationMessage = "to be between {min} and {max}")]
 public static bool IsBetween(this int value, int min, int max)
 {
     return value >= min && value <= max;
 }
 
 // Usage:
-await Assert.That(10).IsGreaterThan(5);
-await Assert.That(7).IsBetween(1, 10);
+await Assert.That(10).IsGreaterThan(5);  // ✅ Passes
+await Assert.That(3).IsGreaterThan(5);   // ❌ Fails: "Expected to be greater than 5 but found 3"
+
+await Assert.That(7).IsBetween(1, 10);   // ✅ Passes
+await Assert.That(15).IsBetween(1, 10);  // ❌ Fails: "Expected to be between 1 and 10 but found 15"
 ```
 
 **Benefits:**
+- Use `{paramName}` in `ExpectationMessage` to include parameter values
 - Parameters automatically get `[CallerArgumentExpression]` for great error messages
 - Each parameter becomes part of the extension method signature
-- Error messages show actual values: `"Expected to satisfy IsGreaterThan(5) but found 3"`
+- Error messages show actual values with clear context
 
 ---
 
@@ -185,28 +233,32 @@ Use `[AssertionFrom]` to create assertions from existing methods in libraries or
 ```csharp
 using TUnit.Assertions.Attributes;
 
-[AssertionFrom<string>("IsNullOrEmpty")]
-[AssertionFrom<string>("StartsWith")]
-[AssertionFrom<string>("EndsWith")]
+[AssertionFrom<string>(nameof(string.IsNullOrEmpty), ExpectationMessage = "to be null or empty")]
+[AssertionFrom<string>(nameof(string.StartsWith), ExpectationMessage = "to start with {value}")]
+[AssertionFrom<string>(nameof(string.EndsWith), ExpectationMessage = "to end with {value}")]
 public static partial class StringAssertionExtensions
 {
 }
 
 // Usage:
 await Assert.That(myString).IsNullOrEmpty();
+// If fails: "Expected to be null or empty but found 'test'"
+
 await Assert.That("hello").StartsWith("he");
+// If fails: "Expected to start with 'he' but found 'hello'"
 ```
 
 ### With Custom Names
 
 ```csharp
-[AssertionFrom<string>("Contains", CustomName = "Has")]
+[AssertionFrom<string>(nameof(string.Contains), CustomName = "Has", ExpectationMessage = "to have '{value}'")]
 public static partial class StringAssertionExtensions
 {
 }
 
 // Usage:
-await Assert.That("hello world").Has("world");
+await Assert.That("hello world").Has("world");  // ✅ Passes
+await Assert.That("hello").Has("world");        // ❌ Fails: "Expected to have 'world' but found 'hello'"
 ```
 
 ### Negation Support
@@ -214,13 +266,14 @@ await Assert.That("hello world").Has("world");
 For `bool`-returning methods, you can generate negated versions:
 
 ```csharp
-[AssertionFrom<string>("Contains", CustomName = "DoesNotContain", NegateLogic = true)]
+[AssertionFrom<string>(nameof(string.Contains), CustomName = "DoesNotContain", NegateLogic = true, ExpectationMessage = "to not contain '{value}'")]
 public static partial class StringAssertionExtensions
 {
 }
 
 // Usage:
-await Assert.That("hello").DoesNotContain("xyz");
+await Assert.That("hello").DoesNotContain("xyz");  // ✅ Passes
+await Assert.That("hello").DoesNotContain("ell");  // ❌ Fails: "Expected to not contain 'ell' but found 'hello'"
 ```
 
 **Note:** Negation only works with `bool`-returning methods. `AssertionResult` methods determine their own pass/fail logic.
@@ -229,7 +282,7 @@ await Assert.That("hello").DoesNotContain("xyz");
 
 ```csharp
 // Reference static methods from another type
-[AssertionFrom<string>(typeof(StringHelper), "IsValidEmail")]
+[AssertionFrom<string>(typeof(StringHelper), nameof(StringHelper.IsValidEmail), ExpectationMessage = "to be a valid email")]
 public static partial class StringAssertionExtensions
 {
 }
@@ -242,6 +295,10 @@ public static class StringHelper
         return value.Contains("@");
     }
 }
+
+// Usage:
+await Assert.That("user@example.com").IsValidEmail();  // ✅ Passes
+await Assert.That("invalid-email").IsValidEmail();     // ❌ Fails: "Expected to be a valid email but found 'invalid-email'"
 ```
 
 ---
@@ -282,6 +339,8 @@ public static partial class StringAssertionExtensions
 
 ✅ **DO:**
 - **Always** use `[EditorBrowsable(EditorBrowsableState.Never)]` on `[GenerateAssertion]` methods
+- **Always** use `ExpectationMessage` to provide clear error messages
+- Use `{paramName}` in expectation messages to include parameter values
 - Use extension methods for cleaner syntax
 - Return `AssertionResult` when you need custom error messages
 - Use async when performing I/O or database operations
@@ -302,10 +361,12 @@ public static partial class StringAssertionExtensions
 All generated assertions support chaining:
 
 ```csharp
-[GenerateAssertion]
+[EditorBrowsable(EditorBrowsableState.Never)]
+[GenerateAssertion(ExpectationMessage = "to be positive")]
 public static bool IsPositive(this int value) => value > 0;
 
-[GenerateAssertion]
+[EditorBrowsable(EditorBrowsableState.Never)]
+[GenerateAssertion(ExpectationMessage = "to be even")]
 public static bool IsEven(this int value) => value % 2 == 0;
 
 // Usage:
@@ -331,7 +392,7 @@ If you're using the old `CreateAssertionAttribute`:
 public static partial class StringAssertionExtensions { }
 
 // New:
-[AssertionFrom<string>("StartsWith")]
+[AssertionFrom<string>(nameof(string.StartsWith), ExpectationMessage = "to start with {value}")]
 public static partial class StringAssertionExtensions { }
 ```
 
@@ -352,7 +413,7 @@ public static partial class UserAssertionExtensions
 {
     // Simple bool
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion]
+    [GenerateAssertion(ExpectationMessage = "to have valid ID")]
     public static bool HasValidId(this User user)
     {
         return user.Id > 0;
@@ -360,7 +421,7 @@ public static partial class UserAssertionExtensions
 
     // With parameters
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion]
+    [GenerateAssertion(ExpectationMessage = "to have role '{role}'")]
     public static bool HasRole(this User user, string role)
     {
         return user.Roles.Contains(role);
@@ -368,7 +429,7 @@ public static partial class UserAssertionExtensions
 
     // Custom messages with AssertionResult
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion]
+    [GenerateAssertion(ExpectationMessage = "to have valid email")]
     public static AssertionResult HasValidEmail(this User user)
     {
         if (string.IsNullOrEmpty(user.Email))
@@ -382,7 +443,7 @@ public static partial class UserAssertionExtensions
 
     // Async with database
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion]
+    [GenerateAssertion(ExpectationMessage = "to exist in database")]
     public static async Task<bool> ExistsInDatabaseAsync(this User user, DbContext db)
     {
         return await db.Users.AnyAsync(u => u.Id == user.Id);
