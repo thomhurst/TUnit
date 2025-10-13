@@ -8,12 +8,16 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="4.8.0" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
     <PackageReference Include="Polly" />
+    <PackageReference Include="MSTest.TestFramework" />
+    <PackageReference Include="NUnit" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj" />
     <ProjectReference Include="..\TUnit.Engine\TUnit.Engine.csproj" />
     <ProjectReference Include="..\TUnit.Analyzers\TUnit.Analyzers.csproj" />
     <ProjectReference Include="..\TUnit.TestProject.Library\TUnit.TestProject.Library.csproj" />
+    <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
+    <ProjectReference Include="..\TUnit.Assertions\TUnit.Assertions.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">

@@ -83,3 +83,5 @@ TUnit0055 | Usage | Warning | Do not overwrite Console.Out/Error - it breaks TUn
 Rule ID | Category | Severity | Notes                                          
 --------|----------|----------|------------------------------------------------
 TUXU0001 | Usage | Info | XUnit code can be migrated to TUnit
+TUNU0001 | Usage | Info | NUnit code can be migrated to TUnit
+TUMS0001 | Usage | Info | MSTest code can be migrated to TUnit
