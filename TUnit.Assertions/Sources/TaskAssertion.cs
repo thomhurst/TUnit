@@ -40,19 +40,14 @@ public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
         Context = new AssertionContext<TValue>(evaluationContext, expressionBuilder);
 
         // Context for task state assertions (e.g., IsCompleted on the Task<TValue>)
+        // DO NOT await the task here - we want to check its state synchronously
         var taskExpressionBuilder = new StringBuilder();
         taskExpressionBuilder.Append(expressionBuilder.ToString());
-        var taskEvaluationContext = new EvaluationContext<Task<TValue>>(async () =>
+        var taskEvaluationContext = new EvaluationContext<Task<TValue>>(() =>
         {
-            try
-            {
-                await task;
-                return (task, null);
-            }
-            catch (Exception ex)
-            {
-                return (task, ex);
-            }
+            // Return the task object itself without awaiting it
+            // This allows IsCompleted, IsCanceled, IsFaulted, etc. to check task properties synchronously
+            return Task.FromResult<(Task<TValue>?, Exception?)>((task, null));
         });
         TaskContext = new AssertionContext<Task<TValue>>(taskEvaluationContext, taskExpressionBuilder);
     }

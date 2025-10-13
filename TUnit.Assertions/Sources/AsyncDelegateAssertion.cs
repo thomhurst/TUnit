@@ -40,20 +40,15 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
         Context = new AssertionContext<object?>(evaluationContext, expressionBuilder);
 
         // Create a TaskContext for Task-specific assertions
+        // DO NOT await the task here - we want to check its state synchronously
         var taskExpressionBuilder = new StringBuilder();
         taskExpressionBuilder.Append(expressionBuilder.ToString());
-        var taskEvaluationContext = new EvaluationContext<Task>(async () =>
+        var taskEvaluationContext = new EvaluationContext<Task>(() =>
         {
-            try
-            {
-                var task = action();
-                await task;
-                return (task, null);
-            }
-            catch (Exception ex)
-            {
-                return (default(Task), ex);
-            }
+            // Return the task object itself without awaiting it
+            // This allows IsCompleted, IsCanceled, IsFaulted, etc. to check task properties synchronously
+            var task = action();
+            return Task.FromResult<(Task?, Exception?)>((task, null));
         });
         TaskContext = new AssertionContext<Task>(taskEvaluationContext, taskExpressionBuilder);
     }
