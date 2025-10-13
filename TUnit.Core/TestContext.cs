@@ -103,6 +103,12 @@ public class TestContext : Context
 
     public Type? DisplayNameFormatter { get; set; }
 
+    /// <summary>
+    /// Custom hook executor that overrides the default hook executor for all test-level hooks.
+    /// Set via TestRegisteredContext.SetHookExecutor() during test registration.
+    /// </summary>
+    public IHookExecutor? CustomHookExecutor { get; set; }
+
     public Func<TestContext, Exception, int, Task<bool>>? RetryFunc { get; set; }
 
     // New: Support multiple parallel constraints

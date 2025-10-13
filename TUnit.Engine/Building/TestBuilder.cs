@@ -6,6 +6,7 @@ using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Extensions;
 using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 using TUnit.Engine.Utilities;
@@ -20,6 +21,7 @@ internal sealed class TestBuilder : ITestBuilder
     private readonly PropertyInjectionService _propertyInjectionService;
     private readonly DataSourceInitializer _dataSourceInitializer;
     private readonly Discovery.IHookDiscoveryService _hookDiscoveryService;
+    private readonly TestArgumentRegistrationService _testArgumentRegistrationService;
 
     public TestBuilder(
         string sessionId,
@@ -27,7 +29,8 @@ internal sealed class TestBuilder : ITestBuilder
         IContextProvider contextProvider,
         PropertyInjectionService propertyInjectionService,
         DataSourceInitializer dataSourceInitializer,
-        Discovery.IHookDiscoveryService hookDiscoveryService)
+        Discovery.IHookDiscoveryService hookDiscoveryService,
+        TestArgumentRegistrationService testArgumentRegistrationService)
     {
         _sessionId = sessionId;
         _hookDiscoveryService = hookDiscoveryService;
@@ -35,6 +38,7 @@ internal sealed class TestBuilder : ITestBuilder
         _contextProvider = contextProvider;
         _propertyInjectionService = propertyInjectionService;
         _dataSourceInitializer = dataSourceInitializer;
+        _testArgumentRegistrationService = testArgumentRegistrationService;
     }
 
     /// <summary>
@@ -764,6 +768,10 @@ internal sealed class TestBuilder : ITestBuilder
         // Arguments will be tracked by TestArgumentTrackingService during TestRegistered event
         // This ensures proper reference counting for shared instances
 
+        // Invoke test registered event receivers BEFORE discovery event receivers
+        // This is critical for allowing attributes to set custom hook executors
+        await InvokeTestRegisteredEventReceiversAsync(context);
+
         await InvokeDiscoveryEventReceiversAsync(context);
 
         var creationContext = new ExecutableTestCreationContext
@@ -854,6 +862,37 @@ internal sealed class TestBuilder : ITestBuilder
         return context;
     }
 
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+#endif
+    private async Task InvokeTestRegisteredEventReceiversAsync(TestContext context)
+    {
+        var discoveredTest = new DiscoveredTest<object>
+        {
+            TestContext = context
+        };
+
+        var registeredContext = new TestRegisteredContext(context)
+        {
+            DiscoveredTest = discoveredTest
+        };
+
+        context.InternalDiscoveredTest = discoveredTest;
+
+        // First, invoke the global test argument registration service to register shared instances
+        await _testArgumentRegistrationService.OnTestRegistered(registeredContext);
+
+        var eventObjects = context.GetEligibleEventObjects();
+
+        foreach (var receiver in eventObjects.OfType<ITestRegisteredEventReceiver>())
+        {
+            await receiver.OnTestRegistered(registeredContext);
+        }
+    }
+
+#if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+#endif
     private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
     {
         var discoveredContext = new DiscoveredTestContext(

@@ -166,7 +166,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         }
 
         var testBuilder = Register<ITestBuilder>(
-            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, PropertyInjectionService, DataSourceInitializer, hookDiscoveryService));
+            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, PropertyInjectionService, DataSourceInitializer, hookDiscoveryService, testArgumentRegistrationService));
 
         TestBuilderPipeline = Register(
             new TestBuilderPipeline(
