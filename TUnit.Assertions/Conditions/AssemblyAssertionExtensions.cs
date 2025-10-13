@@ -8,7 +8,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Source-generated assertions for Assembly type using [AssertionFrom&lt;Assembly&gt;] and [GenerateAssertion] attributes.
 /// </summary>
-#if !NETSTANDARD2_0
+#if NET5_0_OR_GREATER
 [AssertionFrom<Assembly>(nameof(Assembly.IsCollectible), ExpectationMessage = "be collectible")]
 [AssertionFrom<Assembly>(nameof(Assembly.IsCollectible), CustomName = "IsNotCollectible", NegateLogic = true, ExpectationMessage = "be collectible")]
 #endif

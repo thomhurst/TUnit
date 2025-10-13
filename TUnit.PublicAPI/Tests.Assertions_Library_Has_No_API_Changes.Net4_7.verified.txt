@@ -239,16 +239,16 @@ namespace .Conditions
     {
         [.(ExpectationMessage="to be an empty array")]
         public static bool IsEmpty<T>(this T[] value) { }
-        public static .Conditions._IsEmpty_Assertion<T> IsEmpty<T>(this .<T[]> source) { }
         [.(ExpectationMessage="to not be an empty array")]
         public static bool IsNotEmpty<T>(this T[] value) { }
-        public static .Conditions._IsNotEmpty_Assertion<T> IsNotEmpty<T>(this .<T[]> source) { }
+        [.(ExpectationMessage="to not be a single-element collection")]
+        public static bool IsNotSingleElement<T>(this .<T> value) { }
         [.(ExpectationMessage="to not be a single-element array")]
         public static bool IsNotSingleElement<T>(this T[] value) { }
-        public static .Conditions._IsNotSingleElement_Assertion<T> IsNotSingleElement<T>(this .<T[]> source) { }
+        [.(ExpectationMessage="to be a single-element collection")]
+        public static bool IsSingleElement<T>(this .<T> value) { }
         [.(ExpectationMessage="to be a single-element array")]
         public static bool IsSingleElement<T>(this T[] value) { }
-        public static .Conditions._IsSingleElement_Assertion<T> IsSingleElement<T>(this .<T[]> source) { }
     }
     [.<.Assembly>("IsDynamic", CustomName="IsNotDynamic", ExpectationMessage="be dynamic", NegateLogic=true)]
     [.<.Assembly>("IsDynamic", ExpectationMessage="be dynamic")]
@@ -258,56 +258,12 @@ namespace .Conditions
     {
         [.(ExpectationMessage="to be a debug build")]
         public static bool IsDebugBuild(this .Assembly value) { }
-        public static ._IsDebugBuild_Assertion IsDebugBuild(this .<.Assembly> source) { }
-        public static . IsDynamic(this .<.Assembly> source) { }
-        public static . IsFullyTrusted(this .<.Assembly> source) { }
-        public static . IsNotDynamic(this .<.Assembly> source) { }
-        public static . IsNotFullyTrusted(this .<.Assembly> source) { }
         [.(ExpectationMessage="to not be signed")]
         public static bool IsNotSigned(this .Assembly value) { }
-        public static ._IsNotSigned_Assertion IsNotSigned(this .<.Assembly> source) { }
         [.(ExpectationMessage="to be a release build")]
         public static bool IsReleaseBuild(this .Assembly value) { }
-        public static ._IsReleaseBuild_Assertion IsReleaseBuild(this .<.Assembly> source) { }
         [.(ExpectationMessage="to be signed")]
         public static bool IsSigned(this .Assembly value) { }
-        public static ._IsSigned_Assertion IsSigned(this .<.Assembly> source) { }
-    }
-    public class AssemblyIsDynamicAssertion : .<.Assembly>
-    {
-        public AssemblyIsDynamicAssertion(.<.Assembly> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<.Assembly> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class AssemblyIsFullyTrustedAssertion : .<.Assembly>
-    {
-        public AssemblyIsFullyTrustedAssertion(.<.Assembly> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<.Assembly> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public sealed class Assembly_IsDebugBuild_Assertion : .<.Assembly>
-    {
-        public Assembly_IsDebugBuild_Assertion(.<.Assembly> context) { }
-        protected override .<.> CheckAsync(.<.Assembly> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public sealed class Assembly_IsNotSigned_Assertion : .<.Assembly>
-    {
-        public Assembly_IsNotSigned_Assertion(.<.Assembly> context) { }
-        protected override .<.> CheckAsync(.<.Assembly> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public sealed class Assembly_IsReleaseBuild_Assertion : .<.Assembly>
-    {
-        public Assembly_IsReleaseBuild_Assertion(.<.Assembly> context) { }
-        protected override .<.> CheckAsync(.<.Assembly> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public sealed class Assembly_IsSigned_Assertion : .<.Assembly>
-    {
-        public Assembly_IsSigned_Assertion(.<.Assembly> context) { }
-        protected override .<.> CheckAsync(.<.Assembly> metadata) { }
-        protected override string GetExpectation() { }
     }
     public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
     {
@@ -347,24 +303,10 @@ namespace .Conditions
         public .<TValue> InclusiveMaximum() { }
         public .<TValue> InclusiveMinimum() { }
     }
-    public sealed class Bool_IsFalse_Assertion : .<bool>
-    {
-        public Bool_IsFalse_Assertion(.<bool> context) { }
-        protected override .<.> CheckAsync(.<bool> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public sealed class Bool_IsTrue_Assertion : .<bool>
-    {
-        public Bool_IsTrue_Assertion(.<bool> context) { }
-        protected override .<.> CheckAsync(.<bool> metadata) { }
-        protected override string GetExpectation() { }
-    }
     public static class BooleanAssertionExtensions
     {
-        public static ._IsFalse_Assertion IsFalse(this .<bool> source) { }
         [.(ExpectationMessage="to be false")]
         public static bool IsFalse(this bool value) { }
-        public static ._IsTrue_Assertion IsTrue(this .<bool> source) { }
         [.(ExpectationMessage="to be true")]
         public static bool IsTrue(this bool value) { }
     }
@@ -374,40 +316,10 @@ namespace .Conditions
     [.<.CancellationToken>("IsCancellationRequested", ExpectationMessage="have cancellation requested")]
     public static class CancellationTokenAssertionExtensions
     {
-        public static . CanBeCanceled(this .<.CancellationToken> source) { }
-        public static . CannotBeCanceled(this .<.CancellationToken> source) { }
-        public static . IsCancellationRequested(this .<.CancellationToken> source) { }
         [.(ExpectationMessage="to be ")]
         public static bool IsNone(this .CancellationToken value) { }
-        public static ._IsNone_Assertion IsNone(this .<.CancellationToken> source) { }
-        public static . IsNotCancellationRequested(this .<.CancellationToken> source) { }
         [.(ExpectationMessage="to not be ")]
         public static bool IsNotNone(this .CancellationToken value) { }
-        public static ._IsNotNone_Assertion IsNotNone(this .<.CancellationToken> source) { }
-    }
-    public class CancellationTokenCanBeCanceledAssertion : .<.CancellationToken>
-    {
-        public CancellationTokenCanBeCanceledAssertion(.<.CancellationToken> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<.CancellationToken> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CancellationTokenIsCancellationRequestedAssertion : .<.CancellationToken>
-    {
-        public CancellationTokenIsCancellationRequestedAssertion(.<.CancellationToken> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<.CancellationToken> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public sealed class CancellationToken_IsNone_Assertion : .<.CancellationToken>
-    {
-        public CancellationToken_IsNone_Assertion(.<.CancellationToken> context) { }
-        protected override .<.> CheckAsync(.<.CancellationToken> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public sealed class CancellationToken_IsNotNone_Assertion : .<.CancellationToken>
-    {
-        public CancellationToken_IsNotNone_Assertion(.<.CancellationToken> context) { }
-        protected override .<.> CheckAsync(.<.CancellationToken> metadata) { }
-        protected override string GetExpectation() { }
     }
     [.<char>("IsControl", CustomName="IsNotControl", ExpectationMessage="be a control character", NegateLogic=true)]
     [.<char>("IsControl", ExpectationMessage="be a control character")]
@@ -437,121 +349,7 @@ namespace .Conditions
     [.<char>("IsUpper", ExpectationMessage="be uppercase")]
     [.<char>("IsWhiteSpace", CustomName="IsNotWhiteSpace", ExpectationMessage="be whitespace", NegateLogic=true)]
     [.<char>("IsWhiteSpace", ExpectationMessage="be whitespace")]
-    public static class CharAssertionExtensions
-    {
-        public static . IsControl(this .<char> source) { }
-        public static . IsDigit(this .<char> source) { }
-        public static . IsHighSurrogate(this .<char> source) { }
-        public static . IsLetter(this .<char> source) { }
-        public static . IsLetterOrDigit(this .<char> source) { }
-        public static . IsLowSurrogate(this .<char> source) { }
-        public static . IsLower(this .<char> source) { }
-        public static . IsNotControl(this .<char> source) { }
-        public static . IsNotDigit(this .<char> source) { }
-        public static . IsNotHighSurrogate(this .<char> source) { }
-        public static . IsNotLetter(this .<char> source) { }
-        public static . IsNotLetterOrDigit(this .<char> source) { }
-        public static . IsNotLowSurrogate(this .<char> source) { }
-        public static . IsNotLower(this .<char> source) { }
-        public static . IsNotNumber(this .<char> source) { }
-        public static . IsNotPunctuation(this .<char> source) { }
-        public static . IsNotSeparator(this .<char> source) { }
-        public static . IsNotSurrogate(this .<char> source) { }
-        public static . IsNotSymbol(this .<char> source) { }
-        public static . IsNotUpper(this .<char> source) { }
-        public static . IsNotWhiteSpace(this .<char> source) { }
-        public static . IsNumber(this .<char> source) { }
-        public static . IsPunctuation(this .<char> source) { }
-        public static . IsSeparator(this .<char> source) { }
-        public static . IsSurrogate(this .<char> source) { }
-        public static . IsSymbol(this .<char> source) { }
-        public static . IsUpper(this .<char> source) { }
-        public static . IsWhiteSpace(this .<char> source) { }
-    }
-    public class CharIsControlWithCharAssertion : .<char>
-    {
-        public CharIsControlWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsDigitWithCharAssertion : .<char>
-    {
-        public CharIsDigitWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsHighSurrogateWithCharAssertion : .<char>
-    {
-        public CharIsHighSurrogateWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsLetterOrDigitWithCharAssertion : .<char>
-    {
-        public CharIsLetterOrDigitWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsLetterWithCharAssertion : .<char>
-    {
-        public CharIsLetterWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsLowSurrogateWithCharAssertion : .<char>
-    {
-        public CharIsLowSurrogateWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsLowerWithCharAssertion : .<char>
-    {
-        public CharIsLowerWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsNumberWithCharAssertion : .<char>
-    {
-        public CharIsNumberWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsPunctuationWithCharAssertion : .<char>
-    {
-        public CharIsPunctuationWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsSeparatorWithCharAssertion : .<char>
-    {
-        public CharIsSeparatorWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsSurrogateWithCharAssertion : .<char>
-    {
-        public CharIsSurrogateWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsSymbolWithCharAssertion : .<char>
-    {
-        public CharIsSymbolWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsUpperWithCharAssertion : .<char>
-    {
-        public CharIsUpperWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class CharIsWhiteSpaceWithCharAssertion : .<char>
-    {
-        public CharIsWhiteSpaceWithCharAssertion(.<char> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<char> metadata) { }
-        protected override string GetExpectation() { }
-    }
+    public static class CharAssertionExtensions { }
     public class CollectionAllAssertion<TCollection, TItem> : .<TCollection>
         where TCollection : .<TItem>
     {
@@ -671,24 +469,1327 @@ namespace .Conditions
     {
         [.(ExpectationMessage="to be English culture")]
         public static bool IsEnglish(this .CultureInfo value) { }
-        public static ._IsEnglish_Assertion IsEnglish(this .<.CultureInfo> source) { }
         [.(ExpectationMessage="to be invariant culture")]
         public static bool IsInvariant(this .CultureInfo value) { }
-        public static ._IsInvariant_Assertion IsInvariant(this .<.CultureInfo> source) { }
         [.(ExpectationMessage="to be left-to-right culture")]
         public static bool IsLeftToRight(this .CultureInfo value) { }
-        public static ._IsLeftToRight_Assertion IsLeftToRight(this .<.CultureInfo> source) { }
-        public static . IsNeutralCulture(this .<.CultureInfo> source) { }
         [.(ExpectationMessage="to not be English culture")]
         public static bool IsNotEnglish(this .CultureInfo value) { }
-        public static ._IsNotEnglish_Assertion IsNotEnglish(this .<.CultureInfo> source) { }
         [.(ExpectationMessage="to not be invariant culture")]
         public static bool IsNotInvariant(this .CultureInfo value) { }
+        [.(ExpectationMessage="to be right-to-left culture")]
+        public static bool IsRightToLeft(this .CultureInfo value) { }
+    }
+    [.<>("IsDaylightSavingTime", CustomName="IsNotDaylightSavingTime", ExpectationMessage="be during daylight saving time", NegateLogic=true)]
+    [.<>("IsDaylightSavingTime", ExpectationMessage="be during daylight saving time")]
+    public static class DateTimeAssertionExtensions
+    {
+        [.(ExpectationMessage="to be in the future")]
+        public static bool IsInFuture(this  value) { }
+        [.(ExpectationMessage="to be in the future (UTC)")]
+        public static bool IsInFutureUtc(this  value) { }
+        [.(ExpectationMessage="to be in the past")]
+        public static bool IsInPast(this  value) { }
+        [.(ExpectationMessage="to be in the past (UTC)")]
+        public static bool IsInPastUtc(this  value) { }
+        [.(ExpectationMessage="to be in a leap year")]
+        public static bool IsLeapYear(this  value) { }
+        [.(ExpectationMessage="to not be in a leap year")]
+        public static bool IsNotLeapYear(this  value) { }
+        [.(ExpectationMessage="to not be today")]
+        public static bool IsNotToday(this  value) { }
+        [.(ExpectationMessage="to not be UTC")]
+        public static bool IsNotUtc(this  value) { }
+        [.(ExpectationMessage="to be on a weekday")]
+        public static bool IsOnWeekday(this  value) { }
+        [.(ExpectationMessage="to be on a weekend")]
+        public static bool IsOnWeekend(this  value) { }
+        [.(ExpectationMessage="to be today")]
+        public static bool IsToday(this  value) { }
+        [.(ExpectationMessage="to be UTC")]
+        public static bool IsUtc(this  value) { }
+    }
+    public class DateTimeEqualsAssertion : .<>
+    {
+        public DateTimeEqualsAssertion(.<> context,  expected) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
+        protected override string GetExpectation() { }
+        public . Within( tolerance) { }
+    }
+    [.("EqualsExact")]
+    public class DateTimeEqualsExactAssertion : .<>
+    {
+        public DateTimeEqualsExactAssertion(.<> context,  expected) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class DateTimeOffsetAssertionExtensions
+    {
+        [.(ExpectationMessage="to be in the future")]
+        public static bool IsInFuture(this  value) { }
+        [.(ExpectationMessage="to be in the future (UTC)")]
+        public static bool IsInFutureUtc(this  value) { }
+        [.(ExpectationMessage="to be in the past")]
+        public static bool IsInPast(this  value) { }
+        [.(ExpectationMessage="to be in the past (UTC)")]
+        public static bool IsInPastUtc(this  value) { }
+        [.(ExpectationMessage="to be in a leap year")]
+        public static bool IsLeapYear(this  value) { }
+        [.(ExpectationMessage="to not be in a leap year")]
+        public static bool IsNotLeapYear(this  value) { }
+        [.(ExpectationMessage="to not be today")]
+        public static bool IsNotToday(this  value) { }
+        [.(ExpectationMessage="to not be UTC")]
+        public static bool IsNotUtc(this  value) { }
+        [.(ExpectationMessage="to be on a weekday")]
+        public static bool IsOnWeekday(this  value) { }
+        [.(ExpectationMessage="to be on a weekend")]
+        public static bool IsOnWeekend(this  value) { }
+        [.(ExpectationMessage="to be today")]
+        public static bool IsToday(this  value) { }
+        [.(ExpectationMessage="to be UTC")]
+        public static bool IsUtc(this  value) { }
+    }
+    public class DateTimeOffsetEqualsAssertion : .<>
+    {
+        public DateTimeOffsetEqualsAssertion(.<> context,  expected) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
+        protected override string GetExpectation() { }
+        public . Within( tolerance) { }
+    }
+    public static class DayOfWeekAssertionExtensions
+    {
+        [.(ExpectationMessage="to be Friday")]
+        public static bool IsFriday(this  value) { }
+        [.(ExpectationMessage="to be Monday")]
+        public static bool IsMonday(this  value) { }
+        [.(ExpectationMessage="to be a weekday")]
+        public static bool IsWeekday(this  value) { }
+        [.(ExpectationMessage="to be a weekend day")]
+        public static bool IsWeekend(this  value) { }
+    }
+    public class DictionaryContainsKeyAssertion<TKey, TValue> : .<.<TKey, TValue>>
+    {
+        public DictionaryContainsKeyAssertion(.<.<TKey, TValue>> context, TKey expectedKey, .<TKey>? comparer = null) { }
+        protected override .<.> CheckAsync(.<.<TKey, TValue>> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class DictionaryDoesNotContainKeyAssertion<TKey, TValue> : .<.<TKey, TValue>>
+    {
+        public DictionaryDoesNotContainKeyAssertion(.<.<TKey, TValue>> context, TKey expectedKey) { }
+        protected override .<.> CheckAsync(.<.<TKey, TValue>> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("HasFiles")]
+    public class DirectoryHasFilesAssertion : .<.DirectoryInfo>
+    {
+        public DirectoryHasFilesAssertion(.<.DirectoryInfo> context) { }
+        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("HasNoSubdirectories")]
+    public class DirectoryHasNoSubdirectoriesAssertion : .<.DirectoryInfo>
+    {
+        public DirectoryHasNoSubdirectoriesAssertion(.<.DirectoryInfo> context) { }
+        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.<.DirectoryInfo>("Exists", CustomName="DoesNotExist", ExpectationMessage="exist", NegateLogic=true)]
+    [.<.DirectoryInfo>("Exists", ExpectationMessage="exist")]
+    public static class DirectoryInfoAssertionExtensions
+    {
+        [.(ExpectationMessage="to be empty")]
+        public static bool IsEmpty(this .DirectoryInfo value) { }
+        [.(ExpectationMessage="to be hidden")]
+        public static bool IsHidden(this .DirectoryInfo value) { }
+        [.(ExpectationMessage="to not be empty")]
+        public static bool IsNotEmpty(this .DirectoryInfo value) { }
+        [.(ExpectationMessage="to not be hidden")]
+        public static bool IsNotHidden(this .DirectoryInfo value) { }
+        [.(ExpectationMessage="to not be a root directory")]
+        public static bool IsNotRoot(this .DirectoryInfo value) { }
+        [.(ExpectationMessage="to be a root directory")]
+        public static bool IsRoot(this .DirectoryInfo value) { }
+        [.(ExpectationMessage="to be a system directory")]
+        public static bool IsSystemDirectory(this .DirectoryInfo value) { }
+    }
+    public class DoubleEqualsAssertion : .<double>
+    {
+        public DoubleEqualsAssertion(.<double> context, double expected) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
+        protected override string GetExpectation() { }
+        public . Within(double tolerance) { }
+    }
+    [.<.Encoding>("IsSingleByte", CustomName="IsNotSingleByte", ExpectationMessage="be single-byte encoding", NegateLogic=true)]
+    [.<.Encoding>("IsSingleByte", ExpectationMessage="be single-byte encoding")]
+    public static class EncodingAssertionExtensions
+    {
+        [.(ExpectationMessage="to be ASCII encoding")]
+        public static bool IsASCII(this .Encoding value) { }
+        [.(ExpectationMessage="to be big-endian Unicode encoding")]
+        public static bool IsBigEndianUnicode(this .Encoding value) { }
+        [.(ExpectationMessage="to not be UTF-8 encoding")]
+        public static bool IsNotUTF8(this .Encoding value) { }
+        [.(ExpectationMessage="to be UTF-32 encoding")]
+        public static bool IsUTF32(this .Encoding value) { }
+        [.(ExpectationMessage="to be UTF-8 encoding")]
+        public static bool IsUTF8(this .Encoding value) { }
+        [.(ExpectationMessage="to be Unicode encoding")]
+        public static bool IsUnicode(this .Encoding value) { }
+    }
+    public class EqualsAssertion<TValue> : .<TValue>
+    {
+        public EqualsAssertion(.<TValue> context, TValue expected, .<TValue>? comparer = null) { }
+        public TValue Expected { get; }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+        public .<TValue> IgnoringType( type) { }
+        public .<TValue> IgnoringType<TIgnore>() { }
+        public .<TValue> Within(object tolerance) { }
+    }
+    public static class ExceptionAssertionExtensions
+    {
+        [.(ExpectationMessage="to have a help link")]
+        public static bool HasHelpLink(this  value) { }
+        [.(ExpectationMessage="to have an inner exception")]
+        public static bool HasInnerException(this  value) { }
+        [.(ExpectationMessage="to have no data")]
+        public static bool HasNoData(this  value) { }
+        [.(ExpectationMessage="to have no help link")]
+        public static bool HasNoHelpLink(this  value) { }
+        [.(ExpectationMessage="to have no inner exception")]
+        public static bool HasNoInnerException(this  value) { }
+        [.(ExpectationMessage="to have no source")]
+        public static bool HasNoSource(this  value) { }
+        [.(ExpectationMessage="to have no target site")]
+        public static bool HasNoTargetSite(this  value) { }
+        [.(ExpectationMessage="to have a source")]
+        public static bool HasSource(this  value) { }
+        [.(ExpectationMessage="to have a stack trace")]
+        public static bool HasStackTrace(this  value) { }
+        [.(ExpectationMessage="to have a target site")]
+        public static bool HasTargetSite(this  value) { }
+    }
+    public class ExceptionMessageAssertion : .<object?>
+    {
+        public ExceptionMessageAssertion(.<object?> context, string expectedSubstring,  comparison = 4) { }
+        protected override .<.> CheckAsync(.<object?> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.<.FileInfo>("Exists", CustomName="DoesNotExist", ExpectationMessage="exist", NegateLogic=true)]
+    [.<.FileInfo>("Exists", ExpectationMessage="exist")]
+    [.<.FileInfo>("IsReadOnly", CustomName="IsNotReadOnly", ExpectationMessage="be read-only", NegateLogic=true)]
+    [.<.FileInfo>("IsReadOnly", ExpectationMessage="be read-only")]
+    public static class FileInfoAssertionExtensions
+    {
+        [.(ExpectationMessage="to have an extension")]
+        public static bool HasExtension(this .FileInfo value) { }
+        [.(ExpectationMessage="to not have an extension")]
+        public static bool HasNoExtension(this .FileInfo value) { }
+        [.(ExpectationMessage="to be archived")]
+        public static bool IsArchived(this .FileInfo value) { }
+        [.(ExpectationMessage="to be empty")]
+        public static bool IsEmpty(this .FileInfo value) { }
+        [.(ExpectationMessage="to be hidden")]
+        public static bool IsHidden(this .FileInfo value) { }
+        [.(ExpectationMessage="to not be empty")]
+        public static bool IsNotEmpty(this .FileInfo value) { }
+        [.(ExpectationMessage="to not be hidden")]
+        public static bool IsNotHidden(this .FileInfo value) { }
+        [.(ExpectationMessage="to be a system file")]
+        public static bool IsSystemFile(this .FileInfo value) { }
+    }
+    [.("IsNotExecutable")]
+    public class FileIsNotExecutableAssertion : .<.FileInfo>
+    {
+        public FileIsNotExecutableAssertion(.<.FileInfo> context) { }
+        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsNotSystem")]
+    public class FileIsNotSystemAssertion : .<.FileInfo>
+    {
+        public FileIsNotSystemAssertion(.<.FileInfo> context) { }
+        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsGreaterThan")]
+    public class GreaterThanAssertion<TValue> : .<TValue>
+        where TValue : <TValue>
+    {
+        public GreaterThanAssertion(.<TValue> context, TValue minimum) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsGreaterThanOrEqualTo")]
+    public class GreaterThanOrEqualAssertion<TValue> : .<TValue>
+        where TValue : <TValue>
+    {
+        public GreaterThanOrEqualAssertion(.<TValue> context, TValue minimum) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class GuidAssertionExtensions
+    {
+        [.(ExpectationMessage="to be an empty GUID")]
+        public static bool IsEmptyGuid(this  value) { }
+        [.(ExpectationMessage="to not be an empty GUID")]
+        public static bool IsNotEmptyGuid(this  value) { }
+    }
+    public class HasDistinctItemsAssertion<TValue> : .<TValue>
+        where TValue : .IEnumerable
+    {
+        public HasDistinctItemsAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class HasMessageContainingAssertion<TValue> : .<TValue>
+    {
+        public HasMessageContainingAssertion(.<TValue> context, string expectedSubstring,  comparison = 4) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class HasMessageEqualToAssertion<TValue> : .<TValue>
+    {
+        public HasMessageEqualToAssertion(.<TValue> context, string expectedMessage,  comparison = 4) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class HasMessageStartingWithAssertion<TValue> : .<TValue>
+    {
+        public HasMessageStartingWithAssertion(.<TValue> context, string expectedPrefix,  comparison = 4) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class HasSingleItemAssertion<TValue> : .<TValue>
+        where TValue : .IEnumerable
+    {
+        public HasSingleItemAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class HttpStatusCodeAssertionExtensions
+    {
+        [.(ExpectationMessage="to be a client error status code (4xx)")]
+        public static bool IsClientError(this .HttpStatusCode value) { }
+        [.(ExpectationMessage="to be an error status code (4xx or 5xx)")]
+        public static bool IsError(this .HttpStatusCode value) { }
+        [.(ExpectationMessage="to be an informational status code (1xx)")]
+        public static bool IsInformational(this .HttpStatusCode value) { }
+        [.(ExpectationMessage="to not be a success status code")]
+        public static bool IsNotSuccess(this .HttpStatusCode value) { }
+        [.(ExpectationMessage="to be a redirection status code (3xx)")]
+        public static bool IsRedirection(this .HttpStatusCode value) { }
+        [.(ExpectationMessage="to be a server error status code (5xx)")]
+        public static bool IsServerError(this .HttpStatusCode value) { }
+        [.(ExpectationMessage="to be a success status code (2xx)")]
+        public static bool IsSuccess(this .HttpStatusCode value) { }
+    }
+    [.<.IPAddress>("IsIPv4MappedToIPv6", CustomName="IsNotIPv4MappedToIPv6", ExpectationMessage="be an IPv4-mapped IPv6 address", NegateLogic=true)]
+    [.<.IPAddress>("IsIPv4MappedToIPv6", ExpectationMessage="be an IPv4-mapped IPv6 address")]
+    [.<.IPAddress>("IsIPv6LinkLocal", CustomName="IsNotIPv6LinkLocal", ExpectationMessage="be an IPv6 link-local address", NegateLogic=true)]
+    [.<.IPAddress>("IsIPv6LinkLocal", ExpectationMessage="be an IPv6 link-local address")]
+    [.<.IPAddress>("IsIPv6Multicast", CustomName="IsNotIPv6Multicast", ExpectationMessage="be an IPv6 multicast address", NegateLogic=true)]
+    [.<.IPAddress>("IsIPv6Multicast", ExpectationMessage="be an IPv6 multicast address")]
+    [.<.IPAddress>("IsIPv6SiteLocal", CustomName="IsNotIPv6SiteLocal", ExpectationMessage="be an IPv6 site-local address", NegateLogic=true)]
+    [.<.IPAddress>("IsIPv6SiteLocal", ExpectationMessage="be an IPv6 site-local address")]
+    [.<.IPAddress>("IsIPv6Teredo", CustomName="IsNotIPv6Teredo", ExpectationMessage="be an IPv6 Teredo address", NegateLogic=true)]
+    [.<.IPAddress>("IsIPv6Teredo", ExpectationMessage="be an IPv6 Teredo address")]
+    public static class IPAddressAssertionExtensions { }
+    [.("IsAssignableTo")]
+    public class IsAssignableToAssertion<TTarget, TValue> : .<TValue>
+    {
+        public IsAssignableToAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsDefault")]
+    public class IsDefaultAssertion<TValue> : .<TValue>
+    {
+        public IsDefaultAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsEquatableOrEqualTo")]
+    public class IsEquatableOrEqualToAssertion<TValue> : .<TValue>
+    {
+        public IsEquatableOrEqualToAssertion(.<TValue> context, TValue expected) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+        public .<TValue> Using(.<TValue> comparer) { }
+    }
+    public class IsEquivalentToAssertion<TCollection, TItem> : .<TCollection>
+        where TCollection : .<TItem>
+    {
+        public IsEquivalentToAssertion(.<TCollection> context, .<TItem> expected, . ordering = 0) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        protected override string GetExpectation() { }
+        public .<TCollection, TItem> Using(.<TItem> comparer) { }
+    }
+    [.("IsIn")]
+    public class IsInAssertion<TValue> : .<TValue>
+    {
+        public IsInAssertion(.<TValue> context, .<TValue> collection) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+        public .<TValue> Using(.<TValue> comparer) { }
+    }
+    [.("IsNotAssignableTo")]
+    public class IsNotAssignableToAssertion<TTarget, TValue> : .<TValue>
+    {
+        public IsNotAssignableToAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsNotDefault")]
+    public class IsNotDefaultAssertion<TValue> : .<TValue>
+    {
+        public IsNotDefaultAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsNotIn")]
+    public class IsNotInAssertion<TValue> : .<TValue>
+    {
+        public IsNotInAssertion(.<TValue> context, .<TValue> collection) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+        public .<TValue> Using(.<TValue> comparer) { }
+    }
+    public class IsTypeOfRuntimeAssertion<TValue> : .<TValue>
+    {
+        public IsTypeOfRuntimeAssertion(.<TValue> context,  expectedType) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class LazyAssertionExtensions
+    {
+        [.(ExpectationMessage="to have its value created")]
+        public static bool IsValueCreated<T>(this <T> value) { }
+        [.(ExpectationMessage="to not have its value created")]
+        public static bool IsValueNotCreated<T>(this <T> value) { }
+    }
+    [.("IsLessThan")]
+    public class LessThanAssertion<TValue> : .<TValue>
+        where TValue : <TValue>
+    {
+        public LessThanAssertion(.<TValue> context, TValue maximum) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsLessThanOrEqualTo")]
+    public class LessThanOrEqualAssertion<TValue> : .<TValue>
+        where TValue : <TValue>
+    {
+        public LessThanOrEqualAssertion(.<TValue> context, TValue maximum) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class LongEqualsAssertion : .<long>
+    {
+        public LongEqualsAssertion(.<long> context, long expected) { }
+        protected override .<.> CheckAsync(.<long> metadata) { }
+        protected override string GetExpectation() { }
+        public . Within(long tolerance) { }
+    }
+    public class MappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
+    {
+        public MappedSatisfiesAssertion(.<TValue> context, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, string selectorDescription) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class MemberAssertion<TObject, TMember> : .<TMember>, .<TMember>
+    {
+        public MemberAssertion(.<TObject> parentContext, .<<TObject, TMember>> memberSelector) { }
+        protected override .<.> CheckAsync(.<TMember> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsNotEqualTo")]
+    public class NotEqualsAssertion<TValue> : .<TValue>
+    {
+        public NotEqualsAssertion(.<TValue> context, TValue notExpected, .<TValue>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+        public .<TValue> IgnoringType( type) { }
+        public .<TValue> IgnoringType<TIgnore>() { }
+    }
+    public class NotEquivalentToAssertion<TCollection, TItem> : .<TCollection>
+        where TCollection : .<TItem>
+    {
+        public NotEquivalentToAssertion(.<TCollection> context, .<TItem> notExpected, . ordering = 0) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        protected override string GetExpectation() { }
+        public .<TCollection, TItem> Using(.<TItem> comparer) { }
+    }
+    [.("IsNotNull")]
+    public class NotNullAssertion<TValue> : .<TValue>
+    {
+        public NotNullAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsNotSameReferenceAs")]
+    public class NotSameReferenceAssertion<TValue> : .<TValue>
+    {
+        public NotSameReferenceAssertion(.<TValue> context, object? expected) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class NotStructuralEquivalencyAssertion<TValue> : .<TValue>
+    {
+        public NotStructuralEquivalencyAssertion(.<TValue> context, object? notExpected, string? notExpectedExpression = null) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+        public .<TValue> IgnoringMember(string memberPath) { }
+        public .<TValue> IgnoringType( type) { }
+        public .<TValue> IgnoringType<T>() { }
+        public .<TValue> WithPartialEquivalency() { }
+    }
+    [.("IsNull")]
+    public class NullAssertion<TValue> : .<TValue>
+    {
+        public NullAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.<.Process>("EnableRaisingEvents", CustomName="DoesNotHaveEventRaisingEnabled", ExpectationMessage="have event raising enabled", NegateLogic=true)]
+    [.<.Process>("EnableRaisingEvents", ExpectationMessage="have event raising enabled")]
+    [.<.Process>("HasExited", CustomName="HasNotExited", ExpectationMessage="have exited", NegateLogic=true)]
+    [.<.Process>("HasExited", ExpectationMessage="have exited")]
+    [.<.Process>("Responding", CustomName="IsNotResponding", ExpectationMessage="be responding", NegateLogic=true)]
+    [.<.Process>("Responding", ExpectationMessage="be responding")]
+    public static class ProcessAssertionExtensions { }
+    [.("IsSameReferenceAs")]
+    public class SameReferenceAssertion<TValue> : .<TValue>
+    {
+        public SameReferenceAssertion(.<TValue> context, object? expected) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class SatisfiesAssertion<TValue> : .<TValue>
+    {
+        public SatisfiesAssertion(.<TValue> context, <TValue?, bool> predicate, string predicateDescription) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.<.Stream>("CanRead", CustomName="CannotRead", ExpectationMessage="be readable", NegateLogic=true)]
+    [.<.Stream>("CanRead", ExpectationMessage="be readable")]
+    [.<.Stream>("CanSeek", CustomName="CannotSeek", ExpectationMessage="be seekable", NegateLogic=true)]
+    [.<.Stream>("CanSeek", ExpectationMessage="be seekable")]
+    [.<.Stream>("CanTimeout", CustomName="CannotTimeout", ExpectationMessage="support timeout", NegateLogic=true)]
+    [.<.Stream>("CanTimeout", ExpectationMessage="support timeout")]
+    [.<.Stream>("CanWrite", CustomName="CannotWrite", ExpectationMessage="be writable", NegateLogic=true)]
+    [.<.Stream>("CanWrite", ExpectationMessage="be writable")]
+    public static class StreamAssertionExtensions
+    {
+        [.(ExpectationMessage="to be at the end")]
+        public static bool IsAtEnd(this .Stream value) { }
+        [.(ExpectationMessage="to be at the start")]
+        public static bool IsAtStart(this .Stream value) { }
+        [.(ExpectationMessage="to be empty")]
+        public static bool IsEmpty(this .Stream value) { }
+        [.(ExpectationMessage="to not be empty")]
+        public static bool IsNotEmpty(this .Stream value) { }
+    }
+    public static class StringBuilderAssertionExtensions
+    {
+        [.(ExpectationMessage="to have excess capacity")]
+        public static bool HasExcessCapacity(this .StringBuilder value) { }
+        [.(ExpectationMessage="to be empty")]
+        public static bool IsEmpty(this .StringBuilder value) { }
+        [.(ExpectationMessage="to not be empty")]
+        public static bool IsNotEmpty(this .StringBuilder value) { }
+    }
+    [.("Contains")]
+    public class StringContainsAssertion : .<string>
+    {
+        public StringContainsAssertion(.<string> context, string expected) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+        public . IgnoringCase() { }
+        public . IgnoringWhitespace() { }
+        public . WithComparison( comparison) { }
+        public . WithTrimming() { }
+    }
+    [.("DoesNotContain")]
+    public class StringDoesNotContainAssertion : .<string>
+    {
+        public StringDoesNotContainAssertion(.<string> context, string expected) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+        public . IgnoringCase() { }
+        public . WithComparison( comparison) { }
+    }
+    [.("DoesNotMatch")]
+    public class StringDoesNotMatchAssertion : .<string>
+    {
+        public StringDoesNotMatchAssertion(.<string> context, . regex) { }
+        public StringDoesNotMatchAssertion(.<string> context, string pattern) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+        public . IgnoringCase() { }
+        public . WithOptions(. options) { }
+    }
+    [.("EndsWith")]
+    public class StringEndsWithAssertion : .<string>
+    {
+        public StringEndsWithAssertion(.<string> context, string expected) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+        public . IgnoringCase() { }
+        public . WithComparison( comparison) { }
+    }
+    public class StringEqualsAssertion : .<string>
+    {
+        public StringEqualsAssertion(.<string> context, string expected) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+        public . IgnoringCase() { }
+        public . IgnoringWhitespace() { }
+        public . WithComparison( comparison) { }
+        public . WithNullAndEmptyEquality() { }
+        public . WithTrimming() { }
+    }
+    [.("IsEmpty")]
+    public class StringIsEmptyAssertion : .<string>
+    {
+        public StringIsEmptyAssertion(.<string> context) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsNotEmpty")]
+    public class StringIsNotEmptyAssertion : .<string>
+    {
+        public StringIsNotEmptyAssertion(.<string> context) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class StringLengthAssertion : .<string>
+    {
+        public StringLengthAssertion(.<string> context, int expectedLength) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("Matches")]
+    public class StringMatchesAssertion : .<string>
+    {
+        public StringMatchesAssertion(.<string> context, . regex) { }
+        public StringMatchesAssertion(.<string> context, string pattern) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+        public . IgnoringCase() { }
+        public . WithOptions(. options) { }
+    }
+    [.("StartsWith")]
+    public class StringStartsWithAssertion : .<string>
+    {
+        public StringStartsWithAssertion(.<string> context, string expected) { }
+        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override string GetExpectation() { }
+        public . IgnoringCase() { }
+        public . WithComparison( comparison) { }
+    }
+    [.<string>("IsNullOrEmpty", CustomName="IsNotNullOrEmpty", ExpectationMessage="be null or empty", NegateLogic=true)]
+    [.<string>("IsNullOrEmpty", ExpectationMessage="be null or empty")]
+    [.<string>("IsNullOrWhiteSpace", ExpectationMessage="be null, empty, or whitespace")]
+    public static class StringStaticMethodAssertions { }
+    public class StructuralEquivalencyAssertion<TValue> : .<TValue>
+    {
+        public StructuralEquivalencyAssertion(.<TValue> context, object? expected, string? expectedExpression = null) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+        public .<TValue> IgnoringMember(string memberPath) { }
+        public .<TValue> IgnoringType( type) { }
+        public .<TValue> IgnoringType<T>() { }
+        public .<TValue> WithPartialEquivalency() { }
+    }
+    [.<.>("IsCanceled", CustomName="IsNotCanceled", ExpectationMessage="be canceled", NegateLogic=true)]
+    [.<.>("IsCanceled", ExpectationMessage="be canceled")]
+    [.<.>("IsCompleted", CustomName="IsNotCompleted", ExpectationMessage="be completed", NegateLogic=true)]
+    [.<.>("IsCompleted", ExpectationMessage="be completed")]
+    [.<.>("IsFaulted", CustomName="IsNotFaulted", ExpectationMessage="be faulted", NegateLogic=true)]
+    [.<.>("IsFaulted", ExpectationMessage="be faulted")]
+    public static class TaskAssertionExtensions { }
+    [.<.Thread>("IsAlive", CustomName="IsNotAlive", ExpectationMessage="be alive", NegateLogic=true)]
+    [.<.Thread>("IsAlive", ExpectationMessage="be alive")]
+    [.<.Thread>("IsBackground", CustomName="IsNotBackground", ExpectationMessage="be a background thread", NegateLogic=true)]
+    [.<.Thread>("IsBackground", ExpectationMessage="be a background thread")]
+    [.<.Thread>("IsThreadPoolThread", CustomName="IsNotThreadPoolThread", ExpectationMessage="be a thread pool thread", NegateLogic=true)]
+    [.<.Thread>("IsThreadPoolThread", ExpectationMessage="be a thread pool thread")]
+    public static class ThreadAssertionExtensions { }
+    public class ThrowsAssertion<TException> : .<TException, .<TException>>
+        where TException : 
+    {
+        public ThrowsAssertion(.<object?> context) { }
+        protected override bool IsExactTypeMatch { get; }
+        protected override bool CheckExceptionType( actualException, out string? errorMessage) { }
+        public .<> WithInnerException() { }
+    }
+    public class ThrowsExactlyAssertion<TException> : .<TException, .<TException>>
+        where TException : 
+    {
+        public ThrowsExactlyAssertion(.<object?> context) { }
+        protected override bool IsExactTypeMatch { get; }
+        protected override bool CheckExceptionType( actualException, out string? errorMessage) { }
+    }
+    public class ThrowsNothingAssertion<TValue> : .<TValue>
+    {
+        public ThrowsNothingAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class TimeSpanAssertionExtensions
+    {
+        [.(ExpectationMessage="to be negative")]
+        public static bool IsNegative(this  value) { }
+        [.(ExpectationMessage="to be non-negative")]
+        public static bool IsNonNegative(this  value) { }
+        [.(ExpectationMessage="to be non-positive")]
+        public static bool IsNonPositive(this  value) { }
+        [.(ExpectationMessage="to not be zero")]
+        public static bool IsNotZero(this  value) { }
+        [.(ExpectationMessage="to be positive")]
+        public static bool IsPositive(this  value) { }
+        [.(ExpectationMessage="to be zero")]
+        public static bool IsZero(this  value) { }
+    }
+    [.<>("SupportsDaylightSavingTime", CustomName="DoesNotSupportDaylightSavingTime", ExpectationMessage="support daylight saving time", NegateLogic=true)]
+    [.<>("SupportsDaylightSavingTime", ExpectationMessage="support daylight saving time")]
+    public static class TimeZoneInfoAssertionExtensions { }
+    [.<>("ContainsGenericParameters", CustomName="DoesNotContainGenericParameters", ExpectationMessage="contain generic parameters", NegateLogic=true)]
+    [.<>("ContainsGenericParameters", ExpectationMessage="contain generic parameters")]
+    [.<>("IsAbstract", CustomName="IsNotAbstract", ExpectationMessage="be abstract", NegateLogic=true)]
+    [.<>("IsAbstract", ExpectationMessage="be abstract")]
+    [.<>("IsArray", CustomName="IsNotArray", ExpectationMessage="be an array", NegateLogic=true)]
+    [.<>("IsArray", ExpectationMessage="be an array")]
+    [.<>("IsByRef", CustomName="IsNotByRef", ExpectationMessage="be a by-ref type", NegateLogic=true)]
+    [.<>("IsByRef", ExpectationMessage="be a by-ref type")]
+    [.<>("IsCOMObject", CustomName="IsNotCOMObject", ExpectationMessage="be a COM object", NegateLogic=true)]
+    [.<>("IsCOMObject", ExpectationMessage="be a COM object")]
+    [.<>("IsClass", CustomName="IsNotClass", ExpectationMessage="be a class", NegateLogic=true)]
+    [.<>("IsClass", ExpectationMessage="be a class")]
+    [.<>("IsConstructedGenericType", CustomName="IsNotConstructedGenericType", ExpectationMessage="be a constructed generic type", NegateLogic=true)]
+    [.<>("IsConstructedGenericType", ExpectationMessage="be a constructed generic type")]
+    [.<>("IsEnum", CustomName="IsNotEnum", ExpectationMessage="be an enum", NegateLogic=true)]
+    [.<>("IsEnum", ExpectationMessage="be an enum")]
+    [.<>("IsGenericType", CustomName="IsNotGenericType", ExpectationMessage="be a generic type", NegateLogic=true)]
+    [.<>("IsGenericType", ExpectationMessage="be a generic type")]
+    [.<>("IsGenericTypeDefinition", CustomName="IsNotGenericTypeDefinition", ExpectationMessage="be a generic type definition", NegateLogic=true)]
+    [.<>("IsGenericTypeDefinition", ExpectationMessage="be a generic type definition")]
+    [.<>("IsInterface", CustomName="IsNotInterface", ExpectationMessage="be an interface", NegateLogic=true)]
+    [.<>("IsInterface", ExpectationMessage="be an interface")]
+    [.<>("IsNested", CustomName="IsNotNested", ExpectationMessage="be a nested type", NegateLogic=true)]
+    [.<>("IsNested", ExpectationMessage="be a nested type")]
+    [.<>("IsNestedAssembly", CustomName="IsNotNestedAssembly", ExpectationMessage="be a nested assembly type", NegateLogic=true)]
+    [.<>("IsNestedAssembly", ExpectationMessage="be a nested assembly type")]
+    [.<>("IsNestedFamily", CustomName="IsNotNestedFamily", ExpectationMessage="be a nested family type", NegateLogic=true)]
+    [.<>("IsNestedFamily", ExpectationMessage="be a nested family type")]
+    [.<>("IsNestedPrivate", CustomName="IsNotNestedPrivate", ExpectationMessage="be a nested private type", NegateLogic=true)]
+    [.<>("IsNestedPrivate", ExpectationMessage="be a nested private type")]
+    [.<>("IsNestedPublic", CustomName="IsNotNestedPublic", ExpectationMessage="be a nested public type", NegateLogic=true)]
+    [.<>("IsNestedPublic", ExpectationMessage="be a nested public type")]
+    [.<>("IsPointer", CustomName="IsNotPointer", ExpectationMessage="be a pointer type", NegateLogic=true)]
+    [.<>("IsPointer", ExpectationMessage="be a pointer type")]
+    [.<>("IsPrimitive", CustomName="IsNotPrimitive", ExpectationMessage="be a primitive type", NegateLogic=true)]
+    [.<>("IsPrimitive", ExpectationMessage="be a primitive type")]
+    [.<>("IsPublic", CustomName="IsNotPublic", ExpectationMessage="be public", NegateLogic=true)]
+    [.<>("IsPublic", ExpectationMessage="be public")]
+    [.<>("IsSealed", CustomName="IsNotSealed", ExpectationMessage="be sealed", NegateLogic=true)]
+    [.<>("IsSealed", ExpectationMessage="be sealed")]
+    [.<>("IsSerializable", CustomName="IsNotSerializable", ExpectationMessage="be serializable", NegateLogic=true)]
+    [.<>("IsSerializable", ExpectationMessage="be serializable")]
+    [.<>("IsValueType", CustomName="IsNotValueType", ExpectationMessage="be a value type", NegateLogic=true)]
+    [.<>("IsValueType", ExpectationMessage="be a value type")]
+    [.<>("IsVisible", CustomName="IsNotVisible", ExpectationMessage="be visible", NegateLogic=true)]
+    [.<>("IsVisible", ExpectationMessage="be visible")]
+    public static class TypeAssertionExtensions { }
+    public class TypeOfAssertion<TFrom, TTo> : .<TTo>
+    {
+        public TypeOfAssertion(.<TFrom> parentContext) { }
+        protected override .<.> CheckAsync(.<TTo> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.<>("IsAbsoluteUri", CustomName="IsNotAbsoluteUri", ExpectationMessage="be an absolute URI", NegateLogic=true)]
+    [.<>("IsAbsoluteUri", ExpectationMessage="be an absolute URI")]
+    [.<>("IsDefaultPort", CustomName="IsNotDefaultPort", ExpectationMessage="use the default port", NegateLogic=true)]
+    [.<>("IsDefaultPort", ExpectationMessage="use the default port")]
+    [.<>("IsFile", CustomName="IsNotFile", ExpectationMessage="be a file URI", NegateLogic=true)]
+    [.<>("IsFile", ExpectationMessage="be a file URI")]
+    [.<>("IsLoopback", CustomName="IsNotLoopback", ExpectationMessage="be a loopback URI", NegateLogic=true)]
+    [.<>("IsLoopback", ExpectationMessage="be a loopback URI")]
+    [.<>("IsUnc", CustomName="IsNotUnc", ExpectationMessage="be a UNC URI", NegateLogic=true)]
+    [.<>("IsUnc", ExpectationMessage="be a UNC URI")]
+    [.<>("UserEscaped", CustomName="IsNotUserEscaped", ExpectationMessage="be user-escaped", NegateLogic=true)]
+    [.<>("UserEscaped", ExpectationMessage="be user-escaped")]
+    public static class UriAssertionExtensions { }
+    public static class VersionAssertionExtensions
+    {
+        [.(ExpectationMessage="to have a build number")]
+        public static bool HasBuildNumber(this  value) { }
+        [.(ExpectationMessage="to not have a build number")]
+        public static bool HasNoBuildNumber(this  value) { }
+        [.(ExpectationMessage="to not have a revision number")]
+        public static bool HasNoRevisionNumber(this  value) { }
+        [.(ExpectationMessage="to have a revision number")]
+        public static bool HasRevisionNumber(this  value) { }
+        [.(ExpectationMessage="to be a major version (x.0.0.0)")]
+        public static bool IsMajorVersion(this  value) { }
+        [.(ExpectationMessage="to not be a major version")]
+        public static bool IsNotMajorVersion(this  value) { }
+    }
+    [.<>("IsAlive", CustomName="IsNotAlive", ExpectationMessage="be alive", NegateLogic=true)]
+    [.<>("IsAlive", ExpectationMessage="be alive")]
+    [.<>("TrackResurrection", CustomName="DoesNotTrackResurrection", ExpectationMessage="track resurrection", NegateLogic=true)]
+    [.<>("TrackResurrection", ExpectationMessage="track resurrection")]
+    public static class WeakReferenceAssertionExtensions { }
+}
+namespace .
+{
+    public class CountWrapper<TValue> : .<TValue>
+        where TValue : .IEnumerable
+    {
+        public CountWrapper(.<TValue> context) { }
+        public .<TValue> EqualTo(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public .<int> GreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<int> Positive() { }
+    }
+    public class LengthWrapper : .<string>
+    {
+        public LengthWrapper(.<string> context) { }
+        public . EqualTo(int expectedLength, [.("expectedLength")] string? expression = null) { }
+    }
+}
+namespace .Core
+{
+    public class AndContinuation<TValue> : .<TValue>
+    {
+        public .<TValue> Context { get; }
+        public .<TValue> PreviousAssertion { get; }
+    }
+    public sealed class AssertionContext<TValue>
+    {
+        public AssertionContext(.<TValue> evaluation, .StringBuilder expressionBuilder) { }
+        public AssertionContext(TValue? value, .StringBuilder expressionBuilder) { }
+        public .<TValue> Evaluation { get; }
+        public .StringBuilder ExpressionBuilder { get; }
+        [return: .(new string[] {
+                "Value",
+                "Exception"})]
+        public .<<TValue?, ?>> GetAsync() { }
+        [return: .(new string[] {
+                "Start",
+                "End"})]
+        public <, > GetTiming() { }
+        public .<TNew> Map<TNew>(<TValue?, TNew?> mapper) { }
+    }
+    public readonly struct AssertionResult
+    {
+        public bool IsPassed { get; }
+        public string Message { get; }
+        public static . Passed { get; }
+        public static . FailIf(bool condition, string message) { }
+        public static . Failed(string message) { }
+    }
+    public abstract class Assertion<TValue>
+    {
+        protected readonly .<TValue> Context;
+        protected Assertion(.<TValue> context) { }
+        public .<TValue> And { get; }
+        public .<TValue> Or { get; }
+        protected void AppendExpression(string expression) { }
+        public virtual .<TValue?> AssertAsync() { }
+        public .<TValue> Because(string message) { }
+        protected virtual .<.> CheckAsync(.<TValue> metadata) { }
+        protected  CreateException(. result) { }
+        public .<TValue?> GetAwaiter() { }
+        protected abstract string GetExpectation();
+    }
+    public enum ChainType
+    {
+        None = 0,
+        And = 1,
+        Or = 2,
+    }
+    public sealed class EvaluationContext<TValue>
+    {
+        public EvaluationContext(<.<<TValue?, ?>>> evaluator) { }
+        public EvaluationContext(TValue? value) { }
+        [return: .(new string?[]?[] {
+                "Value",
+                "Exception"})]
+        public .<<TValue?, ?>> GetAsync() { }
+        [return: .(new string[] {
+                "Start",
+                "End"})]
+        public <, > GetTiming() { }
+        public .<TNew> Map<TNew>(<TValue?, TNew?> mapper) { }
+    }
+    public readonly struct EvaluationMetadata<TValue>
+    {
+        public EvaluationMetadata(TValue? value, ? exception,  startTime,  endTime) { }
+        public  Duration { get; }
+        public  EndTime { get; }
+        public ? Exception { get; }
+        public  StartTime { get; }
+        public TValue Value { get; }
+    }
+    public interface IAssertionSource<TValue>
+    {
+        .<TValue> Context { get; }
+    }
+    public interface IDelegateAssertionSource<TValue> : .<TValue> { }
+    public class OrContinuation<TValue> : .<TValue>
+    {
+        public .<TValue> Context { get; }
+        public .<TValue> PreviousAssertion { get; }
+    }
+}
+namespace .Enums
+{
+    public enum CollectionOrdering
+    {
+        Any = 0,
+        Matching = 1,
+    }
+}
+namespace .Exceptions
+{
+    public class AssertionException : .
+    {
+        public AssertionException(string? message) { }
+        public AssertionException(string? message,  innerException) { }
+    }
+    public class BaseAssertionException : 
+    {
+        public BaseAssertionException() { }
+        public BaseAssertionException(string? message) { }
+        public BaseAssertionException(string? message, ? innerException) { }
+    }
+    public class MaybeCaughtException : 
+    {
+        public MaybeCaughtException( exception) { }
+    }
+    public class MixedAndOrAssertionsException : .
+    {
+        public MixedAndOrAssertionsException() { }
+    }
+}
+namespace .Extensions
+{
+    public static class ArrayAssertionExtensions
+    {
+        public static .Extensions._IsEmpty_Assertion<T> IsEmpty<T>(this .<T[]> source) { }
+        public static .Extensions._IsNotEmpty_Assertion<T> IsNotEmpty<T>(this .<T[]> source) { }
+        public static ._IsNotSingleElement_Assertion<T> IsNotSingleElement<T>(this .<.<T>> source) { }
+        public static .Extensions._IsNotSingleElement_Assertion<T> IsNotSingleElement<T>(this .<T[]> source) { }
+        public static ._IsSingleElement_Assertion<T> IsSingleElement<T>(this .<.<T>> source) { }
+        public static .Extensions._IsSingleElement_Assertion<T> IsSingleElement<T>(this .<T[]> source) { }
+    }
+    public static class AssemblyAssertionExtensions
+    {
+        public static ._IsDebugBuild_Assertion IsDebugBuild(this .<.Assembly> source) { }
+        public static . IsDynamic(this .<.Assembly> source) { }
+        public static . IsFullyTrusted(this .<.Assembly> source) { }
+        public static . IsNotDynamic(this .<.Assembly> source) { }
+        public static . IsNotFullyTrusted(this .<.Assembly> source) { }
+        public static ._IsNotSigned_Assertion IsNotSigned(this .<.Assembly> source) { }
+        public static ._IsReleaseBuild_Assertion IsReleaseBuild(this .<.Assembly> source) { }
+        public static ._IsSigned_Assertion IsSigned(this .<.Assembly> source) { }
+    }
+    public class AssemblyIsDynamicAssertion : .<.Assembly>
+    {
+        public AssemblyIsDynamicAssertion(.<.Assembly> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Assembly> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class AssemblyIsFullyTrustedAssertion : .<.Assembly>
+    {
+        public AssemblyIsFullyTrustedAssertion(.<.Assembly> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Assembly> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Assembly_IsDebugBuild_Assertion : .<.Assembly>
+    {
+        public Assembly_IsDebugBuild_Assertion(.<.Assembly> context) { }
+        protected override .<.> CheckAsync(.<.Assembly> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Assembly_IsNotSigned_Assertion : .<.Assembly>
+    {
+        public Assembly_IsNotSigned_Assertion(.<.Assembly> context) { }
+        protected override .<.> CheckAsync(.<.Assembly> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Assembly_IsReleaseBuild_Assertion : .<.Assembly>
+    {
+        public Assembly_IsReleaseBuild_Assertion(.<.Assembly> context) { }
+        protected override .<.> CheckAsync(.<.Assembly> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Assembly_IsSigned_Assertion : .<.Assembly>
+    {
+        public Assembly_IsSigned_Assertion(.<.Assembly> context) { }
+        protected override .<.> CheckAsync(.<.Assembly> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class AssertionExtensions
+    {
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<TCollection, TItem> All<TCollection, TItem>(this .<TCollection> source)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem> All<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem> Any<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
+        public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<TCollection> Contains<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem> Contains<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem> Contains<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection> Contains<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey key, [.("key")] string? expression = null) { }
+        public static .<TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey key, .<TKey> comparer, [.("key")] string? expression = null) { }
+        public static .<TKey, TValue> ContainsKey<TDictionary, TKey, TValue>(this .<TDictionary> source, TKey key, [.("key")] string? expression = null)
+            where TDictionary : .<TKey, TValue> { }
+        public static .<TKey, TValue> ContainsKey<TDictionary, TKey, TValue>(this .<TDictionary> source, TKey key, .<TKey> comparer, [.("key")] string? expression = null)
+            where TDictionary : .<TKey, TValue> { }
+        public static .<.<TItem>, TItem> ContainsOnly<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<TCollection, TItem> ContainsOnly<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
+        public static .<TCollection, TItem> DoesNotContain<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem> DoesNotContain<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TKey, TValue> DoesNotContainKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey key, [.("key")] string? expression = null) { }
+        public static .<TKey, TValue> DoesNotContainKey<TDictionary, TKey, TValue>(this .<TDictionary> source, TKey key, [.("key")] string? expression = null)
+            where TDictionary : .<TKey, TValue> { }
+        public static ..DoesNotHaveFlagAssertion<TEnum> DoesNotHaveFlag<TEnum>(this .<TEnum> source, TEnum unexpectedFlag, [.("unexpectedFlag")] string? expression = null)
+            where TEnum :  struct,  { }
+        public static ..DoesNotHaveSameNameAsAssertion<TEnum> DoesNotHaveSameNameAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
+            where TEnum :  struct,  { }
+        public static ..DoesNotHaveSameValueAsAssertion<TEnum> DoesNotHaveSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
+            where TEnum :  struct,  { }
+        public static .<TValue> EqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
+        public static ..CountWrapper<TValue> HasCount<TValue>(this .<TValue> source)
+            where TValue : .IEnumerable { }
+        public static .<TValue> HasCount<TValue>(this .<TValue> source, int expectedCount, [.("expectedCount")] string? expression = null)
+            where TValue : .IEnumerable { }
+        public static .<TValue> HasDistinctItems<TValue>(this .<TValue> source)
+            where TValue : .IEnumerable { }
+        public static ..HasFlagAssertion<TEnum> HasFlag<TEnum>(this .<TEnum> source, TEnum expectedFlag, [.("expectedFlag")] string? expression = null)
+            where TEnum :  struct,  { }
+        public static ..LengthWrapper HasLength(this .<string> source) { }
+        public static ..LengthWrapper HasLength(this .<string> source) { }
+        public static . HasLength(this .<string> source, int expectedLength, [.("expectedLength")] string? expression = null) { }
+        public static .<TObject, TMember> HasMember<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector) { }
+        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring) { }
+        public static . HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring) { }
+        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring) { }
+        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring,  comparison) { }
+        public static . HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring,  comparison) { }
+        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring,  comparison) { }
+        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage) { }
+        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage) { }
+        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage) { }
+        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
+        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
+        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
+        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
+        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
+        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
+        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
+        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
+        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
+        public static ..HasSameNameAsAssertion<TEnum> HasSameNameAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
+            where TEnum :  struct,  { }
+        public static ..HasSameValueAsAssertion<TEnum> HasSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
+            where TEnum :  struct,  { }
+        public static .<TValue> HasSingleItem<TValue>(this .<TValue> source)
+            where TValue : .IEnumerable { }
+        public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<TTarget, object> IsAssignableTo<TTarget>(this .<object> source) { }
+        public static .<TTarget, TValue> IsAssignableTo<TTarget, TValue>(this .<TValue> source) { }
+        public static ..IsDefinedAssertion<TEnum> IsDefined<TEnum>(this .<TEnum> source)
+            where TEnum :  struct,  { }
+        public static .<TValue> IsEmpty<TValue>(this .<TValue> source)
+            where TValue : .IEnumerable { }
+        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expression = null) { }
+        public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expression = null) { }
+        public static . IsEqualTo(this .<string> source, string expected, [.("expected")] string? expression = null) { }
+        public static .<string> IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
+        public static . IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
+        public static .<string> IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
+        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
+        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
+        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
+        public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
+        public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, [.("expected")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, .<TItem> comparer, [.("expected")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, . ordering, [.("expected")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<bool> IsFalse(this .<bool> source) { }
+        public static .<bool> IsFalse(this .<bool> source) { }
+        public static .<TValue> IsIn<TValue>(this .<TValue> source, params TValue[] collection) { }
+        public static .<.<TItem>, TItem> IsInDescendingOrder<TItem>(this .<.<TItem>> source)
+            where TItem : <TItem> { }
+        public static .<TCollection, TItem> IsInDescendingOrder<TCollection, TItem>(this .<TCollection> source)
+            where TCollection : .<TItem>
+            where TItem : <TItem> { }
+        public static .<.<TItem>, TItem> IsInOrder<TItem>(this .<.<TItem>> source)
+            where TItem : <TItem> { }
+        public static .<TCollection, TItem> IsInOrder<TCollection, TItem>(this .<TCollection> source)
+            where TCollection : .<TItem>
+            where TItem : <TItem> { }
+        public static .<TValue> IsNegative<TValue>(this .<TValue> source)
+            where TValue : <TValue> { }
+        public static .<TValue> IsNegative<TValue>(this .<TValue?> source)
+            where TValue :  struct, <TValue> { }
+        public static .<TTarget, TValue> IsNotAssignableTo<TTarget, TValue>(this .<TValue> source) { }
+        public static ..IsNotDefinedAssertion<TEnum> IsNotDefined<TEnum>(this .<TEnum> source)
+            where TEnum :  struct,  { }
+        public static .<TValue> IsNotEmpty<TValue>(this .<TValue> source)
+            where TValue : .IEnumerable { }
+        public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
+        public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
+        public static .<TValue> IsNotEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
+        public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, [.("expected")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, .<TItem> comparer, [.("expected")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, . ordering, [.("expected")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TValue> IsNotIn<TValue>(this .<TValue> source, params TValue[] collection) { }
+        public static ..IsNotParsableIntoAssertion<T> IsNotParsableInto<T>(this .<string> source) { }
+        public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType) { }
+        public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType) { }
+        public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
+        public static ..IsParsableIntoAssertion<T> IsParsableInto<T>(this .<string> source) { }
+        public static .<TValue> IsPositive<TValue>(this .<TValue> source)
+            where TValue : <TValue> { }
+        public static .<TValue> IsPositive<TValue>(this .<TValue?> source)
+            where TValue :  struct, <TValue> { }
+        public static .<bool> IsTrue(this .<bool> source) { }
+        public static .<bool> IsTrue(this .<bool> source) { }
+        public static .<object, TExpected> IsTypeOf<TExpected>(this .<object> source) { }
+        public static .<TFrom, TTo> IsTypeOf<TTo, TFrom>(this .<TFrom> source) { }
+        public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped>> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
+        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
+        public static .<TException> Throws<TException>(this . source)
+            where TException :  { }
+        public static .<TException> Throws<TException>(this . source)
+            where TException :  { }
+        public static .<TException> Throws<TException, TValue>(this .<TValue> source)
+            where TException :  { }
+        public static .<TException> ThrowsAsync<TValue, TException>(this .<TValue> source)
+            where TException :  { }
+        public static .<TException> ThrowsExactly<TException>(this . source)
+            where TException :  { }
+        public static .<TException> ThrowsExactly<TException>(this . source)
+            where TException :  { }
+        public static .<TException> ThrowsExactly<TException, TValue>(this .<TValue> source)
+            where TException :  { }
+        public static .<> ThrowsException<TValue>(this .<TValue> source) { }
+        public static .<TException> ThrowsException<TException, TValue>(this .<TValue> source)
+            where TException :  { }
+        public static .<TValue> ThrowsNothing<TValue>(this .<TValue> source) { }
+        public static ..WhenParsedIntoAssertion<T> WhenParsedInto<T>(this .<string> source) { }
+        public static . WithMessageContaining(this .<object?> source, string expectedSubstring) { }
+        public static . WithMessageContaining(this .<object?> source, string expectedSubstring,  comparison) { }
+    }
+    public static class BetweenAssertionExtensions
+    {
+        public static .<TValue> IsBetween<TValue>(this .<TValue> source, TValue minimum, TValue maximum, [.("minimum")] string? minimumExpression = null, [.("maximum")] string? maximumExpression = null)
+            where TValue : <TValue> { }
+    }
+    public sealed class Bool_IsFalse_Assertion : .<bool>
+    {
+        public Bool_IsFalse_Assertion(.<bool> context) { }
+        protected override .<.> CheckAsync(.<bool> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Bool_IsTrue_Assertion : .<bool>
+    {
+        public Bool_IsTrue_Assertion(.<bool> context) { }
+        protected override .<.> CheckAsync(.<bool> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class BooleanAssertionExtensions
+    {
+        public static ._IsFalse_Assertion IsFalse(this .<bool> source) { }
+        public static ._IsTrue_Assertion IsTrue(this .<bool> source) { }
+    }
+    public static class CancellationTokenAssertionExtensions
+    {
+        public static . CanBeCanceled(this .<.CancellationToken> source) { }
+        public static . CannotBeCanceled(this .<.CancellationToken> source) { }
+        public static . IsCancellationRequested(this .<.CancellationToken> source) { }
+        public static ._IsNone_Assertion IsNone(this .<.CancellationToken> source) { }
+        public static . IsNotCancellationRequested(this .<.CancellationToken> source) { }
+        public static ._IsNotNone_Assertion IsNotNone(this .<.CancellationToken> source) { }
+    }
+    public class CancellationTokenCanBeCanceledAssertion : .<.CancellationToken>
+    {
+        public CancellationTokenCanBeCanceledAssertion(.<.CancellationToken> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.CancellationToken> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CancellationTokenIsCancellationRequestedAssertion : .<.CancellationToken>
+    {
+        public CancellationTokenIsCancellationRequestedAssertion(.<.CancellationToken> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.CancellationToken> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class CancellationToken_IsNone_Assertion : .<.CancellationToken>
+    {
+        public CancellationToken_IsNone_Assertion(.<.CancellationToken> context) { }
+        protected override .<.> CheckAsync(.<.CancellationToken> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class CancellationToken_IsNotNone_Assertion : .<.CancellationToken>
+    {
+        public CancellationToken_IsNotNone_Assertion(.<.CancellationToken> context) { }
+        protected override .<.> CheckAsync(.<.CancellationToken> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class CharAssertionExtensions
+    {
+        public static . IsControl(this .<char> source) { }
+        public static . IsDigit(this .<char> source) { }
+        public static . IsHighSurrogate(this .<char> source) { }
+        public static . IsLetter(this .<char> source) { }
+        public static . IsLetterOrDigit(this .<char> source) { }
+        public static . IsLowSurrogate(this .<char> source) { }
+        public static . IsLower(this .<char> source) { }
+        public static . IsNotControl(this .<char> source) { }
+        public static . IsNotDigit(this .<char> source) { }
+        public static . IsNotHighSurrogate(this .<char> source) { }
+        public static . IsNotLetter(this .<char> source) { }
+        public static . IsNotLetterOrDigit(this .<char> source) { }
+        public static . IsNotLowSurrogate(this .<char> source) { }
+        public static . IsNotLower(this .<char> source) { }
+        public static . IsNotNumber(this .<char> source) { }
+        public static . IsNotPunctuation(this .<char> source) { }
+        public static . IsNotSeparator(this .<char> source) { }
+        public static . IsNotSurrogate(this .<char> source) { }
+        public static . IsNotSymbol(this .<char> source) { }
+        public static . IsNotUpper(this .<char> source) { }
+        public static . IsNotWhiteSpace(this .<char> source) { }
+        public static . IsNumber(this .<char> source) { }
+        public static . IsPunctuation(this .<char> source) { }
+        public static . IsSeparator(this .<char> source) { }
+        public static . IsSurrogate(this .<char> source) { }
+        public static . IsSymbol(this .<char> source) { }
+        public static . IsUpper(this .<char> source) { }
+        public static . IsWhiteSpace(this .<char> source) { }
+    }
+    public class CharIsControlWithCharAssertion : .<char>
+    {
+        public CharIsControlWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsDigitWithCharAssertion : .<char>
+    {
+        public CharIsDigitWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsHighSurrogateWithCharAssertion : .<char>
+    {
+        public CharIsHighSurrogateWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsLetterOrDigitWithCharAssertion : .<char>
+    {
+        public CharIsLetterOrDigitWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsLetterWithCharAssertion : .<char>
+    {
+        public CharIsLetterWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsLowSurrogateWithCharAssertion : .<char>
+    {
+        public CharIsLowSurrogateWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsLowerWithCharAssertion : .<char>
+    {
+        public CharIsLowerWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsNumberWithCharAssertion : .<char>
+    {
+        public CharIsNumberWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsPunctuationWithCharAssertion : .<char>
+    {
+        public CharIsPunctuationWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsSeparatorWithCharAssertion : .<char>
+    {
+        public CharIsSeparatorWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsSurrogateWithCharAssertion : .<char>
+    {
+        public CharIsSurrogateWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsSymbolWithCharAssertion : .<char>
+    {
+        public CharIsSymbolWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsUpperWithCharAssertion : .<char>
+    {
+        public CharIsUpperWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CharIsWhiteSpaceWithCharAssertion : .<char>
+    {
+        public CharIsWhiteSpaceWithCharAssertion(.<char> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<char> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class CultureInfoAssertionExtensions
+    {
+        public static ._IsEnglish_Assertion IsEnglish(this .<.CultureInfo> source) { }
+        public static ._IsInvariant_Assertion IsInvariant(this .<.CultureInfo> source) { }
+        public static ._IsLeftToRight_Assertion IsLeftToRight(this .<.CultureInfo> source) { }
+        public static . IsNeutralCulture(this .<.CultureInfo> source) { }
+        public static ._IsNotEnglish_Assertion IsNotEnglish(this .<.CultureInfo> source) { }
         public static ._IsNotInvariant_Assertion IsNotInvariant(this .<.CultureInfo> source) { }
         public static . IsNotNeutralCulture(this .<.CultureInfo> source) { }
         public static . IsReadOnly(this .<.CultureInfo> source) { }
-        [.(ExpectationMessage="to be right-to-left culture")]
-        public static bool IsRightToLeft(this .CultureInfo value) { }
         public static ._IsRightToLeft_Assertion IsRightToLeft(this .<.CultureInfo> source) { }
     }
     public class CultureInfoIsNeutralCultureAssertion : .<.CultureInfo>
@@ -739,62 +1840,26 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.CultureInfo> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.<>("IsDaylightSavingTime", CustomName="IsNotDaylightSavingTime", ExpectationMessage="be during daylight saving time", NegateLogic=true)]
-    [.<>("IsDaylightSavingTime", ExpectationMessage="be during daylight saving time")]
     public static class DateTimeAssertionExtensions
     {
         public static . IsDaylightSavingTime(this .<> source) { }
-        [.(ExpectationMessage="to be in the future")]
-        public static bool IsInFuture(this  value) { }
         public static ._IsInFuture_Assertion IsInFuture(this .<> source) { }
-        [.(ExpectationMessage="to be in the future (UTC)")]
-        public static bool IsInFutureUtc(this  value) { }
         public static ._IsInFutureUtc_Assertion IsInFutureUtc(this .<> source) { }
-        [.(ExpectationMessage="to be in the past")]
-        public static bool IsInPast(this  value) { }
         public static ._IsInPast_Assertion IsInPast(this .<> source) { }
-        [.(ExpectationMessage="to be in the past (UTC)")]
-        public static bool IsInPastUtc(this  value) { }
         public static ._IsInPastUtc_Assertion IsInPastUtc(this .<> source) { }
-        [.(ExpectationMessage="to be in a leap year")]
-        public static bool IsLeapYear(this  value) { }
         public static ._IsLeapYear_Assertion IsLeapYear(this .<> source) { }
         public static . IsNotDaylightSavingTime(this .<> source) { }
-        [.(ExpectationMessage="to not be in a leap year")]
-        public static bool IsNotLeapYear(this  value) { }
         public static ._IsNotLeapYear_Assertion IsNotLeapYear(this .<> source) { }
-        [.(ExpectationMessage="to not be today")]
-        public static bool IsNotToday(this  value) { }
         public static ._IsNotToday_Assertion IsNotToday(this .<> source) { }
-        [.(ExpectationMessage="to not be UTC")]
-        public static bool IsNotUtc(this  value) { }
         public static ._IsNotUtc_Assertion IsNotUtc(this .<> source) { }
-        [.(ExpectationMessage="to be on a weekday")]
-        public static bool IsOnWeekday(this  value) { }
         public static ._IsOnWeekday_Assertion IsOnWeekday(this .<> source) { }
-        [.(ExpectationMessage="to be on a weekend")]
-        public static bool IsOnWeekend(this  value) { }
         public static ._IsOnWeekend_Assertion IsOnWeekend(this .<> source) { }
-        [.(ExpectationMessage="to be today")]
-        public static bool IsToday(this  value) { }
         public static ._IsToday_Assertion IsToday(this .<> source) { }
-        [.(ExpectationMessage="to be UTC")]
-        public static bool IsUtc(this  value) { }
         public static ._IsUtc_Assertion IsUtc(this .<> source) { }
     }
-    public class DateTimeEqualsAssertion : .<>
+    public static class DateTimeEqualsExactAssertionExtensions
     {
-        public DateTimeEqualsAssertion(.<> context,  expected) { }
-        protected override .<.> CheckAsync(.<> metadata) { }
-        protected override string GetExpectation() { }
-        public . Within( tolerance) { }
-    }
-    [.("EqualsExact")]
-    public class DateTimeEqualsExactAssertion : .<>
-    {
-        public DateTimeEqualsExactAssertion(.<> context,  expected) { }
-        protected override .<.> CheckAsync(.<> metadata) { }
-        protected override string GetExpectation() { }
+        public static . EqualsExact(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
     }
     public class DateTimeIsDaylightSavingTimeAssertion : .<>
     {
@@ -804,49 +1869,18 @@ namespace .Conditions
     }
     public static class DateTimeOffsetAssertionExtensions
     {
-        [.(ExpectationMessage="to be in the future")]
-        public static bool IsInFuture(this  value) { }
         public static ._IsInFuture_Assertion IsInFuture(this .<> source) { }
-        [.(ExpectationMessage="to be in the future (UTC)")]
-        public static bool IsInFutureUtc(this  value) { }
         public static ._IsInFutureUtc_Assertion IsInFutureUtc(this .<> source) { }
-        [.(ExpectationMessage="to be in the past")]
-        public static bool IsInPast(this  value) { }
         public static ._IsInPast_Assertion IsInPast(this .<> source) { }
-        [.(ExpectationMessage="to be in the past (UTC)")]
-        public static bool IsInPastUtc(this  value) { }
         public static ._IsInPastUtc_Assertion IsInPastUtc(this .<> source) { }
-        [.(ExpectationMessage="to be in a leap year")]
-        public static bool IsLeapYear(this  value) { }
         public static ._IsLeapYear_Assertion IsLeapYear(this .<> source) { }
-        [.(ExpectationMessage="to not be in a leap year")]
-        public static bool IsNotLeapYear(this  value) { }
         public static ._IsNotLeapYear_Assertion IsNotLeapYear(this .<> source) { }
-        [.(ExpectationMessage="to not be today")]
-        public static bool IsNotToday(this  value) { }
         public static ._IsNotToday_Assertion IsNotToday(this .<> source) { }
-        [.(ExpectationMessage="to not be UTC")]
-        public static bool IsNotUtc(this  value) { }
         public static ._IsNotUtc_Assertion IsNotUtc(this .<> source) { }
-        [.(ExpectationMessage="to be on a weekday")]
-        public static bool IsOnWeekday(this  value) { }
         public static ._IsOnWeekday_Assertion IsOnWeekday(this .<> source) { }
-        [.(ExpectationMessage="to be on a weekend")]
-        public static bool IsOnWeekend(this  value) { }
         public static ._IsOnWeekend_Assertion IsOnWeekend(this .<> source) { }
-        [.(ExpectationMessage="to be today")]
-        public static bool IsToday(this  value) { }
         public static ._IsToday_Assertion IsToday(this .<> source) { }
-        [.(ExpectationMessage="to be UTC")]
-        public static bool IsUtc(this  value) { }
         public static ._IsUtc_Assertion IsUtc(this .<> source) { }
-    }
-    public class DateTimeOffsetEqualsAssertion : .<>
-    {
-        public DateTimeOffsetEqualsAssertion(.<> context,  expected) { }
-        protected override .<.> CheckAsync(.<> metadata) { }
-        protected override string GetExpectation() { }
-        public . Within( tolerance) { }
     }
     public sealed class DateTimeOffset_IsInFutureUtc_Assertion : .<>
     {
@@ -994,17 +2028,9 @@ namespace .Conditions
     }
     public static class DayOfWeekAssertionExtensions
     {
-        [.(ExpectationMessage="to be Friday")]
-        public static bool IsFriday(this  value) { }
         public static ._IsFriday_Assertion IsFriday(this .<> source) { }
-        [.(ExpectationMessage="to be Monday")]
-        public static bool IsMonday(this  value) { }
         public static ._IsMonday_Assertion IsMonday(this .<> source) { }
-        [.(ExpectationMessage="to be a weekday")]
-        public static bool IsWeekday(this  value) { }
         public static ._IsWeekday_Assertion IsWeekday(this .<> source) { }
-        [.(ExpectationMessage="to be a weekend day")]
-        public static bool IsWeekend(this  value) { }
         public static ._IsWeekend_Assertion IsWeekend(this .<> source) { }
     }
     public sealed class DayOfWeek_IsFriday_Assertion : .<>
@@ -1031,72 +2057,24 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class DictionaryContainsKeyAssertion<TKey, TValue> : .<.<TKey, TValue>>
+    public static class DirectoryHasFilesAssertionExtensions
     {
-        public DictionaryContainsKeyAssertion(.<.<TKey, TValue>> context, TKey expectedKey, .<TKey>? comparer = null) { }
-        protected override .<.> CheckAsync(.<.<TKey, TValue>> metadata) { }
-        protected override string GetExpectation() { }
+        public static . HasFiles(this .<.DirectoryInfo> source) { }
     }
-    public class DictionaryDoesNotContainKeyAssertion<TKey, TValue> : .<.<TKey, TValue>>
+    public static class DirectoryHasNoSubdirectoriesAssertionExtensions
     {
-        public DictionaryDoesNotContainKeyAssertion(.<.<TKey, TValue>> context, TKey expectedKey) { }
-        protected override .<.> CheckAsync(.<.<TKey, TValue>> metadata) { }
-        protected override string GetExpectation() { }
+        public static . HasNoSubdirectories(this .<.DirectoryInfo> source) { }
     }
-    [.("DoesNotExist")]
-    public class DirectoryDoesNotExistAssertion : .<.DirectoryInfo>
-    {
-        public DirectoryDoesNotExistAssertion(.<.DirectoryInfo> context) { }
-        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("Exists")]
-    public class DirectoryExistsAssertion : .<.DirectoryInfo>
-    {
-        public DirectoryExistsAssertion(.<.DirectoryInfo> context) { }
-        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("HasFiles")]
-    public class DirectoryHasFilesAssertion : .<.DirectoryInfo>
-    {
-        public DirectoryHasFilesAssertion(.<.DirectoryInfo> context) { }
-        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("HasNoSubdirectories")]
-    public class DirectoryHasNoSubdirectoriesAssertion : .<.DirectoryInfo>
-    {
-        public DirectoryHasNoSubdirectoriesAssertion(.<.DirectoryInfo> context) { }
-        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.<.DirectoryInfo>("Exists", CustomName="DoesNotExist", ExpectationMessage="exist", NegateLogic=true)]
-    [.<.DirectoryInfo>("Exists", ExpectationMessage="exist")]
     public static class DirectoryInfoAssertionExtensions
     {
         public static . DoesNotExist(this .<.DirectoryInfo> source) { }
         public static . Exists(this .<.DirectoryInfo> source) { }
-        [.(ExpectationMessage="to be empty")]
-        public static bool IsEmpty(this .DirectoryInfo value) { }
         public static ._IsEmpty_Assertion IsEmpty(this .<.DirectoryInfo> source) { }
-        [.(ExpectationMessage="to be hidden")]
-        public static bool IsHidden(this .DirectoryInfo value) { }
         public static ._IsHidden_Assertion IsHidden(this .<.DirectoryInfo> source) { }
-        [.(ExpectationMessage="to not be empty")]
-        public static bool IsNotEmpty(this .DirectoryInfo value) { }
         public static ._IsNotEmpty_Assertion IsNotEmpty(this .<.DirectoryInfo> source) { }
-        [.(ExpectationMessage="to not be hidden")]
-        public static bool IsNotHidden(this .DirectoryInfo value) { }
         public static ._IsNotHidden_Assertion IsNotHidden(this .<.DirectoryInfo> source) { }
-        [.(ExpectationMessage="to not be a root directory")]
-        public static bool IsNotRoot(this .DirectoryInfo value) { }
         public static ._IsNotRoot_Assertion IsNotRoot(this .<.DirectoryInfo> source) { }
-        [.(ExpectationMessage="to be a root directory")]
-        public static bool IsRoot(this .DirectoryInfo value) { }
         public static ._IsRoot_Assertion IsRoot(this .<.DirectoryInfo> source) { }
-        [.(ExpectationMessage="to be a system directory")]
-        public static bool IsSystemDirectory(this .DirectoryInfo value) { }
         public static ._IsSystemDirectory_Assertion IsSystemDirectory(this .<.DirectoryInfo> source) { }
     }
     public class DirectoryInfoExistsAssertion : .<.DirectoryInfo>
@@ -1147,43 +2125,15 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.("IsNotEmpty")]
-    public class DirectoryIsNotEmptyAssertion : .<.DirectoryInfo>
-    {
-        public DirectoryIsNotEmptyAssertion(.<.DirectoryInfo> context) { }
-        protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class DoubleEqualsAssertion : .<double>
-    {
-        public DoubleEqualsAssertion(.<double> context, double expected) { }
-        protected override .<.> CheckAsync(.<double> metadata) { }
-        protected override string GetExpectation() { }
-        public . Within(double tolerance) { }
-    }
-    [.<.Encoding>("IsSingleByte", CustomName="IsNotSingleByte", ExpectationMessage="be single-byte encoding", NegateLogic=true)]
-    [.<.Encoding>("IsSingleByte", ExpectationMessage="be single-byte encoding")]
     public static class EncodingAssertionExtensions
     {
-        [.(ExpectationMessage="to be ASCII encoding")]
-        public static bool IsASCII(this .Encoding value) { }
         public static ._IsASCII_Assertion IsASCII(this .<.Encoding> source) { }
-        [.(ExpectationMessage="to be big-endian Unicode encoding")]
-        public static bool IsBigEndianUnicode(this .Encoding value) { }
         public static ._IsBigEndianUnicode_Assertion IsBigEndianUnicode(this .<.Encoding> source) { }
         public static . IsNotSingleByte(this .<.Encoding> source) { }
-        [.(ExpectationMessage="to not be UTF-8 encoding")]
-        public static bool IsNotUTF8(this .Encoding value) { }
         public static ._IsNotUTF8_Assertion IsNotUTF8(this .<.Encoding> source) { }
         public static . IsSingleByte(this .<.Encoding> source) { }
-        [.(ExpectationMessage="to be UTF-32 encoding")]
-        public static bool IsUTF32(this .Encoding value) { }
         public static ._IsUTF32_Assertion IsUTF32(this .<.Encoding> source) { }
-        [.(ExpectationMessage="to be UTF-8 encoding")]
-        public static bool IsUTF8(this .Encoding value) { }
         public static ._IsUTF8_Assertion IsUTF8(this .<.Encoding> source) { }
-        [.(ExpectationMessage="to be Unicode encoding")]
-        public static bool IsUnicode(this .Encoding value) { }
         public static ._IsUnicode_Assertion IsUnicode(this .<.Encoding> source) { }
     }
     public class EncodingIsSingleByteAssertion : .<.Encoding>
@@ -1228,54 +2178,18 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class EqualsAssertion<TValue> : .<TValue>
-    {
-        public EqualsAssertion(.<TValue> context, TValue expected, .<TValue>? comparer = null) { }
-        public TValue Expected { get; }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-        public .<TValue> IgnoringType( type) { }
-        public .<TValue> IgnoringType<TIgnore>() { }
-        public .<TValue> Within(object tolerance) { }
-    }
     public static class ExceptionAssertionExtensions
     {
-        [.(ExpectationMessage="to have a help link")]
-        public static bool HasHelpLink(this  value) { }
         public static ._HasHelpLink_Assertion HasHelpLink(this .<> source) { }
-        [.(ExpectationMessage="to have an inner exception")]
-        public static bool HasInnerException(this  value) { }
         public static ._HasInnerException_Assertion HasInnerException(this .<> source) { }
-        [.(ExpectationMessage="to have no data")]
-        public static bool HasNoData(this  value) { }
         public static ._HasNoData_Assertion HasNoData(this .<> source) { }
-        [.(ExpectationMessage="to have no help link")]
-        public static bool HasNoHelpLink(this  value) { }
         public static ._HasNoHelpLink_Assertion HasNoHelpLink(this .<> source) { }
-        [.(ExpectationMessage="to have no inner exception")]
-        public static bool HasNoInnerException(this  value) { }
         public static ._HasNoInnerException_Assertion HasNoInnerException(this .<> source) { }
-        [.(ExpectationMessage="to have no source")]
-        public static bool HasNoSource(this  value) { }
         public static ._HasNoSource_Assertion HasNoSource(this .<> source) { }
-        [.(ExpectationMessage="to have no target site")]
-        public static bool HasNoTargetSite(this  value) { }
         public static ._HasNoTargetSite_Assertion HasNoTargetSite(this .<> source) { }
-        [.(ExpectationMessage="to have a source")]
-        public static bool HasSource(this  value) { }
         public static ._HasSource_Assertion HasSource(this .<> source) { }
-        [.(ExpectationMessage="to have a stack trace")]
-        public static bool HasStackTrace(this  value) { }
         public static ._HasStackTrace_Assertion HasStackTrace(this .<> source) { }
-        [.(ExpectationMessage="to have a target site")]
-        public static bool HasTargetSite(this  value) { }
         public static ._HasTargetSite_Assertion HasTargetSite(this .<> source) { }
-    }
-    public class ExceptionMessageAssertion : .<object?>
-    {
-        public ExceptionMessageAssertion(.<object?> context, string expectedSubstring,  comparison = 4) { }
-        protected override .<.> CheckAsync(.<object?> metadata) { }
-        protected override string GetExpectation() { }
     }
     public sealed class Exception_HasHelpLink_Assertion : .<>
     {
@@ -1337,53 +2251,19 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.("DoesNotExist")]
-    public class FileDoesNotExistAssertion : .<.FileInfo>
-    {
-        public FileDoesNotExistAssertion(.<.FileInfo> context) { }
-        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("Exists")]
-    public class FileExistsAssertion : .<.FileInfo>
-    {
-        public FileExistsAssertion(.<.FileInfo> context) { }
-        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.<.FileInfo>("Exists", CustomName="DoesNotExist", ExpectationMessage="exist", NegateLogic=true)]
-    [.<.FileInfo>("Exists", ExpectationMessage="exist")]
-    [.<.FileInfo>("IsReadOnly", CustomName="IsNotReadOnly", ExpectationMessage="be read-only", NegateLogic=true)]
-    [.<.FileInfo>("IsReadOnly", ExpectationMessage="be read-only")]
     public static class FileInfoAssertionExtensions
     {
         public static . DoesNotExist(this .<.FileInfo> source) { }
         public static . Exists(this .<.FileInfo> source) { }
-        [.(ExpectationMessage="to have an extension")]
-        public static bool HasExtension(this .FileInfo value) { }
         public static ._HasExtension_Assertion HasExtension(this .<.FileInfo> source) { }
-        [.(ExpectationMessage="to not have an extension")]
-        public static bool HasNoExtension(this .FileInfo value) { }
         public static ._HasNoExtension_Assertion HasNoExtension(this .<.FileInfo> source) { }
-        [.(ExpectationMessage="to be archived")]
-        public static bool IsArchived(this .FileInfo value) { }
         public static ._IsArchived_Assertion IsArchived(this .<.FileInfo> source) { }
-        [.(ExpectationMessage="to be empty")]
-        public static bool IsEmpty(this .FileInfo value) { }
         public static ._IsEmpty_Assertion IsEmpty(this .<.FileInfo> source) { }
-        [.(ExpectationMessage="to be hidden")]
-        public static bool IsHidden(this .FileInfo value) { }
         public static ._IsHidden_Assertion IsHidden(this .<.FileInfo> source) { }
-        [.(ExpectationMessage="to not be empty")]
-        public static bool IsNotEmpty(this .FileInfo value) { }
         public static ._IsNotEmpty_Assertion IsNotEmpty(this .<.FileInfo> source) { }
-        [.(ExpectationMessage="to not be hidden")]
-        public static bool IsNotHidden(this .FileInfo value) { }
         public static ._IsNotHidden_Assertion IsNotHidden(this .<.FileInfo> source) { }
         public static . IsNotReadOnly(this .<.FileInfo> source) { }
         public static . IsReadOnly(this .<.FileInfo> source) { }
-        [.(ExpectationMessage="to be a system file")]
-        public static bool IsSystemFile(this .FileInfo value) { }
         public static ._IsSystemFile_Assertion IsSystemFile(this .<.FileInfo> source) { }
     }
     public class FileInfoExistsAssertion : .<.FileInfo>
@@ -1446,64 +2326,27 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.("IsNotEmpty")]
-    public class FileIsNotEmptyAssertion : .<.FileInfo>
+    public static class FileIsNotExecutableAssertionExtensions
     {
-        public FileIsNotEmptyAssertion(.<.FileInfo> context) { }
-        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
-        protected override string GetExpectation() { }
+        public static . IsNotExecutable(this .<.FileInfo> source) { }
     }
-    [.("IsNotExecutable")]
-    public class FileIsNotExecutableAssertion : .<.FileInfo>
+    public static class FileIsNotSystemAssertionExtensions
     {
-        public FileIsNotExecutableAssertion(.<.FileInfo> context) { }
-        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
-        protected override string GetExpectation() { }
+        public static . IsNotSystem(this .<.FileInfo> source) { }
     }
-    [.("IsNotHidden")]
-    public class FileIsNotHiddenAssertion : .<.FileInfo>
+    public static class GreaterThanAssertionExtensions
     {
-        public FileIsNotHiddenAssertion(.<.FileInfo> context) { }
-        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
-        protected override string GetExpectation() { }
+        public static .<TValue> IsGreaterThan<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
+            where TValue : <TValue> { }
     }
-    [.("IsNotReadOnly")]
-    public class FileIsNotReadOnlyAssertion : .<.FileInfo>
+    public static class GreaterThanOrEqualAssertionExtensions
     {
-        public FileIsNotReadOnlyAssertion(.<.FileInfo> context) { }
-        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("IsNotSystem")]
-    public class FileIsNotSystemAssertion : .<.FileInfo>
-    {
-        public FileIsNotSystemAssertion(.<.FileInfo> context) { }
-        protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("IsGreaterThan")]
-    public class GreaterThanAssertion<TValue> : .<TValue>
-        where TValue : <TValue>
-    {
-        public GreaterThanAssertion(.<TValue> context, TValue minimum) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("IsGreaterThanOrEqualTo")]
-    public class GreaterThanOrEqualAssertion<TValue> : .<TValue>
-        where TValue : <TValue>
-    {
-        public GreaterThanOrEqualAssertion(.<TValue> context, TValue minimum) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
+        public static .<TValue> IsGreaterThanOrEqualTo<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
+            where TValue : <TValue> { }
     }
     public static class GuidAssertionExtensions
     {
-        [.(ExpectationMessage="to be an empty GUID")]
-        public static bool IsEmptyGuid(this  value) { }
         public static ._IsEmptyGuid_Assertion IsEmptyGuid(this .<> source) { }
-        [.(ExpectationMessage="to not be an empty GUID")]
-        public static bool IsNotEmptyGuid(this  value) { }
         public static ._IsNotEmptyGuid_Assertion IsNotEmptyGuid(this .<> source) { }
     }
     public sealed class Guid_IsEmptyGuid_Assertion : .<>
@@ -1518,60 +2361,14 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class HasDistinctItemsAssertion<TValue> : .<TValue>
-        where TValue : .IEnumerable
-    {
-        public HasDistinctItemsAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class HasMessageContainingAssertion<TValue> : .<TValue>
-    {
-        public HasMessageContainingAssertion(.<TValue> context, string expectedSubstring,  comparison = 4) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class HasMessageEqualToAssertion<TValue> : .<TValue>
-    {
-        public HasMessageEqualToAssertion(.<TValue> context, string expectedMessage,  comparison = 4) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class HasMessageStartingWithAssertion<TValue> : .<TValue>
-    {
-        public HasMessageStartingWithAssertion(.<TValue> context, string expectedPrefix,  comparison = 4) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class HasSingleItemAssertion<TValue> : .<TValue>
-        where TValue : .IEnumerable
-    {
-        public HasSingleItemAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
     public static class HttpStatusCodeAssertionExtensions
     {
-        [.(ExpectationMessage="to be a client error status code (4xx)")]
-        public static bool IsClientError(this .HttpStatusCode value) { }
         public static ._IsClientError_Assertion IsClientError(this .<.HttpStatusCode> source) { }
-        [.(ExpectationMessage="to be an error status code (4xx or 5xx)")]
-        public static bool IsError(this .HttpStatusCode value) { }
         public static ._IsError_Assertion IsError(this .<.HttpStatusCode> source) { }
-        [.(ExpectationMessage="to be an informational status code (1xx)")]
-        public static bool IsInformational(this .HttpStatusCode value) { }
         public static ._IsInformational_Assertion IsInformational(this .<.HttpStatusCode> source) { }
-        [.(ExpectationMessage="to not be a success status code")]
-        public static bool IsNotSuccess(this .HttpStatusCode value) { }
         public static ._IsNotSuccess_Assertion IsNotSuccess(this .<.HttpStatusCode> source) { }
-        [.(ExpectationMessage="to be a redirection status code (3xx)")]
-        public static bool IsRedirection(this .HttpStatusCode value) { }
         public static ._IsRedirection_Assertion IsRedirection(this .<.HttpStatusCode> source) { }
-        [.(ExpectationMessage="to be a server error status code (5xx)")]
-        public static bool IsServerError(this .HttpStatusCode value) { }
         public static ._IsServerError_Assertion IsServerError(this .<.HttpStatusCode> source) { }
-        [.(ExpectationMessage="to be a success status code (2xx)")]
-        public static bool IsSuccess(this .HttpStatusCode value) { }
         public static ._IsSuccess_Assertion IsSuccess(this .<.HttpStatusCode> source) { }
     }
     public sealed class HttpStatusCode_IsClientError_Assertion : .<.HttpStatusCode>
@@ -1616,16 +2413,18 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.HttpStatusCode> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.<.IPAddress>("IsIPv4MappedToIPv6", CustomName="IsNotIPv4MappedToIPv6", ExpectationMessage="be an IPv4-mapped IPv6 address", NegateLogic=true)]
-    [.<.IPAddress>("IsIPv4MappedToIPv6", ExpectationMessage="be an IPv4-mapped IPv6 address")]
-    [.<.IPAddress>("IsIPv6LinkLocal", CustomName="IsNotIPv6LinkLocal", ExpectationMessage="be an IPv6 link-local address", NegateLogic=true)]
-    [.<.IPAddress>("IsIPv6LinkLocal", ExpectationMessage="be an IPv6 link-local address")]
-    [.<.IPAddress>("IsIPv6Multicast", CustomName="IsNotIPv6Multicast", ExpectationMessage="be an IPv6 multicast address", NegateLogic=true)]
-    [.<.IPAddress>("IsIPv6Multicast", ExpectationMessage="be an IPv6 multicast address")]
-    [.<.IPAddress>("IsIPv6SiteLocal", CustomName="IsNotIPv6SiteLocal", ExpectationMessage="be an IPv6 site-local address", NegateLogic=true)]
-    [.<.IPAddress>("IsIPv6SiteLocal", ExpectationMessage="be an IPv6 site-local address")]
-    [.<.IPAddress>("IsIPv6Teredo", CustomName="IsNotIPv6Teredo", ExpectationMessage="be an IPv6 Teredo address", NegateLogic=true)]
-    [.<.IPAddress>("IsIPv6Teredo", ExpectationMessage="be an IPv6 Teredo address")]
+    public sealed class IEnumerableT_IsNotSingleElement_Assertion<T> : .<.<T>>
+    {
+        public IEnumerableT_IsNotSingleElement_Assertion(.<.<T>> context) { }
+        protected override .<.> CheckAsync(.<.<T>> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class IEnumerableT_IsSingleElement_Assertion<T> : .<.<T>>
+    {
+        public IEnumerableT_IsSingleElement_Assertion(.<.<T>> context) { }
+        protected override .<.> CheckAsync(.<.<T>> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public static class IPAddressAssertionExtensions
     {
         public static .4MappedToIPv6Assertion IsIPv4MappedToIPv6(this .<.IPAddress> source) { }
@@ -1669,79 +2468,37 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.IPAddress> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.("IsAssignableTo")]
-    public class IsAssignableToAssertion<TTarget, TValue> : .<TValue>
+    public static class IsAssignableToAssertionExtensions
     {
-        public IsAssignableToAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
+        public static .<TTarget, TValue> IsAssignableTo<TTarget, TValue>(this .<TValue> source) { }
     }
-    [.("IsDefault")]
-    public class IsDefaultAssertion<TValue> : .<TValue>
+    public static class IsDefaultAssertionExtensions
     {
-        public IsDefaultAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
+        public static .<TValue> IsDefault<TValue>(this .<TValue> source) { }
     }
-    [.("IsEquatableOrEqualTo")]
-    public class IsEquatableOrEqualToAssertion<TValue> : .<TValue>
+    public static class IsEquatableOrEqualToAssertionExtensions
     {
-        public IsEquatableOrEqualToAssertion(.<TValue> context, TValue expected) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-        public .<TValue> Using(.<TValue> comparer) { }
+        public static .<TValue> IsEquatableOrEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expectedExpression = null) { }
     }
-    public class IsEquivalentToAssertion<TCollection, TItem> : .<TCollection>
-        where TCollection : .<TItem>
+    public static class IsInAssertionExtensions
     {
-        public IsEquivalentToAssertion(.<TCollection> context, .<TItem> expected, . ordering = 0) { }
-        protected override .<.> CheckAsync(.<TCollection> metadata) { }
-        protected override string GetExpectation() { }
-        public .<TCollection, TItem> Using(.<TItem> comparer) { }
+        public static .<TValue> IsIn<TValue>(this .<TValue> source, .<TValue> collection, [.("collection")] string? collectionExpression = null) { }
     }
-    [.("IsIn")]
-    public class IsInAssertion<TValue> : .<TValue>
+    public static class IsNotAssignableToAssertionExtensions
     {
-        public IsInAssertion(.<TValue> context, .<TValue> collection) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-        public .<TValue> Using(.<TValue> comparer) { }
+        public static .<TTarget, TValue> IsNotAssignableTo<TTarget, TValue>(this .<TValue> source) { }
     }
-    [.("IsNotAssignableTo")]
-    public class IsNotAssignableToAssertion<TTarget, TValue> : .<TValue>
+    public static class IsNotDefaultAssertionExtensions
     {
-        public IsNotAssignableToAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
+        public static .<TValue> IsNotDefault<TValue>(this .<TValue> source) { }
     }
-    [.("IsNotDefault")]
-    public class IsNotDefaultAssertion<TValue> : .<TValue>
+    public static class IsNotInAssertionExtensions
     {
-        public IsNotDefaultAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("IsNotIn")]
-    public class IsNotInAssertion<TValue> : .<TValue>
-    {
-        public IsNotInAssertion(.<TValue> context, .<TValue> collection) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-        public .<TValue> Using(.<TValue> comparer) { }
-    }
-    public class IsTypeOfRuntimeAssertion<TValue> : .<TValue>
-    {
-        public IsTypeOfRuntimeAssertion(.<TValue> context,  expectedType) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
+        public static .<TValue> IsNotIn<TValue>(this .<TValue> source, .<TValue> collection, [.("collection")] string? collectionExpression = null) { }
     }
     public static class LazyAssertionExtensions
     {
-        [.(ExpectationMessage="to have its value created")]
-        public static bool IsValueCreated<T>(this <T> value) { }
         public static ._IsValueCreated_Assertion<T> IsValueCreated<T>(this .<<T>> source) { }
-        [.(ExpectationMessage="to not have its value created")]
-        public static bool IsValueNotCreated<T>(this <T> value) { }
         public static ._IsValueNotCreated_Assertion<T> IsValueNotCreated<T>(this .<<T>> source) { }
     }
     public sealed class LazyT_IsValueCreated_Assertion<T> : .<<T>>
@@ -1756,95 +2513,32 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<<T>> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.("IsLessThan")]
-    public class LessThanAssertion<TValue> : .<TValue>
-        where TValue : <TValue>
+    public static class LessThanAssertionExtensions
     {
-        public LessThanAssertion(.<TValue> context, TValue maximum) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
+        public static .<TValue> IsLessThan<TValue>(this .<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
+            where TValue : <TValue> { }
     }
-    [.("IsLessThanOrEqualTo")]
-    public class LessThanOrEqualAssertion<TValue> : .<TValue>
-        where TValue : <TValue>
+    public static class LessThanOrEqualAssertionExtensions
     {
-        public LessThanOrEqualAssertion(.<TValue> context, TValue maximum) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
+        public static .<TValue> IsLessThanOrEqualTo<TValue>(this .<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
+            where TValue : <TValue> { }
     }
-    public class LongEqualsAssertion : .<long>
+    public static class NotEqualsAssertionExtensions
     {
-        public LongEqualsAssertion(.<long> context, long expected) { }
-        protected override .<.> CheckAsync(.<long> metadata) { }
-        protected override string GetExpectation() { }
-        public . Within(long tolerance) { }
+        public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue notExpected, .<TValue>? comparer = null, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
     }
-    public class MappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
+    public static class NotNullAssertionExtensions
     {
-        public MappedSatisfiesAssertion(.<TValue> context, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, string selectorDescription) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
+        public static .<TValue> IsNotNull<TValue>(this .<TValue> source) { }
     }
-    public class MemberAssertion<TObject, TMember> : .<TMember>, .<TMember>
+    public static class NotSameReferenceAssertionExtensions
     {
-        public MemberAssertion(.<TObject> parentContext, .<<TObject, TMember>> memberSelector) { }
-        protected override .<.> CheckAsync(.<TMember> metadata) { }
-        protected override string GetExpectation() { }
+        public static .<TValue> IsNotSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
     }
-    [.("IsNotEqualTo")]
-    public class NotEqualsAssertion<TValue> : .<TValue>
+    public static class NullAssertionExtensions
     {
-        public NotEqualsAssertion(.<TValue> context, TValue notExpected, .<TValue>? comparer = null) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-        public .<TValue> IgnoringType( type) { }
-        public .<TValue> IgnoringType<TIgnore>() { }
+        public static .<TValue> IsNull<TValue>(this .<TValue> source) { }
     }
-    public class NotEquivalentToAssertion<TCollection, TItem> : .<TCollection>
-        where TCollection : .<TItem>
-    {
-        public NotEquivalentToAssertion(.<TCollection> context, .<TItem> notExpected, . ordering = 0) { }
-        protected override .<.> CheckAsync(.<TCollection> metadata) { }
-        protected override string GetExpectation() { }
-        public .<TCollection, TItem> Using(.<TItem> comparer) { }
-    }
-    [.("IsNotNull")]
-    public class NotNullAssertion<TValue> : .<TValue>
-    {
-        public NotNullAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("IsNotSameReferenceAs")]
-    public class NotSameReferenceAssertion<TValue> : .<TValue>
-    {
-        public NotSameReferenceAssertion(.<TValue> context, object? expected) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    public class NotStructuralEquivalencyAssertion<TValue> : .<TValue>
-    {
-        public NotStructuralEquivalencyAssertion(.<TValue> context, object? notExpected, string? notExpectedExpression = null) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-        public .<TValue> IgnoringMember(string memberPath) { }
-        public .<TValue> IgnoringType( type) { }
-        public .<TValue> IgnoringType<T>() { }
-        public .<TValue> WithPartialEquivalency() { }
-    }
-    [.("IsNull")]
-    public class NullAssertion<TValue> : .<TValue>
-    {
-        public NullAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.<.Process>("EnableRaisingEvents", CustomName="DoesNotHaveEventRaisingEnabled", ExpectationMessage="have event raising enabled", NegateLogic=true)]
-    [.<.Process>("EnableRaisingEvents", ExpectationMessage="have event raising enabled")]
-    [.<.Process>("HasExited", CustomName="HasNotExited", ExpectationMessage="have exited", NegateLogic=true)]
-    [.<.Process>("HasExited", ExpectationMessage="have exited")]
-    [.<.Process>("Responding", CustomName="IsNotResponding", ExpectationMessage="be responding", NegateLogic=true)]
-    [.<.Process>("Responding", ExpectationMessage="be responding")]
     public static class ProcessAssertionExtensions
     {
         public static . DoesNotHaveEventRaisingEnabled(this .<.Process> source) { }
@@ -1872,27 +2566,10 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.Process> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.("IsSameReferenceAs")]
-    public class SameReferenceAssertion<TValue> : .<TValue>
+    public static class SameReferenceAssertionExtensions
     {
-        public SameReferenceAssertion(.<TValue> context, object? expected) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
+        public static .<TValue> IsSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
     }
-    public class SatisfiesAssertion<TValue> : .<TValue>
-    {
-        public SatisfiesAssertion(.<TValue> context, <TValue?, bool> predicate, string predicateDescription) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.<.Stream>("CanRead", CustomName="CannotRead", ExpectationMessage="be readable", NegateLogic=true)]
-    [.<.Stream>("CanRead", ExpectationMessage="be readable")]
-    [.<.Stream>("CanSeek", CustomName="CannotSeek", ExpectationMessage="be seekable", NegateLogic=true)]
-    [.<.Stream>("CanSeek", ExpectationMessage="be seekable")]
-    [.<.Stream>("CanTimeout", CustomName="CannotTimeout", ExpectationMessage="support timeout", NegateLogic=true)]
-    [.<.Stream>("CanTimeout", ExpectationMessage="support timeout")]
-    [.<.Stream>("CanWrite", CustomName="CannotWrite", ExpectationMessage="be writable", NegateLogic=true)]
-    [.<.Stream>("CanWrite", ExpectationMessage="be writable")]
     public static class StreamAssertionExtensions
     {
         public static . CanRead(this .<.Stream> source) { }
@@ -1903,17 +2580,9 @@ namespace .Conditions
         public static . CannotSeek(this .<.Stream> source) { }
         public static . CannotTimeout(this .<.Stream> source) { }
         public static . CannotWrite(this .<.Stream> source) { }
-        [.(ExpectationMessage="to be at the end")]
-        public static bool IsAtEnd(this .Stream value) { }
         public static ._IsAtEnd_Assertion IsAtEnd(this .<.Stream> source) { }
-        [.(ExpectationMessage="to be at the start")]
-        public static bool IsAtStart(this .Stream value) { }
         public static ._IsAtStart_Assertion IsAtStart(this .<.Stream> source) { }
-        [.(ExpectationMessage="to be empty")]
-        public static bool IsEmpty(this .Stream value) { }
         public static ._IsEmpty_Assertion IsEmpty(this .<.Stream> source) { }
-        [.(ExpectationMessage="to not be empty")]
-        public static bool IsNotEmpty(this .Stream value) { }
         public static ._IsNotEmpty_Assertion IsNotEmpty(this .<.Stream> source) { }
     }
     public class StreamCanReadAssertion : .<.Stream>
@@ -1966,14 +2635,8 @@ namespace .Conditions
     }
     public static class StringBuilderAssertionExtensions
     {
-        [.(ExpectationMessage="to have excess capacity")]
-        public static bool HasExcessCapacity(this .StringBuilder value) { }
         public static ._HasExcessCapacity_Assertion HasExcessCapacity(this .<.StringBuilder> source) { }
-        [.(ExpectationMessage="to be empty")]
-        public static bool IsEmpty(this .StringBuilder value) { }
         public static ._IsEmpty_Assertion IsEmpty(this .<.StringBuilder> source) { }
-        [.(ExpectationMessage="to not be empty")]
-        public static bool IsNotEmpty(this .StringBuilder value) { }
         public static ._IsNotEmpty_Assertion IsNotEmpty(this .<.StringBuilder> source) { }
     }
     public sealed class StringBuilder_HasExcessCapacity_Assertion : .<.StringBuilder>
@@ -1994,69 +2657,30 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.StringBuilder> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.("Contains")]
-    public class StringContainsAssertion : .<string>
+    public static class StringContainsAssertionExtensions
     {
-        public StringContainsAssertion(.<string> context, string expected) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
-        protected override string GetExpectation() { }
-        public . IgnoringCase() { }
-        public . IgnoringWhitespace() { }
-        public . WithComparison( comparison) { }
-        public . WithTrimming() { }
+        public static . Contains(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
     }
-    [.("DoesNotContain")]
-    public class StringDoesNotContainAssertion : .<string>
+    public static class StringDoesNotContainAssertionExtensions
     {
-        public StringDoesNotContainAssertion(.<string> context, string expected) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
-        protected override string GetExpectation() { }
-        public . IgnoringCase() { }
-        public . WithComparison( comparison) { }
+        public static . DoesNotContain(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
     }
-    [.("DoesNotMatch")]
-    public class StringDoesNotMatchAssertion : .<string>
+    public static class StringDoesNotMatchAssertionExtensions
     {
-        public StringDoesNotMatchAssertion(.<string> context, . regex) { }
-        public StringDoesNotMatchAssertion(.<string> context, string pattern) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
-        protected override string GetExpectation() { }
-        public . IgnoringCase() { }
-        public . WithOptions(. options) { }
+        public static . DoesNotMatch(this .<string> source, . regex, [.("regex")] string? regexExpression = null) { }
+        public static . DoesNotMatch(this .<string> source, string pattern, [.("pattern")] string? patternExpression = null) { }
     }
-    [.("EndsWith")]
-    public class StringEndsWithAssertion : .<string>
+    public static class StringEndsWithAssertionExtensions
     {
-        public StringEndsWithAssertion(.<string> context, string expected) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
-        protected override string GetExpectation() { }
-        public . IgnoringCase() { }
-        public . WithComparison( comparison) { }
+        public static . EndsWith(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
     }
-    public class StringEqualsAssertion : .<string>
+    public static class StringIsEmptyAssertionExtensions
     {
-        public StringEqualsAssertion(.<string> context, string expected) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
-        protected override string GetExpectation() { }
-        public . IgnoringCase() { }
-        public . IgnoringWhitespace() { }
-        public . WithComparison( comparison) { }
-        public . WithNullAndEmptyEquality() { }
-        public . WithTrimming() { }
+        public static . IsEmpty(this .<string> source) { }
     }
-    [.("IsEmpty")]
-    public class StringIsEmptyAssertion : .<string>
+    public static class StringIsNotEmptyAssertionExtensions
     {
-        public StringIsEmptyAssertion(.<string> context) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.("IsNotEmpty")]
-    public class StringIsNotEmptyAssertion : .<string>
-    {
-        public StringIsNotEmptyAssertion(.<string> context) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
-        protected override string GetExpectation() { }
+        public static . IsNotEmpty(this .<string> source) { }
     }
     public class StringIsNullOrEmptyWithStringAssertion : .<string>
     {
@@ -2070,89 +2694,57 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class StringLengthAssertion : .<string>
+    public static class StringMatchesAssertionExtensions
     {
-        public StringLengthAssertion(.<string> context, int expectedLength) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
-        protected override string GetExpectation() { }
+        public static . Matches(this .<string> source, . regex, [.("regex")] string? regexExpression = null) { }
+        public static . Matches(this .<string> source, string pattern, [.("pattern")] string? patternExpression = null) { }
     }
-    [.("Matches")]
-    public class StringMatchesAssertion : .<string>
+    public static class StringStartsWithAssertionExtensions
     {
-        public StringMatchesAssertion(.<string> context, . regex) { }
-        public StringMatchesAssertion(.<string> context, string pattern) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
-        protected override string GetExpectation() { }
-        public . IgnoringCase() { }
-        public . WithOptions(. options) { }
+        public static . StartsWith(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
     }
-    [.("StartsWith")]
-    public class StringStartsWithAssertion : .<string>
-    {
-        public StringStartsWithAssertion(.<string> context, string expected) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
-        protected override string GetExpectation() { }
-        public . IgnoringCase() { }
-        public . WithComparison( comparison) { }
-    }
-    [.<string>("IsNullOrEmpty", CustomName="IsNotNullOrEmpty", ExpectationMessage="be null or empty", NegateLogic=true)]
-    [.<string>("IsNullOrEmpty", ExpectationMessage="be null or empty")]
-    [.<string>("IsNullOrWhiteSpace", ExpectationMessage="be null, empty, or whitespace")]
     public static class StringStaticMethodAssertions
     {
         public static . IsNotNullOrEmpty(this .<string> source) { }
         public static . IsNullOrEmpty(this .<string> source) { }
         public static . IsNullOrWhiteSpace(this .<string> source) { }
     }
-    public class StructuralEquivalencyAssertion<TValue> : .<TValue>
-    {
-        public StructuralEquivalencyAssertion(.<TValue> context, object? expected, string? expectedExpression = null) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-        public .<TValue> IgnoringMember(string memberPath) { }
-        public .<TValue> IgnoringType( type) { }
-        public .<TValue> IgnoringType<T>() { }
-        public .<TValue> WithPartialEquivalency() { }
-    }
-    [.<.>("IsCanceled", CustomName="IsNotCanceled", ExpectationMessage="be canceled", NegateLogic=true)]
-    [.<.>("IsCanceled", ExpectationMessage="be canceled")]
-    [.<.>("IsCompleted", CustomName="IsNotCompleted", ExpectationMessage="be completed", NegateLogic=true)]
-    [.<.>("IsCompleted", ExpectationMessage="be completed")]
-    [.<.>("IsFaulted", CustomName="IsNotFaulted", ExpectationMessage="be faulted", NegateLogic=true)]
-    [.<.>("IsFaulted", ExpectationMessage="be faulted")]
     public static class TaskAssertionExtensions
     {
-        public static . IsCanceled(this .<.> source) { }
-        public static . IsCompleted(this .<.> source) { }
-        public static . IsFaulted(this .<.> source) { }
-        public static . IsNotCanceled(this .<.> source) { }
-        public static . IsNotCompleted(this .<.> source) { }
-        public static . IsNotFaulted(this .<.> source) { }
+        public static .<TTask> IsCanceled<TTask>(this .<TTask> source)
+            where TTask : . { }
+        public static .<TTask> IsCompleted<TTask>(this .<TTask> source)
+            where TTask : . { }
+        public static .<TTask> IsFaulted<TTask>(this .<TTask> source)
+            where TTask : . { }
+        public static .<TTask> IsNotCanceled<TTask>(this .<TTask> source)
+            where TTask : . { }
+        public static .<TTask> IsNotCompleted<TTask>(this .<TTask> source)
+            where TTask : . { }
+        public static .<TTask> IsNotFaulted<TTask>(this .<TTask> source)
+            where TTask : . { }
     }
-    public class TaskIsCanceledAssertion : .<.>
+    public class TaskIsCanceledAssertion<TTask> : .<TTask>
+        where TTask : .
     {
-        public TaskIsCanceledAssertion(.<.> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<.> metadata) { }
+        public TaskIsCanceledAssertion(.<TTask> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<TTask> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class TaskIsCompletedAssertion : .<.>
+    public class TaskIsCompletedAssertion<TTask> : .<TTask>
+        where TTask : .
     {
-        public TaskIsCompletedAssertion(.<.> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<.> metadata) { }
+        public TaskIsCompletedAssertion(.<TTask> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<TTask> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class TaskIsFaultedAssertion : .<.>
+    public class TaskIsFaultedAssertion<TTask> : .<TTask>
+        where TTask : .
     {
-        public TaskIsFaultedAssertion(.<.> context, bool negated = false) { }
-        protected override .<.> CheckAsync(.<.> metadata) { }
+        public TaskIsFaultedAssertion(.<TTask> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<TTask> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.<.Thread>("IsAlive", CustomName="IsNotAlive", ExpectationMessage="be alive", NegateLogic=true)]
-    [.<.Thread>("IsAlive", ExpectationMessage="be alive")]
-    [.<.Thread>("IsBackground", CustomName="IsNotBackground", ExpectationMessage="be a background thread", NegateLogic=true)]
-    [.<.Thread>("IsBackground", ExpectationMessage="be a background thread")]
-    [.<.Thread>("IsThreadPoolThread", CustomName="IsNotThreadPoolThread", ExpectationMessage="be a thread pool thread", NegateLogic=true)]
-    [.<.Thread>("IsThreadPoolThread", ExpectationMessage="be a thread pool thread")]
     public static class ThreadAssertionExtensions
     {
         public static . IsAlive(this .<.Thread> source) { }
@@ -2180,46 +2772,13 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.Thread> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class ThrowsAssertion<TException> : .<TException, .<TException>>
-        where TException : 
-    {
-        public ThrowsAssertion(.<object?> context) { }
-        protected override bool IsExactTypeMatch { get; }
-        protected override bool CheckExceptionType( actualException, out string? errorMessage) { }
-        public .<> WithInnerException() { }
-    }
-    public class ThrowsExactlyAssertion<TException> : .<TException, .<TException>>
-        where TException : 
-    {
-        public ThrowsExactlyAssertion(.<object?> context) { }
-        protected override bool IsExactTypeMatch { get; }
-        protected override bool CheckExceptionType( actualException, out string? errorMessage) { }
-    }
-    public class ThrowsNothingAssertion<TValue> : .<TValue>
-    {
-        public ThrowsNothingAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-    }
     public static class TimeSpanAssertionExtensions
     {
-        [.(ExpectationMessage="to be negative")]
-        public static bool IsNegative(this  value) { }
         public static ._IsNegative_Assertion IsNegative(this .<> source) { }
-        [.(ExpectationMessage="to be non-negative")]
-        public static bool IsNonNegative(this  value) { }
         public static ._IsNonNegative_Assertion IsNonNegative(this .<> source) { }
-        [.(ExpectationMessage="to be non-positive")]
-        public static bool IsNonPositive(this  value) { }
         public static ._IsNonPositive_Assertion IsNonPositive(this .<> source) { }
-        [.(ExpectationMessage="to not be zero")]
-        public static bool IsNotZero(this  value) { }
         public static ._IsNotZero_Assertion IsNotZero(this .<> source) { }
-        [.(ExpectationMessage="to be positive")]
-        public static bool IsPositive(this  value) { }
         public static ._IsPositive_Assertion IsPositive(this .<> source) { }
-        [.(ExpectationMessage="to be zero")]
-        public static bool IsZero(this  value) { }
         public static ._IsZero_Assertion IsZero(this .<> source) { }
     }
     public sealed class TimeSpan_IsNegative_Assertion : .<>
@@ -2258,8 +2817,6 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.<>("SupportsDaylightSavingTime", CustomName="DoesNotSupportDaylightSavingTime", ExpectationMessage="support daylight saving time", NegateLogic=true)]
-    [.<>("SupportsDaylightSavingTime", ExpectationMessage="support daylight saving time")]
     public static class TimeZoneInfoAssertionExtensions
     {
         public static . DoesNotSupportDaylightSavingTime(this .<> source) { }
@@ -2271,52 +2828,6 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.<>("ContainsGenericParameters", CustomName="DoesNotContainGenericParameters", ExpectationMessage="contain generic parameters", NegateLogic=true)]
-    [.<>("ContainsGenericParameters", ExpectationMessage="contain generic parameters")]
-    [.<>("IsAbstract", CustomName="IsNotAbstract", ExpectationMessage="be abstract", NegateLogic=true)]
-    [.<>("IsAbstract", ExpectationMessage="be abstract")]
-    [.<>("IsArray", CustomName="IsNotArray", ExpectationMessage="be an array", NegateLogic=true)]
-    [.<>("IsArray", ExpectationMessage="be an array")]
-    [.<>("IsByRef", CustomName="IsNotByRef", ExpectationMessage="be a by-ref type", NegateLogic=true)]
-    [.<>("IsByRef", ExpectationMessage="be a by-ref type")]
-    [.<>("IsCOMObject", CustomName="IsNotCOMObject", ExpectationMessage="be a COM object", NegateLogic=true)]
-    [.<>("IsCOMObject", ExpectationMessage="be a COM object")]
-    [.<>("IsClass", CustomName="IsNotClass", ExpectationMessage="be a class", NegateLogic=true)]
-    [.<>("IsClass", ExpectationMessage="be a class")]
-    [.<>("IsConstructedGenericType", CustomName="IsNotConstructedGenericType", ExpectationMessage="be a constructed generic type", NegateLogic=true)]
-    [.<>("IsConstructedGenericType", ExpectationMessage="be a constructed generic type")]
-    [.<>("IsEnum", CustomName="IsNotEnum", ExpectationMessage="be an enum", NegateLogic=true)]
-    [.<>("IsEnum", ExpectationMessage="be an enum")]
-    [.<>("IsGenericType", CustomName="IsNotGenericType", ExpectationMessage="be a generic type", NegateLogic=true)]
-    [.<>("IsGenericType", ExpectationMessage="be a generic type")]
-    [.<>("IsGenericTypeDefinition", CustomName="IsNotGenericTypeDefinition", ExpectationMessage="be a generic type definition", NegateLogic=true)]
-    [.<>("IsGenericTypeDefinition", ExpectationMessage="be a generic type definition")]
-    [.<>("IsInterface", CustomName="IsNotInterface", ExpectationMessage="be an interface", NegateLogic=true)]
-    [.<>("IsInterface", ExpectationMessage="be an interface")]
-    [.<>("IsNested", CustomName="IsNotNested", ExpectationMessage="be a nested type", NegateLogic=true)]
-    [.<>("IsNested", ExpectationMessage="be a nested type")]
-    [.<>("IsNestedAssembly", CustomName="IsNotNestedAssembly", ExpectationMessage="be a nested assembly type", NegateLogic=true)]
-    [.<>("IsNestedAssembly", ExpectationMessage="be a nested assembly type")]
-    [.<>("IsNestedFamily", CustomName="IsNotNestedFamily", ExpectationMessage="be a nested family type", NegateLogic=true)]
-    [.<>("IsNestedFamily", ExpectationMessage="be a nested family type")]
-    [.<>("IsNestedPrivate", CustomName="IsNotNestedPrivate", ExpectationMessage="be a nested private type", NegateLogic=true)]
-    [.<>("IsNestedPrivate", ExpectationMessage="be a nested private type")]
-    [.<>("IsNestedPublic", CustomName="IsNotNestedPublic", ExpectationMessage="be a nested public type", NegateLogic=true)]
-    [.<>("IsNestedPublic", ExpectationMessage="be a nested public type")]
-    [.<>("IsPointer", CustomName="IsNotPointer", ExpectationMessage="be a pointer type", NegateLogic=true)]
-    [.<>("IsPointer", ExpectationMessage="be a pointer type")]
-    [.<>("IsPrimitive", CustomName="IsNotPrimitive", ExpectationMessage="be a primitive type", NegateLogic=true)]
-    [.<>("IsPrimitive", ExpectationMessage="be a primitive type")]
-    [.<>("IsPublic", CustomName="IsNotPublic", ExpectationMessage="be public", NegateLogic=true)]
-    [.<>("IsPublic", ExpectationMessage="be public")]
-    [.<>("IsSealed", CustomName="IsNotSealed", ExpectationMessage="be sealed", NegateLogic=true)]
-    [.<>("IsSealed", ExpectationMessage="be sealed")]
-    [.<>("IsSerializable", CustomName="IsNotSerializable", ExpectationMessage="be serializable", NegateLogic=true)]
-    [.<>("IsSerializable", ExpectationMessage="be serializable")]
-    [.<>("IsValueType", CustomName="IsNotValueType", ExpectationMessage="be a value type", NegateLogic=true)]
-    [.<>("IsValueType", ExpectationMessage="be a value type")]
-    [.<>("IsVisible", CustomName="IsNotVisible", ExpectationMessage="be visible", NegateLogic=true)]
-    [.<>("IsVisible", ExpectationMessage="be visible")]
     public static class TypeAssertionExtensions
     {
         public static . ContainsGenericParameters(this .<> source) { }
@@ -2504,24 +3015,6 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class TypeOfAssertion<TFrom, TTo> : .<TTo>
-    {
-        public TypeOfAssertion(.<TFrom> parentContext) { }
-        protected override .<.> CheckAsync(.<TTo> metadata) { }
-        protected override string GetExpectation() { }
-    }
-    [.<>("IsAbsoluteUri", CustomName="IsNotAbsoluteUri", ExpectationMessage="be an absolute URI", NegateLogic=true)]
-    [.<>("IsAbsoluteUri", ExpectationMessage="be an absolute URI")]
-    [.<>("IsDefaultPort", CustomName="IsNotDefaultPort", ExpectationMessage="use the default port", NegateLogic=true)]
-    [.<>("IsDefaultPort", ExpectationMessage="use the default port")]
-    [.<>("IsFile", CustomName="IsNotFile", ExpectationMessage="be a file URI", NegateLogic=true)]
-    [.<>("IsFile", ExpectationMessage="be a file URI")]
-    [.<>("IsLoopback", CustomName="IsNotLoopback", ExpectationMessage="be a loopback URI", NegateLogic=true)]
-    [.<>("IsLoopback", ExpectationMessage="be a loopback URI")]
-    [.<>("IsUnc", CustomName="IsNotUnc", ExpectationMessage="be a UNC URI", NegateLogic=true)]
-    [.<>("IsUnc", ExpectationMessage="be a UNC URI")]
-    [.<>("UserEscaped", CustomName="IsNotUserEscaped", ExpectationMessage="be user-escaped", NegateLogic=true)]
-    [.<>("UserEscaped", ExpectationMessage="be user-escaped")]
     public static class UriAssertionExtensions
     {
         public static . IsAbsoluteUri(this .<> source) { }
@@ -2575,23 +3068,11 @@ namespace .Conditions
     }
     public static class VersionAssertionExtensions
     {
-        [.(ExpectationMessage="to have a build number")]
-        public static bool HasBuildNumber(this  value) { }
         public static ._HasBuildNumber_Assertion HasBuildNumber(this .<> source) { }
-        [.(ExpectationMessage="to not have a build number")]
-        public static bool HasNoBuildNumber(this  value) { }
         public static ._HasNoBuildNumber_Assertion HasNoBuildNumber(this .<> source) { }
-        [.(ExpectationMessage="to not have a revision number")]
-        public static bool HasNoRevisionNumber(this  value) { }
         public static ._HasNoRevisionNumber_Assertion HasNoRevisionNumber(this .<> source) { }
-        [.(ExpectationMessage="to have a revision number")]
-        public static bool HasRevisionNumber(this  value) { }
         public static ._HasRevisionNumber_Assertion HasRevisionNumber(this .<> source) { }
-        [.(ExpectationMessage="to be a major version (x.0.0.0)")]
-        public static bool IsMajorVersion(this  value) { }
         public static ._IsMajorVersion_Assertion IsMajorVersion(this .<> source) { }
-        [.(ExpectationMessage="to not be a major version")]
-        public static bool IsNotMajorVersion(this  value) { }
         public static ._IsNotMajorVersion_Assertion IsNotMajorVersion(this .<> source) { }
     }
     public sealed class Version_HasBuildNumber_Assertion : .<>
@@ -2630,10 +3111,6 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.<>("IsAlive", CustomName="IsNotAlive", ExpectationMessage="be alive", NegateLogic=true)]
-    [.<>("IsAlive", ExpectationMessage="be alive")]
-    [.<>("TrackResurrection", CustomName="DoesNotTrackResurrection", ExpectationMessage="track resurrection", NegateLogic=true)]
-    [.<>("TrackResurrection", ExpectationMessage="track resurrection")]
     public static class WeakReferenceAssertionExtensions
     {
         public static . DoesNotTrackResurrection(this .<> source) { }
@@ -2646,13 +3123,6 @@ namespace .Conditions
         public WeakReferenceIsAliveAssertion(.<> context, bool negated = false) { }
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
-    }
-    [.<>("IsAlive", CustomName="IsDead", ExpectationMessage="be alive", NegateLogic=true)]
-    [.<>("IsAlive", ExpectationMessage="be alive")]
-    public static class WeakReferencePropertyAssertions
-    {
-        public static . IsAlive(this .<> source) { }
-        public static . IsDead(this .<> source) { }
     }
     public class WeakReferenceTrackResurrectionAssertion : .<>
     {
@@ -2685,483 +3155,18 @@ namespace .Conditions
         protected override string GetExpectation() { }
     }
 }
-namespace .
-{
-    public class CountWrapper<TValue> : .<TValue>
-        where TValue : .IEnumerable
-    {
-        public CountWrapper(.<TValue> context) { }
-        public .<TValue> EqualTo(int expectedCount, [.("expectedCount")] string? expression = null) { }
-        public .<int> GreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
-        public .<int> Positive() { }
-    }
-    public class LengthWrapper : .<string>
-    {
-        public LengthWrapper(.<string> context) { }
-        public . EqualTo(int expectedLength, [.("expectedLength")] string? expression = null) { }
-    }
-}
-namespace .Core
-{
-    public class AndContinuation<TValue> : .<TValue>
-    {
-        public .<TValue> Context { get; }
-        public .<TValue> PreviousAssertion { get; }
-    }
-    public sealed class AssertionContext<TValue>
-    {
-        public AssertionContext(.<TValue> evaluation, .StringBuilder expressionBuilder) { }
-        public AssertionContext(TValue? value, .StringBuilder expressionBuilder) { }
-        public .<TValue> Evaluation { get; }
-        public .StringBuilder ExpressionBuilder { get; }
-        [return: .(new string[] {
-                "Value",
-                "Exception"})]
-        public .<<TValue?, ?>> GetAsync() { }
-        [return: .(new string[] {
-                "Start",
-                "End"})]
-        public <, > GetTiming() { }
-        public .<TNew> Map<TNew>(<TValue?, TNew?> mapper) { }
-    }
-    public readonly struct AssertionResult
-    {
-        public bool IsPassed { get; }
-        public string Message { get; }
-        public static . Passed { get; }
-        public static . FailIf(bool condition, string message) { }
-        public static . Failed(string message) { }
-    }
-    public abstract class Assertion<TValue>
-    {
-        protected readonly .<TValue> Context;
-        protected Assertion(.<TValue> context) { }
-        public .<TValue> And { get; }
-        public .<TValue> Or { get; }
-        protected void AppendExpression(string expression) { }
-        public virtual .<TValue?> AssertAsync() { }
-        public .<TValue> Because(string message) { }
-        protected virtual .<.> CheckAsync(.<TValue> metadata) { }
-        protected  CreateException(. result) { }
-        public .<TValue?> GetAwaiter() { }
-        protected abstract string GetExpectation();
-    }
-    public enum ChainType
-    {
-        None = 0,
-        And = 1,
-        Or = 2,
-    }
-    public sealed class EvaluationContext<TValue>
-    {
-        public EvaluationContext(<.<<TValue?, ?>>> evaluator) { }
-        public EvaluationContext(TValue? value) { }
-        [return: .(new string?[]?[] {
-                "Value",
-                "Exception"})]
-        public .<<TValue?, ?>> GetAsync() { }
-        [return: .(new string[] {
-                "Start",
-                "End"})]
-        public <, > GetTiming() { }
-        public .<TNew> Map<TNew>(<TValue?, TNew?> mapper) { }
-    }
-    public readonly struct EvaluationMetadata<TValue>
-    {
-        public EvaluationMetadata(TValue? value, ? exception,  startTime,  endTime) { }
-        public  Duration { get; }
-        public  EndTime { get; }
-        public ? Exception { get; }
-        public  StartTime { get; }
-        public TValue Value { get; }
-    }
-    public interface IAssertionSource<TValue>
-    {
-        .<TValue> Context { get; }
-    }
-    public interface IDelegateAssertionSource<TValue> : .<TValue> { }
-    public class OrContinuation<TValue> : .<TValue>
-    {
-        public .<TValue> Context { get; }
-        public .<TValue> PreviousAssertion { get; }
-    }
-}
-namespace .Enums
-{
-    public enum CollectionOrdering
-    {
-        Any = 0,
-        Matching = 1,
-    }
-}
-namespace .Exceptions
-{
-    public class AssertionException : .
-    {
-        public AssertionException(string? message) { }
-        public AssertionException(string? message,  innerException) { }
-    }
-    public class BaseAssertionException : 
-    {
-        public BaseAssertionException() { }
-        public BaseAssertionException(string? message) { }
-        public BaseAssertionException(string? message, ? innerException) { }
-    }
-    public class MaybeCaughtException : 
-    {
-        public MaybeCaughtException( exception) { }
-    }
-    public class MixedAndOrAssertionsException : .
-    {
-        public MixedAndOrAssertionsException() { }
-    }
-}
-namespace .Extensions
-{
-    public static class AssertionExtensions
-    {
-        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source) { }
-        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
-        public static .<TCollection, TItem> All<TCollection, TItem>(this .<TCollection> source)
-            where TCollection : .<TItem> { }
-        public static .<TCollection, TItem> All<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection, TItem> Any<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
-        public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
-        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
-        public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
-        public static .<TCollection> Contains<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection, TItem> Contains<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection, TItem> Contains<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection> Contains<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey key, [.("key")] string? expression = null) { }
-        public static .<TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey key, .<TKey> comparer, [.("key")] string? expression = null) { }
-        public static .<TKey, TValue> ContainsKey<TDictionary, TKey, TValue>(this .<TDictionary> source, TKey key, [.("key")] string? expression = null)
-            where TDictionary : .<TKey, TValue> { }
-        public static .<TKey, TValue> ContainsKey<TDictionary, TKey, TValue>(this .<TDictionary> source, TKey key, .<TKey> comparer, [.("key")] string? expression = null)
-            where TDictionary : .<TKey, TValue> { }
-        public static .<.<TItem>, TItem> ContainsOnly<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
-        public static .<TCollection, TItem> ContainsOnly<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
-        public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
-        public static .<TCollection, TItem> DoesNotContain<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection, TItem> DoesNotContain<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TKey, TValue> DoesNotContainKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey key, [.("key")] string? expression = null) { }
-        public static .<TKey, TValue> DoesNotContainKey<TDictionary, TKey, TValue>(this .<TDictionary> source, TKey key, [.("key")] string? expression = null)
-            where TDictionary : .<TKey, TValue> { }
-        public static ..DoesNotHaveFlagAssertion<TEnum> DoesNotHaveFlag<TEnum>(this .<TEnum> source, TEnum unexpectedFlag, [.("unexpectedFlag")] string? expression = null)
-            where TEnum :  struct,  { }
-        public static ..DoesNotHaveSameNameAsAssertion<TEnum> DoesNotHaveSameNameAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
-            where TEnum :  struct,  { }
-        public static ..DoesNotHaveSameValueAsAssertion<TEnum> DoesNotHaveSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
-            where TEnum :  struct,  { }
-        public static .<TValue> EqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static ..CountWrapper<TValue> HasCount<TValue>(this .<TValue> source)
-            where TValue : .IEnumerable { }
-        public static .<TValue> HasCount<TValue>(this .<TValue> source, int expectedCount, [.("expectedCount")] string? expression = null)
-            where TValue : .IEnumerable { }
-        public static .<TValue> HasDistinctItems<TValue>(this .<TValue> source)
-            where TValue : .IEnumerable { }
-        public static ..HasFlagAssertion<TEnum> HasFlag<TEnum>(this .<TEnum> source, TEnum expectedFlag, [.("expectedFlag")] string? expression = null)
-            where TEnum :  struct,  { }
-        public static ..LengthWrapper HasLength(this .<string> source) { }
-        public static ..LengthWrapper HasLength(this .<string> source) { }
-        public static . HasLength(this .<string> source, int expectedLength, [.("expectedLength")] string? expression = null) { }
-        public static .<TObject, TMember> HasMember<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector) { }
-        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring) { }
-        public static . HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring) { }
-        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring) { }
-        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring,  comparison) { }
-        public static . HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring,  comparison) { }
-        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring,  comparison) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
-        public static ..HasSameNameAsAssertion<TEnum> HasSameNameAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
-            where TEnum :  struct,  { }
-        public static ..HasSameValueAsAssertion<TEnum> HasSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
-            where TEnum :  struct,  { }
-        public static .<TValue> HasSingleItem<TValue>(this .<TValue> source)
-            where TValue : .IEnumerable { }
-        public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static .<TTarget, object> IsAssignableTo<TTarget>(this .<object> source) { }
-        public static .<TTarget, TValue> IsAssignableTo<TTarget, TValue>(this .<TValue> source) { }
-        public static ..IsDefinedAssertion<TEnum> IsDefined<TEnum>(this .<TEnum> source)
-            where TEnum :  struct,  { }
-        public static .<TValue> IsEmpty<TValue>(this .<TValue> source)
-            where TValue : .IEnumerable { }
-        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expression = null) { }
-        public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expression = null) { }
-        public static . IsEqualTo(this .<string> source, string expected, [.("expected")] string? expression = null) { }
-        public static .<string> IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
-        public static . IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
-        public static .<string> IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
-        public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, .<TItem> comparer, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, . ordering, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<bool> IsFalse(this .<bool> source) { }
-        public static .<bool> IsFalse(this .<bool> source) { }
-        public static .<TValue> IsIn<TValue>(this .<TValue> source, params TValue[] collection) { }
-        public static .<.<TItem>, TItem> IsInDescendingOrder<TItem>(this .<.<TItem>> source)
-            where TItem : <TItem> { }
-        public static .<TCollection, TItem> IsInDescendingOrder<TCollection, TItem>(this .<TCollection> source)
-            where TCollection : .<TItem>
-            where TItem : <TItem> { }
-        public static .<.<TItem>, TItem> IsInOrder<TItem>(this .<.<TItem>> source)
-            where TItem : <TItem> { }
-        public static .<TCollection, TItem> IsInOrder<TCollection, TItem>(this .<TCollection> source)
-            where TCollection : .<TItem>
-            where TItem : <TItem> { }
-        public static .<TValue> IsNegative<TValue>(this .<TValue> source)
-            where TValue : <TValue> { }
-        public static .<TValue> IsNegative<TValue>(this .<TValue?> source)
-            where TValue :  struct, <TValue> { }
-        public static .<TTarget, TValue> IsNotAssignableTo<TTarget, TValue>(this .<TValue> source) { }
-        public static ..IsNotDefinedAssertion<TEnum> IsNotDefined<TEnum>(this .<TEnum> source)
-            where TEnum :  struct,  { }
-        public static .<TValue> IsNotEmpty<TValue>(this .<TValue> source)
-            where TValue : .IEnumerable { }
-        public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsNotEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
-        public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, .<TItem> comparer, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, . ordering, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TValue> IsNotIn<TValue>(this .<TValue> source, params TValue[] collection) { }
-        public static ..IsNotParsableIntoAssertion<T> IsNotParsableInto<T>(this .<string> source) { }
-        public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType) { }
-        public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType) { }
-        public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
-        public static ..IsParsableIntoAssertion<T> IsParsableInto<T>(this .<string> source) { }
-        public static .<TValue> IsPositive<TValue>(this .<TValue> source)
-            where TValue : <TValue> { }
-        public static .<TValue> IsPositive<TValue>(this .<TValue?> source)
-            where TValue :  struct, <TValue> { }
-        public static .<bool> IsTrue(this .<bool> source) { }
-        public static .<bool> IsTrue(this .<bool> source) { }
-        public static .<object, TExpected> IsTypeOf<TExpected>(this .<object> source) { }
-        public static .<TFrom, TTo> IsTypeOf<TTo, TFrom>(this .<TFrom> source) { }
-        public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
-        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped>> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
-        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
-        public static .<TException> Throws<TException>(this . source)
-            where TException :  { }
-        public static .<TException> Throws<TException>(this . source)
-            where TException :  { }
-        public static .<TException> Throws<TException, TValue>(this .<TValue> source)
-            where TException :  { }
-        public static .<TException> ThrowsAsync<TValue, TException>(this .<TValue> source)
-            where TException :  { }
-        public static .<TException> ThrowsExactly<TException>(this . source)
-            where TException :  { }
-        public static .<TException> ThrowsExactly<TException>(this . source)
-            where TException :  { }
-        public static .<TException> ThrowsExactly<TException, TValue>(this .<TValue> source)
-            where TException :  { }
-        public static .<> ThrowsException<TValue>(this .<TValue> source) { }
-        public static .<TException> ThrowsException<TException, TValue>(this .<TValue> source)
-            where TException :  { }
-        public static .<TValue> ThrowsNothing<TValue>(this .<TValue> source) { }
-        public static ..WhenParsedIntoAssertion<T> WhenParsedInto<T>(this .<string> source) { }
-        public static . WithMessageContaining(this .<object?> source, string expectedSubstring) { }
-        public static . WithMessageContaining(this .<object?> source, string expectedSubstring,  comparison) { }
-    }
-    public static class BetweenAssertionExtensions
-    {
-        public static .<TValue> IsBetween<TValue>(this .<TValue> source, TValue minimum, TValue maximum, [.("minimum")] string? minimumExpression = null, [.("maximum")] string? maximumExpression = null)
-            where TValue : <TValue> { }
-    }
-    public static class DateTimeEqualsExactAssertionExtensions
-    {
-        public static . EqualsExact(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
-    }
-    public static class DirectoryDoesNotExistAssertionExtensions
-    {
-        public static . DoesNotExist(this .<.DirectoryInfo> source) { }
-    }
-    public static class DirectoryExistsAssertionExtensions
-    {
-        public static . Exists(this .<.DirectoryInfo> source) { }
-    }
-    public static class DirectoryHasFilesAssertionExtensions
-    {
-        public static . HasFiles(this .<.DirectoryInfo> source) { }
-    }
-    public static class DirectoryHasNoSubdirectoriesAssertionExtensions
-    {
-        public static . HasNoSubdirectories(this .<.DirectoryInfo> source) { }
-    }
-    public static class DirectoryIsNotEmptyAssertionExtensions
-    {
-        public static . IsNotEmpty(this .<.DirectoryInfo> source) { }
-    }
-    public static class FileDoesNotExistAssertionExtensions
-    {
-        public static . DoesNotExist(this .<.FileInfo> source) { }
-    }
-    public static class FileExistsAssertionExtensions
-    {
-        public static . Exists(this .<.FileInfo> source) { }
-    }
-    public static class FileIsNotEmptyAssertionExtensions
-    {
-        public static . IsNotEmpty(this .<.FileInfo> source) { }
-    }
-    public static class FileIsNotExecutableAssertionExtensions
-    {
-        public static . IsNotExecutable(this .<.FileInfo> source) { }
-    }
-    public static class FileIsNotHiddenAssertionExtensions
-    {
-        public static . IsNotHidden(this .<.FileInfo> source) { }
-    }
-    public static class FileIsNotReadOnlyAssertionExtensions
-    {
-        public static . IsNotReadOnly(this .<.FileInfo> source) { }
-    }
-    public static class FileIsNotSystemAssertionExtensions
-    {
-        public static . IsNotSystem(this .<.FileInfo> source) { }
-    }
-    public static class GreaterThanAssertionExtensions
-    {
-        public static .<TValue> IsGreaterThan<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
-            where TValue : <TValue> { }
-    }
-    public static class GreaterThanOrEqualAssertionExtensions
-    {
-        public static .<TValue> IsGreaterThanOrEqualTo<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
-            where TValue : <TValue> { }
-    }
-    public static class IsAssignableToAssertionExtensions
-    {
-        public static .<TTarget, TValue> IsAssignableTo<TTarget, TValue>(this .<TValue> source) { }
-    }
-    public static class IsDefaultAssertionExtensions
-    {
-        public static .<TValue> IsDefault<TValue>(this .<TValue> source) { }
-    }
-    public static class IsEquatableOrEqualToAssertionExtensions
-    {
-        public static .<TValue> IsEquatableOrEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expectedExpression = null) { }
-    }
-    public static class IsInAssertionExtensions
-    {
-        public static .<TValue> IsIn<TValue>(this .<TValue> source, .<TValue> collection, [.("collection")] string? collectionExpression = null) { }
-    }
-    public static class IsNotAssignableToAssertionExtensions
-    {
-        public static .<TTarget, TValue> IsNotAssignableTo<TTarget, TValue>(this .<TValue> source) { }
-    }
-    public static class IsNotDefaultAssertionExtensions
-    {
-        public static .<TValue> IsNotDefault<TValue>(this .<TValue> source) { }
-    }
-    public static class IsNotInAssertionExtensions
-    {
-        public static .<TValue> IsNotIn<TValue>(this .<TValue> source, .<TValue> collection, [.("collection")] string? collectionExpression = null) { }
-    }
-    public static class LessThanAssertionExtensions
-    {
-        public static .<TValue> IsLessThan<TValue>(this .<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
-            where TValue : <TValue> { }
-    }
-    public static class LessThanOrEqualAssertionExtensions
-    {
-        public static .<TValue> IsLessThanOrEqualTo<TValue>(this .<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
-            where TValue : <TValue> { }
-    }
-    public static class NotEqualsAssertionExtensions
-    {
-        public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue notExpected, .<TValue>? comparer = null, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
-    }
-    public static class NotNullAssertionExtensions
-    {
-        public static .<TValue> IsNotNull<TValue>(this .<TValue> source) { }
-    }
-    public static class NotSameReferenceAssertionExtensions
-    {
-        public static .<TValue> IsNotSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
-    }
-    public static class NullAssertionExtensions
-    {
-        public static .<TValue> IsNull<TValue>(this .<TValue> source) { }
-    }
-    public static class SameReferenceAssertionExtensions
-    {
-        public static .<TValue> IsSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
-    }
-    public static class StringContainsAssertionExtensions
-    {
-        public static . Contains(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
-    }
-    public static class StringDoesNotContainAssertionExtensions
-    {
-        public static . DoesNotContain(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
-    }
-    public static class StringDoesNotMatchAssertionExtensions
-    {
-        public static . DoesNotMatch(this .<string> source, . regex, [.("regex")] string? regexExpression = null) { }
-        public static . DoesNotMatch(this .<string> source, string pattern, [.("pattern")] string? patternExpression = null) { }
-    }
-    public static class StringEndsWithAssertionExtensions
-    {
-        public static . EndsWith(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
-    }
-    public static class StringIsEmptyAssertionExtensions
-    {
-        public static . IsEmpty(this .<string> source) { }
-    }
-    public static class StringIsNotEmptyAssertionExtensions
-    {
-        public static . IsNotEmpty(this .<string> source) { }
-    }
-    public static class StringMatchesAssertionExtensions
-    {
-        public static . Matches(this .<string> source, . regex, [.("regex")] string? regexExpression = null) { }
-        public static . Matches(this .<string> source, string pattern, [.("pattern")] string? patternExpression = null) { }
-    }
-    public static class StringStartsWithAssertionExtensions
-    {
-        public static . StartsWith(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
-    }
-}
 namespace .Sources
 {
-    public class AsyncDelegateAssertion : .<object?>, .<object?>
+    public class AsyncDelegateAssertion : .<object?>, .<.>, .<object?>
     {
         public AsyncDelegateAssertion(<.> action, string? expression) { }
         public .<object?> Context { get; }
+        public .<.> IsCanceled() { }
+        public .<.> IsCompleted() { }
+        public .<.> IsFaulted() { }
+        public .<.> IsNotCanceled() { }
+        public .<.> IsNotCompleted() { }
+        public .<.> IsNotFaulted() { }
     }
     public class AsyncFuncAssertion<TValue> : .<TValue>, .<TValue>
     {
@@ -3191,6 +3196,21 @@ namespace .Sources
     {
         public FuncAssertion(<TValue> func, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TException> Throws<TException>()
+            where TException :  { }
+        public .<TException> ThrowsExactly<TException>()
+            where TException :  { }
+    }
+    public class TaskAssertion<TValue> : .<.<TValue>>, .<TValue>, .<TValue>
+    {
+        public TaskAssertion(.<TValue> task, string? expression) { }
+        public .<TValue> Context { get; }
+        public .<.<TValue>> IsCanceled() { }
+        public .<.<TValue>> IsCompleted() { }
+        public .<.<TValue>> IsFaulted() { }
+        public .<.<TValue>> IsNotCanceled() { }
+        public .<.<TValue>> IsNotCompleted() { }
+        public .<.<TValue>> IsNotFaulted() { }
         public .<TException> Throws<TException>()
             where TException :  { }
         public .<TException> ThrowsExactly<TException>()

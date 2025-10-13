@@ -69,7 +69,7 @@ public class AssemblyAssertionTests
     }
 #endif
 
-#if !NETSTANDARD2_0
+#if NET5_0_OR_GREATER
     [Test]
     public async Task Test_Assembly_IsNotCollectible()
     {

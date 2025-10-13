@@ -146,13 +146,15 @@ public static class Assert
 
     /// <summary>
     /// Creates an assertion for a Task that returns a value.
+    /// Supports both result assertions (e.g., IsEqualTo) and task state assertions (e.g., IsCompleted).
     /// Example: await Assert.That(GetValueAsync()).IsEqualTo(expected);
+    /// Example: await Assert.That(GetValueAsync()).IsCompleted();
     /// </summary>
-    public static AsyncFuncAssertion<TValue> That<TValue>(
+    public static TaskAssertion<TValue> That<TValue>(
         Task<TValue> task,
         [CallerArgumentExpression(nameof(task))] string? expression = null)
     {
-        return new AsyncFuncAssertion<TValue>(() => task, expression);
+        return new TaskAssertion<TValue>(task, expression);
     }
 
     /// <summary>

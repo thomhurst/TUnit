@@ -5,8 +5,9 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
 
-namespace TUnit.Assertions.Conditions;
+namespace TUnit.Assertions.Extensions;
 
 /// <summary>
 /// Generated assertion for IsEmpty
@@ -160,6 +161,82 @@ public sealed class _IsNotSingleElement_Assertion<T> : Assertion<T[]>
     }
 }
 
+/// <summary>
+/// Generated assertion for IsSingleElement
+/// </summary>
+[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+public sealed class IEnumerableT_IsSingleElement_Assertion<T> : Assertion<System.Collections.Generic.IEnumerable<T>>
+{
+    public IEnumerableT_IsSingleElement_Assertion(AssertionContext<System.Collections.Generic.IEnumerable<T>> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Collections.Generic.IEnumerable<T>> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsSingleElement();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be a single-element collection";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotSingleElement
+/// </summary>
+[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+public sealed class IEnumerableT_IsNotSingleElement_Assertion<T> : Assertion<System.Collections.Generic.IEnumerable<T>>
+{
+    public IEnumerableT_IsNotSingleElement_Assertion(AssertionContext<System.Collections.Generic.IEnumerable<T>> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Collections.Generic.IEnumerable<T>> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsNotSingleElement();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be a single-element collection";
+    }
+}
+
 public static partial class ArrayAssertionExtensions
 {
     /// <summary>
@@ -200,6 +277,26 @@ public static partial class ArrayAssertionExtensions
     {
         source.Context.ExpressionBuilder.Append(".IsNotSingleElement()");
         return new _IsNotSingleElement_Assertion<T>(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsSingleElement
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+    public static IEnumerableT_IsSingleElement_Assertion<T> IsSingleElement<T>(this IAssertionSource<System.Collections.Generic.IEnumerable<T>> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsSingleElement()");
+        return new IEnumerableT_IsSingleElement_Assertion<T>(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotSingleElement
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+    public static IEnumerableT_IsNotSingleElement_Assertion<T> IsNotSingleElement<T>(this IAssertionSource<System.Collections.Generic.IEnumerable<T>> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotSingleElement()");
+        return new IEnumerableT_IsNotSingleElement_Assertion<T>(source.Context);
     }
 
 }

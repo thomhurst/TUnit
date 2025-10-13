@@ -5,8 +5,9 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
 
-namespace TUnit.Assertions.Conditions;
+namespace TUnit.Assertions.Extensions;
 
 public class CharIsLetterWithCharAssertion : Assertion<char>
 {

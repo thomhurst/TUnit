@@ -5,20 +5,22 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
 
-namespace TUnit.Assertions.Conditions;
+namespace TUnit.Assertions.Extensions;
 
-public class TaskIsCompletedAssertion : Assertion<System.Threading.Tasks.Task>
+public class TaskIsCompletedAssertion<TTask> : Assertion<TTask>
+    where TTask : System.Threading.Tasks.Task
 {
     private readonly bool _negated;
 
-    public TaskIsCompletedAssertion(AssertionContext<System.Threading.Tasks.Task> context, bool negated = false)
+    public TaskIsCompletedAssertion(AssertionContext<TTask> context, bool negated = false)
         : base(context)
     {
         _negated = negated;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.Tasks.Task> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TTask> metadata)
     {
         var actualValue = metadata.Value;
         var exception = metadata.Exception;
@@ -44,17 +46,18 @@ public class TaskIsCompletedAssertion : Assertion<System.Threading.Tasks.Task>
     }
 }
 
-public class TaskIsCanceledAssertion : Assertion<System.Threading.Tasks.Task>
+public class TaskIsCanceledAssertion<TTask> : Assertion<TTask>
+    where TTask : System.Threading.Tasks.Task
 {
     private readonly bool _negated;
 
-    public TaskIsCanceledAssertion(AssertionContext<System.Threading.Tasks.Task> context, bool negated = false)
+    public TaskIsCanceledAssertion(AssertionContext<TTask> context, bool negated = false)
         : base(context)
     {
         _negated = negated;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.Tasks.Task> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TTask> metadata)
     {
         var actualValue = metadata.Value;
         var exception = metadata.Exception;
@@ -80,17 +83,18 @@ public class TaskIsCanceledAssertion : Assertion<System.Threading.Tasks.Task>
     }
 }
 
-public class TaskIsFaultedAssertion : Assertion<System.Threading.Tasks.Task>
+public class TaskIsFaultedAssertion<TTask> : Assertion<TTask>
+    where TTask : System.Threading.Tasks.Task
 {
     private readonly bool _negated;
 
-    public TaskIsFaultedAssertion(AssertionContext<System.Threading.Tasks.Task> context, bool negated = false)
+    public TaskIsFaultedAssertion(AssertionContext<TTask> context, bool negated = false)
         : base(context)
     {
         _negated = negated;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.Tasks.Task> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TTask> metadata)
     {
         var actualValue = metadata.Value;
         var exception = metadata.Exception;
@@ -118,40 +122,46 @@ public class TaskIsFaultedAssertion : Assertion<System.Threading.Tasks.Task>
 
 public static partial class TaskAssertionExtensions
 {
-    public static TaskIsCompletedAssertion IsCompleted(this IAssertionSource<System.Threading.Tasks.Task> source)
+    public static TaskIsCompletedAssertion<TTask> IsCompleted<TTask>(this IAssertionSource<TTask> source)
+        where TTask : System.Threading.Tasks.Task
     {
         source.Context.ExpressionBuilder.Append(".IsCompleted()");
-        return new TaskIsCompletedAssertion(source.Context, false);
+        return new TaskIsCompletedAssertion<TTask>(source.Context, false);
     }
 
-    public static TaskIsCompletedAssertion IsNotCompleted(this IAssertionSource<System.Threading.Tasks.Task> source)
+    public static TaskIsCompletedAssertion<TTask> IsNotCompleted<TTask>(this IAssertionSource<TTask> source)
+        where TTask : System.Threading.Tasks.Task
     {
         source.Context.ExpressionBuilder.Append(".IsNotCompleted()");
-        return new TaskIsCompletedAssertion(source.Context, true);
+        return new TaskIsCompletedAssertion<TTask>(source.Context, true);
     }
 
-    public static TaskIsCanceledAssertion IsCanceled(this IAssertionSource<System.Threading.Tasks.Task> source)
+    public static TaskIsCanceledAssertion<TTask> IsCanceled<TTask>(this IAssertionSource<TTask> source)
+        where TTask : System.Threading.Tasks.Task
     {
         source.Context.ExpressionBuilder.Append(".IsCanceled()");
-        return new TaskIsCanceledAssertion(source.Context, false);
+        return new TaskIsCanceledAssertion<TTask>(source.Context, false);
     }
 
-    public static TaskIsCanceledAssertion IsNotCanceled(this IAssertionSource<System.Threading.Tasks.Task> source)
+    public static TaskIsCanceledAssertion<TTask> IsNotCanceled<TTask>(this IAssertionSource<TTask> source)
+        where TTask : System.Threading.Tasks.Task
     {
         source.Context.ExpressionBuilder.Append(".IsNotCanceled()");
-        return new TaskIsCanceledAssertion(source.Context, true);
+        return new TaskIsCanceledAssertion<TTask>(source.Context, true);
     }
 
-    public static TaskIsFaultedAssertion IsFaulted(this IAssertionSource<System.Threading.Tasks.Task> source)
+    public static TaskIsFaultedAssertion<TTask> IsFaulted<TTask>(this IAssertionSource<TTask> source)
+        where TTask : System.Threading.Tasks.Task
     {
         source.Context.ExpressionBuilder.Append(".IsFaulted()");
-        return new TaskIsFaultedAssertion(source.Context, false);
+        return new TaskIsFaultedAssertion<TTask>(source.Context, false);
     }
 
-    public static TaskIsFaultedAssertion IsNotFaulted(this IAssertionSource<System.Threading.Tasks.Task> source)
+    public static TaskIsFaultedAssertion<TTask> IsNotFaulted<TTask>(this IAssertionSource<TTask> source)
+        where TTask : System.Threading.Tasks.Task
     {
         source.Context.ExpressionBuilder.Append(".IsNotFaulted()");
-        return new TaskIsFaultedAssertion(source.Context, true);
+        return new TaskIsFaultedAssertion<TTask>(source.Context, true);
     }
 
 }

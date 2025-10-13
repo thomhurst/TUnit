@@ -347,7 +347,12 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             return;
         }
         var sourceBuilder = new StringBuilder();
-        var namespaceName = classSymbol.ContainingNamespace?.ToDisplayString();
+        // Always generate extension methods in TUnit.Assertions.Extensions namespace
+        // so they're available via implicit usings in consuming projects
+        var namespaceName = "TUnit.Assertions.Extensions";
+
+        // Get the original namespace where the helper methods/properties are defined
+        var originalNamespace = classSymbol.ContainingNamespace?.ToDisplayString();
 
         sourceBuilder.AppendLine("#nullable enable");
         sourceBuilder.AppendLine();
@@ -355,6 +360,13 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("using System.Runtime.CompilerServices;");
         sourceBuilder.AppendLine("using System.Threading.Tasks;");
         sourceBuilder.AppendLine("using TUnit.Assertions.Core;");
+
+        // Add using for the original namespace to access helper methods/properties
+        if (!string.IsNullOrEmpty(originalNamespace) && originalNamespace != namespaceName)
+        {
+            sourceBuilder.AppendLine($"using {originalNamespace};");
+        }
+
         sourceBuilder.AppendLine();
 
         if (!string.IsNullOrEmpty(namespaceName))
@@ -489,6 +501,20 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         context.AddSource(fileName, sourceBuilder.ToString());
     }
 
+    private static void GenerateNonGenericTaskMethod(StringBuilder sourceBuilder, string targetTypeName, string generatedMethodName, string assertConditionClassName, bool negated, CreateAssertionAttributeData attributeData)
+    {
+        // Generate non-generic version for IAssertionSource<Task>
+        sourceBuilder.Append($"    public static {assertConditionClassName}<{targetTypeName}> {generatedMethodName}(this IAssertionSource<{targetTypeName}> source)");
+        sourceBuilder.AppendLine();
+        sourceBuilder.AppendLine("    {");
+        sourceBuilder.AppendLine($"        source.Context.ExpressionBuilder.Append(\".{generatedMethodName}()\");");
+        sourceBuilder.Append($"        return new {assertConditionClassName}<{targetTypeName}>(source.Context");
+        sourceBuilder.Append($", {negated.ToString().ToLowerInvariant()}");
+        sourceBuilder.AppendLine(");");
+        sourceBuilder.AppendLine("    }");
+        sourceBuilder.AppendLine();
+    }
+
     private static void GenerateAssertConditionClassForMethod(SourceProductionContext context, StringBuilder sourceBuilder, CreateAssertionAttributeData attributeData, IMethodSymbol staticMethod)
     {
         var targetTypeName = attributeData.TargetType.ToDisplayString();
@@ -522,12 +548,23 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             parameters = staticMethod.Parameters.ToArray(); // Instance: All parameters are additional
         }
 
+        // Check if target type is Task (for special handling of Task and Task<T>)
+        var isTaskType = attributeData.TargetType.Name == "Task" &&
+                        attributeData.TargetType.ContainingNamespace?.ToDisplayString() == "System.Threading.Tasks" &&
+                        attributeData.TargetType.TypeParameters.Length == 0; // Non-generic Task
+
         // For Enum.IsDefined, we need to use a generic type parameter instead of the concrete Enum type
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
             // Generate: public class EnumIsDefinedAssertion<T> : Assertion<T> where T : Enum
             sourceBuilder.AppendLine($"public class {className}<T> : Assertion<T>");
             sourceBuilder.AppendLine($"    where T : Enum");
+        }
+        else if (isTaskType)
+        {
+            // Generate: public class TaskIsCompletedAssertion<TTask> : Assertion<TTask> where TTask : System.Threading.Tasks.Task
+            sourceBuilder.AppendLine($"public class {className}<TTask> : Assertion<TTask>");
+            sourceBuilder.AppendLine($"    where TTask : {targetTypeName}");
         }
         else
         {
@@ -550,6 +587,10 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
             contextType = "AssertionContext<T>";
+        }
+        else if (isTaskType)
+        {
+            contextType = "AssertionContext<TTask>";
         }
         else
         {
@@ -578,6 +619,10 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
             metadataType = "EvaluationMetadata<T>";
+        }
+        else if (isTaskType)
+        {
+            metadataType = "EvaluationMetadata<TTask>";
         }
         else
         {
@@ -902,10 +947,20 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 : parameters.Skip(1) // Static: Skip just the actual value parameter
             : parameters;             // Instance: All parameters are additional
 
+        // Check if target type is Task (for special handling of Task and Task<T>)
+        var isTaskType = attributeData.TargetType.Name == "Task" &&
+                        attributeData.TargetType.ContainingNamespace?.ToDisplayString() == "System.Threading.Tasks" &&
+                        attributeData.TargetType.TypeParameters.Length == 0; // Non-generic Task
+
         // Generate the extension method using the modern IAssertionSource<T> pattern
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
             sourceBuilder.Append($"    public static {assertConditionClassName}<T> {generatedMethodName}<T>(this IAssertionSource<T> source");
+        }
+        else if (isTaskType)
+        {
+            // For Task, generate a generic method that works with Task and Task<T>
+            sourceBuilder.Append($"    public static {assertConditionClassName}<TTask> {generatedMethodName}<TTask>(this IAssertionSource<TTask> source");
         }
         else
         {
@@ -931,6 +986,11 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine();
             sourceBuilder.Append("        where T : Enum");
         }
+        else if (isTaskType)
+        {
+            sourceBuilder.AppendLine();
+            sourceBuilder.Append($"        where TTask : {targetTypeName}");
+        }
 
         sourceBuilder.AppendLine();
         sourceBuilder.AppendLine("    {");
@@ -950,6 +1010,10 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
             sourceBuilder.Append($"        return new {assertConditionClassName}<T>(source.Context");
+        }
+        else if (isTaskType)
+        {
+            sourceBuilder.Append($"        return new {assertConditionClassName}<TTask>(source.Context");
         }
         else
         {

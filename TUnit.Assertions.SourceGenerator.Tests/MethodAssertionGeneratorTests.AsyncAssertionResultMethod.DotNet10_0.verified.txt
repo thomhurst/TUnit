@@ -5,8 +5,9 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
 
-namespace TUnit.Assertions.Tests.TestData;
+namespace TUnit.Assertions.Extensions;
 
 /// <summary>
 /// Generated assertion for IsEvenAsync

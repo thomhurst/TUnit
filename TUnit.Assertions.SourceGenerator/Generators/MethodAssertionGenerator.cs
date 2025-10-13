@@ -167,6 +167,9 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             // so they're available via implicit usings in consuming projects
             var namespaceName = "TUnit.Assertions.Extensions";
 
+            // Get the original namespace where the helper methods are defined
+            var originalNamespace = containingType.ContainingNamespace?.ToDisplayString();
+
             // File header
             sourceBuilder.AppendLine("#nullable enable");
             sourceBuilder.AppendLine();
@@ -174,6 +177,13 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine("using System.Runtime.CompilerServices;");
             sourceBuilder.AppendLine("using System.Threading.Tasks;");
             sourceBuilder.AppendLine("using TUnit.Assertions.Core;");
+
+            // Add using for the original namespace to access helper methods
+            if (!string.IsNullOrEmpty(originalNamespace) && originalNamespace != namespaceName)
+            {
+                sourceBuilder.AppendLine($"using {originalNamespace};");
+            }
+
             sourceBuilder.AppendLine();
 
             if (!string.IsNullOrEmpty(namespaceName))
