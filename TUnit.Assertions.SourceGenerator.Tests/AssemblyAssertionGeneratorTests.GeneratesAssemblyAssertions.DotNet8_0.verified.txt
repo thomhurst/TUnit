@@ -1,0 +1,112 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class AssemblyIsDynamicAssertion : Assertion<System.Reflection.Assembly>
+{
+    private readonly bool _negated;
+
+    public AssemblyIsDynamicAssertion(AssertionContext<System.Reflection.Assembly> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Reflection.Assembly> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsDynamic;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsDynamic"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be dynamic";
+    }
+}
+
+public class AssemblyIsFullyTrustedAssertion : Assertion<System.Reflection.Assembly>
+{
+    private readonly bool _negated;
+
+    public AssemblyIsFullyTrustedAssertion(AssertionContext<System.Reflection.Assembly> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Reflection.Assembly> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsFullyTrusted;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsFullyTrusted"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be fully trusted";
+    }
+}
+
+public static partial class AssemblyAssertionExtensions
+{
+    public static AssemblyIsDynamicAssertion IsDynamic(this IAssertionSource<System.Reflection.Assembly> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsDynamic()");
+        return new AssemblyIsDynamicAssertion(source.Context, false);
+    }
+
+    public static AssemblyIsDynamicAssertion IsNotDynamic(this IAssertionSource<System.Reflection.Assembly> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotDynamic()");
+        return new AssemblyIsDynamicAssertion(source.Context, true);
+    }
+
+    public static AssemblyIsFullyTrustedAssertion IsFullyTrusted(this IAssertionSource<System.Reflection.Assembly> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsFullyTrusted()");
+        return new AssemblyIsFullyTrustedAssertion(source.Context, false);
+    }
+
+    public static AssemblyIsFullyTrustedAssertion IsNotFullyTrusted(this IAssertionSource<System.Reflection.Assembly> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotFullyTrusted()");
+        return new AssemblyIsFullyTrustedAssertion(source.Context, true);
+    }
+
+}
+
+]

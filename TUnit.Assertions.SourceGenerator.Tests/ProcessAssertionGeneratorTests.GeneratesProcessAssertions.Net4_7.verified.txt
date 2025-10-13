@@ -1,0 +1,160 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class ProcessHasExitedAssertion : Assertion<System.Diagnostics.Process>
+{
+    private readonly bool _negated;
+
+    public ProcessHasExitedAssertion(AssertionContext<System.Diagnostics.Process> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Diagnostics.Process> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.HasExited;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy HasExited"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} have exited";
+    }
+}
+
+public class ProcessRespondingAssertion : Assertion<System.Diagnostics.Process>
+{
+    private readonly bool _negated;
+
+    public ProcessRespondingAssertion(AssertionContext<System.Diagnostics.Process> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Diagnostics.Process> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.Responding;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy Responding"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be responding";
+    }
+}
+
+public class ProcessEnableRaisingEventsAssertion : Assertion<System.Diagnostics.Process>
+{
+    private readonly bool _negated;
+
+    public ProcessEnableRaisingEventsAssertion(AssertionContext<System.Diagnostics.Process> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Diagnostics.Process> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.EnableRaisingEvents;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy EnableRaisingEvents"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} have event raising enabled";
+    }
+}
+
+public static partial class ProcessAssertionExtensions
+{
+    public static ProcessHasExitedAssertion HasExited(this IAssertionSource<System.Diagnostics.Process> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasExited()");
+        return new ProcessHasExitedAssertion(source.Context, false);
+    }
+
+    public static ProcessHasExitedAssertion HasNotExited(this IAssertionSource<System.Diagnostics.Process> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasNotExited()");
+        return new ProcessHasExitedAssertion(source.Context, true);
+    }
+
+    public static ProcessRespondingAssertion Responding(this IAssertionSource<System.Diagnostics.Process> source)
+    {
+        source.Context.ExpressionBuilder.Append(".Responding()");
+        return new ProcessRespondingAssertion(source.Context, false);
+    }
+
+    public static ProcessRespondingAssertion IsNotResponding(this IAssertionSource<System.Diagnostics.Process> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotResponding()");
+        return new ProcessRespondingAssertion(source.Context, true);
+    }
+
+    public static ProcessEnableRaisingEventsAssertion EnableRaisingEvents(this IAssertionSource<System.Diagnostics.Process> source)
+    {
+        source.Context.ExpressionBuilder.Append(".EnableRaisingEvents()");
+        return new ProcessEnableRaisingEventsAssertion(source.Context, false);
+    }
+
+    public static ProcessEnableRaisingEventsAssertion DoesNotHaveEventRaisingEnabled(this IAssertionSource<System.Diagnostics.Process> source)
+    {
+        source.Context.ExpressionBuilder.Append(".DoesNotHaveEventRaisingEnabled()");
+        return new ProcessEnableRaisingEventsAssertion(source.Context, true);
+    }
+
+}
+
+]

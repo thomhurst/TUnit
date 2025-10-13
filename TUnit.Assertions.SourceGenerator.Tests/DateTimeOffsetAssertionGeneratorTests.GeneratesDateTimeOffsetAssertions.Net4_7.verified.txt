@@ -1,0 +1,508 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for IsToday
+/// </summary>
+public sealed class DateTimeOffset_IsToday_Assertion : Assertion<System.DateTimeOffset>
+{
+    public DateTimeOffset_IsToday_Assertion(AssertionContext<System.DateTimeOffset> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsToday();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be today";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotToday
+/// </summary>
+public sealed class DateTimeOffset_IsNotToday_Assertion : Assertion<System.DateTimeOffset>
+{
+    public DateTimeOffset_IsNotToday_Assertion(AssertionContext<System.DateTimeOffset> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsNotToday();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be today";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsUtc
+/// </summary>
+public sealed class DateTimeOffset_IsUtc_Assertion : Assertion<System.DateTimeOffset>
+{
+    public DateTimeOffset_IsUtc_Assertion(AssertionContext<System.DateTimeOffset> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsUtc();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be UTC";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotUtc
+/// </summary>
+public sealed class DateTimeOffset_IsNotUtc_Assertion : Assertion<System.DateTimeOffset>
+{
+    public DateTimeOffset_IsNotUtc_Assertion(AssertionContext<System.DateTimeOffset> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsNotUtc();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be UTC";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsLeapYear
+/// </summary>
+public sealed class DateTimeOffset_IsLeapYear_Assertion : Assertion<System.DateTimeOffset>
+{
+    public DateTimeOffset_IsLeapYear_Assertion(AssertionContext<System.DateTimeOffset> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsLeapYear();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be in a leap year";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotLeapYear
+/// </summary>
+public sealed class DateTimeOffset_IsNotLeapYear_Assertion : Assertion<System.DateTimeOffset>
+{
+    public DateTimeOffset_IsNotLeapYear_Assertion(AssertionContext<System.DateTimeOffset> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsNotLeapYear();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be in a leap year";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsInFuture
+/// </summary>
+public sealed class DateTimeOffset_IsInFuture_Assertion : Assertion<System.DateTimeOffset>
+{
+    public DateTimeOffset_IsInFuture_Assertion(AssertionContext<System.DateTimeOffset> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsInFuture();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be in the future";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsInPast
+/// </summary>
+public sealed class DateTimeOffset_IsInPast_Assertion : Assertion<System.DateTimeOffset>
+{
+    public DateTimeOffset_IsInPast_Assertion(AssertionContext<System.DateTimeOffset> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsInPast();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be in the past";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsInFutureUtc
+/// </summary>
+public sealed class DateTimeOffset_IsInFutureUtc_Assertion : Assertion<System.DateTimeOffset>
+{
+    public DateTimeOffset_IsInFutureUtc_Assertion(AssertionContext<System.DateTimeOffset> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsInFutureUtc();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be in the future (UTC)";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsInPastUtc
+/// </summary>
+public sealed class DateTimeOffset_IsInPastUtc_Assertion : Assertion<System.DateTimeOffset>
+{
+    public DateTimeOffset_IsInPastUtc_Assertion(AssertionContext<System.DateTimeOffset> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsInPastUtc();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be in the past (UTC)";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsOnWeekend
+/// </summary>
+public sealed class DateTimeOffset_IsOnWeekend_Assertion : Assertion<System.DateTimeOffset>
+{
+    public DateTimeOffset_IsOnWeekend_Assertion(AssertionContext<System.DateTimeOffset> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsOnWeekend();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be on a weekend";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsOnWeekday
+/// </summary>
+public sealed class DateTimeOffset_IsOnWeekday_Assertion : Assertion<System.DateTimeOffset>
+{
+    public DateTimeOffset_IsOnWeekday_Assertion(AssertionContext<System.DateTimeOffset> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsOnWeekday();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be on a weekday";
+    }
+}
+
+public static partial class DateTimeOffsetAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsToday
+    /// </summary>
+    public static DateTimeOffset_IsToday_Assertion IsToday(this IAssertionSource<System.DateTimeOffset> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsToday()");
+        return new DateTimeOffset_IsToday_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotToday
+    /// </summary>
+    public static DateTimeOffset_IsNotToday_Assertion IsNotToday(this IAssertionSource<System.DateTimeOffset> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotToday()");
+        return new DateTimeOffset_IsNotToday_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsUtc
+    /// </summary>
+    public static DateTimeOffset_IsUtc_Assertion IsUtc(this IAssertionSource<System.DateTimeOffset> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsUtc()");
+        return new DateTimeOffset_IsUtc_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotUtc
+    /// </summary>
+    public static DateTimeOffset_IsNotUtc_Assertion IsNotUtc(this IAssertionSource<System.DateTimeOffset> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotUtc()");
+        return new DateTimeOffset_IsNotUtc_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsLeapYear
+    /// </summary>
+    public static DateTimeOffset_IsLeapYear_Assertion IsLeapYear(this IAssertionSource<System.DateTimeOffset> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsLeapYear()");
+        return new DateTimeOffset_IsLeapYear_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotLeapYear
+    /// </summary>
+    public static DateTimeOffset_IsNotLeapYear_Assertion IsNotLeapYear(this IAssertionSource<System.DateTimeOffset> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotLeapYear()");
+        return new DateTimeOffset_IsNotLeapYear_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsInFuture
+    /// </summary>
+    public static DateTimeOffset_IsInFuture_Assertion IsInFuture(this IAssertionSource<System.DateTimeOffset> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsInFuture()");
+        return new DateTimeOffset_IsInFuture_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsInPast
+    /// </summary>
+    public static DateTimeOffset_IsInPast_Assertion IsInPast(this IAssertionSource<System.DateTimeOffset> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsInPast()");
+        return new DateTimeOffset_IsInPast_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsInFutureUtc
+    /// </summary>
+    public static DateTimeOffset_IsInFutureUtc_Assertion IsInFutureUtc(this IAssertionSource<System.DateTimeOffset> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsInFutureUtc()");
+        return new DateTimeOffset_IsInFutureUtc_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsInPastUtc
+    /// </summary>
+    public static DateTimeOffset_IsInPastUtc_Assertion IsInPastUtc(this IAssertionSource<System.DateTimeOffset> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsInPastUtc()");
+        return new DateTimeOffset_IsInPastUtc_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsOnWeekend
+    /// </summary>
+    public static DateTimeOffset_IsOnWeekend_Assertion IsOnWeekend(this IAssertionSource<System.DateTimeOffset> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsOnWeekend()");
+        return new DateTimeOffset_IsOnWeekend_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsOnWeekday
+    /// </summary>
+    public static DateTimeOffset_IsOnWeekday_Assertion IsOnWeekday(this IAssertionSource<System.DateTimeOffset> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsOnWeekday()");
+        return new DateTimeOffset_IsOnWeekday_Assertion(source.Context);
+    }
+
+}
+
+]

@@ -1,0 +1,106 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class CultureInfoIsNeutralCultureAssertion : Assertion<System.Globalization.CultureInfo>
+{
+    private readonly bool _negated;
+
+    public CultureInfoIsNeutralCultureAssertion(AssertionContext<System.Globalization.CultureInfo> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Globalization.CultureInfo> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsNeutralCulture;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsNeutralCulture"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a neutral culture";
+    }
+}
+
+public class CultureInfoIsReadOnlyAssertion : Assertion<System.Globalization.CultureInfo>
+{
+    private readonly bool _negated;
+
+    public CultureInfoIsReadOnlyAssertion(AssertionContext<System.Globalization.CultureInfo> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Globalization.CultureInfo> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsReadOnly;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsReadOnly"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be read-only culture";
+    }
+}
+
+public static partial class CultureInfoAssertionExtensions
+{
+    public static CultureInfoIsNeutralCultureAssertion IsNeutralCulture(this IAssertionSource<System.Globalization.CultureInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNeutralCulture()");
+        return new CultureInfoIsNeutralCultureAssertion(source.Context, false);
+    }
+
+    public static CultureInfoIsNeutralCultureAssertion IsNotNeutralCulture(this IAssertionSource<System.Globalization.CultureInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotNeutralCulture()");
+        return new CultureInfoIsNeutralCultureAssertion(source.Context, true);
+    }
+
+    public static CultureInfoIsReadOnlyAssertion IsReadOnly(this IAssertionSource<System.Globalization.CultureInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsReadOnly()");
+        return new CultureInfoIsReadOnlyAssertion(source.Context, false);
+    }
+
+}
+
+]

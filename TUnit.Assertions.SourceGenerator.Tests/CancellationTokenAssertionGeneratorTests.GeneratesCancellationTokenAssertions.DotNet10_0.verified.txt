@@ -1,0 +1,102 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class CancellationTokenCanBeCanceledAssertion : Assertion<System.Threading.CancellationToken>
+{
+    private readonly bool _negated;
+
+    public CancellationTokenCanBeCanceledAssertion(AssertionContext<System.Threading.CancellationToken> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.CancellationToken> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = actualValue.CanBeCanceled;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy CanBeCanceled"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be cancellable";
+    }
+}
+
+public class CancellationTokenIsCancellationRequestedAssertion : Assertion<System.Threading.CancellationToken>
+{
+    private readonly bool _negated;
+
+    public CancellationTokenIsCancellationRequestedAssertion(AssertionContext<System.Threading.CancellationToken> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Threading.CancellationToken> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = actualValue.IsCancellationRequested;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsCancellationRequested"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} have cancellation requested";
+    }
+}
+
+public static partial class CancellationTokenAssertionExtensions
+{
+    public static CancellationTokenCanBeCanceledAssertion CanBeCanceled(this IAssertionSource<System.Threading.CancellationToken> source)
+    {
+        source.Context.ExpressionBuilder.Append(".CanBeCanceled()");
+        return new CancellationTokenCanBeCanceledAssertion(source.Context, false);
+    }
+
+    public static CancellationTokenCanBeCanceledAssertion CannotBeCanceled(this IAssertionSource<System.Threading.CancellationToken> source)
+    {
+        source.Context.ExpressionBuilder.Append(".CannotBeCanceled()");
+        return new CancellationTokenCanBeCanceledAssertion(source.Context, true);
+    }
+
+    public static CancellationTokenIsCancellationRequestedAssertion IsCancellationRequested(this IAssertionSource<System.Threading.CancellationToken> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsCancellationRequested()");
+        return new CancellationTokenIsCancellationRequestedAssertion(source.Context, false);
+    }
+
+    public static CancellationTokenIsCancellationRequestedAssertion IsNotCancellationRequested(this IAssertionSource<System.Threading.CancellationToken> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotCancellationRequested()");
+        return new CancellationTokenIsCancellationRequestedAssertion(source.Context, true);
+    }
+
+}
+
+]

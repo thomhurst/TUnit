@@ -1,0 +1,112 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class WeakReferenceIsAliveAssertion : Assertion<System.WeakReference>
+{
+    private readonly bool _negated;
+
+    public WeakReferenceIsAliveAssertion(AssertionContext<System.WeakReference> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.WeakReference> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsAlive;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsAlive"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be alive";
+    }
+}
+
+public class WeakReferenceTrackResurrectionAssertion : Assertion<System.WeakReference>
+{
+    private readonly bool _negated;
+
+    public WeakReferenceTrackResurrectionAssertion(AssertionContext<System.WeakReference> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.WeakReference> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.TrackResurrection;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy TrackResurrection"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} track resurrection";
+    }
+}
+
+public static partial class WeakReferenceAssertionExtensions
+{
+    public static WeakReferenceIsAliveAssertion IsAlive(this IAssertionSource<System.WeakReference> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsAlive()");
+        return new WeakReferenceIsAliveAssertion(source.Context, false);
+    }
+
+    public static WeakReferenceIsAliveAssertion IsNotAlive(this IAssertionSource<System.WeakReference> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotAlive()");
+        return new WeakReferenceIsAliveAssertion(source.Context, true);
+    }
+
+    public static WeakReferenceTrackResurrectionAssertion TrackResurrection(this IAssertionSource<System.WeakReference> source)
+    {
+        source.Context.ExpressionBuilder.Append(".TrackResurrection()");
+        return new WeakReferenceTrackResurrectionAssertion(source.Context, false);
+    }
+
+    public static WeakReferenceTrackResurrectionAssertion DoesNotTrackResurrection(this IAssertionSource<System.WeakReference> source)
+    {
+        source.Context.ExpressionBuilder.Append(".DoesNotTrackResurrection()");
+        return new WeakReferenceTrackResurrectionAssertion(source.Context, true);
+    }
+
+}
+
+]

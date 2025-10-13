@@ -68,6 +68,7 @@ const sidebars: SidebarsConfig = {
           label: 'Extensibility',
           items: [
             'assertions/extensibility/custom-assertions',
+            'assertions/extensibility/source-generator-assertions',
             'assertions/extensibility/extensibility-chaining-and-converting',
             'assertions/extensibility/extensibility-returning-items-from-await',
           ],

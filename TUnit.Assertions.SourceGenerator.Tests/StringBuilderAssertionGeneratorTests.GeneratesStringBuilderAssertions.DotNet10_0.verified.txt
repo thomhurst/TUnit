@@ -1,0 +1,154 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for IsEmpty
+/// </summary>
+public sealed class StringBuilder_IsEmpty_Assertion : Assertion<System.Text.StringBuilder>
+{
+    public StringBuilder_IsEmpty_Assertion(AssertionContext<System.Text.StringBuilder> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Text.StringBuilder> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsEmpty();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be empty";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotEmpty
+/// </summary>
+public sealed class StringBuilder_IsNotEmpty_Assertion : Assertion<System.Text.StringBuilder>
+{
+    public StringBuilder_IsNotEmpty_Assertion(AssertionContext<System.Text.StringBuilder> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Text.StringBuilder> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsNotEmpty();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be empty";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasExcessCapacity
+/// </summary>
+public sealed class StringBuilder_HasExcessCapacity_Assertion : Assertion<System.Text.StringBuilder>
+{
+    public StringBuilder_HasExcessCapacity_Assertion(AssertionContext<System.Text.StringBuilder> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Text.StringBuilder> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasExcessCapacity();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have excess capacity";
+    }
+}
+
+public static partial class StringBuilderAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsEmpty
+    /// </summary>
+    public static StringBuilder_IsEmpty_Assertion IsEmpty(this IAssertionSource<System.Text.StringBuilder> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsEmpty()");
+        return new StringBuilder_IsEmpty_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotEmpty
+    /// </summary>
+    public static StringBuilder_IsNotEmpty_Assertion IsNotEmpty(this IAssertionSource<System.Text.StringBuilder> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotEmpty()");
+        return new StringBuilder_IsNotEmpty_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasExcessCapacity
+    /// </summary>
+    public static StringBuilder_HasExcessCapacity_Assertion HasExcessCapacity(this IAssertionSource<System.Text.StringBuilder> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasExcessCapacity()");
+        return new StringBuilder_HasExcessCapacity_Assertion(source.Context);
+    }
+
+}
+
+]

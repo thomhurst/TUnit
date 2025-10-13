@@ -1,0 +1,112 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class FileInfoExistsAssertion : Assertion<System.IO.FileInfo>
+{
+    private readonly bool _negated;
+
+    public FileInfoExistsAssertion(AssertionContext<System.IO.FileInfo> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.FileInfo> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.Exists;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy Exists"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} exist";
+    }
+}
+
+public class FileInfoIsReadOnlyAssertion : Assertion<System.IO.FileInfo>
+{
+    private readonly bool _negated;
+
+    public FileInfoIsReadOnlyAssertion(AssertionContext<System.IO.FileInfo> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.FileInfo> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsReadOnly;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsReadOnly"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be read-only";
+    }
+}
+
+public static partial class FileInfoAssertionExtensions
+{
+    public static FileInfoExistsAssertion Exists(this IAssertionSource<System.IO.FileInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".Exists()");
+        return new FileInfoExistsAssertion(source.Context, false);
+    }
+
+    public static FileInfoExistsAssertion DoesNotExist(this IAssertionSource<System.IO.FileInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".DoesNotExist()");
+        return new FileInfoExistsAssertion(source.Context, true);
+    }
+
+    public static FileInfoIsReadOnlyAssertion IsReadOnly(this IAssertionSource<System.IO.FileInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsReadOnly()");
+        return new FileInfoIsReadOnlyAssertion(source.Context, false);
+    }
+
+    public static FileInfoIsReadOnlyAssertion IsNotReadOnly(this IAssertionSource<System.IO.FileInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotReadOnly()");
+        return new FileInfoIsReadOnlyAssertion(source.Context, true);
+    }
+
+}
+
+]

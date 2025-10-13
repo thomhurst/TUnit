@@ -1,0 +1,476 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for HasInnerException
+/// </summary>
+public sealed class Exception_HasInnerException_Assertion : Assertion<System.Exception>
+{
+    public Exception_HasInnerException_Assertion(AssertionContext<System.Exception> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Exception> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasInnerException();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have an inner exception";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasNoInnerException
+/// </summary>
+public sealed class Exception_HasNoInnerException_Assertion : Assertion<System.Exception>
+{
+    public Exception_HasNoInnerException_Assertion(AssertionContext<System.Exception> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Exception> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasNoInnerException();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have no inner exception";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasStackTrace
+/// </summary>
+public sealed class Exception_HasStackTrace_Assertion : Assertion<System.Exception>
+{
+    public Exception_HasStackTrace_Assertion(AssertionContext<System.Exception> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Exception> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasStackTrace();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have a stack trace";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasNoData
+/// </summary>
+public sealed class Exception_HasNoData_Assertion : Assertion<System.Exception>
+{
+    public Exception_HasNoData_Assertion(AssertionContext<System.Exception> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Exception> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasNoData();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have no data";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasHelpLink
+/// </summary>
+public sealed class Exception_HasHelpLink_Assertion : Assertion<System.Exception>
+{
+    public Exception_HasHelpLink_Assertion(AssertionContext<System.Exception> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Exception> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasHelpLink();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have a help link";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasNoHelpLink
+/// </summary>
+public sealed class Exception_HasNoHelpLink_Assertion : Assertion<System.Exception>
+{
+    public Exception_HasNoHelpLink_Assertion(AssertionContext<System.Exception> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Exception> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasNoHelpLink();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have no help link";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasSource
+/// </summary>
+public sealed class Exception_HasSource_Assertion : Assertion<System.Exception>
+{
+    public Exception_HasSource_Assertion(AssertionContext<System.Exception> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Exception> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasSource();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have a source";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasNoSource
+/// </summary>
+public sealed class Exception_HasNoSource_Assertion : Assertion<System.Exception>
+{
+    public Exception_HasNoSource_Assertion(AssertionContext<System.Exception> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Exception> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasNoSource();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have no source";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasTargetSite
+/// </summary>
+public sealed class Exception_HasTargetSite_Assertion : Assertion<System.Exception>
+{
+    public Exception_HasTargetSite_Assertion(AssertionContext<System.Exception> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Exception> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasTargetSite();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have a target site";
+    }
+}
+
+/// <summary>
+/// Generated assertion for HasNoTargetSite
+/// </summary>
+public sealed class Exception_HasNoTargetSite_Assertion : Assertion<System.Exception>
+{
+    public Exception_HasNoTargetSite_Assertion(AssertionContext<System.Exception> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Exception> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasNoTargetSite();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to have no target site";
+    }
+}
+
+public static partial class ExceptionAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for HasInnerException
+    /// </summary>
+    public static Exception_HasInnerException_Assertion HasInnerException(this IAssertionSource<System.Exception> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasInnerException()");
+        return new Exception_HasInnerException_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasNoInnerException
+    /// </summary>
+    public static Exception_HasNoInnerException_Assertion HasNoInnerException(this IAssertionSource<System.Exception> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasNoInnerException()");
+        return new Exception_HasNoInnerException_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasStackTrace
+    /// </summary>
+    public static Exception_HasStackTrace_Assertion HasStackTrace(this IAssertionSource<System.Exception> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasStackTrace()");
+        return new Exception_HasStackTrace_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasNoData
+    /// </summary>
+    public static Exception_HasNoData_Assertion HasNoData(this IAssertionSource<System.Exception> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasNoData()");
+        return new Exception_HasNoData_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasHelpLink
+    /// </summary>
+    public static Exception_HasHelpLink_Assertion HasHelpLink(this IAssertionSource<System.Exception> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasHelpLink()");
+        return new Exception_HasHelpLink_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasNoHelpLink
+    /// </summary>
+    public static Exception_HasNoHelpLink_Assertion HasNoHelpLink(this IAssertionSource<System.Exception> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasNoHelpLink()");
+        return new Exception_HasNoHelpLink_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasSource
+    /// </summary>
+    public static Exception_HasSource_Assertion HasSource(this IAssertionSource<System.Exception> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasSource()");
+        return new Exception_HasSource_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasNoSource
+    /// </summary>
+    public static Exception_HasNoSource_Assertion HasNoSource(this IAssertionSource<System.Exception> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasNoSource()");
+        return new Exception_HasNoSource_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasTargetSite
+    /// </summary>
+    public static Exception_HasTargetSite_Assertion HasTargetSite(this IAssertionSource<System.Exception> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasTargetSite()");
+        return new Exception_HasTargetSite_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for HasNoTargetSite
+    /// </summary>
+    public static Exception_HasNoTargetSite_Assertion HasNoTargetSite(this IAssertionSource<System.Exception> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasNoTargetSite()");
+        return new Exception_HasNoTargetSite_Assertion(source.Context);
+    }
+
+}
+
+]

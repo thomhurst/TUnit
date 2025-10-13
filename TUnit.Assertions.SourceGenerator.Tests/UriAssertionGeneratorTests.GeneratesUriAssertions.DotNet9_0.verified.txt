@@ -1,0 +1,304 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class UriIsAbsoluteUriAssertion : Assertion<System.Uri>
+{
+    private readonly bool _negated;
+
+    public UriIsAbsoluteUriAssertion(AssertionContext<System.Uri> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Uri> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsAbsoluteUri;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsAbsoluteUri"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be an absolute URI";
+    }
+}
+
+public class UriIsFileAssertion : Assertion<System.Uri>
+{
+    private readonly bool _negated;
+
+    public UriIsFileAssertion(AssertionContext<System.Uri> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Uri> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsFile;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsFile"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a file URI";
+    }
+}
+
+public class UriIsUncAssertion : Assertion<System.Uri>
+{
+    private readonly bool _negated;
+
+    public UriIsUncAssertion(AssertionContext<System.Uri> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Uri> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsUnc;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsUnc"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a UNC URI";
+    }
+}
+
+public class UriIsLoopbackAssertion : Assertion<System.Uri>
+{
+    private readonly bool _negated;
+
+    public UriIsLoopbackAssertion(AssertionContext<System.Uri> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Uri> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsLoopback;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsLoopback"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be a loopback URI";
+    }
+}
+
+public class UriIsDefaultPortAssertion : Assertion<System.Uri>
+{
+    private readonly bool _negated;
+
+    public UriIsDefaultPortAssertion(AssertionContext<System.Uri> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Uri> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsDefaultPort;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsDefaultPort"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} use the default port";
+    }
+}
+
+public class UriUserEscapedAssertion : Assertion<System.Uri>
+{
+    private readonly bool _negated;
+
+    public UriUserEscapedAssertion(AssertionContext<System.Uri> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Uri> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.UserEscaped;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy UserEscaped"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be user-escaped";
+    }
+}
+
+public static partial class UriAssertionExtensions
+{
+    public static UriIsAbsoluteUriAssertion IsAbsoluteUri(this IAssertionSource<System.Uri> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsAbsoluteUri()");
+        return new UriIsAbsoluteUriAssertion(source.Context, false);
+    }
+
+    public static UriIsAbsoluteUriAssertion IsNotAbsoluteUri(this IAssertionSource<System.Uri> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotAbsoluteUri()");
+        return new UriIsAbsoluteUriAssertion(source.Context, true);
+    }
+
+    public static UriIsFileAssertion IsFile(this IAssertionSource<System.Uri> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsFile()");
+        return new UriIsFileAssertion(source.Context, false);
+    }
+
+    public static UriIsFileAssertion IsNotFile(this IAssertionSource<System.Uri> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotFile()");
+        return new UriIsFileAssertion(source.Context, true);
+    }
+
+    public static UriIsUncAssertion IsUnc(this IAssertionSource<System.Uri> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsUnc()");
+        return new UriIsUncAssertion(source.Context, false);
+    }
+
+    public static UriIsUncAssertion IsNotUnc(this IAssertionSource<System.Uri> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotUnc()");
+        return new UriIsUncAssertion(source.Context, true);
+    }
+
+    public static UriIsLoopbackAssertion IsLoopback(this IAssertionSource<System.Uri> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsLoopback()");
+        return new UriIsLoopbackAssertion(source.Context, false);
+    }
+
+    public static UriIsLoopbackAssertion IsNotLoopback(this IAssertionSource<System.Uri> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotLoopback()");
+        return new UriIsLoopbackAssertion(source.Context, true);
+    }
+
+    public static UriIsDefaultPortAssertion IsDefaultPort(this IAssertionSource<System.Uri> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsDefaultPort()");
+        return new UriIsDefaultPortAssertion(source.Context, false);
+    }
+
+    public static UriIsDefaultPortAssertion IsNotDefaultPort(this IAssertionSource<System.Uri> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotDefaultPort()");
+        return new UriIsDefaultPortAssertion(source.Context, true);
+    }
+
+    public static UriUserEscapedAssertion UserEscaped(this IAssertionSource<System.Uri> source)
+    {
+        source.Context.ExpressionBuilder.Append(".UserEscaped()");
+        return new UriUserEscapedAssertion(source.Context, false);
+    }
+
+    public static UriUserEscapedAssertion IsNotUserEscaped(this IAssertionSource<System.Uri> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotUserEscaped()");
+        return new UriUserEscapedAssertion(source.Context, true);
+    }
+
+}
+
+]

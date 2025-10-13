@@ -1,0 +1,98 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for IsEmptyGuid
+/// </summary>
+public sealed class Guid_IsEmptyGuid_Assertion : Assertion<System.Guid>
+{
+    public Guid_IsEmptyGuid_Assertion(AssertionContext<System.Guid> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Guid> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsEmptyGuid();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be an empty GUID";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsNotEmptyGuid
+/// </summary>
+public sealed class Guid_IsNotEmptyGuid_Assertion : Assertion<System.Guid>
+{
+    public Guid_IsNotEmptyGuid_Assertion(AssertionContext<System.Guid> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Guid> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsNotEmptyGuid();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to not be an empty GUID";
+    }
+}
+
+public static partial class GuidAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsEmptyGuid
+    /// </summary>
+    public static Guid_IsEmptyGuid_Assertion IsEmptyGuid(this IAssertionSource<System.Guid> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsEmptyGuid()");
+        return new Guid_IsEmptyGuid_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsNotEmptyGuid
+    /// </summary>
+    public static Guid_IsNotEmptyGuid_Assertion IsNotEmptyGuid(this IAssertionSource<System.Guid> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotEmptyGuid()");
+        return new Guid_IsNotEmptyGuid_Assertion(source.Context);
+    }
+
+}
+
+]

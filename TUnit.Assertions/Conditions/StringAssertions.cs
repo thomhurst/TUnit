@@ -382,39 +382,6 @@ public class StringLengthAssertion : Assertion<string>
 }
 
 /// <summary>
-/// Asserts that a string is null, empty, or whitespace.
-/// </summary>
-[AssertionExtension("IsNullOrWhitespace")]
-public class StringIsNullOrWhitespaceAssertion : Assertion<string>
-{
-    public StringIsNullOrWhitespaceAssertion(
-        AssertionContext<string> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
-        }
-
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return Task.FromResult(AssertionResult.Passed);
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
-    }
-
-    protected override string GetExpectation() => "to be null, empty, or whitespace";
-}
-
-/// <summary>
 /// Asserts that a string matches a regular expression pattern.
 /// </summary>
 [AssertionExtension("Matches")]
@@ -582,75 +549,4 @@ public class StringDoesNotMatchAssertion : Assertion<string>
         }
         return "text to not match with pattern";
     }
-}
-
-/// <summary>
-/// Asserts that a string is null or empty.
-/// </summary>
-[AssertionExtension("IsNullOrEmpty")]
-public class StringIsNullOrEmptyAssertion : Assertion<string>
-{
-    public StringIsNullOrEmptyAssertion(
-        AssertionContext<string> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
-        }
-
-        if (string.IsNullOrEmpty(value))
-        {
-            return Task.FromResult(AssertionResult.Passed);
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
-    }
-
-    protected override string GetExpectation() => "to be null or empty";
-}
-
-/// <summary>
-/// Asserts that a string is NOT null or empty.
-/// </summary>
-[AssertionExtension("IsNotNullOrEmpty")]
-public class StringIsNotNullOrEmptyAssertion : Assertion<string>
-{
-    public StringIsNotNullOrEmptyAssertion(
-        AssertionContext<string> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
-        }
-
-        if (!string.IsNullOrEmpty(value))
-        {
-            return Task.FromResult(AssertionResult.Passed);
-        }
-
-        if (value == null)
-        {
-            return Task.FromResult(AssertionResult.Failed("value was null"));
-        }
-
-        return Task.FromResult(AssertionResult.Failed("value was empty"));
-    }
-
-    protected override string GetExpectation() => "to not be null or empty";
 }

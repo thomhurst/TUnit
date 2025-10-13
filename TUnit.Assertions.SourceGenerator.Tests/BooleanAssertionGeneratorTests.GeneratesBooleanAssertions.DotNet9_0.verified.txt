@@ -1,0 +1,98 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for IsTrue
+/// </summary>
+public sealed class Bool_IsTrue_Assertion : Assertion<bool>
+{
+    public Bool_IsTrue_Assertion(AssertionContext<bool> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<bool> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsTrue();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be true";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsFalse
+/// </summary>
+public sealed class Bool_IsFalse_Assertion : Assertion<bool>
+{
+    public Bool_IsFalse_Assertion(AssertionContext<bool> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<bool> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value.IsFalse();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be false";
+    }
+}
+
+public static partial class BooleanAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsTrue
+    /// </summary>
+    public static Bool_IsTrue_Assertion IsTrue(this IAssertionSource<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsTrue()");
+        return new Bool_IsTrue_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsFalse
+    /// </summary>
+    public static Bool_IsFalse_Assertion IsFalse(this IAssertionSource<bool> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsFalse()");
+        return new Bool_IsFalse_Assertion(source.Context);
+    }
+
+}
+
+]

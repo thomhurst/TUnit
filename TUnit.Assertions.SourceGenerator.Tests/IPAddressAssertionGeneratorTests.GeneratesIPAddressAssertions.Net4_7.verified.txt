@@ -1,0 +1,255 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+
+namespace TUnit.Assertions.Conditions;
+
+public class IPAddressIsIPv4MappedToIPv6Assertion : Assertion<System.Net.IPAddress>
+{
+    private readonly bool _negated;
+
+    public IPAddressIsIPv4MappedToIPv6Assertion(AssertionContext<System.Net.IPAddress> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Net.IPAddress> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsIPv4MappedToIPv6;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsIPv4MappedToIPv6"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be an IPv4-mapped IPv6 address";
+    }
+}
+
+public class IPAddressIsIPv6LinkLocalAssertion : Assertion<System.Net.IPAddress>
+{
+    private readonly bool _negated;
+
+    public IPAddressIsIPv6LinkLocalAssertion(AssertionContext<System.Net.IPAddress> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Net.IPAddress> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsIPv6LinkLocal;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsIPv6LinkLocal"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be an IPv6 link-local address";
+    }
+}
+
+public class IPAddressIsIPv6MulticastAssertion : Assertion<System.Net.IPAddress>
+{
+    private readonly bool _negated;
+
+    public IPAddressIsIPv6MulticastAssertion(AssertionContext<System.Net.IPAddress> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Net.IPAddress> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsIPv6Multicast;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsIPv6Multicast"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be an IPv6 multicast address";
+    }
+}
+
+public class IPAddressIsIPv6SiteLocalAssertion : Assertion<System.Net.IPAddress>
+{
+    private readonly bool _negated;
+
+    public IPAddressIsIPv6SiteLocalAssertion(AssertionContext<System.Net.IPAddress> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Net.IPAddress> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsIPv6SiteLocal;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsIPv6SiteLocal"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be an IPv6 site-local address";
+    }
+}
+
+public class IPAddressIsIPv6TeredoAssertion : Assertion<System.Net.IPAddress>
+{
+    private readonly bool _negated;
+
+    public IPAddressIsIPv6TeredoAssertion(AssertionContext<System.Net.IPAddress> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Net.IPAddress> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.IsIPv6Teredo;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsIPv6Teredo"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be an IPv6 Teredo address";
+    }
+}
+
+public static partial class IPAddressAssertionExtensions
+{
+    public static IPAddressIsIPv4MappedToIPv6Assertion IsIPv4MappedToIPv6(this IAssertionSource<System.Net.IPAddress> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsIPv4MappedToIPv6()");
+        return new IPAddressIsIPv4MappedToIPv6Assertion(source.Context, false);
+    }
+
+    public static IPAddressIsIPv4MappedToIPv6Assertion IsNotIPv4MappedToIPv6(this IAssertionSource<System.Net.IPAddress> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotIPv4MappedToIPv6()");
+        return new IPAddressIsIPv4MappedToIPv6Assertion(source.Context, true);
+    }
+
+    public static IPAddressIsIPv6LinkLocalAssertion IsIPv6LinkLocal(this IAssertionSource<System.Net.IPAddress> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsIPv6LinkLocal()");
+        return new IPAddressIsIPv6LinkLocalAssertion(source.Context, false);
+    }
+
+    public static IPAddressIsIPv6LinkLocalAssertion IsNotIPv6LinkLocal(this IAssertionSource<System.Net.IPAddress> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotIPv6LinkLocal()");
+        return new IPAddressIsIPv6LinkLocalAssertion(source.Context, true);
+    }
+
+    public static IPAddressIsIPv6MulticastAssertion IsIPv6Multicast(this IAssertionSource<System.Net.IPAddress> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsIPv6Multicast()");
+        return new IPAddressIsIPv6MulticastAssertion(source.Context, false);
+    }
+
+    public static IPAddressIsIPv6MulticastAssertion IsNotIPv6Multicast(this IAssertionSource<System.Net.IPAddress> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotIPv6Multicast()");
+        return new IPAddressIsIPv6MulticastAssertion(source.Context, true);
+    }
+
+    public static IPAddressIsIPv6SiteLocalAssertion IsIPv6SiteLocal(this IAssertionSource<System.Net.IPAddress> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsIPv6SiteLocal()");
+        return new IPAddressIsIPv6SiteLocalAssertion(source.Context, false);
+    }
+
+    public static IPAddressIsIPv6SiteLocalAssertion IsNotIPv6SiteLocal(this IAssertionSource<System.Net.IPAddress> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotIPv6SiteLocal()");
+        return new IPAddressIsIPv6SiteLocalAssertion(source.Context, true);
+    }
+
+    public static IPAddressIsIPv6TeredoAssertion IsIPv6Teredo(this IAssertionSource<System.Net.IPAddress> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsIPv6Teredo()");
+        return new IPAddressIsIPv6TeredoAssertion(source.Context, false);
+    }
+
+    public static IPAddressIsIPv6TeredoAssertion IsNotIPv6Teredo(this IAssertionSource<System.Net.IPAddress> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotIPv6Teredo()");
+        return new IPAddressIsIPv6TeredoAssertion(source.Context, true);
+    }
+
+}
+
+]

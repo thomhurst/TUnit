@@ -2,6 +2,11 @@ using System;
 
 namespace TUnit.Assertions.Attributes;
 
+/// <summary>
+/// DEPRECATED: Use <see cref="AssertionFromAttribute"/> instead.
+/// This attribute has been renamed for better clarity.
+/// </summary>
+[Obsolete("Use AssertionFromAttribute instead. This attribute will be removed in a future version.")]
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class CreateAssertionAttribute : Attribute
 {

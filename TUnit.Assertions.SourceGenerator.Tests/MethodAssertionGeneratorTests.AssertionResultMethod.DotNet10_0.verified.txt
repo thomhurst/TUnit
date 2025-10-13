@@ -1,0 +1,97 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for IsEven
+/// </summary>
+public sealed class Int_IsEven_Assertion : Assertion<int>
+{
+    public Int_IsEven_Assertion(AssertionContext<int> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        return Task.FromResult(value.IsEven());
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to satisfy IsEven";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsBetween
+/// </summary>
+public sealed class Int_IsBetween_Int_Int_Assertion : Assertion<int>
+{
+    private readonly int _min;
+    private readonly int _max;
+
+    public Int_IsBetween_Int_Int_Assertion(AssertionContext<int> context, int min, int max)
+        : base(context)
+    {
+        _min = min;
+        _max = max;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        return Task.FromResult(value.IsBetween(_min, _max));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"to satisfy IsBetween({_min}, {_max})";
+    }
+}
+
+public static partial class AssertionResultMethodExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsEven
+    /// </summary>
+    public static Int_IsEven_Assertion IsEven(this IAssertionSource<int> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsEven()");
+        return new Int_IsEven_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsBetween
+    /// </summary>
+    public static Int_IsBetween_Int_Int_Assertion IsBetween(this IAssertionSource<int> source, int min, int max, [CallerArgumentExpression(nameof(min))] string? minExpression = null, [CallerArgumentExpression(nameof(max))] string? maxExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsBetween({minExpression}, {maxExpression})");
+        return new Int_IsBetween_Int_Int_Assertion(source.Context, min, max);
+    }
+
+}
+
+]

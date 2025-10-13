@@ -1,0 +1,208 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class StreamCanReadAssertion : Assertion<System.IO.Stream>
+{
+    private readonly bool _negated;
+
+    public StreamCanReadAssertion(AssertionContext<System.IO.Stream> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.Stream> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.CanRead;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy CanRead"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be readable";
+    }
+}
+
+public class StreamCanWriteAssertion : Assertion<System.IO.Stream>
+{
+    private readonly bool _negated;
+
+    public StreamCanWriteAssertion(AssertionContext<System.IO.Stream> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.Stream> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.CanWrite;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy CanWrite"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be writable";
+    }
+}
+
+public class StreamCanSeekAssertion : Assertion<System.IO.Stream>
+{
+    private readonly bool _negated;
+
+    public StreamCanSeekAssertion(AssertionContext<System.IO.Stream> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.Stream> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.CanSeek;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy CanSeek"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be seekable";
+    }
+}
+
+public class StreamCanTimeoutAssertion : Assertion<System.IO.Stream>
+{
+    private readonly bool _negated;
+
+    public StreamCanTimeoutAssertion(AssertionContext<System.IO.Stream> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.Stream> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.CanTimeout;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy CanTimeout"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} support timeout";
+    }
+}
+
+public static partial class StreamAssertionExtensions
+{
+    public static StreamCanReadAssertion CanRead(this IAssertionSource<System.IO.Stream> source)
+    {
+        source.Context.ExpressionBuilder.Append(".CanRead()");
+        return new StreamCanReadAssertion(source.Context, false);
+    }
+
+    public static StreamCanReadAssertion CannotRead(this IAssertionSource<System.IO.Stream> source)
+    {
+        source.Context.ExpressionBuilder.Append(".CannotRead()");
+        return new StreamCanReadAssertion(source.Context, true);
+    }
+
+    public static StreamCanWriteAssertion CanWrite(this IAssertionSource<System.IO.Stream> source)
+    {
+        source.Context.ExpressionBuilder.Append(".CanWrite()");
+        return new StreamCanWriteAssertion(source.Context, false);
+    }
+
+    public static StreamCanWriteAssertion CannotWrite(this IAssertionSource<System.IO.Stream> source)
+    {
+        source.Context.ExpressionBuilder.Append(".CannotWrite()");
+        return new StreamCanWriteAssertion(source.Context, true);
+    }
+
+    public static StreamCanSeekAssertion CanSeek(this IAssertionSource<System.IO.Stream> source)
+    {
+        source.Context.ExpressionBuilder.Append(".CanSeek()");
+        return new StreamCanSeekAssertion(source.Context, false);
+    }
+
+    public static StreamCanSeekAssertion CannotSeek(this IAssertionSource<System.IO.Stream> source)
+    {
+        source.Context.ExpressionBuilder.Append(".CannotSeek()");
+        return new StreamCanSeekAssertion(source.Context, true);
+    }
+
+    public static StreamCanTimeoutAssertion CanTimeout(this IAssertionSource<System.IO.Stream> source)
+    {
+        source.Context.ExpressionBuilder.Append(".CanTimeout()");
+        return new StreamCanTimeoutAssertion(source.Context, false);
+    }
+
+    public static StreamCanTimeoutAssertion CannotTimeout(this IAssertionSource<System.IO.Stream> source)
+    {
+        source.Context.ExpressionBuilder.Append(".CannotTimeout()");
+        return new StreamCanTimeoutAssertion(source.Context, true);
+    }
+
+}
+
+]

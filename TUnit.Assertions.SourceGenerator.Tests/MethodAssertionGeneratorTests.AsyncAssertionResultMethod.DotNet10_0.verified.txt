@@ -1,0 +1,97 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for IsEvenAsync
+/// </summary>
+public sealed class Int_IsEvenAsync_Assertion : Assertion<int>
+{
+    public Int_IsEvenAsync_Assertion(AssertionContext<int> context)
+        : base(context)
+    {
+    }
+
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return AssertionResult.Failed($"threw {exception.GetType().FullName}");
+        }
+
+        return await value.IsEvenAsync();
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to satisfy IsEvenAsync";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsBetweenAsync
+/// </summary>
+public sealed class Int_IsBetweenAsync_Int_Int_Assertion : Assertion<int>
+{
+    private readonly int _min;
+    private readonly int _max;
+
+    public Int_IsBetweenAsync_Int_Int_Assertion(AssertionContext<int> context, int min, int max)
+        : base(context)
+    {
+        _min = min;
+        _max = max;
+    }
+
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return AssertionResult.Failed($"threw {exception.GetType().FullName}");
+        }
+
+        return await value.IsBetweenAsync(_min, _max);
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"to satisfy IsBetweenAsync({_min}, {_max})";
+    }
+}
+
+public static partial class AsyncAssertionResultExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsEvenAsync
+    /// </summary>
+    public static Int_IsEvenAsync_Assertion IsEvenAsync(this IAssertionSource<int> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsEvenAsync()");
+        return new Int_IsEvenAsync_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsBetweenAsync
+    /// </summary>
+    public static Int_IsBetweenAsync_Int_Int_Assertion IsBetweenAsync(this IAssertionSource<int> source, int min, int max, [CallerArgumentExpression(nameof(min))] string? minExpression = null, [CallerArgumentExpression(nameof(max))] string? maxExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsBetweenAsync({minExpression}, {maxExpression})");
+        return new Int_IsBetweenAsync_Int_Int_Assertion(source.Context, min, max);
+    }
+
+}
+
+]

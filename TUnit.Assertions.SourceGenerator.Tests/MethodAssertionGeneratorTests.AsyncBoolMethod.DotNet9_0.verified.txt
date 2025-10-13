@@ -1,0 +1,101 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for IsPositiveAsync
+/// </summary>
+public sealed class Int_IsPositiveAsync_Assertion : Assertion<int>
+{
+    public Int_IsPositiveAsync_Assertion(AssertionContext<int> context)
+        : base(context)
+    {
+    }
+
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return AssertionResult.Failed($"threw {exception.GetType().FullName}");
+        }
+
+        var result = await value.IsPositiveAsync();
+        return result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}");
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to satisfy IsPositiveAsync";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsGreaterThanAsync
+/// </summary>
+public sealed class Int_IsGreaterThanAsync_Int_Assertion : Assertion<int>
+{
+    private readonly int _threshold;
+
+    public Int_IsGreaterThanAsync_Int_Assertion(AssertionContext<int> context, int threshold)
+        : base(context)
+    {
+        _threshold = threshold;
+    }
+
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return AssertionResult.Failed($"threw {exception.GetType().FullName}");
+        }
+
+        var result = await value.IsGreaterThanAsync(_threshold);
+        return result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}");
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"to satisfy IsGreaterThanAsync({_threshold})";
+    }
+}
+
+public static partial class AsyncBoolAssertionExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsPositiveAsync
+    /// </summary>
+    public static Int_IsPositiveAsync_Assertion IsPositiveAsync(this IAssertionSource<int> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsPositiveAsync()");
+        return new Int_IsPositiveAsync_Assertion(source.Context);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsGreaterThanAsync
+    /// </summary>
+    public static Int_IsGreaterThanAsync_Int_Assertion IsGreaterThanAsync(this IAssertionSource<int> source, int threshold, [CallerArgumentExpression(nameof(threshold))] string? thresholdExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsGreaterThanAsync({thresholdExpression})");
+        return new Int_IsGreaterThanAsync_Int_Assertion(source.Context, threshold);
+    }
+
+}
+
+]

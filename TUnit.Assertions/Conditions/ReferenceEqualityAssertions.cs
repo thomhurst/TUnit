@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -6,6 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that two references point to the same object.
 /// </summary>
+[AssertionExtension("IsSameReferenceAs")]
 public class SameReferenceAssertion<TValue> : Assertion<TValue>
 {
     private readonly object? _expected;
@@ -42,6 +44,7 @@ public class SameReferenceAssertion<TValue> : Assertion<TValue>
 /// <summary>
 /// Asserts that two references do NOT point to the same object.
 /// </summary>
+[AssertionExtension("IsNotSameReferenceAs")]
 public class NotSameReferenceAssertion<TValue> : Assertion<TValue>
 {
     private readonly object? _expected;

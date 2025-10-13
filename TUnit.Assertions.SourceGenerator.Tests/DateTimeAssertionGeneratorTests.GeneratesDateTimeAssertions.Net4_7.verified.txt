@@ -1,0 +1,59 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class DateTimeIsDaylightSavingTimeAssertion : Assertion<System.DateTime>
+{
+    private readonly bool _negated;
+
+    public DateTimeIsDaylightSavingTimeAssertion(AssertionContext<System.DateTime> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.DateTime> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = actualValue.IsDaylightSavingTime();
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy IsDaylightSavingTime"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} be during daylight saving time";
+    }
+}
+
+public static partial class DateTimeAssertionExtensions
+{
+    public static DateTimeIsDaylightSavingTimeAssertion IsDaylightSavingTime(this IAssertionSource<System.DateTime> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsDaylightSavingTime()");
+        return new DateTimeIsDaylightSavingTimeAssertion(source.Context, false);
+    }
+
+    public static DateTimeIsDaylightSavingTimeAssertion IsNotDaylightSavingTime(this IAssertionSource<System.DateTime> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsNotDaylightSavingTime()");
+        return new DateTimeIsDaylightSavingTimeAssertion(source.Context, true);
+    }
+
+}
+
+]

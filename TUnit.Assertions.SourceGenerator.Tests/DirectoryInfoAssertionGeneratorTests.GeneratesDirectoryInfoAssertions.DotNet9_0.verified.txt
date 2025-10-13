@@ -1,0 +1,64 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Conditions;
+
+namespace TUnit.Assertions.Extensions;
+
+public class DirectoryInfoExistsAssertion : Assertion<System.IO.DirectoryInfo>
+{
+    private readonly bool _negated;
+
+    public DirectoryInfoExistsAssertion(AssertionContext<System.IO.DirectoryInfo> context, bool negated = false)
+        : base(context)
+    {
+        _negated = negated;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.IO.DirectoryInfo> metadata)
+    {
+        var actualValue = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (actualValue is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = actualValue.Exists;
+        var condition = _negated ? result : !result;
+        return Task.FromResult(AssertionResult.FailIf(condition, $"'{actualValue}' was expected {(_negated ? "not " : "")}to satisfy Exists"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"{(_negated ? "not " : "")} exist";
+    }
+}
+
+public static partial class DirectoryInfoAssertionExtensions
+{
+    public static DirectoryInfoExistsAssertion Exists(this IAssertionSource<System.IO.DirectoryInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".Exists()");
+        return new DirectoryInfoExistsAssertion(source.Context, false);
+    }
+
+    public static DirectoryInfoExistsAssertion DoesNotExist(this IAssertionSource<System.IO.DirectoryInfo> source)
+    {
+        source.Context.ExpressionBuilder.Append(".DoesNotExist()");
+        return new DirectoryInfoExistsAssertion(source.Context, true);
+    }
+
+}
+
+]

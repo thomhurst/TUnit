@@ -20,22 +20,6 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // DIAGNOSTIC: Always generate a test file to verify generator is running
-        context.RegisterPostInitializationOutput(ctx =>
-        {
-            ctx.AddSource("_DiagnosticTest.g.cs", @"
-// This file is generated to verify the AssertionExtensionGenerator is running.
-// If you see this file, the generator executed successfully.
-namespace TUnit.Assertions.Diagnostics
-{
-    internal static class GeneratorDiagnostic
-    {
-        public const string Message = ""AssertionExtensionGenerator is running"";
-    }
-}
-");
-        });
-
         // Find all classes decorated with [AssertionExtension]
         var assertionClasses = context.SyntaxProvider
             .ForAttributeWithMetadataName(
