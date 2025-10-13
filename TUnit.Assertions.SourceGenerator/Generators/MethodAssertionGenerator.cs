@@ -163,7 +163,9 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             }
 
             var sourceBuilder = new StringBuilder();
-            var namespaceName = containingType.ContainingNamespace?.ToDisplayString();
+            // Always generate extension methods in TUnit.Assertions.Extensions namespace
+            // so they're available via implicit usings in consuming projects
+            var namespaceName = "TUnit.Assertions.Extensions";
 
             // File header
             sourceBuilder.AppendLine("#nullable enable");
