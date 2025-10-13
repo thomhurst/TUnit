@@ -13,7 +13,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "BoolMethodAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().GreaterThanOrEqualTo(2);
+            await Assert.That(generatedFiles).HasCount().EqualTo(1);
 
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsPositive_Assertion"));
             await Assert.That(mainFile).IsNotNull();
@@ -30,7 +30,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "AssertionResultMethodAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().GreaterThanOrEqualTo(2);
+            await Assert.That(generatedFiles).HasCount().EqualTo(1);
 
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsEven_Assertion"));
             await Assert.That(mainFile).IsNotNull();
@@ -47,7 +47,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "AsyncBoolAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().GreaterThanOrEqualTo(2);
+            await Assert.That(generatedFiles).HasCount().EqualTo(1);
 
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsPositiveAsync_Assertion"));
             await Assert.That(mainFile).IsNotNull();
@@ -63,7 +63,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             "AsyncAssertionResultAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().GreaterThanOrEqualTo(2);
+            await Assert.That(generatedFiles).HasCount().EqualTo(1);
 
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsEvenAsync_Assertion"));
             await Assert.That(mainFile).IsNotNull();

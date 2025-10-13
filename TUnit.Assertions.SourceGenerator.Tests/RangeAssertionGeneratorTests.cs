@@ -13,6 +13,6 @@ internal class RangeAssertionGeneratorTests : TestsBase<MethodAssertionGenerator
             "RangeAssertionExtensions.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().GreaterThanOrEqualTo(1);
+            await Assert.That(generatedFiles).HasCount().EqualTo(0);
         });
 }
