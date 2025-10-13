@@ -789,7 +789,16 @@ internal sealed class TestBuilder : ITestBuilder
 
         // Invoke test registered event receivers BEFORE discovery event receivers
         // This is critical for allowing attributes to set custom hook executors
-        await InvokeTestRegisteredEventReceiversAsync(context);
+        try
+        {
+            await InvokeTestRegisteredEventReceiversAsync(context);
+        }
+        catch (Exception ex)
+        {
+            // Property registration or other registration logic failed
+            // Mark the test as failed immediately, as the old code did
+            test.SetResult(TestState.Failed, ex);
+        }
 
         await InvokeDiscoveryEventReceiversAsync(context);
 
