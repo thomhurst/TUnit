@@ -1815,6 +1815,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsEquatableOrEqualTo")]
     public class IsEquatableOrEqualToAssertion<TValue> : .<TValue>
     {
         public IsEquatableOrEqualToAssertion(.<TValue> context, TValue expected) { }
@@ -1830,6 +1831,7 @@ namespace .Conditions
         protected override string GetExpectation() { }
         public .<TCollection, TItem> Using(.<TItem> comparer) { }
     }
+    [.("IsIn")]
     public class IsInAssertion<TValue> : .<TValue>
     {
         public IsInAssertion(.<TValue> context, .<TValue> collection) { }
@@ -1851,6 +1853,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotIn")]
     public class IsNotInAssertion<TValue> : .<TValue>
     {
         public IsNotInAssertion(.<TValue> context, .<TValue> collection) { }
@@ -1950,6 +1953,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsNotSameReferenceAs")]
     public class NotSameReferenceAssertion<TValue> : .<TValue>
     {
         public NotSameReferenceAssertion(.<TValue> context, object? expected) { }
@@ -2045,6 +2049,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsSameReferenceAs")]
     public class SameReferenceAssertion<TValue> : .<TValue>
     {
         public SameReferenceAssertion(.<TValue> context, object? expected) { }
@@ -3190,7 +3195,6 @@ namespace .Extensions
         public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
         public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
         public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsEquatableOrEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
         public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
@@ -3201,7 +3205,6 @@ namespace .Extensions
         public static .<bool> IsFalse(this .<bool> source) { }
         public static .<bool> IsFalse(this .<bool> source) { }
         public static .<TValue> IsIn<TValue>(this .<TValue> source, params TValue[] collection) { }
-        public static .<TValue> IsIn<TValue>(this .<TValue> source, .<TValue> collection, [.("collection")] string? expression = null) { }
         public static .<.<TItem>, TItem> IsInDescendingOrder<TItem>(this .<.<TItem>> source)
             where TItem : <TItem> { }
         public static .<TCollection, TItem> IsInDescendingOrder<TCollection, TItem>(this .<TCollection> source)
@@ -3231,9 +3234,7 @@ namespace .Extensions
         public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, . ordering, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
         public static .<TValue> IsNotIn<TValue>(this .<TValue> source, params TValue[] collection) { }
-        public static .<TValue> IsNotIn<TValue>(this .<TValue> source, .<TValue> collection, [.("collection")] string? expression = null) { }
         public static ..IsNotParsableIntoAssertion<T> IsNotParsableInto<[.(..None | ..PublicMethods | ..Interfaces)]  T>(this .<string> source) { }
-        public static .<TValue> IsNotSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType) { }
         public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType) { }
         public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
@@ -3242,7 +3243,6 @@ namespace .Extensions
             where TValue : <TValue> { }
         public static .<TValue> IsPositive<TValue>(this .<TValue?> source)
             where TValue :  struct, <TValue> { }
-        public static .<TValue> IsSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<bool> IsTrue(this .<bool> source) { }
         public static .<bool> IsTrue(this .<bool> source) { }
         public static .<object, TExpected> IsTypeOf<TExpected>(this .<object> source) { }
@@ -3347,6 +3347,14 @@ namespace .Extensions
     {
         public static .<TValue> IsDefault<TValue>(this .<TValue> source) { }
     }
+    public static class IsEquatableOrEqualToAssertionExtensions
+    {
+        public static .<TValue> IsEquatableOrEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class IsInAssertionExtensions
+    {
+        public static .<TValue> IsIn<TValue>(this .<TValue> source, .<TValue> collection, [.("collection")] string? collectionExpression = null) { }
+    }
     public static class IsNotAssignableToAssertionExtensions
     {
         public static .<TTarget, TValue> IsNotAssignableTo<TTarget, TValue>(this .<TValue> source) { }
@@ -3354,6 +3362,10 @@ namespace .Extensions
     public static class IsNotDefaultAssertionExtensions
     {
         public static .<TValue> IsNotDefault<TValue>(this .<TValue> source) { }
+    }
+    public static class IsNotInAssertionExtensions
+    {
+        public static .<TValue> IsNotIn<TValue>(this .<TValue> source, .<TValue> collection, [.("collection")] string? collectionExpression = null) { }
     }
     public static class LessThanAssertionExtensions
     {
@@ -3373,9 +3385,17 @@ namespace .Extensions
     {
         public static .<TValue> IsNotNull<TValue>(this .<TValue> source) { }
     }
+    public static class NotSameReferenceAssertionExtensions
+    {
+        public static .<TValue> IsNotSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public static class NullAssertionExtensions
     {
         public static .<TValue> IsNull<TValue>(this .<TValue> source) { }
+    }
+    public static class SameReferenceAssertionExtensions
+    {
+        public static .<TValue> IsSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
     }
     public static class StringContainsAssertionExtensions
     {
