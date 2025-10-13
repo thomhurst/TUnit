@@ -1,5 +1,6 @@
 using System.IO;
 using TUnit.Assertions.Extensions;
+using TUnit.Core.Enums;
 
 namespace TUnit.Assertions.Tests;
 
@@ -136,6 +137,7 @@ public class FileSystemAssertionTests
     }
 
     [Test]
+    [RunOn(OS.Windows)]
     public async Task Test_FileInfo_IsArchived()
     {
         var file = new FileInfo(_testFile);
@@ -144,6 +146,7 @@ public class FileSystemAssertionTests
     }
 
     [Test]
+    [RunOn(OS.Windows)]
     public async Task Test_FileInfo_IsSystemFile()
     {
         var file = new FileInfo(_testFile);
@@ -183,6 +186,7 @@ public class FileSystemAssertionTests
     }
 
     [Test]
+    [RunOn(OS.Windows)]
     public async Task Test_DirectoryInfo_IsHidden()
     {
         var hiddenDir = Path.Combine(_testDirectory, "hidden");
@@ -192,6 +196,7 @@ public class FileSystemAssertionTests
     }
 
     [Test]
+    [RunOn(OS.Windows)]
     public async Task Test_DirectoryInfo_IsSystemDirectory()
     {
         var sysDir = Path.Combine(_testDirectory, "system");
