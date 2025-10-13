@@ -158,12 +158,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
                     // The test building process will handle marking it as failed
                     var exceptionMessage = $"Failed to generate data for property '{metadata.PropertyName}': {ex.Message}";
                     var propertyException = new InvalidOperationException(exceptionMessage, ex);
-
-                    // Mark the test as failed immediately during registration
-                    testContext.InternalExecutableTest.SetResult(TestState.Failed, propertyException);
-
-                    // Re-throw so the error is captured during test building
-                    throw;
+                    throw propertyException;
                 }
             }
         }
@@ -173,12 +168,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
             // The test building process will handle marking it as failed
             var exceptionMessage = $"Failed to register properties for test '{testContext.TestDetails.TestName}': {ex.Message}";
             var registrationException = new InvalidOperationException(exceptionMessage, ex);
-
-            // Mark the test as failed immediately during registration
-            testContext.InternalExecutableTest.SetResult(TestState.Failed, registrationException);
-
-            // Re-throw so the error is captured during test building
-            throw;
+            throw registrationException;
         }
     }
 }
