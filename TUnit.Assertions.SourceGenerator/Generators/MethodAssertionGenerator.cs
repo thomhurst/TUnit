@@ -20,22 +20,6 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // DIAGNOSTIC: Always generate a test file to verify generator is running
-        context.RegisterPostInitializationOutput(ctx =>
-        {
-            ctx.AddSource("_MethodAssertionGeneratorDiagnostic.g.cs", @"
-// This file is generated to verify the MethodAssertionGenerator is running.
-// If you see this file, the generator executed successfully.
-namespace TUnit.Assertions.Diagnostics
-{
-    internal static class MethodAssertionGeneratorDiagnostic
-    {
-        public const string Message = ""MethodAssertionGenerator is running"";
-    }
-}
-");
-        });
-
         // Find all methods decorated with [GenerateAssertion]
         var assertionMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
