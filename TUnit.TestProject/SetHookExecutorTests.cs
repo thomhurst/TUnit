@@ -83,18 +83,28 @@ public class SetHookExecutorWithStaticHooksTests
     [BeforeEvery(Test)]
     public static async Task BeforeEveryTest(TestContext context)
     {
-        // This static hook should also execute with the custom executor
-        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
-        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
-        context.ObjectBag["BeforeEveryExecuted"] = true;
+        // This static hook is GLOBAL and runs for ALL tests in the assembly
+        // Only run assertions for tests in SetHookExecutorWithStaticHooksTests class
+        if (context.TestDetails.ClassType == typeof(SetHookExecutorWithStaticHooksTests))
+        {
+            // This static hook should execute with the custom executor when CustomHookExecutor is set
+            await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+            await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
+            context.ObjectBag["BeforeEveryExecuted"] = true;
+        }
     }
 
     [AfterEvery(Test)]
     public static async Task AfterEveryTest(TestContext context)
     {
-        // This static hook should also execute with the custom executor
-        await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
-        await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
+        // This static hook is GLOBAL and runs for ALL tests in the assembly
+        // Only run assertions for tests in SetHookExecutorWithStaticHooksTests class
+        if (context.TestDetails.ClassType == typeof(SetHookExecutorWithStaticHooksTests))
+        {
+            // This static hook should execute with the custom executor when CustomHookExecutor is set
+            await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
+            await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
+        }
     }
 
     [Test]
