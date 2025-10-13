@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using TUnit.Core;
 using TUnit.Core.Data;
 using TUnit.Core.Enums;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Core.PropertyInjection;
 using TUnit.Core.Tracking;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -89,6 +91,19 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
                     // Create the data source for this property
                     var dataSource = metadata.CreateDataSource();
 
+                    // Create PropertyMetadata for MembersToGenerate
+                    var containingTypeMetadata = ClassMetadataHelper.GetOrCreateClassMetadata(metadata.ContainingType);
+                    var propMetadata = new PropertyMetadata
+                    {
+                        IsStatic = false,
+                        Name = metadata.PropertyName,
+                        ClassMetadata = containingTypeMetadata,
+                        Type = metadata.PropertyType,
+                        ReflectionInfo = PropertyHelper.GetPropertyInfo(metadata.ContainingType, metadata.PropertyName),
+                        Getter = parent => PropertyHelper.GetPropertyInfo(metadata.ContainingType, metadata.PropertyName).GetValue(parent!)!,
+                        ContainingTypeMetadata = containingTypeMetadata
+                    };
+
                     // Create minimal DataGeneratorMetadata for property resolution during registration
                     var testBuilderContext = new TestBuilderContext
                     {
@@ -101,7 +116,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
                     var dataGenMetadata = new DataGeneratorMetadata
                     {
                         TestBuilderContext = new TestBuilderContextAccessor(testBuilderContext),
-                        MembersToGenerate = [], // Properties don't use member generation
+                        MembersToGenerate = [propMetadata], // Pass the property metadata
                         TestInformation = testContext.TestDetails.MethodMetadata,
                         Type = DataGeneratorType.Property,
                         TestSessionId = TestSessionContext.Current?.Id ?? "registration",
@@ -145,7 +160,9 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
 
                     // Mark the test as failed immediately during registration
                     testContext.InternalExecutableTest.SetResult(TestState.Failed, propertyException);
-                    return; // Stop processing further properties for this test
+
+                    // Re-throw so the error is captured during test building
+                    throw;
                 }
             }
         }
@@ -157,6 +174,9 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
 
             // Mark the test as failed immediately during registration
             testContext.InternalExecutableTest.SetResult(TestState.Failed, registrationException);
+
+            // Re-throw so the error is captured during test building
+            throw;
         }
     }
 }

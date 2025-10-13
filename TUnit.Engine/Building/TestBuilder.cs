@@ -768,12 +768,8 @@ internal sealed class TestBuilder : ITestBuilder
         // Arguments will be tracked by TestArgumentTrackingService during TestRegistered event
         // This ensures proper reference counting for shared instances
 
-        // Invoke test registered event receivers BEFORE discovery event receivers
-        // This is critical for allowing attributes to set custom hook executors
-        await InvokeTestRegisteredEventReceiversAsync(context);
-
-        await InvokeDiscoveryEventReceiversAsync(context);
-
+        // Create the test object BEFORE invoking event receivers
+        // This ensures context.InternalExecutableTest is set for error handling in registration
         var creationContext = new ExecutableTestCreationContext
         {
             TestId = testId,
@@ -786,7 +782,18 @@ internal sealed class TestBuilder : ITestBuilder
             ResolvedClassGenericArguments = testData.ResolvedClassGenericArguments
         };
 
-        return metadata.CreateExecutableTestFactory(creationContext, metadata);
+        var test = metadata.CreateExecutableTestFactory(creationContext, metadata);
+
+        // Set InternalExecutableTest so it's available during registration for error handling
+        context.InternalExecutableTest = test;
+
+        // Invoke test registered event receivers BEFORE discovery event receivers
+        // This is critical for allowing attributes to set custom hook executors
+        await InvokeTestRegisteredEventReceiversAsync(context);
+
+        await InvokeDiscoveryEventReceiversAsync(context);
+
+        return test;
     }
 
     /// <summary>
