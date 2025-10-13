@@ -167,7 +167,7 @@ public class DoubleEqualsAssertion : Assertion<double>
             return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
         }
 
-        if (value == _expected)
+        if (double.Equals(value, _expected))
         {
             return Task.FromResult(AssertionResult.Passed);
         }
