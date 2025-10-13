@@ -197,7 +197,8 @@ public class TypeAssertionTests
     [Test]
     public async Task Test_Type_IsPublic()
     {
-        var type = typeof(PublicClass);
+        // Use string which is a top-level public type
+        var type = typeof(string);
         await Assert.That(type).IsPublic();
     }
 
@@ -319,7 +320,8 @@ public class TypeAssertionTests
     [Test]
     public async Task Test_Type_IsNotNested()
     {
-        var type = typeof(TestClass);
+        // Use string which is a top-level type, not nested
+        var type = typeof(string);
         await Assert.That(type).IsNotNested();
     }
 

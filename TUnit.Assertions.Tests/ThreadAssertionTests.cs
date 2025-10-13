@@ -92,8 +92,13 @@ public class ThreadAssertionTests
     [Test]
     public async Task Test_Thread_IsNotBackground_CurrentThread()
     {
-        var currentThread = Thread.CurrentThread;
-        await Assert.That(currentThread).IsNotBackground();
+        // Create a new non-background thread (test threads run on background thread pool threads)
+        var thread = new Thread(() => Thread.Sleep(50))
+        {
+            IsBackground = false
+        };
+
+        await Assert.That(thread).IsNotBackground();
     }
 
     [Test]
@@ -115,8 +120,10 @@ public class ThreadAssertionTests
     [Test]
     public async Task Test_Thread_IsNotThreadPoolThread()
     {
-        var currentThread = Thread.CurrentThread;
-        await Assert.That(currentThread).IsNotThreadPoolThread();
+        // Create a new non-pool thread (test threads run on thread pool threads)
+        var thread = new Thread(() => Thread.Sleep(50));
+
+        await Assert.That(thread).IsNotThreadPoolThread();
     }
 
     [Test]

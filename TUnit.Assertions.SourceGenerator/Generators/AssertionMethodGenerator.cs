@@ -645,18 +645,25 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("        var exception = metadata.Exception;");
         sourceBuilder.AppendLine();
 
-        sourceBuilder.AppendLine("        if (exception != null)");
-        sourceBuilder.AppendLine("        {");
-        if (needsAsync)
+        // For Task state assertions (IsFaulted, IsCanceled, IsCompleted, etc.),
+        // we should NOT check for exceptions in metadata because:
+        // 1. We don't await the task in the evaluator, so there shouldn't be exceptions
+        // 2. Even if there are, we want to check the task's state properties regardless
+        if (!isTaskType)
         {
-            sourceBuilder.AppendLine("            return AssertionResult.Failed($\"threw {exception.GetType().FullName}\");");
+            sourceBuilder.AppendLine("        if (exception != null)");
+            sourceBuilder.AppendLine("        {");
+            if (needsAsync)
+            {
+                sourceBuilder.AppendLine("            return AssertionResult.Failed($\"threw {exception.GetType().FullName}\");");
+            }
+            else
+            {
+                sourceBuilder.AppendLine("            return Task.FromResult(AssertionResult.Failed($\"threw {exception.GetType().FullName}\"));");
+            }
+            sourceBuilder.AppendLine("        }");
+            sourceBuilder.AppendLine();
         }
-        else
-        {
-            sourceBuilder.AppendLine("            return Task.FromResult(AssertionResult.Failed($\"threw {exception.GetType().FullName}\"));");
-        }
-        sourceBuilder.AppendLine("        }");
-        sourceBuilder.AppendLine();
 
         if (!attributeData.TargetType.IsValueType)
         {
