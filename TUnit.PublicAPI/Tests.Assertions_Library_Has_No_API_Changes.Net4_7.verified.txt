@@ -647,6 +647,13 @@ namespace .Conditions
         public .<TValue> IgnoringType<TIgnore>() { }
         public .<TValue> Within(object tolerance) { }
     }
+    public class EquatableAssertion<TActual, TExpected> : .<TActual>
+        where TActual : <TExpected>
+    {
+        public EquatableAssertion(.<TActual> context, TExpected expected) { }
+        protected override .<.> CheckAsync(.<TActual> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public static class ExceptionAssertionExtensions
     {
         [.(ExpectationMessage="to have a help link")]
@@ -950,6 +957,13 @@ namespace .Conditions
     {
         public NullAssertion(.<TValue> context) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class NullableEquatableAssertion<TActual, TExpected> : .<TActual?>
+        where TActual :  struct, <TExpected>
+    {
+        public NullableEquatableAssertion(.<TActual?> context, TExpected expected) { }
+        protected override .<.> CheckAsync(.<TActual?> metadata) { }
         protected override string GetExpectation() { }
     }
     [.<.Process>("EnableRaisingEvents", CustomName="DoesNotHaveEventRaisingEnabled", ExpectationMessage="have event raising enabled", NegateLogic=true)]
@@ -1446,13 +1460,9 @@ namespace .Extensions
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
         public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
-        public static .<TCollection> Contains<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
         public static .<TCollection, TItem> Contains<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
             where TCollection : .<TItem> { }
         public static .<TCollection, TItem> Contains<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection> Contains<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
         public static .<TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey key, [.("key")] string? expression = null) { }
         public static .<TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey key, .<TKey> comparer, [.("key")] string? expression = null) { }
@@ -1488,26 +1498,13 @@ namespace .Extensions
         public static ..HasFlagAssertion<TEnum> HasFlag<TEnum>(this .<TEnum> source, TEnum expectedFlag, [.("expectedFlag")] string? expression = null)
             where TEnum :  struct,  { }
         public static ..LengthWrapper HasLength(this .<string> source) { }
-        public static ..LengthWrapper HasLength(this .<string> source) { }
         public static . HasLength(this .<string> source, int expectedLength, [.("expectedLength")] string? expression = null) { }
         public static .<TObject, TMember> HasMember<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector) { }
-        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring) { }
         public static . HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring) { }
-        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring) { }
-        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring,  comparison) { }
         public static . HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring,  comparison) { }
-        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring,  comparison) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage) { }
         public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage) { }
         public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
         public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
         public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
         public static ..HasSameNameAsAssertion<TEnum> HasSameNameAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
             where TEnum :  struct,  { }
@@ -1527,12 +1524,12 @@ namespace .Extensions
         public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<string> source, string expected, [.("expected")] string? expression = null) { }
-        public static .<string> IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
-        public static .<string> IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
         public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
+        public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual> source, TExpected expected, [.("expected")] string? expression = null)
+            where TActual :  struct, <TExpected> { }
+        public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual?> source, TExpected expected, [.("expected")] string? expression = null)
+            where TActual :  struct, <TExpected> { }
         public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
@@ -1540,8 +1537,6 @@ namespace .Extensions
             where TCollection : .<TItem> { }
         public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, . ordering, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
-        public static .<bool> IsFalse(this .<bool> source) { }
-        public static .<bool> IsFalse(this .<bool> source) { }
         public static .<TValue> IsIn<TValue>(this .<TValue> source, params TValue[] collection) { }
         public static .<.<TItem>, TItem> IsInDescendingOrder<TItem>(this .<.<TItem>> source)
             where TItem : <TItem> { }
@@ -1562,8 +1557,6 @@ namespace .Extensions
             where TEnum :  struct,  { }
         public static .<TValue> IsNotEmpty<TValue>(this .<TValue> source)
             where TValue : .IEnumerable { }
-        public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
         public static .<TValue> IsNotEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
@@ -1573,16 +1566,12 @@ namespace .Extensions
             where TCollection : .<TItem> { }
         public static .<TValue> IsNotIn<TValue>(this .<TValue> source, params TValue[] collection) { }
         public static ..IsNotParsableIntoAssertion<T> IsNotParsableInto<T>(this .<string> source) { }
-        public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType) { }
-        public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType) { }
         public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
         public static ..IsParsableIntoAssertion<T> IsParsableInto<T>(this .<string> source) { }
         public static .<TValue> IsPositive<TValue>(this .<TValue> source)
             where TValue : <TValue> { }
         public static .<TValue> IsPositive<TValue>(this .<TValue?> source)
             where TValue :  struct, <TValue> { }
-        public static .<bool> IsTrue(this .<bool> source) { }
-        public static .<bool> IsTrue(this .<bool> source) { }
         public static .<object, TExpected> IsTypeOf<TExpected>(this .<object> source) { }
         public static .<TValue, TExpected> IsTypeOf<TExpected, TValue>(this .<TValue> source) { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
