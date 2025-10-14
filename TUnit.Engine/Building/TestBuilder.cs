@@ -64,11 +64,22 @@ internal sealed class TestBuilder : ITestBuilder
     /// <summary>
     /// Creates a lightweight TestNodeInfo for early filtering without building the full test object.
     /// </summary>
-    public TestNodeInfo CreateTestNodeInfo(TestMetadata metadata, TestData testData, Attribute[]? attributes = null)
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Discovery event receivers use reflection")]
+    #endif
+    public async Task<TestNodeInfo> CreateTestNodeInfoAsync(TestMetadata metadata, TestData testData, Attribute[]? attributes = null)
     {
         var testId = TestIdentifierService.GenerateTestId(metadata, testData);
         var path = BuildPath(metadata);
-        var propertyBag = BuildPropertyBag(metadata, attributes);
+
+        // Create a minimal TestContext to allow discovery event receivers to add properties
+        var minimalContext = await CreateMinimalTestContextForFilteringAsync(testId, metadata, testData, attributes);
+
+        // Invoke discovery event receivers to allow dynamic property addition
+        await InvokeDiscoveryEventReceiversAsync(minimalContext);
+
+        // Build property bag including dynamically added properties
+        var propertyBag = BuildPropertyBag(metadata, attributes, minimalContext);
 
         return new TestNodeInfo
         {
@@ -78,6 +89,59 @@ internal sealed class TestBuilder : ITestBuilder
             Metadata = metadata,
             TestData = testData
         };
+    }
+
+    /// <summary>
+    /// Creates a minimal TestContext for filtering purposes (doesn't need full test initialization).
+    /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    #endif
+    private async ValueTask<TestContext> CreateMinimalTestContextForFilteringAsync(
+        string testId,
+        TestMetadata metadata,
+        TestData testData,
+        Attribute[]? attributes)
+    {
+        // Use provided attributes or get them from metadata
+        attributes ??= await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
+
+        var testDetails = new TestDetails
+        {
+            TestId = testId,
+            TestName = metadata.TestName,
+            ClassType = metadata.TestClassType,
+            MethodName = metadata.TestMethodName,
+            ClassInstance = PlaceholderInstance.Instance,
+            TestMethodArguments = testData.MethodData,
+            TestClassArguments = testData.ClassData,
+            TestFilePath = metadata.FilePath,
+            TestLineNumber = metadata.LineNumber,
+            ReturnType = metadata.MethodMetadata.ReturnType ?? typeof(void),
+            MethodMetadata = metadata.MethodMetadata,
+            Attributes = attributes,
+            MethodGenericArguments = testData.ResolvedMethodGenericArguments,
+            ClassGenericArguments = testData.ResolvedClassGenericArguments,
+            Timeout = TimeSpan.FromMinutes(30)
+        };
+
+        var testBuilderContext = new TestBuilderContext
+        {
+            TestMetadata = metadata.MethodMetadata,
+            Events = new TestContextEvents(),
+            ObjectBag = new Dictionary<string, object?>(),
+            InitializedAttributes = attributes
+        };
+
+        var context = _contextProvider.CreateTestContext(
+            metadata.TestName,
+            metadata.TestClassType,
+            testBuilderContext,
+            CancellationToken.None);
+
+        context.TestDetails = testDetails;
+
+        return context;
     }
 
     /// <summary>
@@ -97,7 +161,7 @@ internal sealed class TestBuilder : ITestBuilder
     /// <summary>
     /// Builds the property bag used for filtering.
     /// </summary>
-    private PropertyBag BuildPropertyBag(TestMetadata metadata, Attribute[]? attributes = null)
+    private PropertyBag BuildPropertyBag(TestMetadata metadata, Attribute[]? attributes = null, TestContext? context = null)
     {
         var properties = new List<IProperty>();
 
@@ -117,6 +181,15 @@ internal sealed class TestBuilder : ITestBuilder
         foreach (var propertyAttr in propertyAttributes)
         {
             properties.Add(new TestMetadataProperty(propertyAttr.Name, propertyAttr.Value));
+        }
+
+        // Include dynamically added properties from context (if available)
+        if (context != null)
+        {
+            foreach (var propertyEntry in context.TestDetails.CustomProperties)
+            {
+                properties.AddRange(propertyEntry.Value.Select(value => new TestMetadataProperty(propertyEntry.Key, value)));
+            }
         }
 
         return new PropertyBag(properties);
@@ -304,8 +377,8 @@ internal sealed class TestBuilder : ITestBuilder
                                 InheritanceDepth = metadata.InheritanceDepth
                             };
 
-                            // Create lightweight TestNodeInfo
-                            var testNodeInfo = CreateTestNodeInfo(metadata, testData, attributes);
+                            // Create lightweight TestNodeInfo (includes invoking discovery event receivers for dynamic properties)
+                            var testNodeInfo = await CreateTestNodeInfoAsync(metadata, testData, attributes);
                             yield return testNodeInfo;
                         }
                     }

@@ -118,7 +118,7 @@ internal sealed class TestBuilderPipeline
             {
                 // If streaming fails (e.g., failing data source), create a TestNodeInfo for the failed test
                 // This allows filtering to work even with broken tests
-                var failedTestNodeInfo = CreateFailedTestNodeInfo(metadata, ex);
+                var failedTestNodeInfo = await CreateFailedTestNodeInfoAsync(metadata, ex);
                 if (failedTestNodeInfo != null)
                 {
                     allTestNodeInfos.Add(failedTestNodeInfo);
@@ -129,7 +129,10 @@ internal sealed class TestBuilderPipeline
         return allTestNodeInfos;
     }
 
-    private TestNodeInfo? CreateFailedTestNodeInfo(TestMetadata metadata, Exception exception)
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    #endif
+    private async Task<TestNodeInfo?> CreateFailedTestNodeInfoAsync(TestMetadata metadata, Exception exception)
     {
         try
         {
@@ -149,7 +152,7 @@ internal sealed class TestBuilderPipeline
                 ResolvedMethodGenericArguments = Type.EmptyTypes
             };
 
-            return ((TestBuilder)_testBuilder).CreateTestNodeInfo(metadata, testData, null);
+            return await ((TestBuilder)_testBuilder).CreateTestNodeInfoAsync(metadata, testData, null);
         }
         catch
         {
