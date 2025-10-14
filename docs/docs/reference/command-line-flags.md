@@ -20,7 +20,7 @@ Please note that for the coverage and trx report, you need to install [additiona
         Output directory of the diagnostic logging.
         If not specified the file will be generated inside the default 'TestResults' directory.
 
-    --diagnostic-output-fileprefix
+    --diagnostic-file-prefix
         Prefix for the log file name that will replace '[log]_.'
 
     --diagnostic-verbosity
