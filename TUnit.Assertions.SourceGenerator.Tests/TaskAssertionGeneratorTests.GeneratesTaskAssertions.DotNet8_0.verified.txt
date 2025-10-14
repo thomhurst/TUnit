@@ -25,11 +25,6 @@ public class TaskIsCompletedAssertion<TTask> : Assertion<TTask>
         var actualValue = metadata.Value;
         var exception = metadata.Exception;
 
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
         if (actualValue is null)
         {
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
@@ -62,11 +57,6 @@ public class TaskIsCanceledAssertion<TTask> : Assertion<TTask>
         var actualValue = metadata.Value;
         var exception = metadata.Exception;
 
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
         if (actualValue is null)
         {
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
@@ -98,11 +88,6 @@ public class TaskIsFaultedAssertion<TTask> : Assertion<TTask>
     {
         var actualValue = metadata.Value;
         var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
 
         if (actualValue is null)
         {
