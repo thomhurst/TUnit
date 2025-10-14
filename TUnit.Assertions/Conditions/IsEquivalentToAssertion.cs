@@ -19,7 +19,7 @@ public class IsEquivalentToAssertion<TCollection, TItem> : Assertion<TCollection
     public IsEquivalentToAssertion(
         AssertionContext<TCollection> context,
         IEnumerable<TItem> expected,
-        CollectionOrdering ordering = CollectionOrdering.Any)
+        CollectionOrdering ordering = CollectionOrdering.Matching)
         : base(context)
     {
         _expected = expected ?? throw new ArgumentNullException(nameof(expected));
@@ -82,7 +82,50 @@ public class IsEquivalentToAssertion<TCollection, TItem> : Assertion<TCollection
         }
 
         // Otherwise, use frequency map for unordered comparison (CollectionOrdering.Any)
-        // Build a frequency map of actual items - O(n)
+
+        // When using a custom comparer, we use a linear search approach because:
+        // 1. Custom comparers (especially tolerance-based ones for floating-point) often cannot
+        //    implement GetHashCode correctly (equal items MUST have same hash code)
+        // 2. Dictionary lookups rely on both GetHashCode and Equals, which fails with broken hash codes
+        // 3. Linear search is more forgiving and aligns with user expectations for custom comparers
+        var isCustomComparer = _comparer != null;
+
+        if (isCustomComparer)
+        {
+            // Use linear search for custom comparers - O(n²) but correct
+            var remainingActual = new List<TItem>(actualList);
+
+            foreach (var expectedItem in expectedList)
+            {
+                var foundIndex = -1;
+                for (int i = 0; i < remainingActual.Count; i++)
+                {
+                    var actualItem = remainingActual[i];
+
+                    bool areEqual = expectedItem == null && actualItem == null ||
+                                   expectedItem != null && actualItem != null && comparer.Equals(expectedItem, actualItem);
+
+                    if (areEqual)
+                    {
+                        foundIndex = i;
+                        break;
+                    }
+                }
+
+                if (foundIndex == -1)
+                {
+                    return Task.FromResult(AssertionResult.Failed(
+                        $"collection does not contain expected item: {expectedItem}"));
+                }
+
+                remainingActual.RemoveAt(foundIndex);
+            }
+
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        // Use efficient Dictionary-based frequency map for default comparer - O(n)
+        // Build a frequency map of actual items
         // Track null count separately to avoid Dictionary<TKey> notnull constraint
         int nullCount = 0;
 #pragma warning disable CS8714 // Nullability of type argument doesn't match 'notnull' constraint - we handle nulls separately
