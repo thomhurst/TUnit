@@ -10,18 +10,21 @@ using TUnit.Assertions.Tests.TestData;
 namespace TUnit.Assertions.Extensions;
 
 /// <summary>
-/// Generated assertion for IsErrorOfType
+/// Generated assertion for HasValue
 /// </summary>
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
-public sealed class ResultTValue_IsErrorOfType_Assertion<TValue, TError> : Assertion<TUnit.Assertions.Tests.TestData.Result<TValue>>
-    where TError : System.Exception
+public sealed class String_HasValue_T_Assertion<T> : Assertion<string>
+    where T : notnull
 {
-    public ResultTValue_IsErrorOfType_Assertion(AssertionContext<TUnit.Assertions.Tests.TestData.Result<TValue>> context)
+    private readonly T _value;
+
+    public String_HasValue_T_Assertion(AssertionContext<string> context, T value)
         : base(context)
     {
+        _value = value;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TUnit.Assertions.Tests.TestData.Result<TValue>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -36,7 +39,7 @@ public sealed class ResultTValue_IsErrorOfType_Assertion<TValue, TError> : Asser
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsErrorOfType<TValue, TError>();
+        var result = value.HasValue<T>(_value);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -44,21 +47,21 @@ public sealed class ResultTValue_IsErrorOfType_Assertion<TValue, TError> : Asser
 
     protected override string GetExpectation()
     {
-        return "to be Error";
+        return $"have a non-null value";
     }
 }
 
-public static partial class GenericMethodWithNonInferableTypeParameterExtensions
+public static partial class NotNullConstraintExtensions
 {
     /// <summary>
-    /// Generated extension method for IsErrorOfType
+    /// Generated extension method for HasValue
     /// </summary>
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
-    public static ResultTValue_IsErrorOfType_Assertion<TValue, TError> IsErrorOfType<TValue, TError>(this IAssertionSource<TUnit.Assertions.Tests.TestData.Result<TValue>> source)
-    where TError : System.Exception
+    public static String_HasValue_T_Assertion<T> HasValue<T>(this IAssertionSource<string> source, T value, [CallerArgumentExpression(nameof(value))] string? valueExpression = null)
+    where T : notnull
     {
-        source.Context.ExpressionBuilder.Append(".IsErrorOfType()");
-        return new ResultTValue_IsErrorOfType_Assertion<TValue, TError>(source.Context);
+        source.Context.ExpressionBuilder.Append($".HasValue({valueExpression})");
+        return new String_HasValue_T_Assertion<T>(source.Context, value);
     }
 
 }
