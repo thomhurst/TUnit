@@ -52,6 +52,14 @@ public sealed class AssertionContext<TValue>
         );
     }
 
+    public AssertionContext<TException> MapException<TException>() where TException : Exception
+    {
+        return new AssertionContext<TException>(
+            Evaluation.MapException<TException>(),
+            ExpressionBuilder
+        );
+    }
+
     /// <summary>
     /// Gets the evaluated value and any exception that occurred.
     /// Evaluates once and caches the result for subsequent calls.
@@ -68,5 +76,38 @@ public sealed class AssertionContext<TValue>
     public (DateTimeOffset Start, DateTimeOffset End) GetTiming()
     {
         return Evaluation.GetTiming();
+    }
+
+    /// <summary>
+    /// Pending assertion to link with when the next assertion is constructed.
+    /// Set by AndContinuation/OrContinuation, consumed by Assertion constructor.
+    /// </summary>
+    internal Assertion<TValue>? PendingLinkPrevious { get; private set; }
+
+    /// <summary>
+    /// The type of combiner (And/Or) for the pending link.
+    /// </summary>
+    internal CombinerType? PendingLinkType { get; private set; }
+
+    /// <summary>
+    /// Sets the pending link state for the next assertion to consume.
+    /// Called by AndContinuation/OrContinuation constructors.
+    /// </summary>
+    internal void SetPendingLink(Assertion<TValue> previous, CombinerType type)
+    {
+        PendingLinkPrevious = previous;
+        PendingLinkType = type;
+    }
+
+    /// <summary>
+    /// Consumes and clears the pending link state.
+    /// Called by Assertion constructor to auto-detect chaining.
+    /// </summary>
+    internal (Assertion<TValue>? previous, CombinerType? type) ConsumePendingLink()
+    {
+        var result = (PendingLinkPrevious, PendingLinkType);
+        PendingLinkPrevious = null;
+        PendingLinkType = null;
+        return result;
     }
 }

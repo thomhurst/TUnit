@@ -75,6 +75,20 @@ public sealed class EvaluationContext<TValue>
         });
     }
 
+    public EvaluationContext<TException> MapException<TException>() where TException : Exception
+    {
+        return new EvaluationContext<TException>(async () =>
+        {
+            var (value, exception) = await GetAsync();
+            if (exception is TException tException)
+            {
+                return (tException, null);
+            }
+
+            return (null, exception);
+        });
+    }
+
     /// <summary>
     /// Gets the timing information for this evaluation.
     /// Only meaningful after evaluation has occurred.
