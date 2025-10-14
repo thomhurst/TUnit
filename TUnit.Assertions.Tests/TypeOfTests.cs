@@ -119,6 +119,70 @@ public class TypeOfTests
         await Assert.That(result).IsEqualTo(expectedTimeSpan);
     }
 
+    // ============ UNBOXED VALUE TYPE TESTS ============
+
+    [Test]
+    public async Task IsTypeOf_UnboxedInt_Success()
+    {
+        int number = 42;
+
+        // Using two type parameters - should work with unboxed value types
+        var result = await Assert.That(number).IsTypeOf<int, int>();
+
+        await Assert.That(result).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task IsTypeOf_UnboxedDateTime_Success()
+    {
+        var date = new DateTime(2025, 10, 14, 12, 30, 0);
+
+        var result = await Assert.That(date).IsTypeOf<DateTime, DateTime>();
+
+        await Assert.That(result).IsEqualTo(date);
+    }
+
+    [Test]
+    public async Task IsTypeOf_UnboxedGuid_Success()
+    {
+        var guid = Guid.NewGuid();
+
+        var result = await Assert.That(guid).IsTypeOf<Guid, Guid>();
+
+        await Assert.That(result).IsEqualTo(guid);
+    }
+
+    [Test]
+    public async Task IsTypeOf_UnboxedBool_Success()
+    {
+        bool value = true;
+
+        var result = await Assert.That(value).IsTypeOf<bool, bool>();
+
+        await Assert.That(result).IsTrue();
+    }
+
+    [Test]
+    public async Task IsTypeOf_UnboxedDouble_Success()
+    {
+        double value = 3.14159;
+
+        var result = await Assert.That(value).IsTypeOf<double, double>();
+
+        await Assert.That(result).IsEqualTo(3.14159);
+    }
+
+    [Test]
+    public async Task IsTypeOf_UnboxedCustomStruct_Success()
+    {
+        var customStruct = new CustomStruct { Value = 99, Name = "Unboxed" };
+
+        var result = await Assert.That(customStruct).IsTypeOf<CustomStruct, CustomStruct>();
+
+        await Assert.That(result.Value).IsEqualTo(99);
+        await Assert.That(result.Name).IsEqualTo("Unboxed");
+    }
+
     // ============ NULLABLE COLLECTION TESTS ============
 
     [Test]
