@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Engine.Building;
 using TUnit.Engine.Configuration;
+using TUnit.Engine.Models;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
@@ -57,224 +58,157 @@ internal sealed class TestDiscoveryService : IDataProducer
         await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
         var contextProvider = _testExecutor.GetContextProvider();
-
         contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
 
-        // Stage 1: Stream independent tests immediately while buffering dependent tests
-        var independentTests = new List<AbstractExecutableTest>();
-        var dependentTests = new List<AbstractExecutableTest>();
-        var allTests = new List<AbstractExecutableTest>();
+        // Step 1: Stream lightweight TestNodeInfo objects
+        var allTestNodeInfos = await _testBuilderPipeline.StreamTestNodeInfoAsync(testSessionId, cancellationToken).ConfigureAwait(false);
 
-        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, cancellationToken).ConfigureAwait(false))
+        // Step 2: Determine which tests to build based on filter and execution mode
+        List<TestNodeInfo> testNodeInfosToBuild;
+
+        if (!isForExecution)
         {
-            allTests.Add(test);
-
-            // Check if this test has dependencies based on metadata
-            if (test.Metadata.Dependencies.Length > 0)
-            {
-                // Buffer tests with dependencies for later resolution
-                dependentTests.Add(test);
-            }
-            else
-            {
-                // Independent test - can be used immediately
-                independentTests.Add(test);
-            }
+            // Discovery mode (IDE): Build all tests
+            testNodeInfosToBuild = allTestNodeInfos;
         }
-
-        // Now resolve dependencies for dependent tests
-        foreach (var test in dependentTests)
+        else
         {
-            _dependencyResolver.TryResolveDependencies(test);
-        }
+            // Execution mode: Apply filtering
+            var filteredTestNodeInfos = new List<TestNodeInfo>();
+            var explicitTestNodeInfos = new List<TestNodeInfo>();
 
-        // Combine independent and dependent tests
-        var tests = new List<AbstractExecutableTest>(independentTests.Count + dependentTests.Count);
-        tests.AddRange(independentTests);
-        tests.AddRange(dependentTests);
-
-        // For discovery requests (IDE test explorers), return all tests including explicit ones
-        // For execution requests, apply filtering to exclude explicit tests unless explicitly targeted
-        var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, tests) : tests;
-
-        // If we applied filtering, find all dependencies of filtered tests and add them
-        if (isForExecution)
-        {
-            var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
-            var queue = new Queue<AbstractExecutableTest>(filteredTests);
-
-            while (queue.Count > 0)
+            foreach (var testNodeInfo in allTestNodeInfos)
             {
-                var test = queue.Dequeue();
-                foreach (var resolvedDep in test.Dependencies)
+                if (_testFilterService.MatchesTestNode(filter, testNodeInfo))
                 {
-                    var dependency = resolvedDep.Test;
-                    if (testsToInclude.Add(dependency))
+                    if (_testFilterService.IsExplicitTest(testNodeInfo))
                     {
-                        queue.Enqueue(dependency);
+                        explicitTestNodeInfos.Add(testNodeInfo);
+                    }
+                    else
+                    {
+                        filteredTestNodeInfos.Add(testNodeInfo);
                     }
                 }
             }
 
-            filteredTests = testsToInclude.ToList();
+            // Handle explicit tests logic
+            if (filteredTestNodeInfos.Count > 0 && explicitTestNodeInfos.Count > 0)
+            {
+                // If we have both, exclude explicit tests (filter wasn't targeting them)
+                testNodeInfosToBuild = filteredTestNodeInfos;
+            }
+            else if (explicitTestNodeInfos.Count > 0)
+            {
+                // Only explicit tests matched - include them
+                testNodeInfosToBuild = explicitTestNodeInfos;
+            }
+            else
+            {
+                testNodeInfosToBuild = filteredTestNodeInfos;
+            }
         }
 
-        contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
+        // Step 3: Find all tests we need to build (filtered tests + their dependencies recursively)
+        var testNodeInfosToInclude = new HashSet<TestNodeInfo>();
+        var queue = new Queue<TestNodeInfo>();
+
+        // Start with filtered tests
+        foreach (var testNodeInfo in testNodeInfosToBuild)
+        {
+            if (testNodeInfosToInclude.Add(testNodeInfo))
+            {
+                queue.Enqueue(testNodeInfo);
+            }
+        }
+
+        // Add all dependencies recursively
+        while (queue.Count > 0)
+        {
+            var testNodeInfo = queue.Dequeue();
+
+            // Check metadata for dependencies
+            foreach (var dependency in testNodeInfo.Metadata.Dependencies)
+            {
+                // Find all tests that match this dependency
+                foreach (var candidateNodeInfo in allTestNodeInfos)
+                {
+                    if (dependency.Matches(candidateNodeInfo.Metadata, testNodeInfo.Metadata))
+                    {
+                        if (testNodeInfosToInclude.Add(candidateNodeInfo))
+                        {
+                            queue.Enqueue(candidateNodeInfo);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Step 4: Build full tests only for filtered tests and their dependencies
+        var filteredTests = new List<AbstractExecutableTest>();
+
+        foreach (var testNodeInfo in testNodeInfosToInclude)
+        {
+            var test = await _testBuilderPipeline.BuildTestFromNodeInfoAsync(testNodeInfo, cancellationToken).ConfigureAwait(false);
+            filteredTests.Add(test);
+            _dependencyResolver.RegisterTest(test);
+            _cachedTests.Add(test);
+        }
+
+        // Step 5: Resolve dependencies for built tests
+        foreach (var test in filteredTests.Where(t => t.Metadata.Dependencies.Length > 0))
+        {
+            _dependencyResolver.TryResolveDependencies(test);
+        }
+
+        // Step 6: For hooks, we need ALL test contexts (not just filtered ones)
+        // Build lightweight tests for remaining tests (those that were filtered out)
+        // This ensures hooks see all discovered tests
+        List<AbstractExecutableTest> allTestsForContext;
+
+        if (isForExecution && testNodeInfosToInclude.Count < allTestNodeInfos.Count)
+        {
+            // Some tests were filtered out - build them too for context (but don't register them)
+            allTestsForContext = new List<AbstractExecutableTest>(filteredTests);
+            var filteredIds = new HashSet<string>(filteredTests.Select(t => t.TestId));
+
+            foreach (var testNodeInfo in allTestNodeInfos)
+            {
+                if (!filteredIds.Contains(testNodeInfo.TestId))
+                {
+                    try
+                    {
+                        var test = await _testBuilderPipeline.BuildTestFromNodeInfoAsync(testNodeInfo, cancellationToken).ConfigureAwait(false);
+                        allTestsForContext.Add(test);
+                        _cachedTests.Add(test);
+                    }
+                    catch (Exception)
+                    {
+                        // Skip tests that fail to build
+                        continue;
+                    }
+                }
+            }
+        }
+        else
+        {
+            // No filtering applied or discovery mode - all tests are included
+            allTestsForContext = filteredTests;
+        }
+
+        contextProvider.TestDiscoveryContext.AddTests(allTestsForContext.Select(static t => t.Context));
 
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
         contextProvider.TestDiscoveryContext.RestoreExecutionContext();
 
-        // Register the filtered tests to invoke ITestRegisteredEventReceiver
+        // Register only the filtered tests (not the ones built just for hooks)
         await _testFilterService.RegisterTestsAsync(filteredTests).ConfigureAwait(false);
 
         // Capture the final execution context after discovery
         var finalContext = ExecutionContext.Capture();
         return new TestDiscoveryResult(filteredTests, finalContext);
     }
-
-    /// Streams test discovery for parallel discovery and execution
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
-    #endif
-    private async IAsyncEnumerable<AbstractExecutableTest> DiscoverTestsStreamAsync(
-        string testSessionId,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
-        if (!Debugger.IsAttached)
-        {
-            // Configure from environment if needed
-            DiscoveryConfiguration.ConfigureFromEnvironment();
-            cts.CancelAfter(DiscoveryConfiguration.DiscoveryTimeout);
-        }
-
-        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, cancellationToken).ConfigureAwait(false);
-
-        foreach (var test in tests)
-        {
-            _dependencyResolver.RegisterTest(test);
-
-            // Cache for backward compatibility
-            _cachedTests.Add(test);
-
-            yield return test;
-        }
-    }
-
-    /// <summary>
-    /// Simplified streaming test discovery without channels - matches source generation approach
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
-    #endif
-    public async IAsyncEnumerable<AbstractExecutableTest> DiscoverTestsFullyStreamingAsync(
-        string testSessionId,
-        ITestExecutionFilter? filter,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
-
-        // Collect all tests first (like source generation mode does)
-        var allTests = new List<AbstractExecutableTest>();
-        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, cancellationToken).ConfigureAwait(false))
-        {
-            allTests.Add(test);
-        }
-
-        // Resolve dependencies for all tests
-        foreach (var test in allTests)
-        {
-            _dependencyResolver.TryResolveDependencies(test);
-        }
-
-        // Separate into independent and dependent tests
-        var independentTests = new List<AbstractExecutableTest>();
-        var dependentTests = new List<AbstractExecutableTest>();
-
-        foreach (var test in allTests)
-        {
-            if (test.Dependencies.Length == 0)
-            {
-                independentTests.Add(test);
-            }
-            else
-            {
-                dependentTests.Add(test);
-            }
-        }
-
-        // Yield independent tests first
-        foreach (var test in independentTests)
-        {
-            if (_testFilterService.MatchesTest(filter, test))
-            {
-                yield return test;
-            }
-        }
-
-        // Process dependent tests in dependency order
-        var yieldedTests = new HashSet<string>(independentTests.Select(static t => t.TestId));
-        var remainingTests = new List<AbstractExecutableTest>(dependentTests);
-
-        while (remainingTests.Count > 0)
-        {
-            var readyTests = new List<AbstractExecutableTest>();
-
-            foreach (var test in remainingTests)
-            {
-                // Check if all dependencies have been yielded
-                var allDependenciesYielded = test.Dependencies.All(dep => yieldedTests.Contains(dep.Test.TestId));
-
-                if (allDependenciesYielded)
-                {
-                    readyTests.Add(test);
-                }
-            }
-
-            // If no tests are ready, we have a circular dependency
-            if (readyTests.Count == 0 && remainingTests.Count > 0)
-            {
-                // Yield remaining tests anyway to avoid hanging
-                foreach (var test in remainingTests)
-                {
-                    if (_testFilterService.MatchesTest(filter, test))
-                    {
-                        yield return test;
-                    }
-                }
-                break;
-            }
-
-            // Yield ready tests and remove from remaining
-            foreach (var test in readyTests)
-            {
-                if (_testFilterService.MatchesTest(filter, test))
-                {
-                    yield return test;
-                }
-                yieldedTests.Add(test.TestId);
-                remainingTests.Remove(test);
-            }
-        }
-    }
-
-    private bool AreAllDependenciesSatisfied(AbstractExecutableTest test, ConcurrentDictionary<string, bool> completedTests)
-    {
-        foreach (var dependency in test.Dependencies)
-        {
-            if (!completedTests.ContainsKey(dependency.Test.TestId))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-
 
     public IEnumerable<TestContext> GetCachedTestContexts()
     {

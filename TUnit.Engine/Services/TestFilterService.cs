@@ -7,6 +7,7 @@ using TUnit.Core.Interfaces;
 using TUnit.Core.Logging;
 using TUnit.Engine.Extensions;
 using TUnit.Engine.Logging;
+using TUnit.Engine.Models;
 
 namespace TUnit.Engine.Services;
 
@@ -110,6 +111,31 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         }
     }
 
+    /// <summary>
+    /// Filters TestNodeInfo objects before building full test objects.
+    /// This is more efficient as it avoids expensive test construction for filtered tests.
+    /// </summary>
+    public bool MatchesTestNode(ITestExecutionFilter? testExecutionFilter, TestNodeInfo testNodeInfo)
+    {
+#pragma warning disable TPEXP
+        var shouldRunTest = testExecutionFilter switch
+        {
+            null => true,
+            NopFilter => true,
+            TestNodeUidListFilter testNodeUidListFilter => testNodeUidListFilter.TestNodeUids.Contains(new TestNodeUid(testNodeInfo.TestId)),
+            TreeNodeFilter treeNodeFilter => CheckTreeNodeFilter(treeNodeFilter, testNodeInfo.Path, testNodeInfo.PropertyBag),
+            _ => UnhandledFilter(testExecutionFilter)
+        };
+
+        if (!shouldRunTest)
+        {
+            logger.LogTrace($"Test {testNodeInfo.TestId} with path '{testNodeInfo.Path}' did not match filter");
+        }
+
+        return shouldRunTest;
+#pragma warning restore TPEXP
+    }
+
     public bool MatchesTest(ITestExecutionFilter? testExecutionFilter, AbstractExecutableTest executableTest)
     {
 #pragma warning disable TPEXP
@@ -148,14 +174,23 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         AbstractExecutableTest executableTest)
     {
         var path = BuildPath(executableTest);
-
         var propertyBag = BuildPropertyBag(executableTest);
+        return CheckTreeNodeFilter(treeNodeFilter, path, propertyBag, executableTest.TestId);
+    }
 
+    private bool CheckTreeNodeFilter(
+#pragma warning disable TPEXP
+        TreeNodeFilter treeNodeFilter,
+#pragma warning restore TPEXP
+        string path,
+        PropertyBag propertyBag,
+        string? testId = null)
+    {
         var matches = treeNodeFilter.MatchesFilter(path, propertyBag);
 
-        if (!matches)
+        if (!matches && testId != null)
         {
-            logger.LogTrace($"Test {executableTest.TestId} with path '{path}' did not match treenode filter");
+            logger.LogTrace($"Test {testId} with path '{path}' did not match treenode filter");
         }
 
         return matches;
@@ -183,6 +218,22 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         }
 
         return new PropertyBag(properties);
+    }
+
+    /// <summary>
+    /// Checks if a TestNodeInfo represents an explicit test.
+    /// </summary>
+    public bool IsExplicitTest(TestNodeInfo testNodeInfo)
+    {
+        var attributes = testNodeInfo.Metadata.AttributeFactory();
+        if (attributes.OfType<ExplicitAttribute>().Any())
+        {
+            return true;
+        }
+
+        // Check class type for ExplicitAttribute
+        var testClassType = testNodeInfo.Metadata.TestClassType;
+        return testClassType.GetCustomAttributes(typeof(ExplicitAttribute), true).Length > 0;
     }
 
     private bool IsExplicitTest(AbstractExecutableTest test)

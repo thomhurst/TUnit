@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
@@ -7,6 +8,7 @@ using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Helpers;
+using TUnit.Engine.Models;
 using TUnit.Engine.Services;
 using TUnit.Engine.Utilities;
 
@@ -59,6 +61,67 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
+    /// <summary>
+    /// Creates a lightweight TestNodeInfo for early filtering without building the full test object.
+    /// </summary>
+    public TestNodeInfo CreateTestNodeInfo(TestMetadata metadata, TestData testData, Attribute[]? attributes = null)
+    {
+        var testId = TestIdentifierService.GenerateTestId(metadata, testData);
+        var path = BuildPath(metadata);
+        var propertyBag = BuildPropertyBag(metadata, attributes);
+
+        return new TestNodeInfo
+        {
+            TestId = testId,
+            Path = path,
+            PropertyBag = propertyBag,
+            Metadata = metadata,
+            TestData = testData
+        };
+    }
+
+    /// <summary>
+    /// Builds the test path used for TreeNodeFilter matching.
+    /// </summary>
+    private static string BuildPath(TestMetadata metadata)
+    {
+        var classMetadata = metadata.MethodMetadata.Class;
+        var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
+        var namespaceName = classMetadata.Namespace ?? "*";
+        var classTypeName = classMetadata.Name;
+        var methodName = metadata.TestMethodName;
+
+        return $"/{assemblyName}/{namespaceName}/{classTypeName}/{methodName}";
+    }
+
+    /// <summary>
+    /// Builds the property bag used for filtering.
+    /// </summary>
+    private PropertyBag BuildPropertyBag(TestMetadata metadata, Attribute[]? attributes = null)
+    {
+        var properties = new List<IProperty>();
+
+        // Get attributes if not provided
+        attributes ??= metadata.AttributeFactory();
+
+        // Extract categories from attributes
+        var categoryAttributes = attributes.OfType<TUnit.Core.CategoryAttribute>();
+        foreach (var category in categoryAttributes)
+        {
+            properties.Add(new TestMetadataProperty(category.Category));
+            properties.Add(new TestMetadataProperty("Category", category.Category));
+        }
+
+        // Extract properties from PropertyAttribute
+        var propertyAttributes = attributes.OfType<TUnit.Core.PropertyAttribute>();
+        foreach (var propertyAttr in propertyAttributes)
+        {
+            properties.Add(new TestMetadataProperty(propertyAttr.Name, propertyAttr.Value));
+        }
+
+        return new PropertyBag(properties);
+    }
+
     private async Task<object> CreateInstance(TestMetadata metadata, Type[] resolvedClassGenericArgs, object?[] classData, TestBuilderContext builderContext)
     {
         // Initialize any deferred IAsyncInitializer objects in class data
@@ -104,6 +167,150 @@ internal sealed class TestBuilder : ITestBuilder
                 throw new InvalidOperationException($"Failed to create instance of {metadata.TestClassType.FullName} in AOT scenario. Ensure types are properly annotated for AOT compatibility.", ex);
             }
             throw new InvalidOperationException($"Failed to create instance of {metadata.TestClassType.FullName}. This may be due to a ClassConstructor attribute issue or AOT incompatibility.", ex);
+        }
+    }
+
+    /// <summary>
+    /// Streams lightweight TestNodeInfo objects for filtering before building full tests.
+    /// This is more efficient as it avoids expensive test construction for filtered tests.
+    /// </summary>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Generic type inference uses reflection on data sources and parameters")]
+    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
+    #endif
+    public async IAsyncEnumerable<TestNodeInfo> StreamTestNodeInfoAsync(
+        TestMetadata metadata,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        // Handle GenericTestMetadata with ConcreteInstantiations
+        if (metadata is GenericTestMetadata { ConcreteInstantiations.Count: > 0 } genericMetadata)
+        {
+            foreach (var concreteMetadata in genericMetadata.ConcreteInstantiations.Values)
+            {
+                await foreach (var testNodeInfo in StreamTestNodeInfoAsync(concreteMetadata, cancellationToken))
+                {
+                    yield return testNodeInfo;
+                }
+            }
+            yield break;
+        }
+
+        // Initialize attributes once for all tests from this metadata
+        var attributes = await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
+        var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
+        var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
+        var repeatCount = repeatAttr?.Times ?? 0;
+
+        // Check for circular dependency
+        if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
+        {
+            // Skip streaming - this will fail during build anyway
+            yield break;
+        }
+
+        var contextAccessor = new TestBuilderContextAccessor(new TestBuilderContext
+        {
+            TestMetadata = metadata.MethodMetadata,
+            Events = new TestContextEvents(),
+            ObjectBag = new Dictionary<string, object?>(),
+            InitializedAttributes = attributes
+        });
+
+        // Stream through all data source combinations
+        var classDataAttributeIndex = 0;
+        foreach (var classDataSource in await GetDataSourcesAsync(metadata.ClassDataSources))
+        {
+            classDataAttributeIndex++;
+            var classDataLoopIndex = 0;
+
+            await foreach (var classDataFactory in GetInitializedDataRowsAsync(
+                classDataSource,
+                DataGeneratorMetadataCreator.CreateDataGeneratorMetadata(
+                    testMetadata: metadata,
+                    testSessionId: _sessionId,
+                    generatorType: DataGeneratorType.ClassParameters,
+                    testClassInstance: null,
+                    classInstanceArguments: null,
+                    contextAccessor)))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                classDataLoopIndex++;
+
+                var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+
+                // Handle instance creation for method data sources if needed
+                var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
+                object? instanceForMethodDataSources = null;
+
+                if (needsInstanceForMethodDataSources)
+                {
+                    instanceForMethodDataSources = await CreateInstanceForMethodDataSources(
+                        metadata, classDataAttributeIndex, classDataLoopIndex, classData);
+
+                    if (instanceForMethodDataSources == null)
+                    {
+                        continue; // Skip if instance creation failed
+                    }
+                }
+
+                // Stream through method data sources
+                var methodDataAttributeIndex = 0;
+                foreach (var methodDataSource in await GetDataSourcesAsync(metadata.DataSources))
+                {
+                    methodDataAttributeIndex++;
+                    var methodDataLoopIndex = 0;
+
+                    await foreach (var methodDataFactory in GetInitializedDataRowsAsync(
+                        methodDataSource,
+                        DataGeneratorMetadataCreator.CreateDataGeneratorMetadata(
+                            testMetadata: metadata,
+                            testSessionId: _sessionId,
+                            generatorType: DataGeneratorType.TestParameters,
+                            testClassInstance: methodDataSource is IAccessesInstanceData ? instanceForMethodDataSources : null,
+                            classInstanceArguments: classData,
+                            contextAccessor)))
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        methodDataLoopIndex++;
+
+                        // Stream through repeat count
+                        for (var i = 0; i < repeatCount + 1; i++)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+
+                            // Get method data to check compatibility
+                            var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
+
+                            // Check data compatibility for generic methods
+                            if (metadata.GenericMethodTypeArguments is { Length: > 0 })
+                            {
+                                if (!IsDataCompatibleWithExpectedTypes(metadata, methodData))
+                                {
+                                    continue; // Skip incompatible data
+                                }
+                            }
+
+                            // Create TestData for this combination
+                            var testData = new TestData
+                            {
+                                TestClassInstanceFactory = () => Task.FromResult<object>(null!), // Placeholder
+                                ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                                ClassDataLoopIndex = classDataLoopIndex,
+                                ClassData = classData,
+                                MethodDataSourceAttributeIndex = methodDataAttributeIndex,
+                                MethodDataLoopIndex = methodDataLoopIndex,
+                                MethodData = methodData,
+                                RepeatIndex = i,
+                                InheritanceDepth = metadata.InheritanceDepth
+                            };
+
+                            // Create lightweight TestNodeInfo
+                            var testNodeInfo = CreateTestNodeInfo(metadata, testData, attributes);
+                            yield return testNodeInfo;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -652,6 +859,112 @@ internal sealed class TestBuilder : ITestBuilder
         {
             yield return dataRow;
         }
+    }
+
+    /// <summary>
+    /// Builds a full AbstractExecutableTest from a TestNodeInfo.
+    /// This should be called only for tests that pass filtering.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Hook discovery service handles mode-specific logic; reflection calls suppressed in AOT mode")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Hook discovery service handles mode-specific logic; dynamic code suppressed in AOT mode")]
+    public async Task<AbstractExecutableTest> BuildTestFromNodeInfoAsync(TestNodeInfo testNodeInfo, CancellationToken cancellationToken = default)
+    {
+        var metadata = testNodeInfo.Metadata;
+        var testData = testNodeInfo.TestData;
+
+        // Get or reuse attributes from the TestNodeInfo if available
+        var attributes = metadata.AttributeFactory();
+
+        // Resolve generic types
+        Type[] resolvedClassGenericArgs;
+        Type[] resolvedMethodGenericArgs;
+
+        try
+        {
+            var resolution = TestGenericTypeResolver.Resolve(metadata, testData);
+            resolvedClassGenericArgs = resolution.ResolvedClassGenericArguments;
+            resolvedMethodGenericArgs = resolution.ResolvedMethodGenericArguments;
+        }
+        catch (GenericTypeResolutionException) when (
+            metadata.TestClassType.IsGenericTypeDefinition &&
+            testData.ClassData.Length == 0 &&
+            testData.MethodData.Length > 0)
+        {
+            try
+            {
+                resolvedClassGenericArgs = TryInferClassGenericsFromMethodData(metadata, testData.MethodData);
+                resolvedMethodGenericArgs = Type.EmptyTypes;
+            }
+            catch (Exception ex)
+            {
+                return await CreateFailedTestForDataGenerationError(metadata, ex);
+            }
+        }
+        catch (Exception ex)
+        {
+            return await CreateFailedTestForDataGenerationError(metadata, ex);
+        }
+
+        if (metadata.TestClassType.IsGenericTypeDefinition && resolvedClassGenericArgs.Length == 0)
+        {
+            throw new InvalidOperationException($"Cannot create instance of generic type {metadata.TestClassType.Name} with empty type arguments");
+        }
+
+        // Create instance factory
+        var basicSkipReason = GetBasicSkipReason(metadata, attributes);
+        Func<Task<object>> instanceFactory;
+
+        if (basicSkipReason is { Length: > 0 })
+        {
+            instanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance);
+        }
+        else
+        {
+            var capturedMetadata = metadata;
+            var capturedClassGenericArgs = resolvedClassGenericArgs;
+            var capturedClassData = testData.ClassData;
+            var testBuilderContext = new TestBuilderContext
+            {
+                TestMetadata = metadata.MethodMetadata,
+                Events = new TestContextEvents(),
+                ObjectBag = new Dictionary<string, object?>(),
+                InitializedAttributes = attributes
+            };
+            instanceFactory = () => CreateInstance(capturedMetadata, capturedClassGenericArgs, capturedClassData, testBuilderContext);
+        }
+
+        // Update testData with resolved types and instance factory
+        var fullTestData = new TestData
+        {
+            TestClassInstanceFactory = instanceFactory,
+            ClassDataSourceAttributeIndex = testData.ClassDataSourceAttributeIndex,
+            ClassDataLoopIndex = testData.ClassDataLoopIndex,
+            ClassData = testData.ClassData,
+            MethodDataSourceAttributeIndex = testData.MethodDataSourceAttributeIndex,
+            MethodDataLoopIndex = testData.MethodDataLoopIndex,
+            MethodData = testData.MethodData,
+            RepeatIndex = testData.RepeatIndex,
+            InheritanceDepth = testData.InheritanceDepth,
+            ResolvedClassGenericArguments = resolvedClassGenericArgs,
+            ResolvedMethodGenericArguments = resolvedMethodGenericArgs
+        };
+
+        var testSpecificContext = new TestBuilderContext
+        {
+            TestMetadata = metadata.MethodMetadata,
+            Events = new TestContextEvents(),
+            ObjectBag = new Dictionary<string, object?>(),
+            InitializedAttributes = attributes
+        };
+
+        var test = await BuildTestAsync(metadata, fullTestData, testSpecificContext);
+
+        if (!string.IsNullOrEmpty(basicSkipReason))
+        {
+            test.Context.SkipReason = basicSkipReason;
+        }
+
+        return test;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Hook discovery service handles mode-specific logic; reflection calls suppressed in AOT mode")]

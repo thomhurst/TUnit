@@ -4,6 +4,7 @@ using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Models;
 using TUnit.Engine.Services;
 using TUnit.Engine.Utilities;
 
@@ -80,6 +81,94 @@ internal sealed class TestBuilderPipeline
         return await collectedMetadata
             .SelectManyAsync(BuildTestsFromSingleMetadataAsync, cancellationToken: cancellationToken)
             .ProcessInParallel(cancellationToken: cancellationToken);
+    }
+
+    /// <summary>
+    /// Streams lightweight TestNodeInfo objects for early filtering.
+    /// This avoids building full test objects until after filtering is applied.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
+    public async Task<List<TestNodeInfo>> StreamTestNodeInfoAsync(
+        string testSessionId,
+        CancellationToken cancellationToken = default)
+    {
+        var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
+        var allTestNodeInfos = new List<TestNodeInfo>();
+
+        foreach (var metadata in collectedMetadata)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Skip dynamic tests - they don't benefit from early filtering
+            if (metadata is IDynamicTestMetadata)
+            {
+                continue;
+            }
+
+            try
+            {
+                // Stream TestNodeInfo from this metadata
+                await foreach (var testNodeInfo in ((TestBuilder)_testBuilder).StreamTestNodeInfoAsync(metadata, cancellationToken))
+                {
+                    allTestNodeInfos.Add(testNodeInfo);
+                }
+            }
+            catch (Exception ex)
+            {
+                // If streaming fails (e.g., failing data source), create a TestNodeInfo for the failed test
+                // This allows filtering to work even with broken tests
+                var failedTestNodeInfo = CreateFailedTestNodeInfo(metadata, ex);
+                if (failedTestNodeInfo != null)
+                {
+                    allTestNodeInfos.Add(failedTestNodeInfo);
+                }
+            }
+        }
+
+        return allTestNodeInfos;
+    }
+
+    private TestNodeInfo? CreateFailedTestNodeInfo(TestMetadata metadata, Exception exception)
+    {
+        try
+        {
+            // Create minimal TestData for a failed test
+            var testData = new TestBuilder.TestData
+            {
+                TestClassInstanceFactory = () => Task.FromResult<object>(null!),
+                ClassDataSourceAttributeIndex = 0,
+                ClassDataLoopIndex = 0,
+                ClassData = [],
+                MethodDataSourceAttributeIndex = 0,
+                MethodDataLoopIndex = 0,
+                MethodData = [],
+                RepeatIndex = 0,
+                InheritanceDepth = metadata.InheritanceDepth,
+                ResolvedClassGenericArguments = Type.EmptyTypes,
+                ResolvedMethodGenericArguments = Type.EmptyTypes
+            };
+
+            return ((TestBuilder)_testBuilder).CreateTestNodeInfo(metadata, testData, null);
+        }
+        catch
+        {
+            // If we can't even create TestNodeInfo, return null
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Builds full AbstractExecutableTest from a TestNodeInfo.
+    /// Should only be called for tests that passed filtering.
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
+    public async Task<AbstractExecutableTest> BuildTestFromNodeInfoAsync(
+        TestNodeInfo testNodeInfo,
+        CancellationToken cancellationToken = default)
+    {
+        return await ((TestBuilder)_testBuilder).BuildTestFromNodeInfoAsync(testNodeInfo, cancellationToken);
     }
 
     private async IAsyncEnumerable<TestMetadata> ToAsyncEnumerable(IEnumerable<TestMetadata> metadata)
