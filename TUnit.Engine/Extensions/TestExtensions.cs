@@ -22,13 +22,13 @@ internal static class TestExtensions
                     new LinePosition(testDetails.TestLineNumber, 0)
                 )),
                 new TestMethodIdentifierProperty(
-                    Namespace: testDetails.MethodMetadata.Class.Type.Namespace ?? "",
-                    AssemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.GetName().FullName,
-                    TypeName: testContext.GetClassTypeName(),
-                    MethodName: testDetails.MethodName,
-                    ParameterTypeFullNames: CreateParameterTypeArray(testDetails.MethodMetadata.Parameters.Select(static p => p.Type).ToArray()),
-                    ReturnTypeFullName: testDetails.ReturnType.FullName ?? typeof(void).FullName!,
-                    MethodArity: testDetails.MethodMetadata.GenericTypeCount
+                    @namespace: testDetails.MethodMetadata.Class.Type.Namespace ?? "",
+                    assemblyFullName: testDetails.MethodMetadata.Class.Type.Assembly.GetName().FullName,
+                    typeName: testContext.GetClassTypeName(),
+                    methodName: testDetails.MethodName,
+                    parameterTypeFullNames: CreateParameterTypeArray(testDetails.MethodMetadata.Parameters.Select(static p => p.Type).ToArray()),
+                    returnTypeFullName: testDetails.ReturnType.FullName ?? typeof(void).FullName!,
+                    methodArity: testDetails.MethodMetadata.GenericTypeCount
                     ),
 
                 // Custom TUnit Properties

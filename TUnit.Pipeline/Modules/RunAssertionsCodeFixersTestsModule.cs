@@ -17,8 +17,9 @@ public class RunAssertionsCodeFixersTestsModule : Module<CommandResult>
     {
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Assertions.Analyzers.CodeFixers.Tests.csproj").AssertExists();
 
-        return await context.DotNet().Test(new DotNetTestOptions(project)
+        return await context.DotNet().Test(new DotNetTestOptions
         {
+            WorkingDirectory = project.Folder!,
             NoBuild = true,
             Configuration = Configuration.Release,
             Framework = "net8.0",

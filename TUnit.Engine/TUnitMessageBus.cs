@@ -205,7 +205,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
         if (!string.IsNullOrEmpty(testContext.SkipReason))
         {
-            yield return new TrxMessage($"Skipped: {testContext.SkipReason}");
+            yield return new DebugOrTraceTrxMessage($"Skipped: {testContext.SkipReason}");
         }
     }
 
