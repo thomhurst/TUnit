@@ -35,7 +35,7 @@ public sealed class LazyT_IsValueCreated_Assertion<T> : Assertion<System.Lazy<T>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsValueCreated();
+        var result = value.IsValueCreated<T>();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -73,7 +73,7 @@ public sealed class LazyT_IsValueNotCreated_Assertion<T> : Assertion<System.Lazy
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsValueNotCreated();
+        var result = value.IsValueNotCreated<T>();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));

@@ -70,4 +70,22 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile!).Contains("IsEvenAsync_Assertion");
             await Assert.That(mainFile!).Contains("return await"); // Awaits and returns
         });
+
+    [Test]
+    public Task GenericMethodWithNonInferableTypeParameter() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "GenericMethodWithNonInferableTypeParameter.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).HasCount().EqualTo(1);
+
+            var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsErrorOfType"));
+            await Assert.That(mainFile).IsNotNull();
+            // Verify the method call includes type arguments
+            await Assert.That(mainFile!).Contains("value.IsErrorOfType<TValue, TError>()");
+            // Verify the assertion class is generic
+            await Assert.That(mainFile!).Contains("ResultTValue_IsErrorOfType_Assertion<TValue, TError>");
+        });
 }

@@ -382,19 +382,27 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var containingType = data.Method.ContainingType.ToDisplayString();
         var methodName = data.Method.Name;
 
+        // Build type arguments if the method is generic
+        var typeArguments = "";
+        if (data.Method.IsGenericMethod && data.Method.TypeParameters.Length > 0)
+        {
+            var typeParams = string.Join(", ", data.Method.TypeParameters.Select(tp => tp.Name));
+            typeArguments = $"<{typeParams}>";
+        }
+
         if (data.IsExtensionMethod)
         {
-            // Extension method syntax: value.MethodName(params)
+            // Extension method syntax: value.MethodName<T1, T2>(params)
             var paramList = string.Join(", ", data.AdditionalParameters.Select(p => $"_{p.Name}"));
-            return $"value.{methodName}({paramList})";
+            return $"value.{methodName}{typeArguments}({paramList})";
         }
         else
         {
-            // Static method syntax: ContainingType.MethodName(value, params)
+            // Static method syntax: ContainingType.MethodName<T1, T2>(value, params)
             var allParams = new List<string> { "value" };
             allParams.AddRange(data.AdditionalParameters.Select(p => $"_{p.Name}"));
             var paramList = string.Join(", ", allParams);
-            return $"{containingType}.{methodName}({paramList})";
+            return $"{containingType}.{methodName}{typeArguments}({paramList})";
         }
     }
 
