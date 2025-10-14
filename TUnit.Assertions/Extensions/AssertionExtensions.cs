@@ -25,7 +25,9 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that the value is equal to the expected value.
     /// Generic method that works for all types.
+    /// Priority 0: Fallback for types without specialized overloads.
     /// </summary>
+    [OverloadResolutionPriority(0)]
     public static EqualsAssertion<TValue> IsEqualTo<TValue>(
         this IAssertionSource<TValue> source,
         TValue expected,
@@ -53,7 +55,9 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that the DateTime is equal to the expected value.
     /// Returns DateTimeEqualsAssertion which has .Within() method!
+    /// Priority 2: Highest priority for specialized type.
     /// </summary>
+    [OverloadResolutionPriority(2)]
     public static DateTimeEqualsAssertion IsEqualTo(
         this IAssertionSource<DateTime> source,
         DateTime expected,
@@ -66,7 +70,9 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that the string is equal to the expected value.
     /// Returns StringEqualsAssertion which has .IgnoringCase() and .WithComparison() methods!
+    /// Priority 2: Highest priority for specialized type.
     /// </summary>
+    [OverloadResolutionPriority(2)]
     public static StringEqualsAssertion IsEqualTo(
         this IAssertionSource<string> source,
         string expected,
@@ -94,7 +100,9 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that the DateOnly is equal to the expected value.
     /// Returns DateOnlyEqualsAssertion which has .WithinDays() method!
+    /// Priority 2: Highest priority for specialized type.
     /// </summary>
+    [OverloadResolutionPriority(2)]
     public static DateOnlyEqualsAssertion IsEqualTo(
         this IAssertionSource<DateOnly> source,
         DateOnly expected,
@@ -107,7 +115,9 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that the TimeOnly is equal to the expected value.
     /// Returns TimeOnlyEqualsAssertion which has .Within() method!
+    /// Priority 2: Highest priority for specialized type.
     /// </summary>
+    [OverloadResolutionPriority(2)]
     public static TimeOnlyEqualsAssertion IsEqualTo(
         this IAssertionSource<TimeOnly> source,
         TimeOnly expected,
@@ -121,7 +131,9 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that the double is equal to the expected value.
     /// Returns DoubleEqualsAssertion which has .Within() method!
+    /// Priority 2: Highest priority for specialized type.
     /// </summary>
+    [OverloadResolutionPriority(2)]
     public static DoubleEqualsAssertion IsEqualTo(
         this IAssertionSource<double> source,
         double expected,
@@ -134,7 +146,9 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that the long is equal to the expected value.
     /// Returns LongEqualsAssertion which has .Within() method!
+    /// Priority 2: Highest priority for specialized type.
     /// </summary>
+    [OverloadResolutionPriority(2)]
     public static LongEqualsAssertion IsEqualTo(
         this IAssertionSource<long> source,
         long expected,
@@ -147,7 +161,9 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that the DateTimeOffset is equal to the expected value.
     /// Returns DateTimeOffsetEqualsAssertion which has .Within() method!
+    /// Priority 2: Highest priority for specialized type.
     /// </summary>
+    [OverloadResolutionPriority(2)]
     public static DateTimeOffsetEqualsAssertion IsEqualTo(
         this IAssertionSource<DateTimeOffset> source,
         DateTimeOffset expected,
@@ -158,11 +174,40 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that the int is equal to the expected value.
+    /// Priority 2: Takes precedence over IEquatable overload to provide .Within() support.
+    /// </summary>
+    [OverloadResolutionPriority(2)]
+    public static EqualsAssertion<int> IsEqualTo(
+        this IAssertionSource<int> source,
+        int expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        return new EqualsAssertion<int>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the TimeSpan is equal to the expected value.
+    /// Priority 2: Takes precedence over IEquatable overload to provide .Within() support.
+    /// </summary>
+    [OverloadResolutionPriority(2)]
+    public static EqualsAssertion<TimeSpan> IsEqualTo(
+        this IAssertionSource<TimeSpan> source,
+        TimeSpan expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        return new EqualsAssertion<TimeSpan>(source.Context, expected);
+    }
+
+    /// <summary>
     /// Asserts that a struct implementing IEquatable&lt;TExpected&gt; is equal to the expected value.
     /// This enables direct equality comparisons for structs with cross-type IEquatable implementations.
     /// Example: A Wrapper struct implementing IEquatable&lt;long&gt; can be compared directly to a long value.
-    /// Note: In cases of ambiguity with same-type comparisons, explicitly specify the type parameter.
+    /// Priority 1: Higher priority than generic fallback, uses type-specific IEquatable.Equals.
     /// </summary>
+    [OverloadResolutionPriority(1)]
     public static EquatableAssertion<TActual, TExpected> IsEqualTo<TActual, TExpected>(
         this IAssertionSource<TActual> source,
         TExpected expected,
@@ -176,8 +221,9 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that a nullable struct implementing IEquatable&lt;TExpected&gt; is equal to the expected value.
     /// Handles nullable structs with cross-type IEquatable implementations.
-    /// Note: In cases of ambiguity with same-type comparisons, explicitly specify the type parameter.
+    /// Priority 1: Higher priority than generic fallback, uses type-specific IEquatable.Equals.
     /// </summary>
+    [OverloadResolutionPriority(1)]
     public static NullableEquatableAssertion<TActual, TExpected> IsEqualTo<TActual, TExpected>(
         this IAssertionSource<TActual?> source,
         TExpected expected,

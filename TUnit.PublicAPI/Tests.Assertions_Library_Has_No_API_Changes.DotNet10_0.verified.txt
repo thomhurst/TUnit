@@ -1614,17 +1614,31 @@ namespace .Extensions
             where TEnum :  struct,  { }
         public static .<TValue> IsEmpty<TValue>(this .<TValue> source)
             where TValue : .IEnumerable { }
+        [.(2)]
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        [.(2)]
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        [.(2)]
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        [.(2)]
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        [.(2)]
+        public static .<> IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        [.(2)]
         public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expression = null) { }
+        [.(2)]
+        public static .<int> IsEqualTo(this .<int> source, int expected, [.("expected")] string? expression = null) { }
+        [.(2)]
         public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expression = null) { }
+        [.(2)]
         public static . IsEqualTo(this .<string> source, string expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
+        [.(0)]
         public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
+        [.(1)]
         public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual> source, TExpected expected, [.("expected")] string? expression = null)
             where TActual :  struct, <TExpected> { }
+        [.(1)]
         public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual?> source, TExpected expected, [.("expected")] string? expression = null)
             where TActual :  struct, <TExpected> { }
         public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }

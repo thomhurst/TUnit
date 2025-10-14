@@ -1521,7 +1521,9 @@ namespace .Extensions
             where TValue : .IEnumerable { }
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expression = null) { }
+        public static .<int> IsEqualTo(this .<int> source, int expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<string> source, string expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
