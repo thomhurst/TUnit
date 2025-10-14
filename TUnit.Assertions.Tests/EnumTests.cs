@@ -167,4 +167,123 @@ public class EnumTests
             await Assert.That(value).DoesNotHaveSameValueAs(value2)
         ).Throws<AssertionException>();
     }
+
+    [Test]
+    public async Task IsEqualTo_Good()
+    {
+        var value = MyEnum.One;
+
+        await Assert.That(value).IsEqualTo(MyEnum.One);
+    }
+
+    [Test]
+    public async Task IsEqualTo_Bad()
+    {
+        var value = MyEnum.One;
+
+        await Assert.That(async () =>
+            await Assert.That(value).IsEqualTo(MyEnum.Two)
+        ).Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task IsEqualTo_Nullable_Good()
+    {
+        MyEnum? value = MyEnum.One;
+
+        await Assert.That(value).IsEqualTo(MyEnum.One);
+    }
+
+    [Test]
+    public async Task IsEqualTo_Nullable_Bad()
+    {
+        MyEnum? value = MyEnum.One;
+
+        await Assert.That(async () =>
+            await Assert.That(value).IsEqualTo(MyEnum.Two)
+        ).Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task IsEqualTo_Nullable_Null()
+    {
+        MyEnum? value = null;
+
+        await Assert.That(async () =>
+            await Assert.That(value).IsEqualTo(MyEnum.One)
+        ).Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task IsTypeOf_Enum()
+    {
+        object value = MyEnum.One;
+
+        await Assert.That(value).IsTypeOf<MyEnum>();
+    }
+
+    [Test]
+    public async Task IsNotEqualTo_Good()
+    {
+        var value = MyEnum.One;
+
+        await Assert.That(value).IsNotEqualTo(MyEnum.Two);
+    }
+
+    [Test]
+    public async Task IsNotEqualTo_Bad()
+    {
+        var value = MyEnum.One;
+
+        await Assert.That(async () =>
+            await Assert.That(value).IsNotEqualTo(MyEnum.One)
+        ).Throws<AssertionException>();
+    }
+
+    // Custom value type (struct) tests
+    public struct CustomValueType
+    {
+        public int Value { get; set; }
+        public string Name { get; set; }
+
+        public CustomValueType(int value, string name)
+        {
+            Value = value;
+            Name = name;
+        }
+    }
+
+    [Test]
+    public async Task CustomValueType_IsEqualTo_Good()
+    {
+        var value = new CustomValueType(42, "Test");
+
+        await Assert.That(value).IsEqualTo(new CustomValueType(42, "Test"));
+    }
+
+    [Test]
+    public async Task CustomValueType_IsEqualTo_Bad()
+    {
+        var value = new CustomValueType(42, "Test");
+
+        await Assert.That(async () =>
+            await Assert.That(value).IsEqualTo(new CustomValueType(99, "Different"))
+        ).Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task CustomValueType_IsNotEqualTo_Good()
+    {
+        var value = new CustomValueType(42, "Test");
+
+        await Assert.That(value).IsNotEqualTo(new CustomValueType(99, "Different"));
+    }
+
+    [Test]
+    public async Task CustomValueType_IsTypeOf()
+    {
+        object value = new CustomValueType(42, "Test");
+
+        await Assert.That(value).IsTypeOf<CustomValueType>();
+    }
 }
