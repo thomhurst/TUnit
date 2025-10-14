@@ -206,9 +206,9 @@ public static class AssertionExtensions
     /// Asserts that a struct implementing IEquatable&lt;TExpected&gt; is equal to the expected value.
     /// This enables direct equality comparisons for structs with cross-type IEquatable implementations.
     /// Example: A Wrapper struct implementing IEquatable&lt;long&gt; can be compared directly to a long value.
-    /// Priority 1: Higher priority than generic fallback, uses type-specific IEquatable.Equals.
+    /// Priority -1: Lower than generic fallback; only used for cross-type IEquatable scenarios (TActual != TExpected).
     /// </summary>
-    [OverloadResolutionPriority(1)]
+    [OverloadResolutionPriority(-1)]
     public static EquatableAssertion<TActual, TExpected> IsEqualTo<TActual, TExpected>(
         this IAssertionSource<TActual> source,
         TExpected expected,
@@ -222,9 +222,9 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that a nullable struct implementing IEquatable&lt;TExpected&gt; is equal to the expected value.
     /// Handles nullable structs with cross-type IEquatable implementations.
-    /// Priority 1: Higher priority than generic fallback, uses type-specific IEquatable.Equals.
+    /// Priority -1: Lower than generic fallback; only used for cross-type IEquatable scenarios (TActual != TExpected).
     /// </summary>
-    [OverloadResolutionPriority(1)]
+    [OverloadResolutionPriority(-1)]
     public static NullableEquatableAssertion<TActual, TExpected> IsEqualTo<TActual, TExpected>(
         this IAssertionSource<TActual?> source,
         TExpected expected,

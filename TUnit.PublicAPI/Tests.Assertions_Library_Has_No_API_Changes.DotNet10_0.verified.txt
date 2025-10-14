@@ -1685,10 +1685,10 @@ namespace .Extensions
         public static . IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
         [.(0)]
         public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        [.(1)]
+        [.(-1)]
         public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual> source, TExpected expected, [.("expected")] string? expression = null)
             where TActual :  struct, <TExpected> { }
-        [.(1)]
+        [.(-1)]
         public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual?> source, TExpected expected, [.("expected")] string? expression = null)
             where TActual :  struct, <TExpected> { }
         public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
