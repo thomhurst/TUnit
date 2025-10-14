@@ -553,6 +553,17 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                         attributeData.TargetType.ContainingNamespace?.ToDisplayString() == "System.Threading.Tasks" &&
                         attributeData.TargetType.TypeParameters.Length == 0; // Non-generic Task
 
+        // Collect generic constraints from the method
+        var genericConstraints = CollectGenericConstraints(staticMethod);
+
+        // Determine if we need to generate a generic assertion class
+        var hasMethodTypeParameters = staticMethod.IsGenericMethod && staticMethod.TypeParameters.Length > 0;
+        string? genericTypeParams = null;
+        if (hasMethodTypeParameters)
+        {
+            genericTypeParams = $"<{string.Join(", ", staticMethod.TypeParameters.Select(tp => tp.Name))}>";
+        }
+
         // For Enum.IsDefined, we need to use a generic type parameter instead of the concrete Enum type
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
@@ -565,6 +576,19 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             // Generate: public class TaskIsCompletedAssertion<TTask> : Assertion<TTask> where TTask : System.Threading.Tasks.Task
             sourceBuilder.AppendLine($"public class {className}<TTask> : Assertion<TTask>");
             sourceBuilder.AppendLine($"    where TTask : {targetTypeName}");
+        }
+        else if (hasMethodTypeParameters)
+        {
+            // Generate generic assertion class with the method's type parameters
+            sourceBuilder.AppendLine($"public class {className}{genericTypeParams} : Assertion<{targetTypeName}>");
+            // Apply constraints to the assertion class
+            if (genericConstraints.Count > 0)
+            {
+                foreach (var constraint in genericConstraints)
+                {
+                    sourceBuilder.AppendLine($"    {constraint}");
+                }
+            }
         }
         else
         {
@@ -591,6 +615,11 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         else if (isTaskType)
         {
             contextType = "AssertionContext<TTask>";
+        }
+        else if (hasMethodTypeParameters)
+        {
+            // Use target type with no generic parameters from method (method generics are separate)
+            contextType = $"AssertionContext<{targetTypeName}>";
         }
         else
         {
@@ -623,6 +652,11 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         else if (isTaskType)
         {
             metadataType = "EvaluationMetadata<TTask>";
+        }
+        else if (hasMethodTypeParameters)
+        {
+            // Use target type with no generic parameters from method
+            metadataType = $"EvaluationMetadata<{targetTypeName}>";
         }
         else
         {
@@ -912,6 +946,53 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         };
     }
 
+    /// <summary>
+    /// Collects generic constraints from method type parameters.
+    /// Returns a list of constraint strings in the format "where T : constraint1, constraint2"
+    /// </summary>
+    private static List<string> CollectGenericConstraints(IMethodSymbol method)
+    {
+        var constraints = new List<string>();
+
+        if (!method.IsGenericMethod || method.TypeParameters.Length == 0)
+        {
+            return constraints;
+        }
+
+        foreach (var typeParameter in method.TypeParameters)
+        {
+            var typeConstraints = new List<string>();
+
+            if (typeParameter.HasReferenceTypeConstraint)
+            {
+                typeConstraints.Add("class");
+            }
+            if (typeParameter.HasValueTypeConstraint)
+            {
+                typeConstraints.Add("struct");
+            }
+            if (typeParameter.HasNotNullConstraint)
+            {
+                typeConstraints.Add("notnull");
+            }
+            foreach (var constraintType in typeParameter.ConstraintTypes)
+            {
+                typeConstraints.Add(constraintType.ToDisplayString());
+            }
+            if (typeParameter.HasConstructorConstraint)
+            {
+                typeConstraints.Add("new()");
+            }
+
+            if (typeConstraints.Count > 0)
+            {
+                constraints.Add($"where {typeParameter.Name} : {string.Join(", ", typeConstraints)}");
+            }
+        }
+
+        return constraints;
+    }
+
     private static void GenerateMethodsForSpecificOverload(SourceProductionContext context, StringBuilder sourceBuilder, CreateAssertionAttributeData attributeData, IMethodSymbol staticMethod)
     {
         var targetTypeName = attributeData.TargetType.ToDisplayString();
@@ -959,6 +1040,17 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                         attributeData.TargetType.ContainingNamespace?.ToDisplayString() == "System.Threading.Tasks" &&
                         attributeData.TargetType.TypeParameters.Length == 0; // Non-generic Task
 
+        // Collect generic constraints from the method
+        var genericConstraints = CollectGenericConstraints(method);
+
+        // Determine if the method has generic type parameters
+        var hasMethodTypeParameters = method.IsGenericMethod && method.TypeParameters.Length > 0;
+        string? methodGenericTypeParams = null;
+        if (hasMethodTypeParameters)
+        {
+            methodGenericTypeParams = $"<{string.Join(", ", method.TypeParameters.Select(tp => tp.Name))}>";
+        }
+
         // Generate the extension method using the modern IAssertionSource<T> pattern
         if (attributeData is { RequiresGenericTypeParameter: true, TargetType.Name: "Enum" })
         {
@@ -968,6 +1060,11 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         {
             // For Task, generate a generic method that works with Task and Task<T>
             sourceBuilder.Append($"    public static {assertConditionClassName}<TTask> {generatedMethodName}<TTask>(this IAssertionSource<TTask> source");
+        }
+        else if (hasMethodTypeParameters)
+        {
+            // Method has generic type parameters - include them in the extension method
+            sourceBuilder.Append($"    public static {assertConditionClassName}{methodGenericTypeParams} {generatedMethodName}{methodGenericTypeParams}(this IAssertionSource<{targetTypeName}> source");
         }
         else
         {
@@ -998,6 +1095,12 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine();
             sourceBuilder.Append($"        where TTask : {targetTypeName}");
         }
+        else if (hasMethodTypeParameters && genericConstraints.Count > 0)
+        {
+            // Add generic constraints from the method
+            sourceBuilder.AppendLine();
+            sourceBuilder.Append($"        {string.Join(" ", genericConstraints)}");
+        }
 
         sourceBuilder.AppendLine();
         sourceBuilder.AppendLine("    {");
@@ -1021,6 +1124,11 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         else if (isTaskType)
         {
             sourceBuilder.Append($"        return new {assertConditionClassName}<TTask>(source.Context");
+        }
+        else if (hasMethodTypeParameters)
+        {
+            // Include generic type parameters in the assertion class instantiation
+            sourceBuilder.Append($"        return new {assertConditionClassName}{methodGenericTypeParams}(source.Context");
         }
         else
         {
