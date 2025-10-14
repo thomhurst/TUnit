@@ -69,7 +69,7 @@ internal static class PropertyInjectionPlanBuilder
         while (currentType != null && currentType != typeof(object))
         {
             var properties = currentType.GetProperties(
-                BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
                 .Where(p => p.CanWrite || p.SetMethod?.IsPublic == false);  // Include init-only properties
             
             foreach (var property in properties)
