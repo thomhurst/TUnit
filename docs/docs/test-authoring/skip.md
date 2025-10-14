@@ -48,3 +48,19 @@ public class MyTestClass
 }
 ```
 
+## Global Skipping
+
+In case you want to skip all tests in a project, you can add the attribute on the assembly level.
+
+```csharp
+[assembly: Skip("Skipping all tests in this assembly")]
+```
+
+Or you can skip all the tests in a class like this:
+
+```csharp
+[Skip("Skipping all tests in this class")]
+public class MyTestClass
+{
+}
+```
