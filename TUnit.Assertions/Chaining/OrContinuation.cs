@@ -25,5 +25,8 @@ public class OrContinuation<TValue> : IAssertionSource<TValue>
         Context = context ?? throw new ArgumentNullException(nameof(context));
         PreviousAssertion = previousAssertion ?? throw new ArgumentNullException(nameof(previousAssertion));
         Context.ExpressionBuilder.Append(".Or");
+
+        // Set pending link state for next assertion to consume
+        Context.SetPendingLink(previousAssertion, CombinerType.Or);
     }
 }

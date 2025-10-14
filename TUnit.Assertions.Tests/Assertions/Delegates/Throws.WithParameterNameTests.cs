@@ -11,10 +11,10 @@ public partial class Throws
             var paramName1 = "foo";
             var paramName2 = "bar";
             var expectedMessage = """
-                                  Expected to throw exactly ArgumentException
-                                  but ArgumentException parameter name "foo" does not equal "bar"
+                                  Expected ArgumentException to have parameter name "bar"
+                                  but ArgumentException parameter name was "foo"
 
-                                  at Assert.That(action).ThrowsExactly<ArgumentException>().WithParameterName(paramName2)
+                                  at Assert.That(action).ThrowsExactly<ArgumentException>().WithParameterName("bar")
                                   """;
             ArgumentException exception = new(string.Empty, paramName1);
             Action action = () => throw exception;

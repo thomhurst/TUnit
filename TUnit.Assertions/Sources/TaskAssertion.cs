@@ -60,7 +60,7 @@ public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
     public ThrowsAssertion<TException> Throws<TException>() where TException : Exception
     {
         Context.ExpressionBuilder.Append($".Throws<{typeof(TException).Name}>()");
-        var mappedContext = Context.Map<object?>(_ => null);
+        var mappedContext = Context.MapException<TException>();
         return new ThrowsAssertion<TException>(mappedContext);
     }
 
@@ -72,7 +72,7 @@ public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
     public ThrowsExactlyAssertion<TException> ThrowsExactly<TException>() where TException : Exception
     {
         Context.ExpressionBuilder.Append($".ThrowsExactly<{typeof(TException).Name}>()");
-        var mappedContext = Context.Map<object?>(_ => null);
+        var mappedContext = Context.MapException<TException>();
         return new ThrowsExactlyAssertion<TException>(mappedContext);
     }
 

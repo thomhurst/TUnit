@@ -275,21 +275,11 @@ namespace .Conditions
         where TException : 
         where TSelf : .<TException, TSelf>
     {
-        protected BaseThrowsAssertion(.<object?> context, bool allowSubclasses) { }
+        protected BaseThrowsAssertion(.<TException> context, bool allowSubclasses) { }
         protected abstract bool IsExactTypeMatch { get; }
         protected override sealed .<.> CheckAsync(.<TException> metadata) { }
         protected abstract bool CheckExceptionType( actualException, out string? errorMessage);
         protected override string GetExpectation() { }
-        public TSelf HasMessageContaining(string expectedSubstring, [.("expectedSubstring")] string? expression = null) { }
-        public TSelf HasMessageContaining(string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null) { }
-        public TSelf WithMessage(string expectedMessage, [.("expectedMessage")] string? expression = null) { }
-        public TSelf WithMessageContaining(string expectedSubstring, [.("expectedSubstring")] string? expression = null) { }
-        public TSelf WithMessageContaining(string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null) { }
-        public TSelf WithMessageMatching(.StringMatcher matcher, [.("matcher")] string? expression = null) { }
-        public TSelf WithMessageMatching(string pattern, [.("pattern")] string? expression = null) { }
-        public TSelf WithMessageNotContaining(string notExpectedSubstring, [.("notExpectedSubstring")] string? expression = null) { }
-        public TSelf WithMessageNotContaining(string notExpectedSubstring,  comparison, [.("notExpectedSubstring")] string? expression = null) { }
-        public TSelf WithParameterName(string expectedParameterName, [.("expectedParameterName")] string? expression = null) { }
     }
     [.("IsBetween")]
     public class BetweenAssertion<TValue> : .<TValue>
@@ -647,6 +637,13 @@ namespace .Conditions
         public .<TValue> IgnoringType<TIgnore>() { }
         public .<TValue> Within(object tolerance) { }
     }
+    public class EquatableAssertion<TActual, TExpected> : .<TActual>
+        where TActual : <TExpected>
+    {
+        public EquatableAssertion(.<TActual> context, TExpected expected) { }
+        protected override .<.> CheckAsync(.<TActual> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public static class ExceptionAssertionExtensions
     {
         [.(ExpectationMessage="to have a help link")]
@@ -670,10 +667,46 @@ namespace .Conditions
         [.(ExpectationMessage="to have a target site")]
         public static bool HasTargetSite(this  value) { }
     }
-    public class ExceptionMessageAssertion : .<object?>
+    public class ExceptionMessageContainsAssertion<TException> : .<TException>
+        where TException : 
     {
-        public ExceptionMessageAssertion(.<object?> context, string expectedSubstring,  comparison = 4) { }
-        protected override .<.> CheckAsync(.<object?> metadata) { }
+        public ExceptionMessageContainsAssertion(.<TException> context, string expectedSubstring,  comparison = 4) { }
+        protected override .<.> CheckAsync(.<TException> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class ExceptionMessageEqualsAssertion<TException> : .<TException>
+        where TException : 
+    {
+        public ExceptionMessageEqualsAssertion(.<TException> context, string expectedMessage,  comparison = 4) { }
+        protected override .<.> CheckAsync(.<TException> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class ExceptionMessageMatchesAssertion<TException> : .<TException>
+        where TException : 
+    {
+        public ExceptionMessageMatchesAssertion(.<TException> context, .StringMatcher matcher) { }
+        protected override .<.> CheckAsync(.<TException> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class ExceptionMessageMatchesPatternAssertion<TException> : .<TException>
+        where TException : 
+    {
+        public ExceptionMessageMatchesPatternAssertion(.<TException> context, string pattern) { }
+        protected override .<.> CheckAsync(.<TException> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class ExceptionMessageNotContainsAssertion<TException> : .<TException>
+        where TException : 
+    {
+        public ExceptionMessageNotContainsAssertion(.<TException> context, string notExpectedSubstring,  comparison = 4) { }
+        protected override .<.> CheckAsync(.<TException> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class ExceptionParameterNameAssertion<TException> : .<TException>
+        where TException : 
+    {
+        public ExceptionParameterNameAssertion(.<TException> context, string expectedParameterName) { }
+        protected override .<.> CheckAsync(.<TException> metadata) { }
         protected override string GetExpectation() { }
     }
     [.<.FileInfo>("Exists", CustomName="DoesNotExist", ExpectationMessage="exist", NegateLogic=true)]
@@ -952,6 +985,13 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    public class NullableEquatableAssertion<TActual, TExpected> : .<TActual?>
+        where TActual :  struct, <TExpected>
+    {
+        public NullableEquatableAssertion(.<TActual?> context, TExpected expected) { }
+        protected override .<.> CheckAsync(.<TActual?> metadata) { }
+        protected override string GetExpectation() { }
+    }
     [.<.Process>("EnableRaisingEvents", CustomName="DoesNotHaveEventRaisingEnabled", ExpectationMessage="have event raising enabled", NegateLogic=true)]
     [.<.Process>("EnableRaisingEvents", ExpectationMessage="have event raising enabled")]
     [.<.Process>("HasExited", CustomName="HasNotExited", ExpectationMessage="have exited", NegateLogic=true)]
@@ -1120,17 +1160,35 @@ namespace .Conditions
     public class ThrowsAssertion<TException> : .<TException, .<TException>>
         where TException : 
     {
-        public ThrowsAssertion(.<object?> context) { }
+        public ThrowsAssertion(.<TException> context) { }
         protected override bool IsExactTypeMatch { get; }
         protected override bool CheckExceptionType( actualException, out string? errorMessage) { }
         public .<> WithInnerException() { }
+        public .<TException> WithMessage(string expectedMessage) { }
+        public .<TException> WithMessage(string expectedMessage,  comparison) { }
+        public .<TException> WithMessageContaining(string expectedSubstring) { }
+        public .<TException> WithMessageContaining(string expectedSubstring,  comparison) { }
+        public .<TException> WithMessageMatching(.StringMatcher matcher) { }
+        public .<TException> WithMessageMatching(string pattern) { }
+        public .<TException> WithMessageNotContaining(string notExpectedSubstring) { }
+        public .<TException> WithMessageNotContaining(string notExpectedSubstring,  comparison) { }
+        public .<TException> WithParameterName(string expectedParameterName) { }
     }
     public class ThrowsExactlyAssertion<TException> : .<TException, .<TException>>
         where TException : 
     {
-        public ThrowsExactlyAssertion(.<object?> context) { }
+        public ThrowsExactlyAssertion(.<TException> context) { }
         protected override bool IsExactTypeMatch { get; }
         protected override bool CheckExceptionType( actualException, out string? errorMessage) { }
+        public .<TException> WithMessage(string expectedMessage) { }
+        public .<TException> WithMessage(string expectedMessage,  comparison) { }
+        public .<TException> WithMessageContaining(string expectedSubstring) { }
+        public .<TException> WithMessageContaining(string expectedSubstring,  comparison) { }
+        public .<TException> WithMessageMatching(.StringMatcher matcher) { }
+        public .<TException> WithMessageMatching(string pattern) { }
+        public .<TException> WithMessageNotContaining(string notExpectedSubstring) { }
+        public .<TException> WithMessageNotContaining(string notExpectedSubstring,  comparison) { }
+        public .<TException> WithParameterName(string expectedParameterName) { }
     }
     public class ThrowsNothingAssertion<TValue> : .<TValue>
     {
@@ -1281,6 +1339,8 @@ namespace .Core
                 "End"})]
         public <, > GetTiming() { }
         public .<TNew> Map<TNew>(<TValue?, TNew?> mapper) { }
+        public .<TException> MapException<TException>()
+            where TException :  { }
     }
     public readonly struct AssertionResult
     {
@@ -1323,6 +1383,8 @@ namespace .Core
                 "End"})]
         public <, > GetTiming() { }
         public .<TNew> Map<TNew>(<TValue?, TNew?> mapper) { }
+        public .<TException> MapException<TException>()
+            where TException :  { }
     }
     public readonly struct EvaluationMetadata<TValue>
     {
@@ -1446,13 +1508,9 @@ namespace .Extensions
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
         public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public static .<.<TItem>, TItem> Contains<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
-        public static .<TCollection> Contains<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
         public static .<TCollection, TItem> Contains<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
             where TCollection : .<TItem> { }
         public static .<TCollection, TItem> Contains<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection> Contains<TCollection, TItem>(this .<TCollection> source, TItem expected, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
         public static .<TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey key, [.("key")] string? expression = null) { }
         public static .<TKey, TValue> ContainsKey<TKey, TValue>(this .<.<TKey, TValue>> source, TKey key, .<TKey> comparer, [.("key")] string? expression = null) { }
@@ -1488,26 +1546,15 @@ namespace .Extensions
         public static ..HasFlagAssertion<TEnum> HasFlag<TEnum>(this .<TEnum> source, TEnum expectedFlag, [.("expectedFlag")] string? expression = null)
             where TEnum :  struct,  { }
         public static ..LengthWrapper HasLength(this .<string> source) { }
-        public static ..LengthWrapper HasLength(this .<string> source) { }
         public static . HasLength(this .<string> source, int expectedLength, [.("expectedLength")] string? expression = null) { }
         public static .<TObject, TMember> HasMember<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector) { }
-        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring) { }
-        public static . HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring) { }
-        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring) { }
-        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring,  comparison) { }
-        public static . HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring,  comparison) { }
-        public static .<TValue> HasMessageContaining<TValue>(this .<TValue> source, string expectedSubstring,  comparison) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage) { }
+        public static .<TException> HasMessageContaining<TException>(this .<TException> source, string expectedSubstring, [.("expectedSubstring")] string? expression = null)
+            where TException :  { }
+        public static .<TException> HasMessageContaining<TException>(this .<TException> source, string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null)
+            where TException :  { }
         public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage) { }
         public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
-        public static .<TValue> HasMessageEqualTo<TValue>(this .<TValue> source, string expectedMessage,  comparison) { }
         public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
-        public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
         public static .<TValue> HasMessageStartingWith<TValue>(this .<TValue> source, string expectedPrefix,  comparison) { }
         public static ..HasSameNameAsAssertion<TEnum> HasSameNameAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
             where TEnum :  struct,  { }
@@ -1524,15 +1571,17 @@ namespace .Extensions
             where TValue : .IEnumerable { }
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expression = null) { }
+        public static .<int> IsEqualTo(this .<int> source, int expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<string> source, string expected, [.("expected")] string? expression = null) { }
-        public static .<string> IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
-        public static .<string> IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
         public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
+        public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual> source, TExpected expected, [.("expected")] string? expression = null)
+            where TActual :  struct, <TExpected> { }
+        public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual?> source, TExpected expected, [.("expected")] string? expression = null)
+            where TActual :  struct, <TExpected> { }
         public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
@@ -1540,8 +1589,6 @@ namespace .Extensions
             where TCollection : .<TItem> { }
         public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, . ordering, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
-        public static .<bool> IsFalse(this .<bool> source) { }
-        public static .<bool> IsFalse(this .<bool> source) { }
         public static .<TValue> IsIn<TValue>(this .<TValue> source, params TValue[] collection) { }
         public static .<.<TItem>, TItem> IsInDescendingOrder<TItem>(this .<.<TItem>> source)
             where TItem : <TItem> { }
@@ -1562,8 +1609,6 @@ namespace .Extensions
             where TEnum :  struct,  { }
         public static .<TValue> IsNotEmpty<TValue>(this .<TValue> source)
             where TValue : .IEnumerable { }
-        public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
         public static .<TValue> IsNotEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
@@ -1573,16 +1618,12 @@ namespace .Extensions
             where TCollection : .<TItem> { }
         public static .<TValue> IsNotIn<TValue>(this .<TValue> source, params TValue[] collection) { }
         public static ..IsNotParsableIntoAssertion<T> IsNotParsableInto<T>(this .<string> source) { }
-        public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType) { }
-        public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType) { }
         public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
         public static ..IsParsableIntoAssertion<T> IsParsableInto<T>(this .<string> source) { }
         public static .<TValue> IsPositive<TValue>(this .<TValue> source)
             where TValue : <TValue> { }
         public static .<TValue> IsPositive<TValue>(this .<TValue?> source)
             where TValue :  struct, <TValue> { }
-        public static .<bool> IsTrue(this .<bool> source) { }
-        public static .<bool> IsTrue(this .<bool> source) { }
         public static .<object, TExpected> IsTypeOf<TExpected>(this .<object> source) { }
         public static .<TValue, TExpected> IsTypeOf<TExpected, TValue>(this .<TValue> source) { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
@@ -1607,8 +1648,24 @@ namespace .Extensions
             where TException :  { }
         public static .<TValue> ThrowsNothing<TValue>(this .<TValue> source) { }
         public static ..WhenParsedIntoAssertion<T> WhenParsedInto<T>(this .<string> source) { }
-        public static . WithMessageContaining(this .<object?> source, string expectedSubstring) { }
-        public static . WithMessageContaining(this .<object?> source, string expectedSubstring,  comparison) { }
+        public static .<TException> WithMessage<TException>(this .<TException> source, string expectedMessage, [.("expectedMessage")] string? expression = null)
+            where TException :  { }
+        public static .<TException> WithMessage<TException>(this .<TException> source, string expectedMessage,  comparison, [.("expectedMessage")] string? expression = null)
+            where TException :  { }
+        public static .<TException> WithMessageContaining<TException>(this .<TException> source, string expectedSubstring, [.("expectedSubstring")] string? expression = null)
+            where TException :  { }
+        public static .<TException> WithMessageContaining<TException>(this .<TException> source, string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null)
+            where TException :  { }
+        public static .<TException> WithMessageMatching<TException>(this .<TException> source, .StringMatcher matcher, [.("matcher")] string? expression = null)
+            where TException :  { }
+        public static .<TException> WithMessageMatching<TException>(this .<TException> source, string pattern, [.("pattern")] string? expression = null)
+            where TException :  { }
+        public static .<TException> WithMessageNotContaining<TException>(this .<TException> source, string notExpectedSubstring, [.("notExpectedSubstring")] string? expression = null)
+            where TException :  { }
+        public static .<TException> WithMessageNotContaining<TException>(this .<TException> source, string notExpectedSubstring,  comparison, [.("notExpectedSubstring")] string? expression = null)
+            where TException :  { }
+        public static .<TException> WithParameterName<TException>(this .<TException> source, string expectedParameterName, [.("expectedParameterName")] string? expression = null)
+            where TException :  { }
     }
     public static class BetweenAssertionExtensions
     {
