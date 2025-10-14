@@ -199,7 +199,7 @@ internal static class ReflectionAttributeExtractor
     {
         var propertyDataSources = new List<PropertyDataSource>();
 
-        var properties = testClass.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+        var properties = testClass.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
             .Where(p => p.CanWrite);
 
         foreach (var property in properties)
