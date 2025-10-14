@@ -1,88 +1,111 @@
 # Returning Data via `await`
 
-Sometimes, you may want your assertion to return a value, such as an item found in a collection, so you can use it in further assertions or logic.  
-TUnit supports this by allowing your assertion to return a mapped result when awaited.
+Sometimes, you may want your assertion to return a value, such as an item found in a collection, so you can use it in further assertions or logic.
+TUnit supports this by allowing your assertion to return a value when awaited.
 
 This is useful for scenarios where you want to extract a value from an assertion and use it in subsequent test logic, reducing the need for manual extraction or casting.
 
-It may make sense for our assertions to return data that is different from the input, based on what the assertion is doing. This can allow more cleanly written tests than have to manually do casting or parsing afterwards.
+For example, `await Assert.That(collection).Contains(item => item.Price < 0.99)` can return the first item that meets the criteria.
 
-For example, `await Assert.That(collection).Contains(item => item.Price < 0.99)`
+## How to Return Values from Assertions
 
-We could make that statement return the first item it finds that meets the criteria.
+The key to returning values is to make your assertion class extend `Assertion<TReturn>` where `TReturn` is the type you want to return when awaited. The value is returned by transforming the input using `context.Map<TReturn>(...)`.
 
-To do this, in your assert condition, in the `GetResult` method where the logic is evaluated, store the item you'll return if the assertion passes within a property.
+### Example: Contains with Predicate
 
-For the example above:
+Let's say we want to create a `Contains` assertion that returns the found item:
 
 ```csharp
-public class EnumerableContainsExpectedFuncAssertCondition<TActual, TInner>(
-    Func<TInner, bool> matcher, string? matcherString)
-    : BaseAssertCondition<TActual>
-    where TActual : IEnumerable<TInner>
+public class CollectionContainsPredicateAssertion<TCollection, TItem> : Assertion<TItem>
+    where TCollection : IEnumerable<TItem>
 {
-    private bool _wasFound;
-    
-    protected override string GetExpectation() => $"to contain an entry matching {matcherString ?? "null"}";
-    
-    protected override ValueTask<AssertionResult> GetResult(
-        TActual? actualValue, Exception? exception,
-        AssertionMetadata assertionMetadata
-    )
-    {
-        if (actualValue is null)
-        {
-            return FailWithMessage($"{ActualExpression ?? typeof(TActual).Name} is null");
-        }
+    private readonly Func<TItem, bool> _predicate;
 
-        foreach (var inner in actualValue)
+    public CollectionContainsPredicateAssertion(
+        AssertionContext<TCollection> context,
+        Func<TItem, bool> predicate)
+        : base(context.Map<TItem>(collection =>
         {
-            if (matcher(inner))
+            if (collection == null)
             {
-                _wasFound = true;
-                FoundItem = inner;
-                break;
+                throw new ArgumentNullException(nameof(collection), "collection was null");
             }
-        }
-        
-        return AssertionResult
-            .FailIf(_wasFound is false, "there was no match found in the collection");
+
+            foreach (var item in collection)
+            {
+                if (predicate(item))
+                {
+                    // Return the found item - this becomes the value when awaited
+                    return item;
+                }
+            }
+
+            // Throw an exception if not found - this will be captured as a failure
+            throw new InvalidOperationException("no item matching predicate found in collection");
+        }))
+    {
+        _predicate = predicate;
     }
 
-    public TInner? FoundItem { get; private set; }
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TItem> metadata)
+    {
+        // The transformation already happened in the Map function
+        // If we got here without exception, the item was found
+        if (metadata.Exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed(metadata.Exception.Message));
+        }
+
+        return Task.FromResult(AssertionResult.Passed);
+    }
+
+    protected override string GetExpectation() => "to contain item matching predicate";
 }
 ```
 
-As you can see, if we find an item that matches the predicate, we store it in the `FoundItem` property.
+### How It Works
 
-After that, the extension method to invoke your assertion should return a `MappableResultAssertionBuilder<TSource, TAssertCondition, TMappedResult>`.
+1. **Extend `Assertion<TReturn>`**: Your assertion class extends `Assertion<TItem>` where `TItem` is what you want to return
+2. **Use `context.Map<TReturn>(...)`**: In the constructor, call `context.Map<TReturn>(...)` to transform the input value
+3. **Return the value**: Inside the Map function, return the value you want to make available when the assertion is awaited
+4. **Throw on failure**: If you can't find/produce the value, throw an exception - this will be captured as an assertion failure
 
-`TSource` is the original type of the data you're asserting on. For the above, that's an `IEnumerable<>`.
+### Extension Method
 
-`TAssertCondition` is the Assert Condition that you've created, where you've stored the item in the field.
-
-`TMappedResult` is the type of object that you'd return from the `await Assert.That(...)`
-
-This takes 3 arguments:
-
-The assertion builder, via `valueSource.RegisterAssertion(assertCondition)` - As per how assertions are normally registered.
-
-The assert condition object. It is important that you use the same instance that is passed into the `RegisterAssertion(...)` call.
-
-And a mapper to tell the code how to find the item.
-
-So for the above example, that looks like this. (It looks like a lot of generics, I know!)
+The extension method is straightforward - just return your assertion class:
 
 ```csharp
-public static MappableResultAssertionBuilder<IEnumerable<TInner>, EnumerableContainsExpectedFuncAssertCondition<IEnumerable<TInner>, TInner>, TInner> Contains<TInner>(this IValueSource<IEnumerable<TInner>> valueSource, Func<TInner, bool> matcher, [CallerArgumentExpression(nameof(matcher))] string doNotPopulateThisValue = null)
+public static class CollectionAssertionExtensions
+{
+    public static CollectionContainsPredicateAssertion<TCollection, TItem> Contains<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
     {
-        var enumerableContainsExpectedFuncAssertCondition = new EnumerableContainsExpectedFuncAssertCondition<IEnumerable<TInner>, TInner>(matcher, doNotPopulateThisValue);
-
-        return new MappableResultAssertionBuilder<IEnumerable<TInner>,
-            EnumerableContainsExpectedFuncAssertCondition<IEnumerable<TInner>, TInner>, TInner>(
-            valueSource.RegisterAssertion(enumerableContainsExpectedFuncAssertCondition, [doNotPopulateThisValue]),
-            enumerableContainsExpectedFuncAssertCondition,
-            (_, assertCondition) => assertCondition.FoundItem
-        );
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsPredicateAssertion<TCollection, TItem>(source.Context, predicate);
     }
+}
 ```
+
+### Usage
+
+You can now use the assertion and get the found item:
+
+```csharp
+// Returns the first item with price < 0.99
+Product cheapProduct = await Assert.That(products).Contains(p => p.Price < 0.99);
+
+// Use the returned value in further assertions
+await Assert.That(cheapProduct.Name).IsNotNull();
+await Assert.That(cheapProduct.Category).IsEqualTo("Bargain");
+```
+
+## Built-in Examples
+
+TUnit includes several built-in examples of assertions that return values:
+
+- `Contains(predicate)` - Returns the first item matching the predicate
+- `WhenParsedInto<T>()` - Returns the parsed value (e.g., `int value = await Assert.That("123").WhenParsedInto<int>()`)
+- `IsTypeOf<T>()` - Returns the casted value (e.g., `StringBuilder sb = await Assert.That(obj).IsTypeOf<StringBuilder>()`)
