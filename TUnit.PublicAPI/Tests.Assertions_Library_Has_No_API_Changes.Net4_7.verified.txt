@@ -821,7 +821,7 @@ namespace .Conditions
     public class IsEquivalentToAssertion<TCollection, TItem> : .<TCollection>
         where TCollection : .<TItem>
     {
-        public IsEquivalentToAssertion(.<TCollection> context, .<TItem> expected, . ordering = 0) { }
+        public IsEquivalentToAssertion(.<TCollection> context, .<TItem> expected, . ordering = 1) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
         public .<TCollection, TItem> Using(.<TItem> comparer) { }
