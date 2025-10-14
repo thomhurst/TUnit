@@ -21,7 +21,7 @@ internal sealed class InternalClassWithInternalProperty
 public sealed class PublicClassWithInternalProperty
 {
     [ClassDataSource<Dep>(Shared = SharedType.None)]
-    internal required Dep Dep { get; init; }
+    public required Dep Dep { get; init; }
 
     [Test]
     public async Task TestMethod1()
