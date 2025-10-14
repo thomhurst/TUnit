@@ -95,7 +95,7 @@ public class EquivalentAssertionTests
             { "A", "A" },
         };
 
-        await TUnitAssert.That(dict1).IsEquivalentTo(dict2);
+        await TUnitAssert.That(dict1).IsEquivalentTo(dict2, CollectionOrdering.Any);
     }
 
     [Test]

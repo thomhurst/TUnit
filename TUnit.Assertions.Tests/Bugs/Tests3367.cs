@@ -1,3 +1,5 @@
+using TUnit.Assertions.Enums;
+
 namespace TUnit.Assertions.Tests.Bugs;
 
 public class Tests3367
@@ -50,7 +52,7 @@ public class Tests3367
         double[] array2 = [0.2, 0.1, 0.30000000000000004];
 
         // Act & Assert - should work regardless of order
-        await TUnitAssert.That(array1).IsEquivalentTo(array2).Using(comparer);
+        await TUnitAssert.That(array1).IsEquivalentTo(array2, CollectionOrdering.Any).Using(comparer);
     }
 
     [Test]
@@ -77,6 +79,6 @@ public class Tests3367
         double[] array2 = [0.1, 0.20000000000000001, 0.19999999999999999, 0.30000000000000004];
 
         // Act & Assert - should handle duplicates correctly
-        await TUnitAssert.That(array1).IsEquivalentTo(array2).Using(comparer);
+        await TUnitAssert.That(array1).IsEquivalentTo(array2, CollectionOrdering.Any).Using(comparer);
     }
 }
