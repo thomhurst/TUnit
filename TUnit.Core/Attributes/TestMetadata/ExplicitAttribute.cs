@@ -2,7 +2,6 @@
 
 namespace TUnit.Core;
 
-
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public sealed class ExplicitAttribute(
     [CallerFilePath] string callerFile = "",
