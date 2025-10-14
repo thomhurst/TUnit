@@ -27,18 +27,20 @@ public class StringContainsAssertion : Assertion<string>
     private readonly StringComparison _comparison;
 
     public StringContainsAssertion(
-        EvaluationContext<string> context,
+        AssertionContext<string> context,
         string expected,
-        StringBuilder expressionBuilder,
         StringComparison comparison = StringComparison.Ordinal)
-        : base(context, expressionBuilder)
+        : base(context)
     {
         _expected = expected ?? throw new ArgumentNullException(nameof(expected));
         _comparison = comparison;
     }
 
-    protected override Task<AssertionResult> CheckAsync(string? value, Exception? exception)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
         if (exception != null)
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
 
@@ -71,11 +73,10 @@ public static class StringAssertionExtensions
         string expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
-        source.ExpressionBuilder.Append($".ContainsIgnoreCase({expression})");
+        source.Context.ExpressionBuilder.Append($".ContainsIgnoreCase({expression})");
         return new StringContainsAssertion(
             source.Context,
             expected,
-            source.ExpressionBuilder,
             StringComparison.OrdinalIgnoreCase);
     }
 }
@@ -102,7 +103,8 @@ await Assert.That("Hello World")
 ## Key Points
 
 - **Extension target**: Always extend `IAssertionSource<T>` so your method works on assertions, And, and Or continuations
-- **Append expression**: Call `source.ExpressionBuilder.Append(...)` to build helpful error messages
+- **Append expression**: Call `source.Context.ExpressionBuilder.Append(...)` to build helpful error messages
 - **Return your assertion**: Return a new instance of your custom `Assertion<T>` subclass
-- **Context sharing**: Pass `source.Context` and `source.ExpressionBuilder` to your assertion constructor
+- **Context sharing**: Pass `source.Context` to your assertion constructor (it contains the evaluation context and expression builder)
+- **CheckAsync parameter**: Use `EvaluationMetadata<TValue> metadata` which contains both `Value` and `Exception` properties
 - **CallerArgumentExpression**: Use this attribute to capture parameter expressions for better error messages
