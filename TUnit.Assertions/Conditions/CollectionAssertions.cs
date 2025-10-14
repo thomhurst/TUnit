@@ -41,7 +41,35 @@ public class CollectionIsEmptyAssertion<TValue> : Assertion<TValue>
                 return Task.FromResult(AssertionResult.Passed);
             }
 
-            return Task.FromResult(AssertionResult.Failed("collection contains items"));
+            // Collection is not empty - collect items for error message
+            var items = new List<object?>();
+            const int maxItemsToShow = 10;
+            var totalCount = 1; // We already have the first item
+
+            // Add first item
+            items.Add(enumerator.Current);
+
+            // Collect remaining items up to the limit
+            while (enumerator.MoveNext())
+            {
+                totalCount++;
+                if (items.Count < maxItemsToShow)
+                {
+                    items.Add(enumerator.Current);
+                }
+            }
+
+            // Build error message
+            var sb = new StringBuilder("collection contains items: [");
+            sb.Append(string.Join(", ", items));
+            if (totalCount > maxItemsToShow)
+            {
+                var remainingCount = totalCount - maxItemsToShow;
+                sb.Append($", and {remainingCount} more...");
+            }
+            sb.Append(']');
+
+            return Task.FromResult(AssertionResult.Failed(sb.ToString()));
         }
         finally
         {
