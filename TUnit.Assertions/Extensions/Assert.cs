@@ -63,39 +63,39 @@ public static class Assert
     }
 
     /// <summary>
-    /// Creates an assertion for an array.
+    /// Creates an assertion for an array (nullable or non-nullable).
     /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
     /// Example: await Assert.That(array).IsInOrder();
     /// </summary>
     public static CollectionAssertion<TItem> That<TItem>(
-        TItem[] value,
+        TItem[]? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return new CollectionAssertion<TItem>(value, expression);
+        return new CollectionAssertion<TItem>(value!, expression);
     }
 
     /// <summary>
-    /// Creates an assertion for a List.
+    /// Creates an assertion for a List (nullable or non-nullable).
     /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
     /// Example: await Assert.That(list).IsInOrder();
     /// </summary>
     public static CollectionAssertion<TItem> That<TItem>(
-        List<TItem> value,
+        List<TItem>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return new CollectionAssertion<TItem>(value, expression);
+        return new CollectionAssertion<TItem>(value!, expression);
     }
 
     /// <summary>
-    /// Creates an assertion for an IEnumerable.
+    /// Creates an assertion for an IEnumerable (nullable or non-nullable).
     /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
     /// Example: await Assert.That(enumerable).IsInOrder();
     /// </summary>
     public static CollectionAssertion<TItem> That<TItem>(
-        IEnumerable<TItem> value,
+        IEnumerable<TItem>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return new CollectionAssertion<TItem>(value, expression);
+        return new CollectionAssertion<TItem>(value!, expression);
     }
 
     /// <summary>

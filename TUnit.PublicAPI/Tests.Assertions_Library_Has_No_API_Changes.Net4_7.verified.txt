@@ -9,12 +9,12 @@ namespace
         public static .<.IEnumerable> That(.IEnumerable value, [.("value")] string? expression = null) { }
         public static . That(<.> action, [.("action")] string? expression = null) { }
         public static . That(. task, [.("task")] string? expression = null) { }
-        public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
-        public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
+        public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         public static .<TValue> That<TValue>(<.<TValue>> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(<TValue> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(.<TValue> task, [.("task")] string? expression = null) { }
-        public static .<TItem> That<TItem>(TItem[] value, [.("value")] string? expression = null) { }
+        public static .<TItem> That<TItem>(TItem[]? value, [.("value")] string? expression = null) { }
         public static .<TValue> That<TValue>(TValue? value, [.("value")] string? expression = null) { }
         public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue> value, [.("value")] string? expression = null)
             where TKey :  notnull { }
@@ -1584,7 +1584,7 @@ namespace .Extensions
         public static .<bool> IsTrue(this .<bool> source) { }
         public static .<bool> IsTrue(this .<bool> source) { }
         public static .<object, TExpected> IsTypeOf<TExpected>(this .<object> source) { }
-        public static .<TFrom, TTo> IsTypeOf<TTo, TFrom>(this .<TFrom> source) { }
+        public static .<TValue, TExpected> IsTypeOf<TExpected, TValue>(this .<TValue> source) { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
         public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped>> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
         public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
