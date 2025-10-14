@@ -11,10 +11,10 @@ public partial class Throws
             var outerMessage = "foo";
             var expectedInnerMessage = "bar";
             var expectedMessage = """
-                                  Expected to throw Exception with message "bar"
-                                  but exception message "some different inner message" does not equal "bar"
+                                  Expected exception message to equal "bar"
+                                  but exception message was "some different inner message"
 
-                                  at Assert.That(action).ThrowsException().WithInnerException().WithMessage(expectedInnerMessage)
+                                  at Assert.That(action).ThrowsException().WithInnerException().WithMessage("bar")
                                   """;
             Exception exception = CreateCustomException(outerMessage,
                 CreateCustomException("some different inner message"));

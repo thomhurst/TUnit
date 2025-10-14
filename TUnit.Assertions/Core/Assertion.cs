@@ -118,6 +118,12 @@ public abstract class Assertion<TValue>
     /// </summary>
     internal async Task<TValue?> ExecuteCoreAsync()
     {
+        // If this is an And/OrAssertion (composite), delegate to AssertAsync which has custom logic
+        if (this is Chaining.AndAssertion<TValue> or Chaining.OrAssertion<TValue>)
+        {
+            return await AssertAsync();
+        }
+
         // Normal single-assertion execution (never delegates to wrapper)
         var (value, exception) = await Context.GetAsync();
         var (startTime, endTime) = Context.GetTiming();
@@ -155,13 +161,35 @@ public abstract class Assertion<TValue>
     /// Creates an And continuation for chaining additional assertions.
     /// All assertions in an And chain must pass.
     /// </summary>
-    public AndContinuation<TValue> And => new(Context, this);
+    public AndContinuation<TValue> And
+    {
+        get
+        {
+            // Check if we're chaining And after Or (mixing combiners)
+            if (_wrappedExecution is Chaining.OrAssertion<TValue>)
+            {
+                throw new Exceptions.MixedAndOrAssertionsException();
+            }
+            return new(Context, _wrappedExecution ?? this);
+        }
+    }
 
     /// <summary>
     /// Creates an Or continuation for chaining alternative assertions.
     /// At least one assertion in an Or chain must pass.
     /// </summary>
-    public OrContinuation<TValue> Or => new(Context, this);
+    public OrContinuation<TValue> Or
+    {
+        get
+        {
+            // Check if we're chaining Or after And (mixing combiners)
+            if (_wrappedExecution is Chaining.AndAssertion<TValue>)
+            {
+                throw new Exceptions.MixedAndOrAssertionsException();
+            }
+            return new(Context, _wrappedExecution ?? this);
+        }
+    }
 
     /// <summary>
     /// Creates an AssertionException with a formatted error message.
