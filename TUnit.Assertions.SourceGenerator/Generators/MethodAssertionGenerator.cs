@@ -226,6 +226,9 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var genericDeclaration = genericParams.Length > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
         var isNullable = data.TargetType.IsReferenceType || data.TargetType.NullableAnnotation == NullableAnnotation.Annotated;
 
+        // Collect generic constraints from the method
+        var genericConstraints = CollectGenericConstraints(data.Method);
+
         // Class declaration
         sb.AppendLine($"/// <summary>");
         sb.AppendLine($"/// Generated assertion for {data.Method.Name}");
@@ -238,6 +241,16 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         sb.AppendLine($"public sealed class {className}{genericDeclaration} : Assertion<{targetTypeName}>");
+
+        // Apply generic constraints if present
+        if (genericConstraints.Count > 0)
+        {
+            foreach (var constraint in genericConstraints)
+            {
+                sb.AppendLine($"    {constraint}");
+            }
+        }
+
         sb.AppendLine("{");
 
         // Private fields for additional parameters
@@ -414,6 +427,9 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var genericParams = GetGenericTypeParameters(data.TargetType, data.Method);
         var genericDeclaration = genericParams.Length > 0 ? $"<{string.Join(", ", genericParams)}>" : "";
 
+        // Collect generic constraints from the method
+        var genericConstraints = CollectGenericConstraints(data.Method);
+
         // XML documentation
         sb.AppendLine("    /// <summary>");
         sb.AppendLine($"    /// Generated extension method for {methodName}");
@@ -443,6 +459,16 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         sb.AppendLine(")");
+
+        // Apply generic constraints if present
+        if (genericConstraints.Count > 0)
+        {
+            foreach (var constraint in genericConstraints)
+            {
+                sb.AppendLine($"    {constraint}");
+            }
+        }
+
         sb.AppendLine("    {");
 
         // Build expression string
@@ -536,6 +562,53 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         }
 
         return simpleName;
+    }
+
+    /// <summary>
+    /// Collects generic constraints from method type parameters.
+    /// Returns a list of constraint strings in the format "where T : constraint1, constraint2"
+    /// </summary>
+    private static List<string> CollectGenericConstraints(IMethodSymbol method)
+    {
+        var constraints = new List<string>();
+
+        if (!method.IsGenericMethod || method.TypeParameters.Length == 0)
+        {
+            return constraints;
+        }
+
+        foreach (var typeParameter in method.TypeParameters)
+        {
+            var typeConstraints = new List<string>();
+
+            if (typeParameter.HasReferenceTypeConstraint)
+            {
+                typeConstraints.Add("class");
+            }
+            if (typeParameter.HasValueTypeConstraint)
+            {
+                typeConstraints.Add("struct");
+            }
+            if (typeParameter.HasNotNullConstraint)
+            {
+                typeConstraints.Add("notnull");
+            }
+            foreach (var constraintType in typeParameter.ConstraintTypes)
+            {
+                typeConstraints.Add(constraintType.ToDisplayString());
+            }
+            if (typeParameter.HasConstructorConstraint)
+            {
+                typeConstraints.Add("new()");
+            }
+
+            if (typeConstraints.Count > 0)
+            {
+                constraints.Add($"where {typeParameter.Name} : {string.Join(", ", typeConstraints)}");
+            }
+        }
+
+        return constraints;
     }
 
     private enum ReturnTypeKind
