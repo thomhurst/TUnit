@@ -442,6 +442,20 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : .<TCollection>
+        where TCollection : .<TItem>
+    {
+        public CollectionIsOrderedByAssertion(.<TCollection> context, <TItem, TKey> keySelector, .<TKey>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> : .<TCollection>
+        where TCollection : .<TItem>
+    {
+        public CollectionIsOrderedByDescendingAssertion(.<TCollection> context, <TItem, TKey> keySelector, .<TKey>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public class CompletesWithinActionAssertion : .<object?>
     {
         public CompletesWithinActionAssertion( action,  timeout, .<object?>? context = null) { }
@@ -1404,6 +1418,9 @@ namespace .Core
     {
         public .<TValue> Context { get; }
         public .<TValue> PreviousAssertion { get; }
+        public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
+        public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
     public sealed class AssertionContext<TValue>
     {
@@ -1485,6 +1502,9 @@ namespace .Core
     {
         public .<TValue> Context { get; }
         public .<TValue> PreviousAssertion { get; }
+        public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
+        public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
 }
 namespace .Enums
@@ -1716,6 +1736,18 @@ namespace .Extensions
         public static .<TValue> IsNotIn<TValue>(this .<TValue> source, params TValue[] collection) { }
         public static ..IsNotParsableIntoAssertion<T> IsNotParsableInto<[.(..None | ..PublicMethods | ..Interfaces)]  T>(this .<string> source) { }
         public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null) { }
+        public static .<TCollection, TItem, TKey> IsOrderedBy<TCollection, TItem, TKey>(this .<TCollection> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem, TKey> IsOrderedBy<TCollection, TItem, TKey>(this .<TCollection> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null) { }
+        public static .<TCollection, TItem, TKey> IsOrderedByDescending<TCollection, TItem, TKey>(this .<TCollection> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem, TKey> IsOrderedByDescending<TCollection, TItem, TKey>(this .<TCollection> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null)
+            where TCollection : .<TItem> { }
         public static ..IsParsableIntoAssertion<T> IsParsableInto<[.(..None | ..PublicMethods | ..Interfaces)]  T>(this .<string> source) { }
         public static .<TValue> IsPositive<TValue>(this .<TValue> source)
             where TValue : <TValue> { }
@@ -3519,6 +3551,10 @@ namespace .Sources
         public .<.> IsNotCompleted() { }
         public .<.> IsNotCompletedSuccessfully() { }
         public .<.> IsNotFaulted() { }
+        public .<TException> Throws<TException>()
+            where TException :  { }
+        public .<TException> ThrowsExactly<TException>()
+            where TException :  { }
     }
     public class AsyncFuncAssertion<TValue> : .<TValue>, .<TValue>
     {
@@ -3532,17 +3568,19 @@ namespace .Sources
     public class CollectionAssertion<TItem> : .<.<TItem>>
     {
         public CollectionAssertion(.<TItem> value, string? expression) { }
-        public .<.<TItem>> Context { get; }
     }
     public class DelegateAssertion : .<object?>, .<object?>
     {
         public DelegateAssertion( action, string? expression) { }
         public .<object?> Context { get; }
+        public .<TException> Throws<TException>()
+            where TException :  { }
+        public .<TException> ThrowsExactly<TException>()
+            where TException :  { }
     }
     public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>>
     {
         public DictionaryAssertion(.<TKey, TValue> value, string? expression) { }
-        public .<.<TKey, TValue>> Context { get; }
     }
     public class FuncAssertion<TValue> : .<TValue>, .<TValue>
     {
@@ -3574,5 +3612,8 @@ namespace .Sources
     {
         public ValueAssertion(TValue? value, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
+        public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
 }

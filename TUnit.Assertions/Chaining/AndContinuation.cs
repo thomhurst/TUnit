@@ -1,3 +1,4 @@
+using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Core;
@@ -28,5 +29,38 @@ public class AndContinuation<TValue> : IAssertionSource<TValue>
 
         // Set pending link state for next assertion to consume
         Context.SetPendingLink(previousAssertion, CombinerType.And);
+    }
+
+    /// <summary>
+    /// Asserts that the value is of the specified type and returns an assertion on the casted value.
+    /// This instance method allows single type parameter usage without needing to specify the source type.
+    /// Example: await Assert.That(value).IsNotNull().And.IsTypeOf<List<string>>();
+    /// </summary>
+    public TypeOfAssertion<TValue, TExpected> IsTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
+        return new TypeOfAssertion<TValue, TExpected>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the value's type is assignable to the specified type.
+    /// This instance method allows single type parameter usage without needing to specify the source type.
+    /// Example: await Assert.That(value).IsNotNull().And.IsAssignableTo<IDisposable>();
+    /// </summary>
+    public IsAssignableToAssertion<TTarget, TValue> IsAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsAssignableToAssertion<TTarget, TValue>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the value's type is NOT assignable to the specified type.
+    /// This instance method allows single type parameter usage without needing to specify the source type.
+    /// Example: await Assert.That(value).IsNotNull().And.IsNotAssignableTo<IDisposable>();
+    /// </summary>
+    public IsNotAssignableToAssertion<TTarget, TValue> IsNotAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableToAssertion<TTarget, TValue>(Context);
     }
 }
