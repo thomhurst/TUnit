@@ -24,6 +24,16 @@ public class StringContainsAssertion : Assertion<string>
         _expected = expected;
     }
 
+    public StringContainsAssertion(
+        AssertionContext<string> context,
+        string expected,
+        StringComparison comparison)
+        : base(context)
+    {
+        _expected = expected;
+        _comparison = comparison;
+    }
+
     public StringContainsAssertion IgnoringCase()
     {
         _comparison = StringComparison.OrdinalIgnoreCase;
@@ -110,6 +120,16 @@ public class StringDoesNotContainAssertion : Assertion<string>
         _expected = expected;
     }
 
+    public StringDoesNotContainAssertion(
+        AssertionContext<string> context,
+        string expected,
+        StringComparison comparison)
+        : base(context)
+    {
+        _expected = expected;
+        _comparison = comparison;
+    }
+
     public StringDoesNotContainAssertion IgnoringCase()
     {
         _comparison = StringComparison.OrdinalIgnoreCase;
@@ -167,6 +187,16 @@ public class StringStartsWithAssertion : Assertion<string>
         _expected = expected;
     }
 
+    public StringStartsWithAssertion(
+        AssertionContext<string> context,
+        string expected,
+        StringComparison comparison)
+        : base(context)
+    {
+        _expected = expected;
+        _comparison = comparison;
+    }
+
     public StringStartsWithAssertion IgnoringCase()
     {
         _comparison = StringComparison.OrdinalIgnoreCase;
@@ -222,6 +252,16 @@ public class StringEndsWithAssertion : Assertion<string>
         : base(context)
     {
         _expected = expected;
+    }
+
+    public StringEndsWithAssertion(
+        AssertionContext<string> context,
+        string expected,
+        StringComparison comparison)
+        : base(context)
+    {
+        _expected = expected;
+        _comparison = comparison;
     }
 
     public StringEndsWithAssertion IgnoringCase()
