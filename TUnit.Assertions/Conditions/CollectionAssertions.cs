@@ -809,3 +809,125 @@ public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Assert
 
     protected override string GetExpectation() => "to be in descending order";
 }
+
+/// <summary>
+/// Asserts that a collection is ordered by a key selector in ascending order.
+/// </summary>
+public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Assertion<TCollection>
+    where TCollection : IEnumerable<TItem>
+{
+    private readonly Func<TItem, TKey> _keySelector;
+    private readonly IComparer<TKey>? _comparer;
+
+    public CollectionIsOrderedByAssertion(
+        AssertionContext<TCollection> context,
+        Func<TItem, TKey> keySelector,
+        IComparer<TKey>? comparer = null)
+        : base(context)
+    {
+        _keySelector = keySelector ?? throw new ArgumentNullException(nameof(keySelector));
+        _comparer = comparer;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("collection was null"));
+        }
+
+        var comparer = _comparer ?? Comparer<TKey>.Default;
+        var enumerated = value.ToArray();
+        var ordered = enumerated.OrderBy(_keySelector, comparer).ToArray();
+
+        if (enumerated.SequenceEqual(ordered))
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        // Find the first out-of-order item
+        for (int i = 1; i < enumerated.Length; i++)
+        {
+            var prevKey = _keySelector(enumerated[i - 1]);
+            var currKey = _keySelector(enumerated[i]);
+
+            if (comparer.Compare(prevKey, currKey) > 0)
+            {
+                return Task.FromResult(AssertionResult.Failed($"item at index {i} is out of order (key: {currKey}) compared to previous item (key: {prevKey})"));
+            }
+        }
+
+        return Task.FromResult(AssertionResult.Passed);
+    }
+
+    protected override string GetExpectation() => "to be ordered by key selector in ascending order";
+}
+
+/// <summary>
+/// Asserts that a collection is ordered by a key selector in descending order.
+/// </summary>
+public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> : Assertion<TCollection>
+    where TCollection : IEnumerable<TItem>
+{
+    private readonly Func<TItem, TKey> _keySelector;
+    private readonly IComparer<TKey>? _comparer;
+
+    public CollectionIsOrderedByDescendingAssertion(
+        AssertionContext<TCollection> context,
+        Func<TItem, TKey> keySelector,
+        IComparer<TKey>? comparer = null)
+        : base(context)
+    {
+        _keySelector = keySelector ?? throw new ArgumentNullException(nameof(keySelector));
+        _comparer = comparer;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (value == null)
+        {
+            return Task.FromResult(AssertionResult.Failed("collection was null"));
+        }
+
+        var comparer = _comparer ?? Comparer<TKey>.Default;
+        var enumerated = value.ToArray();
+        var ordered = enumerated.OrderByDescending(_keySelector, comparer).ToArray();
+
+        if (enumerated.SequenceEqual(ordered))
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        // Find the first out-of-order item
+        for (int i = 1; i < enumerated.Length; i++)
+        {
+            var prevKey = _keySelector(enumerated[i - 1]);
+            var currKey = _keySelector(enumerated[i]);
+
+            if (comparer.Compare(prevKey, currKey) < 0)
+            {
+                return Task.FromResult(AssertionResult.Failed($"item at index {i} is out of order (key: {currKey}) compared to previous item (key: {prevKey})"));
+            }
+        }
+
+        return Task.FromResult(AssertionResult.Passed);
+    }
+
+    protected override string GetExpectation() => "to be ordered by key selector in descending order";
+}

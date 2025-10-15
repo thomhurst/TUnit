@@ -1,3 +1,4 @@
+using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Core;
@@ -28,5 +29,16 @@ public class AndContinuation<TValue> : IAssertionSource<TValue>
 
         // Set pending link state for next assertion to consume
         Context.SetPendingLink(previousAssertion, CombinerType.And);
+    }
+
+    /// <summary>
+    /// Asserts that the value is of the specified type and returns an assertion on the casted value.
+    /// This instance method allows single type parameter usage without needing to specify the source type.
+    /// Example: await Assert.That(value).IsNotNull().And.IsTypeOf<List<string>>();
+    /// </summary>
+    public TypeOfAssertion<TValue, TExpected> IsTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
+        return new TypeOfAssertion<TValue, TExpected>(Context);
     }
 }

@@ -440,6 +440,20 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : .<TCollection>
+        where TCollection : .<TItem>
+    {
+        public CollectionIsOrderedByAssertion(.<TCollection> context, <TItem, TKey> keySelector, .<TKey>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> : .<TCollection>
+        where TCollection : .<TItem>
+    {
+        public CollectionIsOrderedByDescendingAssertion(.<TCollection> context, <TItem, TKey> keySelector, .<TKey>? comparer = null) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public class CompletesWithinActionAssertion : .<object?>
     {
         public CompletesWithinActionAssertion( action,  timeout, .<object?>? context = null) { }
@@ -1619,6 +1633,18 @@ namespace .Extensions
         public static .<TValue> IsNotIn<TValue>(this .<TValue> source, params TValue[] collection) { }
         public static ..IsNotParsableIntoAssertion<T> IsNotParsableInto<T>(this .<string> source) { }
         public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null) { }
+        public static .<TCollection, TItem, TKey> IsOrderedBy<TCollection, TItem, TKey>(this .<TCollection> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem, TKey> IsOrderedBy<TCollection, TItem, TKey>(this .<TCollection> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
+        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null) { }
+        public static .<TCollection, TItem, TKey> IsOrderedByDescending<TCollection, TItem, TKey>(this .<TCollection> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TItem, TKey> IsOrderedByDescending<TCollection, TItem, TKey>(this .<TCollection> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null)
+            where TCollection : .<TItem> { }
         public static ..IsParsableIntoAssertion<T> IsParsableInto<T>(this .<string> source) { }
         public static .<TValue> IsPositive<TValue>(this .<TValue> source)
             where TValue : <TValue> { }

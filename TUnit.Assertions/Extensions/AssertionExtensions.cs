@@ -680,6 +680,114 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that the collection is ordered by the specified key selector in ascending order.
+    /// </summary>
+    public static CollectionIsOrderedByAssertion<TCollection, TItem, TKey> IsOrderedBy<TCollection, TItem, TKey>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, TKey> keySelector,
+        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".IsOrderedBy({expression})");
+        return new CollectionIsOrderedByAssertion<TCollection, TItem, TKey>(source.Context, keySelector);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is ordered by the specified key selector in ascending order using the specified comparer.
+    /// </summary>
+    public static CollectionIsOrderedByAssertion<TCollection, TItem, TKey> IsOrderedBy<TCollection, TItem, TKey>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, TKey> keySelector,
+        IComparer<TKey> comparer,
+        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".IsOrderedBy({expression}, comparer)");
+        return new CollectionIsOrderedByAssertion<TCollection, TItem, TKey>(source.Context, keySelector, comparer);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is ordered by the specified key selector in ascending order.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static CollectionIsOrderedByAssertion<IEnumerable<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        Func<TItem, TKey> keySelector,
+        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsOrderedBy({expression})");
+        return new CollectionIsOrderedByAssertion<IEnumerable<TItem>, TItem, TKey>(source.Context, keySelector);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is ordered by the specified key selector in ascending order using the specified comparer.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static CollectionIsOrderedByAssertion<IEnumerable<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        Func<TItem, TKey> keySelector,
+        IComparer<TKey> comparer,
+        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsOrderedBy({expression}, comparer)");
+        return new CollectionIsOrderedByAssertion<IEnumerable<TItem>, TItem, TKey>(source.Context, keySelector, comparer);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is ordered by the specified key selector in descending order.
+    /// </summary>
+    public static CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> IsOrderedByDescending<TCollection, TItem, TKey>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, TKey> keySelector,
+        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".IsOrderedByDescending({expression})");
+        return new CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey>(source.Context, keySelector);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is ordered by the specified key selector in descending order using the specified comparer.
+    /// </summary>
+    public static CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> IsOrderedByDescending<TCollection, TItem, TKey>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, TKey> keySelector,
+        IComparer<TKey> comparer,
+        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".IsOrderedByDescending({expression}, comparer)");
+        return new CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey>(source.Context, keySelector, comparer);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is ordered by the specified key selector in descending order.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static CollectionIsOrderedByDescendingAssertion<IEnumerable<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        Func<TItem, TKey> keySelector,
+        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsOrderedByDescending({expression})");
+        return new CollectionIsOrderedByDescendingAssertion<IEnumerable<TItem>, TItem, TKey>(source.Context, keySelector);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is ordered by the specified key selector in descending order using the specified comparer.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static CollectionIsOrderedByDescendingAssertion<IEnumerable<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        Func<TItem, TKey> keySelector,
+        IComparer<TKey> comparer,
+        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsOrderedByDescending({expression}, comparer)");
+        return new CollectionIsOrderedByDescendingAssertion<IEnumerable<TItem>, TItem, TKey>(source.Context, keySelector, comparer);
+    }
+
+    /// <summary>
     /// Returns a wrapper for collection count assertions.
     /// Example: await Assert.That(list).HasCount().EqualTo(5);
     /// </summary>
