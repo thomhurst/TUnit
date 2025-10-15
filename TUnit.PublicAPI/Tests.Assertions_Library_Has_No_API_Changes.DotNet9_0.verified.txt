@@ -1418,6 +1418,8 @@ namespace .Core
     {
         public .<TValue> Context { get; }
         public .<TValue> PreviousAssertion { get; }
+        public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
         public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
     public sealed class AssertionContext<TValue>
@@ -1500,6 +1502,8 @@ namespace .Core
     {
         public .<TValue> Context { get; }
         public .<TValue> PreviousAssertion { get; }
+        public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
         public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
 }
@@ -3612,6 +3616,8 @@ namespace .Sources
     {
         public ValueAssertion(TValue? value, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
         public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
 }

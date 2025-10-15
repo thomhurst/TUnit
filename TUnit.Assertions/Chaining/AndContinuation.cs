@@ -41,4 +41,26 @@ public class AndContinuation<TValue> : IAssertionSource<TValue>
         Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
         return new TypeOfAssertion<TValue, TExpected>(Context);
     }
+
+    /// <summary>
+    /// Asserts that the value's type is assignable to the specified type.
+    /// This instance method allows single type parameter usage without needing to specify the source type.
+    /// Example: await Assert.That(value).IsNotNull().And.IsAssignableTo<IDisposable>();
+    /// </summary>
+    public IsAssignableToAssertion<TTarget, TValue> IsAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsAssignableToAssertion<TTarget, TValue>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the value's type is NOT assignable to the specified type.
+    /// This instance method allows single type parameter usage without needing to specify the source type.
+    /// Example: await Assert.That(value).IsNotNull().And.IsNotAssignableTo<IDisposable>();
+    /// </summary>
+    public IsNotAssignableToAssertion<TTarget, TValue> IsNotAssignableTo<TTarget>()
+    {
+        Context.ExpressionBuilder.Append($".IsNotAssignableTo<{typeof(TTarget).Name}>()");
+        return new IsNotAssignableToAssertion<TTarget, TValue>(Context);
+    }
 }

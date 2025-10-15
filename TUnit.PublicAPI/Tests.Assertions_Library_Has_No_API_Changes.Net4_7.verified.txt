@@ -1337,6 +1337,9 @@ namespace .Core
     {
         public .<TValue> Context { get; }
         public .<TValue> PreviousAssertion { get; }
+        public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
+        public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
     public sealed class AssertionContext<TValue>
     {
@@ -1418,6 +1421,9 @@ namespace .Core
     {
         public .<TValue> Context { get; }
         public .<TValue> PreviousAssertion { get; }
+        public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
+        public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
 }
 namespace .Enums
@@ -3263,7 +3269,6 @@ namespace .Sources
     public class CollectionAssertion<TItem> : .<.<TItem>>
     {
         public CollectionAssertion(.<TItem> value, string? expression) { }
-        public .<.<TItem>> Context { get; }
     }
     public class DelegateAssertion : .<object?>, .<object?>
     {
@@ -3273,7 +3278,6 @@ namespace .Sources
     public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>>
     {
         public DictionaryAssertion(.<TKey, TValue> value, string? expression) { }
-        public .<.<TKey, TValue>> Context { get; }
     }
     public class FuncAssertion<TValue> : .<TValue>, .<TValue>
     {
@@ -3303,5 +3307,8 @@ namespace .Sources
     {
         public ValueAssertion(TValue? value, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TTarget, TValue> IsAssignableTo<TTarget>() { }
+        public .<TTarget, TValue> IsNotAssignableTo<TTarget>() { }
+        public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
 }
