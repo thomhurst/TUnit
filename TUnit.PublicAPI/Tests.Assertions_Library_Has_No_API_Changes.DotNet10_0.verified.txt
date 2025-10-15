@@ -1418,6 +1418,7 @@ namespace .Core
     {
         public .<TValue> Context { get; }
         public .<TValue> PreviousAssertion { get; }
+        public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
     public sealed class AssertionContext<TValue>
     {
@@ -1499,6 +1500,7 @@ namespace .Core
     {
         public .<TValue> Context { get; }
         public .<TValue> PreviousAssertion { get; }
+        public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
 }
 namespace .Enums
@@ -3571,6 +3573,7 @@ namespace .Sources
     {
         public CollectionAssertion(.<TItem> value, string? expression) { }
         public .<.<TItem>> Context { get; }
+        public .<.<TItem>, TExpected> IsTypeOf<TExpected>() { }
     }
     public class DelegateAssertion : .<object?>, .<object?>
     {
@@ -3612,5 +3615,6 @@ namespace .Sources
     {
         public ValueAssertion(TValue? value, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TValue, TExpected> IsTypeOf<TExpected>() { }
     }
 }

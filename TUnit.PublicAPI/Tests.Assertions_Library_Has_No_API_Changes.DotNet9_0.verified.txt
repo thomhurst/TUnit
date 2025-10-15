@@ -3572,8 +3572,6 @@ namespace .Sources
     public class CollectionAssertion<TItem> : .<.<TItem>>
     {
         public CollectionAssertion(.<TItem> value, string? expression) { }
-        public .<.<TItem>> Context { get; }
-        public .<.<TItem>, TExpected> IsTypeOf<TExpected>() { }
     }
     public class DelegateAssertion : .<object?>, .<object?>
     {
@@ -3583,7 +3581,6 @@ namespace .Sources
     public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>>
     {
         public DictionaryAssertion(.<TKey, TValue> value, string? expression) { }
-        public .<.<TKey, TValue>> Context { get; }
     }
     public class FuncAssertion<TValue> : .<TValue>, .<TValue>
     {
