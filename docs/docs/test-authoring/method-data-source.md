@@ -234,7 +234,7 @@ public class AsyncDataSourceTests
     [MethodDataSource(typeof(AsyncTestDataSources), nameof(AsyncTestDataSources.GetSimpleAsyncData))]
     public async Task TestWithAsyncSimpleData(int id, string name)
     {
-        await Assert.That(id).IsInRange(1, 3);
+        await Assert.That(id).IsBetween(1, 3);
         await Assert.That(name).IsNotEmpty();
     }
 }
