@@ -1321,9 +1321,15 @@ namespace .
         where TValue : .IEnumerable
     {
         public CountWrapper(.<TValue> context) { }
+        public .<int> Between(int minimum, int maximum, [.("minimum")] string? minExpression = null, [.("maximum")] string? maxExpression = null) { }
         public .<TValue> EqualTo(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public .<int> GreaterThan(int expected, [.("expected")] string? expression = null) { }
         public .<int> GreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<int> LessThan(int expected, [.("expected")] string? expression = null) { }
+        public .<int> LessThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
+        public .<int> NotEqualTo(int expected, [.("expected")] string? expression = null) { }
         public .<int> Positive() { }
+        public .<TValue> Zero() { }
     }
     public class LengthWrapper : .<string>
     {
