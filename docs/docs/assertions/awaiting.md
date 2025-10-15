@@ -47,13 +47,13 @@ You can chain multiple assertions together for more complex validations:
 public async Task ComplexObjectValidation()
 {
     var user = await GetUserAsync("john.doe");
-    
-    // Chain multiple property assertions
+
+    // Chain multiple member assertions
     await Assert.That(user)
         .IsNotNull()
-        .And.HasProperty(u => u.Email).EqualTo("john.doe@example.com")
-        .And.HasProperty(u => u.Age).GreaterThan(18)
-        .And.HasProperty(u => u.Roles).Contains("Admin");
+        .And.HasMember(u => u.Email).IsEqualTo("john.doe@example.com")
+        .And.HasMember(u => u.Age).IsGreaterThan(18)
+        .And.HasMember(u => u.Roles).Contains("Admin");
 }
 ```
 
@@ -64,14 +64,14 @@ public async Task ComplexObjectValidation()
 public async Task ComplexCollectionAssertions()
 {
     var orders = await GetOrdersAsync();
-    
+
     // Assert multiple conditions on a collection
     await Assert.That(orders)
-        .HasCount().GreaterThan(0)
+        .HasCount().IsGreaterThan(0)
         .And.Contains(o => o.Status == OrderStatus.Completed)
         .And.DoesNotContain(o => o.Total < 0)
-        .And.HasDistinctItems(new OrderIdComparer());
-    
+        .And.HasDistinctItems();
+
     // Assert on filtered subset
     var completedOrders = orders.Where(o => o.Status == OrderStatus.Completed);
     await Assert.That(completedOrders)
@@ -89,16 +89,15 @@ public async Task AsyncOperationAssertions()
     // Assert that async operation completes within time limit
     await Assert.That(async () => await LongRunningOperationAsync())
         .CompletesWithin(TimeSpan.FromSeconds(5));
-    
+
     // Assert that async operation throws specific exception
     await Assert.That(async () => await RiskyOperationAsync())
         .Throws<InvalidOperationException>()
-        .WithMessage().Containing("connection failed");
-    
+        .WithMessageContaining("connection failed");
+
     // Assert on result of async operation
-    await Assert.That(() => CalculateAsync(10, 20))
-        .ResultsIn(30)
-        .Within(TimeSpan.FromSeconds(1));
+    var result = await CalculateAsync(10, 20);
+    await Assert.That(result).IsEqualTo(30);
 }
 ```
 
@@ -109,18 +108,15 @@ public async Task AsyncOperationAssertions()
 public async Task NestedObjectAssertions()
 {
     var company = await GetCompanyAsync();
-    
+
     await Assert.That(company)
         .IsNotNull()
-        .And.HasProperty(c => c.Name).EqualTo("TechCorp")
-        .And.HasProperty(c => c.Address).Satisfies(address => 
-            Assert.That(address)
-                .HasProperty(a => a.City).EqualTo("Seattle")
-                .And.HasProperty(a => a.ZipCode).Matches(@"^\d{5}$")
-        )
-        .And.HasProperty(c => c.Employees).Satisfies(employees =>
+        .And.HasMember(c => c.Name).IsEqualTo("TechCorp")
+        .And.HasMember(c => c.Address.City).IsEqualTo("Seattle")
+        .And.HasMember(c => c.Address.ZipCode).Matches(@"^\d{5}$")
+        .And.HasMember(c => c.Employees).Satisfies(employees =>
             Assert.That(employees)
-                .HasCount().Between(100, 500)
+                .HasCount().IsBetween(100, 500)
                 .And.All(e => e.Email.EndsWith("@techcorp.com"))
         );
 }
@@ -133,19 +129,23 @@ public async Task NestedObjectAssertions()
 public async Task DetailedExceptionAssertions()
 {
     var invalidData = new { Id = -1, Name = "" };
-    
-    // Assert exception with specific properties
+
+    // Assert exception with specific message
     await Assert.That(() => ProcessDataAsync(invalidData))
         .Throws<ValidationException>()
-        .WithMessage().EqualTo("Validation failed")
-        .And.WithInnerException<ArgumentException>()
+        .WithMessage("Validation failed");
+
+    // Assert ArgumentException with parameter name
+    await Assert.That(() => ProcessInvalidData(null))
+        .Throws<ArgumentException>()
         .WithParameterName("data");
-    
+
     // Assert aggregate exception
-    await Assert.That(() => ParallelOperationAsync())
-        .Throws<AggregateException>()
-        .Where(ex => ex.InnerExceptions.Count == 3)
-        .And.Where(ex => ex.InnerExceptions.All(e => e is TaskCanceledException));
+    var exception = await Assert.That(() => ParallelOperationAsync())
+        .Throws<AggregateException>();
+
+    await Assert.That(exception.InnerExceptions).HasCount(3);
+    await Assert.That(exception.InnerExceptions).All(e => e is TaskCanceledException);
 }
 ```
 
@@ -180,13 +180,12 @@ public async Task CustomAssertionConditions()
 public async Task DateTimeAssertions()
 {
     var order = await CreateOrderAsync();
-    
+
     // Complex datetime assertions
     await Assert.That(order.CreatedAt)
-        .IsAfter(DateTime.UtcNow.AddMinutes(-1))
-        .And.IsBefore(DateTime.UtcNow.AddMinutes(1))
-        .And.HasKind(DateTimeKind.Utc);
-    
+        .IsGreaterThan(DateTime.UtcNow.AddMinutes(-1))
+        .And.IsLessThan(DateTime.UtcNow.AddMinutes(1));
+
     // TimeSpan assertions
     var processingTime = order.CompletedAt - order.CreatedAt;
     await Assert.That(processingTime)
@@ -202,16 +201,22 @@ public async Task DateTimeAssertions()
 public async Task FloatingPointAssertions()
 {
     var calculations = await PerformComplexCalculationsAsync();
-    
+
     // Use tolerance for floating point comparisons
     await Assert.That(calculations.Pi)
         .IsEqualTo(Math.PI).Within(0.0001);
-    
+
     // Assert on collections of floating point numbers
     await Assert.That(calculations.Results)
-        .All(r => Math.Abs(r) < 1000000) // No overflow
-        .And.Contains(42.0).Within(0.1)  // Contains approximately 42
-        .And.HasSum().EqualTo(expectedSum).Within(0.01);
+        .All(r => Math.Abs(r) < 1000000); // No overflow
+
+    // Check for approximate value in collection
+    var hasApproximate42 = calculations.Results.Any(r => Math.Abs(r - 42.0) < 0.1);
+    await Assert.That(hasApproximate42).IsTrue();
+
+    // Assert on sum with tolerance
+    var sum = calculations.Results.Sum();
+    await Assert.That(sum).IsEqualTo(expectedSum).Within(0.01);
 }
 ```
 
@@ -222,20 +227,20 @@ public async Task FloatingPointAssertions()
 public async Task StringPatternAssertions()
 {
     var logs = await GetLogEntriesAsync();
-    
+
     // Complex string assertions
     await Assert.That(logs)
-        .All(log => log.Matches(@"^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]"))
+        .All(log => Regex.IsMatch(log, @"^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]"))
         .And.Any(log => log.Contains("ERROR"))
-        .And.None(log => log.Contains("SENSITIVE_DATA"));
-    
+        .And.DoesNotContain(log => log.Contains("SENSITIVE_DATA"));
+
     // Assert on formatted output
     var report = await GenerateReportAsync();
     await Assert.That(report)
         .StartsWith("Report Generated:")
         .And.Contains("Total Items:")
         .And.DoesNotContain("null")
-        .And.HasLength().Between(1000, 5000);
+        .And.HasLength().IsBetween(1000, 5000);
 }
 ```
 
@@ -246,23 +251,25 @@ public async Task StringPatternAssertions()
 public async Task ComplexLogicalConditions()
 {
     var product = await GetProductAsync();
-    
+
     // Complex logical combinations
-    await Assert.That(product)
-        .HasProperty(p => p.Status)
-        .EqualTo(ProductStatus.Active)
-        .Or.EqualTo(ProductStatus.Pending)
-        .And.HasProperty(p => p.Price)
-        .GreaterThan(0)
-        .And.LessThan(10000);
-    
-    // Multiple condition paths
-    await Assert.That(product.Category)
-        .IsEqualTo("Electronics")
-        .And(Assert.That(product.Warranty).IsNotNull())
-        .Or
-        .IsEqualTo("Books")
-        .And(Assert.That(product.ISBN).IsNotNull());
+    await Assert.That(product.Status)
+        .IsEqualTo(ProductStatus.Active)
+        .Or.IsEqualTo(ProductStatus.Pending);
+
+    await Assert.That(product.Price)
+        .IsGreaterThan(0)
+        .And.IsLessThan(10000);
+
+    // Category-based conditional checks
+    if (product.Category == "Electronics")
+    {
+        await Assert.That(product.Warranty).IsNotNull();
+    }
+    else if (product.Category == "Books")
+    {
+        await Assert.That(product.ISBN).IsNotNull();
+    }
 }
 ```
 
@@ -302,23 +309,21 @@ public async Task PerformanceAssertions()
 public async Task StateMachineAssertions()
 {
     var workflow = new OrderWorkflow();
-    
+
     // Initial state
     await Assert.That(workflow.State).IsEqualTo(OrderState.New);
-    
+
     // State transition assertions
     await workflow.StartProcessing();
-    await Assert.That(workflow.State)
-        .IsEqualTo(OrderState.Processing)
-        .And(Assert.That(workflow.CanTransitionTo(OrderState.Completed)).IsTrue())
-        .And(Assert.That(workflow.CanTransitionTo(OrderState.New)).IsFalse());
-    
+    await Assert.That(workflow.State).IsEqualTo(OrderState.Processing);
+    await Assert.That(workflow.CanTransitionTo(OrderState.Completed)).IsTrue();
+    await Assert.That(workflow.CanTransitionTo(OrderState.New)).IsFalse();
+
     // Complex workflow validation
     await workflow.Complete();
-    await Assert.That(workflow)
-        .HasProperty(w => w.State).EqualTo(OrderState.Completed)
-        .And.HasProperty(w => w.CompletedAt).IsNotNull()
-        .And.HasProperty(w => w.History).Contains(h => h.State == OrderState.Processing);
+    await Assert.That(workflow.State).IsEqualTo(OrderState.Completed);
+    await Assert.That(workflow.CompletedAt).IsNotNull();
+    await Assert.That(workflow.History).Contains(h => h.State == OrderState.Processing);
 }
 ```
 

@@ -118,18 +118,20 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static bool IsPubliclyAccessible(INamedTypeSymbol typeSymbol)
     {
-        // Check if the type itself is public
-        if (typeSymbol.DeclaredAccessibility != Accessibility.Public)
+        // Check if the type itself is public or internal
+        if (typeSymbol.DeclaredAccessibility != Accessibility.Public && 
+            typeSymbol.DeclaredAccessibility != Accessibility.Internal)
         {
             return false;
         }
 
-        // If it's a nested type, ensure all containing types are also public
+        // If it's a nested type, ensure all containing types are also public or internal
         // and don't have unbound type parameters
         var containingType = typeSymbol.ContainingType;
         while (containingType != null)
         {
-            if (containingType.DeclaredAccessibility != Accessibility.Public)
+            if (containingType.DeclaredAccessibility != Accessibility.Public && 
+                containingType.DeclaredAccessibility != Accessibility.Internal)
             {
                 return false;
             }

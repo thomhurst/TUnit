@@ -40,7 +40,7 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
             {
                 ConsoleColor = GetConsoleColor(logLevel)
             }
-        });
+        }, CancellationToken.None);
 
         await _adapter.LogAsync(logLevel, state, exception, formatter);
     }
@@ -60,7 +60,7 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
             {
                 ConsoleColor = GetConsoleColor(logLevel)
             }
-        });
+        }, CancellationToken.None);
 
         _adapter.Log(logLevel, state, exception, formatter);
     }

@@ -30,12 +30,12 @@ public class AndAssertion<TValue> : Assertion<TValue>
     {
         var currentScope = AssertionScope.GetCurrentAssertionScope();
 
-        // Try first assertion
+        // Try first assertion - use ExecuteCoreAsync to avoid recursion
         if (currentScope != null)
         {
             // Inside Assert.Multiple - track exception count
             var exceptionCountBefore = currentScope.ExceptionCount;
-            await _first.AssertAsync();
+            await _first.ExecuteCoreAsync();
 
             if (currentScope.ExceptionCount > exceptionCountBefore)
             {
@@ -65,14 +65,14 @@ public class AndAssertion<TValue> : Assertion<TValue>
         else
         {
             // Not in Assert.Multiple - first must pass
-            await _first.AssertAsync();  // Will throw if fails
+            await _first.ExecuteCoreAsync();  // Will throw if fails
         }
 
-        // First passed, try second assertion
+        // First passed, try second assertion - use ExecuteCoreAsync to avoid recursion
         if (currentScope != null)
         {
             var exceptionCountBefore = currentScope.ExceptionCount;
-            await _second.AssertAsync();
+            await _second.ExecuteCoreAsync();
 
             if (currentScope.ExceptionCount > exceptionCountBefore)
             {
@@ -107,7 +107,7 @@ public class AndAssertion<TValue> : Assertion<TValue>
             // Not in Assert.Multiple
             try
             {
-                var result = await _second.AssertAsync();
+                var result = await _second.ExecuteCoreAsync();
                 return result;
             }
             catch (AssertionException ex)

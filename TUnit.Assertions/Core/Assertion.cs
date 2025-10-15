@@ -33,10 +33,25 @@ public abstract class Assertion<TValue>
     /// </summary>
     private string? _becauseMessage;
 
+    /// <summary>
+    /// Wrapped execution for And/Or chaining.
+    /// When set, AssertAsync() delegates to this wrapper instead of executing directly.
+    /// </summary>
+    private Assertion<TValue>? _wrappedExecution;
 
     protected Assertion(AssertionContext<TValue> context)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
+
+        // Auto-detect chaining from context state
+        var (previous, combiner) = context.ConsumePendingLink();
+        if (previous != null)
+        {
+            // Create wrapper based on combiner type
+            _wrappedExecution = combiner == CombinerType.And
+                ? new Chaining.AndAssertion<TValue>(previous, this)
+                : new Chaining.OrAssertion<TValue>(previous, this);
+        }
     }
 
     /// <summary>
@@ -84,9 +99,32 @@ public abstract class Assertion<TValue>
     /// Main assertion execution flow.
     /// Evaluates the context (if not already evaluated), checks the condition,
     /// and throws if the assertion fails (or adds to AssertionScope if within Assert.Multiple).
+    /// If this assertion is part of an And/Or chain, delegates to the wrapper.
     /// </summary>
     public virtual async Task<TValue?> AssertAsync()
     {
+        // If part of an And/Or chain, delegate to the wrapper
+        if (_wrappedExecution != null)
+        {
+            return await _wrappedExecution.AssertAsync();
+        }
+
+        return await ExecuteCoreAsync();
+    }
+
+    /// <summary>
+    /// Executes the core assertion logic without delegation.
+    /// Used internally by AndAssertion/OrAssertion to avoid infinite recursion.
+    /// </summary>
+    internal async Task<TValue?> ExecuteCoreAsync()
+    {
+        // If this is an And/OrAssertion (composite), delegate to AssertAsync which has custom logic
+        if (this is Chaining.AndAssertion<TValue> or Chaining.OrAssertion<TValue>)
+        {
+            return await AssertAsync();
+        }
+
+        // Normal single-assertion execution (never delegates to wrapper)
         var (value, exception) = await Context.GetAsync();
         var (startTime, endTime) = Context.GetTiming();
 
@@ -123,13 +161,35 @@ public abstract class Assertion<TValue>
     /// Creates an And continuation for chaining additional assertions.
     /// All assertions in an And chain must pass.
     /// </summary>
-    public AndContinuation<TValue> And => new(Context, this);
+    public AndContinuation<TValue> And
+    {
+        get
+        {
+            // Check if we're chaining And after Or (mixing combiners)
+            if (_wrappedExecution is Chaining.OrAssertion<TValue>)
+            {
+                throw new Exceptions.MixedAndOrAssertionsException();
+            }
+            return new(Context, _wrappedExecution ?? this);
+        }
+    }
 
     /// <summary>
     /// Creates an Or continuation for chaining alternative assertions.
     /// At least one assertion in an Or chain must pass.
     /// </summary>
-    public OrContinuation<TValue> Or => new(Context, this);
+    public OrContinuation<TValue> Or
+    {
+        get
+        {
+            // Check if we're chaining Or after And (mixing combiners)
+            if (_wrappedExecution is Chaining.AndAssertion<TValue>)
+            {
+                throw new Exceptions.MixedAndOrAssertionsException();
+            }
+            return new(Context, _wrappedExecution ?? this);
+        }
+    }
 
     /// <summary>
     /// Creates an AssertionException with a formatted error message.

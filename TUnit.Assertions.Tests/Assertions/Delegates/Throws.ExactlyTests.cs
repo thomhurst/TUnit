@@ -10,7 +10,7 @@ public partial class Throws
         {
             var expectedMessage = """
                                   Expected to throw exactly CustomException
-                                  but wrong exception type: OtherException instead of exactly CustomException
+                                  but threw TUnit.Assertions.Tests.Assertions.Delegates.Throws+OtherException
 
                                   at Assert.That(action).ThrowsExactly<CustomException>()
                                   """;

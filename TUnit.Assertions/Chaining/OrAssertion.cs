@@ -31,12 +31,12 @@ public class OrAssertion<TValue> : Assertion<TValue>
         var currentScope = AssertionScope.GetCurrentAssertionScope();
         Exception? firstException = null;
 
-        // Try first assertion
+        // Try first assertion - use ExecuteCoreAsync to avoid recursion
         if (currentScope != null)
         {
             // Inside Assert.Multiple - track exception count
             var exceptionCountBefore = currentScope.ExceptionCount;
-            await _first.AssertAsync();
+            await _first.ExecuteCoreAsync();
 
             if (currentScope.ExceptionCount > exceptionCountBefore)
             {
@@ -54,7 +54,7 @@ public class OrAssertion<TValue> : Assertion<TValue>
             // Not in Assert.Multiple - use exception handling
             try
             {
-                var result = await _first.AssertAsync();
+                var result = await _first.ExecuteCoreAsync();
                 // First passed - return success
                 return result;
             }
@@ -64,11 +64,11 @@ public class OrAssertion<TValue> : Assertion<TValue>
             }
         }
 
-        // First failed, try second assertion
+        // First failed, try second assertion - use ExecuteCoreAsync to avoid recursion
         if (currentScope != null)
         {
             var exceptionCountBefore = currentScope.ExceptionCount;
-            await _second.AssertAsync();
+            await _second.ExecuteCoreAsync();
 
             if (currentScope.ExceptionCount > exceptionCountBefore)
             {
@@ -108,7 +108,7 @@ public class OrAssertion<TValue> : Assertion<TValue>
             // Not in Assert.Multiple
             try
             {
-                var result = await _second.AssertAsync();
+                var result = await _second.ExecuteCoreAsync();
                 // Second passed - return success (first failed but Or means at least one passes)
                 return result;
             }

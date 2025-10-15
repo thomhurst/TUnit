@@ -1,0 +1,69 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for IsNullOrDefault
+/// </summary>
+[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+public sealed class String_IsNullOrDefault_T_Assertion<T> : Assertion<string>
+    where T : class
+{
+    private readonly T _obj;
+
+    public String_IsNullOrDefault_T_Assertion(AssertionContext<string> context, T obj)
+        : base(context)
+    {
+        _obj = obj;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsNullOrDefault<T>(_obj);
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"be null or default";
+    }
+}
+
+public static partial class ReferenceTypeConstraintExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsNullOrDefault
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+    public static String_IsNullOrDefault_T_Assertion<T> IsNullOrDefault<T>(this IAssertionSource<string> source, T obj, [CallerArgumentExpression(nameof(obj))] string? objExpression = null)
+    where T : class
+    {
+        source.Context.ExpressionBuilder.Append($".IsNullOrDefault({objExpression})");
+        return new String_IsNullOrDefault_T_Assertion<T>(source.Context, obj);
+    }
+
+}
+
+]

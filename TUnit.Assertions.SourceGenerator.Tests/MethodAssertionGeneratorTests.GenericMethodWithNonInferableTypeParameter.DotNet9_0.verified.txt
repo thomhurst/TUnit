@@ -1,0 +1,66 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for IsErrorOfType
+/// </summary>
+[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+public sealed class ResultTValue_IsErrorOfType_Assertion<TValue, TError> : Assertion<TUnit.Assertions.Tests.TestData.Result<TValue>>
+    where TError : System.Exception
+{
+    public ResultTValue_IsErrorOfType_Assertion(AssertionContext<TUnit.Assertions.Tests.TestData.Result<TValue>> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TUnit.Assertions.Tests.TestData.Result<TValue>> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.IsErrorOfType<TValue, TError>();
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be Error";
+    }
+}
+
+public static partial class GenericMethodWithNonInferableTypeParameterExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsErrorOfType
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+    public static ResultTValue_IsErrorOfType_Assertion<TValue, TError> IsErrorOfType<TValue, TError>(this IAssertionSource<TUnit.Assertions.Tests.TestData.Result<TValue>> source)
+    where TError : System.Exception
+    {
+        source.Context.ExpressionBuilder.Append(".IsErrorOfType()");
+        return new ResultTValue_IsErrorOfType_Assertion<TValue, TError>(source.Context);
+    }
+
+}
+
+]

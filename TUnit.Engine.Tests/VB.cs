@@ -24,7 +24,7 @@ public class VB
                     "--configuration", "Release",
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
-                    "--diagnostic", "--diagnostic-output-fileprefix", $"log_{GetType().Name}_",
+                    "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_",
                     "--timeout", "5m",
                     // "--hangdump", "--hangdump-filename", $"hangdump.tests-{guid}.dmp", "--hangdump-timeout", "3m",
 

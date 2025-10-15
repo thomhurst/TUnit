@@ -11,10 +11,10 @@ public partial class Throws
             var message1 = "foo";
             var message2 = "bar";
             var expectedMessage = """
-                                  Expected to throw exactly CustomException with message "bar"
-                                  but exception message "foo" does not equal "bar"
+                                  Expected exception message to equal "bar"
+                                  but exception message was "foo"
 
-                                  at Assert.That(action).ThrowsExactly<CustomException>().WithMessage(message2)
+                                  at Assert.That(action).ThrowsExactly<CustomException>().WithMessage("bar")
                                   """;
             Exception exception = CreateCustomException(message1);
             Action action = () => throw exception;

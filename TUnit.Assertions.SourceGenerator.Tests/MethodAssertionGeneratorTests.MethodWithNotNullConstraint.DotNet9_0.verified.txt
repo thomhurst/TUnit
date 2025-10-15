@@ -1,0 +1,69 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for HasValue
+/// </summary>
+[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+public sealed class String_HasValue_T_Assertion<T> : Assertion<string>
+    where T : notnull
+{
+    private readonly T _value;
+
+    public String_HasValue_T_Assertion(AssertionContext<string> context, T value)
+        : base(context)
+    {
+        _value = value;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value.HasValue<T>(_value);
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"have a non-null value";
+    }
+}
+
+public static partial class NotNullConstraintExtensions
+{
+    /// <summary>
+    /// Generated extension method for HasValue
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+    public static String_HasValue_T_Assertion<T> HasValue<T>(this IAssertionSource<string> source, T value, [CallerArgumentExpression(nameof(value))] string? valueExpression = null)
+    where T : notnull
+    {
+        source.Context.ExpressionBuilder.Append($".HasValue({valueExpression})");
+        return new String_HasValue_T_Assertion<T>(source.Context, value);
+    }
+
+}
+
+]
