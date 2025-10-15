@@ -9,7 +9,7 @@ namespace TUnit.Assertions.Conditions;
 /// </summary>
 public class StringEqualsAssertion : Assertion<string>
 {
-    private readonly string _expected;
+    private readonly string? _expected;
     private StringComparison _comparison = StringComparison.Ordinal;
     private bool _trimming = false;
     private bool _nullAndEmptyEquality = false;
@@ -17,7 +17,7 @@ public class StringEqualsAssertion : Assertion<string>
 
     public StringEqualsAssertion(
         AssertionContext<string> context,
-        string expected)
+        string? expected)
         : base(context)
     {
         _expected = expected;

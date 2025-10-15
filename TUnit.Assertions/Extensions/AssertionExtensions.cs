@@ -76,7 +76,7 @@ public static class AssertionExtensions
     [OverloadResolutionPriority(2)]
     public static StringEqualsAssertion IsEqualTo(
         this IAssertionSource<string> source,
-        string expected,
+        string? expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
@@ -88,7 +88,7 @@ public static class AssertionExtensions
     /// </summary>
     public static StringEqualsAssertion IsEqualTo(
         this IAssertionSource<string> source,
-        string expected,
+        string? expected,
         StringComparison comparison,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {

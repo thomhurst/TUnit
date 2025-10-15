@@ -11,9 +11,9 @@ namespace
         public static . That(. task, [.("task")] string? expression = null) { }
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
-        public static .<TValue> That<TValue>(<.<TValue>> func, [.("func")] string? expression = null) { }
-        public static .<TValue> That<TValue>(<TValue> func, [.("func")] string? expression = null) { }
-        public static .<TValue> That<TValue>(.<TValue> task, [.("task")] string? expression = null) { }
+        public static .<TValue> That<TValue>(<.<TValue?>> func, [.("func")] string? expression = null) { }
+        public static .<TValue> That<TValue>(<TValue?> func, [.("func")] string? expression = null) { }
+        public static .<TValue> That<TValue>(.<TValue?> task, [.("task")] string? expression = null) { }
         public static .<TItem> That<TItem>(TItem[]? value, [.("value")] string? expression = null) { }
         public static .<TValue> That<TValue>(TValue? value, [.("value")] string? expression = null) { }
         public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue> value, [.("value")] string? expression = null)
@@ -1134,7 +1134,7 @@ namespace .Conditions
     }
     public class StringEqualsAssertion : .<string>
     {
-        public StringEqualsAssertion(.<string> context, string expected) { }
+        public StringEqualsAssertion(.<string> context, string? expected) { }
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
@@ -1681,8 +1681,8 @@ namespace .Extensions
         [.(2)]
         public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expression = null) { }
         [.(2)]
-        public static . IsEqualTo(this .<string> source, string expected, [.("expected")] string? expression = null) { }
-        public static . IsEqualTo(this .<string> source, string expected,  comparison, [.("expected")] string? expression = null) { }
+        public static . IsEqualTo(this .<string> source, string? expected, [.("expected")] string? expression = null) { }
+        public static . IsEqualTo(this .<string> source, string? expected,  comparison, [.("expected")] string? expression = null) { }
         [.(0)]
         public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
         [.(-1)]
@@ -3534,7 +3534,7 @@ namespace .Sources
     }
     public class AsyncFuncAssertion<TValue> : .<TValue>, .<TValue>
     {
-        public AsyncFuncAssertion(<.<TValue>> func, string? expression) { }
+        public AsyncFuncAssertion(<.<TValue?>> func, string? expression) { }
         public .<TValue> Context { get; }
         public .<TException> Throws<TException>()
             where TException :  { }
@@ -3558,16 +3558,16 @@ namespace .Sources
     }
     public class FuncAssertion<TValue> : .<TValue>, .<TValue>
     {
-        public FuncAssertion(<TValue> func, string? expression) { }
+        public FuncAssertion(<TValue?> func, string? expression) { }
         public .<TValue> Context { get; }
         public .<TException> Throws<TException>()
             where TException :  { }
         public .<TException> ThrowsExactly<TException>()
             where TException :  { }
     }
-    public class TaskAssertion<TValue> : .<.<TValue>>, .<TValue>, .<TValue>
+    public class TaskAssertion<TValue> : .<.<TValue?>>, .<TValue>, .<TValue>
     {
-        public TaskAssertion(.<TValue> task, string? expression) { }
+        public TaskAssertion(.<TValue?> task, string? expression) { }
         public .<TValue> Context { get; }
         public .<.<TValue>> IsCanceled() { }
         public .<.<TValue>> IsCompleted() { }

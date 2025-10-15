@@ -127,7 +127,7 @@ public static class Assert
     /// Example: await Assert.That(() => GetValue()).IsGreaterThan(10);
     /// </summary>
     public static FuncAssertion<TValue> That<TValue>(
-        Func<TValue> func,
+        Func<TValue?> func,
         [CallerArgumentExpression(nameof(func))] string? expression = null)
     {
         return new FuncAssertion<TValue>(func, expression);
@@ -138,7 +138,7 @@ public static class Assert
     /// Example: await Assert.That(async () => await GetValueAsync()).IsEqualTo(expected);
     /// </summary>
     public static AsyncFuncAssertion<TValue> That<TValue>(
-        Func<Task<TValue>> func,
+        Func<Task<TValue?>> func,
         [CallerArgumentExpression(nameof(func))] string? expression = null)
     {
         return new AsyncFuncAssertion<TValue>(func, expression);
@@ -151,7 +151,7 @@ public static class Assert
     /// Example: await Assert.That(GetValueAsync()).IsCompleted();
     /// </summary>
     public static TaskAssertion<TValue> That<TValue>(
-        Task<TValue> task,
+        Task<TValue?> task,
         [CallerArgumentExpression(nameof(task))] string? expression = null)
     {
         return new TaskAssertion<TValue>(task, expression);
