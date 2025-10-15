@@ -3551,6 +3551,10 @@ namespace .Sources
         public .<.> IsNotCompleted() { }
         public .<.> IsNotCompletedSuccessfully() { }
         public .<.> IsNotFaulted() { }
+        public .<TException> Throws<TException>()
+            where TException :  { }
+        public .<TException> ThrowsExactly<TException>()
+            where TException :  { }
     }
     public class AsyncFuncAssertion<TValue> : .<TValue>, .<TValue>
     {
@@ -3569,6 +3573,10 @@ namespace .Sources
     {
         public DelegateAssertion( action, string? expression) { }
         public .<object?> Context { get; }
+        public .<TException> Throws<TException>()
+            where TException :  { }
+        public .<TException> ThrowsExactly<TException>()
+            where TException :  { }
     }
     public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>>
     {
