@@ -21,7 +21,6 @@ public class DateTimeEqualsAssertion : Assertion<DateTime>
     }
 
     /// <summary>
-    /// ⚡ CUSTOM METHOD - No wrapper needed!
     /// Specifies the acceptable tolerance for the comparison.
     /// </summary>
     public DateTimeEqualsAssertion Within(TimeSpan tolerance)

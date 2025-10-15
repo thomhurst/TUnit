@@ -12,14 +12,14 @@ namespace TUnit.Assertions.Sources;
 /// Implements IDelegateAssertionSource to enable Throws() extension methods.
 /// Does not inherit from Assertion to prevent premature awaiting.
 /// </summary>
-public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertionSource<TValue>, IAssertionSource<Task<TValue>>
+public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertionSource<TValue>, IAssertionSource<Task<TValue?>>
 {
     public AssertionContext<TValue> Context { get; }
-    AssertionContext<Task<TValue>> IAssertionSource<Task<TValue>>.Context => TaskContext;
+    AssertionContext<Task<TValue?>> IAssertionSource<Task<TValue?>>.Context => TaskContext;
 
-    private AssertionContext<Task<TValue>> TaskContext { get; }
+    private AssertionContext<Task<TValue?>> TaskContext { get; }
 
-    public TaskAssertion(Task<TValue> task, string? expression)
+    public TaskAssertion(Task<TValue?> task, string? expression)
     {
         var expressionBuilder = new StringBuilder();
         expressionBuilder.Append($"Assert.That({expression ?? "?"})");
@@ -43,13 +43,14 @@ public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
         // DO NOT await the task here - we want to check its state synchronously
         var taskExpressionBuilder = new StringBuilder();
         taskExpressionBuilder.Append(expressionBuilder.ToString());
-        var taskEvaluationContext = new EvaluationContext<Task<TValue>>(() =>
+        var taskEvaluationContext = new EvaluationContext<Task<TValue?>>(() =>
         {
             // Return the task object itself without awaiting it
             // This allows IsCompleted, IsCanceled, IsFaulted, etc. to check task properties synchronously
-            return Task.FromResult<(Task<TValue>?, Exception?)>((task, null));
+            return Task.FromResult<(Task<TValue?>?, Exception?)>((task, null));
         });
-        TaskContext = new AssertionContext<Task<TValue>>(taskEvaluationContext, taskExpressionBuilder);
+
+        TaskContext = new AssertionContext<Task<TValue?>>(taskEvaluationContext, taskExpressionBuilder);
     }
 
     /// <summary>

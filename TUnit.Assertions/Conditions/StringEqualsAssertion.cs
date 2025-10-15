@@ -9,7 +9,7 @@ namespace TUnit.Assertions.Conditions;
 /// </summary>
 public class StringEqualsAssertion : Assertion<string>
 {
-    private readonly string _expected;
+    private readonly string? _expected;
     private StringComparison _comparison = StringComparison.Ordinal;
     private bool _trimming = false;
     private bool _nullAndEmptyEquality = false;
@@ -17,14 +17,13 @@ public class StringEqualsAssertion : Assertion<string>
 
     public StringEqualsAssertion(
         AssertionContext<string> context,
-        string expected)
+        string? expected)
         : base(context)
     {
         _expected = expected;
     }
 
     /// <summary>
-    /// ⚡ CUSTOM METHOD - No wrapper needed!
     /// Makes the comparison case-insensitive.
     /// </summary>
     public StringEqualsAssertion IgnoringCase()
@@ -35,7 +34,6 @@ public class StringEqualsAssertion : Assertion<string>
     }
 
     /// <summary>
-    /// ⚡ CUSTOM METHOD - No wrapper needed!
     /// Specifies a custom string comparison type.
     /// </summary>
     public StringEqualsAssertion WithComparison(StringComparison comparison)
@@ -46,7 +44,6 @@ public class StringEqualsAssertion : Assertion<string>
     }
 
     /// <summary>
-    /// ⚡ CUSTOM METHOD - No wrapper needed!
     /// Trims both strings before comparing.
     /// </summary>
     public StringEqualsAssertion WithTrimming()
@@ -57,7 +54,6 @@ public class StringEqualsAssertion : Assertion<string>
     }
 
     /// <summary>
-    /// ⚡ CUSTOM METHOD - No wrapper needed!
     /// Treats null and empty string as equal.
     /// </summary>
     public StringEqualsAssertion WithNullAndEmptyEquality()
@@ -68,7 +64,6 @@ public class StringEqualsAssertion : Assertion<string>
     }
 
     /// <summary>
-    /// ⚡ CUSTOM METHOD - No wrapper needed!
     /// Removes all whitespace from both strings before comparing.
     /// </summary>
     public StringEqualsAssertion IgnoringWhitespace()
