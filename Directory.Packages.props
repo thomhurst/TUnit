@@ -79,7 +79,7 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.7.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.7.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="Verify" Version="31.0.1" />
+    <PackageVersion Include="Verify" Version="31.0.2" />
     <PackageVersion Include="Verify.NUnit" Version="31.0.2" />
     <PackageVersion Include="TUnit" Version="0.72.0" />
     <PackageVersion Include="TUnit.Core" Version="0.72.0" />
