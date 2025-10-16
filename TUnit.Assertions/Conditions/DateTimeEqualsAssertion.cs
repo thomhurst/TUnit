@@ -7,52 +7,47 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a DateTime is equal to an expected value.
 /// Demonstrates custom methods WITHOUT wrappers: .Within() is directly on this class!
 /// </summary>
-public class DateTimeEqualsAssertion : Assertion<DateTime>
+public class DateTimeEqualsAssertion : ToleranceBasedEqualsAssertion<DateTime, TimeSpan>
 {
-    private readonly DateTime _expected;
-    private TimeSpan _tolerance = TimeSpan.Zero;
-
     public DateTimeEqualsAssertion(
         AssertionContext<DateTime> context,
         DateTime expected)
-        : base(context)
+        : base(context, expected)
     {
-        _expected = expected;
     }
 
-    /// <summary>
-    /// Specifies the acceptable tolerance for the comparison.
-    /// </summary>
-    public DateTimeEqualsAssertion Within(TimeSpan tolerance)
+    protected override bool HasToleranceValue()
     {
-        _tolerance = tolerance;
-        Context.ExpressionBuilder.Append($".Within({tolerance})");
-        return this; // Return self for continued chaining
+        // For DateTime, we use TimeSpan.Zero as the default, so check if it's not zero
+        return true; // TimeSpan? always has meaningful value when not null
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DateTime> metadata)
+    protected override bool IsWithinTolerance(DateTime actual, DateTime expected, TimeSpan tolerance)
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
-        }
-
-        var diff = Math.Abs((_expected - value).Ticks);
-
-        if (diff <= _tolerance.Ticks)
-        {
-            return Task.FromResult(AssertionResult.Passed);
-        }
-
-        var actualDiff = TimeSpan.FromTicks(diff);
-        return Task.FromResult(AssertionResult.Failed($"difference was {actualDiff}"));
+        var diff = Math.Abs((expected - actual).Ticks);
+        return diff <= tolerance.Ticks;
     }
 
-    protected override string GetExpectation() =>
-        _tolerance == TimeSpan.Zero
-            ? $"to be equal to {_expected}"
-            : $"to be equal to {_expected} within {_tolerance}";
+    protected override object CalculateDifference(DateTime actual, DateTime expected)
+    {
+        var diff = Math.Abs((expected - actual).Ticks);
+        return TimeSpan.FromTicks(diff);
+    }
+
+    protected override bool AreExactlyEqual(DateTime actual, DateTime expected)
+    {
+        return actual == expected;
+    }
+
+    protected override string FormatDifferenceMessage(DateTime actual, object difference)
+    {
+        return $"difference was {difference}";
+    }
+
+    protected override string GetExpectation()
+    {
+        // Override to use "equal to" instead of just tolerance message
+        var baseExpectation = base.GetExpectation();
+        return baseExpectation.Replace("to be within", "to be equal to expected within").Replace(" of ", " ");
+    }
 }
