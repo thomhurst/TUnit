@@ -760,6 +760,13 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    public class FloatEqualsAssertion : .<float>
+    {
+        public FloatEqualsAssertion(.<float> context, float expected) { }
+        protected override .<.> CheckAsync(.<float> metadata) { }
+        protected override string GetExpectation() { }
+        public . Within(float tolerance) { }
+    }
     [.("IsGreaterThan")]
     public class GreaterThanAssertion<TValue> : .<TValue>
         where TValue : <TValue>
@@ -1598,6 +1605,7 @@ namespace .Extensions
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<> IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expression = null) { }
+        public static . IsEqualTo(this .<float> source, float expected, [.("expected")] string? expression = null) { }
         public static .<int> IsEqualTo(this .<int> source, int expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<string> source, string? expected, [.("expected")] string? expression = null) { }
