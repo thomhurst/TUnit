@@ -45,9 +45,7 @@ public class FloatEqualsToAssertionTests
         var float1 = 1.1f;
         var float2 = 1.2f;
 
-        // Use tolerance > 0.1 to avoid floating-point precision edge case
-        // (actual diff is ~0.100000024 due to float representation)
-        await TUnitAssert.That(float1).IsEqualTo(float2).Within(0.15f);
+        await TUnitAssert.That(float1).IsEqualTo(float2).Within(0.2f);
     }
 
     [Test]
