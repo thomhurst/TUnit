@@ -1111,6 +1111,7 @@ namespace .Conditions
     public class StringContainsAssertion : .<string>
     {
         public StringContainsAssertion(.<string> context, string expected) { }
+        public StringContainsAssertion(.<string> context, string expected,  comparison) { }
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
@@ -1122,6 +1123,7 @@ namespace .Conditions
     public class StringDoesNotContainAssertion : .<string>
     {
         public StringDoesNotContainAssertion(.<string> context, string expected) { }
+        public StringDoesNotContainAssertion(.<string> context, string expected,  comparison) { }
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
@@ -1141,6 +1143,7 @@ namespace .Conditions
     public class StringEndsWithAssertion : .<string>
     {
         public StringEndsWithAssertion(.<string> context, string expected) { }
+        public StringEndsWithAssertion(.<string> context, string expected,  comparison) { }
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
@@ -1191,6 +1194,7 @@ namespace .Conditions
     public class StringStartsWithAssertion : .<string>
     {
         public StringStartsWithAssertion(.<string> context, string expected) { }
+        public StringStartsWithAssertion(.<string> context, string expected,  comparison) { }
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
@@ -2985,10 +2989,12 @@ namespace .Extensions
     public static class StringContainsAssertionExtensions
     {
         public static . Contains(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
+        public static . Contains(this .<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
     }
     public static class StringDoesNotContainAssertionExtensions
     {
         public static . DoesNotContain(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
+        public static . DoesNotContain(this .<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
     }
     public static class StringDoesNotMatchAssertionExtensions
     {
@@ -2998,6 +3004,7 @@ namespace .Extensions
     public static class StringEndsWithAssertionExtensions
     {
         public static . EndsWith(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
+        public static . EndsWith(this .<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
     }
     public static class StringIsEmptyAssertionExtensions
     {
@@ -3027,6 +3034,7 @@ namespace .Extensions
     public static class StringStartsWithAssertionExtensions
     {
         public static . StartsWith(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
+        public static . StartsWith(this .<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
     }
     public static class StringStaticMethodAssertions
     {
