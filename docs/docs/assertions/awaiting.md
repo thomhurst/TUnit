@@ -51,9 +51,9 @@ public async Task ComplexObjectValidation()
     // Chain multiple member assertions
     await Assert.That(user)
         .IsNotNull()
-        .And.HasMember(u => u.Email).IsEqualTo("john.doe@example.com")
-        .And.HasMember(u => u.Age).IsGreaterThan(18)
-        .And.HasMember(u => u.Roles).Contains("Admin");
+        .And.Member(u => u.Email, email => email.IsEqualTo("john.doe@example.com"))
+        .And.Member(u => u.Age, age => age.IsGreaterThan(18))
+        .And.Member(u => u.Roles, roles => roles.Contains("Admin"));
 }
 ```
 
@@ -98,27 +98,6 @@ public async Task AsyncOperationAssertions()
     // Assert on result of async operation
     var result = await CalculateAsync(10, 20);
     await Assert.That(result).IsEqualTo(30);
-}
-```
-
-### Nested Object Assertions
-
-```csharp
-[Test]
-public async Task NestedObjectAssertions()
-{
-    var company = await GetCompanyAsync();
-
-    await Assert.That(company)
-        .IsNotNull()
-        .And.HasMember(c => c.Name).IsEqualTo("TechCorp")
-        .And.HasMember(c => c.Address.City).IsEqualTo("Seattle")
-        .And.HasMember(c => c.Address.ZipCode).Matches(@"^\d{5}$")
-        .And.HasMember(c => c.Employees).Satisfies(employees =>
-            Assert.That(employees)
-                .HasCount().IsBetween(100, 500)
-                .And.All(e => e.Email.EndsWith("@techcorp.com"))
-        );
 }
 ```
 
@@ -297,7 +276,7 @@ public async Task PerformanceAssertions()
     await Assert.That(results.Max())
         .IsLessThan(500); // No operation over 500ms
     
-    await Assert.That(results.Where(r => r > 200).Count())
+    await Assert.That(results.Where(r => r > 200).HasCount())
         .IsLessThan(5); // Less than 5% over 200ms
 }
 ```

@@ -945,11 +945,11 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class MemberAssertion<TObject, TMember> : .<TMember>, .<TMember>
+    public class MemberAssertionResult<TObject>
     {
-        public MemberAssertion(.<TObject> parentContext, .<<TObject, TMember>> memberSelector) { }
-        protected override .<.> CheckAsync(.<TMember> metadata) { }
-        protected override string GetExpectation() { }
+        public .<TObject> And { get; }
+        public .<TObject> Or { get; }
+        public .<TObject?> GetAwaiter() { }
     }
     [.("IsNotEqualTo")]
     public class NotEqualsAssertion<TValue> : .<TValue>
@@ -1573,7 +1573,6 @@ namespace .Extensions
             where TEnum :  struct,  { }
         public static ..LengthWrapper HasLength(this .<string> source) { }
         public static . HasLength(this .<string> source, int expectedLength, [.("expectedLength")] string? expression = null) { }
-        public static .<TObject, TMember> HasMember<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector) { }
         public static .<TException> HasMessageContaining<TException>(this .<TException> source, string expectedSubstring, [.("expectedSubstring")] string? expression = null)
             where TException :  { }
         public static .<TException> HasMessageContaining<TException>(this .<TException> source, string expectedSubstring,  comparison, [.("expectedSubstring")] string? expression = null)
@@ -1664,6 +1663,7 @@ namespace .Extensions
             where TValue :  struct, <TValue> { }
         public static .<object, TExpected> IsTypeOf<TExpected>(this .<object> source) { }
         public static .<TValue, TExpected> IsTypeOf<TExpected, TValue>(this .<TValue> source) { }
+        public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
         public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped>> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
         public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
