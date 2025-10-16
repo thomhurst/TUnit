@@ -1198,6 +1198,7 @@ namespace
         public .CancellationToken CancellationToken { get; set; }
         public .ClassHookContext ClassContext { get; }
         public int CurrentRetryAttempt { get; }
+        public .? CustomHookExecutor { get; set; }
         public .<.TestDetails> Dependencies { get; }
         public ? DisplayNameFormatter { get; set; }
         public .TestContextEvents Events { get; }
@@ -1399,6 +1400,7 @@ namespace
         public .TestContext TestContext { get; }
         public .TestDetails TestDetails { get; }
         public string TestName { get; }
+        public void SetHookExecutor(. executor) { }
         public void SetParallelLimiter(. parallelLimit) { }
         public void SetTestExecutor(. executor) { }
     }
