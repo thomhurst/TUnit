@@ -384,11 +384,12 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class CollectionContainsPredicateAssertion<TCollection, TItem> : .<TItem>
+    public class CollectionContainsPredicateAssertion<TCollection, TItem> : .<TCollection>
         where TCollection : .<TItem>
     {
         public CollectionContainsPredicateAssertion(.<TCollection> context, <TItem, bool> predicate) { }
-        protected override .<.> CheckAsync(.<TItem> metadata) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        public new .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
     }
     public class CollectionCountAssertion<TValue> : .<TValue>
