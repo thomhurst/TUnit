@@ -338,13 +338,33 @@ public abstract class CollectionAssertionBase<TCollection, TItem>
     /// Returns an And continuation that preserves collection instance methods.
     /// Overrides the base Assertion.And to return a collection-specific continuation.
     /// </summary>
-    public new CollectionAndContinuation<TCollection, TItem> And =>
-        new CollectionAndContinuation<TCollection, TItem>(Context, this);
+    public new CollectionAndContinuation<TCollection, TItem> And
+    {
+        get
+        {
+            // Check if we're chaining And after Or (mixing combiners)
+            if (InternalWrappedExecution is Chaining.OrAssertion<TCollection>)
+            {
+                throw new Exceptions.MixedAndOrAssertionsException();
+            }
+            return new CollectionAndContinuation<TCollection, TItem>(Context, this);
+        }
+    }
 
     /// <summary>
     /// Returns an Or continuation that preserves collection instance methods.
     /// Overrides the base Assertion.Or to return a collection-specific continuation.
     /// </summary>
-    public new CollectionOrContinuation<TCollection, TItem> Or =>
-        new CollectionOrContinuation<TCollection, TItem>(Context, this);
+    public new CollectionOrContinuation<TCollection, TItem> Or
+    {
+        get
+        {
+            // Check if we're chaining Or after And (mixing combiners)
+            if (InternalWrappedExecution is Chaining.AndAssertion<TCollection>)
+            {
+                throw new Exceptions.MixedAndOrAssertionsException();
+            }
+            return new CollectionOrContinuation<TCollection, TItem>(Context, this);
+        }
+    }
 }

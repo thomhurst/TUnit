@@ -14,7 +14,7 @@ public class CollectionAndContinuation<TCollection, TItem> : CollectionAssertion
     {
         context.ExpressionBuilder.Append(".And");
         // Set pending link for the next assertion to consume
-        context.SetPendingLinkSelfTyped(previousAssertion, CombinerType.And);
+        context.SetPendingLink(previousAssertion, CombinerType.And);
     }
 
     protected override string GetExpectation()
@@ -35,7 +35,7 @@ public class CollectionOrContinuation<TCollection, TItem> : CollectionAssertionB
     {
         context.ExpressionBuilder.Append(".Or");
         // Set pending link for the next assertion to consume
-        context.SetPendingLinkSelfTyped(previousAssertion, CombinerType.Or);
+        context.SetPendingLink(previousAssertion, CombinerType.Or);
     }
 
     protected override string GetExpectation()

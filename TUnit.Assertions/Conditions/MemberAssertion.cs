@@ -114,29 +114,6 @@ internal class TypeErasedAssertion<T> : Assertion<object?>
 }
 
 /// <summary>
-/// Type-erased wrapper for self-typed assertions to allow storing different types in MemberAssertionResult.
-/// </summary>
-internal class SelfTypedErasedAssertion<T, TSelf> : Assertion<object?>
-    where TSelf : Core.SelfTypedAssertion<T, TSelf>
-{
-    private readonly Core.SelfTypedAssertion<T, TSelf> _innerAssertion;
-
-    public SelfTypedErasedAssertion(Core.SelfTypedAssertion<T, TSelf> innerAssertion)
-        : base(new AssertionContext<object?>((object?)null, innerAssertion.InternalContext.ExpressionBuilder))
-    {
-        _innerAssertion = innerAssertion ?? throw new ArgumentNullException(nameof(innerAssertion));
-    }
-
-    public override async Task<object?> AssertAsync()
-    {
-        await _innerAssertion.AssertAsync();
-        return null;
-    }
-
-    protected override string GetExpectation() => _innerAssertion.InternalGetExpectation();
-}
-
-/// <summary>
 /// Simple adapter to wrap an AssertionContext as an IAssertionSource.
 /// Used to pass member context to the assertion lambda.
 /// </summary>

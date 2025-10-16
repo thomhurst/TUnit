@@ -90,28 +90,12 @@ public sealed class AssertionContext<TValue>
     internal CombinerType? PendingLinkType { get; private set; }
 
     /// <summary>
-    /// Pending assertion to link with for self-typed assertions.
-    /// Stored as object to avoid type parameter explosion.
-    /// </summary>
-    internal object? PendingLinkPreviousSelfTyped { get; private set; }
-
-    /// <summary>
     /// Sets the pending link state for the next assertion to consume.
     /// Called by AndContinuation/OrContinuation constructors.
     /// </summary>
     internal void SetPendingLink(Assertion<TValue> previous, CombinerType type)
     {
         PendingLinkPrevious = previous;
-        PendingLinkType = type;
-    }
-
-    /// <summary>
-    /// Sets the pending link state for self-typed assertions.
-    /// Called by SelfTypedAndContinuation/SelfTypedOrContinuation constructors.
-    /// </summary>
-    internal void SetPendingLinkSelfTyped(object previous, CombinerType type)
-    {
-        PendingLinkPreviousSelfTyped = previous;
         PendingLinkType = type;
     }
 
@@ -123,18 +107,6 @@ public sealed class AssertionContext<TValue>
     {
         var result = (PendingLinkPrevious, PendingLinkType);
         PendingLinkPrevious = null;
-        PendingLinkType = null;
-        return result;
-    }
-
-    /// <summary>
-    /// Consumes and clears the self-typed pending link state.
-    /// Called by SelfTypedAssertion constructor to auto-detect chaining.
-    /// </summary>
-    internal (object? previous, CombinerType? type) ConsumePendingLinkSelfTyped()
-    {
-        var result = (PendingLinkPreviousSelfTyped, PendingLinkType);
-        PendingLinkPreviousSelfTyped = null;
         PendingLinkType = null;
         return result;
     }

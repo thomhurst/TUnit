@@ -39,6 +39,11 @@ public abstract class Assertion<TValue>
     /// </summary>
     private Assertion<TValue>? _wrappedExecution;
 
+    /// <summary>
+    /// Internal accessor for the wrapped execution, used by derived classes to check combiner type.
+    /// </summary>
+    protected internal Assertion<TValue>? InternalWrappedExecution => _wrappedExecution;
+
     protected Assertion(AssertionContext<TValue> context)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));

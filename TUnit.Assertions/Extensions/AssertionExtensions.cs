@@ -413,7 +413,6 @@ public static class AssertionExtensions
 
     /// <summary>
     /// Asserts on a member of an object using a lambda selector and assertion lambda.
-    /// This overload supports both Assertion&lt;T&gt; and SelfTypedAssertion&lt;T, TSelf&gt; return types.
     /// The assertion lambda receives the member value and can perform any assertions on it.
     /// After the member assertion completes, returns to the parent object context for further chaining.
     /// Example: await Assert.That(myObject).Member(x => x.Tags, tags => tags.Contains("value"));
@@ -447,7 +446,7 @@ public static class AssertionExtensions
         var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
         var memberAssertionObj = assertions(memberSource);
 
-        // Type-erase to object? for storage - handle both Assertion<T> and SelfTypedAssertion<T, TSelf>
+        // Type-erase to object? for storage
         var erasedAssertion = WrapMemberAssertion<TMember>(memberAssertionObj);
 
         // If there was a pending link, wrap both assertions together
@@ -464,61 +463,18 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Helper method to wrap member assertions - handles both standard Assertion and SelfTypedAssertion types.
+    /// Helper method to wrap member assertions for type erasure.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050:MakeGenericType",
-        Justification = "Member assertions use known assertion types at compile time. The generic instantiations are created by user code.")]
     private static Assertion<object?> WrapMemberAssertion<TMember>(object memberAssertion)
     {
-        // Try standard Assertion<TMember> first
         if (memberAssertion is Assertion<TMember> standardAssertion)
         {
             return new TypeErasedAssertion<TMember>(standardAssertion);
         }
 
-        // Check if it's a SelfTypedAssertion<TMember, TSelf>
-        var type = memberAssertion.GetType();
-        var selfTypedBase = FindSelfTypedBase(type, typeof(TMember));
-
-        if (selfTypedBase != null)
-        {
-            // Extract TSelf from SelfTypedAssertion<TMember, TSelf>
-            var tself = selfTypedBase.GetGenericArguments()[1];
-
-            // Create SelfTypedErasedAssertion<TMember, TSelf>
-            var wrapperType = typeof(SelfTypedErasedAssertion<,>).MakeGenericType(typeof(TMember), tself);
-            return (Assertion<object?>)Activator.CreateInstance(wrapperType, memberAssertion)!;
-        }
-
         throw new InvalidOperationException(
-            $"Member assertion returned unexpected type: {type}. " +
-            $"Expected Assertion<{typeof(TMember).Name}> or SelfTypedAssertion<{typeof(TMember).Name}, TSelf>.");
-    }
-
-    /// <summary>
-    /// Finds the SelfTypedAssertion base type in the inheritance hierarchy.
-    /// </summary>
-    private static Type? FindSelfTypedBase(Type type, Type expectedValueType)
-    {
-        var current = type;
-        while (current != null && current != typeof(object))
-        {
-            if (current.IsGenericType)
-            {
-                var genericDef = current.GetGenericTypeDefinition();
-                if (genericDef == typeof(Core.SelfTypedAssertion<,>))
-                {
-                    var args = current.GetGenericArguments();
-                    // Check if TValue matches
-                    if (args[0] == expectedValueType)
-                    {
-                        return current;
-                    }
-                }
-            }
-            current = current.BaseType;
-        }
-        return null;
+            $"Member assertion returned unexpected type: {memberAssertion.GetType()}. " +
+            $"Expected Assertion<{typeof(TMember).Name}>.");
     }
 
     private static string GetMemberPath<TObject, TMember>(Expression<Func<TObject, TMember>> expression)
