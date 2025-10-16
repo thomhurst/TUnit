@@ -12,7 +12,7 @@ namespace TUnit.TestProject;
 public class NotInParallelClassGroupingTests_ClassA
 {
     internal static readonly ConcurrentQueue<string> ExecutionOrder = new();
-    
+
     [Test, NotInParallel(Order = 1)]
     public async Task Test1()
     {
@@ -92,7 +92,7 @@ public class NotInParallelClassGroupingTests_Verify
         var maxRetries = 10;
         var retryDelay = 100;
         List<string> order = [];
-        
+
         for (int i = 0; i < maxRetries; i++)
         {
             order = NotInParallelClassGroupingTests_ClassA.ExecutionOrder.ToList();
@@ -100,14 +100,14 @@ public class NotInParallelClassGroupingTests_Verify
                 break;
             await Task.Delay(retryDelay);
         }
-        
+
         // We should have 8 test executions (3 from ClassA, 2 from ClassB, 3 from ClassC)
         await Assert.That(order).HasCount(8);
 
         // Verify that all tests from one class complete before another class starts
         var classSequence = new List<string>();
         string? lastClass = null;
-        
+
         foreach (var execution in order)
         {
             var className = execution.Split('.')[0];

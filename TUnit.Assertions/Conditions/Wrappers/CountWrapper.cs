@@ -8,7 +8,7 @@ namespace TUnit.Assertions.Conditions.Wrappers;
 
 /// <summary>
 /// Wrapper for collection count assertions that provides .EqualTo() method.
-/// Example: await Assert.That(list).HasCount().EqualTo(5);
+/// Example: await Assert.That(list).Count().EqualTo(5);
 /// </summary>
 public class CountWrapper<TValue> : IAssertionSource<TValue>
     where TValue : IEnumerable

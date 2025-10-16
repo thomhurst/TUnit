@@ -344,15 +344,70 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts on a member of an object using a lambda selector.
-    /// Returns an assertion on the member value for further chaining.
-    /// Example: await Assert.That(myObject).HasMember(x => x.PropertyName).IsEqualTo(expectedValue);
+    /// Asserts on a member of an object using a lambda selector and assertion lambda.
+    /// The assertion lambda receives the member value and can perform any assertions on it.
+    /// After the member assertion completes, returns to the parent object context for further chaining.
+    /// Example: await Assert.That(myObject).Member(x => x.PropertyName, value => value.IsEqualTo(expectedValue));
     /// </summary>
-    public static MemberAssertion<TObject, TMember> HasMember<TObject, TMember>(
+    public static MemberAssertionResult<TObject> Member<TObject, TMember>(
         this IAssertionSource<TObject> source,
-        Expression<Func<TObject, TMember>> memberSelector)
+        Expression<Func<TObject, TMember>> memberSelector,
+        Func<IAssertionSource<TMember>, Assertion<TMember>> assertions)
     {
-        return new MemberAssertion<TObject, TMember>(source.Context, memberSelector);
+        var parentContext = source.Context;
+        var memberPath = GetMemberPath(memberSelector);
+
+        parentContext.ExpressionBuilder.Append($".Member(x => x.{memberPath}, ...)");
+
+        // Check if there's a pending link (from .And or .Or) that needs to be consumed
+        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
+
+        // Map to member context
+        var memberContext = parentContext.Map<TMember>(obj =>
+        {
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
+            }
+
+            var compiled = memberSelector.Compile();
+            return compiled(obj);
+        });
+
+        // Let user build assertion via lambda
+        // Create a simple adapter that implements IAssertionSource<TMember>
+        var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
+        var memberAssertion = assertions(memberSource);
+
+        // Type-erase to object? for storage
+        var erasedAssertion = new TypeErasedAssertion<TMember>(memberAssertion);
+
+        // If there was a pending link, wrap both assertions together
+        if (pendingAssertion != null && combinerType != null)
+        {
+            // Create a combined wrapper that executes the pending assertion first (or together for Or)
+            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
+                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
+                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
+
+            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
+        }
+
+        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+    }
+
+    private static string GetMemberPath<TObject, TMember>(Expression<Func<TObject, TMember>> expression)
+    {
+        var body = expression.Body;
+        var parts = new List<string>();
+
+        while (body is MemberExpression memberExpr)
+        {
+            parts.Insert(0, memberExpr.Member.Name);
+            body = memberExpr.Expression;
+        }
+
+        return parts.Count > 0 ? string.Join(".", parts) : "Unknown";
     }
 
     // ============ REFERENCE EQUALITY ============
