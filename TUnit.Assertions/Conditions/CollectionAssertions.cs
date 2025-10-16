@@ -128,8 +128,9 @@ public class CollectionIsNotEmptyAssertion<TValue> : Assertion<TValue>
 
 /// <summary>
 /// Asserts that a collection contains the expected item.
+/// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
-public class CollectionContainsAssertion<TCollection, TItem> : Assertion<TCollection>
+public class CollectionContainsAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly TItem _expected;
@@ -178,8 +179,9 @@ public class CollectionContainsAssertion<TCollection, TItem> : Assertion<TCollec
 
 /// <summary>
 /// Asserts that a collection does NOT contain the expected item.
+/// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
-public class CollectionDoesNotContainAssertion<TCollection, TItem> : Assertion<TCollection>
+public class CollectionDoesNotContainAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly TItem _expected;
@@ -381,7 +383,7 @@ public class CollectionAllSatisfyHelper<TCollection, TItem>
     }
 }
 
-public class CollectionAllAssertion<TCollection, TItem> : Assertion<TCollection>
+public class CollectionAllAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, bool> _predicate;
@@ -706,8 +708,9 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
 
 /// <summary>
 /// Asserts that a collection is in ascending order.
+/// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
-public class CollectionIsInOrderAssertion<TCollection, TItem> : Assertion<TCollection>
+public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
     where TItem : IComparable<TItem>
 {
@@ -759,8 +762,9 @@ public class CollectionIsInOrderAssertion<TCollection, TItem> : Assertion<TColle
 
 /// <summary>
 /// Asserts that a collection is in descending order.
+/// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
-public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Assertion<TCollection>
+public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
     where TItem : IComparable<TItem>
 {

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Exceptions;
@@ -67,11 +68,24 @@ public static class Assert
     /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
     /// Example: await Assert.That(array).IsInOrder();
     /// </summary>
-    public static CollectionAssertion<TItem> That<TItem>(
+    [OverloadResolutionPriority(1)]
+    public static CollectionAssertion<TCollection, TItem> That<TCollection, TItem>(
+        TCollection? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null) where TCollection : IEnumerable<TItem>
+    {
+        return new CollectionAssertion<TCollection, TItem>(value!, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for an array (nullable or non-nullable).
+    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
+    /// Example: await Assert.That(array).IsInOrder();
+    /// </summary>
+    public static CollectionAssertion<TItem[], TItem> That<TItem>(
         TItem[]? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return new CollectionAssertion<TItem>(value!, expression);
+        return new CollectionAssertion<TItem[], TItem>(value!, expression);
     }
 
     /// <summary>
@@ -79,11 +93,11 @@ public static class Assert
     /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
     /// Example: await Assert.That(list).IsInOrder();
     /// </summary>
-    public static CollectionAssertion<TItem> That<TItem>(
+    public static CollectionAssertion<List<TItem>, TItem> That<TItem>(
         List<TItem>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return new CollectionAssertion<TItem>(value!, expression);
+        return new CollectionAssertion<List<TItem>, TItem>(value!, expression);
     }
 
     /// <summary>
@@ -91,11 +105,11 @@ public static class Assert
     /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
     /// Example: await Assert.That(enumerable).IsInOrder();
     /// </summary>
-    public static CollectionAssertion<TItem> That<TItem>(
+    public static CollectionAssertion<IEnumerable<TItem>, TItem> That<TItem>(
         IEnumerable<TItem>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return new CollectionAssertion<TItem>(value!, expression);
+        return new CollectionAssertion<IEnumerable<TItem>, TItem>(value!, expression);
     }
 
     /// <summary>

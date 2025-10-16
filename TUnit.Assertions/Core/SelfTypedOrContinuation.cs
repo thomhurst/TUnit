@@ -1,37 +1,38 @@
-using System.Text;
 using TUnit.Assertions.Conditions;
-using TUnit.Assertions.Core;
 
-namespace TUnit.Assertions.Sources;
+namespace TUnit.Assertions.Core;
 
 /// <summary>
-/// Source assertion for immediate values.
-/// This is the entry point for: Assert.That(value)
-/// Does not inherit from Assertion to prevent premature awaiting.
+/// Represents an Or continuation that preserves the source assertion type.
+/// Enables instance methods from TSelf to remain available after .Or.
 /// </summary>
-public class ValueAssertion<TValue> : IAssertionSource<TValue>
+/// <typeparam name="TValue">The type of value being asserted</typeparam>
+/// <typeparam name="TSelf">The source assertion type to preserve</typeparam>
+public class SelfTypedOrContinuation<TValue, TSelf> : IAssertionSource<TValue>
+    where TSelf : SelfTypedAssertion<TValue, TSelf>
 {
+    /// <summary>
+    /// The assertion context shared by all assertions in the chain.
+    /// </summary>
     public AssertionContext<TValue> Context { get; }
 
-    public ValueAssertion(TValue? value, string? expression)
-    {
-        var expressionBuilder = new StringBuilder();
-        expressionBuilder.Append($"Assert.That({expression ?? "?"})");
-        Context = new AssertionContext<TValue>(value, expressionBuilder);
-    }
-
     /// <summary>
-    /// Protected constructor for derived classes that need to pass an existing context.
+    /// The previous assertion in the chain that could also pass.
     /// </summary>
-    protected ValueAssertion(AssertionContext<TValue> context)
+    public TSelf PreviousAssertion { get; }
+
+    internal SelfTypedOrContinuation(AssertionContext<TValue> context, TSelf previousAssertion)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
+        PreviousAssertion = previousAssertion ?? throw new ArgumentNullException(nameof(previousAssertion));
+        Context.ExpressionBuilder.Append(".Or");
+
+        // Set pending link state for next assertion to consume
+        Context.SetPendingLinkSelfTyped(previousAssertion, CombinerType.Or);
     }
 
     /// <summary>
     /// Asserts that the value is of the specified type and returns an assertion on the casted value.
-    /// This instance method allows single type parameter usage without needing to specify the source type.
-    /// Example: await Assert.That(myList).IsTypeOf<List<string>>();
     /// </summary>
     public TypeOfAssertion<TValue, TExpected> IsTypeOf<TExpected>()
     {
@@ -41,8 +42,6 @@ public class ValueAssertion<TValue> : IAssertionSource<TValue>
 
     /// <summary>
     /// Asserts that the value's type is assignable to the specified type.
-    /// This instance method allows single type parameter usage without needing to specify the source type.
-    /// Example: await Assert.That(myObject).IsAssignableTo<IDisposable>();
     /// </summary>
     public IsAssignableToAssertion<TTarget, TValue> IsAssignableTo<TTarget>()
     {
@@ -52,8 +51,6 @@ public class ValueAssertion<TValue> : IAssertionSource<TValue>
 
     /// <summary>
     /// Asserts that the value's type is NOT assignable to the specified type.
-    /// This instance method allows single type parameter usage without needing to specify the source type.
-    /// Example: await Assert.That(myObject).IsNotAssignableTo<IDisposable>();
     /// </summary>
     public IsNotAssignableToAssertion<TTarget, TValue> IsNotAssignableTo<TTarget>()
     {

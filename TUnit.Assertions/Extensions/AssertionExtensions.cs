@@ -396,6 +396,116 @@ public static class AssertionExtensions
         return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
     }
 
+    /// <summary>
+    /// Asserts on a member of an object using a lambda selector and assertion lambda.
+    /// This overload supports both Assertion&lt;T&gt; and SelfTypedAssertion&lt;T, TSelf&gt; return types.
+    /// The assertion lambda receives the member value and can perform any assertions on it.
+    /// After the member assertion completes, returns to the parent object context for further chaining.
+    /// Example: await Assert.That(myObject).Member(x => x.Tags, tags => tags.Contains("value"));
+    /// </summary>
+    public static MemberAssertionResult<TObject> Member<TObject, TMember>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, TMember>> memberSelector,
+        Func<IAssertionSource<TMember>, object> assertions)
+    {
+        var parentContext = source.Context;
+        var memberPath = GetMemberPath(memberSelector);
+
+        parentContext.ExpressionBuilder.Append($".Member(x => x.{memberPath}, ...)");
+
+        // Check if there's a pending link (from .And or .Or) that needs to be consumed
+        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
+
+        // Map to member context
+        var memberContext = parentContext.Map<TMember>(obj =>
+        {
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
+            }
+
+            var compiled = memberSelector.Compile();
+            return compiled(obj);
+        });
+
+        // Let user build assertion via lambda
+        var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
+        var memberAssertionObj = assertions(memberSource);
+
+        // Type-erase to object? for storage - handle both Assertion<T> and SelfTypedAssertion<T, TSelf>
+        var erasedAssertion = WrapMemberAssertion<TMember>(memberAssertionObj);
+
+        // If there was a pending link, wrap both assertions together
+        if (pendingAssertion != null && combinerType != null)
+        {
+            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
+                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
+                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
+
+            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
+        }
+
+        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Helper method to wrap member assertions - handles both standard Assertion and SelfTypedAssertion types.
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050:MakeGenericType",
+        Justification = "Member assertions use known assertion types at compile time. The generic instantiations are created by user code.")]
+    private static Assertion<object?> WrapMemberAssertion<TMember>(object memberAssertion)
+    {
+        // Try standard Assertion<TMember> first
+        if (memberAssertion is Assertion<TMember> standardAssertion)
+        {
+            return new TypeErasedAssertion<TMember>(standardAssertion);
+        }
+
+        // Check if it's a SelfTypedAssertion<TMember, TSelf>
+        var type = memberAssertion.GetType();
+        var selfTypedBase = FindSelfTypedBase(type, typeof(TMember));
+
+        if (selfTypedBase != null)
+        {
+            // Extract TSelf from SelfTypedAssertion<TMember, TSelf>
+            var tself = selfTypedBase.GetGenericArguments()[1];
+
+            // Create SelfTypedErasedAssertion<TMember, TSelf>
+            var wrapperType = typeof(SelfTypedErasedAssertion<,>).MakeGenericType(typeof(TMember), tself);
+            return (Assertion<object?>)Activator.CreateInstance(wrapperType, memberAssertion)!;
+        }
+
+        throw new InvalidOperationException(
+            $"Member assertion returned unexpected type: {type}. " +
+            $"Expected Assertion<{typeof(TMember).Name}> or SelfTypedAssertion<{typeof(TMember).Name}, TSelf>.");
+    }
+
+    /// <summary>
+    /// Finds the SelfTypedAssertion base type in the inheritance hierarchy.
+    /// </summary>
+    private static Type? FindSelfTypedBase(Type type, Type expectedValueType)
+    {
+        var current = type;
+        while (current != null && current != typeof(object))
+        {
+            if (current.IsGenericType)
+            {
+                var genericDef = current.GetGenericTypeDefinition();
+                if (genericDef == typeof(Core.SelfTypedAssertion<,>))
+                {
+                    var args = current.GetGenericArguments();
+                    // Check if TValue matches
+                    if (args[0] == expectedValueType)
+                    {
+                        return current;
+                    }
+                }
+            }
+            current = current.BaseType;
+        }
+        return null;
+    }
+
     private static string GetMemberPath<TObject, TMember>(Expression<Func<TObject, TMember>> expression)
     {
         var body = expression.Body;
@@ -700,6 +810,20 @@ public static class AssertionExtensions
 
     /// <summary>
     /// Asserts that the collection is in ascending order.
+    /// Optimized overload for CollectionAssertionBase with better type inference.
+    /// </summary>
+    public static CollectionIsInOrderAssertion<TCollection, TItem> IsInOrder<TCollection, TItem>(
+        this Sources.CollectionAssertionBase<TCollection, TItem> source)
+        where TCollection : IEnumerable<TItem>
+        where TItem : IComparable<TItem>
+    {
+        var context = ((IAssertionSource<TCollection>)source).Context;
+        context.ExpressionBuilder.Append(".IsInOrder()");
+        return new CollectionIsInOrderAssertion<TCollection, TItem>(context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is in ascending order.
     /// Specific overload for IEnumerable to fix C# type inference.
     /// </summary>
     public static CollectionIsInOrderAssertion<IEnumerable<TItem>, TItem> IsInOrder<TItem>(
@@ -720,6 +844,20 @@ public static class AssertionExtensions
     {
         source.Context.ExpressionBuilder.Append(".IsInDescendingOrder()");
         return new CollectionIsInDescendingOrderAssertion<TCollection, TItem>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is in descending order.
+    /// Optimized overload for CollectionAssertionBase with better type inference.
+    /// </summary>
+    public static CollectionIsInDescendingOrderAssertion<TCollection, TItem> IsInDescendingOrder<TCollection, TItem>(
+        this Sources.CollectionAssertionBase<TCollection, TItem> source)
+        where TCollection : IEnumerable<TItem>
+        where TItem : IComparable<TItem>
+    {
+        var context = ((IAssertionSource<TCollection>)source).Context;
+        context.ExpressionBuilder.Append(".IsInDescendingOrder()");
+        return new CollectionIsInDescendingOrderAssertion<TCollection, TItem>(context);
     }
 
     /// <summary>
