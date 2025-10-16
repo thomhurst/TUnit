@@ -55,7 +55,7 @@ jobs:
 
       - name: Docker Setup Docker
         if: matrix.os == 'ubuntu-latest'
-        uses: docker/setup-docker-action@v4.3.0
+        uses: docker/setup-docker-action@v4.4.0
 
       - name: Install Playwright Dependencies
         run: npx playwright install-deps
