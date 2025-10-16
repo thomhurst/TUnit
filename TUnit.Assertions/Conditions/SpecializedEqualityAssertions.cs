@@ -158,6 +158,17 @@ public class DoubleEqualsAssertion : Assertion<double>
 
         if (_tolerance.HasValue)
         {
+            // Handle NaN comparisons: NaN is only equal to NaN
+            if (double.IsNaN(value) && double.IsNaN(_expected))
+            {
+                return Task.FromResult(AssertionResult.Passed);
+            }
+
+            if (double.IsNaN(value) || double.IsNaN(_expected))
+            {
+                return Task.FromResult(AssertionResult.Failed($"found {value}"));
+            }
+
             var diff = Math.Abs(value - _expected);
             if (diff <= _tolerance.Value)
             {
@@ -168,6 +179,75 @@ public class DoubleEqualsAssertion : Assertion<double>
         }
 
         if (double.Equals(value, _expected))
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation() =>
+        _tolerance.HasValue
+            ? $"to be within {_tolerance} of {_expected}"
+            : $"to be {_expected}";
+}
+
+/// <summary>
+/// Asserts that a float value is equal to another, with optional tolerance.
+/// </summary>
+public class FloatEqualsAssertion : Assertion<float>
+{
+    private readonly float _expected;
+    private float? _tolerance;
+
+    public FloatEqualsAssertion(
+        AssertionContext<float> context,
+        float expected)
+        : base(context)
+    {
+        _expected = expected;
+    }
+
+    public FloatEqualsAssertion Within(float tolerance)
+    {
+        _tolerance = tolerance;
+        Context.ExpressionBuilder.Append($".Within({tolerance})");
+        return this;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<float> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (_tolerance.HasValue)
+        {
+            // Handle NaN comparisons: NaN is only equal to NaN
+            if (float.IsNaN(value) && float.IsNaN(_expected))
+            {
+                return Task.FromResult(AssertionResult.Passed);
+            }
+
+            if (float.IsNaN(value) || float.IsNaN(_expected))
+            {
+                return Task.FromResult(AssertionResult.Failed($"found {value}"));
+            }
+
+            var diff = Math.Abs(value - _expected);
+            if (diff <= _tolerance.Value)
+            {
+                return Task.FromResult(AssertionResult.Passed);
+            }
+
+            return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
+        }
+
+        if (float.Equals(value, _expected))
         {
             return Task.FromResult(AssertionResult.Passed);
         }

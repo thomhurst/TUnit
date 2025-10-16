@@ -31,6 +31,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
 #endif
         [typeof(int)] = new ToleranceComparer<int>(CompareInt),
         [typeof(long)] = new ToleranceComparer<long>(CompareLong),
+        [typeof(float)] = new ToleranceComparer<float>(CompareFloat),
         [typeof(double)] = new ToleranceComparer<double>(CompareDouble),
         [typeof(decimal)] = new ToleranceComparer<decimal>(CompareDecimal)
     };
@@ -156,11 +157,56 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         return false;
     }
 
+    private static bool CompareFloat(float actual, float expected, object tolerance, out string? errorMessage)
+    {
+        if (tolerance is not float floatTolerance)
+        {
+            errorMessage = null;
+            return false;
+        }
+
+        // Handle NaN comparisons: NaN is only equal to NaN
+        if (float.IsNaN(actual) && float.IsNaN(expected))
+        {
+            errorMessage = null;
+            return true;
+        }
+
+        if (float.IsNaN(actual) || float.IsNaN(expected))
+        {
+            errorMessage = $"found {actual}";
+            return false;
+        }
+
+        var difference = actual > expected ? actual - expected : expected - actual;
+        if (difference <= floatTolerance)
+        {
+            errorMessage = null;
+            return true;
+        }
+
+        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {floatTolerance}";
+        return false;
+    }
+
     private static bool CompareDouble(double actual, double expected, object tolerance, out string? errorMessage)
     {
         if (tolerance is not double doubleTolerance)
         {
             errorMessage = null;
+            return false;
+        }
+
+        // Handle NaN comparisons: NaN is only equal to NaN
+        if (double.IsNaN(actual) && double.IsNaN(expected))
+        {
+            errorMessage = null;
+            return true;
+        }
+
+        if (double.IsNaN(actual) || double.IsNaN(expected))
+        {
+            errorMessage = $"found {actual}";
             return false;
         }
 
