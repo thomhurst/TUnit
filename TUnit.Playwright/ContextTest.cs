@@ -5,7 +5,7 @@ namespace TUnit.Playwright;
 
 public class ContextTest : BrowserTest
 {
-    public ContextTest() : base()
+    public ContextTest()
     {
     }
 
