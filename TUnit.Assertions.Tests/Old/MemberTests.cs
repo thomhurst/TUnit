@@ -13,7 +13,7 @@ public class MemberTests
             Flag = false
         };
 
-        await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(123);
+        await TUnitAssert.That(myClass).Member(x => x.Number, num => num.IsEqualTo(123));
     }
 
     [Test]
@@ -26,15 +26,11 @@ public class MemberTests
             Flag = false
         };
 
-        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(1));
-        await TUnitAssert.That(exception).HasMessageEqualTo(
-            """
-            Expected to be equal to 1
-            but found 123
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
+            await TUnitAssert.That(myClass).Member(x => x.Number, num => num.IsEqualTo(1)));
 
-            at Assert.That(myClass).HasMember(x => x.Number).EqualTo(1)
-            """
-            );
+        await TUnitAssert.That(exception.Message).Contains("to be equal to 1");
+        await TUnitAssert.That(exception.Message).Contains("but found 123");
     }
 
     [Test]
@@ -47,15 +43,11 @@ public class MemberTests
             Flag = false
         };
 
-        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Nested.Nested.Nested.Number).EqualTo(1));
-        await TUnitAssert.That(exception).HasMessageEqualTo(
-            """
-            Expected to be equal to 1
-            but found 123
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
+            await TUnitAssert.That(myClass).Member(x => x.Nested.Nested.Nested.Number, num => num.IsEqualTo(1)));
 
-            at Assert.That(myClass).HasMember(x => x.Nested.Nested.Nested.Number).EqualTo(1)
-            """
-        );
+        await TUnitAssert.That(exception.Message).Contains("to be equal to 1");
+        await TUnitAssert.That(exception.Message).Contains("but found 123");
     }
 
     [Test]
@@ -63,15 +55,111 @@ public class MemberTests
     {
         MyClass myClass = null!;
 
-        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(myClass).HasMember(x => x.Number).EqualTo(1));
-        await TUnitAssert.That(exception).HasMessageEqualTo(
-            """
-            Expected to be equal to 1
-            but threw System.InvalidOperationException
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
+            await TUnitAssert.That(myClass).Member(x => x.Number, num => num.IsEqualTo(1)));
 
-            at Assert.That(myClass).HasMember(x => x.Number).EqualTo(1)
-            """
-        );
+        await TUnitAssert.That(exception.Message).Contains("InvalidOperationException");
+    }
+
+    [Test]
+    public async Task Multiple_HasMember_Chained_With_And()
+    {
+        var myClass = new MyClass
+        {
+            Number = 123,
+            Text = "Blah",
+            Flag = true
+        };
+
+        await TUnitAssert.That(myClass)
+            .Member(x => x.Number, num => num.IsEqualTo(123))
+            .And.Member(x => x.Text, text => text.IsEqualTo("Blah"))
+            .And.Member(x => x.Flag, flag => flag.IsTrue());
+    }
+
+    [Test]
+    public async Task Multiple_HasMember_Chained_Second_Fails()
+    {
+        var myClass = new MyClass
+        {
+            Number = 123,
+            Text = "Blah",
+            Flag = true
+        };
+
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
+            await TUnitAssert.That(myClass)
+                .Member(x => x.Number, num => num.IsEqualTo(123))
+                .And.Member(x => x.Text, text => text.IsEqualTo("Wrong")));
+
+        await TUnitAssert.That(exception.Message).Contains("to be equal to \"Wrong\"");
+    }
+
+    [Test]
+    public async Task Multiple_HasMember_Chained_First_Fails()
+    {
+        var myClass = new MyClass
+        {
+            Number = 123,
+            Text = "Blah",
+            Flag = true
+        };
+
+        var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
+            await TUnitAssert.That(myClass)
+                .Member(x => x.Number, num => num.IsEqualTo(999))
+                .And.Member(x => x.Text, text => text.IsEqualTo("Blah")));
+
+        await TUnitAssert.That(exception.Message).Contains("to be equal to 999");
+    }
+
+    [Test]
+    public async Task Multiple_HasMember_Chained_With_Or()
+    {
+        var myClass = new MyClass
+        {
+            Number = 123,
+            Text = "Blah",
+            Flag = true
+        };
+
+        await TUnitAssert.That(myClass)
+            .Member(x => x.Number, num => num.IsEqualTo(999))
+            .Or.Member(x => x.Text, text => text.IsEqualTo("Blah"));
+    }
+
+    [Test]
+    public async Task Chained_HasMember_With_IsNotNull()
+    {
+        var myClass = new MyClass
+        {
+            Number = 123,
+            Text = "Blah",
+            Flag = true
+        };
+
+        await TUnitAssert.That(myClass)
+            .IsNotNull()
+            .And.Member(x => x.Number, num => num.IsEqualTo(123))
+            .And.Member(x => x.Text, text => text.IsEqualTo("Blah"));
+    }
+
+    [Test]
+    public async Task Chained_HasMember_Different_Types()
+    {
+        var complexObject = new ComplexClass
+        {
+            Name = "Test",
+            Age = 25,
+            IsActive = true,
+            Tags = ["tag1", "tag2"]
+        };
+
+        await TUnitAssert.That(complexObject)
+            .Member(x => x.Name, name => name.IsEqualTo("Test"))
+            .And.Member(x => x.Age, age => age.IsGreaterThan(18))
+            .And.Member(x => x.IsActive, active => active.IsTrue())
+            .And.Member(x => x.Tags, tags => tags.Contains("tag1"));
     }
 
     private class MyClass
@@ -81,5 +169,13 @@ public class MemberTests
         public required bool Flag { get; init; }
 
         public MyClass Nested => this;
+    }
+
+    private class ComplexClass
+    {
+        public required string Name { get; init; }
+        public required int Age { get; init; }
+        public required bool IsActive { get; init; }
+        public required List<string> Tags { get; init; }
     }
 }
