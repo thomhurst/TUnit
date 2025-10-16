@@ -51,15 +51,20 @@ public abstract class InvokableTestBase(TestMode testMode)
         List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
     {
         var testProject = Sourcy.DotNet.Projects.TUnit_TestProject;
+
+        // Build path to the executable
+        var binPath = Path.Combine(testProject.DirectoryName!, "bin", "Release", GetEnvironmentVariable);
+
+        // Find the executable file (with or without .exe extension)
+        var files = new DirectoryInfo(binPath).EnumerateFiles("*", SearchOption.TopDirectoryOnly).ToArray();
+        var executable = files.FirstOrDefault(x => x.Name == "TUnit.TestProject")
+                         ?? files.First(x => x.Name == "TUnit.TestProject.exe");
+
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
-        var command = Cli.Wrap("dotnet")
+        var command = Cli.Wrap(executable.FullName)
             .WithArguments(
                 [
-                    "run",
-                    "--no-build",
-                    "-f", GetEnvironmentVariable,
-                    "--configuration", "Release",
                     "--treenode-filter", filter,
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
@@ -69,7 +74,6 @@ public abstract class InvokableTestBase(TestMode testMode)
                     ..runOptions.AdditionalArguments
                 ]
             )
-            .WithWorkingDirectory(testProject.DirectoryName!)
             .WithValidation(CommandResultValidation.None);
 
         await RunWithFailureLogging(command, trxFilename, assertions, assertionExpression);

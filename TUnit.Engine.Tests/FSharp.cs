@@ -13,15 +13,20 @@ public class FSharp
         var runOptions = new RunOptions();
 
         var testProject = Sourcy.DotNet.Projects.TUnit_TestProject_FSharp;
+
+        // Build path to the executable
+        var binPath = Path.Combine(testProject.DirectoryName!, "bin", "Release", "net10.0");
+
+        // Find the executable file (with or without .exe extension)
+        var files = new DirectoryInfo(binPath).EnumerateFiles("*", SearchOption.TopDirectoryOnly).ToArray();
+        var executable = files.FirstOrDefault(x => x.Name == "TUnit.TestProject.FSharp")
+                         ?? files.First(x => x.Name == "TUnit.TestProject.FSharp.exe");
+
         var guid = Guid.NewGuid().ToString("N");
         var trxFilename = guid + ".trx";
-        var command = Cli.Wrap("dotnet")
+        var command = Cli.Wrap(executable.FullName)
             .WithArguments(
                 [
-                    "run",
-                    "--no-build",
-                    "-f", "net10.0",
-                    "--configuration", "Release",
                     "--report-trx", "--report-trx-filename", trxFilename,
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_",
@@ -31,7 +36,6 @@ public class FSharp
                     ..runOptions.AdditionalArguments
                 ]
             )
-            .WithWorkingDirectory(testProject.DirectoryName!)
             .WithValidation(CommandResultValidation.None);
 
         var result = await command.ExecuteBufferedAsync();
