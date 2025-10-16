@@ -36,16 +36,21 @@ public class TypeInferenceTests
     [Test]
     public async Task PredicateAssertionsReturnItem()
     {
-        // Contains with predicate returns the found item, not the collection
-        // This allows further assertions on the item itself
+        // Contains with predicate can be awaited to get the found item
+        // Or chained with .And to continue collection assertions
         IEnumerable<int> enumerable = [1, 2, 3];
 
         try
         {
+            // Test 1: Await to get the found item
+            var item = await Assert.That(enumerable).Contains(x => x > 1);
+            await Assert.That(item).IsGreaterThan(0);
+
+            // Test 2: Chain with .And for collection assertions
             await Assert.That(enumerable)
-                .Contains(x => x > 1)  // Returns Assertion<int> with the found item
+                .Contains(x => x > 1)
                 .And
-                .IsGreaterThan(0);  // Can assert on the found item
+                .Contains(x => x > 2);  // Can chain multiple Contains
         }
         catch
         {
