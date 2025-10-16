@@ -145,6 +145,21 @@ public static class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that the float is equal to the expected value.
+    /// Returns FloatEqualsAssertion which has .Within() method!
+    /// Priority 2: Highest priority for specialized type.
+    /// </summary>
+    [OverloadResolutionPriority(2)]
+    public static FloatEqualsAssertion IsEqualTo(
+        this IAssertionSource<float> source,
+        float expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
+        return new FloatEqualsAssertion(source.Context, expected);
+    }
+
+    /// <summary>
     /// Asserts that the long is equal to the expected value.
     /// Returns LongEqualsAssertion which has .Within() method!
     /// Priority 2: Highest priority for specialized type.
