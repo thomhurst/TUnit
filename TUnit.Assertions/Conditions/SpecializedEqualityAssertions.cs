@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -7,6 +8,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a DateOnly value is equal to another, with optional tolerance.
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class DateOnlyEqualsAssertion : Assertion<DateOnly>
 {
     private readonly DateOnly _expected;
@@ -67,6 +69,7 @@ public class DateOnlyEqualsAssertion : Assertion<DateOnly>
 /// <summary>
 /// Asserts that a TimeOnly value is equal to another, with optional tolerance.
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class TimeOnlyEqualsAssertion : Assertion<TimeOnly>
 {
     private readonly TimeOnly _expected;
@@ -126,6 +129,7 @@ public class TimeOnlyEqualsAssertion : Assertion<TimeOnly>
 /// <summary>
 /// Asserts that a double value is equal to another, with optional tolerance.
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class DoubleEqualsAssertion : Assertion<double>
 {
     private readonly double _expected;
@@ -195,6 +199,7 @@ public class DoubleEqualsAssertion : Assertion<double>
 /// <summary>
 /// Asserts that a float value is equal to another, with optional tolerance.
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class FloatEqualsAssertion : Assertion<float>
 {
     private readonly float _expected;
@@ -264,6 +269,7 @@ public class FloatEqualsAssertion : Assertion<float>
 /// <summary>
 /// Asserts that a long value is equal to another, with optional tolerance.
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class LongEqualsAssertion : Assertion<long>
 {
     private readonly long _expected;
@@ -322,6 +328,7 @@ public class LongEqualsAssertion : Assertion<long>
 /// <summary>
 /// Asserts that a DateTimeOffset value is equal to another, with optional tolerance.
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class DateTimeOffsetEqualsAssertion : Assertion<DateTimeOffset>
 {
     private readonly DateTimeOffset _expected;
