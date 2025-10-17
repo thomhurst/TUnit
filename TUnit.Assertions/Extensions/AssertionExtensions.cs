@@ -54,38 +54,6 @@ public static class AssertionExtensions
         return assertion.WithComparison(comparison);
     }
 
-    /// <summary>
-    /// Asserts that a struct implementing IEquatable&lt;TExpected&gt; is equal to the expected value.
-    /// This enables direct equality comparisons for structs with cross-type IEquatable implementations.
-    /// Example: A Wrapper struct implementing IEquatable&lt;long&gt; can be compared directly to a long value.
-    /// Priority -1: Lower than generic fallback; only used for cross-type IEquatable scenarios (TActual != TExpected).
-    /// </summary>
-    [OverloadResolutionPriority(-1)]
-    public static EquatableAssertion<TActual, TExpected> IsEqualTo<TActual, TExpected>(
-        this IAssertionSource<TActual> source,
-        TExpected expected,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-        where TActual : struct, IEquatable<TExpected>
-    {
-        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
-        return new EquatableAssertion<TActual, TExpected>(source.Context, expected);
-    }
-
-    /// <summary>
-    /// Asserts that a nullable struct implementing IEquatable&lt;TExpected&gt; is equal to the expected value.
-    /// Handles nullable structs with cross-type IEquatable implementations.
-    /// Priority -1: Lower than generic fallback; only used for cross-type IEquatable scenarios (TActual != TExpected).
-    /// </summary>
-    [OverloadResolutionPriority(-1)]
-    public static NullableEquatableAssertion<TActual, TExpected> IsEqualTo<TActual, TExpected>(
-        this IAssertionSource<TActual?> source,
-        TExpected expected,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-        where TActual : struct, IEquatable<TExpected>
-    {
-        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
-        return new NullableEquatableAssertion<TActual, TExpected>(source.Context, expected);
-    }
 
     // ============ COMPARISONS ============
     // IsGreaterThan, IsGreaterThanOrEqualTo, IsLessThan, IsLessThanOrEqualTo, and IsBetween
