@@ -1455,6 +1455,7 @@ namespace .Core
                 "Start",
                 "End"})]
         public <, > GetTiming() { }
+        public .<TNew> Map<TNew>(<.<TValue>, .<TNew>> evaluationFactory) { }
         public .<TNew> Map<TNew>(<TValue?, TNew?> mapper) { }
         public .<TException> MapException<TException>()
             where TException :  { }
