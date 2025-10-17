@@ -325,7 +325,7 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that the value is of the specified type and returns an assertion on the casted value.
     /// Example: await Assert.That(obj).IsTypeOf<StringBuilder>();
-    /// This generic overload works with any source type.
+    /// Single type parameter version - infers source type.
     /// </summary>
     public static TypeOfAssertion<TValue, TExpected> IsTypeOf<TExpected, TValue>(
         this IAssertionSource<TValue> source)
@@ -335,14 +335,15 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that the value is of the specified type and returns an assertion on the casted value (specialized for object).
-    /// Example: await Assert.That(obj).IsTypeOf<StringBuilder>();
+    /// Asserts that the IEnumerable is of the specified type and returns an assertion on the casted value.
+    /// Specialized overload for IEnumerable assertions with better type inference.
+    /// Example: await Assert.That(enumerable).IsTypeOf<int[]>() where enumerable is IEnumerable<int>
     /// </summary>
-    public static TypeOfAssertion<object, TExpected> IsTypeOf<TExpected>(
-        this IAssertionSource<object> source)
+    public static TypeOfAssertion<IEnumerable<TItem>, TExpected> IsTypeOf<TExpected, TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source)
     {
         source.Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
-        return new TypeOfAssertion<object, TExpected>(source.Context);
+        return new TypeOfAssertion<IEnumerable<TItem>, TExpected>(source.Context);
     }
 
     /// <summary>

@@ -365,7 +365,7 @@ public class TypeOfTests
     {
         IEnumerable<int> enumerable = new int[] { 10, 20, 30 };
 
-        var result = await Assert.That(enumerable).IsTypeOf<int[]>();
+        var result = await Assert.That(enumerable).IsTypeOf<int[], IEnumerable<int>>();
 
         await Assert.That(result.Length).IsEqualTo(3);
         await Assert.That(result[1]).IsEqualTo(20);
@@ -401,7 +401,7 @@ public class TypeOfTests
     {
         IEnumerable<string> enumerable = new HashSet<string> { "alpha", "beta", "gamma" };
 
-        var result = await Assert.That(enumerable).IsTypeOf<HashSet<string>>();
+        var result = await Assert.That(enumerable).IsTypeOf<HashSet<string>, IEnumerable<string>>();
 
         await Assert.That(result.Count).IsEqualTo(3);
         await Assert.That(result.Contains("beta")).IsTrue();
@@ -607,7 +607,7 @@ public class TypeOfTests
     {
         IEnumerable<int> enumerable = new LinkedList<int>(new[] { 10, 20, 30 });
 
-        var result = await Assert.That(enumerable).IsTypeOf<LinkedList<int>>();
+        var result = await Assert.That(enumerable).IsTypeOf<LinkedList<int>, IEnumerable<int>>();
 
         await Assert.That(result.Count).IsEqualTo(3);
         await Assert.That(result.First!.Value).IsEqualTo(10);

@@ -8,15 +8,10 @@ namespace TUnit.Assertions.Core;
 /// Implements IAssertionSource so all extension methods work automatically.
 /// </summary>
 /// <typeparam name="TValue">The type of value being asserted</typeparam>
-public class OrContinuation<TValue> : IAssertionSource<TValue>
+public class OrContinuation<TValue> : ContinuationBase<TValue>
 {
-    public AssertionContext<TValue> Context { get; }
-
     internal OrContinuation(AssertionContext<TValue> context, Assertion<TValue> previousAssertion)
+        : base(context, previousAssertion, ".Or", CombinerType.Or)
     {
-        Context = context ?? throw new ArgumentNullException(nameof(context));
-        context.ExpressionBuilder.Append(".Or");
-        // Set pending link state for next assertion to consume
-        context.SetPendingLink(previousAssertion, CombinerType.Or);
     }
 }

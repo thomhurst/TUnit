@@ -163,6 +163,18 @@ public abstract class Assertion<TValue>
     public TaskAwaiter<TValue?> GetAwaiter() => AssertAsync().GetAwaiter();
 
     /// <summary>
+    /// Helper method to check if we're mixing And/Or combiners and throw if so.
+    /// </summary>
+    protected void ThrowIfMixingCombiner<TCombinerToAvoid>()
+        where TCombinerToAvoid : Assertion<TValue>
+    {
+        if (_wrappedExecution is TCombinerToAvoid)
+        {
+            throw new MixedAndOrAssertionsException();
+        }
+    }
+
+    /// <summary>
     /// Creates an And continuation for chaining additional assertions.
     /// All assertions in an And chain must pass.
     /// </summary>
@@ -170,11 +182,7 @@ public abstract class Assertion<TValue>
     {
         get
         {
-            // Check if we're chaining And after Or (mixing combiners)
-            if (_wrappedExecution is Chaining.OrAssertion<TValue>)
-            {
-                throw new Exceptions.MixedAndOrAssertionsException();
-            }
+            ThrowIfMixingCombiner<Chaining.OrAssertion<TValue>>();
             return new(Context, _wrappedExecution ?? this);
         }
     }
@@ -187,11 +195,7 @@ public abstract class Assertion<TValue>
     {
         get
         {
-            // Check if we're chaining Or after And (mixing combiners)
-            if (_wrappedExecution is Chaining.AndAssertion<TValue>)
-            {
-                throw new Exceptions.MixedAndOrAssertionsException();
-            }
+            ThrowIfMixingCombiner<Chaining.AndAssertion<TValue>>();
             return new(Context, _wrappedExecution ?? this);
         }
     }

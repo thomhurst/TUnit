@@ -32,11 +32,7 @@ public abstract class CollectionAssertionBase<TCollection, TItem>
     {
         get
         {
-            // Check if we're chaining And after Or (mixing combiners)
-            if (InternalWrappedExecution is Chaining.OrAssertion<TCollection>)
-            {
-                throw new Exceptions.MixedAndOrAssertionsException();
-            }
+            ThrowIfMixingCombiner<Chaining.OrAssertion<TCollection>>();
             return new CollectionAndContinuation<TCollection, TItem>(Context, InternalWrappedExecution ?? this);
         }
     }
@@ -49,11 +45,7 @@ public abstract class CollectionAssertionBase<TCollection, TItem>
     {
         get
         {
-            // Check if we're chaining Or after And (mixing combiners)
-            if (InternalWrappedExecution is Chaining.AndAssertion<TCollection>)
-            {
-                throw new Exceptions.MixedAndOrAssertionsException();
-            }
+            ThrowIfMixingCombiner<Chaining.AndAssertion<TCollection>>();
             return new CollectionOrContinuation<TCollection, TItem>(Context, InternalWrappedExecution ?? this);
         }
     }

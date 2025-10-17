@@ -8,15 +8,10 @@ namespace TUnit.Assertions.Core;
 /// Implements IAssertionSource so all extension methods work automatically.
 /// </summary>
 /// <typeparam name="TValue">The type of value being asserted</typeparam>
-public class AndContinuation<TValue> : IAssertionSource<TValue>
+public class AndContinuation<TValue> : ContinuationBase<TValue>
 {
-    public AssertionContext<TValue> Context { get; }
-
     internal AndContinuation(AssertionContext<TValue> context, Assertion<TValue> previousAssertion)
+        : base(context, previousAssertion, ".And", CombinerType.And)
     {
-        Context = context ?? throw new ArgumentNullException(nameof(context));
-        context.ExpressionBuilder.Append(".And");
-        // Set pending link state for next assertion to consume
-        context.SetPendingLink(previousAssertion, CombinerType.And);
     }
 }
