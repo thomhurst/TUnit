@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Runtime.CompilerServices;
+using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Sources;
@@ -39,6 +41,56 @@ public abstract class CollectionAssertionBase<TCollection, TItem>
     }
 
     protected override string GetExpectation() => "collection assertion";
+
+    /// <summary>
+    /// Asserts that the collection is of the specified type and returns an assertion on the casted value.
+    /// This instance method allows single type parameter usage without needing to specify the source type.
+    /// Example: await Assert.That(readOnlyList).IsTypeOf&lt;List&lt;double&gt;&gt;();
+    /// </summary>
+    public TypeOfAssertion<TCollection, TExpected> IsTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
+        return new TypeOfAssertion<TCollection, TExpected>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains the expected item.
+    /// This instance method enables calling Contains with proper type inference.
+    /// Example: await Assert.That(list).Contains("value");
+    /// </summary>
+    public CollectionContainsAssertion<TCollection, TItem> Contains(
+        TItem expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsAssertion<TCollection, TItem>(Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains an item matching the predicate.
+    /// This instance method enables calling Contains with proper type inference.
+    /// Example: await Assert.That(list).Contains(x => x > 5);
+    /// </summary>
+    public CollectionContainsPredicateAssertion<TCollection, TItem> Contains(
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsPredicateAssertion<TCollection, TItem>(Context, predicate);
+    }
+
+    /// <summary>
+    /// Asserts that the collection has the expected count.
+    /// This instance method enables calling HasCount with proper type inference.
+    /// Example: await Assert.That(list).HasCount(5);
+    /// </summary>
+    public CollectionCountAssertion<TCollection, TItem> HasCount(
+        int expectedCount,
+        [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasCount({expression})");
+        return new CollectionCountAssertion<TCollection, TItem>(Context, expectedCount);
+    }
 
     /// <summary>
     /// Returns an And continuation that preserves collection type and item type.

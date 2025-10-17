@@ -604,6 +604,53 @@ public static class AssertionExtensions
     // ============ COLLECTION ASSERTIONS ============
     // Collection assertions are now in CollectionContentAssertionExtensions
     // and work on ICollectionAssertionSource<TCollection, TItem>
+    // These extension methods work on ANY IAssertionSource<T> where T : IEnumerable<TItem>
+    // This enables collection methods on ValueAssertion, AndContinuation, etc.
+
+    /// <summary>
+    /// Asserts that the collection contains the expected item.
+    /// Works on any assertion source where the type is a collection.
+    /// Example: await Assert.That(customList).Contains("value");
+    /// </summary>
+    public static CollectionContainsAssertion<TCollection, TItem> Contains<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        TItem expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsAssertion<TCollection, TItem>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains an item matching the predicate.
+    /// Works on any assertion source where the type is a collection.
+    /// Example: await Assert.That(customList).Contains(x => x > 5);
+    /// </summary>
+    public static CollectionContainsPredicateAssertion<TCollection, TItem> Contains<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsPredicateAssertion<TCollection, TItem>(source.Context, predicate);
+    }
+
+    /// <summary>
+    /// Asserts that the collection has the expected count.
+    /// Works on any assertion source where the type is a collection.
+    /// Example: await Assert.That(customList).HasCount(5);
+    /// </summary>
+    public static CollectionCountAssertion<TCollection, TItem> HasCount<TCollection, TItem>(
+        this IAssertionSource<TCollection> source,
+        int expectedCount,
+        [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".HasCount({expression})");
+        return new CollectionCountAssertion<TCollection, TItem>(source.Context, expectedCount);
+    }
 
     /// <summary>
     /// Asserts that the collection does NOT contain the expected item.
@@ -629,6 +676,66 @@ public static class AssertionExtensions
     {
         source.Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
         return new CollectionDoesNotContainPredicateAssertion<TCollection, TItem>(source.Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that the collection has the expected count.
+    /// Specific overload for List to fix C# type inference.
+    /// Priority 2: Highest priority for specific type.
+    /// </summary>
+    [OverloadResolutionPriority(2)]
+    public static CollectionCountAssertion<List<TItem>, TItem> HasCount<TItem>(
+        this IAssertionSource<List<TItem>> source,
+        int expectedCount,
+        [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".HasCount({expression})");
+        return new CollectionCountAssertion<List<TItem>, TItem>(source.Context, expectedCount);
+    }
+
+    /// <summary>
+    /// Asserts that the collection has the expected count.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// Priority 1: Higher than the generic constrained version to resolve ambiguity.
+    /// </summary>
+    [OverloadResolutionPriority(1)]
+    public static CollectionCountAssertion<IEnumerable<TItem>, TItem> HasCount<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        int expectedCount,
+        [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".HasCount({expression})");
+        return new CollectionCountAssertion<IEnumerable<TItem>, TItem>(source.Context, expectedCount);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains the expected item.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// Priority 1: Higher than the generic constrained version to resolve ambiguity.
+    /// </summary>
+    [OverloadResolutionPriority(1)]
+    public static CollectionContainsAssertion<IEnumerable<TItem>, TItem> Contains<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        TItem expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsAssertion<IEnumerable<TItem>, TItem>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains an item matching the predicate.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// Priority 1: Higher than the generic constrained version to resolve ambiguity.
+    /// </summary>
+    [OverloadResolutionPriority(1)]
+    public static CollectionContainsPredicateAssertion<IEnumerable<TItem>, TItem> Contains<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source,
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsPredicateAssertion<IEnumerable<TItem>, TItem>(source.Context, predicate);
     }
 
     /// <summary>
