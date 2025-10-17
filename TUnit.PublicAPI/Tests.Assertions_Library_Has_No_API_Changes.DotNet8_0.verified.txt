@@ -887,11 +887,12 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class HasSingleItemAssertion<TValue> : .<TValue>
-        where TValue : .IEnumerable
+    public class HasSingleItemAssertion<TCollection, TItem> : .<TCollection>
+        where TCollection : .<TItem>
     {
-        public HasSingleItemAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        public HasSingleItemAssertion(.<TCollection> context) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        public new .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
     }
     public static class HttpStatusCodeAssertionExtensions
@@ -1743,8 +1744,10 @@ namespace .Extensions
             where TEnum :  struct,  { }
         public static ..HasSameValueAsAssertion<TEnum> HasSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
             where TEnum :  struct,  { }
-        public static .<TValue> HasSingleItem<TValue>(this .<TValue> source)
-            where TValue : .IEnumerable { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source) { }
+        public static .<TCollection, TItem> HasSingleItem<TCollection, TItem>(this .<TCollection> source)
+            where TCollection : .<TItem> { }
         public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }

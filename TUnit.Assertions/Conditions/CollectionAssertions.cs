@@ -481,17 +481,20 @@ public class CollectionAnyAssertion<TCollection, TItem> : Assertion<TCollection>
 
 /// <summary>
 /// Asserts that a collection contains exactly one item.
+/// When awaited, returns the single item for further assertions.
 /// </summary>
-public class HasSingleItemAssertion<TValue> : Assertion<TValue>
-    where TValue : IEnumerable
+public class HasSingleItemAssertion<TCollection, TItem> : Assertion<TCollection>
+    where TCollection : IEnumerable<TItem>
 {
+    private TItem? _singleItem;
+
     public HasSingleItemAssertion(
-        AssertionContext<TValue> context)
+        AssertionContext<TCollection> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -514,7 +517,10 @@ public class HasSingleItemAssertion<TValue> : Assertion<TValue>
                 return Task.FromResult(AssertionResult.Failed("collection is empty"));
             }
 
-            // First item exists, check if there's a second
+            // Store the single item
+            _singleItem = enumerator.Current;
+
+            // Check if there's a second item
             if (enumerator.MoveNext())
             {
                 return Task.FromResult(AssertionResult.Failed("collection has more than one item"));
@@ -529,6 +535,24 @@ public class HasSingleItemAssertion<TValue> : Assertion<TValue>
     }
 
     protected override string GetExpectation() => "to have exactly one item";
+
+    /// <summary>
+    /// Enables await syntax that returns the single item.
+    /// This allows both chaining (.And) and item capture (await).
+    /// </summary>
+    public new System.Runtime.CompilerServices.TaskAwaiter<TItem> GetAwaiter()
+    {
+        return ExecuteAndReturnItemAsync().GetAwaiter();
+    }
+
+    private async Task<TItem> ExecuteAndReturnItemAsync()
+    {
+        // Execute the assertion (will throw if not exactly one item)
+        await AssertAsync();
+
+        // Return the single item
+        return _singleItem!;
+    }
 }
 
 /// <summary>
