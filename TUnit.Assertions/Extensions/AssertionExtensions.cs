@@ -31,7 +31,7 @@ public static class AssertionExtensions
     [OverloadResolutionPriority(0)]
     public static EqualsAssertion<TValue> IsEqualTo<TValue>(
         this IAssertionSource<TValue> source,
-        TValue expected,
+        TValue? expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
@@ -44,7 +44,7 @@ public static class AssertionExtensions
     /// </summary>
     public static EqualsAssertion<TValue> EqualTo<TValue>(
         this IAssertionSource<TValue> source,
-        TValue expected,
+        TValue? expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".EqualTo({expression})");
