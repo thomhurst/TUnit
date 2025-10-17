@@ -40,16 +40,41 @@ public sealed class AssertionContext<TValue>
     }
 
     /// <summary>
-    /// Creates a derived context by mapping the value to a different type.
-    /// Used for type transformations like IsTypeOf&lt;T&gt;().
-    /// The mapping function is only called if evaluation succeeds (no exception).
+    /// Creates a derived context by transforming to a different type with automatic pending link transfer.
+    /// This is the standard way to create type-transforming assertions (like WhenParsedInto, Match, IsTypeOf, etc).
+    /// Automatically handles:
+    /// - Transferring the expression builder
+    /// - Consuming pending links from the source context
+    /// - Setting up pre-work to execute previous assertions before the transformation
+    /// </summary>
+    /// <typeparam name="TNew">The target type after transformation</typeparam>
+    /// <param name="evaluationFactory">Factory to create the new evaluation context from the current one</param>
+    /// <returns>A new assertion context with pending links properly transferred</returns>
+    public AssertionContext<TNew> Map<TNew>(Func<EvaluationContext<TValue>, EvaluationContext<TNew>> evaluationFactory)
+    {
+        var newEvaluation = evaluationFactory(Evaluation);
+        var newContext = new AssertionContext<TNew>(newEvaluation, ExpressionBuilder);
+
+        // Transfer pending links from source context to handle cross-type chaining
+        // e.g., Assert.That(str).HasLength(3).And.Match(@"\d+").And.Captured<int>(1)
+        var (pendingAssertion, combinerType) = ConsumePendingLink();
+        if (pendingAssertion != null)
+        {
+            // Store the pending assertion execution as pre-work
+            // It will be executed before any assertions on the transformed value
+            newContext.PendingPreWork = async () => await pendingAssertion.ExecuteCoreAsync();
+        }
+
+        return newContext;
+    }
+
+    /// <summary>
+    /// Convenience overload for simple value-to-value transformations.
+    /// Wraps a simple mapper function in an evaluation context transformation.
     /// </summary>
     public AssertionContext<TNew> Map<TNew>(Func<TValue?, TNew?> mapper)
     {
-        return new AssertionContext<TNew>(
-            Evaluation.Map(mapper),
-            ExpressionBuilder
-        );
+        return Map(evalContext => evalContext.Map(mapper));
     }
 
     public AssertionContext<TException> MapException<TException>() where TException : Exception
@@ -88,6 +113,12 @@ public sealed class AssertionContext<TValue>
     /// The type of combiner (And/Or) for the pending link.
     /// </summary>
     internal CombinerType? PendingLinkType { get; private set; }
+
+    /// <summary>
+    /// Pre-work to execute before evaluating assertions in this context.
+    /// Used for cross-type assertion chaining (e.g., string assertions before WhenParsedInto&lt;int&gt;).
+    /// </summary>
+    internal Func<Task>? PendingPreWork { get; set; }
 
     /// <summary>
     /// Sets the pending link state for the next assertion to consume.

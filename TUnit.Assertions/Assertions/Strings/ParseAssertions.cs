@@ -229,6 +229,16 @@ public class WhenParsedIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
         IFormatProvider? formatProvider = null)
         : base(new AssertionContext<T>(CreateParsedContext(stringContext.Evaluation, formatProvider), stringContext.ExpressionBuilder))
     {
+        // Transfer pending links from string context to handle cross-type chaining
+        // e.g., Assert.That(str).HasLength(4).And.WhenParsedInto<int>()
+        var (pendingAssertion, combinerType) = stringContext.ConsumePendingLink();
+        if (pendingAssertion != null)
+        {
+            // Store the pending assertion execution as pre-work
+            // It will be executed before any assertions on the parsed value
+            Context.PendingPreWork = async () => await pendingAssertion.ExecuteCoreAsync();
+        }
+
         _formatProvider = formatProvider;
     }
 

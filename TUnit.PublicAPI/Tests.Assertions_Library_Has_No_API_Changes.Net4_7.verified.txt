@@ -644,7 +644,7 @@ namespace .Conditions
     }
     public class EqualsAssertion<TValue> : .<TValue>
     {
-        public EqualsAssertion(.<TValue> context, TValue expected, .<TValue>? comparer = null) { }
+        public EqualsAssertion(.<TValue> context, TValue? expected, .<TValue>? comparer = null) { }
         public TValue Expected { get; }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
@@ -816,11 +816,12 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class HasSingleItemAssertion<TValue> : .<TValue>
-        where TValue : .IEnumerable
+    public class HasSingleItemAssertion<TCollection, TItem> : .<TCollection>
+        where TCollection : .<TItem>
     {
-        public HasSingleItemAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        public HasSingleItemAssertion(.<TCollection> context) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        public new .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
     }
     public static class HttpStatusCodeAssertionExtensions
@@ -958,6 +959,7 @@ namespace .Conditions
         public .<TObject> And { get; }
         public .<TObject> Or { get; }
         public .<TObject?> GetAwaiter() { }
+        public static .<TObject> op_Implicit(.<TObject> result) { }
     }
     [.("IsNotEqualTo")]
     public class NotEqualsAssertion<TValue> : .<TValue>
@@ -1373,6 +1375,7 @@ namespace .Core
                 "Start",
                 "End"})]
         public <, > GetTiming() { }
+        public .<TNew> Map<TNew>(<.<TValue>, .<TNew>> evaluationFactory) { }
         public .<TNew> Map<TNew>(<TValue?, TNew?> mapper) { }
         public .<TException> MapException<TException>()
             where TException :  { }
@@ -1574,7 +1577,7 @@ namespace .Extensions
             where TEnum :  struct,  { }
         public static ..DoesNotHaveSameValueAsAssertion<TEnum> DoesNotHaveSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
             where TEnum :  struct,  { }
-        public static .<TValue> EqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
+        public static .<TValue> EqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
         public static ..CountWrapper<TValue> HasCount<TValue>(this .<TValue> source)
             where TValue : .IEnumerable { }
         public static .<TValue> HasCount<TValue>(this .<TValue> source, int expectedCount, [.("expectedCount")] string? expression = null)
@@ -1597,11 +1600,20 @@ namespace .Extensions
             where TEnum :  struct,  { }
         public static ..HasSameValueAsAssertion<TEnum> HasSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
             where TEnum :  struct,  { }
-        public static .<TValue> HasSingleItem<TValue>(this .<TValue> source)
-            where TValue : .IEnumerable { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source) { }
+        public static .<TCollection, TItem> HasSingleItem<TCollection, TItem>(this .<TCollection> source)
+            where TCollection : .<TItem> { }
+        public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<TTarget, object> IsAssignableTo<TTarget>(this .<object> source) { }
         public static .<TTarget, TValue> IsAssignableTo<TTarget, TValue>(this .<TValue> source) { }
+        public static .<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsBeforeOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsBeforeOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static ..IsDefinedAssertion<TEnum> IsDefined<TEnum>(this .<TEnum> source)
             where TEnum :  struct,  { }
         public static .<TValue> IsEmpty<TValue>(this .<TValue> source)
@@ -1615,7 +1627,7 @@ namespace .Extensions
         public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<string> source, string? expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<string> source, string? expected,  comparison, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expression = null) { }
+        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
         public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual> source, TExpected expected, [.("expected")] string? expression = null)
             where TActual :  struct, <TExpected> { }
         public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual?> source, TExpected expected, [.("expected")] string? expression = null)

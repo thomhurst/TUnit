@@ -12,7 +12,7 @@ namespace TUnit.Assertions.Conditions;
 /// </summary>
 public class EqualsAssertion<TValue> : Assertion<TValue>
 {
-    private readonly TValue _expected;
+    private readonly TValue? _expected;
     private readonly IEqualityComparer<TValue>? _comparer;
     private object? _tolerance;
     private readonly HashSet<Type> _ignoredTypes = new();
@@ -244,11 +244,11 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
     /// Gets the expected value for this equality assertion.
     /// Used by extension methods like Within() to create derived assertions.
     /// </summary>
-    public TValue Expected => _expected;
+    public TValue? Expected => _expected;
 
     public EqualsAssertion(
         AssertionContext<TValue> context,
-        TValue expected,
+        TValue? expected,
         IEqualityComparer<TValue>? comparer = null)
         : base(context)
     {
@@ -346,7 +346,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         // Standard equality comparison
         var comparer = _comparer ?? EqualityComparer<TValue>.Default;
 
-        if (comparer.Equals(value!, _expected))
+        if (comparer.Equals(value!, _expected!))
         {
             return Task.FromResult(AssertionResult.Passed);
         }
