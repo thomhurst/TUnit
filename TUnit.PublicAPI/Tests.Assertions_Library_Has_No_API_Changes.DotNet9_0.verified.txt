@@ -1694,9 +1694,24 @@ namespace .Extensions
             where TEnum :  struct,  { }
         public static .<TValue> HasSingleItem<TValue>(this .<TValue> source)
             where TValue : .IEnumerable { }
+        public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<TTarget, object> IsAssignableTo<TTarget>(this .<object> source) { }
         public static .<TTarget, TValue> IsAssignableTo<TTarget, TValue>(this .<TValue> source) { }
+        public static .<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsBefore(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsBeforeOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsBeforeOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsBeforeOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
+        public static .<> IsBeforeOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static ..IsDefinedAssertion<TEnum> IsDefined<TEnum>(this .<TEnum> source)
             where TEnum :  struct,  { }
         public static .<TValue> IsEmpty<TValue>(this .<TValue> source)
