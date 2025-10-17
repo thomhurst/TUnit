@@ -1599,6 +1599,9 @@ namespace .Extensions
         public static ..HasSameValueAsAssertion<TEnum> HasSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
             where TEnum :  struct,  { }
         public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source) { }
+        public static .<.<TItem>, TItem> HasSingleItem<TItem>(this .<.<TItem>> source) { }
+        public static .<TCollection, TItem> HasSingleItem<TCollection, TItem>(this .<TCollection> source)
+            where TCollection : .<TItem> { }
         public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<> IsAfter(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static .<> IsAfterOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
