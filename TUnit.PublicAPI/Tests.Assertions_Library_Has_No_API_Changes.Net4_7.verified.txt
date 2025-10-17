@@ -121,6 +121,21 @@ namespace .
         protected override string GetExpectation() { }
     }
 }
+namespace .Assertions
+{
+    public class PropertyAssertionResult<TObject> : ., .<TObject>
+    {
+        public .<TObject> Context { get; }
+        public .<TObject?> GetAwaiter() { }
+    }
+    public class PropertyAssertion<TObject, TProperty>
+    {
+        public .<TObject> IsEqualTo(TProperty expected) { }
+        public .<TObject> IsNotEqualTo(TProperty expected) { }
+        public .<TObject> IsNotNull() { }
+        public .<TObject> IsNull() { }
+    }
+}
 namespace .
 {
     public class IsNotParsableIntoAssertion<T> : .<string>
@@ -1437,6 +1452,8 @@ namespace .Core
     {
         public .<TValue> Context { get; }
     }
+    public class DictionaryAndContinuation<TKey, TValue> : .<.<TKey, TValue>>, ., .<.<TKey, TValue>>, .<.<TKey, TValue>, .<TKey, TValue>> { }
+    public class DictionaryOrContinuation<TKey, TValue> : .<.<TKey, TValue>>, ., .<.<TKey, TValue>>, .<.<TKey, TValue>, .<TKey, TValue>> { }
     public sealed class EvaluationContext<TValue>
     {
         public EvaluationContext(<.<<TValue?, ?>>> evaluator) { }
@@ -2776,6 +2793,11 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.Process> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class PropertyAssertionExtensions
+    {
+        public static .<TObject, TProperty> HasProperty<TObject, TProperty>(this .<TObject> source, .<<TObject, TProperty>> propertySelector) { }
+        public static .<TObject> HasProperty<TObject, TProperty>(this .<TObject> source, .<<TObject, TProperty>> propertySelector, TProperty expectedValue, [.("expectedValue")] string? expression = null) { }
+    }
     public static class SameReferenceAssertionExtensions
     {
         public static .<TValue> IsSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
@@ -3417,7 +3439,14 @@ namespace .Sources
         public .<TException> ThrowsExactly<TException>()
             where TException :  { }
     }
-    public class DictionaryAssertion<TKey, TValue> : .<.<TKey, TValue>>
+    public abstract class DictionaryAssertionBase<TKey, TValue> : .<.<TKey, TValue>>, ., .<.<TKey, TValue>>, .<.<TKey, TValue>, .<TKey, TValue>>
+    {
+        protected DictionaryAssertionBase(.<.<TKey, TValue>> context) { }
+        public new .<TKey, TValue> And { get; }
+        public new .<TKey, TValue> Or { get; }
+        protected override string GetExpectation() { }
+    }
+    public class DictionaryAssertion<TKey, TValue> : .<TKey, TValue>
     {
         public DictionaryAssertion(.<TKey, TValue> value, string? expression) { }
     }
