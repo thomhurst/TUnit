@@ -58,4 +58,30 @@ public class TypeInferenceTests
             // Just want to surface any compiler errors if we knock out type inference
         }
     }
+
+    [Test]
+    public async Task HasSingleItemReturnsSingleItem()
+    {
+        // HasSingleItem can be awaited to get the single item
+        // Or chained with .And to continue collection assertions
+        IEnumerable<int> enumerable = [42];
+
+        try
+        {
+            // Test 1: Await to get the single item
+            var item = await Assert.That(enumerable).HasSingleItem();
+            await Assert.That(item).IsEqualTo(42);
+
+            // Test 2: Chain with .And for collection assertions
+            await Assert.That(enumerable)
+                .HasSingleItem()
+                .And
+                .ContainsOnly(x => x == 42);
+        }
+        catch
+        {
+            // Don't care for assertion failures
+            // Just want to surface any compiler errors if we knock out type inference
+        }
+    }
 }
