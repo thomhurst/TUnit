@@ -53,6 +53,15 @@ public class MemberAssertionResult<TObject>
         return ExecuteAsync().GetAwaiter();
     }
 
+    /// <summary>
+    /// Implicit conversion to Assertion&lt;TObject&gt; to allow Member() to be used as the final statement
+    /// in contexts that expect an Assertion, such as Satisfies() lambdas.
+    /// </summary>
+    public static implicit operator Assertion<TObject>(MemberAssertionResult<TObject> result)
+    {
+        return new MemberExecutionWrapper<TObject>(result._parentContext, result._memberAssertion);
+    }
+
     private async Task<TObject?> ExecuteAsync()
     {
         // Execute the member assertion
@@ -86,6 +95,13 @@ internal class MemberExecutionWrapper<TObject> : Assertion<TObject>
         // Return the parent object value for further chaining
         var (parentValue, _) = await Context.GetAsync();
         return parentValue;
+    }
+
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TObject> metadata)
+    {
+        // Execute the member assertion
+        await _memberAssertion.AssertAsync();
+        return AssertionResult.Passed;
     }
 
     protected override string GetExpectation() => _memberAssertion.InternalGetExpectation();

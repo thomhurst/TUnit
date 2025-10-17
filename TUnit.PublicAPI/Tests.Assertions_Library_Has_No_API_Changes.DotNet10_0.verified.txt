@@ -1001,6 +1001,7 @@ namespace .Conditions
         public .<TObject> And { get; }
         public .<TObject> Or { get; }
         public .<TObject?> GetAwaiter() { }
+        public static .<TObject> op_Implicit(.<TObject> result) { }
     }
     [.("IsNotEqualTo")]
     public class NotEqualsAssertion<TValue> : .<TValue>
