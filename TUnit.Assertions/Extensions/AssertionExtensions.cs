@@ -948,13 +948,38 @@ public static class AssertionExtensions
 
     /// <summary>
     /// Asserts that the collection contains exactly one item.
+    /// When awaited, returns the single item for further assertions.
     /// </summary>
-    public static HasSingleItemAssertion<TValue> HasSingleItem<TValue>(
-        this IAssertionSource<TValue> source)
-        where TValue : IEnumerable
+    public static HasSingleItemAssertion<TCollection, TItem> HasSingleItem<TCollection, TItem>(
+        this IAssertionSource<TCollection> source)
+        where TCollection : IEnumerable<TItem>
     {
         source.Context.ExpressionBuilder.Append(".HasSingleItem()");
-        return new HasSingleItemAssertion<TValue>(source.Context);
+        return new HasSingleItemAssertion<TCollection, TItem>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains exactly one item.
+    /// When awaited, returns the single item for further assertions.
+    /// Specific overload for IEnumerable to fix C# type inference.
+    /// </summary>
+    public static HasSingleItemAssertion<IEnumerable<TItem>, TItem> HasSingleItem<TItem>(
+        this IAssertionSource<IEnumerable<TItem>> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasSingleItem()");
+        return new HasSingleItemAssertion<IEnumerable<TItem>, TItem>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains exactly one item.
+    /// When awaited, returns the single item for further assertions.
+    /// Specific overload for IReadOnlyList to fix C# type inference.
+    /// </summary>
+    public static HasSingleItemAssertion<IReadOnlyList<TItem>, TItem> HasSingleItem<TItem>(
+        this IAssertionSource<IReadOnlyList<TItem>> source)
+    {
+        source.Context.ExpressionBuilder.Append(".HasSingleItem()");
+        return new HasSingleItemAssertion<IReadOnlyList<TItem>, TItem>(source.Context);
     }
 
     /// <summary>
