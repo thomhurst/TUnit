@@ -189,4 +189,66 @@ public class DateTimeOffsetAssertionTests
         var wednesday = new DateTimeOffset(daysUntilWednesday == 0 ? today : today.AddDays(daysUntilWednesday));
         await Assert.That(wednesday).IsOnWeekday();
     }
+
+    [Test]
+    public async Task Test_DateTimeOffset_IsAfter()
+    {
+        var before = new DateTimeOffset(2024, 1, 1, 12, 0, 0, TimeSpan.Zero);
+        var after = new DateTimeOffset(2024, 1, 2, 12, 0, 0, TimeSpan.Zero);
+        await Assert.That(after).IsAfter(before);
+    }
+
+    [Test]
+    public async Task Test_DateTimeOffset_IsAfter_SameTime_Fails()
+    {
+        var dateTimeOffset = new DateTimeOffset(2024, 1, 1, 12, 0, 0, TimeSpan.Zero);
+        await Assert.That(async () => await Assert.That(dateTimeOffset).IsAfter(dateTimeOffset))
+            .ThrowsException();
+    }
+
+    [Test]
+    public async Task Test_DateTimeOffset_IsBefore()
+    {
+        var before = new DateTimeOffset(2024, 1, 1, 12, 0, 0, TimeSpan.Zero);
+        var after = new DateTimeOffset(2024, 1, 2, 12, 0, 0, TimeSpan.Zero);
+        await Assert.That(before).IsBefore(after);
+    }
+
+    [Test]
+    public async Task Test_DateTimeOffset_IsBefore_SameTime_Fails()
+    {
+        var dateTimeOffset = new DateTimeOffset(2024, 1, 1, 12, 0, 0, TimeSpan.Zero);
+        await Assert.That(async () => await Assert.That(dateTimeOffset).IsBefore(dateTimeOffset))
+            .ThrowsException();
+    }
+
+    [Test]
+    public async Task Test_DateTimeOffset_IsAfterOrEqualTo()
+    {
+        var before = new DateTimeOffset(2024, 1, 1, 12, 0, 0, TimeSpan.Zero);
+        var after = new DateTimeOffset(2024, 1, 2, 12, 0, 0, TimeSpan.Zero);
+        await Assert.That(after).IsAfterOrEqualTo(before);
+    }
+
+    [Test]
+    public async Task Test_DateTimeOffset_IsAfterOrEqualTo_SameTime()
+    {
+        var dateTimeOffset = new DateTimeOffset(2024, 1, 1, 12, 0, 0, TimeSpan.Zero);
+        await Assert.That(dateTimeOffset).IsAfterOrEqualTo(dateTimeOffset);
+    }
+
+    [Test]
+    public async Task Test_DateTimeOffset_IsBeforeOrEqualTo()
+    {
+        var before = new DateTimeOffset(2024, 1, 1, 12, 0, 0, TimeSpan.Zero);
+        var after = new DateTimeOffset(2024, 1, 2, 12, 0, 0, TimeSpan.Zero);
+        await Assert.That(before).IsBeforeOrEqualTo(after);
+    }
+
+    [Test]
+    public async Task Test_DateTimeOffset_IsBeforeOrEqualTo_SameTime()
+    {
+        var dateTimeOffset = new DateTimeOffset(2024, 1, 1, 12, 0, 0, TimeSpan.Zero);
+        await Assert.That(dateTimeOffset).IsBeforeOrEqualTo(dateTimeOffset);
+    }
 }

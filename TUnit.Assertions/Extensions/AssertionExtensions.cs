@@ -31,7 +31,7 @@ public static class AssertionExtensions
     [OverloadResolutionPriority(0)]
     public static EqualsAssertion<TValue> IsEqualTo<TValue>(
         this IAssertionSource<TValue> source,
-        TValue expected,
+        TValue? expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsEqualTo({expression})");
@@ -44,7 +44,7 @@ public static class AssertionExtensions
     /// </summary>
     public static EqualsAssertion<TValue> EqualTo<TValue>(
         this IAssertionSource<TValue> source,
-        TValue expected,
+        TValue? expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         source.Context.ExpressionBuilder.Append($".EqualTo({expression})");
@@ -1612,6 +1612,203 @@ public static class AssertionExtensions
         source.Context.ExpressionBuilder.Append($".IsAfterOrEqualTo({expression})");
         return new GreaterThanOrEqualAssertion<DateTime>(source.Context, expected);
     }
+
+    /// <summary>
+    /// Asserts that the DateTime is after the expected DateTime.
+    /// Alias for IsGreaterThan for better readability with dates.
+    /// </summary>
+    public static GreaterThanAssertion<DateTime> IsAfter(
+        this IAssertionSource<DateTime> source,
+        DateTime expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsAfter({expression})");
+        return new GreaterThanAssertion<DateTime>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the DateTime is before the expected DateTime.
+    /// Alias for IsLessThan for better readability with dates.
+    /// </summary>
+    public static LessThanAssertion<DateTime> IsBefore(
+        this IAssertionSource<DateTime> source,
+        DateTime expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsBefore({expression})");
+        return new LessThanAssertion<DateTime>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the DateTime is before or equal to the expected DateTime.
+    /// Alias for IsLessThanOrEqualTo for better readability with dates.
+    /// </summary>
+    public static LessThanOrEqualAssertion<DateTime> IsBeforeOrEqualTo(
+        this IAssertionSource<DateTime> source,
+        DateTime expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsBeforeOrEqualTo({expression})");
+        return new LessThanOrEqualAssertion<DateTime>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the DateTimeOffset is after the expected DateTimeOffset.
+    /// Alias for IsGreaterThan for better readability with dates.
+    /// </summary>
+    public static GreaterThanAssertion<DateTimeOffset> IsAfter(
+        this IAssertionSource<DateTimeOffset> source,
+        DateTimeOffset expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsAfter({expression})");
+        return new GreaterThanAssertion<DateTimeOffset>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the DateTimeOffset is before the expected DateTimeOffset.
+    /// Alias for IsLessThan for better readability with dates.
+    /// </summary>
+    public static LessThanAssertion<DateTimeOffset> IsBefore(
+        this IAssertionSource<DateTimeOffset> source,
+        DateTimeOffset expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsBefore({expression})");
+        return new LessThanAssertion<DateTimeOffset>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the DateTimeOffset is after or equal to the expected DateTimeOffset.
+    /// Alias for IsGreaterThanOrEqualTo for better readability with dates.
+    /// </summary>
+    public static GreaterThanOrEqualAssertion<DateTimeOffset> IsAfterOrEqualTo(
+        this IAssertionSource<DateTimeOffset> source,
+        DateTimeOffset expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsAfterOrEqualTo({expression})");
+        return new GreaterThanOrEqualAssertion<DateTimeOffset>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the DateTimeOffset is before or equal to the expected DateTimeOffset.
+    /// Alias for IsLessThanOrEqualTo for better readability with dates.
+    /// </summary>
+    public static LessThanOrEqualAssertion<DateTimeOffset> IsBeforeOrEqualTo(
+        this IAssertionSource<DateTimeOffset> source,
+        DateTimeOffset expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsBeforeOrEqualTo({expression})");
+        return new LessThanOrEqualAssertion<DateTimeOffset>(source.Context, expected);
+    }
+
+#if NET6_0_OR_GREATER
+    /// <summary>
+    /// Asserts that the DateOnly is after the expected DateOnly.
+    /// Alias for IsGreaterThan for better readability with dates.
+    /// </summary>
+    public static GreaterThanAssertion<DateOnly> IsAfter(
+        this IAssertionSource<DateOnly> source,
+        DateOnly expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsAfter({expression})");
+        return new GreaterThanAssertion<DateOnly>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the DateOnly is before the expected DateOnly.
+    /// Alias for IsLessThan for better readability with dates.
+    /// </summary>
+    public static LessThanAssertion<DateOnly> IsBefore(
+        this IAssertionSource<DateOnly> source,
+        DateOnly expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsBefore({expression})");
+        return new LessThanAssertion<DateOnly>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the DateOnly is after or equal to the expected DateOnly.
+    /// Alias for IsGreaterThanOrEqualTo for better readability with dates.
+    /// </summary>
+    public static GreaterThanOrEqualAssertion<DateOnly> IsAfterOrEqualTo(
+        this IAssertionSource<DateOnly> source,
+        DateOnly expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsAfterOrEqualTo({expression})");
+        return new GreaterThanOrEqualAssertion<DateOnly>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the DateOnly is before or equal to the expected DateOnly.
+    /// Alias for IsLessThanOrEqualTo for better readability with dates.
+    /// </summary>
+    public static LessThanOrEqualAssertion<DateOnly> IsBeforeOrEqualTo(
+        this IAssertionSource<DateOnly> source,
+        DateOnly expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsBeforeOrEqualTo({expression})");
+        return new LessThanOrEqualAssertion<DateOnly>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the TimeOnly is after the expected TimeOnly.
+    /// Alias for IsGreaterThan for better readability with times.
+    /// </summary>
+    public static GreaterThanAssertion<TimeOnly> IsAfter(
+        this IAssertionSource<TimeOnly> source,
+        TimeOnly expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsAfter({expression})");
+        return new GreaterThanAssertion<TimeOnly>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the TimeOnly is before the expected TimeOnly.
+    /// Alias for IsLessThan for better readability with times.
+    /// </summary>
+    public static LessThanAssertion<TimeOnly> IsBefore(
+        this IAssertionSource<TimeOnly> source,
+        TimeOnly expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsBefore({expression})");
+        return new LessThanAssertion<TimeOnly>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the TimeOnly is after or equal to the expected TimeOnly.
+    /// Alias for IsGreaterThanOrEqualTo for better readability with times.
+    /// </summary>
+    public static GreaterThanOrEqualAssertion<TimeOnly> IsAfterOrEqualTo(
+        this IAssertionSource<TimeOnly> source,
+        TimeOnly expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsAfterOrEqualTo({expression})");
+        return new GreaterThanOrEqualAssertion<TimeOnly>(source.Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the TimeOnly is before or equal to the expected TimeOnly.
+    /// Alias for IsLessThanOrEqualTo for better readability with times.
+    /// </summary>
+    public static LessThanOrEqualAssertion<TimeOnly> IsBeforeOrEqualTo(
+        this IAssertionSource<TimeOnly> source,
+        TimeOnly expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".IsBeforeOrEqualTo({expression})");
+        return new LessThanOrEqualAssertion<TimeOnly>(source.Context, expected);
+    }
+#endif
 
     // IsDefault and IsNotDefault are now generated by AssertionExtensionGenerator
 

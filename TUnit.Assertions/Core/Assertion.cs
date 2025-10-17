@@ -123,6 +123,13 @@ public abstract class Assertion<TValue>
     /// </summary>
     internal async Task<TValue?> ExecuteCoreAsync()
     {
+        // Execute any pending cross-type assertions first (e.g., string assertions before WhenParsedInto<int>)
+        if (Context.PendingPreWork != null)
+        {
+            await Context.PendingPreWork();
+            Context.PendingPreWork = null; // Execute only once
+        }
+
         // If this is an And/OrAssertion (composite), delegate to AssertAsync which has custom logic
         if (this is Chaining.AndAssertion<TValue> or Chaining.OrAssertion<TValue>)
         {

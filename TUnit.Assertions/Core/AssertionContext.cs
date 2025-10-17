@@ -90,6 +90,12 @@ public sealed class AssertionContext<TValue>
     internal CombinerType? PendingLinkType { get; private set; }
 
     /// <summary>
+    /// Pre-work to execute before evaluating assertions in this context.
+    /// Used for cross-type assertion chaining (e.g., string assertions before WhenParsedInto&lt;int&gt;).
+    /// </summary>
+    internal Func<Task>? PendingPreWork { get; set; }
+
+    /// <summary>
     /// Sets the pending link state for the next assertion to consume.
     /// Called by AndContinuation/OrContinuation constructors.
     /// </summary>

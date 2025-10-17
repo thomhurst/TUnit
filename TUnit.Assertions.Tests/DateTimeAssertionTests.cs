@@ -210,4 +210,58 @@ public class DateTimeAssertionTests
             await Assert.That(winterDate).IsNotDaylightSavingTime();
         }
     }
+
+    [Test]
+    public async Task Test_DateTime_IsAfter()
+    {
+        var dateTimeBefore = new DateTime(2024, 1, 1, 12, 0, 0);
+        var dateTimeAfter = new DateTime(2024, 1, 2, 12, 0, 0);
+        await Assert.That(dateTimeAfter).IsAfter(dateTimeBefore);
+    }
+
+    [Test]
+    public async Task Test_DateTime_IsAfter_SameTime_Fails()
+    {
+        var dateTime = new DateTime(2024, 1, 1, 12, 0, 0);
+        await Assert.That(async () => await Assert.That(dateTime).IsAfter(dateTime))
+            .ThrowsException();
+    }
+
+    [Test]
+    public async Task Test_DateTime_IsBefore()
+    {
+        var dateTimeBefore = new DateTime(2024, 1, 1, 12, 0, 0);
+        var dateTimeAfter = new DateTime(2024, 1, 2, 12, 0, 0);
+        await Assert.That(dateTimeBefore).IsBefore(dateTimeAfter);
+    }
+
+    [Test]
+    public async Task Test_DateTime_IsBefore_SameTime_Fails()
+    {
+        var dateTime = new DateTime(2024, 1, 1, 12, 0, 0);
+        await Assert.That(async () => await Assert.That(dateTime).IsBefore(dateTime))
+            .ThrowsException();
+    }
+
+    [Test]
+    public async Task Test_DateTime_IsBeforeOrEqualTo()
+    {
+        var dateTimeBefore = new DateTime(2024, 1, 1, 12, 0, 0);
+        var dateTimeAfter = new DateTime(2024, 1, 2, 12, 0, 0);
+        await Assert.That(dateTimeBefore).IsBeforeOrEqualTo(dateTimeAfter);
+    }
+
+    [Test]
+    public async Task Test_DateTime_IsBeforeOrEqualTo_SameTime()
+    {
+        var dateTime = new DateTime(2024, 1, 1, 12, 0, 0);
+        await Assert.That(dateTime).IsBeforeOrEqualTo(dateTime);
+    }
+
+    [Test]
+    public async Task Test_DateTime_IsAfterOrEqualTo_SameTime()
+    {
+        var dateTime = new DateTime(2024, 1, 1, 12, 0, 0);
+        await Assert.That(dateTime).IsAfterOrEqualTo(dateTime);
+    }
 }

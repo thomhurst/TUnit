@@ -499,4 +499,180 @@ public class TypeAssertionTests
         await Assert.That(type).IsNotSerializable();
     }
 #endif
+
+    // Tests for issue #3425: Assertions before type conversion are not checked
+    [Test]
+    public async Task IsTypeOf_WithAnd_PreviousAssertion_ShouldFail()
+    {
+        // HasLength(4) should fail because "123" has length 3
+        var exception = await Assert.That(async () =>
+        {
+            var sut = "123";
+            await Assert.That(sut)
+                .HasLength(4)
+                .And
+                .IsTypeOf<string>()
+                .And
+                .HasLength(3);
+        }).ThrowsException().And.HasMessageContaining("HasLength(4)");
+    }
+
+    [Test]
+    public async Task IsTypeOf_WithAnd_PreviousAssertion_ShouldPass()
+    {
+        // Both assertions should pass
+        var sut = "123";
+        await Assert.That(sut)
+            .HasLength(3)
+            .And
+            .IsTypeOf<string>()
+            .And
+            .StartsWith("1");
+    }
+
+    [Test]
+    public async Task IsTypeOf_WithAnd_ObjectToString()
+    {
+        // IsNotNull should be checked before IsTypeOf
+        object? sut = "test";
+        await Assert.That(sut)
+            .IsNotNull()
+            .And
+            .IsTypeOf<string>()
+            .And
+            .HasLength(4);
+    }
+
+    [Test]
+    public async Task IsTypeOf_WithAnd_NullCheck_ShouldFail()
+    {
+        // IsNotNull should fail
+        var exception = await Assert.That(async () =>
+        {
+            object? sut = null;
+            await Assert.That(sut)
+                .IsNotNull()
+                .And
+                .IsTypeOf<string>();
+        }).ThrowsException().And.HasMessageContaining("IsNotNull");
+    }
+
+    [Test]
+    public async Task IsTypeOf_WithAnd_MultipleAssertionsBeforeTypeChange()
+    {
+        // All object assertions should be checked before type conversion
+        object? sut = "hello";
+        await Assert.That(sut)
+            .IsNotNull()
+            .And
+            .IsNotEqualTo("world")
+            .And
+            .IsTypeOf<string>()
+            .And
+            .HasLength(5)
+            .And
+            .StartsWith("h");
+    }
+
+    [Test]
+    public async Task IsTypeOf_WithAnd_SecondObjectAssertionFails()
+    {
+        // Second object assertion should fail before type conversion
+        var exception = await Assert.That(async () =>
+        {
+            object? sut = "hello";
+            await Assert.That(sut)
+                .IsNotNull()
+                .And
+                .IsEqualTo("world")
+                .And
+                .IsTypeOf<string>();
+        }).ThrowsException().And.HasMessageContaining("IsEqualTo");
+    }
+
+    [Test]
+    public async Task IsTypeOf_WithAnd_AssertionAfterTypeChangeFails()
+    {
+        // Object assertions pass, but string assertion fails
+        var exception = await Assert.That(async () =>
+        {
+            object? sut = "hello";
+            await Assert.That(sut)
+                .IsNotNull()
+                .And
+                .IsTypeOf<string>()
+                .And
+                .HasLength(10);
+        }).ThrowsException().And.HasMessageContaining("HasLength");
+    }
+
+    [Test]
+    public async Task IsTypeOf_AssertMultiple_AllAssertionsChecked()
+    {
+        // In Assert.Multiple, all failing assertions should be captured
+        var exception = await Assert.That(async () =>
+        {
+            using (Assert.Multiple())
+            {
+                object? sut = "test";
+                await Assert.That(sut)
+                    .IsNotNull()
+                    .And
+                    .IsEqualTo("wrong")
+                    .And
+                    .IsTypeOf<string>()
+                    .And
+                    .HasLength(10);
+            }
+        }).ThrowsException();
+
+        // Should have recorded the IsEqualTo failure at minimum
+        await Assert.That(exception.Message).Contains("IsEqualTo");
+    }
+
+    [Test]
+    public async Task IsTypeOf_ComplexChain_AllChecked()
+    {
+        // Complex chain with multiple type changes
+        object? sut = "12345";
+        await Assert.That(sut)
+            .IsNotNull()
+            .And
+            .IsTypeOf<string>()
+            .And
+            .HasLength(5)
+            .And
+            .StartsWith("1")
+            .And
+            .EndsWith("5");
+    }
+
+    [Test]
+    public async Task IsTypeOf_GenericObject_ToSpecificType()
+    {
+        // Generic object assertions before narrowing to specific type
+        object? sut = new List<int> { 1, 2, 3 };
+        await Assert.That(sut)
+            .IsNotNull()
+            .And
+            .IsTypeOf<List<int>>()
+            .And
+            .HasCount(3);
+    }
+
+    [Test]
+    public async Task IsTypeOf_GenericObject_TypeCheckFails()
+    {
+        // Previous assertion should be checked before type check fails
+        var exception = await Assert.That(async () =>
+        {
+            object? sut = "string";
+            await Assert.That(sut)
+                .IsNotNull()
+                .And
+                .IsEqualTo("wrong")
+                .And
+                .IsTypeOf<int>();
+        }).ThrowsException().And.HasMessageContaining("IsEqualTo");
+    }
 }

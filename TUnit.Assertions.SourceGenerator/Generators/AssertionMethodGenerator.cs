@@ -699,7 +699,28 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine();
         }
 
-        if (!attributeData.TargetType.IsValueType)
+        // Check if the method's first parameter accepts null values
+        // For static methods like string.IsNullOrEmpty(string? value), the first parameter
+        // is the value being asserted. If it's marked as nullable (NullableAnnotation.Annotated),
+        // we should skip the null check and let the method handle null values.
+        var shouldGenerateNullCheck = !attributeData.TargetType.IsValueType;
+        if (shouldGenerateNullCheck && staticMethod.Parameters.Length > 0)
+        {
+            var firstParameter = staticMethod.Parameters[0];
+            // Skip null check if the parameter explicitly accepts null (e.g., string? value)
+            if (firstParameter.NullableAnnotation == NullableAnnotation.Annotated)
+            {
+                shouldGenerateNullCheck = false;
+            }
+            // For backwards compatibility with .NET Framework where NullableAnnotation might not be set,
+            // also check for well-known methods that accept null by design
+            else if (methodName == "IsNullOrEmpty" || methodName == "IsNullOrWhiteSpace")
+            {
+                shouldGenerateNullCheck = false;
+            }
+        }
+
+        if (shouldGenerateNullCheck)
         {
             sourceBuilder.AppendLine("        if (actualValue is null)");
             sourceBuilder.AppendLine("        {");
