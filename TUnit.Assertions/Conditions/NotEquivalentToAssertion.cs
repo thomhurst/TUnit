@@ -8,8 +8,9 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a collection is NOT equivalent to another collection.
 /// Two collections are considered NOT equivalent if they differ in elements or (optionally) their order.
+/// Inherits from CollectionComparerBasedAssertion to preserve collection type awareness in And/Or chains.
 /// </summary>
-public class NotEquivalentToAssertion<TCollection, TItem> : ComparerBasedAssertion<TCollection, TItem>
+public class NotEquivalentToAssertion<TCollection, TItem> : CollectionComparerBasedAssertion<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly IEnumerable<TItem> _notExpected;

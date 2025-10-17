@@ -14,23 +14,23 @@ public static class CollectionContentAssertionExtensions
     /// <summary>
     /// Asserts that the collection is empty.
     /// </summary>
-    public static CollectionIsEmptyAssertion<TCollection> IsEmpty<TCollection, TItem>(
+    public static CollectionIsEmptyAssertion<TCollection, TItem> IsEmpty<TCollection, TItem>(
         this ICollectionAssertionSource<TCollection, TItem> source)
         where TCollection : IEnumerable<TItem>
     {
         source.Context.ExpressionBuilder.Append(".IsEmpty()");
-        return new CollectionIsEmptyAssertion<TCollection>(source.Context);
+        return new CollectionIsEmptyAssertion<TCollection, TItem>(source.Context);
     }
 
     /// <summary>
     /// Asserts that the collection is NOT empty.
     /// </summary>
-    public static CollectionIsNotEmptyAssertion<TCollection> IsNotEmpty<TCollection, TItem>(
+    public static CollectionIsNotEmptyAssertion<TCollection, TItem> IsNotEmpty<TCollection, TItem>(
         this ICollectionAssertionSource<TCollection, TItem> source)
         where TCollection : IEnumerable<TItem>
     {
         source.Context.ExpressionBuilder.Append(".IsNotEmpty()");
-        return new CollectionIsNotEmptyAssertion<TCollection>(source.Context);
+        return new CollectionIsNotEmptyAssertion<TCollection, TItem>(source.Context);
     }
 
     /// <summary>
@@ -96,5 +96,18 @@ public static class CollectionContentAssertionExtensions
     {
         source.Context.ExpressionBuilder.Append($".ContainsOnly({expression})");
         return new CollectionAllAssertion<TCollection, TItem>(source.Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that the collection is of the specified concrete type.
+    /// This overload infers the collection type from the source, requiring only TExpected to be specified.
+    /// Example: await Assert.That(readOnlyList).IsTypeOf&lt;List&lt;double&gt;&gt;();
+    /// </summary>
+    public static TypeOfAssertion<TCollection, TExpected> IsTypeOf<TExpected, TCollection, TItem>(
+        this ICollectionAssertionSource<TCollection, TItem> source)
+        where TCollection : IEnumerable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
+        return new TypeOfAssertion<TCollection, TExpected>(source.Context);
     }
 }

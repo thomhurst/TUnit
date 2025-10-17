@@ -29,6 +29,22 @@ public class ValueAssertion<TValue> : IAssertionSource<TValue>
     }
 
     /// <summary>
+    /// Constructor for continuation classes (AndContinuation, OrContinuation).
+    /// Handles linking to previous assertion and appending combiner expression.
+    /// Private protected means accessible only to derived classes within the same assembly.
+    /// </summary>
+    private protected ValueAssertion(
+        AssertionContext<TValue> context,
+        Assertion<TValue> previousAssertion,
+        string combinerExpression,
+        CombinerType combinerType)
+    {
+        Context = context ?? throw new ArgumentNullException(nameof(context));
+        context.ExpressionBuilder.Append(combinerExpression);
+        context.SetPendingLink(previousAssertion, combinerType);
+    }
+
+    /// <summary>
     /// Asserts that the value is of the specified type and returns an assertion on the casted value.
     /// This instance method allows single type parameter usage without needing to specify the source type.
     /// Example: await Assert.That(myList).IsTypeOf<List<string>>();

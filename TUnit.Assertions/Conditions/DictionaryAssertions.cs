@@ -5,8 +5,9 @@ namespace TUnit.Assertions.Conditions;
 
 /// <summary>
 /// Asserts that a dictionary contains a specific key.
+/// Inherits from DictionaryAssertionBase to enable chaining of dictionary methods.
 /// </summary>
-public class DictionaryContainsKeyAssertion<TKey, TValue> : Assertion<IReadOnlyDictionary<TKey, TValue>>
+public class DictionaryContainsKeyAssertion<TKey, TValue> : Sources.DictionaryAssertionBase<TKey, TValue>
 {
     private readonly TKey _expectedKey;
     private readonly IEqualityComparer<TKey>? _comparer;
@@ -60,8 +61,9 @@ public class DictionaryContainsKeyAssertion<TKey, TValue> : Assertion<IReadOnlyD
 
 /// <summary>
 /// Asserts that a dictionary does NOT contain a specific key.
+/// Inherits from DictionaryAssertionBase to enable chaining of dictionary methods.
 /// </summary>
-public class DictionaryDoesNotContainKeyAssertion<TKey, TValue> : Assertion<IReadOnlyDictionary<TKey, TValue>>
+public class DictionaryDoesNotContainKeyAssertion<TKey, TValue> : Sources.DictionaryAssertionBase<TKey, TValue>
 {
     private readonly TKey _expectedKey;
 

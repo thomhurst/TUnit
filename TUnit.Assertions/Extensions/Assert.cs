@@ -64,11 +64,11 @@ public static class Assert
     }
 
     /// <summary>
-    /// Creates an assertion for an array (nullable or non-nullable).
+    /// Creates an assertion for any collection type (nullable or non-nullable).
     /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
     /// Example: await Assert.That(array).IsInOrder();
     /// </summary>
-    [OverloadResolutionPriority(1)]
+    [OverloadResolutionPriority(10)]
     public static CollectionAssertion<TCollection, TItem> That<TCollection, TItem>(
         TCollection? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null) where TCollection : IEnumerable<TItem>
@@ -110,6 +110,54 @@ public static class Assert
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
         return new CollectionAssertion<IEnumerable<TItem>, TItem>(value!, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for an IReadOnlyList (nullable or non-nullable).
+    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
+    /// Example: await Assert.That(readOnlyList).IsInOrder();
+    /// </summary>
+    public static CollectionAssertion<IReadOnlyList<TItem>, TItem> That<TItem>(
+        IReadOnlyList<TItem>? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new CollectionAssertion<IReadOnlyList<TItem>, TItem>(value!, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for an ImmutableArray (nullable or non-nullable).
+    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
+    /// Example: await Assert.That(immutableArray).IsEmpty();
+    /// </summary>
+    public static CollectionAssertion<System.Collections.Immutable.ImmutableArray<TItem>, TItem> That<TItem>(
+        System.Collections.Immutable.ImmutableArray<TItem> value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new CollectionAssertion<System.Collections.Immutable.ImmutableArray<TItem>, TItem>(value, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for an ImmutableList (nullable or non-nullable).
+    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
+    /// Example: await Assert.That(immutableList).IsEmpty();
+    /// </summary>
+    public static CollectionAssertion<System.Collections.Immutable.ImmutableList<TItem>, TItem> That<TItem>(
+        System.Collections.Immutable.ImmutableList<TItem>? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new CollectionAssertion<System.Collections.Immutable.ImmutableList<TItem>, TItem>(value!, expression);
+    }
+
+    /// <summary>
+    /// Creates an assertion for a string (nullable or non-nullable).
+    /// Treats the string as a collection of characters.
+    /// Example: await Assert.That("ABC").Contains('B');
+    /// </summary>
+    public static CollectionAssertion<string, char> That(
+        string? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+    {
+        return new CollectionAssertion<string, char>(value!, expression);
     }
 
     /// <summary>

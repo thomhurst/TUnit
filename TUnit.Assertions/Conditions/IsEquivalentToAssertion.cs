@@ -9,8 +9,9 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a collection is equivalent to another collection.
 /// Two collections are equivalent if they contain the same elements, regardless of order (default).
 /// Can be configured to require matching order using CollectionOrdering.Matching.
+/// Inherits from CollectionComparerBasedAssertion to preserve collection type awareness in And/Or chains.
 /// </summary>
-public class IsEquivalentToAssertion<TCollection, TItem> : ComparerBasedAssertion<TCollection, TItem>
+public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBasedAssertion<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly IEnumerable<TItem> _expected;

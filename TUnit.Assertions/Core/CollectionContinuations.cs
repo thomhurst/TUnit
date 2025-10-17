@@ -5,9 +5,9 @@ namespace TUnit.Assertions.Core;
 
 /// <summary>
 /// And continuation for collection assertions that preserves collection type and item type.
-/// Implements ICollectionAssertionSource to enable all collection extension methods.
+/// Inherits from CollectionAssertionBase to automatically expose all collection methods.
 /// </summary>
-public class CollectionAndContinuation<TCollection, TItem> : ContinuationBase<TCollection>, ICollectionAssertionSource<TCollection, TItem>
+public class CollectionAndContinuation<TCollection, TItem> : CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     internal CollectionAndContinuation(AssertionContext<TCollection> context, Assertion<TCollection> previousAssertion)
@@ -18,9 +18,9 @@ public class CollectionAndContinuation<TCollection, TItem> : ContinuationBase<TC
 
 /// <summary>
 /// Or continuation for collection assertions that preserves collection type and item type.
-/// Implements ICollectionAssertionSource to enable all collection extension methods.
+/// Inherits from CollectionAssertionBase to automatically expose all collection methods.
 /// </summary>
-public class CollectionOrContinuation<TCollection, TItem> : ContinuationBase<TCollection>, ICollectionAssertionSource<TCollection, TItem>
+public class CollectionOrContinuation<TCollection, TItem> : CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     internal CollectionOrContinuation(AssertionContext<TCollection> context, Assertion<TCollection> previousAssertion)

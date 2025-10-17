@@ -16,26 +16,26 @@ public static class CollectionQuantifierAssertionExtensions
     /// Returns a wrapper for collection count assertions.
     /// Example: await Assert.That(list).HasCount().EqualTo(5);
     /// </summary>
-    public static CountWrapper<TCollection> HasCount<TCollection, TItem>(
+    public static CountWrapper<TCollection, TItem> HasCount<TCollection, TItem>(
         this ICollectionAssertionSource<TCollection, TItem> source)
         where TCollection : IEnumerable<TItem>
     {
         source.Context.ExpressionBuilder.Append(".HasCount()");
-        return new CountWrapper<TCollection>(source.Context);
+        return new CountWrapper<TCollection, TItem>(source.Context);
     }
 
     /// <summary>
     /// Asserts that the collection has the expected count.
     /// Example: await Assert.That(list).HasCount(5);
     /// </summary>
-    public static CollectionCountAssertion<TCollection> HasCount<TCollection, TItem>(
+    public static CollectionCountAssertion<TCollection, TItem> HasCount<TCollection, TItem>(
         this ICollectionAssertionSource<TCollection, TItem> source,
         int expectedCount,
         [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
         where TCollection : IEnumerable<TItem>
     {
         source.Context.ExpressionBuilder.Append($".HasCount({expression})");
-        return new CollectionCountAssertion<TCollection>(source.Context, expectedCount);
+        return new CollectionCountAssertion<TCollection, TItem>(source.Context, expectedCount);
     }
 
     /// <summary>
@@ -79,12 +79,12 @@ public static class CollectionQuantifierAssertionExtensions
     /// <summary>
     /// Asserts that the collection contains exactly one item.
     /// </summary>
-    public static HasSingleItemAssertion<TCollection> HasSingleItem<TCollection, TItem>(
+    public static HasSingleItemAssertion<TCollection, TItem> HasSingleItem<TCollection, TItem>(
         this ICollectionAssertionSource<TCollection, TItem> source)
         where TCollection : IEnumerable<TItem>
     {
         source.Context.ExpressionBuilder.Append(".HasSingleItem()");
-        return new HasSingleItemAssertion<TCollection>(source.Context);
+        return new HasSingleItemAssertion<TCollection, TItem>(source.Context);
     }
 
     /// <summary>

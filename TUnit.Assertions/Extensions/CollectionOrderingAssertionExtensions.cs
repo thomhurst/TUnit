@@ -64,4 +64,30 @@ public static class CollectionOrderingAssertionExtensions
         source.Context.ExpressionBuilder.Append($".IsOrderedByDescending({expression}, comparer)");
         return new CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey>(source.Context, keySelector, comparer);
     }
+
+    /// <summary>
+    /// Asserts that the collection is in ascending order.
+    /// Items must implement IComparable&lt;TItem&gt;.
+    /// </summary>
+    public static CollectionIsInOrderAssertion<TCollection, TItem> IsInOrder<TCollection, TItem>(
+        this ICollectionAssertionSource<TCollection, TItem> source)
+        where TCollection : IEnumerable<TItem>
+        where TItem : IComparable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append(".IsInOrder()");
+        return new CollectionIsInOrderAssertion<TCollection, TItem>(source.Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is in descending order.
+    /// Items must implement IComparable&lt;TItem&gt;.
+    /// </summary>
+    public static CollectionIsInDescendingOrderAssertion<TCollection, TItem> IsInDescendingOrder<TCollection, TItem>(
+        this ICollectionAssertionSource<TCollection, TItem> source)
+        where TCollection : IEnumerable<TItem>
+        where TItem : IComparable<TItem>
+    {
+        source.Context.ExpressionBuilder.Append(".IsInDescendingOrder()");
+        return new CollectionIsInDescendingOrderAssertion<TCollection, TItem>(source.Context);
+    }
 }

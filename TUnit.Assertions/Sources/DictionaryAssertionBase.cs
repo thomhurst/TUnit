@@ -20,6 +20,22 @@ public abstract class DictionaryAssertionBase<TKey, TValue>
     {
     }
 
+    /// <summary>
+    /// Constructor for continuation classes (DictionaryAndContinuation, DictionaryOrContinuation).
+    /// Handles linking to previous assertion and appending combiner expression.
+    /// Private protected means accessible only to derived classes within the same assembly.
+    /// </summary>
+    private protected DictionaryAssertionBase(
+        AssertionContext<IReadOnlyDictionary<TKey, TValue>> context,
+        Assertion<IReadOnlyDictionary<TKey, TValue>> previousAssertion,
+        string combinerExpression,
+        CombinerType combinerType)
+        : base(context)
+    {
+        context.ExpressionBuilder.Append(combinerExpression);
+        context.SetPendingLink(previousAssertion, combinerType);
+    }
+
     protected override string GetExpectation() => "dictionary assertion";
 
     /// <summary>

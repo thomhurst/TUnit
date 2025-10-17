@@ -22,6 +22,22 @@ public abstract class CollectionAssertionBase<TCollection, TItem>
     {
     }
 
+    /// <summary>
+    /// Constructor for continuation classes (CollectionAndContinuation, CollectionOrContinuation).
+    /// Handles linking to previous assertion and appending combiner expression.
+    /// Private protected means accessible only to derived classes within the same assembly.
+    /// </summary>
+    private protected CollectionAssertionBase(
+        AssertionContext<TCollection> context,
+        Assertion<TCollection> previousAssertion,
+        string combinerExpression,
+        CombinerType combinerType)
+        : base(context)
+    {
+        context.ExpressionBuilder.Append(combinerExpression);
+        context.SetPendingLink(previousAssertion, combinerType);
+    }
+
     protected override string GetExpectation() => "collection assertion";
 
     /// <summary>

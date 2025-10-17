@@ -4,12 +4,9 @@ namespace TUnit.Assertions.Core;
 
 /// <summary>
 /// And continuation for dictionary assertions that preserves dictionary type, key type, and value type.
-/// Implements both IAssertionSource and ICollectionAssertionSource to enable dictionary-specific
-/// and collection extension methods.
+/// Inherits from DictionaryAssertionBase to automatically expose all dictionary and collection methods.
 /// </summary>
-public class DictionaryAndContinuation<TKey, TValue>
-    : ContinuationBase<IReadOnlyDictionary<TKey, TValue>>,
-      ICollectionAssertionSource<IReadOnlyDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>
+public class DictionaryAndContinuation<TKey, TValue> : DictionaryAssertionBase<TKey, TValue>
 {
     internal DictionaryAndContinuation(
         AssertionContext<IReadOnlyDictionary<TKey, TValue>> context,
@@ -21,12 +18,9 @@ public class DictionaryAndContinuation<TKey, TValue>
 
 /// <summary>
 /// Or continuation for dictionary assertions that preserves dictionary type, key type, and value type.
-/// Implements both IAssertionSource and ICollectionAssertionSource to enable dictionary-specific
-/// and collection extension methods.
+/// Inherits from DictionaryAssertionBase to automatically expose all dictionary and collection methods.
 /// </summary>
-public class DictionaryOrContinuation<TKey, TValue>
-    : ContinuationBase<IReadOnlyDictionary<TKey, TValue>>,
-      ICollectionAssertionSource<IReadOnlyDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>
+public class DictionaryOrContinuation<TKey, TValue> : DictionaryAssertionBase<TKey, TValue>
 {
     internal DictionaryOrContinuation(
         AssertionContext<IReadOnlyDictionary<TKey, TValue>> context,
