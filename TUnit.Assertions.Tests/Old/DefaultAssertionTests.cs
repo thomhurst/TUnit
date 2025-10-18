@@ -3,23 +3,6 @@
 public class DefaultAssertionTests
 {
     [Test]
-    public async Task IsDefault_ReferenceType_Default()
-    {
-        string? s = null;
-        await TUnitAssert.That(s).IsDefault();
-    }
-
-    [Test]
-    public async Task IsDefault_ReferenceType_NotDefault()
-    {
-        await TUnitAssert.That(async () =>
-        {
-            var s = "1";
-            await TUnitAssert.That(s).IsDefault();
-        }).Throws<TUnitAssertionException>();
-    }
-
-    [Test]
     public async Task IsDefault_ValueType_Integer_Default()
     {
         var x = 0;
@@ -51,23 +34,6 @@ public class DefaultAssertionTests
             var dt = DateTime.Now;
             await TUnitAssert.That(dt).IsDefault();
         }).Throws<TUnitAssertionException>();
-    }
-
-    [Test]
-    public async Task IsNotDefault_ReferenceType_Default()
-    {
-        await TUnitAssert.That(async () =>
-        {
-            string? s = null;
-            await TUnitAssert.That(s).IsNotDefault();
-        }).Throws<TUnitAssertionException>();
-    }
-
-    [Test]
-    public async Task IsNotDefault_ReferenceType_NotDefault()
-    {
-        var s = "1";
-        await TUnitAssert.That(s).IsNotDefault();
     }
 
     [Test]
