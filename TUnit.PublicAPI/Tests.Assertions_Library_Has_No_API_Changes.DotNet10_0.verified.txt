@@ -158,6 +158,7 @@ namespace .Attributes
         public AssertionExtensionAttribute(string methodName) { }
         public string MethodName { get; }
         public string? NegatedMethodName { get; set; }
+        public int OverloadResolutionPriority { get; set; }
     }
     [(.Class, AllowMultiple=true, Inherited=false)]
     public class AssertionFromAttribute : 
@@ -517,6 +518,7 @@ namespace .Conditions
         [.(ExpectationMessage="to be today")]
         public static bool IsToday(this  value) { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class DateOnlyEqualsAssertion : .<>
     {
         public DateOnlyEqualsAssertion(.<> context,  expected) { }
@@ -553,6 +555,7 @@ namespace .Conditions
         [.(ExpectationMessage="to be UTC")]
         public static bool IsUtc(this  value) { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class DateTimeEqualsAssertion : .<>
     {
         public DateTimeEqualsAssertion(.<> context,  expected) { }
@@ -594,6 +597,7 @@ namespace .Conditions
         [.(ExpectationMessage="to be UTC")]
         public static bool IsUtc(this  value) { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class DateTimeOffsetEqualsAssertion : .<>
     {
         public DateTimeOffsetEqualsAssertion(.<> context,  expected) { }
@@ -657,6 +661,7 @@ namespace .Conditions
         [.(ExpectationMessage="to be a system directory")]
         public static bool IsSystemDirectory(this .DirectoryInfo value) { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class DoubleEqualsAssertion : .<double>
     {
         public DoubleEqualsAssertion(.<double> context, double expected) { }
@@ -681,17 +686,18 @@ namespace .Conditions
         [.(ExpectationMessage="to be Unicode encoding")]
         public static bool IsUnicode(this .Encoding value) { }
     }
+    [.("IsEqualTo")]
     public class EqualsAssertion<TValue> : .<TValue>
     {
-        public EqualsAssertion(.<TValue> context, TValue? expected, .<TValue>? comparer = null) { }
+        public EqualsAssertion(.<TValue> context, TValue? expected) { }
+        public EqualsAssertion(.<TValue> context, TValue? expected, .<TValue> comparer) { }
         public TValue Expected { get; }
-        [.("Trimming", "IL2075", Justification="Tolerance comparison requires dynamic invocation of known comparer delegates")]
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
         public .<TValue> IgnoringType( type) { }
         public .<TValue> IgnoringType<TIgnore>() { }
-        public .<TValue> Within(object tolerance) { }
     }
+    [.("IsEquatableTo")]
     public class EquatableAssertion<TActual, TExpected> : .<TActual>
         where TActual : <TExpected>
     {
@@ -805,6 +811,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class FloatEqualsAssertion : .<float>
     {
         public FloatEqualsAssertion(.<float> context, float expected) { }
@@ -899,6 +906,14 @@ namespace .Conditions
     [.<>("IsFromEnd", CustomName="IsNotFromEnd", ExpectationMessage="be from the end", NegateLogic=true)]
     [.<>("IsFromEnd", ExpectationMessage="be from the end")]
     public static class IndexAssertionExtensions { }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
+    public class IntEqualsAssertion : .<int>
+    {
+        public IntEqualsAssertion(.<int> context, int expected) { }
+        protected override .<.> CheckAsync(.<int> metadata) { }
+        protected override string GetExpectation() { }
+        public . Within(int tolerance) { }
+    }
     [.("IsAssignableTo")]
     public class IsAssignableToAssertion<TTarget, TValue> : .<TValue>
     {
@@ -992,6 +1007,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class LongEqualsAssertion : .<long>
     {
         public LongEqualsAssertion(.<long> context, long expected) { }
@@ -1060,6 +1076,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsEquatableTo")]
     public class NullableEquatableAssertion<TActual, TExpected> : .<TActual?>
         where TActual :  struct, <TExpected>
     {
@@ -1168,6 +1185,7 @@ namespace .Conditions
         public . IgnoringCase() { }
         public . WithComparison( comparison) { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class StringEqualsAssertion : .<string>
     {
         public StringEqualsAssertion(.<string> context, string? expected) { }
@@ -1305,6 +1323,7 @@ namespace .Conditions
         [.(ExpectationMessage="to be at the start of the hour")]
         public static bool IsStartOfHour(this  value) { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class TimeOnlyEqualsAssertion : .<>
     {
         public TimeOnlyEqualsAssertion(.<> context,  expected) { }
@@ -1326,6 +1345,14 @@ namespace .Conditions
         public static bool IsPositive(this  value) { }
         [.(ExpectationMessage="to be zero")]
         public static bool IsZero(this  value) { }
+    }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
+    public class TimeSpanEqualsAssertion : .<>
+    {
+        public TimeSpanEqualsAssertion(.<> context,  expected) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
+        protected override string GetExpectation() { }
+        public . Within( tolerance) { }
     }
     [.<>("HasIanaId", CustomName="DoesNotHaveIanaId", ExpectationMessage="have an IANA ID", NegateLogic=true)]
     [.<>("HasIanaId", ExpectationMessage="have an IANA ID")]
@@ -1730,35 +1757,7 @@ namespace .Extensions
             where TEnum :  struct,  { }
         public static .<TValue> IsEmpty<TValue>(this .<TValue> source)
             where TValue : .IEnumerable { }
-        [.(2)]
-        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        [.(2)]
-        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        [.(2)]
-        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        [.(2)]
-        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        [.(2)]
-        public static .<> IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        [.(2)]
-        public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expression = null) { }
-        [.(2)]
-        public static . IsEqualTo(this .<float> source, float expected, [.("expected")] string? expression = null) { }
-        [.(2)]
-        public static .<int> IsEqualTo(this .<int> source, int expected, [.("expected")] string? expression = null) { }
-        [.(2)]
-        public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expression = null) { }
-        [.(2)]
-        public static . IsEqualTo(this .<string> source, string? expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<string> source, string? expected,  comparison, [.("expected")] string? expression = null) { }
-        [.(0)]
-        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
-        [.(-1)]
-        public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual> source, TExpected expected, [.("expected")] string? expression = null)
-            where TActual :  struct, <TExpected> { }
-        [.(-1)]
-        public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual?> source, TExpected expected, [.("expected")] string? expression = null)
-            where TActual :  struct, <TExpected> { }
         public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
@@ -2104,6 +2103,11 @@ namespace .Extensions
         public static ._IsOnWeekend_Assertion IsOnWeekend(this .<> source) { }
         public static ._IsToday_Assertion IsToday(this .<> source) { }
     }
+    public static class DateOnlyEqualsAssertionExtensions
+    {
+        [.(2)]
+        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public sealed class DateOnly_IsFirstDayOfMonth_Assertion : .<>
     {
         public DateOnly_IsFirstDayOfMonth_Assertion(.<> context) { }
@@ -2181,6 +2185,11 @@ namespace .Extensions
         public static ._IsToday_Assertion IsToday(this .<> source) { }
         public static ._IsUtc_Assertion IsUtc(this .<> source) { }
     }
+    public static class DateTimeEqualsAssertionExtensions
+    {
+        [.(2)]
+        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public static class DateTimeEqualsExactAssertionExtensions
     {
         public static . EqualsExact(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
@@ -2205,6 +2214,11 @@ namespace .Extensions
         public static ._IsOnWeekend_Assertion IsOnWeekend(this .<> source) { }
         public static ._IsToday_Assertion IsToday(this .<> source) { }
         public static ._IsUtc_Assertion IsUtc(this .<> source) { }
+    }
+    public static class DateTimeOffsetEqualsAssertionExtensions
+    {
+        [.(2)]
+        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
     }
     public sealed class DateTimeOffset_IsInFutureUtc_Assertion : .<>
     {
@@ -2449,6 +2463,11 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class DoubleEqualsAssertionExtensions
+    {
+        [.(2)]
+        public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public static class EncodingAssertionExtensions
     {
         public static ._IsASCII_Assertion IsASCII(this .<.Encoding> source) { }
@@ -2501,6 +2520,16 @@ namespace .Extensions
         public Encoding_IsUnicode_Assertion(.<.Encoding> context) { }
         protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
+    }
+    public static class EqualsAssertionExtensions
+    {
+        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expectedExpression = null) { }
+        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue? expected, .<TValue> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+    }
+    public static class EquatableAssertionExtensions
+    {
+        public static .<TActual, TExpected> IsEquatableTo<TActual, TExpected>(this .<TActual> source, TExpected expected, [.("expected")] string? expectedExpression = null)
+            where TActual : <TExpected> { }
     }
     public static class ExceptionAssertionExtensions
     {
@@ -2658,6 +2687,11 @@ namespace .Extensions
     {
         public static . IsNotSystem(this .<.FileInfo> source) { }
     }
+    public static class FloatEqualsAssertionExtensions
+    {
+        [.(2)]
+        public static . IsEqualTo(this .<float> source, float expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public static class GreaterThanAssertionExtensions
     {
         public static .<TValue> IsGreaterThan<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
@@ -2810,6 +2844,11 @@ namespace .Extensions
         public static ._IsEven_Assertion IsEven(this .<int> source) { }
         public static ._IsOdd_Assertion IsOdd(this .<int> source) { }
     }
+    public static class IntEqualsAssertionExtensions
+    {
+        [.(2)]
+        public static . IsEqualTo(this .<int> source, int expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public sealed class Int_IsEven_Assertion : .<int>
     {
         public Int_IsEven_Assertion(.<int> context) { }
@@ -2883,6 +2922,11 @@ namespace .Extensions
         public static .<TValue> IsLessThanOrEqualTo<TValue>(this .<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
             where TValue : <TValue> { }
     }
+    public static class LongEqualsAssertionExtensions
+    {
+        [.(2)]
+        public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public static class NotEqualsAssertionExtensions
     {
         public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue notExpected, .<TValue>? comparer = null, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
@@ -2894,6 +2938,11 @@ namespace .Extensions
     public static class NullAssertionExtensions
     {
         public static .<TValue> IsNull<TValue>(this .<TValue> source) { }
+    }
+    public static class NullableEquatableAssertionExtensions
+    {
+        public static .<TActual, TExpected> IsEquatableTo<TActual, TExpected>(this .<TActual?> source, TExpected expected, [.("expected")] string? expectedExpression = null)
+            where TActual :  struct, <TExpected> { }
     }
     public static class ProcessAssertionExtensions
     {
@@ -3064,6 +3113,11 @@ namespace .Extensions
         public static . EndsWith(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
         public static . EndsWith(this .<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
     }
+    public static class StringEqualsAssertionExtensions
+    {
+        [.(2)]
+        public static . IsEqualTo(this .<string> source, string? expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public static class StringIsEmptyAssertionExtensions
     {
         public static . IsEmpty(this .<string> source) { }
@@ -3184,6 +3238,11 @@ namespace .Extensions
         public static ._IsPM_Assertion IsPM(this .<> source) { }
         public static ._IsStartOfHour_Assertion IsStartOfHour(this .<> source) { }
     }
+    public static class TimeOnlyEqualsAssertionExtensions
+    {
+        [.(2)]
+        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public sealed class TimeOnly_IsAM_Assertion : .<>
     {
         public TimeOnly_IsAM_Assertion(.<> context) { }
@@ -3234,6 +3293,11 @@ namespace .Extensions
         public static ._IsNotZero_Assertion IsNotZero(this .<> source) { }
         public static ._IsPositive_Assertion IsPositive(this .<> source) { }
         public static ._IsZero_Assertion IsZero(this .<> source) { }
+    }
+    public static class TimeSpanEqualsAssertionExtensions
+    {
+        [.(2)]
+        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
     }
     public sealed class TimeSpan_IsNegative_Assertion : .<>
     {
