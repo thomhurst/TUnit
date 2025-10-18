@@ -19,7 +19,7 @@ public class Tests1600
         MyModel[] array1 = [new(), new(), new()];
         MyModel[] array2 = [new(), new(), new()];
 
-        await Assert.That(array1).IsEquivalentTo(array2, new MyModelComparer());
+        await Assert.That(array1).IsEquivalentTo(array2).Using(new MyModelComparer());
     }
 
     public class MyModel

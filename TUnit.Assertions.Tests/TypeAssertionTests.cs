@@ -657,7 +657,7 @@ public class TypeAssertionTests
             .And
             .IsTypeOf<List<int>>()
             .And
-            .HasCount(3);
+            .HasCount<List<int>, int>(3);
     }
 
     [Test]

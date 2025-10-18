@@ -29,6 +29,18 @@ public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBas
         _ordering = ordering;
     }
 
+    public IsEquivalentToAssertion(
+        AssertionContext<TCollection> context,
+        IEnumerable<TItem> expected,
+        IEqualityComparer<TItem> comparer,
+        CollectionOrdering ordering = CollectionOrdering.Any)
+        : base(context)
+    {
+        _expected = expected ?? throw new ArgumentNullException(nameof(expected));
+        _ordering = ordering;
+        SetComparer(comparer);
+    }
+
     public IsEquivalentToAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
     {
         SetComparer(comparer);

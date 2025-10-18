@@ -244,6 +244,7 @@ public class TypeOfTests
         await Assert.That(nullableBytes).HasCount(5);
         await Assert.That(nullableBytes).Contains((byte)3);
         await Assert.That(nullableBytes).IsInOrder();
+
     }
 
     [Test]

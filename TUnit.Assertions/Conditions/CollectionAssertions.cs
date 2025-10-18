@@ -769,11 +769,11 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
 /// <summary>
 /// Asserts that a collection is in ascending order.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
+/// Uses runtime comparison via Comparer&lt;TItem&gt;.Default to allow instance method usage without constraints.
 /// </summary>
 [AssertionExtension("IsInOrder")]
 public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
-    where TItem : IComparable<TItem>
 {
     public CollectionIsInOrderAssertion(
         AssertionContext<TCollection> context)
@@ -796,6 +796,7 @@ public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.Collecti
             return Task.FromResult(AssertionResult.Failed("collection was null"));
         }
 
+        var comparer = Comparer<TItem>.Default;
         TItem? previous = default;
         bool first = true;
         int index = 0;
@@ -804,7 +805,7 @@ public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.Collecti
         {
             if (!first && previous != null)
             {
-                if (previous.CompareTo(item) > 0)
+                if (comparer.Compare(previous, item) > 0)
                 {
                     return Task.FromResult(AssertionResult.Failed($"item at index {index} ({item}) is less than previous item ({previous})"));
                 }
@@ -824,11 +825,11 @@ public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.Collecti
 /// <summary>
 /// Asserts that a collection is in descending order.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
+/// Uses runtime comparison via Comparer&lt;TItem&gt;.Default to allow instance method usage without constraints.
 /// </summary>
 [AssertionExtension("IsInDescendingOrder")]
 public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
-    where TItem : IComparable<TItem>
 {
     public CollectionIsInDescendingOrderAssertion(
         AssertionContext<TCollection> context)
@@ -851,6 +852,7 @@ public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Source
             return Task.FromResult(AssertionResult.Failed("collection was null"));
         }
 
+        var comparer = Comparer<TItem>.Default;
         TItem? previous = default;
         bool first = true;
         int index = 0;
@@ -859,7 +861,7 @@ public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Source
         {
             if (!first && previous != null)
             {
-                if (previous.CompareTo(item) < 0)
+                if (comparer.Compare(previous, item) < 0)
                 {
                     return Task.FromResult(AssertionResult.Failed($"item at index {index} ({item}) is greater than previous item ({previous})"));
                 }
@@ -879,8 +881,8 @@ public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Source
 /// <summary>
 /// Asserts that a collection is ordered by a key selector in ascending order.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
+/// Available as an instance method on CollectionAssertionBase for proper type inference.
 /// </summary>
-[AssertionExtension("IsOrderedBy")]
 public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -942,8 +944,8 @@ public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Sources.
 /// <summary>
 /// Asserts that a collection is ordered by a key selector in descending order.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
+/// Available as an instance method on CollectionAssertionBase for proper type inference.
 /// </summary>
-[AssertionExtension("IsOrderedByDescending")]
 public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {

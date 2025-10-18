@@ -94,6 +94,184 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     }
 
     /// <summary>
+    /// Asserts that the collection is ordered by the specified key selector in ascending order.
+    /// This instance method enables calling IsOrderedBy with proper type inference.
+    /// Example: await Assert.That(list).IsOrderedBy(x => x.Name);
+    /// </summary>
+    public CollectionIsOrderedByAssertion<TCollection, TItem, TKey> IsOrderedBy<TKey>(
+        Func<TItem, TKey> keySelector,
+        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".IsOrderedBy({expression})");
+        return new CollectionIsOrderedByAssertion<TCollection, TItem, TKey>(Context, keySelector);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is ordered by the specified key selector in ascending order using a custom comparer.
+    /// This instance method enables calling IsOrderedBy with proper type inference.
+    /// Example: await Assert.That(list).IsOrderedBy(x => x.Name, StringComparer.OrdinalIgnoreCase);
+    /// </summary>
+    public CollectionIsOrderedByAssertion<TCollection, TItem, TKey> IsOrderedBy<TKey>(
+        Func<TItem, TKey> keySelector,
+        IComparer<TKey>? comparer,
+        [CallerArgumentExpression(nameof(keySelector))] string? selectorExpression = null,
+        [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
+    {
+        Context.ExpressionBuilder.Append($".IsOrderedBy({selectorExpression}, {comparerExpression})");
+        return new CollectionIsOrderedByAssertion<TCollection, TItem, TKey>(Context, keySelector, comparer);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is ordered by the specified key selector in descending order.
+    /// This instance method enables calling IsOrderedByDescending with proper type inference.
+    /// Example: await Assert.That(list).IsOrderedByDescending(x => x.Age);
+    /// </summary>
+    public CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> IsOrderedByDescending<TKey>(
+        Func<TItem, TKey> keySelector,
+        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".IsOrderedByDescending({expression})");
+        return new CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey>(Context, keySelector);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is ordered by the specified key selector in descending order using a custom comparer.
+    /// This instance method enables calling IsOrderedByDescending with proper type inference.
+    /// Example: await Assert.That(list).IsOrderedByDescending(x => x.Name, StringComparer.OrdinalIgnoreCase);
+    /// </summary>
+    public CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> IsOrderedByDescending<TKey>(
+        Func<TItem, TKey> keySelector,
+        IComparer<TKey>? comparer,
+        [CallerArgumentExpression(nameof(keySelector))] string? selectorExpression = null,
+        [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
+    {
+        Context.ExpressionBuilder.Append($".IsOrderedByDescending({selectorExpression}, {comparerExpression})");
+        return new CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey>(Context, keySelector, comparer);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is empty.
+    /// This instance method enables calling IsEmpty with proper type inference.
+    /// Example: await Assert.That(list).IsEmpty();
+    /// </summary>
+    public CollectionIsEmptyAssertion<TCollection, TItem> IsEmpty()
+    {
+        Context.ExpressionBuilder.Append(".IsEmpty()");
+        return new CollectionIsEmptyAssertion<TCollection, TItem>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is not empty.
+    /// This instance method enables calling IsNotEmpty with proper type inference.
+    /// Example: await Assert.That(list).IsNotEmpty();
+    /// </summary>
+    public CollectionIsNotEmptyAssertion<TCollection, TItem> IsNotEmpty()
+    {
+        Context.ExpressionBuilder.Append(".IsNotEmpty()");
+        return new CollectionIsNotEmptyAssertion<TCollection, TItem>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection does not contain the specified item.
+    /// This instance method enables calling DoesNotContain with proper type inference.
+    /// Example: await Assert.That(list).DoesNotContain("value");
+    /// </summary>
+    public CollectionDoesNotContainAssertion<TCollection, TItem> DoesNotContain(
+        TItem expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
+        return new CollectionDoesNotContainAssertion<TCollection, TItem>(Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the collection does not contain any item matching the predicate.
+    /// This instance method enables calling DoesNotContain with proper type inference.
+    /// Example: await Assert.That(list).DoesNotContain(x => x > 10);
+    /// </summary>
+    public CollectionDoesNotContainPredicateAssertion<TCollection, TItem> DoesNotContain(
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
+        return new CollectionDoesNotContainPredicateAssertion<TCollection, TItem>(Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that all items in the collection satisfy the predicate.
+    /// This instance method enables calling All with proper type inference.
+    /// Example: await Assert.That(list).All(x => x > 0);
+    /// </summary>
+    public CollectionAllAssertion<TCollection, TItem> All(
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".All({expression})");
+        return new CollectionAllAssertion<TCollection, TItem>(Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Returns a helper for the .All().Satisfy() pattern.
+    /// This instance method enables calling All().Satisfy() with proper type inference.
+    /// Example: await Assert.That(list).All().Satisfy(item => item.IsNotNull());
+    /// </summary>
+    public CollectionAllSatisfyHelper<TCollection, TItem> All()
+    {
+        Context.ExpressionBuilder.Append(".All()");
+        return new CollectionAllSatisfyHelper<TCollection, TItem>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that at least one item in the collection satisfies the predicate.
+    /// This instance method enables calling Any with proper type inference.
+    /// Example: await Assert.That(list).Any(x => x > 10);
+    /// </summary>
+    public CollectionAnyAssertion<TCollection, TItem> Any(
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".Any({expression})");
+        return new CollectionAnyAssertion<TCollection, TItem>(Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains only items matching the predicate (all items must match).
+    /// This instance method enables calling ContainsOnly with proper type inference.
+    /// Example: await Assert.That(list).ContainsOnly(x => x > 0);
+    /// </summary>
+    public CollectionAllAssertion<TCollection, TItem> ContainsOnly(
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".ContainsOnly({expression})");
+        return new CollectionAllAssertion<TCollection, TItem>(Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that the collection is in ascending order.
+    /// This instance method enables calling IsInOrder with pure type inference.
+    /// Uses runtime comparison via Comparer&lt;TItem&gt;.Default.
+    /// Example: await Assert.That(list).IsInOrder();
+    /// </summary>
+    public CollectionIsInOrderAssertion<TCollection, TItem> IsInOrder()
+    {
+        Context.ExpressionBuilder.Append(".IsInOrder()");
+        return new CollectionIsInOrderAssertion<TCollection, TItem>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection is in descending order.
+    /// This instance method enables calling IsInDescendingOrder with pure type inference.
+    /// Uses runtime comparison via Comparer&lt;TItem&gt;.Default.
+    /// Example: await Assert.That(list).IsInDescendingOrder();
+    /// </summary>
+    public CollectionIsInDescendingOrderAssertion<TCollection, TItem> IsInDescendingOrder()
+    {
+        Context.ExpressionBuilder.Append(".IsInDescendingOrder()");
+        return new CollectionIsInDescendingOrderAssertion<TCollection, TItem>(Context);
+    }
+
+    /// <summary>
     /// Returns an And continuation that preserves collection type and item type.
     /// Overrides the base Assertion.And to return a collection-specific continuation.
     /// </summary>

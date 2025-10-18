@@ -349,7 +349,7 @@ public sealed class OrAssertionTests
                 return _ < 10; // Passes
             });
 
-        await Assert.That(evaluationOrder).HasCount().EqualTo(2);
+        await Assert.That(evaluationOrder).HasCount(2);
         await Assert.That(evaluationOrder[0]).IsEqualTo(1);
         await Assert.That(evaluationOrder[1]).IsEqualTo(2);
     }
@@ -374,7 +374,7 @@ public sealed class OrAssertionTests
                 return _ < 10;
             });
 
-        await Assert.That(evaluationOrder).HasCount().EqualTo(1);
+        await Assert.That(evaluationOrder).HasCount(1);
         await Assert.That(evaluationOrder[0]).IsEqualTo(1);
     }
 
@@ -386,7 +386,7 @@ public sealed class OrAssertionTests
         await Assert.That(collection)
             .Contains(5)
             .Or
-            .HasCount().EqualTo(3);
+            .HasCount(3);
     }
 
     [Test]

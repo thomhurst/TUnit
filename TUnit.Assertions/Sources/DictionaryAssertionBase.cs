@@ -85,6 +85,104 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Asser
     }
 
     /// <summary>
+    /// Asserts that the dictionary is empty (has no key-value pairs).
+    /// This instance method enables calling IsEmpty with proper type inference.
+    /// Example: await Assert.That(dictionary).IsEmpty();
+    /// </summary>
+    public CollectionIsEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>> IsEmpty()
+    {
+        Context.ExpressionBuilder.Append(".IsEmpty()");
+        return new CollectionIsEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary is not empty (has at least one key-value pair).
+    /// This instance method enables calling IsNotEmpty with proper type inference.
+    /// Example: await Assert.That(dictionary).IsNotEmpty();
+    /// </summary>
+    public CollectionIsNotEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>> IsNotEmpty()
+    {
+        Context.ExpressionBuilder.Append(".IsNotEmpty()");
+        return new CollectionIsNotEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary contains the specified key-value pair.
+    /// This instance method enables calling Contains with proper type inference.
+    /// Example: await Assert.That(dictionary).Contains(new KeyValuePair&lt;string, int&gt;("key", 1));
+    /// </summary>
+    public CollectionContainsAssertion<TDictionary, KeyValuePair<TKey, TValue>> Contains(
+        KeyValuePair<TKey, TValue> expected,
+        [CallerArgumentExpression(nameof(expected))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context, expected);
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary contains a key-value pair matching the predicate.
+    /// This instance method enables calling Contains with proper type inference.
+    /// Example: await Assert.That(dictionary).Contains(kvp => kvp.Value > 10);
+    /// </summary>
+    public CollectionContainsPredicateAssertion<TDictionary, KeyValuePair<TKey, TValue>> Contains(
+        Func<KeyValuePair<TKey, TValue>, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".Contains({expression})");
+        return new CollectionContainsPredicateAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context, predicate);
+    }
+
+    /// <summary>
+    /// Asserts that all key-value pairs in the dictionary satisfy the predicate.
+    /// This instance method enables calling All with proper type inference.
+    /// Example: await Assert.That(dictionary).All(kvp => kvp.Value > 0);
+    /// </summary>
+    public CollectionAllAssertion<TDictionary, KeyValuePair<TKey, TValue>> All(
+        Func<KeyValuePair<TKey, TValue>, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".All({expression})");
+        return new CollectionAllAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Returns a helper for the .All().Satisfy() pattern on dictionaries.
+    /// This instance method enables calling All().Satisfy() with proper type inference.
+    /// Example: await Assert.That(dictionary).All().Satisfy(kvp => kvp.Value.IsNotNull());
+    /// </summary>
+    public CollectionAllSatisfyHelper<TDictionary, KeyValuePair<TKey, TValue>> All()
+    {
+        Context.ExpressionBuilder.Append(".All()");
+        return new CollectionAllSatisfyHelper<TDictionary, KeyValuePair<TKey, TValue>>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that at least one key-value pair in the dictionary satisfies the predicate.
+    /// This instance method enables calling Any with proper type inference.
+    /// Example: await Assert.That(dictionary).Any(kvp => kvp.Value > 100);
+    /// </summary>
+    public CollectionAnyAssertion<TDictionary, KeyValuePair<TKey, TValue>> Any(
+        Func<KeyValuePair<TKey, TValue>, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".Any({expression})");
+        return new CollectionAnyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context, predicate, expression ?? "predicate");
+    }
+
+    /// <summary>
+    /// Asserts that the dictionary has the expected number of key-value pairs.
+    /// This instance method enables calling HasCount with proper type inference.
+    /// Example: await Assert.That(dictionary).HasCount(5);
+    /// </summary>
+    public CollectionCountAssertion<TDictionary, KeyValuePair<TKey, TValue>> HasCount(
+        int expectedCount,
+        [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".HasCount({expression})");
+        return new CollectionCountAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context, expectedCount);
+    }
+
+    /// <summary>
     /// Returns an And continuation that preserves dictionary type, key type, and value type.
     /// Overrides the base Assertion.And to return a dictionary-specific continuation.
     /// </summary>
