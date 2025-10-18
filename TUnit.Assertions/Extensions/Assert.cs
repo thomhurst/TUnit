@@ -10,47 +10,9 @@ namespace TUnit.Assertions;
 /// Entry point for all assertions.
 /// Provides Assert.That() overloads for different source types.
 /// </summary>
+[SuppressMessage("Usage", "TUnitAssertions0002:Assert statement not awaited")]
 public static class Assert
 {
-    /// <summary>
-    /// Creates an assertion for a Dictionary value.
-    /// This overload enables better type inference for dictionary operations like ContainsKey.
-    /// Example: await Assert.That(dict).ContainsKey("key");
-    /// </summary>
-    public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
-        Dictionary<TKey, TValue> value,
-        [CallerArgumentExpression(nameof(value))] string? expression = null)
-        where TKey : notnull
-    {
-        return new DictionaryAssertion<TKey, TValue>(value, expression);
-    }
-
-    /// <summary>
-    /// Creates an assertion for an ImmutableDictionary value.
-    /// This overload enables better type inference for dictionary operations like ContainsKey.
-    /// Example: await Assert.That(dict).ContainsKey("key");
-    /// </summary>
-    public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
-        System.Collections.Immutable.ImmutableDictionary<TKey, TValue> value,
-        [CallerArgumentExpression(nameof(value))] string? expression = null)
-        where TKey : notnull
-    {
-        return new DictionaryAssertion<TKey, TValue>(value, expression);
-    }
-
-    /// <summary>
-    /// Creates an assertion for a ReadOnlyDictionary value.
-    /// This overload enables better type inference for dictionary operations like ContainsKey.
-    /// Example: await Assert.That(dict).ContainsKey("key");
-    /// </summary>
-    public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
-        System.Collections.ObjectModel.ReadOnlyDictionary<TKey, TValue> value,
-        [CallerArgumentExpression(nameof(value))] string? expression = null)
-        where TKey : notnull
-    {
-        return new DictionaryAssertion<TKey, TValue>(value, expression);
-    }
-
     /// <summary>
     /// Creates an assertion for an IReadOnlyDictionary value.
     /// This overload enables better type inference for dictionary operations like ContainsKey.
@@ -77,34 +39,11 @@ public static class Assert
     }
 
     /// <summary>
-    /// Creates an assertion for an array (nullable or non-nullable).
-    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
-    /// Example: await Assert.That(array).IsInOrder();
-    /// </summary>
-    public static CollectionAssertion<TItem[], TItem> That<TItem>(
-        TItem[]? value,
-        [CallerArgumentExpression(nameof(value))] string? expression = null)
-    {
-        return new CollectionAssertion<TItem[], TItem>(value!, expression);
-    }
-
-    /// <summary>
-    /// Creates an assertion for a List (nullable or non-nullable).
-    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
-    /// Example: await Assert.That(list).IsInOrder();
-    /// </summary>
-    public static CollectionAssertion<List<TItem>, TItem> That<TItem>(
-        List<TItem>? value,
-        [CallerArgumentExpression(nameof(value))] string? expression = null)
-    {
-        return new CollectionAssertion<List<TItem>, TItem>(value!, expression);
-    }
-
-    /// <summary>
     /// Creates an assertion for an IEnumerable (nullable or non-nullable).
     /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
     /// Example: await Assert.That(enumerable).IsInOrder();
     /// </summary>
+    [OverloadResolutionPriority(1)]
     public static CollectionAssertion<IEnumerable<TItem>, TItem> That<TItem>(
         IEnumerable<TItem>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
@@ -113,46 +52,11 @@ public static class Assert
     }
 
     /// <summary>
-    /// Creates an assertion for an IReadOnlyList (nullable or non-nullable).
-    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
-    /// Example: await Assert.That(readOnlyList).IsInOrder();
-    /// </summary>
-    public static CollectionAssertion<IReadOnlyList<TItem>, TItem> That<TItem>(
-        IReadOnlyList<TItem>? value,
-        [CallerArgumentExpression(nameof(value))] string? expression = null)
-    {
-        return new CollectionAssertion<IReadOnlyList<TItem>, TItem>(value!, expression);
-    }
-
-    /// <summary>
-    /// Creates an assertion for an ImmutableArray (nullable or non-nullable).
-    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
-    /// Example: await Assert.That(immutableArray).IsEmpty();
-    /// </summary>
-    public static CollectionAssertion<System.Collections.Immutable.ImmutableArray<TItem>, TItem> That<TItem>(
-        System.Collections.Immutable.ImmutableArray<TItem> value,
-        [CallerArgumentExpression(nameof(value))] string? expression = null)
-    {
-        return new CollectionAssertion<System.Collections.Immutable.ImmutableArray<TItem>, TItem>(value, expression);
-    }
-
-    /// <summary>
-    /// Creates an assertion for an ImmutableList (nullable or non-nullable).
-    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
-    /// Example: await Assert.That(immutableList).IsEmpty();
-    /// </summary>
-    public static CollectionAssertion<System.Collections.Immutable.ImmutableList<TItem>, TItem> That<TItem>(
-        System.Collections.Immutable.ImmutableList<TItem>? value,
-        [CallerArgumentExpression(nameof(value))] string? expression = null)
-    {
-        return new CollectionAssertion<System.Collections.Immutable.ImmutableList<TItem>, TItem>(value!, expression);
-    }
-
-    /// <summary>
     /// Creates an assertion for a string (nullable or non-nullable).
     /// Treats the string as a collection of characters.
     /// Example: await Assert.That("ABC").Contains('B');
     /// </summary>
+    [OverloadResolutionPriority(2)]
     public static CollectionAssertion<string, char> That(
         string? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
@@ -166,11 +70,11 @@ public static class Assert
     /// For collection-specific assertions, cast to IEnumerable<object> first.
     /// Example: await Assert.That(nonGenericCollection).IsSameReferenceAs(other);
     /// </summary>
-    public static ValueAssertion<System.Collections.IEnumerable> That(
-        System.Collections.IEnumerable value,
+    public static CollectionAssertion<IEnumerable<object?>, object?> That(
+        IEnumerable value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return new ValueAssertion<System.Collections.IEnumerable>(value, expression);
+        return That(value.Cast<object?>(), expression);
     }
 
     /// <summary>

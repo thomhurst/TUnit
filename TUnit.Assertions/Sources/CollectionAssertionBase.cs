@@ -94,6 +94,30 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     }
 
     /// <summary>
+    /// Gets the count of items in the collection for further numeric assertions.
+    /// This enables fluent assertions on the count itself.
+    /// Example: await Assert.That(list).Count().IsGreaterThan(5);
+    /// </summary>
+    public CollectionCountValueAssertion<TCollection, TItem> Count()
+    {
+        Context.ExpressionBuilder.Append(".Count()");
+        return new CollectionCountValueAssertion<TCollection, TItem>(Context, null);
+    }
+
+    /// <summary>
+    /// Gets the count of items matching the predicate for further numeric assertions.
+    /// This enables fluent assertions on filtered counts.
+    /// Example: await Assert.That(list).Count(x => x > 10).IsEqualTo(3);
+    /// </summary>
+    public CollectionCountValueAssertion<TCollection, TItem> Count(
+        Func<TItem, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        Context.ExpressionBuilder.Append($".Count({expression})");
+        return new CollectionCountValueAssertion<TCollection, TItem>(Context, predicate);
+    }
+
+    /// <summary>
     /// Asserts that the collection is ordered by the specified key selector in ascending order.
     /// This instance method enables calling IsOrderedBy with proper type inference.
     /// Example: await Assert.That(list).IsOrderedBy(x => x.Name);
@@ -169,6 +193,17 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     {
         Context.ExpressionBuilder.Append(".IsNotEmpty()");
         return new CollectionIsNotEmptyAssertion<TCollection, TItem>(Context);
+    }
+
+    /// <summary>
+    /// Asserts that the collection contains exactly one item.
+    /// This instance method enables calling HasSingleItem with proper type inference.
+    /// Example: await Assert.That(list).HasSingleItem();
+    /// </summary>
+    public HasSingleItemAssertion<TCollection, TItem> HasSingleItem()
+    {
+        Context.ExpressionBuilder.Append(".HasSingleItem()");
+        return new HasSingleItemAssertion<TCollection, TItem>(Context);
     }
 
     /// <summary>

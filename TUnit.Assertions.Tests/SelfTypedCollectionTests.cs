@@ -94,6 +94,14 @@ public class SelfTypedCollectionTests
             .HasCount(3);
     }
 
+    [Test]
+    public async Task CustomCollection_ContainsWithPredicate_Issue3401()
+    {
+        var collection = new CustomCollection("test") { "A", "B", "C" };
+
+        await Assert.That(collection).Contains(x => x == "A");
+    }
+
     public class CustomCollection(string title) : List<string>
     {
         public string Title { get; } = title;
