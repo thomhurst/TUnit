@@ -59,13 +59,18 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             return null;
         }
 
-        // Extract optional negated method name
+        // Extract optional negated method name and overload resolution priority
         string? negatedMethodName = null;
+        int overloadPriority = 0;  // Default to 0
         foreach (var namedArg in attributeData.NamedArguments)
         {
             if (namedArg.Key == "NegatedMethodName")
             {
                 negatedMethodName = namedArg.Value.Value?.ToString();
+            }
+            else if (namedArg.Key == "OverloadResolutionPriority" && namedArg.Value.Value is int priority)
+            {
+                overloadPriority = priority;
             }
         }
 
@@ -92,7 +97,8 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             methodName!,
             negatedMethodName,
             assertionBaseType,
-            constructors
+            constructors,
+            overloadPriority
         );
     }
 
@@ -288,6 +294,12 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine($"    /// Extension method for {assertionType.Name}.");
         sourceBuilder.AppendLine("    /// </summary>");
 
+        // Add OverloadResolutionPriority attribute only if priority > 0
+        if (data.OverloadResolutionPriority > 0)
+        {
+            sourceBuilder.AppendLine($"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({data.OverloadResolutionPriority})]");
+        }
+
         // Method declaration
         var returnType = assertionType.IsGenericType
             ? $"{assertionType.Name}{genericParamsString}"
@@ -393,6 +405,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         string MethodName,
         string? NegatedMethodName,
         INamedTypeSymbol AssertionBaseType,
-        ImmutableArray<IMethodSymbol> Constructors
+        ImmutableArray<IMethodSymbol> Constructors,
+        int OverloadResolutionPriority
     );
 }
