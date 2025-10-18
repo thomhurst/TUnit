@@ -15,6 +15,7 @@ namespace
     public class ContextTest : .BrowserTest
     {
         public ContextTest() { }
+        public ContextTest(.BrowserTypeLaunchOptions options) { }
         public .IBrowserContext Context { get; }
         public virtual .BrowserNewContextOptions ContextOptions(.TestContext testContext) { }
         [.Before(., "", 0)]
@@ -33,6 +34,7 @@ namespace
     public class PageTest : .ContextTest
     {
         public PageTest() { }
+        public PageTest(.BrowserTypeLaunchOptions options) { }
         public .IPage Page { get; }
         [.Before(., "", 0)]
         public . PageSetup() { }
