@@ -1,3 +1,4 @@
+using TUnit.Core;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.TestProject;
@@ -160,6 +161,69 @@ public class SkipEventReceiverAttribute : Attribute,
     public ValueTask OnTestEnd(TestContext context)
     {
         SkippedEventReceiverTests.Events.Add("TestEnd");
+        return default;
+    }
+}
+
+// Test for runtime skip using Skip.Test()
+public class RuntimeSkipEventReceiverTests
+{
+    public static readonly List<string> Events = [];
+    public static string? CapturedSkipReason = null;
+
+    [Before(Test)]
+    public void ClearEvents()
+    {
+        Events.Clear();
+        CapturedSkipReason = null;
+    }
+
+    [Test]
+    [RuntimeSkipEventReceiverAttribute]
+    public void RuntimeSkippedTestWithCustomReason()
+    {
+        Skip.Test("Custom runtime skip reason");
+    }
+
+    [After(Test)]
+    public async Task VerifyRuntimeSkipEventFired(TestContext context)
+    {
+        // Give some time for async event receivers to complete
+        await Task.Delay(100);
+
+        if (context.GetDisplayName().Contains("RuntimeSkippedTestWithCustomReason"))
+        {
+            // Verify skip reason is preserved
+            await Assert.That(CapturedSkipReason).IsEqualTo("Custom runtime skip reason");
+
+            // Verify both skipped and end events are fired
+            await Assert.That(Events).Contains("TestSkipped");
+            await Assert.That(Events).Contains("TestEnd");
+
+            // Verify TestEnd is called exactly once (not twice)
+            var testEndCount = Events.Count(e => e == "TestEnd");
+            await Assert.That(testEndCount).IsEqualTo(1);
+        }
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
+public class RuntimeSkipEventReceiverAttribute : Attribute,
+    ITestSkippedEventReceiver,
+    ITestEndEventReceiver
+{
+    public int Order => 0;
+
+    public ValueTask OnTestSkipped(TestContext context)
+    {
+        RuntimeSkipEventReceiverTests.Events.Add("TestSkipped");
+        RuntimeSkipEventReceiverTests.CapturedSkipReason = context.SkipReason;
+        return default;
+    }
+
+    public ValueTask OnTestEnd(TestContext context)
+    {
+        RuntimeSkipEventReceiverTests.Events.Add("TestEnd");
         return default;
     }
 }

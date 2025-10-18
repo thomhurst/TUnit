@@ -146,13 +146,10 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         catch (SkipTestException ex)
         {
+            test.Context.SkipReason = ex.Message;
             await _stateManager.MarkSkippedAsync(test, ex.Message);
 
-            // Invoke skipped event receivers
             await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
-
-            // Invoke test end event receivers for skipped tests
-            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken);
         }
         catch (Exception ex)
         {
