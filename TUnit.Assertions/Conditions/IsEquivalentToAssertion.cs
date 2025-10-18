@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Conditions.Helpers;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Enums;
@@ -11,6 +12,7 @@ namespace TUnit.Assertions.Conditions;
 /// Can be configured to require matching order using CollectionOrdering.Matching.
 /// Inherits from CollectionComparerBasedAssertion to preserve collection type awareness in And/Or chains.
 /// </summary>
+[AssertionExtension("IsEquivalentTo")]
 public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBasedAssertion<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -20,7 +22,7 @@ public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBas
     public IsEquivalentToAssertion(
         AssertionContext<TCollection> context,
         IEnumerable<TItem> expected,
-        CollectionOrdering ordering = CollectionOrdering.Matching)
+        CollectionOrdering ordering = CollectionOrdering.Any)
         : base(context)
     {
         _expected = expected ?? throw new ArgumentNullException(nameof(expected));

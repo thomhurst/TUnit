@@ -128,6 +128,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("using System;");
         sourceBuilder.AppendLine("using System.Runtime.CompilerServices;");
         sourceBuilder.AppendLine("using TUnit.Assertions.Core;");
+        sourceBuilder.AppendLine("using TUnit.Assertions.Enums;");
 
         // Add using for the assertion class's namespace if different
         var assertionNamespace = data.ClassSymbol.ContainingNamespace?.ToDisplayString();
@@ -214,10 +215,14 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         var genericParams = new List<string>();
         var typeConstraints = new List<string>();
 
+        // NEW: Detect if this is a multi-parameter generic assertion (e.g., collection assertions)
+        // Check if the assertion class has multiple type parameters beyond just Assertion<T>
+        var isMultiParameterGeneric = assertionType.TypeParameters.Length > 1;
+
         if (assertionType.IsGenericType && assertionType.TypeParameters.Length > 0)
         {
             // The assertion class defines its own generic type parameters
-            // e.g., GreaterThanAssertion<TValue>
+            // e.g., GreaterThanAssertion<TValue> or CollectionContainsAssertion<TCollection, TItem>
             foreach (var typeParameter in assertionType.TypeParameters)
             {
                 genericParams.Add(typeParameter.Name);
@@ -305,9 +310,18 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             ? $"{assertionType.Name}{genericParamsString}"
             : assertionType.Name;
 
-        var sourceType = typeParam is ITypeParameterSymbol
-            ? $"IAssertionSource<{typeParam.Name}>"
-            : $"IAssertionSource<{typeParam.ToDisplayString()}>";
+        // The extension method always extends IAssertionSource<T> where T is the type argument
+        // from the Assertion<T> base class. This ensures the source.Context type matches what
+        // the assertion constructor expects.
+        string sourceType;
+        if (typeParam is ITypeParameterSymbol baseTypeParam)
+        {
+            sourceType = $"IAssertionSource<{baseTypeParam.Name}>";
+        }
+        else
+        {
+            sourceType = $"IAssertionSource<{typeParam.ToDisplayString()}>";
+        }
 
         sourceBuilder.Append($"    public static {returnType} {methodName}{genericParamsString}(");
         sourceBuilder.Append($"this {sourceType} source");
@@ -377,9 +391,21 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             return "null";
         }
 
-        if (type.TypeKind == TypeKind.Enum)
+        if (type.TypeKind == TypeKind.Enum && type is INamedTypeSymbol enumType)
         {
-            return $"{type.ToDisplayString()}.{defaultValue}";
+            // Find the enum member that matches the default value
+            foreach (var member in enumType.GetMembers())
+            {
+                if (member is IFieldSymbol { HasConstantValue: true } field &&
+                    field.ConstantValue != null &&
+                    field.ConstantValue.Equals(defaultValue))
+                {
+                    // Use just the enum name without namespace since we have using TUnit.Assertions.Enums;
+                    return $"{enumType.Name}.{field.Name}";
+                }
+            }
+            // Fallback if no matching member found
+            return $"({enumType.ToDisplayString()})({defaultValue})";
         }
 
         if (defaultValue is string str)

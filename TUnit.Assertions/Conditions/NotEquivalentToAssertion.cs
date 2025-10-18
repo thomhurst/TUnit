@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Conditions.Helpers;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Enums;
@@ -10,6 +11,7 @@ namespace TUnit.Assertions.Conditions;
 /// Two collections are considered NOT equivalent if they differ in elements or (optionally) their order.
 /// Inherits from CollectionComparerBasedAssertion to preserve collection type awareness in And/Or chains.
 /// </summary>
+[AssertionExtension("IsNotEquivalentTo")]
 public class NotEquivalentToAssertion<TCollection, TItem> : CollectionComparerBasedAssertion<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {

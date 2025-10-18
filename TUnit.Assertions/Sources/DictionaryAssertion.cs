@@ -10,7 +10,7 @@ namespace TUnit.Assertions.Sources;
 /// Inherits from DictionaryAssertionBase to get And/Or chaining with type preservation,
 /// plus collection methods (Contains, IsEmpty, All, etc.) since dictionaries are collections of KeyValuePair items.
 /// </summary>
-public class DictionaryAssertion<TKey, TValue> : DictionaryAssertionBase<TKey, TValue>
+public class DictionaryAssertion<TKey, TValue> : DictionaryAssertionBase<IReadOnlyDictionary<TKey, TValue>, TKey, TValue>
 {
     public DictionaryAssertion(IReadOnlyDictionary<TKey, TValue> value, string? expression)
         : base(CreateContext(value, expression))

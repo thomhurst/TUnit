@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Sources;
 
@@ -9,6 +10,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a collection/enumerable is empty.
 /// </summary>
+[AssertionExtension("IsEmpty")]
 public class CollectionIsEmptyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -83,6 +85,7 @@ public class CollectionIsEmptyAssertion<TCollection, TItem> : Sources.Collection
 /// <summary>
 /// Asserts that a collection/enumerable is NOT empty.
 /// </summary>
+[AssertionExtension("IsNotEmpty")]
 public class CollectionIsNotEmptyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -130,6 +133,7 @@ public class CollectionIsNotEmptyAssertion<TCollection, TItem> : Sources.Collect
 /// Asserts that a collection contains the expected item.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
+[AssertionExtension("Contains")]
 public class CollectionContainsAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -181,6 +185,7 @@ public class CollectionContainsAssertion<TCollection, TItem> : Sources.Collectio
 /// Asserts that a collection does NOT contain the expected item.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
+[AssertionExtension("DoesNotContain")]
 public class CollectionDoesNotContainAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -232,6 +237,7 @@ public class CollectionDoesNotContainAssertion<TCollection, TItem> : Sources.Col
 /// Asserts that a collection does NOT contain any item matching the predicate.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
+[AssertionExtension("DoesNotContain")]
 public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -281,6 +287,7 @@ public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : So
 /// Asserts that a collection has a specific count/length.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
+[AssertionExtension("HasCount")]
 public class CollectionCountAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -385,6 +392,7 @@ public class CollectionAllSatisfyHelper<TCollection, TItem>
     }
 }
 
+[AssertionExtension("All")]
 public class CollectionAllAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -437,6 +445,7 @@ public class CollectionAllAssertion<TCollection, TItem> : Sources.CollectionAsse
 /// Asserts that at least one item in a collection satisfies a predicate.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
+[AssertionExtension("Any")]
 public class CollectionAnyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -487,6 +496,7 @@ public class CollectionAnyAssertion<TCollection, TItem> : Sources.CollectionAsse
 /// When awaited, returns the single item for further assertions.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
+[AssertionExtension("HasSingleItem")]
 public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -564,6 +574,7 @@ public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAsse
 /// When awaited, returns the found item for further assertions.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
+[AssertionExtension("Contains")]
 public class CollectionContainsPredicateAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -759,6 +770,7 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
 /// Asserts that a collection is in ascending order.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
+[AssertionExtension("IsInOrder")]
 public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
     where TItem : IComparable<TItem>
@@ -813,6 +825,7 @@ public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.Collecti
 /// Asserts that a collection is in descending order.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
+[AssertionExtension("IsInDescendingOrder")]
 public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
     where TItem : IComparable<TItem>
@@ -867,6 +880,7 @@ public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Source
 /// Asserts that a collection is ordered by a key selector in ascending order.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
+[AssertionExtension("IsOrderedBy")]
 public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -929,6 +943,7 @@ public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Sources.
 /// Asserts that a collection is ordered by a key selector in descending order.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
+[AssertionExtension("IsOrderedByDescending")]
 public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {

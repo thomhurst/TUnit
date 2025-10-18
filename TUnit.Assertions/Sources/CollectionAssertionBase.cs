@@ -7,16 +7,17 @@ namespace TUnit.Assertions.Sources;
 
 /// <summary>
 /// Base class for all collection assertions that preserves type through And/Or chains.
-/// Implements ICollectionAssertionSource to enable all collection extension methods.
-/// All collection-specific operations (Contains, IsInOrder, etc.) are provided via extension methods.
+/// Implements IAssertionSource&lt;TCollection&gt; to enable all collection and value extension methods.
+/// All collection-specific operations (Contains, IsInOrder, etc.) are provided via source-generated extension methods.
 /// </summary>
 /// <typeparam name="TCollection">The specific collection type</typeparam>
 /// <typeparam name="TItem">The type of items in the collection</typeparam>
-public abstract class CollectionAssertionBase<TCollection, TItem>
-    : Assertion<TCollection>,
-      ICollectionAssertionSource<TCollection, TItem>
+public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TCollection>, IAssertionSource<TCollection>
     where TCollection : IEnumerable<TItem>
 {
+    /// <summary>
+    /// Explicit implementation of IAssertionSource.Context to expose the context publicly.
+    /// </summary>
     AssertionContext<TCollection> IAssertionSource<TCollection>.Context => Context;
 
     protected CollectionAssertionBase(AssertionContext<TCollection> context)
