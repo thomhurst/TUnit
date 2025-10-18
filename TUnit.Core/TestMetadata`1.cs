@@ -61,6 +61,8 @@ public class TestMetadata<
     /// <summary>
     /// Factory delegate that creates an ExecutableTest for this metadata.
     /// </summary>
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Source-generated tests provide strongly-typed factories that avoid reflection. Reflection paths are only used in fallback scenarios for dynamic test discovery.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "TestMetadata uses DynamicallyAccessedMembers attributes to preserve required members for test execution.")]
     public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
     {
         get
