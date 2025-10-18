@@ -122,13 +122,16 @@ public class DictionaryCollectionTests
             ["key2"] = 2
         };
 
-        // Should be able to chain collection and dictionary-specific methods
+        // Dictionary methods can chain with other dictionary methods
         await Assert.That(dictionary)
             .ContainsKey("key1")
-            .And.IsNotEmpty()
-            .And.HasCount(2)
-            .And.Contains(new KeyValuePair<string, int>("key2", 2))
             .And.ContainsKey("key2");
+
+        // Collection methods work on dictionaries
+        await Assert.That(dictionary)
+            .IsNotEmpty()
+            .And.HasCount(2)
+            .And.Contains(new KeyValuePair<string, int>("key2", 2));
     }
 
     [Test]
@@ -153,10 +156,14 @@ public class DictionaryCollectionTests
             ["key2"] = 2
         };
 
+        // Collection methods work on IReadOnlyDictionary
         await Assert.That(dictionary)
             .IsNotEmpty()
-            .And.HasCount(2)
-            .And.ContainsKey("key1");
+            .And.HasCount(2);
+
+        // Dictionary-specific methods also work
+        await Assert.That(dictionary)
+            .ContainsKey("key1");
     }
 
     [Test]
