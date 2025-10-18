@@ -29,7 +29,7 @@ public class MemberTests
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
             await TUnitAssert.That(myClass).Member(x => x.Number, num => num.IsEqualTo(1)));
 
-        await TUnitAssert.That(exception.Message).Contains("to be equal to 1");
+        await TUnitAssert.That(exception.Message).Contains("to be 1");
         await TUnitAssert.That(exception.Message).Contains("but found 123");
     }
 
@@ -46,7 +46,7 @@ public class MemberTests
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () =>
             await TUnitAssert.That(myClass).Member(x => x.Nested.Nested.Nested.Number, num => num.IsEqualTo(1)));
 
-        await TUnitAssert.That(exception.Message).Contains("to be equal to 1");
+        await TUnitAssert.That(exception.Message).Contains("to be 1");
         await TUnitAssert.That(exception.Message).Contains("but found 123");
     }
 
@@ -110,7 +110,7 @@ public class MemberTests
                 .Member(x => x.Number, num => num.IsEqualTo(999))
                 .And.Member(x => x.Text, text => text.IsEqualTo("Blah")));
 
-        await TUnitAssert.That(exception.Message).Contains("to be equal to 999");
+        await TUnitAssert.That(exception.Message).Contains("to be 999");
     }
 
     [Test]
