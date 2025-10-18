@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
@@ -35,7 +36,6 @@ public class NullAssertion<TValue> : Assertion<TValue>
 /// <summary>
 /// Asserts that a value is not null.
 /// </summary>
-[AssertionExtension("IsNotNull")]
 public class NotNullAssertion<TValue> : Assertion<TValue>
 {
     public NotNullAssertion(
@@ -47,7 +47,6 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
         var value = metadata.Value;
-        var exception = metadata.Exception;
 
         if (value != null)
         {
@@ -58,6 +57,18 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
     }
 
     protected override string GetExpectation() => "to not be null";
+
+    public new TaskAwaiter<TValue> GetAwaiter()
+    {
+        return GetNonNullValueAsync().GetAwaiter();
+    }
+
+    private async Task<TValue> GetNonNullValueAsync()
+    {
+        var (value, _) = await Context.GetAsync();
+
+        return value!;
+    }
 }
 
 /// <summary>
@@ -65,7 +76,7 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
 /// For reference types, this is null. For value types, this is the zero-initialized value.
 /// </summary>
 [AssertionExtension("IsDefault")]
-public class IsDefaultAssertion<TValue> : Assertion<TValue>
+public class IsDefaultAssertion<TValue> : Assertion<TValue> where TValue : struct
 {
     public IsDefaultAssertion(
         AssertionContext<TValue> context)
@@ -98,7 +109,7 @@ public class IsDefaultAssertion<TValue> : Assertion<TValue>
 /// Asserts that a value is not the default value for its type.
 /// </summary>
 [AssertionExtension("IsNotDefault")]
-public class IsNotDefaultAssertion<TValue> : Assertion<TValue>
+public class IsNotDefaultAssertion<TValue> : Assertion<TValue> where TValue : struct
 {
     public IsNotDefaultAssertion(
         AssertionContext<TValue> context)

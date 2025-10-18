@@ -51,6 +51,13 @@ namespace
         public static void Unless([.(false)] bool condition, string reason) { }
         public static void When([.(true)] bool condition, string reason) { }
     }
+    public static class IntAssertions
+    {
+        [.]
+        public static bool IsEven(this int value) { }
+        [.]
+        public static bool IsOdd(this int value) { }
+    }
     public class StringMatcher
     {
         public .StringMatcher IgnoringCase() { }
@@ -916,6 +923,7 @@ namespace .Conditions
     }
     [.("IsDefault")]
     public class IsDefaultAssertion<TValue> : .<TValue>
+        where TValue :  struct
     {
         public IsDefaultAssertion(.<TValue> context) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
@@ -954,6 +962,7 @@ namespace .Conditions
     }
     [.("IsNotDefault")]
     public class IsNotDefaultAssertion<TValue> : .<TValue>
+        where TValue :  struct
     {
         public IsNotDefaultAssertion(.<TValue> context) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
@@ -1036,11 +1045,11 @@ namespace .Conditions
         protected override string GetExpectation() { }
         public .<TCollection, TItem> Using(.<TItem> comparer) { }
     }
-    [.("IsNotNull")]
     public class NotNullAssertion<TValue> : .<TValue>
     {
         public NotNullAssertion(.<TValue> context) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
+        public new .<TValue> GetAwaiter() { }
         protected override string GetExpectation() { }
     }
     [.("IsNotSameReferenceAs")]
@@ -1784,6 +1793,10 @@ namespace .Extensions
         public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, . ordering, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
         public static .<TValue> IsNotIn<TValue>(this .<TValue> source, params TValue[] collection) { }
+        public static .<TValue> IsNotNull<TValue>(this .<TValue> source)
+            where TValue :  class { }
+        public static .<TValue> IsNotNull<TValue>(this .<TValue?> source)
+            where TValue :  struct { }
         public static ..IsNotParsableIntoAssertion<T> IsNotParsableInto<[.(..None | ..PublicMethods | ..Interfaces)]  T>(this .<string> source) { }
         public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
         public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
@@ -2821,9 +2834,26 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class IntAssertions
+    {
+        public static ._IsEven_Assertion IsEven(this .<int> source) { }
+        public static ._IsOdd_Assertion IsOdd(this .<int> source) { }
+    }
     public static class IntEqualsAssertionExtensions
     {
         public static . IsEqualTo(this .<int> source, int expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public sealed class Int_IsEven_Assertion : .<int>
+    {
+        public Int_IsEven_Assertion(.<int> context) { }
+        protected override .<.> CheckAsync(.<int> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Int_IsOdd_Assertion : .<int>
+    {
+        public Int_IsOdd_Assertion(.<int> context) { }
+        protected override .<.> CheckAsync(.<int> metadata) { }
+        protected override string GetExpectation() { }
     }
     public static class IsAssignableToAssertionExtensions
     {
@@ -2831,7 +2861,8 @@ namespace .Extensions
     }
     public static class IsDefaultAssertionExtensions
     {
-        public static .<TValue> IsDefault<TValue>(this .<TValue> source) { }
+        public static .<TValue> IsDefault<TValue>(this .<TValue> source)
+            where TValue :  struct { }
     }
     public static class IsEquatableOrEqualToAssertionExtensions
     {
@@ -2847,7 +2878,8 @@ namespace .Extensions
     }
     public static class IsNotDefaultAssertionExtensions
     {
-        public static .<TValue> IsNotDefault<TValue>(this .<TValue> source) { }
+        public static .<TValue> IsNotDefault<TValue>(this .<TValue> source)
+            where TValue :  struct { }
     }
     public static class IsNotInAssertionExtensions
     {
@@ -2891,10 +2923,6 @@ namespace .Extensions
     public static class NotEqualsAssertionExtensions
     {
         public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue notExpected, .<TValue>? comparer = null, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
-    }
-    public static class NotNullAssertionExtensions
-    {
-        public static .<TValue> IsNotNull<TValue>(this .<TValue> source) { }
     }
     public static class NotSameReferenceAssertionExtensions
     {
