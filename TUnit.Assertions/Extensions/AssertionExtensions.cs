@@ -158,25 +158,14 @@ public static class AssertionExtensions
 
     /// <summary>
     /// Asserts that the value is of the specified type and returns an assertion on the casted value.
-    /// Example: await Assert.That(obj).IsTypeOf<StringBuilder>();
-    /// This generic overload works with any source type.
+    /// This extension method variant requires specifying both TExpected and TValue type parameters.
+    /// Example: await Assert.That(enumerable).IsTypeOf&lt;int[], IEnumerable&lt;int&gt;&gt;();
     /// </summary>
     public static TypeOfAssertion<TValue, TExpected> IsTypeOf<TExpected, TValue>(
         this IAssertionSource<TValue> source)
     {
         source.Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
         return new TypeOfAssertion<TValue, TExpected>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that the value is of the specified type and returns an assertion on the casted value (specialized for object).
-    /// Example: await Assert.That(obj).IsTypeOf<StringBuilder>();
-    /// </summary>
-    public static TypeOfAssertion<object, TExpected> IsTypeOf<TExpected>(
-        this IAssertionSource<object> source)
-    {
-        source.Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
-        return new TypeOfAssertion<object, TExpected>(source.Context);
     }
 
     /// <summary>
@@ -245,6 +234,72 @@ public static class AssertionExtensions
         return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
     }
 
+    /// <summary>
+    /// Asserts on a member of an object using a lambda selector and assertion lambda.
+    /// The assertion lambda receives the member value and can perform any assertions on it.
+    /// After the member assertion completes, returns to the parent object context for further chaining.
+    /// Example: await Assert.That(myObject).Member(x => x.Tags, tags => tags.Contains("value"));
+    /// </summary>
+    public static MemberAssertionResult<TObject> Member<TObject, TMember>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, TMember>> memberSelector,
+        Func<IAssertionSource<TMember>, object> assertions)
+    {
+        var parentContext = source.Context;
+        var memberPath = GetMemberPath(memberSelector);
+
+        parentContext.ExpressionBuilder.Append($".Member(x => x.{memberPath}, ...)");
+
+        // Check if there's a pending link (from .And or .Or) that needs to be consumed
+        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
+
+        // Map to member context
+        var memberContext = parentContext.Map<TMember>(obj =>
+        {
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
+            }
+
+            var compiled = memberSelector.Compile();
+            return compiled(obj);
+        });
+
+        // Let user build assertion via lambda
+        var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
+        var memberAssertionObj = assertions(memberSource);
+
+        // Type-erase to object? for storage
+        var erasedAssertion = WrapMemberAssertion<TMember>(memberAssertionObj);
+
+        // If there was a pending link, wrap both assertions together
+        if (pendingAssertion != null && combinerType != null)
+        {
+            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
+                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
+                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
+
+            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
+        }
+
+        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Helper method to wrap member assertions for type erasure.
+    /// </summary>
+    private static Assertion<object?> WrapMemberAssertion<TMember>(object memberAssertion)
+    {
+        if (memberAssertion is Assertion<TMember> standardAssertion)
+        {
+            return new TypeErasedAssertion<TMember>(standardAssertion);
+        }
+
+        throw new InvalidOperationException(
+            $"Member assertion returned unexpected type: {memberAssertion.GetType()}. " +
+            $"Expected Assertion<{typeof(TMember).Name}>.");
+    }
+
     private static string GetMemberPath<TObject, TMember>(Expression<Func<TObject, TMember>> expression)
     {
         var body = expression.Body;
@@ -291,530 +346,14 @@ public static class AssertionExtensions
     }
 
     // ============ DICTIONARY ASSERTIONS ============
-
-    /// <summary>
-    /// Asserts that the dictionary contains the specified key.
-    /// Example: await Assert.That(dict).ContainsKey("key");
-    /// </summary>
-    public static DictionaryContainsKeyAssertion<TKey, TValue> ContainsKey<TKey, TValue>(
-        this IAssertionSource<IReadOnlyDictionary<TKey, TValue>> source,
-        TKey key,
-        [CallerArgumentExpression(nameof(key))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".ContainsKey({expression})");
-        return new DictionaryContainsKeyAssertion<TKey, TValue>(source.Context, key);
-    }
-
-    /// <summary>
-    /// Asserts that the dictionary contains the specified key.
-    /// This overload works with custom dictionary types.
-    /// Example: await Assert.That(customDict).ContainsKey("key");
-    /// </summary>
-    public static DictionaryContainsKeyAssertion<TKey, TValue> ContainsKey<TDictionary, TKey, TValue>(
-        this IAssertionSource<TDictionary> source,
-        TKey key,
-        [CallerArgumentExpression(nameof(key))] string? expression = null)
-        where TDictionary : IReadOnlyDictionary<TKey, TValue>
-    {
-        source.Context.ExpressionBuilder.Append($".ContainsKey({expression})");
-        var mappedContext = source.Context.Map<IReadOnlyDictionary<TKey, TValue>>(dict => dict);
-        return new DictionaryContainsKeyAssertion<TKey, TValue>(mappedContext, key);
-    }
-
-    /// <summary>
-    /// Asserts that the dictionary contains the specified key using the specified comparer.
-    /// Example: await Assert.That(dict).ContainsKey("key", StringComparer.OrdinalIgnoreCase);
-    /// </summary>
-    public static DictionaryContainsKeyAssertion<TKey, TValue> ContainsKey<TKey, TValue>(
-        this IAssertionSource<IReadOnlyDictionary<TKey, TValue>> source,
-        TKey key,
-        IEqualityComparer<TKey> comparer,
-        [CallerArgumentExpression(nameof(key))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".ContainsKey({expression}, comparer)");
-        return new DictionaryContainsKeyAssertion<TKey, TValue>(source.Context, key,  comparer);
-    }
-
-    /// <summary>
-    /// Asserts that the dictionary contains the specified key using the specified comparer.
-    /// This overload works with custom dictionary types.
-    /// </summary>
-    public static DictionaryContainsKeyAssertion<TKey, TValue> ContainsKey<TDictionary, TKey, TValue>(
-        this IAssertionSource<TDictionary> source,
-        TKey key,
-        IEqualityComparer<TKey> comparer,
-        [CallerArgumentExpression(nameof(key))] string? expression = null)
-        where TDictionary : IReadOnlyDictionary<TKey, TValue>
-    {
-        source.Context.ExpressionBuilder.Append($".ContainsKey({expression}, comparer)");
-        var mappedContext = source.Context.Map<IReadOnlyDictionary<TKey, TValue>>(dict => dict);
-        return new DictionaryContainsKeyAssertion<TKey, TValue>(mappedContext, key,  comparer);
-    }
-
-    /// <summary>
-    /// Asserts that the dictionary does NOT contain the specified key.
-    /// Example: await Assert.That(dict).DoesNotContainKey("key");
-    /// </summary>
-    public static DictionaryDoesNotContainKeyAssertion<TKey, TValue> DoesNotContainKey<TKey, TValue>(
-        this IAssertionSource<IReadOnlyDictionary<TKey, TValue>> source,
-        TKey key,
-        [CallerArgumentExpression(nameof(key))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".DoesNotContainKey({expression})");
-        return new DictionaryDoesNotContainKeyAssertion<TKey, TValue>(source.Context, key);
-    }
-
-    /// <summary>
-    /// Asserts that the dictionary does NOT contain the specified key.
-    /// This overload works with custom dictionary types.
-    /// Example: await Assert.That(customDict).DoesNotContainKey("key");
-    /// </summary>
-    public static DictionaryDoesNotContainKeyAssertion<TKey, TValue> DoesNotContainKey<TDictionary, TKey, TValue>(
-        this IAssertionSource<TDictionary> source,
-        TKey key,
-        [CallerArgumentExpression(nameof(key))] string? expression = null)
-        where TDictionary : IReadOnlyDictionary<TKey, TValue>
-    {
-        source.Context.ExpressionBuilder.Append($".DoesNotContainKey({expression})");
-        var mappedContext = source.Context.Map<IReadOnlyDictionary<TKey, TValue>>(dict => dict);
-        return new DictionaryDoesNotContainKeyAssertion<TKey, TValue>(mappedContext, key);
-    }
+    // Dictionary assertions (ContainsKey, DoesNotContainKey) are now generated by AssertionExtensionGenerator
+    // from the dictionary assertion classes decorated with [AssertionExtension] attributes.
+    // Use .Using(comparer) to specify a custom equality comparer for key comparison.
 
     // ============ COLLECTION ASSERTIONS ============
-
-    /// <summary>
-    /// Asserts that the collection is empty.
-    /// </summary>
-    public static CollectionIsEmptyAssertion<TValue> IsEmpty<TValue>(
-        this IAssertionSource<TValue> source)
-        where TValue : IEnumerable
-    {
-        source.Context.ExpressionBuilder.Append(".IsEmpty()");
-        return new CollectionIsEmptyAssertion<TValue>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is NOT empty.
-    /// </summary>
-    public static CollectionIsNotEmptyAssertion<TValue> IsNotEmpty<TValue>(
-        this IAssertionSource<TValue> source)
-        where TValue : IEnumerable
-    {
-        source.Context.ExpressionBuilder.Append(".IsNotEmpty()");
-        return new CollectionIsNotEmptyAssertion<TValue>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that the collection contains the expected item.
-    /// </summary>
-    public static CollectionContainsAssertion<TCollection, TItem> Contains<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        TItem expected,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".Contains({expression})");
-        return new CollectionContainsAssertion<TCollection, TItem>(source.Context, expected);
-    }
-
-    /// <summary>
-    /// Asserts that the collection contains an item matching the predicate.
-    /// </summary>
-    public static CollectionContainsPredicateAssertion<TCollection, TItem> Contains<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        Func<TItem, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".Contains({expression})");
-        return new CollectionContainsPredicateAssertion<TCollection, TItem>(source.Context, predicate);
-    }
-
-    /// <summary>
-    /// Asserts that the collection contains the expected item.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static CollectionContainsAssertion<IEnumerable<TItem>, TItem> Contains<TItem>(
-        this IAssertionSource<IEnumerable<TItem>> source,
-        TItem expected,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".Contains({expression})");
-        return new CollectionContainsAssertion<IEnumerable<TItem>, TItem>(source.Context, expected);
-    }
-
-    /// <summary>
-    /// Asserts that the collection contains an item matching the predicate.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static CollectionContainsPredicateAssertion<IEnumerable<TItem>, TItem> Contains<TItem>(
-        this IAssertionSource<IEnumerable<TItem>> source,
-        Func<TItem, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".Contains({expression})");
-        return new CollectionContainsPredicateAssertion<IEnumerable<TItem>, TItem>(source.Context, predicate);
-    }
-
-
-    /// <summary>
-    /// Asserts that the collection does NOT contain the expected item.
-    /// </summary>
-    public static CollectionDoesNotContainAssertion<TCollection, TItem> DoesNotContain<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        TItem expected,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
-        return new CollectionDoesNotContainAssertion<TCollection, TItem>(source.Context, expected);
-    }
-
-    /// <summary>
-    /// Asserts that the collection does NOT contain any item matching the predicate.
-    /// </summary>
-    public static CollectionDoesNotContainPredicateAssertion<TCollection, TItem> DoesNotContain<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        Func<TItem, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
-        return new CollectionDoesNotContainPredicateAssertion<TCollection, TItem>(source.Context, predicate, expression ?? "predicate");
-    }
-
-    /// <summary>
-    /// Asserts that the collection does NOT contain the expected item.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static CollectionDoesNotContainAssertion<IEnumerable<TItem>, TItem> DoesNotContain<TItem>(
-        this IAssertionSource<IEnumerable<TItem>> source,
-        TItem expected,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
-        return new CollectionDoesNotContainAssertion<IEnumerable<TItem>, TItem>(source.Context, expected);
-    }
-
-    /// <summary>
-    /// Asserts that the collection does NOT contain any item matching the predicate.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static CollectionDoesNotContainPredicateAssertion<IEnumerable<TItem>, TItem> DoesNotContain<TItem>(
-        this IAssertionSource<IEnumerable<TItem>> source,
-        Func<TItem, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
-        return new CollectionDoesNotContainPredicateAssertion<IEnumerable<TItem>, TItem>(source.Context, predicate, expression ?? "predicate");
-    }
-
-    /// <summary>
-    /// Asserts that the collection contains ONLY items matching the predicate (all items satisfy the predicate).
-    /// </summary>
-    public static CollectionAllAssertion<TCollection, TItem> ContainsOnly<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        Func<TItem, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".ContainsOnly({expression})");
-        return new CollectionAllAssertion<TCollection, TItem>(source.Context, predicate, expression ?? "predicate");
-    }
-
-    /// <summary>
-    /// Asserts that the collection contains ONLY items matching the predicate (all items satisfy the predicate).
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static CollectionAllAssertion<IEnumerable<TItem>, TItem> ContainsOnly<TItem>(
-        this IAssertionSource<IEnumerable<TItem>> source,
-        Func<TItem, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".ContainsOnly({expression})");
-        return new CollectionAllAssertion<IEnumerable<TItem>, TItem>(source.Context, predicate, expression ?? "predicate");
-    }
-
-    /// <summary>
-    /// Asserts that the collection is in ascending order.
-    /// </summary>
-    public static CollectionIsInOrderAssertion<TCollection, TItem> IsInOrder<TCollection, TItem>(
-        this IAssertionSource<TCollection> source)
-        where TCollection : IEnumerable<TItem>
-        where TItem : IComparable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append(".IsInOrder()");
-        return new CollectionIsInOrderAssertion<TCollection, TItem>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is in ascending order.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static CollectionIsInOrderAssertion<IEnumerable<TItem>, TItem> IsInOrder<TItem>(
-        this IAssertionSource<IEnumerable<TItem>> source)
-        where TItem : IComparable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append(".IsInOrder()");
-        return new CollectionIsInOrderAssertion<IEnumerable<TItem>, TItem>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is in descending order.
-    /// </summary>
-    public static CollectionIsInDescendingOrderAssertion<TCollection, TItem> IsInDescendingOrder<TCollection, TItem>(
-        this IAssertionSource<TCollection> source)
-        where TCollection : IEnumerable<TItem>
-        where TItem : IComparable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append(".IsInDescendingOrder()");
-        return new CollectionIsInDescendingOrderAssertion<TCollection, TItem>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is in descending order.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static CollectionIsInDescendingOrderAssertion<IEnumerable<TItem>, TItem> IsInDescendingOrder<TItem>(
-        this IAssertionSource<IEnumerable<TItem>> source)
-        where TItem : IComparable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append(".IsInDescendingOrder()");
-        return new CollectionIsInDescendingOrderAssertion<IEnumerable<TItem>, TItem>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is ordered by the specified key selector in ascending order.
-    /// </summary>
-    public static CollectionIsOrderedByAssertion<TCollection, TItem, TKey> IsOrderedBy<TCollection, TItem, TKey>(
-        this IAssertionSource<TCollection> source,
-        Func<TItem, TKey> keySelector,
-        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".IsOrderedBy({expression})");
-        return new CollectionIsOrderedByAssertion<TCollection, TItem, TKey>(source.Context, keySelector);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is ordered by the specified key selector in ascending order using the specified comparer.
-    /// </summary>
-    public static CollectionIsOrderedByAssertion<TCollection, TItem, TKey> IsOrderedBy<TCollection, TItem, TKey>(
-        this IAssertionSource<TCollection> source,
-        Func<TItem, TKey> keySelector,
-        IComparer<TKey> comparer,
-        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".IsOrderedBy({expression}, comparer)");
-        return new CollectionIsOrderedByAssertion<TCollection, TItem, TKey>(source.Context, keySelector, comparer);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is ordered by the specified key selector in ascending order.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static CollectionIsOrderedByAssertion<IEnumerable<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(
-        this IAssertionSource<IEnumerable<TItem>> source,
-        Func<TItem, TKey> keySelector,
-        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".IsOrderedBy({expression})");
-        return new CollectionIsOrderedByAssertion<IEnumerable<TItem>, TItem, TKey>(source.Context, keySelector);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is ordered by the specified key selector in ascending order using the specified comparer.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static CollectionIsOrderedByAssertion<IEnumerable<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(
-        this IAssertionSource<IEnumerable<TItem>> source,
-        Func<TItem, TKey> keySelector,
-        IComparer<TKey> comparer,
-        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".IsOrderedBy({expression}, comparer)");
-        return new CollectionIsOrderedByAssertion<IEnumerable<TItem>, TItem, TKey>(source.Context, keySelector, comparer);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is ordered by the specified key selector in descending order.
-    /// </summary>
-    public static CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> IsOrderedByDescending<TCollection, TItem, TKey>(
-        this IAssertionSource<TCollection> source,
-        Func<TItem, TKey> keySelector,
-        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".IsOrderedByDescending({expression})");
-        return new CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey>(source.Context, keySelector);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is ordered by the specified key selector in descending order using the specified comparer.
-    /// </summary>
-    public static CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> IsOrderedByDescending<TCollection, TItem, TKey>(
-        this IAssertionSource<TCollection> source,
-        Func<TItem, TKey> keySelector,
-        IComparer<TKey> comparer,
-        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".IsOrderedByDescending({expression}, comparer)");
-        return new CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey>(source.Context, keySelector, comparer);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is ordered by the specified key selector in descending order.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static CollectionIsOrderedByDescendingAssertion<IEnumerable<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(
-        this IAssertionSource<IEnumerable<TItem>> source,
-        Func<TItem, TKey> keySelector,
-        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".IsOrderedByDescending({expression})");
-        return new CollectionIsOrderedByDescendingAssertion<IEnumerable<TItem>, TItem, TKey>(source.Context, keySelector);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is ordered by the specified key selector in descending order using the specified comparer.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static CollectionIsOrderedByDescendingAssertion<IEnumerable<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(
-        this IAssertionSource<IEnumerable<TItem>> source,
-        Func<TItem, TKey> keySelector,
-        IComparer<TKey> comparer,
-        [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".IsOrderedByDescending({expression}, comparer)");
-        return new CollectionIsOrderedByDescendingAssertion<IEnumerable<TItem>, TItem, TKey>(source.Context, keySelector, comparer);
-    }
-
-    /// <summary>
-    /// Returns a wrapper for collection count assertions.
-    /// Example: await Assert.That(list).HasCount().EqualTo(5);
-    /// </summary>
-    public static CountWrapper<TValue> HasCount<TValue>(
-        this IAssertionSource<TValue> source)
-        where TValue : IEnumerable
-    {
-        source.Context.ExpressionBuilder.Append(".HasCount()");
-        return new CountWrapper<TValue>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that the collection has the expected count.
-    /// Example: await Assert.That(list).HasCount(5);
-    /// </summary>
-    public static CollectionCountAssertion<TValue> HasCount<TValue>(
-        this IAssertionSource<TValue> source,
-        int expectedCount,
-        [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
-        where TValue : IEnumerable
-    {
-        source.Context.ExpressionBuilder.Append($".HasCount({expression})");
-        return new CollectionCountAssertion<TValue>(source.Context, expectedCount);
-    }
-
-    /// <summary>
-    /// Creates a helper for asserting that all items in the collection satisfy custom assertions.
-    /// Example: await Assert.That(list).All().Satisfy(item => item.IsNotNull());
-    /// </summary>
-    public static CollectionAllSatisfyHelper<TCollection, TItem> All<TCollection, TItem>(
-        this IAssertionSource<TCollection> source)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append(".All()");
-        return new CollectionAllSatisfyHelper<TCollection, TItem>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that all items in the collection satisfy the predicate.
-    /// </summary>
-    public static CollectionAllAssertion<TCollection, TItem> All<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        Func<TItem, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".All({expression})");
-        return new CollectionAllAssertion<TCollection, TItem>(source.Context, predicate, expression ?? "predicate");
-    }
-
-    /// <summary>
-    /// Creates a helper for asserting that all items in the collection satisfy custom assertions.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// Example: await Assert.That(list).All().Satisfy(item => item.IsNotNull());
-    /// </summary>
-    public static CollectionAllSatisfyHelper<IEnumerable<TItem>, TItem> All<TItem>(
-        this IAssertionSource<IEnumerable<TItem>> source)
-    {
-        source.Context.ExpressionBuilder.Append(".All()");
-        return new CollectionAllSatisfyHelper<IEnumerable<TItem>, TItem>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that all items in the collection satisfy the predicate.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static CollectionAllAssertion<IEnumerable<TItem>, TItem> All<TItem>(
-        this IAssertionSource<IEnumerable<TItem>> source,
-        Func<TItem, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".All({expression})");
-        return new CollectionAllAssertion<IEnumerable<TItem>, TItem>(source.Context, predicate, expression ?? "predicate");
-    }
-
-    /// <summary>
-    /// Asserts that at least one item in the collection satisfies the predicate.
-    /// </summary>
-    public static CollectionAnyAssertion<TCollection, TItem> Any<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        Func<TItem, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".Any({expression})");
-        return new CollectionAnyAssertion<TCollection, TItem>(source.Context, predicate, expression ?? "predicate");
-    }
-
-    /// <summary>
-    /// Asserts that the collection contains exactly one item.
-    /// When awaited, returns the single item for further assertions.
-    /// </summary>
-    public static HasSingleItemAssertion<TCollection, TItem> HasSingleItem<TCollection, TItem>(
-        this IAssertionSource<TCollection> source)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append(".HasSingleItem()");
-        return new HasSingleItemAssertion<TCollection, TItem>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that the collection contains exactly one item.
-    /// When awaited, returns the single item for further assertions.
-    /// Specific overload for IEnumerable to fix C# type inference.
-    /// </summary>
-    public static HasSingleItemAssertion<IEnumerable<TItem>, TItem> HasSingleItem<TItem>(
-        this IAssertionSource<IEnumerable<TItem>> source)
-    {
-        source.Context.ExpressionBuilder.Append(".HasSingleItem()");
-        return new HasSingleItemAssertion<IEnumerable<TItem>, TItem>(source.Context);
-    }
-
-    /// <summary>
-    /// Asserts that the collection contains exactly one item.
-    /// When awaited, returns the single item for further assertions.
-    /// Specific overload for IReadOnlyList to fix C# type inference.
-    /// </summary>
-    public static HasSingleItemAssertion<IReadOnlyList<TItem>, TItem> HasSingleItem<TItem>(
-        this IAssertionSource<IReadOnlyList<TItem>> source)
-    {
-        source.Context.ExpressionBuilder.Append(".HasSingleItem()");
-        return new HasSingleItemAssertion<IReadOnlyList<TItem>, TItem>(source.Context);
-    }
+    // Collection assertions are now generated by AssertionExtensionGenerator
+    // from the collection assertion classes decorated with [AssertionExtension] attributes.
+    // This eliminates the need for manual overloads with OverloadResolutionPriority workarounds.
 
     /// <summary>
     /// Asserts that the collection contains only distinct (unique) items.
@@ -827,48 +366,9 @@ public static class AssertionExtensions
         return new HasDistinctItemsAssertion<TValue>(source.Context);
     }
 
-    /// <summary>
-    /// Asserts that the collection is equivalent to the expected collection.
-    /// Two collections are equivalent if they contain the same elements, regardless of order.
-    /// </summary>
-    public static IsEquivalentToAssertion<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        IEnumerable<TItem> expected,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".IsEquivalentTo({expression})");
-        return new IsEquivalentToAssertion<TCollection, TItem>(source.Context, expected);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is equivalent to the expected collection using the specified comparer.
-    /// Two collections are equivalent if they contain the same elements, regardless of order.
-    /// </summary>
-    public static IsEquivalentToAssertion<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        IEnumerable<TItem> expected,
-        IEqualityComparer<TItem> comparer,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".IsEquivalentTo({expression}, comparer)");
-        return new IsEquivalentToAssertion<TCollection, TItem>(source.Context, expected).Using(comparer);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is equivalent to the expected collection with the specified ordering requirement.
-    /// </summary>
-    public static IsEquivalentToAssertion<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        IEnumerable<TItem> expected,
-        Enums.CollectionOrdering ordering,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".IsEquivalentTo({expression}, CollectionOrdering.{ordering})");
-        return new IsEquivalentToAssertion<TCollection, TItem>(source.Context, expected,  ordering);
-    }
+    // Collection equivalence assertions (IsEquivalentTo/IsNotEquivalentTo for IEnumerable<T>)
+    // are now generated by AssertionExtensionGenerator.
+    // Use .Using(comparer) to specify a custom equality comparer.
 
     /// <summary>
     /// Asserts that the value is structurally equivalent to the expected value.
@@ -882,48 +382,6 @@ public static class AssertionExtensions
     {
         source.Context.ExpressionBuilder.Append($".IsEquivalentTo({expression})");
         return new StructuralEquivalencyAssertion<TValue>(source.Context, expected, expression);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is NOT equivalent to the expected collection.
-    /// Two collections are NOT equivalent if they differ in elements or order.
-    /// </summary>
-    public static NotEquivalentToAssertion<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        IEnumerable<TItem> expected,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".IsNotEquivalentTo({expression})");
-        return new NotEquivalentToAssertion<TCollection, TItem>(source.Context, expected);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is NOT equivalent to the expected collection using the specified comparer.
-    /// </summary>
-    public static NotEquivalentToAssertion<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        IEnumerable<TItem> expected,
-        IEqualityComparer<TItem> comparer,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".IsNotEquivalentTo({expression}, comparer)");
-        return new NotEquivalentToAssertion<TCollection, TItem>(source.Context, expected).Using(comparer);
-    }
-
-    /// <summary>
-    /// Asserts that the collection is NOT equivalent to the expected collection with the specified ordering requirement.
-    /// </summary>
-    public static NotEquivalentToAssertion<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(
-        this IAssertionSource<TCollection> source,
-        IEnumerable<TItem> expected,
-        Enums.CollectionOrdering ordering,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-        where TCollection : IEnumerable<TItem>
-    {
-        source.Context.ExpressionBuilder.Append($".IsNotEquivalentTo({expression}, CollectionOrdering.{ordering})");
-        return new NotEquivalentToAssertion<TCollection, TItem>(source.Context, expected,  ordering);
     }
 
     /// <summary>

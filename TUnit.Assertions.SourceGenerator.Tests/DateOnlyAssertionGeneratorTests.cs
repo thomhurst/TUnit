@@ -13,6 +13,6 @@ internal class DateOnlyAssertionGeneratorTests : TestsBase<MethodAssertionGenera
             "DateOnlyAssertionExtensions.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(0);
+            await Assert.That(generatedFiles).HasCount(0);
         });
 }

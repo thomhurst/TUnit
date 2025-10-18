@@ -12,6 +12,6 @@ internal class ThreadAssertionGeneratorTests : TestsBase
             "ThreadAssertionExtensions.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().GreaterThanOrEqualTo(1);
+            await Assert.That(generatedFiles).IsNotEmpty();
         });
 }

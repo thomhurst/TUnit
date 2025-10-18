@@ -271,4 +271,13 @@ public class EnumerableTests
         // Test that type inference works with IEnumerable<T>
         await Assert.That(items).IsOrderedBy(i => i.Name);
     }
+
+    [Test]
+    public async Task IQueryable()
+    {
+        IQueryable<TestItem> items = new EnumerableQuery<TestItem>([]);
+
+        // Test that type inference works with IEnumerable<T>
+        await Assert.That(items).IsOrderedBy(i => i.Name);
+    }
 }
