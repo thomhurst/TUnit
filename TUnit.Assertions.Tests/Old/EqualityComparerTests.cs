@@ -19,8 +19,8 @@ public class EqualityComparerTests
     {
         const double a = 10;
         const double b = 0;
-        // Old API used to accept IEqualityComparer, new API requires using the comparer directly
-        await TUnitAssert.That(new Comparer().Equals(a, b)).IsTrue();
+        // With IEqualityComparer support restored, we can use it directly
+        await TUnitAssert.That(a).IsEqualTo(b, new Comparer());
     }
 
     [Test]
@@ -28,6 +28,6 @@ public class EqualityComparerTests
     {
         const double a = 10;
         const double b = 0;
-        await TUnitAssert.That(new Comparer().Equals(a, b)).IsTrue();
+        await TUnitAssert.That(a).IsEqualTo(b, new Comparer());
     }
 }
