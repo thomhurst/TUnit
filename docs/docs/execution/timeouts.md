@@ -25,3 +25,29 @@ public class MyTestClass
     }
 }
 ```
+
+## Global Timeout
+
+In case you want to apply the timeout to all tests in a project, you can add the attribute on the assembly level.
+
+```csharp
+[assembly: Timeout(3000)]
+```
+
+Or you can apply the Timeout on all the tests in a class like this:
+
+```csharp
+[Timeout(3000)]
+public class MyTestClass
+{
+}
+```
+
+The more specific attribute will always override the more general one.
+For example, the `[Timeout(3000)]` on a method will override the `[Timeout(5000)]` on the class,
+which in turn will override the `[Timeout(7000)]` on the assembly.
+
+So the order of precedence is:
+1. Method
+1. Class
+1. Assembly
