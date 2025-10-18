@@ -51,4 +51,15 @@ public class AssertionExtensionAttribute : Attribute
     /// [AssertionExtension("Contains", NegatedMethodName = "DoesNotContain")]
     /// </example>
     public string? NegatedMethodName { get; set; }
+
+    /// <summary>
+    /// Optional: The overload resolution priority for the generated extension methods.
+    /// Higher values are preferred over lower values during overload resolution.
+    /// Default is 0. When 0, no OverloadResolutionPriority attribute is generated.
+    /// Use higher values (e.g., 2) for specialized overloads that should take precedence.
+    /// </summary>
+    /// <example>
+    /// [AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
+    /// </example>
+    public int OverloadResolutionPriority { get; set; } = 0;
 }

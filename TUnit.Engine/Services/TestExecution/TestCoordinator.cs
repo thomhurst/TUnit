@@ -22,6 +22,7 @@ internal sealed class TestCoordinator : ITestCoordinator
     private readonly TestInitializer _testInitializer;
     private readonly ObjectTracker _objectTracker;
     private readonly TUnitFrameworkLogger _logger;
+    private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
 
     public TestCoordinator(
         TestExecutionGuard executionGuard,
@@ -31,7 +32,8 @@ internal sealed class TestCoordinator : ITestCoordinator
         TestExecutor testExecutor,
         TestInitializer testInitializer,
         ObjectTracker objectTracker,
-        TUnitFrameworkLogger logger)
+        TUnitFrameworkLogger logger,
+        EventReceiverOrchestrator eventReceiverOrchestrator)
     {
         _executionGuard = executionGuard;
         _stateManager = stateManager;
@@ -41,6 +43,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         _testInitializer = testInitializer;
         _objectTracker = objectTracker;
         _logger = logger;
+        _eventReceiverOrchestrator = eventReceiverOrchestrator;
     }
 
     #if NET6_0_OR_GREATER
@@ -92,6 +95,13 @@ internal sealed class TestCoordinator : ITestCoordinator
                     !string.IsNullOrEmpty(test.Context.SkipReason))
                 {
                     await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped");
+
+                    // Invoke skipped event receivers
+                    await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
+
+                    // Invoke test end event receivers for skipped tests
+                    await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken);
+
                     return;
                 }
 
@@ -136,7 +146,10 @@ internal sealed class TestCoordinator : ITestCoordinator
         }
         catch (SkipTestException ex)
         {
+            test.Context.SkipReason = ex.Message;
             await _stateManager.MarkSkippedAsync(test, ex.Message);
+
+            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -159,6 +172,46 @@ internal sealed class TestCoordinator : ITestCoordinator
                     await _logger.LogErrorAsync($"Error executing After hooks for {test.TestId}: {ex}");
                 }
                 cleanupExceptions.AddRange(hookExceptions);
+            }
+
+            // Invoke Last event receivers for class and assembly
+            try
+            {
+                await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(
+                    test.Context,
+                    test.Context.ClassContext,
+                    CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in last test in class event receiver for {test.TestId}: {ex}");
+                cleanupExceptions.Add(ex);
+            }
+
+            try
+            {
+                await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(
+                    test.Context,
+                    test.Context.ClassContext.AssemblyContext,
+                    CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in last test in assembly event receiver for {test.TestId}: {ex}");
+                cleanupExceptions.Add(ex);
+            }
+
+            try
+            {
+                await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(
+                    test.Context,
+                    test.Context.ClassContext.AssemblyContext.TestSessionContext,
+                    CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                await _logger.LogErrorAsync($"Error in last test in session event receiver for {test.TestId}: {ex}");
+                cleanupExceptions.Add(ex);
             }
 
             // If any cleanup exceptions occurred, mark the test as failed

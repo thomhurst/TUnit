@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -10,271 +11,41 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a value is equal to an expected value.
 /// Generic implementation that works for all types.
 /// </summary>
+[AssertionExtension("IsEqualTo")]
 public class EqualsAssertion<TValue> : Assertion<TValue>
 {
-    private readonly TValue _expected;
+    private readonly TValue? _expected;
     private readonly IEqualityComparer<TValue>? _comparer;
-    private object? _tolerance;
     private readonly HashSet<Type> _ignoredTypes = new();
-
-    // Delegate for tolerance comparison strategies
-    private delegate bool ToleranceComparer<T>(T actual, T expected, object tolerance, out string? errorMessage);
-
-    // Static dictionary mapping types to their tolerance comparison strategies
-    private static readonly Dictionary<Type, Delegate> ToleranceComparers = new()
-    {
-        [typeof(TimeSpan)] = new ToleranceComparer<TimeSpan>(CompareTimeSpan),
-        [typeof(DateTime)] = new ToleranceComparer<DateTime>(CompareDateTime),
-        [typeof(DateTimeOffset)] = new ToleranceComparer<DateTimeOffset>(CompareDateTimeOffset),
-#if NET6_0_OR_GREATER
-        [typeof(TimeOnly)] = new ToleranceComparer<TimeOnly>(CompareTimeOnly),
-#endif
-        [typeof(int)] = new ToleranceComparer<int>(CompareInt),
-        [typeof(long)] = new ToleranceComparer<long>(CompareLong),
-        [typeof(float)] = new ToleranceComparer<float>(CompareFloat),
-        [typeof(double)] = new ToleranceComparer<double>(CompareDouble),
-        [typeof(decimal)] = new ToleranceComparer<decimal>(CompareDecimal)
-    };
 
     // Cache reflection results for better performance in deep comparison
     private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache = new();
     private static readonly ConcurrentDictionary<Type, FieldInfo[]> FieldCache = new();
 
-    // Tolerance comparison strategies
-    private static bool CompareTimeSpan(TimeSpan actual, TimeSpan expected, object tolerance, out string? errorMessage)
-    {
-        if (tolerance is not TimeSpan timeSpanTolerance)
-        {
-            errorMessage = null;
-            return false;
-        }
-
-        var difference = actual > expected ? actual - expected : expected - actual;
-        if (difference <= timeSpanTolerance)
-        {
-            errorMessage = null;
-            return true;
-        }
-
-        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {timeSpanTolerance}";
-        return false;
-    }
-
-    private static bool CompareDateTime(DateTime actual, DateTime expected, object tolerance, out string? errorMessage)
-    {
-        if (tolerance is not TimeSpan dateTimeTolerance)
-        {
-            errorMessage = null;
-            return false;
-        }
-
-        var difference = actual > expected ? actual - expected : expected - actual;
-        if (difference <= dateTimeTolerance)
-        {
-            errorMessage = null;
-            return true;
-        }
-
-        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {dateTimeTolerance}";
-        return false;
-    }
-
-    private static bool CompareDateTimeOffset(DateTimeOffset actual, DateTimeOffset expected, object tolerance, out string? errorMessage)
-    {
-        if (tolerance is not TimeSpan dateTimeOffsetTolerance)
-        {
-            errorMessage = null;
-            return false;
-        }
-
-        var difference = actual > expected ? actual - expected : expected - actual;
-        if (difference <= dateTimeOffsetTolerance)
-        {
-            errorMessage = null;
-            return true;
-        }
-
-        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {dateTimeOffsetTolerance}";
-        return false;
-    }
-
-#if NET6_0_OR_GREATER
-    private static bool CompareTimeOnly(TimeOnly actual, TimeOnly expected, object tolerance, out string? errorMessage)
-    {
-        if (tolerance is not TimeSpan timeOnlyTolerance)
-        {
-            errorMessage = null;
-            return false;
-        }
-
-        var difference = actual > expected ? actual.ToTimeSpan() - expected.ToTimeSpan() : expected.ToTimeSpan() - actual.ToTimeSpan();
-        if (difference <= timeOnlyTolerance)
-        {
-            errorMessage = null;
-            return true;
-        }
-
-        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {timeOnlyTolerance}";
-        return false;
-    }
-#endif
-
-    private static bool CompareInt(int actual, int expected, object tolerance, out string? errorMessage)
-    {
-        if (tolerance is not int intTolerance)
-        {
-            errorMessage = null;
-            return false;
-        }
-
-        var difference = actual > expected ? actual - expected : expected - actual;
-        if (difference <= intTolerance)
-        {
-            errorMessage = null;
-            return true;
-        }
-
-        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {intTolerance}";
-        return false;
-    }
-
-    private static bool CompareLong(long actual, long expected, object tolerance, out string? errorMessage)
-    {
-        if (tolerance is not long longTolerance)
-        {
-            errorMessage = null;
-            return false;
-        }
-
-        var difference = actual > expected ? actual - expected : expected - actual;
-        if (difference <= longTolerance)
-        {
-            errorMessage = null;
-            return true;
-        }
-
-        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {longTolerance}";
-        return false;
-    }
-
-    private static bool CompareFloat(float actual, float expected, object tolerance, out string? errorMessage)
-    {
-        if (tolerance is not float floatTolerance)
-        {
-            errorMessage = null;
-            return false;
-        }
-
-        // Handle NaN comparisons: NaN is only equal to NaN
-        if (float.IsNaN(actual) && float.IsNaN(expected))
-        {
-            errorMessage = null;
-            return true;
-        }
-
-        if (float.IsNaN(actual) || float.IsNaN(expected))
-        {
-            errorMessage = $"found {actual}";
-            return false;
-        }
-
-        var difference = actual > expected ? actual - expected : expected - actual;
-        if (difference <= floatTolerance)
-        {
-            errorMessage = null;
-            return true;
-        }
-
-        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {floatTolerance}";
-        return false;
-    }
-
-    private static bool CompareDouble(double actual, double expected, object tolerance, out string? errorMessage)
-    {
-        if (tolerance is not double doubleTolerance)
-        {
-            errorMessage = null;
-            return false;
-        }
-
-        // Handle NaN comparisons: NaN is only equal to NaN
-        if (double.IsNaN(actual) && double.IsNaN(expected))
-        {
-            errorMessage = null;
-            return true;
-        }
-
-        if (double.IsNaN(actual) || double.IsNaN(expected))
-        {
-            errorMessage = $"found {actual}";
-            return false;
-        }
-
-        var difference = actual > expected ? actual - expected : expected - actual;
-        if (difference <= doubleTolerance)
-        {
-            errorMessage = null;
-            return true;
-        }
-
-        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {doubleTolerance}";
-        return false;
-    }
-
-    private static bool CompareDecimal(decimal actual, decimal expected, object tolerance, out string? errorMessage)
-    {
-        if (tolerance is not decimal decimalTolerance)
-        {
-            errorMessage = null;
-            return false;
-        }
-
-        var difference = actual > expected ? actual - expected : expected - actual;
-        if (difference <= decimalTolerance)
-        {
-            errorMessage = null;
-            return true;
-        }
-
-        errorMessage = $"found {actual}, difference {difference} exceeds tolerance {decimalTolerance}";
-        return false;
-    }
-
     /// <summary>
     /// Gets the expected value for this equality assertion.
-    /// Used by extension methods like Within() to create derived assertions.
     /// </summary>
-    public TValue Expected => _expected;
+    public TValue? Expected => _expected;
 
+    // Constructor 1: Just expected value
     public EqualsAssertion(
         AssertionContext<TValue> context,
-        TValue expected,
-        IEqualityComparer<TValue>? comparer = null)
+        TValue? expected)
+        : base(context)
+    {
+        _expected = expected;
+        _comparer = null;
+    }
+
+    // Constructor 2: Expected value with comparer
+    public EqualsAssertion(
+        AssertionContext<TValue> context,
+        TValue? expected,
+        IEqualityComparer<TValue> comparer)
         : base(context)
     {
         _expected = expected;
         _comparer = comparer;
-    }
-
-    /// <summary>
-    /// Specifies a tolerance for numeric/temporal comparisons.
-    /// Supports TimeSpan (for DateTime/DateTimeOffset/TimeOnly), and numeric types (int, long, double, decimal).
-    /// </summary>
-    public EqualsAssertion<TValue> Within(object tolerance)
-    {
-        _tolerance = tolerance;
-        Context.ExpressionBuilder.Append($".Within({tolerance})");
-        return this;
-    }
-
-    /// <summary>
-    /// Sets a tolerance for numeric/temporal comparisons.
-    /// Internal method used by Within(). Most users should call Within() instead.
-    /// </summary>
-    internal EqualsAssertion<TValue> WithTolerance(object tolerance)
-    {
-        _tolerance = tolerance;
-        return this;
     }
 
     /// <summary>
@@ -299,7 +70,6 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         return this;
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Tolerance comparison requires dynamic invocation of known comparer delegates")]
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
         var value = metadata.Value;
@@ -308,25 +78,6 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         if (exception != null)
         {
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        // Handle tolerance-based comparisons using strategy pattern
-        if (_tolerance != null && value != null && ToleranceComparers.TryGetValue(typeof(TValue), out var toleranceComparer))
-        {
-            // Invoke the appropriate comparer using dynamic invocation
-            var parameters = new[] { value, _expected, _tolerance, null };
-            var result = (bool)toleranceComparer.DynamicInvoke(parameters)!;
-            var errorMessage = (string?)parameters[3];
-
-            if (result)
-            {
-                return Task.FromResult(AssertionResult.Passed);
-            }
-
-            if (errorMessage != null)
-            {
-                return Task.FromResult(AssertionResult.Failed(errorMessage));
-            }
         }
 
         // Deep comparison with ignored types
@@ -346,7 +97,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         // Standard equality comparison
         var comparer = _comparer ?? EqualityComparer<TValue>.Default;
 
-        if (comparer.Equals(value!, _expected))
+        if (comparer.Equals(value!, _expected!))
         {
             return Task.FromResult(AssertionResult.Passed);
         }
@@ -461,10 +212,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         return (true, null);
     }
 
-    protected override string GetExpectation() =>
-        _tolerance != null
-            ? $"to equal {_expected} within {_tolerance}"
-            : $"to be equal to {_expected}";
+    protected override string GetExpectation() => $"to be equal to {_expected}";
 
     /// <summary>
     /// Comparer that uses reference equality instead of value equality.

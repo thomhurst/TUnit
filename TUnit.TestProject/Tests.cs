@@ -266,9 +266,7 @@ public class Tests
     {
         var list = new List<int> { 1 };
         var item = await Assert.That(list).HasSingleItem();
-        await Assert.That(list).HasSingleItem();
-        // Fixed: HasSingleItem returns the collection, not the single item
-        // await Assert.That(item).IsEqualTo(1);
+        await Assert.That(item).IsEqualTo(1);
     }
 
     [Test]

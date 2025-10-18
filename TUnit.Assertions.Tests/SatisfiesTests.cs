@@ -232,6 +232,70 @@ public class SatisfiesTests
                                                            """);
     }
 
+    [Test]
+    public async Task Satisfies_With_Member_As_Final_Statement()
+    {
+        var list = new List<MyModelWithId>
+        {
+            new() { Id = 1, Name = "First" }
+        };
+
+        await Assert.That(list).Satisfies(
+            l => l.First(),
+            item => item.Member(i => i.Id, v => v.EqualTo(1)));
+    }
+
+    [Test]
+    public async Task Satisfies_With_Member_After_Chaining()
+    {
+        var list = new List<MyModelWithId>
+        {
+            new() { Id = 1, Name = "First" }
+        };
+
+        await Assert.That(list).Satisfies(
+            l => l.First(),
+            item => item.IsNotNull()
+                .And.Member(i => i.Id, v => v.EqualTo(1)));
+    }
+
+    [Test]
+    public async Task Satisfies_With_Member_Before_Other_Assertions()
+    {
+        var list = new List<MyModelWithId>
+        {
+            new() { Id = 1, Name = "First" }
+        };
+
+        await Assert.That(list).Satisfies(
+            l => l.First(),
+            item => item.Member(i => i.Id, v => v.EqualTo(1))
+                .And.IsNotNull());
+    }
+
+    [Test]
+    public async Task Satisfies_With_Member_Fails_Correctly()
+    {
+        var list = new List<MyModelWithId>
+        {
+            new() { Id = 2, Name = "First" }
+        };
+
+        await Assert.That(async () =>
+            await Assert.That(list).Satisfies(
+                l => l.First(),
+                item => item.IsNotNull()
+                    .And.Member(i => i.Id, v => v.EqualTo(1)))
+        ).Throws<AssertionException>().WithMessageMatching("""
+                                                           *to satisfy*
+                                                           """);
+    }
+
+    public class MyModelWithId
+    {
+        public int Id { get; init; }
+        public string? Name { get; init; }
+    }
 
     public class MyModel
     {
