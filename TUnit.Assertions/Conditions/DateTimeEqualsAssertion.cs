@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -7,6 +8,7 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a DateTime is equal to an expected value.
 /// Demonstrates custom methods WITHOUT wrappers: .Within() is directly on this class!
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class DateTimeEqualsAssertion : ToleranceBasedEqualsAssertion<DateTime, TimeSpan>
 {
     public DateTimeEqualsAssertion(

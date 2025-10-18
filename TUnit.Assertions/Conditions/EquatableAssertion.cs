@@ -1,3 +1,4 @@
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -7,6 +8,7 @@ namespace TUnit.Assertions.Conditions;
 /// This allows comparing types that implement IEquatable with cross-type equality.
 /// Example: A Wrapper struct implementing IEquatable&lt;long&gt; can be compared directly to a long value.
 /// </summary>
+[AssertionExtension("IsEquatableTo")]
 public class EquatableAssertion<TActual, TExpected> : Assertion<TActual>
     where TActual : IEquatable<TExpected>
 {
@@ -51,6 +53,7 @@ public class EquatableAssertion<TActual, TExpected> : Assertion<TActual>
 /// Asserts that a nullable value type implementing IEquatable&lt;TExpected&gt; is equal to an expected value.
 /// Handles nullable structs that implement IEquatable.
 /// </summary>
+[AssertionExtension("IsEquatableTo")]
 public class NullableEquatableAssertion<TActual, TExpected> : Assertion<TActual?>
     where TActual : struct, IEquatable<TExpected>
 {

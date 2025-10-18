@@ -1,8 +1,8 @@
 <Project>
-    <PropertyGroup>
+    <!-- <PropertyGroup>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <CompilerGeneratedFilesOutputPath>SourceGeneratedViewer</CompilerGeneratedFilesOutputPath>
-    </PropertyGroup>
+    </PropertyGroup> -->
 
     <ItemGroup>
         <Compile Remove="SourceGeneratedViewer\**" />

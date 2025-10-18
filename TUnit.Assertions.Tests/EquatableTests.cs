@@ -76,7 +76,7 @@ public class EquatableTests
         Wrapper wrapper = new() { Value = 42 };
 
         // Act & Assert
-        await Assert.That(wrapper).IsEqualTo(42L);
+        await Assert.That(wrapper).IsEquatableTo(42L);
     }
 
     [Test]
@@ -88,7 +88,7 @@ public class EquatableTests
         // Act & Assert
         await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(async () =>
         {
-            await Assert.That(wrapper).IsEqualTo(99L);
+            await Assert.That(wrapper).IsEquatableTo(99L);
         });
     }
 
@@ -110,7 +110,7 @@ public class EquatableTests
         Wrapper? wrapper = new Wrapper { Value = 42 };
 
         // Act & Assert
-        await Assert.That(wrapper).IsEqualTo(42L);
+        await Assert.That(wrapper).IsEquatableTo(42L);
     }
 
     [Test]
@@ -122,7 +122,7 @@ public class EquatableTests
         // Act & Assert
         await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(async () =>
         {
-            await Assert.That(wrapper).IsEqualTo(42L);
+            await Assert.That(wrapper).IsEquatableTo(42L);
         });
     }
 
@@ -133,7 +133,7 @@ public class EquatableTests
         MultiEquatable value = new() { IntValue = 100, StringValue = "test" };
 
         // Act & Assert
-        await Assert.That(value).IsEqualTo(100);
+        await Assert.That(value).IsEquatableTo(100);
     }
 
     [Test]
@@ -143,7 +143,7 @@ public class EquatableTests
         MultiEquatable value = new() { IntValue = 100, StringValue = "test" };
 
         // Act & Assert
-        await Assert.That(value).IsEqualTo("test");
+        await Assert.That(value).IsEquatableTo("test");
     }
 
     [Test]
@@ -153,7 +153,7 @@ public class EquatableTests
         IntWrapper wrapper = new() { Value = 123 };
 
         // Act & Assert
-        await Assert.That(wrapper).IsEqualTo(123);
+        await Assert.That(wrapper).IsEquatableTo(123);
     }
 
     [Test]
@@ -165,7 +165,7 @@ public class EquatableTests
         // Act & Assert
         await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(async () =>
         {
-            await Assert.That(wrapper).IsEqualTo(456);
+            await Assert.That(wrapper).IsEquatableTo(456);
         });
     }
 
@@ -176,7 +176,7 @@ public class EquatableTests
         Wrapper wrapper = new() { Value = 42 };
 
         // Act & Assert
-        await Assert.That(wrapper).IsEqualTo(42L).And.IsEqualTo(new Wrapper { Value = 42 });
+        await Assert.That(wrapper).IsEquatableTo(42L).And.IsEqualTo(new Wrapper { Value = 42 });
     }
 
     [Test]
@@ -186,7 +186,7 @@ public class EquatableTests
         Wrapper wrapper = new() { Value = 42 };
 
         // Act & Assert - should pass because first condition is true
-        await Assert.That(wrapper).IsEqualTo(42L).Or.IsEqualTo(new Wrapper { Value = 99 });
+        await Assert.That(wrapper).IsEquatableTo(42L).Or.IsEqualTo(new Wrapper { Value = 99 });
     }
 
     [Test]
@@ -198,7 +198,7 @@ public class EquatableTests
         // Act & Assert
         await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(async () =>
         {
-            await Assert.That(wrapper).IsEqualTo(42L).And.IsEqualTo(new Wrapper { Value = 99 });
+            await Assert.That(wrapper).IsEquatableTo(42L).And.IsEqualTo(new Wrapper { Value = 99 });
         });
     }
 
@@ -209,7 +209,7 @@ public class EquatableTests
         Wrapper wrapper = new() { Value = 42 };
 
         // Act & Assert - test that And continuation works
-        await Assert.That(wrapper).IsEqualTo(42L).And.IsEqualTo(42L);
+        await Assert.That(wrapper).IsEquatableTo(42L).And.IsEquatableTo(42L);
     }
 
     [Test]
@@ -219,7 +219,7 @@ public class EquatableTests
         Wrapper wrapper = new() { Value = 42 };
 
         // Act & Assert - test that Or continuation works
-        await Assert.That(wrapper).IsEqualTo(99L).Or.IsEqualTo(42L);
+        await Assert.That(wrapper).IsEquatableTo(99L).Or.IsEquatableTo(42L);
     }
 
     [Test]
@@ -229,7 +229,7 @@ public class EquatableTests
         IntWrapper? wrapper = new IntWrapper { Value = 789 };
 
         // Act & Assert
-        await Assert.That(wrapper).IsEqualTo(789);
+        await Assert.That(wrapper).IsEquatableTo(789);
     }
 
     [Test]
@@ -241,7 +241,7 @@ public class EquatableTests
         // Act & Assert
         await Assert.ThrowsAsync<TUnit.Assertions.Exceptions.AssertionException>(async () =>
         {
-            await Assert.That(wrapper).IsEqualTo(789);
+            await Assert.That(wrapper).IsEquatableTo(789);
         });
     }
 
@@ -262,7 +262,7 @@ public class EquatableTests
     {
         // This is the exact example from the GitHub issue
         Wrapper value = new() { Value = 1 };
-        await Assert.That(value).IsEqualTo(1L);
+        await Assert.That(value).IsEquatableTo(1L);
     }
 }
 #endif

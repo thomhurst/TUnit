@@ -9,7 +9,11 @@ namespace
         public static .<.IEnumerable> That(.IEnumerable value, [.("value")] string? expression = null) { }
         public static . That(<.> action, [.("action")] string? expression = null) { }
         public static . That(. task, [.("task")] string? expression = null) { }
+        public static .<string, char> That(string? value, [.("value")] string? expression = null) { }
         public static .<.<TItem>, TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        public static .<.<TItem>, TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        public static .<.<TItem>, TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        public static .<.<TItem>, TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
         public static .<.<TItem>, TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         public static .<TValue> That<TValue>(<.<TValue?>> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(<TValue?> func, [.("func")] string? expression = null) { }
@@ -52,6 +56,13 @@ namespace
         public static void Test(string reason) { }
         public static void Unless([.(false)] bool condition, string reason) { }
         public static void When([.(true)] bool condition, string reason) { }
+    }
+    public static class IntAssertions
+    {
+        [.]
+        public static bool IsEven(this int value) { }
+        [.]
+        public static bool IsOdd(this int value) { }
     }
     public class StringMatcher
     {
@@ -168,6 +179,7 @@ namespace .Attributes
         public AssertionExtensionAttribute(string methodName) { }
         public string MethodName { get; }
         public string? NegatedMethodName { get; set; }
+        public int OverloadResolutionPriority { get; set; }
     }
     [(.Class, AllowMultiple=true, Inherited=false)]
     public class AssertionFromAttribute : 
@@ -364,7 +376,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class CollectionAllSatisfyAssertion<TCollection, TItem> : .<TCollection>
+    public class CollectionAllSatisfyAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
         public CollectionAllSatisfyAssertion(.<TCollection> context, <.<TItem>, .<TItem>?> assertion, string assertionDescription) { }
@@ -378,19 +390,27 @@ namespace .Conditions
         public .<TCollection, TItem> Satisfy(<.<TItem>, .<TItem>?> assertion, [.("assertion")] string? expression = null) { }
         public .<TCollection, TItem, TMapped> Satisfy<TMapped>(<TItem, TMapped> mapper, <.<TMapped>, .<TMapped>?> assertion, [.("mapper")] string? mapperExpression = null, [.("assertion")] string? assertionExpression = null) { }
     }
-    public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : .<TCollection>
+    public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
         public CollectionAllSatisfyMappedAssertion(.<TCollection> context, <TItem, TMapped> mapper, <.<TMapped>, .<TMapped>?> assertion, string mapperDescription, string assertionDescription) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class CollectionAnyAssertion<TCollection, TItem> : .<TCollection>
+    public class CollectionAnyAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
         public CollectionAnyAssertion(.<TCollection> context, <TItem, bool> predicate, string predicateDescription) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
+    }
+    public abstract class CollectionComparerBasedAssertion<TCollection, TItem> : .<TCollection, TItem>
+        where TCollection : .<TItem>
+    {
+        protected CollectionComparerBasedAssertion(.<TCollection> context) { }
+        protected .<TItem> GetComparer() { }
+        protected bool HasCustomComparer() { }
+        protected void SetComparer(.<TItem> comparer) { }
     }
     public class CollectionContainsAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
@@ -399,19 +419,19 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class CollectionContainsPredicateAssertion<TCollection, TItem> : .<TCollection>
+    public class CollectionContainsPredicateAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
         public CollectionContainsPredicateAssertion(.<TCollection> context, <TItem, bool> predicate) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
-        public new .<TItem> GetAwaiter() { }
+        public .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
     }
-    public class CollectionCountAssertion<TValue> : .<TValue>
-        where TValue : .IEnumerable
+    public class CollectionCountAssertion<TCollection, TItem> : .<TCollection, TItem>
+        where TCollection : .<TItem>
     {
-        public CollectionCountAssertion(.<TValue> context, int expectedCount) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        public CollectionCountAssertion(.<TCollection> context, int expectedCount) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionDoesNotContainAssertion<TCollection, TItem> : .<TCollection, TItem>
@@ -421,18 +441,18 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : .<TCollection>
+    public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
         public CollectionDoesNotContainPredicateAssertion(.<TCollection> context, <TItem, bool> predicate, string predicateDescription) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class CollectionIsEmptyAssertion<TValue> : .<TValue>
-        where TValue : .IEnumerable
+    public class CollectionIsEmptyAssertion<TCollection, TItem> : .<TCollection, TItem>
+        where TCollection : .<TItem>
     {
-        public CollectionIsEmptyAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        public CollectionIsEmptyAssertion(.<TCollection> context) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
     public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : .<TCollection, TItem>
@@ -451,21 +471,21 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class CollectionIsNotEmptyAssertion<TValue> : .<TValue>
-        where TValue : .IEnumerable
+    public class CollectionIsNotEmptyAssertion<TCollection, TItem> : .<TCollection, TItem>
+        where TCollection : .<TItem>
     {
-        public CollectionIsNotEmptyAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        public CollectionIsNotEmptyAssertion(.<TCollection> context) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : .<TCollection>
+    public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
         public CollectionIsOrderedByAssertion(.<TCollection> context, <TItem, TKey> keySelector, .<TKey>? comparer = null) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> : .<TCollection>
+    public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
         public CollectionIsOrderedByDescendingAssertion(.<TCollection> context, <TItem, TKey> keySelector, .<TKey>? comparer = null) { }
@@ -538,6 +558,7 @@ namespace .Conditions
         [.(ExpectationMessage="to be UTC")]
         public static bool IsUtc(this  value) { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class DateTimeEqualsAssertion : .<, >
     {
         public DateTimeEqualsAssertion(.<> context,  expected) { }
@@ -582,6 +603,7 @@ namespace .Conditions
         [.(ExpectationMessage="to be UTC")]
         public static bool IsUtc(this  value) { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class DateTimeOffsetEqualsAssertion : .<, >
     {
         public DateTimeOffsetEqualsAssertion(.<> context,  expected) { }
@@ -601,13 +623,13 @@ namespace .Conditions
         [.(ExpectationMessage="to be a weekend day")]
         public static bool IsWeekend(this  value) { }
     }
-    public class DictionaryContainsKeyAssertion<TKey, TValue> : .<.<TKey, TValue>>
+    public class DictionaryContainsKeyAssertion<TKey, TValue> : .<TKey, TValue>
     {
         public DictionaryContainsKeyAssertion(.<.<TKey, TValue>> context, TKey expectedKey, .<TKey>? comparer = null) { }
         protected override .<.> CheckAsync(.<.<TKey, TValue>> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class DictionaryDoesNotContainKeyAssertion<TKey, TValue> : .<.<TKey, TValue>>
+    public class DictionaryDoesNotContainKeyAssertion<TKey, TValue> : .<TKey, TValue>
     {
         public DictionaryDoesNotContainKeyAssertion(.<.<TKey, TValue>> context, TKey expectedKey) { }
         protected override .<.> CheckAsync(.<.<TKey, TValue>> metadata) { }
@@ -646,6 +668,7 @@ namespace .Conditions
         [.(ExpectationMessage="to be a system directory")]
         public static bool IsSystemDirectory(this .DirectoryInfo value) { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class DoubleEqualsAssertion : .<double, double>
     {
         public DoubleEqualsAssertion(.<double> context, double expected) { }
@@ -671,16 +694,18 @@ namespace .Conditions
         [.(ExpectationMessage="to be Unicode encoding")]
         public static bool IsUnicode(this .Encoding value) { }
     }
+    [.("IsEqualTo")]
     public class EqualsAssertion<TValue> : .<TValue>
     {
-        public EqualsAssertion(.<TValue> context, TValue? expected, .<TValue>? comparer = null) { }
+        public EqualsAssertion(.<TValue> context, TValue? expected) { }
+        public EqualsAssertion(.<TValue> context, TValue? expected, .<TValue> comparer) { }
         public TValue Expected { get; }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
         public .<TValue> IgnoringType( type) { }
         public .<TValue> IgnoringType<TIgnore>() { }
-        public .<TValue> Within(object tolerance) { }
     }
+    [.("IsEquatableTo")]
     public class EquatableAssertion<TActual, TExpected> : .<TActual>
         where TActual : <TExpected>
     {
@@ -790,6 +815,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<.FileInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class FloatEqualsAssertion : .<float, float>
     {
         public FloatEqualsAssertion(.<float> context, float expected) { }
@@ -846,12 +872,12 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
-    public class HasSingleItemAssertion<TCollection, TItem> : .<TCollection>
+    public class HasSingleItemAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
         public HasSingleItemAssertion(.<TCollection> context) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
-        public new .<TItem> GetAwaiter() { }
+        public .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
     }
     public static class HttpStatusCodeAssertionExtensions
@@ -882,6 +908,14 @@ namespace .Conditions
     [.<.IPAddress>("IsIPv6Teredo", CustomName="IsNotIPv6Teredo", ExpectationMessage="be an IPv6 Teredo address", NegateLogic=true)]
     [.<.IPAddress>("IsIPv6Teredo", ExpectationMessage="be an IPv6 Teredo address")]
     public static class IPAddressAssertionExtensions { }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
+    public class IntEqualsAssertion : .<int>
+    {
+        public IntEqualsAssertion(.<int> context, int expected) { }
+        protected override .<.> CheckAsync(.<int> metadata) { }
+        protected override string GetExpectation() { }
+        public . Within(int tolerance) { }
+    }
     [.("IsAssignableTo")]
     public class IsAssignableToAssertion<TTarget, TValue> : .<TValue>
     {
@@ -891,6 +925,7 @@ namespace .Conditions
     }
     [.("IsDefault")]
     public class IsDefaultAssertion<TValue> : .<TValue>
+        where TValue :  struct
     {
         public IsDefaultAssertion(.<TValue> context) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
@@ -929,6 +964,7 @@ namespace .Conditions
     }
     [.("IsNotDefault")]
     public class IsNotDefaultAssertion<TValue> : .<TValue>
+        where TValue :  struct
     {
         public IsNotDefaultAssertion(.<TValue> context) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
@@ -971,6 +1007,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class LongEqualsAssertion : .<long, long>
     {
         public LongEqualsAssertion(.<long> context, long expected) { }
@@ -990,6 +1027,7 @@ namespace .Conditions
         public .<TObject> And { get; }
         public .<TObject> Or { get; }
         public .<TObject?> GetAwaiter() { }
+        public static .<TObject> op_Implicit(.<TObject> result) { }
     }
     [.("IsNotEqualTo")]
     public class NotEqualsAssertion<TValue> : .<TValue>
@@ -1008,11 +1046,11 @@ namespace .Conditions
         protected override string GetExpectation() { }
         public .<TCollection, TItem> Using(.<TItem> comparer) { }
     }
-    [.("IsNotNull")]
     public class NotNullAssertion<TValue> : .<TValue>
     {
         public NotNullAssertion(.<TValue> context) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
+        public new .<TValue> GetAwaiter() { }
         protected override string GetExpectation() { }
     }
     [.("IsNotSameReferenceAs")]
@@ -1039,6 +1077,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsEquatableTo")]
     public class NullableEquatableAssertion<TActual, TExpected> : .<TActual?>
         where TActual :  struct, <TExpected>
     {
@@ -1136,6 +1175,7 @@ namespace .Conditions
         public . IgnoringCase() { }
         public . WithComparison( comparison) { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class StringEqualsAssertion : .<string>
     {
         public StringEqualsAssertion(.<string> context, string? expected) { }
@@ -1269,6 +1309,14 @@ namespace .Conditions
         [.(ExpectationMessage="to be zero")]
         public static bool IsZero(this  value) { }
     }
+    [.("IsEqualTo", OverloadResolutionPriority=2)]
+    public class TimeSpanEqualsAssertion : .<>
+    {
+        public TimeSpanEqualsAssertion(.<> context,  expected) { }
+        protected override .<.> CheckAsync(.<> metadata) { }
+        protected override string GetExpectation() { }
+        public . Within( tolerance) { }
+    }
     [.<>("SupportsDaylightSavingTime", CustomName="DoesNotSupportDaylightSavingTime", ExpectationMessage="support daylight saving time", NegateLogic=true)]
     [.<>("SupportsDaylightSavingTime", ExpectationMessage="support daylight saving time")]
     public static class TimeZoneInfoAssertionExtensions { }
@@ -1373,19 +1421,19 @@ namespace .Conditions
 }
 namespace .
 {
-    public class CountWrapper<TValue> : ., .<TValue>
-        where TValue : .IEnumerable
+    public class CountWrapper<TCollection, TItem> : ., .<TCollection>
+        where TCollection : .<TItem>
     {
-        public CountWrapper(.<TValue> context) { }
+        public CountWrapper(.<TCollection> context) { }
         public .<int> Between(int minimum, int maximum, [.("minimum")] string? minExpression = null, [.("maximum")] string? maxExpression = null) { }
-        public .<TValue> EqualTo(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public .<TCollection, TItem> EqualTo(int expectedCount, [.("expectedCount")] string? expression = null) { }
         public .<int> GreaterThan(int expected, [.("expected")] string? expression = null) { }
         public .<int> GreaterThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
         public .<int> LessThan(int expected, [.("expected")] string? expression = null) { }
         public .<int> LessThanOrEqualTo(int expected, [.("expected")] string? expression = null) { }
         public .<int> NotEqualTo(int expected, [.("expected")] string? expression = null) { }
         public .<int> Positive() { }
-        public .<TValue> Zero() { }
+        public .<TCollection, TItem> Zero() { }
     }
     public class LengthWrapper : ., .<string>
     {
@@ -1410,6 +1458,7 @@ namespace .Core
                 "Start",
                 "End"})]
         public <, > GetTiming() { }
+        public .<TNew> Map<TNew>(<.<TValue>, .<TNew>> evaluationFactory) { }
         public .<TNew> Map<TNew>(<TValue?, TNew?> mapper) { }
         public .<TException> MapException<TException>()
             where TException :  { }
@@ -1445,16 +1494,12 @@ namespace .Core
         And = 1,
         Or = 2,
     }
-    public class CollectionAndContinuation<TCollection, TItem> : .<TCollection>, ., .<TCollection>, .<TCollection, TItem>
+    public class CollectionAndContinuation<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem> { }
-    public class CollectionOrContinuation<TCollection, TItem> : .<TCollection>, ., .<TCollection>, .<TCollection, TItem>
+    public class CollectionOrContinuation<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem> { }
-    public abstract class ContinuationBase<TValue> : ., .<TValue>
-    {
-        public .<TValue> Context { get; }
-    }
-    public class DictionaryAndContinuation<TKey, TValue> : .<.<TKey, TValue>>, ., .<.<TKey, TValue>>, .<.<TKey, TValue>, .<TKey, TValue>> { }
-    public class DictionaryOrContinuation<TKey, TValue> : .<.<TKey, TValue>>, ., .<.<TKey, TValue>>, .<.<TKey, TValue>, .<TKey, TValue>> { }
+    public class DictionaryAndContinuation<TKey, TValue> : .<TKey, TValue> { }
+    public class DictionaryOrContinuation<TKey, TValue> : .<TKey, TValue> { }
     public sealed class EvaluationContext<TValue>
     {
         public EvaluationContext(<.<<TValue?, ?>>> evaluator) { }
@@ -1580,12 +1625,6 @@ namespace .Extensions
     }
     public static class AssertionExtensions
     {
-        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source) { }
-        public static .<.<TItem>, TItem> All<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
-        public static .<TCollection, TItem> All<TCollection, TItem>(this .<TCollection> source)
-            where TCollection : .<TItem> { }
-        public static .<TCollection, TItem> All<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
-            where TCollection : .<TItem> { }
         public static .<TCollection, TItem> Any<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
             where TCollection : .<TItem> { }
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
@@ -1602,9 +1641,6 @@ namespace .Extensions
             where TDictionary : .<TKey, TValue> { }
         public static .<TKey, TValue> ContainsKey<TDictionary, TKey, TValue>(this .<TDictionary> source, TKey key, .<TKey> comparer, [.("key")] string? expression = null)
             where TDictionary : .<TKey, TValue> { }
-        public static .<.<TItem>, TItem> ContainsOnly<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
-        public static .<TCollection, TItem> ContainsOnly<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
-            where TCollection : .<TItem> { }
         public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, TItem expected, [.("expected")] string? expression = null) { }
         public static .<TCollection, TItem> DoesNotContain<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
@@ -1621,10 +1657,10 @@ namespace .Extensions
         public static ..DoesNotHaveSameValueAsAssertion<TEnum> DoesNotHaveSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
             where TEnum :  struct,  { }
         public static .<TValue> EqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
-        public static ..CountWrapper<TValue> HasCount<TValue>(this .<TValue> source)
-            where TValue : .IEnumerable { }
-        public static .<TValue> HasCount<TValue>(this .<TValue> source, int expectedCount, [.("expectedCount")] string? expression = null)
-            where TValue : .IEnumerable { }
+        public static .<.<TItem>, TItem> HasCount<TItem>(this .<.<TItem>> source, int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public static .<.<TItem>, TItem> HasCount<TItem>(this .<.<TItem>> source, int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public static .<TCollection, TItem> HasCount<TCollection, TItem>(this .<TCollection> source, int expectedCount, [.("expectedCount")] string? expression = null)
+            where TCollection : .<TItem> { }
         public static .<TValue> HasDistinctItems<TValue>(this .<TValue> source)
             where TValue : .IEnumerable { }
         public static ..HasFlagAssertion<TEnum> HasFlag<TEnum>(this .<TEnum> source, TEnum expectedFlag, [.("expectedFlag")] string? expression = null)
@@ -1659,22 +1695,7 @@ namespace .Extensions
         public static .<> IsBeforeOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static ..IsDefinedAssertion<TEnum> IsDefined<TEnum>(this .<TEnum> source)
             where TEnum :  struct,  { }
-        public static .<TValue> IsEmpty<TValue>(this .<TValue> source)
-            where TValue : .IEnumerable { }
-        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static .<> IsEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
-        public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expression = null) { }
-        public static . IsEqualTo(this .<float> source, float expected, [.("expected")] string? expression = null) { }
-        public static .<int> IsEqualTo(this .<int> source, int expected, [.("expected")] string? expression = null) { }
-        public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expression = null) { }
-        public static . IsEqualTo(this .<string> source, string? expected, [.("expected")] string? expression = null) { }
         public static . IsEqualTo(this .<string> source, string? expected,  comparison, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
-        public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual> source, TExpected expected, [.("expected")] string? expression = null)
-            where TActual :  struct, <TExpected> { }
-        public static .<TActual, TExpected> IsEqualTo<TActual, TExpected>(this .<TActual?> source, TExpected expected, [.("expected")] string? expression = null)
-            where TActual :  struct, <TExpected> { }
         public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
@@ -1683,22 +1704,6 @@ namespace .Extensions
         public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, . ordering, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
         public static .<TValue> IsIn<TValue>(this .<TValue> source, params TValue[] collection) { }
-        public static .<.<TItem>, TItem> IsInDescendingOrder<TItem>(this .<.<TItem>> source)
-            where TItem : <TItem> { }
-        public static .<TCollection, TItem> IsInDescendingOrder<TCollection, TItem>(this .<TCollection> source)
-            where TCollection : .<TItem>
-            where TItem : <TItem> { }
-        public static .<TCollection, TItem> IsInDescendingOrder<TCollection, TItem>(this .<TCollection, TItem> source)
-            where TCollection : .<TItem>
-            where TItem : <TItem> { }
-        public static .<.<TItem>, TItem> IsInOrder<TItem>(this .<.<TItem>> source)
-            where TItem : <TItem> { }
-        public static .<TCollection, TItem> IsInOrder<TCollection, TItem>(this .<TCollection> source)
-            where TCollection : .<TItem>
-            where TItem : <TItem> { }
-        public static .<TCollection, TItem> IsInOrder<TCollection, TItem>(this .<TCollection, TItem> source)
-            where TCollection : .<TItem>
-            where TItem : <TItem> { }
         public static .<TValue> IsNegative<TValue>(this .<TValue> source)
             where TValue : <TValue> { }
         public static .<TValue> IsNegative<TValue>(this .<TValue?> source)
@@ -1706,8 +1711,6 @@ namespace .Extensions
         public static .<TTarget, TValue> IsNotAssignableTo<TTarget, TValue>(this .<TValue> source) { }
         public static ..IsNotDefinedAssertion<TEnum> IsNotDefined<TEnum>(this .<TEnum> source)
             where TEnum :  struct,  { }
-        public static .<TValue> IsNotEmpty<TValue>(this .<TValue> source)
-            where TValue : .IEnumerable { }
         public static .<TValue> IsNotEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
@@ -1716,26 +1719,17 @@ namespace .Extensions
         public static .<TCollection, TItem> IsNotEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, . ordering, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
         public static .<TValue> IsNotIn<TValue>(this .<TValue> source, params TValue[] collection) { }
+        public static .<TValue> IsNotNull<TValue>(this .<TValue> source)
+            where TValue :  class { }
+        public static .<TValue> IsNotNull<TValue>(this .<TValue?> source)
+            where TValue :  struct { }
         public static ..IsNotParsableIntoAssertion<T> IsNotParsableInto<T>(this .<string> source) { }
         public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
-        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
-        public static .<.<TItem>, TItem, TKey> IsOrderedBy<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null) { }
-        public static .<TCollection, TItem, TKey> IsOrderedBy<TCollection, TItem, TKey>(this .<TCollection> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection, TItem, TKey> IsOrderedBy<TCollection, TItem, TKey>(this .<TCollection> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null) { }
-        public static .<.<TItem>, TItem, TKey> IsOrderedByDescending<TItem, TKey>(this .<.<TItem>> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null) { }
-        public static .<TCollection, TItem, TKey> IsOrderedByDescending<TCollection, TItem, TKey>(this .<TCollection> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null)
-            where TCollection : .<TItem> { }
-        public static .<TCollection, TItem, TKey> IsOrderedByDescending<TCollection, TItem, TKey>(this .<TCollection> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null)
-            where TCollection : .<TItem> { }
         public static ..IsParsableIntoAssertion<T> IsParsableInto<T>(this .<string> source) { }
         public static .<TValue> IsPositive<TValue>(this .<TValue> source)
             where TValue : <TValue> { }
         public static .<TValue> IsPositive<TValue>(this .<TValue?> source)
             where TValue :  struct, <TValue> { }
-        public static .<.<TItem>, TExpected> IsTypeOf<TExpected, TItem>(this .<.<TItem>> source) { }
         public static .<TValue, TExpected> IsTypeOf<TExpected, TValue>(this .<TValue> source) { }
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, object> assertions) { }
@@ -1962,9 +1956,11 @@ namespace .Extensions
             where TCollection : .<TItem> { }
         public static .<TCollection, TItem> DoesNotContain<TCollection, TItem>(this .<TCollection, TItem> source, TItem expected, [.("expected")] string? expression = null)
             where TCollection : .<TItem> { }
-        public static .<TCollection> IsEmpty<TCollection, TItem>(this .<TCollection, TItem> source)
+        public static .<TCollection, TItem> IsEmpty<TCollection, TItem>(this .<TCollection, TItem> source)
             where TCollection : .<TItem> { }
-        public static .<TCollection> IsNotEmpty<TCollection, TItem>(this .<TCollection, TItem> source)
+        public static .<TCollection, TItem> IsNotEmpty<TCollection, TItem>(this .<TCollection, TItem> source)
+            where TCollection : .<TItem> { }
+        public static .<TCollection, TExpected> IsTypeOf<TExpected, TCollection, TItem>(this .<TCollection, TItem> source)
             where TCollection : .<TItem> { }
     }
     public static class CollectionEquivalenceAssertionExtensions
@@ -1984,6 +1980,12 @@ namespace .Extensions
     }
     public static class CollectionOrderingAssertionExtensions
     {
+        public static .<TCollection, TItem> IsInDescendingOrder<TCollection, TItem>(this .<TCollection, TItem> source)
+            where TCollection : .<TItem>
+            where TItem : <TItem> { }
+        public static .<TCollection, TItem> IsInOrder<TCollection, TItem>(this .<TCollection, TItem> source)
+            where TCollection : .<TItem>
+            where TItem : <TItem> { }
         public static .<TCollection, TItem, TKey> IsOrderedBy<TCollection, TItem, TKey>(this .<TCollection, TItem> source, <TItem, TKey> keySelector, [.("keySelector")] string? expression = null)
             where TCollection : .<TItem> { }
         public static .<TCollection, TItem, TKey> IsOrderedBy<TCollection, TItem, TKey>(this .<TCollection, TItem> source, <TItem, TKey> keySelector, .<TKey> comparer, [.("keySelector")] string? expression = null)
@@ -2001,13 +2003,13 @@ namespace .Extensions
             where TCollection : .<TItem> { }
         public static .<TCollection, TItem> Any<TCollection, TItem>(this .<TCollection, TItem> source, <TItem, bool> predicate, [.("predicate")] string? expression = null)
             where TCollection : .<TItem> { }
-        public static ..CountWrapper<TCollection> HasCount<TCollection, TItem>(this .<TCollection, TItem> source)
+        public static ..CountWrapper<TCollection, TItem> HasCount<TCollection, TItem>(this .<TCollection, TItem> source)
             where TCollection : .<TItem> { }
-        public static .<TCollection> HasCount<TCollection, TItem>(this .<TCollection, TItem> source, int expectedCount, [.("expectedCount")] string? expression = null)
+        public static .<TCollection, TItem> HasCount<TCollection, TItem>(this .<TCollection, TItem> source, int expectedCount, [.("expectedCount")] string? expression = null)
             where TCollection : .<TItem> { }
         public static .<TCollection> HasDistinctItems<TCollection, TItem>(this .<TCollection, TItem> source)
             where TCollection : .<TItem> { }
-        public static .<TCollection> HasSingleItem<TCollection, TItem>(this .<TCollection, TItem> source)
+        public static .<TCollection, TItem> HasSingleItem<TCollection, TItem>(this .<TCollection, TItem> source)
             where TCollection : .<TItem> { }
     }
     public static class CultureInfoAssertionExtensions
@@ -2087,6 +2089,10 @@ namespace .Extensions
         public static ._IsToday_Assertion IsToday(this .<> source) { }
         public static ._IsUtc_Assertion IsUtc(this .<> source) { }
     }
+    public static class DateTimeEqualsAssertionExtensions
+    {
+        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public static class DateTimeEqualsExactAssertionExtensions
     {
         public static . EqualsExact(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
@@ -2111,6 +2117,10 @@ namespace .Extensions
         public static ._IsOnWeekend_Assertion IsOnWeekend(this .<> source) { }
         public static ._IsToday_Assertion IsToday(this .<> source) { }
         public static ._IsUtc_Assertion IsUtc(this .<> source) { }
+    }
+    public static class DateTimeOffsetEqualsAssertionExtensions
+    {
+        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
     }
     public sealed class DateTimeOffset_IsInFutureUtc_Assertion : .<>
     {
@@ -2355,6 +2365,10 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class DoubleEqualsAssertionExtensions
+    {
+        public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public static class EncodingAssertionExtensions
     {
         public static ._IsASCII_Assertion IsASCII(this .<.Encoding> source) { }
@@ -2407,6 +2421,16 @@ namespace .Extensions
         public Encoding_IsUnicode_Assertion(.<.Encoding> context) { }
         protected override .<.> CheckAsync(.<.Encoding> metadata) { }
         protected override string GetExpectation() { }
+    }
+    public static class EqualsAssertionExtensions
+    {
+        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expectedExpression = null) { }
+        public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue? expected, .<TValue> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
+    }
+    public static class EquatableAssertionExtensions
+    {
+        public static .<TActual, TExpected> IsEquatableTo<TActual, TExpected>(this .<TActual> source, TExpected expected, [.("expected")] string? expectedExpression = null)
+            where TActual : <TExpected> { }
     }
     public static class ExceptionAssertionExtensions
     {
@@ -2564,6 +2588,10 @@ namespace .Extensions
     {
         public static . IsNotSystem(this .<.FileInfo> source) { }
     }
+    public static class FloatEqualsAssertionExtensions
+    {
+        public static . IsEqualTo(this .<float> source, float expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public static class GreaterThanAssertionExtensions
     {
         public static .<TValue> IsGreaterThan<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
@@ -2698,13 +2726,35 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.IPAddress> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class IntAssertions
+    {
+        public static ._IsEven_Assertion IsEven(this .<int> source) { }
+        public static ._IsOdd_Assertion IsOdd(this .<int> source) { }
+    }
+    public static class IntEqualsAssertionExtensions
+    {
+        public static . IsEqualTo(this .<int> source, int expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public sealed class Int_IsEven_Assertion : .<int>
+    {
+        public Int_IsEven_Assertion(.<int> context) { }
+        protected override .<.> CheckAsync(.<int> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Int_IsOdd_Assertion : .<int>
+    {
+        public Int_IsOdd_Assertion(.<int> context) { }
+        protected override .<.> CheckAsync(.<int> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public static class IsAssignableToAssertionExtensions
     {
         public static .<TTarget, TValue> IsAssignableTo<TTarget, TValue>(this .<TValue> source) { }
     }
     public static class IsDefaultAssertionExtensions
     {
-        public static .<TValue> IsDefault<TValue>(this .<TValue> source) { }
+        public static .<TValue> IsDefault<TValue>(this .<TValue> source)
+            where TValue :  struct { }
     }
     public static class IsEquatableOrEqualToAssertionExtensions
     {
@@ -2720,7 +2770,8 @@ namespace .Extensions
     }
     public static class IsNotDefaultAssertionExtensions
     {
-        public static .<TValue> IsNotDefault<TValue>(this .<TValue> source) { }
+        public static .<TValue> IsNotDefault<TValue>(this .<TValue> source)
+            where TValue :  struct { }
     }
     public static class IsNotInAssertionExtensions
     {
@@ -2753,13 +2804,13 @@ namespace .Extensions
         public static .<TValue> IsLessThanOrEqualTo<TValue>(this .<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
             where TValue : <TValue> { }
     }
+    public static class LongEqualsAssertionExtensions
+    {
+        public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public static class NotEqualsAssertionExtensions
     {
         public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue notExpected, .<TValue>? comparer = null, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
-    }
-    public static class NotNullAssertionExtensions
-    {
-        public static .<TValue> IsNotNull<TValue>(this .<TValue> source) { }
     }
     public static class NotSameReferenceAssertionExtensions
     {
@@ -2768,6 +2819,11 @@ namespace .Extensions
     public static class NullAssertionExtensions
     {
         public static .<TValue> IsNull<TValue>(this .<TValue> source) { }
+    }
+    public static class NullableEquatableAssertionExtensions
+    {
+        public static .<TActual, TExpected> IsEquatableTo<TActual, TExpected>(this .<TActual?> source, TExpected expected, [.("expected")] string? expectedExpression = null)
+            where TActual :  struct, <TExpected> { }
     }
     public static class ProcessAssertionExtensions
     {
@@ -2912,6 +2968,10 @@ namespace .Extensions
         public static . EndsWith(this .<string> source, string expected, [.("expected")] string? expectedExpression = null) { }
         public static . EndsWith(this .<string> source, string expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
     }
+    public static class StringEqualsAssertionExtensions
+    {
+        public static . IsEqualTo(this .<string> source, string? expected, [.("expected")] string? expectedExpression = null) { }
+    }
     public static class StringIsEmptyAssertionExtensions
     {
         public static . IsEmpty(this .<string> source) { }
@@ -3019,6 +3079,10 @@ namespace .Extensions
         public static ._IsNotZero_Assertion IsNotZero(this .<> source) { }
         public static ._IsPositive_Assertion IsPositive(this .<> source) { }
         public static ._IsZero_Assertion IsZero(this .<> source) { }
+    }
+    public static class TimeSpanEqualsAssertionExtensions
+    {
+        public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
     }
     public sealed class TimeSpan_IsNegative_Assertion : .<>
     {
@@ -3426,7 +3490,11 @@ namespace .Sources
         protected CollectionAssertionBase(.<TCollection> context) { }
         public new .<TCollection, TItem> And { get; }
         public new .<TCollection, TItem> Or { get; }
+        public .<TCollection, TItem> Contains(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
+        public .<TCollection, TItem> Contains(TItem expected, [.("expected")] string? expression = null) { }
         protected override string GetExpectation() { }
+        public .<TCollection, TItem> HasCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public .<TCollection, TExpected> IsTypeOf<TExpected>() { }
     }
     public class CollectionAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>

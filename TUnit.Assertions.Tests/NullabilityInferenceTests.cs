@@ -27,4 +27,19 @@ public class NullabilityInferenceTests
 
         Console.WriteLine(notNullValue.ToString());
     }
+
+    [Test]
+    public async Task NotNull_ValueType_Chaining()
+    {
+        // ReSharper disable once SuggestVarOrType_BuiltInTypes
+        // ReSharper disable once ConvertToConstant.Local
+        // ReSharper disable once VariableCanBeNotNullable
+        int? nullableValue = 1;
+        int nonNullableValue = 1;
+
+        var notNullValue = await Assert.That(nullableValue).IsNotNull().And.IsBetween(0, 10);
+        var notNullValue2 = await Assert.That(nonNullableValue).IsNotDefault().And.IsBetween(0, 10);
+
+        Console.WriteLine(notNullValue.ToString());
+    }
 }
