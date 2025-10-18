@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -7,6 +8,7 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a string is equal to an expected value.
 /// Demonstrates multiple custom methods WITHOUT wrappers!
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class StringEqualsAssertion : Assertion<string>
 {
     private readonly string? _expected;

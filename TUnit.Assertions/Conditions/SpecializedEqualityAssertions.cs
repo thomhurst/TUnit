@@ -1,4 +1,5 @@
 using System.Text;
+using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions;
@@ -7,6 +8,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a DateOnly value is equal to another, with optional tolerance.
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class DateOnlyEqualsAssertion : Assertion<DateOnly>
 {
     private readonly DateOnly _expected;
@@ -67,6 +69,7 @@ public class DateOnlyEqualsAssertion : Assertion<DateOnly>
 /// <summary>
 /// Asserts that a TimeOnly value is equal to another, with optional tolerance.
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class TimeOnlyEqualsAssertion : Assertion<TimeOnly>
 {
     private readonly TimeOnly _expected;
@@ -126,6 +129,7 @@ public class TimeOnlyEqualsAssertion : Assertion<TimeOnly>
 /// <summary>
 /// Asserts that a double value is equal to another, with optional tolerance.
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class DoubleEqualsAssertion : Assertion<double>
 {
     private readonly double _expected;
@@ -195,6 +199,7 @@ public class DoubleEqualsAssertion : Assertion<double>
 /// <summary>
 /// Asserts that a float value is equal to another, with optional tolerance.
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class FloatEqualsAssertion : Assertion<float>
 {
     private readonly float _expected;
@@ -262,8 +267,68 @@ public class FloatEqualsAssertion : Assertion<float>
 }
 
 /// <summary>
+/// Asserts that an int value is equal to another, with optional tolerance.
+/// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
+public class IntEqualsAssertion : Assertion<int>
+{
+    private readonly int _expected;
+    private int? _tolerance;
+
+    public IntEqualsAssertion(
+        AssertionContext<int> context,
+        int expected)
+        : base(context)
+    {
+        _expected = expected;
+    }
+
+    public IntEqualsAssertion Within(int tolerance)
+    {
+        _tolerance = tolerance;
+        Context.ExpressionBuilder.Append($".Within({tolerance})");
+        return this;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (_tolerance.HasValue)
+        {
+            var diff = Math.Abs(value - _expected);
+            if (diff <= _tolerance.Value)
+            {
+                return Task.FromResult(AssertionResult.Passed);
+            }
+
+            return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
+        }
+
+        if (value == _expected)
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation() =>
+        _tolerance.HasValue
+            ? $"to be within {_tolerance} of {_expected}"
+            : $"to be {_expected}";
+}
+
+/// <summary>
 /// Asserts that a long value is equal to another, with optional tolerance.
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class LongEqualsAssertion : Assertion<long>
 {
     private readonly long _expected;
@@ -322,6 +387,7 @@ public class LongEqualsAssertion : Assertion<long>
 /// <summary>
 /// Asserts that a DateTimeOffset value is equal to another, with optional tolerance.
 /// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
 public class DateTimeOffsetEqualsAssertion : Assertion<DateTimeOffset>
 {
     private readonly DateTimeOffset _expected;
@@ -343,6 +409,65 @@ public class DateTimeOffsetEqualsAssertion : Assertion<DateTimeOffset>
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DateTimeOffset> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (_tolerance.HasValue)
+        {
+            var diff = value > _expected ? value - _expected : _expected - value;
+            if (diff <= _tolerance.Value)
+            {
+                return Task.FromResult(AssertionResult.Passed);
+            }
+
+            return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
+        }
+
+        if (value == _expected)
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation() =>
+        _tolerance.HasValue
+            ? $"to be within {_tolerance} of {_expected}"
+            : $"to be {_expected}";
+}
+
+/// <summary>
+/// Asserts that a TimeSpan value is equal to another, with optional tolerance.
+/// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
+public class TimeSpanEqualsAssertion : Assertion<TimeSpan>
+{
+    private readonly TimeSpan _expected;
+    private TimeSpan? _tolerance;
+
+    public TimeSpanEqualsAssertion(
+        AssertionContext<TimeSpan> context,
+        TimeSpan expected)
+        : base(context)
+    {
+        _expected = expected;
+    }
+
+    public TimeSpanEqualsAssertion Within(TimeSpan tolerance)
+    {
+        _tolerance = tolerance;
+        Context.ExpressionBuilder.Append($".Within({tolerance})");
+        return this;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TimeSpan> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
