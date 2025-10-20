@@ -1,4 +1,5 @@
 using TUnit.Assertions.Conditions.Helpers;
+using TUnit.Assertions.Enums;
 
 namespace TUnit.Assertions.Tests;
 
@@ -151,12 +152,21 @@ public class CollectionStructuralEquivalenceTests
     }
 
     [Test]
-    public async Task Collections_With_Different_Null_Positions_Are_Not_Equivalent()
+    public async Task Collections_With_Different_Null_Positions_Are_Equivalent_By_Default()
     {
         var listA = new List<Message?> { new Message { Content = "Hello" }, null };
         var listB = new List<Message?> { null, new Message { Content = "Hello" } };
 
-        await TUnitAssert.That(listA).IsNotEquivalentTo(listB);
+        await TUnitAssert.That(listA).IsEquivalentTo(listB);
+    }
+
+    [Test]
+    public async Task Collections_With_Different_Null_Positions_Are_Not_Equivalent_When_Order_Matters()
+    {
+        var listA = new List<Message?> { new Message { Content = "Hello" }, null };
+        var listB = new List<Message?> { null, new Message { Content = "Hello" } };
+
+        await TUnitAssert.That(listA).IsNotEquivalentTo(listB, CollectionOrdering.Matching);
     }
 
     [Test]

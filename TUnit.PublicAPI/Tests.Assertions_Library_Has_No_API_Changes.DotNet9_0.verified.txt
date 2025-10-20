@@ -977,11 +977,14 @@ namespace .Conditions
         protected override string GetExpectation() { }
         public .<TValue> Using(.<TValue> comparer) { }
     }
+    [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+        "ires reflection and is not compatible with AOT")]
     [.("IsEquivalentTo")]
     public class IsEquivalentToAssertion<TItem> : .<TItem>
     {
         public IsEquivalentToAssertion(.<.<TItem>> context, .<TItem> expected, . ordering = 0) { }
         public IsEquivalentToAssertion(.<.<TItem>> context, .<TItem> expected, .<TItem> comparer, . ordering = 0) { }
+        [.("AOT", "IL3050", Justification="Collection equivalency uses structural comparison which requires reflection")]
         protected override .<.> CheckAsync(.<.<TItem>> metadata) { }
         protected override string GetExpectation() { }
         public .<TItem> Using(.<TItem> comparer) { }
@@ -1079,10 +1082,13 @@ namespace .Conditions
         public .<TValue> IgnoringType( type) { }
         public .<TValue> IgnoringType<TIgnore>() { }
     }
+    [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+        "ires reflection and is not compatible with AOT")]
     [.("IsNotEquivalentTo")]
     public class NotEquivalentToAssertion<TItem> : .<TItem>
     {
         public NotEquivalentToAssertion(.<.<TItem>> context, .<TItem> notExpected, . ordering = 0) { }
+        [.("AOT", "IL3050", Justification="Collection equivalency uses structural comparison which requires reflection")]
         protected override .<.> CheckAsync(.<.<TItem>> metadata) { }
         protected override string GetExpectation() { }
         public .<TItem> Using(.<TItem> comparer) { }
@@ -1511,6 +1517,8 @@ namespace .
         public bool Equals(T? x, T? y) { }
         public int GetHashCode(T obj) { }
     }
+    [.("Structural equality comparison uses reflection to access object members and is no" +
+        "t compatible with AOT")]
     public sealed class StructuralEqualityComparer<T> : .<T>
     {
         public static readonly ..StructuralEqualityComparer<T> Instance;
@@ -2914,7 +2922,11 @@ namespace .Extensions
     }
     public static class IsEquivalentToAssertionExtensions
     {
+        [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+            "ires reflection and is not compatible with AOT")]
         public static .<TItem> IsEquivalentTo<TItem>(this .<.<TItem>> source, .<TItem> expected, . ordering = 0, [.("expected")] string? expectedExpression = null, [.("ordering")] string? orderingExpression = null) { }
+        [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+            "ires reflection and is not compatible with AOT")]
         public static .<TItem> IsEquivalentTo<TItem>(this .<.<TItem>> source, .<TItem> expected, .<TItem> comparer, . ordering = 0, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null, [.("ordering")] string? orderingExpression = null) { }
     }
     public static class IsInAssertionExtensions
@@ -2976,6 +2988,8 @@ namespace .Extensions
     }
     public static class NotEquivalentToAssertionExtensions
     {
+        [.("Collection equivalency uses structural comparison for complex objects, which requ" +
+            "ires reflection and is not compatible with AOT")]
         public static .<TItem> IsNotEquivalentTo<TItem>(this .<.<TItem>> source, .<TItem> notExpected, . ordering = 0, [.("notExpected")] string? notExpectedExpression = null, [.("ordering")] string? orderingExpression = null) { }
     }
     public static class NotSameReferenceAssertionExtensions

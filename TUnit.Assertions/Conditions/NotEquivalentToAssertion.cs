@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Conditions.Helpers;
@@ -12,6 +13,7 @@ namespace TUnit.Assertions.Conditions;
 /// Inherits from CollectionComparerBasedAssertion to preserve collection type awareness in And/Or chains.
 /// </summary>
 [AssertionExtension("IsNotEquivalentTo")]
+[RequiresDynamicCode("Collection equivalency uses structural comparison for complex objects, which requires reflection and is not compatible with AOT")]
 public class NotEquivalentToAssertion<TItem> : CollectionComparerBasedAssertion<TItem>
 {
     private readonly IEnumerable<TItem> _notExpected;
@@ -33,6 +35,7 @@ public class NotEquivalentToAssertion<TItem> : CollectionComparerBasedAssertion<
         return this;
     }
 
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Collection equivalency uses structural comparison which requires reflection")]
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
     {
         var value = metadata.Value;

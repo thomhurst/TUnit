@@ -10,6 +10,7 @@ namespace TUnit.Assertions.Conditions.Helpers;
 /// For complex objects, performs deep comparison of properties and fields.
 /// </summary>
 /// <typeparam name="T">The type of objects to compare</typeparam>
+[RequiresDynamicCode("Structural equality comparison uses reflection to access object members and is not compatible with AOT")]
 public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
 {
     /// <summary>
@@ -75,6 +76,7 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
             ;
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "GetType() is acceptable for runtime structural comparison")]
     private bool CompareStructurally(object? x, object? y, HashSet<object> visited)
     {
         if (x == null && y == null)
@@ -124,9 +126,7 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
             return true;
         }
 
-#pragma warning disable IL2072
         var members = GetMembersToCompare(xType);
-#pragma warning restore IL2072
 
         foreach (var member in members)
         {

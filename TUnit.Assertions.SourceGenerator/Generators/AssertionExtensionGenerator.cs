@@ -92,13 +92,23 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             return null;
         }
 
+        // Check for RequiresDynamicCode attribute
+        var requiresDynamicCodeAttr = classSymbol.GetAttributes()
+            .FirstOrDefault(attr => attr.AttributeClass?.Name == "RequiresDynamicCodeAttribute");
+        string? requiresDynamicCodeMessage = null;
+        if (requiresDynamicCodeAttr != null && requiresDynamicCodeAttr.ConstructorArguments.Length > 0)
+        {
+            requiresDynamicCodeMessage = requiresDynamicCodeAttr.ConstructorArguments[0].Value?.ToString();
+        }
+
         return new AssertionExtensionData(
             classSymbol,
             methodName!,
             negatedMethodName,
             assertionBaseType,
             constructors,
-            overloadPriority
+            overloadPriority,
+            requiresDynamicCodeMessage
         );
     }
 
@@ -299,6 +309,13 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine($"    /// Extension method for {assertionType.Name}.");
         sourceBuilder.AppendLine("    /// </summary>");
 
+        // Add RequiresDynamicCode attribute if present
+        if (!string.IsNullOrEmpty(data.RequiresDynamicCodeMessage))
+        {
+            var escapedMessage = data.RequiresDynamicCodeMessage.Replace("\"", "\\\"");
+            sourceBuilder.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresDynamicCode(\"{escapedMessage}\")]");
+        }
+
         // Add OverloadResolutionPriority attribute only if priority > 0
         if (data.OverloadResolutionPriority > 0)
         {
@@ -436,6 +453,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         string? NegatedMethodName,
         INamedTypeSymbol AssertionBaseType,
         ImmutableArray<IMethodSymbol> Constructors,
-        int OverloadResolutionPriority
+        int OverloadResolutionPriority,
+        string? RequiresDynamicCodeMessage
     );
 }
