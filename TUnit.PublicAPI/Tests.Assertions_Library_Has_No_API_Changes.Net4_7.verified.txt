@@ -1413,6 +1413,22 @@ namespace .Conditions
 }
 namespace .
 {
+    public sealed class ReferenceEqualityComparer<T> : .<T>
+        where T :  class
+    {
+        public static readonly ..ReferenceEqualityComparer<T> Instance;
+        public bool Equals(T? x, T? y) { }
+        public int GetHashCode(T obj) { }
+    }
+    public sealed class StructuralEqualityComparer<T> : .<T>
+    {
+        public static readonly ..StructuralEqualityComparer<T> Instance;
+        public bool Equals(T? x, T? y) { }
+        public int GetHashCode(T obj) { }
+    }
+}
+namespace .
+{
     public class CountWrapper<TItem> : ., .<.<TItem>>
     {
         public CountWrapper(.<.<TItem>> context) { }
