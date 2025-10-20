@@ -12,6 +12,18 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     where TAnalyzer : DiagnosticAnalyzer, new()
     where TCodeFix : CodeFixProvider, new()
 {
+    private static ReferenceAssemblies GetReferenceAssemblies()
+    {
+#if NET472
+        return ReferenceAssemblies.NetFramework.Net472.Default;
+#elif NET8_0
+        return ReferenceAssemblies.Net.Net80;
+#elif NET9_0 || NET10_0_OR_GREATER
+        return ReferenceAssemblies.Net.Net90;
+#else
+        return ReferenceAssemblies.Net.Net80; // Default fallback
+#endif
+    }
     /// <inheritdoc cref="Microsoft.CodeAnalysis.Diagnostic"/>
     public static DiagnosticResult Diagnostic()
         => CSharpCodeFixVerifier<TAnalyzer, TCodeFix, DefaultVerifier>.Diagnostic();
@@ -33,7 +45,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         {
             TestCode = source.NormalizeLineEndings(),
             CodeActionValidationMode = CodeActionValidationMode.SemanticStructure,
-            ReferenceAssemblies = ReferenceAssemblies.Net.Net90
+            ReferenceAssemblies = GetReferenceAssemblies()
                 .AddPackages([new PackageIdentity("xunit.v3.assert", "2.0.0")]),
             TestState =
             {
@@ -68,7 +80,7 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         {
             TestCode = source.NormalizeLineEndings(),
             FixedCode = fixedSource.NormalizeLineEndings(),
-            ReferenceAssemblies = ReferenceAssemblies.Net.Net90
+            ReferenceAssemblies = GetReferenceAssemblies()
                 .AddPackages([new PackageIdentity("xunit.v3.assert", "2.0.0")]),
             TestState =
             {

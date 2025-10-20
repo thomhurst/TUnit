@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Sources;
@@ -10,7 +9,6 @@ namespace TUnit.Assertions;
 /// Entry point for all assertions.
 /// Provides Assert.That() overloads for different source types.
 /// </summary>
-[SuppressMessage("Usage", "TUnitAssertions0002:Assert statement not awaited")]
 public static class Assert
 {
     /// <summary>

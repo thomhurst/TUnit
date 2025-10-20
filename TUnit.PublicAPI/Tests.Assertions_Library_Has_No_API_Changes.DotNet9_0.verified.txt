@@ -1542,6 +1542,7 @@ namespace .Core
         public <, > GetTiming() { }
         public .<TNew> Map<TNew>(<.<TValue>, .<TNew>> evaluationFactory) { }
         public .<TNew> Map<TNew>(<TValue?, TNew?> mapper) { }
+        public .<.<TNew?>> MapAsync<TNew>(<TValue?, .<TNew?>> mapper) { }
         public .<TException> MapException<TException>()
             where TException :  { }
     }
