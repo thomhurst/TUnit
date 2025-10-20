@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Conditions;
+using TUnit.Assertions.Conditions.Wrappers;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Sources;
@@ -89,6 +90,17 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     {
         Context.ExpressionBuilder.Append($".HasCount({expression})");
         return new CollectionCountAssertion<TItem>(Context, expectedCount);
+    }
+
+    /// <summary>
+    /// Returns a wrapper for fluent count assertions.
+    /// This enables the pattern: .HasCount().GreaterThan(5)
+    /// Example: await Assert.That(list).HasCount().EqualTo(5);
+    /// </summary>
+    public CountWrapper<TItem> HasCount()
+    {
+        Context.ExpressionBuilder.Append(".HasCount()");
+        return new CountWrapper<TItem>(Context);
     }
 
     /// <summary>

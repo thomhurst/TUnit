@@ -3764,6 +3764,7 @@ namespace .Sources
         public .<TItem> DoesNotContain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TItem> DoesNotContain(TItem expected, [.("expected")] string? expression = null) { }
         protected override string GetExpectation() { }
+        public ..CountWrapper<TItem> HasCount() { }
         public .<TItem> HasCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
         public .<TItem> HasSingleItem() { }
         public .<TItem> IsEmpty() { }
@@ -3804,6 +3805,7 @@ namespace .Sources
         public .<TDictionary, TKey, TValue> ContainsKey(TKey expectedKey, .<TKey>? comparer, [.("expectedKey")] string? keyExpression = null, [.("comparer")] string? comparerExpression = null) { }
         public .<TDictionary, TKey, TValue> DoesNotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
         protected override string GetExpectation() { }
+        public ..CountWrapper<.<TKey, TValue>> HasCount() { }
         public .<.<TKey, TValue>> HasCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
         public .<.<TKey, TValue>> IsEmpty() { }
         public .<.<TKey, TValue>> IsNotEmpty() { }

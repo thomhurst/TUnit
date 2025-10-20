@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Conditions;
+using TUnit.Assertions.Conditions.Wrappers;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Sources;
@@ -180,6 +181,17 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Asser
     {
         Context.ExpressionBuilder.Append($".HasCount({expression})");
         return new CollectionCountAssertion<KeyValuePair<TKey, TValue>>(Context.Map<IEnumerable<KeyValuePair<TKey, TValue>>>(dict => dict), expectedCount);
+    }
+
+    /// <summary>
+    /// Returns a wrapper for fluent count assertions on dictionaries.
+    /// This enables the pattern: .HasCount().GreaterThan(5)
+    /// Example: await Assert.That(dictionary).HasCount().EqualTo(5);
+    /// </summary>
+    public CountWrapper<KeyValuePair<TKey, TValue>> HasCount()
+    {
+        Context.ExpressionBuilder.Append(".HasCount()");
+        return new CountWrapper<KeyValuePair<TKey, TValue>>(Context.Map<IEnumerable<KeyValuePair<TKey, TValue>>>(dict => dict));
     }
 
     /// <summary>
