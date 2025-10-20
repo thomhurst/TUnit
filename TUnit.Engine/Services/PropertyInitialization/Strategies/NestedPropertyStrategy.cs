@@ -16,8 +16,8 @@ internal sealed class NestedPropertyStrategy : IPropertyInitializationStrategy
 
     public NestedPropertyStrategy(DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
     {
-        _dataSourceInitializer = dataSourceInitializer ?? throw new System.ArgumentNullException(nameof(dataSourceInitializer));
-        _objectRegistrationService = objectRegistrationService ?? throw new System.ArgumentNullException(nameof(objectRegistrationService));
+        _dataSourceInitializer = dataSourceInitializer ?? throw new ArgumentNullException(nameof(dataSourceInitializer));
+        _objectRegistrationService = objectRegistrationService ?? throw new ArgumentNullException(nameof(objectRegistrationService));
     }
 
     public NestedPropertyStrategy()

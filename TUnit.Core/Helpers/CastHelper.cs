@@ -341,12 +341,9 @@ public static class CastHelper
 
     public static MethodInfo? GetConversionMethod([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type baseType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type targetType)
     {
-        // In single file mode, we might need to look harder for conversion methods
-        // First try the base type methods (including inherited and declared only)
         var baseMethods = baseType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
             .Concat(baseType.GetMethods(BindingFlags.Public | BindingFlags.Static));
 
-        // Then try the target type methods
         var targetMethods = targetType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
             .Concat(targetType.GetMethods(BindingFlags.Public | BindingFlags.Static));
 

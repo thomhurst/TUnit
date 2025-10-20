@@ -10,21 +10,14 @@ public class ThreadSafeDictionary<TKey,
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] TValue>
     where TKey : notnull
 {
-    // Using Lazy<TValue> ensures factory functions are only executed once per key,
-    // solving the race condition issue with ConcurrentDictionary.GetOrAdd
     private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _innerDictionary = new();
 
     public ICollection<TKey> Keys => _innerDictionary.Keys;
 
-    // Return IEnumerable to avoid allocating a List on every access
-    // Callers can materialize if needed
     public IEnumerable<TValue> Values => _innerDictionary.Values.Select(lazy => lazy.Value);
 
     public TValue GetOrAdd(TKey key, Func<TKey, TValue> func)
     {
-        // The Lazy wrapper ensures the factory function is only executed once,
-        // even if multiple threads race to add the same key
-        // We use ExecutionAndPublication mode for thread safety
         var lazy = _innerDictionary.GetOrAdd(key,
             k => new Lazy<TValue>(() => func(k), LazyThreadSafetyMode.ExecutionAndPublication));
 

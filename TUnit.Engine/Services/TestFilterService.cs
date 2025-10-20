@@ -18,13 +18,11 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         {
             logger.LogTrace("No test filter found.");
 
-            // When no filter is specified, exclude explicit tests
             return FilterOutExplicitTests(testNodes);
         }
 
         logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
 
-        // Apply the filter and separate explicit from non-explicit tests in one pass
         var filteredTests = new List<AbstractExecutableTest>();
         var filteredExplicitTests = new List<AbstractExecutableTest>();
         
@@ -43,22 +41,18 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             }
         }
 
-        // If we have both explicit and non-explicit tests, exclude the explicit ones
-        // This means the filter wasn't specifically targeting explicit tests
         if (filteredTests.Count > 0 && filteredExplicitTests.Count > 0)
         {
             logger.LogTrace($"Filter matched both explicit and non-explicit tests. Excluding {filteredExplicitTests.Count} explicit tests.");
             return filteredTests;
         }
 
-        // If we only have explicit tests, the filter was specifically targeting them
         if (filteredExplicitTests.Count > 0)
         {
             logger.LogTrace($"Filter matched only explicit tests. Running {filteredExplicitTests.Count} explicit tests.");
             return filteredExplicitTests;
         }
 
-        // Otherwise, return the non-explicit tests
         return filteredTests;
     }
 
@@ -79,7 +73,6 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
         test.Context.InternalDiscoveredTest = discoveredTest;
 
-        // First, invoke the global test argument registration service to register shared instances
         await testArgumentRegistrationService.OnTestRegistered(registeredContext);
 
         var eventObjects = test.Context.GetEligibleEventObjects();
@@ -187,14 +180,11 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
     private bool IsExplicitTest(AbstractExecutableTest test)
     {
-        // Check if the test or its class has the ExplicitAttribute
-        // First check the aggregated attributes (should contain both method and class attributes)
         if (test.Context.TestDetails.Attributes.OfType<ExplicitAttribute>().Any())
         {
             return true;
         }
 
-        // Also check the class type directly as a fallback
         var testClassType = test.Context.TestDetails.ClassType;
         return testClassType.GetCustomAttributes(typeof(ExplicitAttribute), true).Length > 0;
     }

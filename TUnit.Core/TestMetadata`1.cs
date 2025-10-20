@@ -24,7 +24,6 @@ public class TestMetadata<
         init
         {
             _instanceFactory = value;
-            // Also set the base class property with a wrapper
             if (value != null)
             {
                 base.InstanceFactory = (typeArgs, args) => value(typeArgs, args);
@@ -41,7 +40,6 @@ public class TestMetadata<
         init
         {
             _testInvoker = value;
-            // Also set the base class property with a wrapper
             if (value != null)
             {
                 base.TestInvoker = (instance, args) => value((T)instance, args);
@@ -81,8 +79,6 @@ public class TestMetadata<
                             return await context.TestClassInstanceFactory();
                         }
 
-                        // Otherwise fall back to creating instance normally
-                        // Try to create instance with ClassConstructor attribute
                         var attributes = metadata.AttributeFactory();
                         var instance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
                             attributes,

@@ -610,7 +610,7 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
     #endif
     private async Task<IDataSourceAttribute[]> GetDataSourcesAsync(IDataSourceAttribute[] dataSources)
     {
@@ -633,7 +633,7 @@ internal sealed class TestBuilder : ITestBuilder
     /// This centralizes the initialization logic for all data source usage.
     /// </summary>
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
     #endif
     private async IAsyncEnumerable<Func<Task<object?[]?>>> GetInitializedDataRowsAsync(
         IDataSourceAttribute dataSource,
@@ -723,7 +723,7 @@ internal sealed class TestBuilder : ITestBuilder
 
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
     #endif
     private async ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
@@ -768,7 +768,7 @@ internal sealed class TestBuilder : ITestBuilder
 
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
     #endif
     private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
     {
@@ -782,7 +782,7 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
     #endif
     private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
@@ -790,7 +790,7 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
     #endif
     private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination)
     {
@@ -812,7 +812,7 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
     #endif
     private async Task<TestDetails> CreateFailedTestDetails(TestMetadata metadata, string testId)
     {
@@ -835,7 +835,7 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
     #endif
     private async Task<Attribute[]> InitializeAttributesAsync(Attribute[] attributes)
     {
@@ -872,7 +872,7 @@ internal sealed class TestBuilder : ITestBuilder
 
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
     #endif
     private async Task<AbstractExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
     {
@@ -881,7 +881,7 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
     #endif
     private async Task<AbstractExecutableTest> CreateFailedTestForClassDataSourceCircularDependency(TestMetadata metadata)
     {

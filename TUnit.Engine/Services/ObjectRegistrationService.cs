@@ -29,7 +29,7 @@ internal sealed class ObjectRegistrationService
     /// <param name="methodMetadata">Method metadata for the test. Can be null.</param>
     /// <param name="events">Test context events for tracking. Must not be null and must be unique per test permutation.</param>
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
     #endif
     public async Task RegisterObjectAsync(
         object instance,
@@ -67,7 +67,7 @@ internal sealed class ObjectRegistrationService
     /// Used during test registration to prepare arguments without executing expensive operations.
     /// </summary>
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
     #endif
     public async Task RegisterArgumentsAsync(
         object?[] arguments,

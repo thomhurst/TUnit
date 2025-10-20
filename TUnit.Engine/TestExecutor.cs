@@ -52,7 +52,7 @@ internal class TestExecutor
     /// Uses focused services that follow SRP to manage lifecycle and execution.
     /// </summary>
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
     #endif
     public async Task ExecuteAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {
@@ -275,7 +275,6 @@ internal class TestExecutor
                     }
                 }
 
-                // Then dispose the instance itself
                 switch (instance)
                 {
                     case IAsyncDisposable asyncDisposable:

@@ -31,8 +31,8 @@ internal sealed class TestRegistry : ITestRegistry
         _sessionId = sessionId;
         _sessionCancellationToken = sessionCancellationToken;
     }
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Adding dynamic tests requires runtime compilation and reflection which are not supported in native AOT scenarios.")]
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
+    [RequiresDynamicCode("Adding dynamic tests requires runtime compilation and reflection which are not supported in native AOT scenarios.")]
+    [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
     public async Task AddDynamicTest<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
@@ -94,20 +94,16 @@ internal sealed class TestRegistry : ITestRegistry
             testMetadataList.Add(metadata);
         }
 
-        // Use the existing TestBuilderPipeline to build the tests
-        // This ensures all the same logic is applied (repeat, retry, context creation, etc.)
         var builtTests = await _testBuilderPipeline!.BuildTestsFromMetadataAsync(testMetadataList);
 
-        // Then execute each test through the single test executor
         foreach (var test in builtTests)
         {
-            // The SingleTestExecutor will handle all execution-related message publishing
             await _testCoordinator.ExecuteTestAsync(test, _sessionCancellationToken);
         }
     }
 
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic tests require runtime compilation of lambda expressions and are not supported in native AOT scenarios.")]
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Method metadata creation uses reflection on parameters and types")]
+    [RequiresDynamicCode("Dynamic tests require runtime compilation of lambda expressions and are not supported in native AOT scenarios.")]
+    [RequiresUnreferencedCode("Method metadata creation uses reflection on parameters and types")]
     private async Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
     {
         if (result.TestClassType == null || result.TestMethod == null)
@@ -156,7 +152,7 @@ internal sealed class TestRegistry : ITestRegistry
         });
     }
 
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic test instance creation requires Activator.CreateInstance which is not supported in native AOT scenarios.")]
+    [RequiresDynamicCode("Dynamic test instance creation requires Activator.CreateInstance which is not supported in native AOT scenarios.")]
     [UnconditionalSuppressMessage("Trimming",
         "IL2067:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call",
         Justification = "Dynamic tests require reflection")]
@@ -177,7 +173,7 @@ internal sealed class TestRegistry : ITestRegistry
         };
     }
 
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Dynamic test invocation requires LambdaExpression.Compile() which is not supported in native AOT scenarios.")]
+    [RequiresDynamicCode("Dynamic test invocation requires LambdaExpression.Compile() which is not supported in native AOT scenarios.")]
     private static Func<object, object?[], Task> CreateRuntimeTestInvoker(DynamicDiscoveryResult result)
     {
         return async (instance, args) =>
@@ -235,7 +231,6 @@ internal sealed class TestRegistry : ITestRegistry
         {
             get => (context, metadata) =>
             {
-                // For dynamic tests, we need to use the specific arguments from the dynamic result
                 var modifiedContext = new ExecutableTestCreationContext
                 {
                     TestId = context.TestId,
@@ -245,12 +240,10 @@ internal sealed class TestRegistry : ITestRegistry
                     Context = context.Context
                 };
 
-                // Create instance and test invoker for the dynamic test
                 var createInstance = (TestContext testContext) =>
                 {
                     var instance = metadata.InstanceFactory(Type.EmptyTypes, modifiedContext.ClassArguments);
 
-                    // Handle property injections
                     foreach (var propertyInjection in metadata.PropertyInjections)
                     {
                         var value = propertyInjection.ValueFactory();

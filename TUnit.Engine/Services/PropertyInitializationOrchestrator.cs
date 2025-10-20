@@ -89,7 +89,7 @@ internal sealed class PropertyInitializationOrchestrator
     /// Handles the complete initialization flow for an object with properties.
     /// </summary>
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Reflection-based property initialization uses PropertyInfo")]
+    [RequiresUnreferencedCode("Reflection-based property initialization uses PropertyInfo")]
     #endif
     public async Task InitializeObjectWithPropertiesAsync(
         object instance,

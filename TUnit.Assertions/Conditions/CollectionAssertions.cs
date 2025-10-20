@@ -41,15 +41,12 @@ public class CollectionIsEmptyAssertion<TValue> : Assertion<TValue>
                 return Task.FromResult(AssertionResult.Passed);
             }
 
-            // Collection is not empty - collect items for error message
             var items = new List<object?>();
             const int maxItemsToShow = 10;
-            var totalCount = 1; // We already have the first item
+            var totalCount = 1;
 
-            // Add first item
             items.Add(enumerator.Current);
 
-            // Collect remaining items up to the limit
             while (enumerator.MoveNext())
             {
                 totalCount++;
@@ -59,7 +56,6 @@ public class CollectionIsEmptyAssertion<TValue> : Assertion<TValue>
                 }
             }
 
-            // Build error message
             var sb = new StringBuilder("collection contains items: [");
             sb.Append(string.Join(", ", items));
             if (totalCount > maxItemsToShow)
@@ -515,10 +511,8 @@ public class HasSingleItemAssertion<TCollection, TItem> : Assertion<TCollection>
                 return Task.FromResult(AssertionResult.Failed("collection is empty"));
             }
 
-            // Store the single item
             _singleItem = enumerator.Current;
 
-            // Check if there's a second item
             if (enumerator.MoveNext())
             {
                 return Task.FromResult(AssertionResult.Failed("collection has more than one item"));
@@ -545,10 +539,8 @@ public class HasSingleItemAssertion<TCollection, TItem> : Assertion<TCollection>
 
     private async Task<TItem> ExecuteAndReturnItemAsync()
     {
-        // Execute the assertion (will throw if not exactly one item)
         await AssertAsync();
 
-        // Return the single item
         return _singleItem!;
     }
 }
@@ -586,7 +578,6 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Assertio
             return Task.FromResult(AssertionResult.Failed("collection was null"));
         }
 
-        // Search for matching item
         foreach (var item in value)
         {
             if (_predicate(item))
@@ -612,10 +603,8 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Assertio
 
     private async Task<TItem> ExecuteAndReturnItemAsync()
     {
-        // Execute the assertion (will throw if item not found)
         await AssertAsync();
 
-        // Return the found item
         return _foundItem!;
     }
 }
@@ -660,7 +649,6 @@ public class CollectionAllSatisfyAssertion<TCollection, TItem> : Assertion<TColl
             var itemAssertion = new ValueAssertion<TItem>(item, $"item[{index}]");
             try
             {
-                // Execute the assertion function and await the result
                 var assertion = _assertion(itemAssertion);
                 if (assertion != null)
                 {
@@ -895,7 +883,6 @@ public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Assertio
             return Task.FromResult(AssertionResult.Passed);
         }
 
-        // Find the first out-of-order item
         for (int i = 1; i < enumerated.Length; i++)
         {
             var prevKey = _keySelector(enumerated[i - 1]);
@@ -956,7 +943,6 @@ public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> 
             return Task.FromResult(AssertionResult.Passed);
         }
 
-        // Find the first out-of-order item
         for (int i = 1; i < enumerated.Length; i++)
         {
             var prevKey = _keySelector(enumerated[i - 1]);
