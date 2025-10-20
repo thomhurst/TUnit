@@ -158,8 +158,10 @@ public class MemberTests
         await TUnitAssert.That(complexObject)
             .Member(x => x.Name, name => name.IsEqualTo("Test"))
             .And.Member(x => x.Age, age => age.IsGreaterThan(18))
-            .And.Member(x => x.IsActive, active => active.IsTrue())
-            .And.Member(x => x.Tags, tags => tags.Contains("tag1"));
+            .And.Member(x => x.IsActive, active => active.IsTrue());
+
+        // Assert on collection contents separately
+        await TUnitAssert.That(complexObject.Tags).Contains("tag1");
     }
 
     private class MyClass

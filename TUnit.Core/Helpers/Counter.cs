@@ -7,14 +7,12 @@ public class Counter
 {
     private int _count;
 
-    // Use volatile to ensure proper visibility of the event field across threads
     private volatile EventHandler<int>? _onCountChanged;
 
     public int Increment()
     {
         var newCount = Interlocked.Increment(ref _count);
 
-        // Get a snapshot of the event handler to avoid race conditions
         var handler = _onCountChanged;
         handler?.Invoke(this, newCount);
 
@@ -25,7 +23,6 @@ public class Counter
     {
         var newCount = Interlocked.Decrement(ref _count);
 
-        // Get a snapshot of the event handler to avoid race conditions
         var handler = _onCountChanged;
         handler?.Invoke(this, newCount);
 
@@ -36,7 +33,6 @@ public class Counter
     {
         var newCount = Interlocked.Add(ref _count, value);
 
-        // Get a snapshot of the event handler to avoid race conditions
         var handler = _onCountChanged;
         handler?.Invoke(this, newCount);
 
@@ -49,7 +45,6 @@ public class Counter
     {
         add
         {
-            // Use Interlocked.CompareExchange for thread-safe event subscription
             EventHandler<int>? current;
             EventHandler<int>? newHandler;
             do
@@ -60,7 +55,6 @@ public class Counter
         }
         remove
         {
-            // Use Interlocked.CompareExchange for thread-safe event unsubscription
             EventHandler<int>? current;
             EventHandler<int>? newHandler;
             do

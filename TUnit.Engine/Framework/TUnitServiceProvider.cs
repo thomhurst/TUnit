@@ -220,7 +220,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             Logger,
             ParallelLimitLockProvider));
 
-        var staticPropertyHandler = Register(new Services.StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, disposer));
+        var staticPropertyHandler = Register(new StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, disposer));
 
         var testScheduler = Register<ITestScheduler>(new TestScheduler(
             Logger,

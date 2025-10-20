@@ -12,8 +12,7 @@ public class CustomCollectionTests
     {
         var collection = new CustomCollection("alphabet") { "A", "B", "C" };
 
-        // Custom collection types require cast to IEnumerable<T> for collection assertions
-        // This is the documented workaround for C# type inference limitations
-        await Assert.That((IEnumerable<string>)collection).Contains(x => x == "A");
+        // Custom collection types now work directly without casts
+        await Assert.That(collection).Contains(x => x == "A");
     }
 }

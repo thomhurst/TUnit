@@ -18,6 +18,7 @@ public static class Assert
     /// This overload enables better type inference for dictionary operations like ContainsKey.
     /// Example: await Assert.That(dict).ContainsKey("key");
     /// </summary>
+    [OverloadResolutionPriority(3)]
     public static DictionaryAssertion<TKey, TValue> That<TKey, TValue>(
         IReadOnlyDictionary<TKey, TValue> value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
@@ -26,55 +27,51 @@ public static class Assert
     }
 
     /// <summary>
-    /// Creates an assertion for any collection type (nullable or non-nullable).
-    /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
-    /// Example: await Assert.That(array).IsInOrder();
+    /// Creates an assertion for a string value.
+    /// Strings are treated as values, not as character collections, by default.
+    /// For character-level assertions, explicitly cast to IEnumerable&lt;char&gt; or char[].
+    /// Example: await Assert.That("hello").IsEqualTo("hello");
+    /// Example: await Assert.That((IEnumerable&lt;char&gt;)"ABC").Contains('B');
     /// </summary>
-    [OverloadResolutionPriority(10)]
-    public static CollectionAssertion<TCollection, TItem> That<TCollection, TItem>(
-        TCollection? value,
-        [CallerArgumentExpression(nameof(value))] string? expression = null) where TCollection : IEnumerable<TItem>
+    [OverloadResolutionPriority(2)]
+    public static ValueAssertion<string> That(
+        string? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return new CollectionAssertion<TCollection, TItem>(value!, expression);
+        return new ValueAssertion<string>(value, expression);
     }
 
     /// <summary>
     /// Creates an assertion for an IEnumerable (nullable or non-nullable).
     /// This overload enables better type inference for collection operations like IsInOrder, All, ContainsOnly.
+    /// Works with any type implementing IEnumerable&lt;T&gt; including List, Array, DbSet, IQueryable, and custom collections.
     /// Example: await Assert.That(enumerable).IsInOrder();
     /// </summary>
     [OverloadResolutionPriority(1)]
-    public static CollectionAssertion<IEnumerable<TItem>, TItem> That<TItem>(
+    public static CollectionAssertion<TItem> That<TItem>(
         IEnumerable<TItem>? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return new CollectionAssertion<IEnumerable<TItem>, TItem>(value!, expression);
-    }
-
-    /// <summary>
-    /// Creates an assertion for a string (nullable or non-nullable).
-    /// Treats the string as a collection of characters.
-    /// Example: await Assert.That("ABC").Contains('B');
-    /// </summary>
-    [OverloadResolutionPriority(2)]
-    public static CollectionAssertion<string, char> That(
-        string? value,
-        [CallerArgumentExpression(nameof(value))] string? expression = null)
-    {
-        return new CollectionAssertion<string, char>(value!, expression);
+        return new CollectionAssertion<TItem>(value!, expression);
     }
 
     /// <summary>
     /// Creates an assertion for a non-generic IEnumerable.
-    /// Use ValueAssertion to preserve reference equality for IsSameReferenceAs checks.
-    /// For collection-specific assertions, cast to IEnumerable<object> first.
-    /// Example: await Assert.That(nonGenericCollection).IsSameReferenceAs(other);
+    /// Automatically casts to IEnumerable&lt;object?&gt; for collection assertions.
+    /// Example: await Assert.That(nonGenericCollection).Contains("item");
     /// </summary>
-    public static CollectionAssertion<IEnumerable<object?>, object?> That(
+    public static CollectionAssertion<object?> That(
         IEnumerable value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
-        return That(value.Cast<object?>(), expression);
+        // Cast to IEnumerable<object?> directly without calling Cast<>() to preserve reference identity
+        // This allows IsSameReferenceAs to work correctly on non-generic IEnumerables
+        if (value is IEnumerable<object?> genericEnumerable)
+        {
+            return new CollectionAssertion<object?>(genericEnumerable, expression);
+        }
+
+        return new CollectionAssertion<object?>(value.Cast<object?>(), expression);
     }
 
     /// <summary>

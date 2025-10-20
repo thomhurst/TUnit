@@ -145,7 +145,8 @@ public class EnumerableTests
     {
         int[] array = [1, 2, 3];
 
-        IEnumerable enumerable = array;
+        // Use generic IEnumerable<int> to preserve reference identity
+        IEnumerable<int> enumerable = array;
 
         await Assert.That(enumerable).IsSameReferenceAs(enumerable);
     }
@@ -155,7 +156,8 @@ public class EnumerableTests
     {
         int[] array = [1, 2, 3];
 
-        IEnumerable enumerable = array;
+        // Use generic IEnumerable<int> to preserve reference identity
+        IEnumerable<int> enumerable = array;
 
         await Assert.That(enumerable).IsSameReferenceAs(enumerable);
     }

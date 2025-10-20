@@ -24,7 +24,6 @@ internal class AssertionScope : IDisposable
     {
         SetCurrentAssertionScope(_parent);
 
-        // If we have a parent scope, bubble up all exceptions to it
         if (_parent != null)
         {
             foreach (var exception in _exceptions)
@@ -35,19 +34,16 @@ internal class AssertionScope : IDisposable
             return;
         }
 
-        // No exceptions accumulated - all assertions passed
         if (_exceptions.Count == 0)
         {
             return;
         }
 
-        // Single exception - throw it directly to preserve stack trace
         if (_exceptions.Count == 1)
         {
             ExceptionDispatchInfo.Capture(_exceptions[0]).Throw();
         }
 
-        // Multiple exceptions - throw aggregate with combined messages
         var message = string.Join(Environment.NewLine + Environment.NewLine, _exceptions.Select(e => e.Message));
         throw new AssertionException(message, new AggregateException(_exceptions));
     }

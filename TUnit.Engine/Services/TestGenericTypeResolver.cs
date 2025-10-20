@@ -19,7 +19,7 @@ internal sealed class TestGenericTypeResolver
     /// <param name="testData">The runtime test data containing actual arguments</param>
     /// <returns>A result containing resolved generic types for both class and method</returns>
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
+    [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
     #endif
     public static TestGenericTypeResolution Resolve(TestMetadata metadata, TestBuilder.TestData testData)
     {
@@ -56,7 +56,7 @@ internal sealed class TestGenericTypeResolver
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
+    [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
     #endif
     private static Type[] ResolveClassGenericArguments(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type genericClassType,
@@ -121,7 +121,7 @@ internal sealed class TestGenericTypeResolver
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
+    [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
     #endif
     private static Type[] ResolveMethodGenericArguments(
         MethodMetadata methodMetadata,
@@ -416,7 +416,7 @@ internal sealed class TestGenericTypeResolver
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
+    [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
     #endif
     private static bool TryInferTypesFromArguments(
         ParameterInfo[] parameters,
@@ -442,7 +442,7 @@ internal sealed class TestGenericTypeResolver
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
+    [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
     #endif
     private static void InferTypeMapping(
         Type parameterType,

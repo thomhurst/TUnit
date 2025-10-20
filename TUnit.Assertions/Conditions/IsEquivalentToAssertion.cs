@@ -13,14 +13,13 @@ namespace TUnit.Assertions.Conditions;
 /// Inherits from CollectionComparerBasedAssertion to preserve collection type awareness in And/Or chains.
 /// </summary>
 [AssertionExtension("IsEquivalentTo")]
-public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBasedAssertion<TCollection, TItem>
-    where TCollection : IEnumerable<TItem>
+public class IsEquivalentToAssertion<TItem> : CollectionComparerBasedAssertion<TItem>
 {
     private readonly IEnumerable<TItem> _expected;
     private readonly CollectionOrdering _ordering;
 
     public IsEquivalentToAssertion(
-        AssertionContext<TCollection> context,
+        AssertionContext<IEnumerable<TItem>> context,
         IEnumerable<TItem> expected,
         CollectionOrdering ordering = CollectionOrdering.Any)
         : base(context)
@@ -30,7 +29,7 @@ public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBas
     }
 
     public IsEquivalentToAssertion(
-        AssertionContext<TCollection> context,
+        AssertionContext<IEnumerable<TItem>> context,
         IEnumerable<TItem> expected,
         IEqualityComparer<TItem> comparer,
         CollectionOrdering ordering = CollectionOrdering.Any)
@@ -41,13 +40,13 @@ public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBas
         SetComparer(comparer);
     }
 
-    public IsEquivalentToAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
+    public IsEquivalentToAssertion<TItem> Using(IEqualityComparer<TItem> comparer)
     {
         SetComparer(comparer);
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;

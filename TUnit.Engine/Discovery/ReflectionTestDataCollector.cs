@@ -623,7 +623,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // For each data source combination, create a concrete generic type
         foreach (var dataSource in classDataSources)
         {
-            var dataItems = await GetDataFromSourceAsync(dataSource, null!).ConfigureAwait(false); // TODO
+            var dataItems = await GetDataFromSourceAsync(dataSource, null!).ConfigureAwait(false);
 
             foreach (var dataRow in dataItems)
             {
@@ -718,7 +718,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var dataItems = await GetDataFromSourceAsync(dataSource, null!).ConfigureAwait(false); // TODO
+            var dataItems = await GetDataFromSourceAsync(dataSource, null!).ConfigureAwait(false);
 
             foreach (var dataRow in dataItems)
             {
@@ -1501,7 +1501,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     }
 
                     // Check if we have a pre-compiled method for these type arguments (AOT-friendly)
-                    var compiledMethod = TUnit.Core.AotCompatibility.GenericTestRegistry.GetCompiledMethod(
+                    var compiledMethod = Core.AotCompatibility.GenericTestRegistry.GetCompiledMethod(
                         testClass, testMethod.Name, typeArguments);
 
                     if (compiledMethod != null)

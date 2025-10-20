@@ -454,7 +454,7 @@ internal sealed class TestBuilderPipeline
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
+    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
     #endif
     private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
     {

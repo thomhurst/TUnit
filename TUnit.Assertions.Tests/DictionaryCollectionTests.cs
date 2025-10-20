@@ -182,7 +182,9 @@ public class DictionaryCollectionTests
         };
 
         // IsEquivalentTo works on collections regardless of order
-        await Assert.That(dictionary1).IsEquivalentTo(dictionary2);
+        // Cast both to IEnumerable to use collection equivalency
+        await Assert.That((IEnumerable<KeyValuePair<string, int>>)dictionary1)
+            .IsEquivalentTo((IEnumerable<KeyValuePair<string, int>>)dictionary2);
     }
 
     [Test]

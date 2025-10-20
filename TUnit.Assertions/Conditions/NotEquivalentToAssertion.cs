@@ -12,14 +12,13 @@ namespace TUnit.Assertions.Conditions;
 /// Inherits from CollectionComparerBasedAssertion to preserve collection type awareness in And/Or chains.
 /// </summary>
 [AssertionExtension("IsNotEquivalentTo")]
-public class NotEquivalentToAssertion<TCollection, TItem> : CollectionComparerBasedAssertion<TCollection, TItem>
-    where TCollection : IEnumerable<TItem>
+public class NotEquivalentToAssertion<TItem> : CollectionComparerBasedAssertion<TItem>
 {
     private readonly IEnumerable<TItem> _notExpected;
     private readonly CollectionOrdering _ordering;
 
     public NotEquivalentToAssertion(
-        AssertionContext<TCollection> context,
+        AssertionContext<IEnumerable<TItem>> context,
         IEnumerable<TItem> notExpected,
         CollectionOrdering ordering = CollectionOrdering.Any)
         : base(context)
@@ -28,13 +27,13 @@ public class NotEquivalentToAssertion<TCollection, TItem> : CollectionComparerBa
         _ordering = ordering;
     }
 
-    public NotEquivalentToAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
+    public NotEquivalentToAssertion<TItem> Using(IEqualityComparer<TItem> comparer)
     {
         SetComparer(comparer);
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;

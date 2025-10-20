@@ -77,11 +77,13 @@ public class PropertyAssertionTests
         collection.Title = "Alphabet";
         collection.Version = 1;
 
-        // Can assert on both collection properties AND collection contents
-        await Assert.That(collection)
+        // Assert on collection properties using explicit type
+        await Assert.That<CustomCollection>(collection)
             .HasProperty(x => x.Title, "Alphabet")
-            .And.HasProperty(x => x.Version, 1)
-            .And.Contains("A");
+            .And.HasProperty(x => x.Version, 1);
+
+        // Assert on collection contents separately
+        await Assert.That(collection).Contains("A");
     }
 
     [Test]

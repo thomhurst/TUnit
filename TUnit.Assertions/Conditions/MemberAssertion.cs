@@ -133,7 +133,7 @@ internal class TypeErasedAssertion<T> : Assertion<object?>
 /// Simple adapter to wrap an AssertionContext as an IAssertionSource.
 /// Used to pass member context to the assertion lambda.
 /// </summary>
-internal class AssertionSourceAdapter<T> : IAssertionSource<T>
+public class AssertionSourceAdapter<T> : IAssertionSource<T>
 {
     public AssertionContext<T> Context { get; }
 

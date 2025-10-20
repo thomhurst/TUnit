@@ -359,13 +359,17 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine("    {");
 
         // Build expression string for error messages
-        sourceBuilder.Append($"        source.Context.ExpressionBuilder.Append($\".{methodName}(");
+        // Only include parameters that were actually provided (non-null expressions)
+        sourceBuilder.Append($"        source.Context.ExpressionBuilder.Append(\".{methodName}(\"");
         if (additionalParams.Length > 0)
         {
-            var expressionParts = additionalParams.Select(p => $"{{{p.Name}Expression}}");
+            sourceBuilder.AppendLine();
+            sourceBuilder.Append("            + string.Join(\", \", new[] { ");
+            var expressionParts = additionalParams.Select(p => $"{p.Name}Expression");
             sourceBuilder.Append(string.Join(", ", expressionParts));
+            sourceBuilder.Append(" }.Where(e => e != null))");
         }
-        sourceBuilder.AppendLine(")\");");
+        sourceBuilder.AppendLine(" + \")\");");
 
         // Construct and return the assertion
         sourceBuilder.Append($"        return new {assertionType.Name}");

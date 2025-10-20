@@ -85,7 +85,7 @@ internal sealed class PropertyInjectionService
 #if NETSTANDARD2_0
         var visitedObjects = new ConcurrentDictionary<object, byte>();
 #else
-        var visitedObjects = new ConcurrentDictionary<object, byte>(System.Collections.Generic.ReferenceEqualityComparer.Instance);
+        var visitedObjects = new ConcurrentDictionary<object, byte>(ReferenceEqualityComparer.Instance);
 #endif
         return InjectPropertiesIntoObjectAsyncCore(instance, objectBag, methodMetadata, events, visitedObjects);
     }

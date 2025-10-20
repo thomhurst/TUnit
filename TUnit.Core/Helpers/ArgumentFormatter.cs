@@ -44,16 +44,13 @@ public static class ArgumentFormatter
             return "null";
         }
 
-        // Cache GetType() result to avoid repeated virtual method calls
         var type = o.GetType();
 
-        // Handle tuples specially
         if (TupleHelper.IsTupleType(type))
         {
             return FormatTuple(o);
         }
 
-        // Handle arrays and collections by showing their elements
         if (o is IEnumerable enumerable and not string)
         {
             return FormatEnumerable(enumerable);

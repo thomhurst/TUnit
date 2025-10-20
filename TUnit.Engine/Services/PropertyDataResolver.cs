@@ -75,7 +75,7 @@ internal static class PropertyDataResolver
     /// Ensures the data source is fully initialized (including property injection) before returning it.
     /// </summary>
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
+    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
     #endif
     private static async Task<IDataSourceAttribute?> GetInitializedDataSourceAsync(PropertyInitializationContext context, DataSourceInitializer dataSourceInitializer)
     {

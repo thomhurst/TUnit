@@ -655,9 +655,10 @@ public class TypeAssertionTests
         await Assert.That(sut)
             .IsNotNull()
             .And
-            .IsTypeOf<List<int>>()
-            .And
-            .HasCount<List<int>, int>(3);
+            .IsTypeOf<List<int>>();
+
+        // Assert on collection contents separately
+        await Assert.That((List<int>)sut).HasCount(3);
     }
 
     [Test]

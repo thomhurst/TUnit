@@ -31,12 +31,9 @@ internal static class DataGeneratorMetadataCreator
             }
         }
 
-        // Handle property data generation specifically
         MemberMetadata[] membersToGenerate;
         if (generatorType == DataGeneratorType.Property)
         {
-            // For properties, we generate data for properties that have data sources
-            // If PropertyDataSources is populated, use only those properties
             if (testMetadata.PropertyDataSources.Length > 0)
             {
                 var propertyMetadataList = new List<PropertyMetadata>();
@@ -55,13 +52,11 @@ internal static class DataGeneratorMetadataCreator
             }
             else
             {
-                // If no specific PropertyDataSources, include all class properties
                 membersToGenerate = testMetadata.MethodMetadata.Class.Properties;
             }
         }
         else
         {
-            // For parameters (class or test), use the parameter metadata
             membersToGenerate = [..parametersToGenerate];
         }
 

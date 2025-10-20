@@ -10,11 +10,10 @@ namespace TUnit.Assertions.Sources;
 /// Inherits from CollectionAssertionBase to get all collection-specific instance methods (Contains, IsInOrder, etc.)
 /// that persist through And/Or continuations.
 /// </summary>
-public class CollectionAssertion<TCollection, TItem> : CollectionAssertionBase<TCollection, TItem>
-    where TCollection : IEnumerable<TItem>
+public class CollectionAssertion<TItem> : CollectionAssertionBase<TItem>
 {
-    public CollectionAssertion(TCollection value, string? expression)
-        : base(new AssertionContext<TCollection>(value, CreateExpressionBuilder(expression)))
+    public CollectionAssertion(IEnumerable<TItem> value, string? expression)
+        : base(new AssertionContext<IEnumerable<TItem>>(value, CreateExpressionBuilder(expression)))
     {
     }
 

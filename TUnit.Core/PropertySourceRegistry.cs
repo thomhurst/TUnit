@@ -83,14 +83,12 @@ public static class PropertySourceRegistry
     #endif
     public static PropertyInjectionData[] DiscoverInjectableProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type)
     {
-        // First try source-generated data
         var sourceGenerated = GetPropertyInjectionData(type);
         if (sourceGenerated != null)
         {
             return sourceGenerated;
         }
 
-        // Fall back to reflection discovery
         var injectableProperties = new List<PropertyInjectionData>();
 
         foreach (var property in type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
