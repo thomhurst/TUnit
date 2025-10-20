@@ -43,11 +43,14 @@ public class NotEquivalentToAssertion<TItem> : CollectionComparerBasedAssertion<
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
+        // Use structural equality comparer by default for consistent behavior with object IsEquivalentTo
+        var comparer = HasCustomComparer() ? GetComparer() : StructuralEqualityComparer<TItem>.Instance;
+
         var result = CollectionEquivalencyChecker.AreEquivalent(
             value,
             _notExpected,
             _ordering,
-            GetComparer());
+            comparer);
 
         // Invert the logic: we want them to NOT be equivalent
         return Task.FromResult(result.AreEquivalent
