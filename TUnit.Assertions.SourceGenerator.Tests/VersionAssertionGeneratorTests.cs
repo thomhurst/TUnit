@@ -13,6 +13,6 @@ internal class VersionAssertionGeneratorTests : TestsBase<MethodAssertionGenerat
             "VersionAssertionExtensions.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().GreaterThanOrEqualTo(1);
+            await Assert.That(generatedFiles).IsNotEmpty();
         });
 }

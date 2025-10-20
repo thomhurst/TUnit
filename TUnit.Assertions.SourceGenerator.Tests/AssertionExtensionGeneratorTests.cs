@@ -13,7 +13,7 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             "NonGenericAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(1);
+            await Assert.That(generatedFiles).HasCount(1);
             var extensionFile = generatedFiles.FirstOrDefault(f => f.Contains("IsEmpty"));
             await Assert.That(extensionFile).IsNotNull();
             await Assert.That(extensionFile!).Contains("IsEmpty");
@@ -27,7 +27,7 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             "SingleGenericParameterAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(1);
+            await Assert.That(generatedFiles).HasCount(1);
             var extensionFile = generatedFiles.FirstOrDefault(f => f.Contains("IsNull"));
             await Assert.That(extensionFile).IsNotNull();
             await Assert.That(extensionFile!).Contains("IsNull");
@@ -42,7 +42,7 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             "MultipleGenericParametersAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(1);
+            await Assert.That(generatedFiles).HasCount(1);
             var extensionFile = generatedFiles.FirstOrDefault(f => f.Contains("IsAssignableTo"));
             await Assert.That(extensionFile).IsNotNull();
             await Assert.That(extensionFile!).Contains("IsAssignableTo");
@@ -57,7 +57,7 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             "OptionalParameterAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(1);
+            await Assert.That(generatedFiles).HasCount(1);
             var extensionFile = generatedFiles.FirstOrDefault(f => f.Contains("IsNotEqualTo"));
             await Assert.That(extensionFile).IsNotNull();
             await Assert.That(extensionFile!).Contains("IsNotEqualTo");
@@ -72,7 +72,7 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             "GenericConstraintsAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(1);
+            await Assert.That(generatedFiles).HasCount(1);
             var extensionFile = generatedFiles.FirstOrDefault(f => f.Contains("IsGreaterThan"));
             await Assert.That(extensionFile).IsNotNull();
             await Assert.That(extensionFile!).Contains("IsGreaterThan");
@@ -87,7 +87,7 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             "MultipleConstructorsAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(1);
+            await Assert.That(generatedFiles).HasCount(1);
             var extensionFile = generatedFiles.FirstOrDefault(f => f.Contains("IsEqualTo"));
             await Assert.That(extensionFile).IsNotNull();
             // Should generate multiple overloads
@@ -103,7 +103,7 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             "NegatedMethodAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(1);
+            await Assert.That(generatedFiles).HasCount(1);
             var extensionFile = generatedFiles.FirstOrDefault(f => f.Contains("IsTrue"));
             await Assert.That(extensionFile).IsNotNull();
             await Assert.That(extensionFile!).Contains("IsTrue");
@@ -118,7 +118,7 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             "DefaultValuesAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(1);
+            await Assert.That(generatedFiles).HasCount(1);
             var extensionFile = generatedFiles.FirstOrDefault(f => f.Contains("= true"));
             await Assert.That(extensionFile).IsNotNull();
             await Assert.That(extensionFile!).Contains("= true");
@@ -134,7 +134,7 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             "EnumDefaultAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(1);
+            await Assert.That(generatedFiles).HasCount(1);
             var extensionFile = generatedFiles.FirstOrDefault(f => f.Contains("StringComparison"));
             await Assert.That(extensionFile).IsNotNull();
             await Assert.That(extensionFile!).Contains("StringComparison.");
@@ -148,7 +148,7 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
             "MultipleParametersAssertion.cs"),
         async generatedFiles =>
         {
-            await Assert.That(generatedFiles).HasCount().EqualTo(1);
+            await Assert.That(generatedFiles).HasCount(1);
             var extensionFile = generatedFiles.FirstOrDefault(f => f.Contains("IsBetween"));
             await Assert.That(extensionFile).IsNotNull();
             await Assert.That(extensionFile!).Contains("IsBetween");

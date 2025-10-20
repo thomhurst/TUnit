@@ -48,10 +48,9 @@ public class SatisfiesAssertion<TValue> : Assertion<TValue>
 /// This is useful for types that implement IEquatable for better performance.
 /// </summary>
 [AssertionExtension("IsEquatableOrEqualTo")]
-public class IsEquatableOrEqualToAssertion<TValue> : Assertion<TValue>
+public class IsEquatableOrEqualToAssertion<TValue> : ComparerBasedAssertion<TValue, TValue>
 {
     private readonly TValue _expected;
-    private IEqualityComparer<TValue>? _comparer;
 
     public IsEquatableOrEqualToAssertion(
         AssertionContext<TValue> context,
@@ -63,8 +62,7 @@ public class IsEquatableOrEqualToAssertion<TValue> : Assertion<TValue>
 
     public IsEquatableOrEqualToAssertion<TValue> Using(IEqualityComparer<TValue> comparer)
     {
-        _comparer = comparer;
-        Context.ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
+        SetComparer(comparer);
         return this;
     }
 
@@ -78,7 +76,7 @@ public class IsEquatableOrEqualToAssertion<TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
-        var comparer = _comparer ?? EqualityComparer<TValue>.Default;
+        var comparer = GetComparer();
 
         if (comparer.Equals(value!, _expected))
         {

@@ -9,59 +9,53 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a DateOnly value is equal to another, with optional tolerance.
 /// </summary>
 [AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
-public class DateOnlyEqualsAssertion : Assertion<DateOnly>
+public class DateOnlyEqualsAssertion : ToleranceBasedEqualsAssertion<DateOnly, int>
 {
-    private readonly DateOnly _expected;
-    private int? _toleranceDays;
-
     public DateOnlyEqualsAssertion(
         AssertionContext<DateOnly> context,
         DateOnly expected)
-        : base(context)
+        : base(context, expected)
     {
-        _expected = expected;
     }
 
     public DateOnlyEqualsAssertion WithinDays(int days)
     {
-        _toleranceDays = days;
-        Context.ExpressionBuilder.Append($".WithinDays({days})");
+        Within(days);
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DateOnly> metadata)
+    protected override bool HasToleranceValue()
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
-        }
-
-        if (_toleranceDays.HasValue)
-        {
-            var diff = Math.Abs(value.DayNumber - _expected.DayNumber);
-            if (diff <= _toleranceDays.Value)
-            {
-                return Task.FromResult(AssertionResult.Passed);
-            }
-
-            return Task.FromResult(AssertionResult.Failed($"found {value}, which is {diff} days from expected"));
-        }
-
-        if (value == _expected)
-        {
-            return Task.FromResult(AssertionResult.Passed);
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        return true; // int? always has meaningful value when not null
     }
 
-    protected override string GetExpectation() =>
-        _toleranceDays.HasValue
-            ? $"to be within {_toleranceDays} days of {_expected}"
-            : $"to be {_expected}";
+    protected override bool IsWithinTolerance(DateOnly actual, DateOnly expected, int toleranceDays)
+    {
+        var diff = Math.Abs(actual.DayNumber - expected.DayNumber);
+        return diff <= toleranceDays;
+    }
+
+    protected override object CalculateDifference(DateOnly actual, DateOnly expected)
+    {
+        return Math.Abs(actual.DayNumber - expected.DayNumber);
+    }
+
+    protected override bool AreExactlyEqual(DateOnly actual, DateOnly expected)
+    {
+        return actual == expected;
+    }
+
+    protected override string FormatDifferenceMessage(DateOnly actual, object difference)
+    {
+        return $"found {actual}, which is {difference} days from expected";
+    }
+
+    protected override string GetExpectation()
+    {
+        // Override to use "days" instead of just the tolerance value
+        var baseExpectation = base.GetExpectation();
+        return baseExpectation.Replace("to be within ", "to be within ").Replace(" of ", " days of ");
+    }
 }
 #endif
 
@@ -70,59 +64,40 @@ public class DateOnlyEqualsAssertion : Assertion<DateOnly>
 /// Asserts that a TimeOnly value is equal to another, with optional tolerance.
 /// </summary>
 [AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
-public class TimeOnlyEqualsAssertion : Assertion<TimeOnly>
+public class TimeOnlyEqualsAssertion : ToleranceBasedEqualsAssertion<TimeOnly, TimeSpan>
 {
-    private readonly TimeOnly _expected;
-    private TimeSpan? _tolerance;
-
     public TimeOnlyEqualsAssertion(
         AssertionContext<TimeOnly> context,
         TimeOnly expected)
-        : base(context)
+        : base(context, expected)
     {
-        _expected = expected;
     }
 
-    public TimeOnlyEqualsAssertion Within(TimeSpan tolerance)
+    protected override bool HasToleranceValue()
     {
-        _tolerance = tolerance;
-        Context.ExpressionBuilder.Append($".Within({tolerance})");
-        return this;
+        return true; // TimeSpan? always has meaningful value when not null
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TimeOnly> metadata)
+    protected override bool IsWithinTolerance(TimeOnly actual, TimeOnly expected, TimeSpan tolerance)
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
-        }
-
-        if (_tolerance.HasValue)
-        {
-            var diff = value > _expected ? value.ToTimeSpan() - _expected.ToTimeSpan() : _expected.ToTimeSpan() - value.ToTimeSpan();
-            if (diff <= _tolerance.Value)
-            {
-                return Task.FromResult(AssertionResult.Passed);
-            }
-
-            return Task.FromResult(AssertionResult.Failed($"found {value}, which is {diff} from expected"));
-        }
-
-        if (value == _expected)
-        {
-            return Task.FromResult(AssertionResult.Passed);
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        var diff = actual > expected ? actual.ToTimeSpan() - expected.ToTimeSpan() : expected.ToTimeSpan() - actual.ToTimeSpan();
+        return diff <= tolerance;
     }
 
-    protected override string GetExpectation() =>
-        _tolerance.HasValue
-            ? $"to be within {_tolerance} of {_expected}"
-            : $"to be {_expected}";
+    protected override object CalculateDifference(TimeOnly actual, TimeOnly expected)
+    {
+        return actual > expected ? actual.ToTimeSpan() - expected.ToTimeSpan() : expected.ToTimeSpan() - actual.ToTimeSpan();
+    }
+
+    protected override bool AreExactlyEqual(TimeOnly actual, TimeOnly expected)
+    {
+        return actual == expected;
+    }
+
+    protected override string FormatDifferenceMessage(TimeOnly actual, object difference)
+    {
+        return $"found {actual}, which is {difference} from expected";
+    }
 }
 #endif
 
@@ -130,140 +105,114 @@ public class TimeOnlyEqualsAssertion : Assertion<TimeOnly>
 /// Asserts that a double value is equal to another, with optional tolerance.
 /// </summary>
 [AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
-public class DoubleEqualsAssertion : Assertion<double>
+public class DoubleEqualsAssertion : ToleranceBasedEqualsAssertion<double, double>
 {
-    private readonly double _expected;
-    private double? _tolerance;
-
     public DoubleEqualsAssertion(
         AssertionContext<double> context,
         double expected)
-        : base(context)
+        : base(context, expected)
     {
-        _expected = expected;
     }
 
-    public DoubleEqualsAssertion Within(double tolerance)
+    protected override bool HasToleranceValue()
     {
-        _tolerance = tolerance;
-        Context.ExpressionBuilder.Append($".Within({tolerance})");
-        return this;
+        return true; // double? always has meaningful value when not null
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<double> metadata)
+    protected override bool IsWithinTolerance(double actual, double expected, double tolerance)
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
+        // Handle NaN comparisons: NaN is only equal to NaN
+        if (double.IsNaN(actual) && double.IsNaN(expected))
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return true;
         }
 
-        if (_tolerance.HasValue)
+        if (double.IsNaN(actual) || double.IsNaN(expected))
         {
-            // Handle NaN comparisons: NaN is only equal to NaN
-            if (double.IsNaN(value) && double.IsNaN(_expected))
-            {
-                return Task.FromResult(AssertionResult.Passed);
-            }
-
-            if (double.IsNaN(value) || double.IsNaN(_expected))
-            {
-                return Task.FromResult(AssertionResult.Failed($"found {value}"));
-            }
-
-            var diff = Math.Abs(value - _expected);
-            if (diff <= _tolerance.Value)
-            {
-                return Task.FromResult(AssertionResult.Passed);
-            }
-
-            return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
+            return false;
         }
 
-        if (double.Equals(value, _expected))
+        // Handle infinity: infinity equals infinity
+        if (double.IsPositiveInfinity(actual) && double.IsPositiveInfinity(expected))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return true;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        if (double.IsNegativeInfinity(actual) && double.IsNegativeInfinity(expected))
+        {
+            return true;
+        }
+
+        var diff = Math.Abs(actual - expected);
+        return diff <= tolerance;
     }
 
-    protected override string GetExpectation() =>
-        _tolerance.HasValue
-            ? $"to be within {_tolerance} of {_expected}"
-            : $"to be {_expected}";
+    protected override object CalculateDifference(double actual, double expected)
+    {
+        return Math.Abs(actual - expected);
+    }
+
+    protected override bool AreExactlyEqual(double actual, double expected)
+    {
+        return double.Equals(actual, expected);
+    }
 }
 
 /// <summary>
 /// Asserts that a float value is equal to another, with optional tolerance.
 /// </summary>
 [AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
-public class FloatEqualsAssertion : Assertion<float>
+public class FloatEqualsAssertion : ToleranceBasedEqualsAssertion<float, float>
 {
-    private readonly float _expected;
-    private float? _tolerance;
-
     public FloatEqualsAssertion(
         AssertionContext<float> context,
         float expected)
-        : base(context)
+        : base(context, expected)
     {
-        _expected = expected;
     }
 
-    public FloatEqualsAssertion Within(float tolerance)
+    protected override bool HasToleranceValue()
     {
-        _tolerance = tolerance;
-        Context.ExpressionBuilder.Append($".Within({tolerance})");
-        return this;
+        return true; // float? always has meaningful value when not null
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<float> metadata)
+    protected override bool IsWithinTolerance(float actual, float expected, float tolerance)
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
+        // Handle NaN comparisons: NaN is only equal to NaN
+        if (float.IsNaN(actual) && float.IsNaN(expected))
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            return true;
         }
 
-        if (_tolerance.HasValue)
+        if (float.IsNaN(actual) || float.IsNaN(expected))
         {
-            // Handle NaN comparisons: NaN is only equal to NaN
-            if (float.IsNaN(value) && float.IsNaN(_expected))
-            {
-                return Task.FromResult(AssertionResult.Passed);
-            }
-
-            if (float.IsNaN(value) || float.IsNaN(_expected))
-            {
-                return Task.FromResult(AssertionResult.Failed($"found {value}"));
-            }
-
-            var diff = Math.Abs(value - _expected);
-            if (diff <= _tolerance.Value)
-            {
-                return Task.FromResult(AssertionResult.Passed);
-            }
-
-            return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
+            return false;
         }
 
-        if (float.Equals(value, _expected))
+        // Handle infinity: infinity equals infinity
+        if (float.IsPositiveInfinity(actual) && float.IsPositiveInfinity(expected))
         {
-            return Task.FromResult(AssertionResult.Passed);
+            return true;
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        if (float.IsNegativeInfinity(actual) && float.IsNegativeInfinity(expected))
+        {
+            return true;
+        }
+
+        var diff = Math.Abs(actual - expected);
+        return diff <= tolerance;
     }
 
-    protected override string GetExpectation() =>
-        _tolerance.HasValue
-            ? $"to be within {_tolerance} of {_expected}"
-            : $"to be {_expected}";
+    protected override object CalculateDifference(float actual, float expected)
+    {
+        return Math.Abs(actual - expected);
+    }
+
+    protected override bool AreExactlyEqual(float actual, float expected)
+    {
+        return float.Equals(actual, expected);
+    }
 }
 
 /// <summary>
@@ -329,118 +278,70 @@ public class IntEqualsAssertion : Assertion<int>
 /// Asserts that a long value is equal to another, with optional tolerance.
 /// </summary>
 [AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
-public class LongEqualsAssertion : Assertion<long>
+public class LongEqualsAssertion : ToleranceBasedEqualsAssertion<long, long>
 {
-    private readonly long _expected;
-    private long? _tolerance;
-
     public LongEqualsAssertion(
         AssertionContext<long> context,
         long expected)
-        : base(context)
+        : base(context, expected)
     {
-        _expected = expected;
     }
 
-    public LongEqualsAssertion Within(long tolerance)
+    protected override bool HasToleranceValue()
     {
-        _tolerance = tolerance;
-        Context.ExpressionBuilder.Append($".Within({tolerance})");
-        return this;
+        return true; // long? always has meaningful value when not null
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<long> metadata)
+    protected override bool IsWithinTolerance(long actual, long expected, long tolerance)
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
-        }
-
-        if (_tolerance.HasValue)
-        {
-            var diff = Math.Abs(value - _expected);
-            if (diff <= _tolerance.Value)
-            {
-                return Task.FromResult(AssertionResult.Passed);
-            }
-
-            return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
-        }
-
-        if (value == _expected)
-        {
-            return Task.FromResult(AssertionResult.Passed);
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        var diff = Math.Abs(actual - expected);
+        return diff <= tolerance;
     }
 
-    protected override string GetExpectation() =>
-        _tolerance.HasValue
-            ? $"to be within {_tolerance} of {_expected}"
-            : $"to be {_expected}";
+    protected override object CalculateDifference(long actual, long expected)
+    {
+        return Math.Abs(actual - expected);
+    }
+
+    protected override bool AreExactlyEqual(long actual, long expected)
+    {
+        return actual == expected;
+    }
 }
 
 /// <summary>
 /// Asserts that a DateTimeOffset value is equal to another, with optional tolerance.
 /// </summary>
 [AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
-public class DateTimeOffsetEqualsAssertion : Assertion<DateTimeOffset>
+public class DateTimeOffsetEqualsAssertion : ToleranceBasedEqualsAssertion<DateTimeOffset, TimeSpan>
 {
-    private readonly DateTimeOffset _expected;
-    private TimeSpan? _tolerance;
-
     public DateTimeOffsetEqualsAssertion(
         AssertionContext<DateTimeOffset> context,
         DateTimeOffset expected)
-        : base(context)
+        : base(context, expected)
     {
-        _expected = expected;
     }
 
-    public DateTimeOffsetEqualsAssertion Within(TimeSpan tolerance)
+    protected override bool HasToleranceValue()
     {
-        _tolerance = tolerance;
-        Context.ExpressionBuilder.Append($".Within({tolerance})");
-        return this;
+        return true; // TimeSpan? always has meaningful value when not null
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<DateTimeOffset> metadata)
+    protected override bool IsWithinTolerance(DateTimeOffset actual, DateTimeOffset expected, TimeSpan tolerance)
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
-        }
-
-        if (_tolerance.HasValue)
-        {
-            var diff = value > _expected ? value - _expected : _expected - value;
-            if (diff <= _tolerance.Value)
-            {
-                return Task.FromResult(AssertionResult.Passed);
-            }
-
-            return Task.FromResult(AssertionResult.Failed($"found {value}, which differs by {diff}"));
-        }
-
-        if (value == _expected)
-        {
-            return Task.FromResult(AssertionResult.Passed);
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"found {value}"));
+        var diff = actual > expected ? actual - expected : expected - actual;
+        return diff <= tolerance;
     }
 
-    protected override string GetExpectation() =>
-        _tolerance.HasValue
-            ? $"to be within {_tolerance} of {_expected}"
-            : $"to be {_expected}";
+    protected override object CalculateDifference(DateTimeOffset actual, DateTimeOffset expected)
+    {
+        return actual > expected ? actual - expected : expected - actual;
+    }
+
+    protected override bool AreExactlyEqual(DateTimeOffset actual, DateTimeOffset expected)
+    {
+        return actual == expected;
+    }
 }
 
 /// <summary>

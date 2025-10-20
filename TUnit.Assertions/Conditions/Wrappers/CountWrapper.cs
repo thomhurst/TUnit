@@ -10,27 +10,26 @@ namespace TUnit.Assertions.Conditions.Wrappers;
 /// Wrapper for collection count assertions that provides .EqualTo() method.
 /// Example: await Assert.That(list).Count().EqualTo(5);
 /// </summary>
-public class CountWrapper<TValue> : IAssertionSource<TValue>
-    where TValue : IEnumerable
+public class CountWrapper<TItem> : IAssertionSource<IEnumerable<TItem>>
 {
-    private readonly AssertionContext<TValue> _context;
+    private readonly AssertionContext<IEnumerable<TItem>> _context;
 
-    public CountWrapper(AssertionContext<TValue> context)
+    public CountWrapper(AssertionContext<IEnumerable<TItem>> context)
     {
         _context = context;
     }
 
-    AssertionContext<TValue> IAssertionSource<TValue>.Context => _context;
+    AssertionContext<IEnumerable<TItem>> IAssertionSource<IEnumerable<TItem>>.Context => _context;
 
     /// <summary>
     /// Asserts that the collection count is equal to the expected count.
     /// </summary>
-    public CollectionCountAssertion<TValue> EqualTo(
+    public CollectionCountAssertion<TItem> EqualTo(
         int expectedCount,
         [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
     {
         _context.ExpressionBuilder.Append($".EqualTo({expression})");
-        return new CollectionCountAssertion<TValue>(_context, expectedCount);
+        return new CollectionCountAssertion<TItem>(_context, expectedCount);
     }
 
     /// <summary>
@@ -192,10 +191,10 @@ public class CountWrapper<TValue> : IAssertionSource<TValue>
     /// <summary>
     /// Asserts that the collection count is zero (empty collection).
     /// </summary>
-    public CollectionCountAssertion<TValue> Zero()
+    public CollectionCountAssertion<TItem> Zero()
     {
         _context.ExpressionBuilder.Append(".Zero()");
-        return new CollectionCountAssertion<TValue>(_context, 0);
+        return new CollectionCountAssertion<TItem>(_context, 0);
     }
 
     /// <summary>

@@ -5,14 +5,17 @@ namespace TUnit.Assertions.Conditions;
 
 /// <summary>
 /// Asserts that a dictionary contains a specific key.
+/// Inherits from DictionaryAssertionBase to enable chaining of dictionary methods.
+/// Available as an instance method on DictionaryAssertionBase for proper type inference.
 /// </summary>
-public class DictionaryContainsKeyAssertion<TKey, TValue> : Assertion<IReadOnlyDictionary<TKey, TValue>>
+public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+    where TDictionary : IReadOnlyDictionary<TKey, TValue>
 {
     private readonly TKey _expectedKey;
     private readonly IEqualityComparer<TKey>? _comparer;
 
     public DictionaryContainsKeyAssertion(
-        AssertionContext<IReadOnlyDictionary<TKey, TValue>> context,
+        AssertionContext<TDictionary> context,
         TKey expectedKey,
         IEqualityComparer<TKey>? comparer = null)
         : base(context)
@@ -21,7 +24,12 @@ public class DictionaryContainsKeyAssertion<TKey, TValue> : Assertion<IReadOnlyD
         _comparer = comparer;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IReadOnlyDictionary<TKey, TValue>> metadata)
+    public DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> Using(IEqualityComparer<TKey> comparer)
+    {
+        return new DictionaryContainsKeyAssertion<TDictionary, TKey, TValue>(Context, _expectedKey, comparer);
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TDictionary> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -60,20 +68,23 @@ public class DictionaryContainsKeyAssertion<TKey, TValue> : Assertion<IReadOnlyD
 
 /// <summary>
 /// Asserts that a dictionary does NOT contain a specific key.
+/// Inherits from DictionaryAssertionBase to enable chaining of dictionary methods.
+/// Available as an instance method on DictionaryAssertionBase for proper type inference.
 /// </summary>
-public class DictionaryDoesNotContainKeyAssertion<TKey, TValue> : Assertion<IReadOnlyDictionary<TKey, TValue>>
+public class DictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+    where TDictionary : IReadOnlyDictionary<TKey, TValue>
 {
     private readonly TKey _expectedKey;
 
     public DictionaryDoesNotContainKeyAssertion(
-        AssertionContext<IReadOnlyDictionary<TKey, TValue>> context,
+        AssertionContext<TDictionary> context,
         TKey expectedKey)
         : base(context)
     {
         _expectedKey = expectedKey;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IReadOnlyDictionary<TKey, TValue>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TDictionary> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;

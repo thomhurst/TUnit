@@ -8,10 +8,9 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a value is in a collection.
 /// </summary>
 [AssertionExtension("IsIn")]
-public class IsInAssertion<TValue> : Assertion<TValue>
+public class IsInAssertion<TValue> : ComparerBasedAssertion<TValue, TValue>
 {
     private readonly IEnumerable<TValue> _collection;
-    private IEqualityComparer<TValue>? _comparer;
 
     public IsInAssertion(
         AssertionContext<TValue> context,
@@ -23,8 +22,7 @@ public class IsInAssertion<TValue> : Assertion<TValue>
 
     public IsInAssertion<TValue> Using(IEqualityComparer<TValue> comparer)
     {
-        _comparer = comparer;
-        Context.ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
+        SetComparer(comparer);
         return this;
     }
 
@@ -38,7 +36,7 @@ public class IsInAssertion<TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
-        var comparer = _comparer ?? EqualityComparer<TValue>.Default;
+        var comparer = GetComparer();
 
         foreach (var item in _collection)
         {
@@ -58,10 +56,9 @@ public class IsInAssertion<TValue> : Assertion<TValue>
 /// Asserts that a value is NOT in a collection.
 /// </summary>
 [AssertionExtension("IsNotIn")]
-public class IsNotInAssertion<TValue> : Assertion<TValue>
+public class IsNotInAssertion<TValue> : ComparerBasedAssertion<TValue, TValue>
 {
     private readonly IEnumerable<TValue> _collection;
-    private IEqualityComparer<TValue>? _comparer;
 
     public IsNotInAssertion(
         AssertionContext<TValue> context,
@@ -73,8 +70,7 @@ public class IsNotInAssertion<TValue> : Assertion<TValue>
 
     public IsNotInAssertion<TValue> Using(IEqualityComparer<TValue> comparer)
     {
-        _comparer = comparer;
-        Context.ExpressionBuilder.Append($".Using({comparer.GetType().Name})");
+        SetComparer(comparer);
         return this;
     }
 
@@ -88,7 +84,7 @@ public class IsNotInAssertion<TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
-        var comparer = _comparer ?? EqualityComparer<TValue>.Default;
+        var comparer = GetComparer();
 
         foreach (var item in _collection)
         {

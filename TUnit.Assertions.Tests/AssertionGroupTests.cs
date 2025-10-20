@@ -10,13 +10,14 @@ public class AssertionGroupTests
         var value = "CD";
 
         // Try first assertion, if it fails try second
+        // Cast to IEnumerable<char> for character-level assertions
         try
         {
-            await Assert.That(value).Contains('C').And.Contains('D');
+            await Assert.That((IEnumerable<char>)value).Contains('C').And.Contains('D');
         }
         catch (AssertionException)
         {
-            await Assert.That(value).Contains('A').And.Contains('B');
+            await Assert.That((IEnumerable<char>)value).Contains('A').And.Contains('B');
         }
     }
 

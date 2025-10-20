@@ -145,7 +145,8 @@ public class EnumerableTests
     {
         int[] array = [1, 2, 3];
 
-        IEnumerable enumerable = array;
+        // Use generic IEnumerable<int> to preserve reference identity
+        IEnumerable<int> enumerable = array;
 
         await Assert.That(enumerable).IsSameReferenceAs(enumerable);
     }
@@ -155,7 +156,8 @@ public class EnumerableTests
     {
         int[] array = [1, 2, 3];
 
-        IEnumerable enumerable = array;
+        // Use generic IEnumerable<int> to preserve reference identity
+        IEnumerable<int> enumerable = array;
 
         await Assert.That(enumerable).IsSameReferenceAs(enumerable);
     }
@@ -267,6 +269,15 @@ public class EnumerableTests
             new TestItem { Name = "B", Value = 2 },
             new TestItem { Name = "C", Value = 3 }
         };
+
+        // Test that type inference works with IEnumerable<T>
+        await Assert.That(items).IsOrderedBy(i => i.Name);
+    }
+
+    [Test]
+    public async Task IQueryable()
+    {
+        IQueryable<TestItem> items = new EnumerableQuery<TestItem>([]);
 
         // Test that type inference works with IEnumerable<T>
         await Assert.That(items).IsOrderedBy(i => i.Name);

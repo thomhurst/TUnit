@@ -10,14 +10,14 @@ public class Tests2117
         Expected to be equivalent to [3, 2, 1]
         but collection item at index 0 does not match: expected 3, but was 1
 
-        at Assert.That(a).IsEquivalentTo(b, CollectionOrdering.Matching)
+        at Assert.That(a).IsEquivalentTo(b, collectionOrdering.Value)
         """)]
     [Arguments(new[] { 1, 2, 3 }, new[] { 1, 2, 3, 4 }, CollectionOrdering.Any,
         """
         Expected to be equivalent to [1, 2, 3, 4]
         but collection has 3 items but expected 4
 
-        at Assert.That(a).IsEquivalentTo(b, CollectionOrdering.Any)
+        at Assert.That(a).IsEquivalentTo(b, collectionOrdering.Value)
         """)]
     [Arguments(new[] { 1, 2, 3 }, new[] { 1, 2, 3, 4 }, null,
         """
@@ -42,14 +42,14 @@ public class Tests2117
         Expected to not be equivalent to [3, 2, 1]
         but collections are equivalent but should not be
 
-        at Assert.That(a).IsNotEquivalentTo(b, CollectionOrdering.Any)
+        at Assert.That(a).IsNotEquivalentTo(b, collectionOrdering.Value)
         """)]
     [Arguments(new[] { 1, 2, 3 }, new[] { 1, 2, 3 }, CollectionOrdering.Matching,
         """
         Expected to not be equivalent to [1, 2, 3]
         but collections are equivalent but should not be
 
-        at Assert.That(a).IsNotEquivalentTo(b, CollectionOrdering.Matching)
+        at Assert.That(a).IsNotEquivalentTo(b, collectionOrdering.Value)
         """)]
     [Arguments(new[] { 1, 2, 3 }, new[] { 1, 2, 3 }, null,
         """

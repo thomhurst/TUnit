@@ -77,6 +77,15 @@ public sealed class AssertionContext<TValue>
         return Map(evalContext => evalContext.Map(mapper));
     }
 
+    /// <summary>
+    /// Convenience overload for simple value-to-value transformations.
+    /// Wraps a simple mapper function in an evaluation context transformation.
+    /// </summary>
+    public AssertionContext<Task<TNew?>> MapAsync<TNew>(Func<TValue?, Task<TNew?>> mapper)
+    {
+        return Map(evalContext => evalContext.Map(mapper));
+    }
+
     public AssertionContext<TException> MapException<TException>() where TException : Exception
     {
         return new AssertionContext<TException>(
