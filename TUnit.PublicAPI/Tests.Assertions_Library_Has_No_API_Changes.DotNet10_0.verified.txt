@@ -275,6 +275,11 @@ namespace .Conditions
         [.(ExpectationMessage="to be signed")]
         public static bool IsSigned(this .Assembly value) { }
     }
+    public class AssertionSourceAdapter<T> : .<T>
+    {
+        public AssertionSourceAdapter(.<T> context) { }
+        public .<T> Context { get; }
+    }
     public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
     {
         public AsyncMappedSatisfiesAssertion(.<TValue> context, <TValue?, .<TMapped>> selector, <.<TMapped>, .<TMapped>?> assertions, string selectorDescription) { }
