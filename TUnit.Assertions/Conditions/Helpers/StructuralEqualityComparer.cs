@@ -23,7 +23,6 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
 
     public bool Equals(T? x, T? y)
     {
-        // Handle nulls
         if (x == null && y == null)
         {
             return true;
@@ -36,27 +35,21 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
 
         var type = typeof(T);
 
-        // For primitive types, strings, enums, dates, and other simple types, use default comparison
         if (IsPrimitiveType(type))
         {
             return EqualityComparer<T>.Default.Equals(x, y);
         }
 
-        // For types implementing IEquatable<T>, use their Equals implementation
         if (typeof(IEquatable<T>).IsAssignableFrom(type))
         {
             return ((IEquatable<T>)x).Equals(y);
         }
 
-        // For complex objects, perform structural comparison
         return CompareStructurally(x, y, new HashSet<object>(new ReferenceEqualityComparer()));
     }
 
     public int GetHashCode(T obj)
     {
-        // For hash code, we use the default implementation
-        // This is acceptable because GetHashCode is primarily used for dictionary lookups,
-        // and our structural comparison will handle equality correctly
         if (obj == null)
         {
             return 0;
@@ -84,7 +77,6 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
 
     private bool CompareStructurally(object? x, object? y, HashSet<object> visited)
     {
-        // Handle nulls
         if (x == null && y == null)
         {
             return true;
@@ -98,13 +90,11 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
         var xType = x.GetType();
         var yType = y.GetType();
 
-        // Handle primitive types
         if (IsPrimitiveType(xType))
         {
             return Equals(x, y);
         }
 
-        // Handle cycles
         if (visited.Contains(x))
         {
             return true;
@@ -112,7 +102,6 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
 
         visited.Add(x);
 
-        // Handle enumerables (but not strings)
         if (x is IEnumerable xEnumerable && y is IEnumerable yEnumerable
             && x is not string && y is not string)
         {
@@ -135,8 +124,7 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
             return true;
         }
 
-        // Compare properties and fields
-#pragma warning disable IL2072 // GetType() does not preserve DynamicallyAccessedMembers - acceptable for runtime structural comparison
+#pragma warning disable IL2072
         var members = GetMembersToCompare(xType);
 #pragma warning restore IL2072
 

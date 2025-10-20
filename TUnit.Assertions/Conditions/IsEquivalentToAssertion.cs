@@ -56,7 +56,6 @@ public class IsEquivalentToAssertion<TItem> : CollectionComparerBasedAssertion<T
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
         }
 
-        // Use structural equality comparer by default for consistent behavior with object IsEquivalentTo
         var comparer = HasCustomComparer() ? GetComparer() : StructuralEqualityComparer<TItem>.Instance;
 
         var result = CollectionEquivalencyChecker.AreEquivalent(
