@@ -4,6 +4,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Enums;
 using TUnit.Assertions.Tests.TestData;
 
 namespace TUnit.Assertions.Extensions;
@@ -19,7 +20,7 @@ public static class StringIsEmptyAssertionExtensions
     /// </summary>
     public static StringIsEmptyAssertion IsEmpty(this IAssertionSource<string> source)
     {
-        source.Context.ExpressionBuilder.Append($".IsEmpty()");
+        source.Context.ExpressionBuilder.Append(".IsEmpty(" + ")");
         return new StringIsEmptyAssertion(source.Context);
     }
 }

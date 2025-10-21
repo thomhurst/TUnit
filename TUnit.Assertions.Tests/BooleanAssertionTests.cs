@@ -32,4 +32,50 @@ public class BooleanAssertionTests
         var result = 5 < 3;
         await Assert.That(result).IsFalse();
     }
+
+    [Test]
+    public async Task Test_NullableBoolean_IsTrue_WithTrue()
+    {
+        bool? value = true;
+        await Assert.That(value).IsTrue();
+    }
+
+    [Test]
+    public async Task Test_NullableBoolean_IsTrue_WithFalse()
+    {
+        bool? value = false;
+        await Assert.That(async () => await Assert.That(value).IsTrue())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Test_NullableBoolean_IsTrue_WithNull()
+    {
+        bool? value = null;
+        await Assert.That(async () => await Assert.That(value).IsTrue())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Test_NullableBoolean_IsFalse_WithFalse()
+    {
+        bool? value = false;
+        await Assert.That(value).IsFalse();
+    }
+
+    [Test]
+    public async Task Test_NullableBoolean_IsFalse_WithTrue()
+    {
+        bool? value = true;
+        await Assert.That(async () => await Assert.That(value).IsFalse())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Test_NullableBoolean_IsFalse_WithNull()
+    {
+        bool? value = null;
+        await Assert.That(async () => await Assert.That(value).IsFalse())
+            .Throws<AssertionException>();
+    }
 }

@@ -88,4 +88,42 @@ public class StringNullabilityAssertionTests
         var value = "Hello";
         await Assert.That(value).IsNotNullOrEmpty();
     }
+
+    [Test]
+    public async Task IsNotNullOrWhiteSpace_WithNullString_Fails()
+    {
+        string? nullString = null;
+        await Assert.That(async () => await Assert.That(nullString).IsNotNullOrWhiteSpace())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task IsNotNullOrWhiteSpace_WithEmptyString_Fails()
+    {
+        var emptyString = "";
+        await Assert.That(async () => await Assert.That(emptyString).IsNotNullOrWhiteSpace())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task IsNotNullOrWhiteSpace_WithWhitespace_Fails()
+    {
+        var whitespace = "   ";
+        await Assert.That(async () => await Assert.That(whitespace).IsNotNullOrWhiteSpace())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task IsNotNullOrWhiteSpace_WithNonEmptyString_Passes()
+    {
+        var value = "Hello";
+        await Assert.That(value).IsNotNullOrWhiteSpace();
+    }
+
+    [Test]
+    public async Task IsNotNullOrWhiteSpace_WithStringContainingWhitespace_Passes()
+    {
+        var value = "Hello World";
+        await Assert.That(value).IsNotNullOrWhiteSpace();
+    }
 }

@@ -219,6 +219,17 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     }
 
     /// <summary>
+    /// Asserts that the collection contains only distinct (unique) items.
+    /// This instance method enables calling HasDistinctItems with proper type inference.
+    /// Example: await Assert.That(list).HasDistinctItems();
+    /// </summary>
+    public HasDistinctItemsAssertion<TCollection, TItem> HasDistinctItems()
+    {
+        Context.ExpressionBuilder.Append(".HasDistinctItems()");
+        return new HasDistinctItemsAssertion<TCollection, TItem>(Context);
+    }
+
+    /// <summary>
     /// Asserts that the collection does not contain the specified item.
     /// This instance method enables calling DoesNotContain with proper type inference.
     /// Example: await Assert.That(list).DoesNotContain("value");

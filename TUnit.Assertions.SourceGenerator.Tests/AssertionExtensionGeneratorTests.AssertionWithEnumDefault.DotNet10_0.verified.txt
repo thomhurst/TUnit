@@ -4,6 +4,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Enums;
 using TUnit.Assertions.Tests.TestData;
 
 namespace TUnit.Assertions.Extensions;
@@ -17,9 +18,10 @@ public static class StringComparisonAssertionExtensions
     /// <summary>
     /// Extension method for StringComparisonAssertion.
     /// </summary>
-    public static StringComparisonAssertion IsEqualToWithComparison(this IAssertionSource<string> source, string expected, System.StringComparison comparison = System.StringComparison.4, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null, [CallerArgumentExpression(nameof(comparison))] string? comparisonExpression = null)
+    public static StringComparisonAssertion IsEqualToWithComparison(this IAssertionSource<string> source, string expected, System.StringComparison comparison = StringComparison.Ordinal, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null, [CallerArgumentExpression(nameof(comparison))] string? comparisonExpression = null)
     {
-        source.Context.ExpressionBuilder.Append($".IsEqualToWithComparison({expectedExpression}, {comparisonExpression})");
+        source.Context.ExpressionBuilder.Append(".IsEqualToWithComparison("
+            + string.Join(", ", new[] { expectedExpression, comparisonExpression }.Where(e => e != null)) + ")");
         return new StringComparisonAssertion(source.Context, expected, comparison);
     }
 }

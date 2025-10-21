@@ -5,17 +5,18 @@ namespace TUnit.Assertions.Conditions;
 
 /// <summary>
 /// Asserts that a collection contains only distinct (unique) items.
+/// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
-public class HasDistinctItemsAssertion<TValue> : Assertion<TValue>
-    where TValue : System.Collections.IEnumerable
+public class HasDistinctItemsAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     public HasDistinctItemsAssertion(
-        AssertionContext<TValue> context)
+        AssertionContext<TCollection> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -30,7 +31,7 @@ public class HasDistinctItemsAssertion<TValue> : Assertion<TValue>
             return Task.FromResult(AssertionResult.Failed("collection was null"));
         }
 
-        var list = value.Cast<object?>().ToList();
+        var list = value.ToList();
         var distinctList = list.Distinct().ToList();
 
         if (list.Count == distinctList.Count)

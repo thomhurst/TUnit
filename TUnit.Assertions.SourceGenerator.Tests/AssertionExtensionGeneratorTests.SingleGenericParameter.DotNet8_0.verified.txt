@@ -4,6 +4,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Enums;
 using TUnit.Assertions.Tests.TestData;
 
 namespace TUnit.Assertions.Extensions;
@@ -19,7 +20,7 @@ public static class NullAssertionExtensions
     /// </summary>
     public static NullAssertion<TValue> IsNull<TValue>(this IAssertionSource<TValue> source)
     {
-        source.Context.ExpressionBuilder.Append($".IsNull()");
+        source.Context.ExpressionBuilder.Append(".IsNull(" + ")");
         return new NullAssertion<TValue>(source.Context);
     }
 }

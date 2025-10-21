@@ -4,6 +4,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Enums;
 using TUnit.Assertions.Tests.TestData;
 
 namespace TUnit.Assertions.Extensions;
@@ -20,7 +21,8 @@ public static class GreaterThanAssertionExtensions
     public static GreaterThanAssertion<TValue> IsGreaterThan<TValue>(this IAssertionSource<TValue> source, TValue expected, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
         where TValue : System.IComparable<TValue>
     {
-        source.Context.ExpressionBuilder.Append($".IsGreaterThan({expectedExpression})");
+        source.Context.ExpressionBuilder.Append(".IsGreaterThan("
+            + string.Join(", ", new[] { expectedExpression }.Where(e => e != null)) + ")");
         return new GreaterThanAssertion<TValue>(source.Context, expected);
     }
 }

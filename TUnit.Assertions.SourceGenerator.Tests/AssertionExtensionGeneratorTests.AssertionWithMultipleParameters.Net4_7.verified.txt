@@ -4,6 +4,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Enums;
 using TUnit.Assertions.Tests.TestData;
 
 namespace TUnit.Assertions.Extensions;
@@ -20,7 +21,8 @@ public static class BetweenAssertionExtensions
     public static BetweenAssertion<TValue> IsBetween<TValue>(this IAssertionSource<TValue> source, TValue lowerBound, TValue upperBound, [CallerArgumentExpression(nameof(lowerBound))] string? lowerBoundExpression = null, [CallerArgumentExpression(nameof(upperBound))] string? upperBoundExpression = null)
         where TValue : System.IComparable<TValue>
     {
-        source.Context.ExpressionBuilder.Append($".IsBetween({lowerBoundExpression}, {upperBoundExpression})");
+        source.Context.ExpressionBuilder.Append(".IsBetween("
+            + string.Join(", ", new[] { lowerBoundExpression, upperBoundExpression }.Where(e => e != null)) + ")");
         return new BetweenAssertion<TValue>(source.Context, lowerBound, upperBound);
     }
 }
