@@ -679,4 +679,31 @@ public class TypeOfTests
 
         await Assert.That(result.Length).IsEqualTo(0);
     }
+
+    // ============ CHAINING WITH PROPERTY TESTS (Issue #3461) ============
+
+    private record TestRecord(int Id, string Name);
+
+    [Test]
+    public async Task IsTypeOf_WithHasProperty_OnRecord_DoesNotStackOverflow()
+    {
+        // Regression test for issue #3461
+        // This previously caused a StackOverflowException due to duplicate pending link consumption
+        object record = new TestRecord(2, "Test");
+
+        await Assert.That(record)
+            .IsTypeOf<TestRecord>()
+            .And.HasProperty(x => x.Id).IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task IsTypeOf_WithMultipleHasProperty_OnRecord()
+    {
+        object record = new TestRecord(42, "Hello");
+
+        var casted = await Assert.That(record).IsTypeOf<TestRecord>();
+
+        await Assert.That(casted).HasProperty(x => x.Id).IsEqualTo(42);
+        await Assert.That(casted).HasProperty(x => x.Name).IsEqualTo("Hello");
+    }
 }
