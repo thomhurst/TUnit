@@ -7,20 +7,15 @@ namespace TUnit.Assertions.Sources;
 
 /// <summary>
 /// Base class for dictionary assertions that preserves type through And/Or chains.
-/// Implements IAssertionSource&lt;TDictionary&gt; to enable all collection and dictionary extension methods.
-/// Since dictionaries are collections of KeyValuePair items, collection assertions also work on dictionaries.
+/// Inherits from CollectionAssertionBase to automatically get all collection methods (HasSingleItem, IsInOrder, etc.)
+/// since dictionaries are collections of KeyValuePair items.
 /// </summary>
 /// <typeparam name="TDictionary">The dictionary type (e.g., Dictionary, IReadOnlyDictionary)</typeparam>
 /// <typeparam name="TKey">The dictionary key type</typeparam>
 /// <typeparam name="TValue">The dictionary value type</typeparam>
-public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Assertion<TDictionary>, IAssertionSource<TDictionary>
+public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : CollectionAssertionBase<TDictionary, KeyValuePair<TKey, TValue>>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
 {
-    /// <summary>
-    /// Explicit implementation of IAssertionSource.Context to expose the context publicly.
-    /// </summary>
-    AssertionContext<TDictionary> IAssertionSource<TDictionary>.Context => Context;
-
     protected DictionaryAssertionBase(AssertionContext<TDictionary> context)
         : base(context)
     {
@@ -36,10 +31,8 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Asser
         Assertion<TDictionary> previousAssertion,
         string combinerExpression,
         CombinerType combinerType)
-        : base(context)
+        : base(context, previousAssertion, combinerExpression, combinerType)
     {
-        context.ExpressionBuilder.Append(combinerExpression);
-        context.SetPendingLink(previousAssertion, combinerType);
     }
 
     protected override string GetExpectation() => "dictionary assertion";
@@ -83,115 +76,6 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Asser
     {
         Context.ExpressionBuilder.Append($".DoesNotContainKey({expression})");
         return new DictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TValue>(Context, expectedKey);
-    }
-
-    /// <summary>
-    /// Asserts that the dictionary is empty (has no key-value pairs).
-    /// This instance method enables calling IsEmpty with proper type inference.
-    /// Example: await Assert.That(dictionary).IsEmpty();
-    /// </summary>
-    public CollectionIsEmptyAssertion<KeyValuePair<TKey, TValue>> IsEmpty()
-    {
-        Context.ExpressionBuilder.Append(".IsEmpty()");
-        return new CollectionIsEmptyAssertion<KeyValuePair<TKey, TValue>>(Context.Map<IEnumerable<KeyValuePair<TKey, TValue>>>(dict => dict));
-    }
-
-    /// <summary>
-    /// Asserts that the dictionary is not empty (has at least one key-value pair).
-    /// This instance method enables calling IsNotEmpty with proper type inference.
-    /// Example: await Assert.That(dictionary).IsNotEmpty();
-    /// </summary>
-    public CollectionIsNotEmptyAssertion<KeyValuePair<TKey, TValue>> IsNotEmpty()
-    {
-        Context.ExpressionBuilder.Append(".IsNotEmpty()");
-        return new CollectionIsNotEmptyAssertion<KeyValuePair<TKey, TValue>>(Context.Map<IEnumerable<KeyValuePair<TKey, TValue>>>(dict => dict));
-    }
-
-    /// <summary>
-    /// Asserts that the dictionary contains the specified key-value pair.
-    /// This instance method enables calling Contains with proper type inference.
-    /// Example: await Assert.That(dictionary).Contains(new KeyValuePair&lt;string, int&gt;("key", 1));
-    /// </summary>
-    public CollectionContainsAssertion<KeyValuePair<TKey, TValue>> Contains(
-        KeyValuePair<TKey, TValue> expected,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-    {
-        Context.ExpressionBuilder.Append($".Contains({expression})");
-        return new CollectionContainsAssertion<KeyValuePair<TKey, TValue>>(Context.Map<IEnumerable<KeyValuePair<TKey, TValue>>>(dict => dict), expected);
-    }
-
-    /// <summary>
-    /// Asserts that the dictionary contains a key-value pair matching the predicate.
-    /// This instance method enables calling Contains with proper type inference.
-    /// Example: await Assert.That(dictionary).Contains(kvp => kvp.Value > 10);
-    /// </summary>
-    public CollectionContainsPredicateAssertion<KeyValuePair<TKey, TValue>> Contains(
-        Func<KeyValuePair<TKey, TValue>, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
-    {
-        Context.ExpressionBuilder.Append($".Contains({expression})");
-        return new CollectionContainsPredicateAssertion<KeyValuePair<TKey, TValue>>(Context.Map<IEnumerable<KeyValuePair<TKey, TValue>>>(dict => dict), predicate);
-    }
-
-    /// <summary>
-    /// Asserts that all key-value pairs in the dictionary satisfy the predicate.
-    /// This instance method enables calling All with proper type inference.
-    /// Example: await Assert.That(dictionary).All(kvp => kvp.Value > 0);
-    /// </summary>
-    public CollectionAllAssertion<KeyValuePair<TKey, TValue>> All(
-        Func<KeyValuePair<TKey, TValue>, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
-    {
-        Context.ExpressionBuilder.Append($".All({expression})");
-        return new CollectionAllAssertion<KeyValuePair<TKey, TValue>>(Context.Map<IEnumerable<KeyValuePair<TKey, TValue>>>(dict => dict), predicate, expression ?? "predicate");
-    }
-
-    /// <summary>
-    /// Returns a helper for the .All().Satisfy() pattern on dictionaries.
-    /// This instance method enables calling All().Satisfy() with proper type inference.
-    /// Example: await Assert.That(dictionary).All().Satisfy(kvp => kvp.Value.IsNotNull());
-    /// </summary>
-    public CollectionAllSatisfyHelper<KeyValuePair<TKey, TValue>> All()
-    {
-        Context.ExpressionBuilder.Append(".All()");
-        return new CollectionAllSatisfyHelper<KeyValuePair<TKey, TValue>>(Context.Map<IEnumerable<KeyValuePair<TKey, TValue>>>(dict => dict));
-    }
-
-    /// <summary>
-    /// Asserts that at least one key-value pair in the dictionary satisfies the predicate.
-    /// This instance method enables calling Any with proper type inference.
-    /// Example: await Assert.That(dictionary).Any(kvp => kvp.Value > 100);
-    /// </summary>
-    public CollectionAnyAssertion<KeyValuePair<TKey, TValue>> Any(
-        Func<KeyValuePair<TKey, TValue>, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
-    {
-        Context.ExpressionBuilder.Append($".Any({expression})");
-        return new CollectionAnyAssertion<KeyValuePair<TKey, TValue>>(Context.Map<IEnumerable<KeyValuePair<TKey, TValue>>>(dict => dict), predicate, expression ?? "predicate");
-    }
-
-    /// <summary>
-    /// Asserts that the dictionary has the expected number of key-value pairs.
-    /// This instance method enables calling HasCount with proper type inference.
-    /// Example: await Assert.That(dictionary).HasCount(5);
-    /// </summary>
-    public CollectionCountAssertion<KeyValuePair<TKey, TValue>> HasCount(
-        int expectedCount,
-        [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
-    {
-        Context.ExpressionBuilder.Append($".HasCount({expression})");
-        return new CollectionCountAssertion<KeyValuePair<TKey, TValue>>(Context.Map<IEnumerable<KeyValuePair<TKey, TValue>>>(dict => dict), expectedCount);
-    }
-
-    /// <summary>
-    /// Returns a wrapper for fluent count assertions on dictionaries.
-    /// This enables the pattern: .HasCount().GreaterThan(5)
-    /// Example: await Assert.That(dictionary).HasCount().EqualTo(5);
-    /// </summary>
-    public CountWrapper<KeyValuePair<TKey, TValue>> HasCount()
-    {
-        Context.ExpressionBuilder.Append(".HasCount()");
-        return new CountWrapper<KeyValuePair<TKey, TValue>>(Context.Map<IEnumerable<KeyValuePair<TKey, TValue>>>(dict => dict));
     }
 
     /// <summary>

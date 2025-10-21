@@ -66,6 +66,18 @@ public class DictionaryAssertionTests
         );
     }
 
+    // Picks up collection methods via inheritance
+    [Test]
+    public async Task HasSingleItem()
+    {
+        var dictionary = new Dictionary<string, byte[]>
+        {
+            ["Blah"] = [1]
+        };
+
+        await TUnitAssert.That(dictionary).HasSingleItem();
+    }
+
     public class ReadDictionary : IReadOnlyDictionary<string, string>
     {
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()

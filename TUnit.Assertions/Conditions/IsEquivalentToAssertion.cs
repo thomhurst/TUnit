@@ -15,13 +15,14 @@ namespace TUnit.Assertions.Conditions;
 /// </summary>
 [AssertionExtension("IsEquivalentTo")]
 [RequiresDynamicCode("Collection equivalency uses structural comparison for complex objects, which requires reflection and is not compatible with AOT")]
-public class IsEquivalentToAssertion<TItem> : CollectionComparerBasedAssertion<TItem>
+public class IsEquivalentToAssertion<TCollection, TItem> : CollectionComparerBasedAssertion<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly IEnumerable<TItem> _expected;
     private readonly CollectionOrdering _ordering;
 
     public IsEquivalentToAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         IEnumerable<TItem> expected,
         CollectionOrdering ordering = CollectionOrdering.Any)
         : base(context)
@@ -31,7 +32,7 @@ public class IsEquivalentToAssertion<TItem> : CollectionComparerBasedAssertion<T
     }
 
     public IsEquivalentToAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         IEnumerable<TItem> expected,
         IEqualityComparer<TItem> comparer,
         CollectionOrdering ordering = CollectionOrdering.Any)
@@ -42,14 +43,14 @@ public class IsEquivalentToAssertion<TItem> : CollectionComparerBasedAssertion<T
         SetComparer(comparer);
     }
 
-    public IsEquivalentToAssertion<TItem> Using(IEqualityComparer<TItem> comparer)
+    public IsEquivalentToAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
     {
         SetComparer(comparer);
         return this;
     }
 
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Collection equivalency uses structural comparison which requires reflection")]
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;

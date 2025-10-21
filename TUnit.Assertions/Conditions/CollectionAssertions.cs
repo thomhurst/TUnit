@@ -11,15 +11,16 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a collection/enumerable is empty.
 /// </summary>
 [AssertionExtension("IsEmpty")]
-public class CollectionIsEmptyAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class CollectionIsEmptyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     public CollectionIsEmptyAssertion(
-        AssertionContext<IEnumerable<TItem>> context)
+        AssertionContext<TCollection> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -82,15 +83,16 @@ public class CollectionIsEmptyAssertion<TItem> : Sources.CollectionAssertionBase
 /// Asserts that a collection/enumerable is NOT empty.
 /// </summary>
 [AssertionExtension("IsNotEmpty")]
-public class CollectionIsNotEmptyAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class CollectionIsNotEmptyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     public CollectionIsNotEmptyAssertion(
-        AssertionContext<IEnumerable<TItem>> context)
+        AssertionContext<TCollection> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -129,13 +131,14 @@ public class CollectionIsNotEmptyAssertion<TItem> : Sources.CollectionAssertionB
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
 [AssertionExtension("Contains")]
-public class CollectionContainsAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class CollectionContainsAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly TItem _expected;
     private readonly IEqualityComparer<TItem>? _comparer;
 
     public CollectionContainsAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         TItem expected,
         IEqualityComparer<TItem>? comparer = null)
         : base(context)
@@ -144,7 +147,7 @@ public class CollectionContainsAssertion<TItem> : Sources.CollectionAssertionBas
         _comparer = comparer;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -180,13 +183,14 @@ public class CollectionContainsAssertion<TItem> : Sources.CollectionAssertionBas
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
 [AssertionExtension("DoesNotContain")]
-public class CollectionDoesNotContainAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class CollectionDoesNotContainAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly TItem _expected;
     private readonly IEqualityComparer<TItem>? _comparer;
 
     public CollectionDoesNotContainAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         TItem expected,
         IEqualityComparer<TItem>? comparer = null)
         : base(context)
@@ -195,7 +199,7 @@ public class CollectionDoesNotContainAssertion<TItem> : Sources.CollectionAssert
         _comparer = comparer;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -231,13 +235,14 @@ public class CollectionDoesNotContainAssertion<TItem> : Sources.CollectionAssert
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
 [AssertionExtension("DoesNotContain")]
-public class CollectionDoesNotContainPredicateAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, bool> _predicate;
     private readonly string _predicateDescription;
 
     public CollectionDoesNotContainPredicateAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         Func<TItem, bool> predicate,
         string predicateDescription)
         : base(context)
@@ -246,7 +251,7 @@ public class CollectionDoesNotContainPredicateAssertion<TItem> : Sources.Collect
         _predicateDescription = predicateDescription;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -280,19 +285,20 @@ public class CollectionDoesNotContainPredicateAssertion<TItem> : Sources.Collect
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
 [AssertionExtension("HasCount")]
-public class CollectionCountAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class CollectionCountAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly int _expectedCount;
 
     public CollectionCountAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         int expectedCount)
         : base(context)
     {
         _expectedCount = expectedCount;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -345,11 +351,12 @@ public class CollectionCountAssertion<TItem> : Sources.CollectionAssertionBase<T
 /// <summary>
 /// Helper for All().Satisfy() pattern - allows custom assertions on all collection items.
 /// </summary>
-public class CollectionAllSatisfyHelper<TItem>
+public class CollectionAllSatisfyHelper<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
-    private readonly AssertionContext<IEnumerable<TItem>> _context;
+    private readonly AssertionContext<TCollection> _context;
 
-    public CollectionAllSatisfyHelper(AssertionContext<IEnumerable<TItem>> context)
+    public CollectionAllSatisfyHelper(AssertionContext<TCollection> context)
     {
         _context = context;
     }
@@ -358,38 +365,39 @@ public class CollectionAllSatisfyHelper<TItem>
     /// Asserts that all items satisfy the given assertion.
     /// Example: .All().Satisfy(item => item.IsNotNull())
     /// </summary>
-    public CollectionAllSatisfyAssertion<TItem> Satisfy(
+    public CollectionAllSatisfyAssertion<TCollection, TItem> Satisfy(
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
         [CallerArgumentExpression(nameof(assertion))] string? expression = null)
     {
         _context.ExpressionBuilder.Append($".Satisfy({expression})");
-        return new CollectionAllSatisfyAssertion<TItem>(_context, assertion, expression ?? "assertion");
+        return new CollectionAllSatisfyAssertion<TCollection, TItem>(_context, assertion, expression ?? "assertion");
     }
 
     /// <summary>
     /// Asserts that all items, when mapped, satisfy the given assertion.
     /// Example: .All().Satisfy(model => model.Value, assert => assert.IsNotNull())
     /// </summary>
-    public CollectionAllSatisfyMappedAssertion<TItem, TMapped> Satisfy<TMapped>(
+    public CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> Satisfy<TMapped>(
         Func<TItem, TMapped> mapper,
         Func<IAssertionSource<TMapped>, Assertion<TMapped>?> assertion,
         [CallerArgumentExpression(nameof(mapper))] string? mapperExpression = null,
         [CallerArgumentExpression(nameof(assertion))] string? assertionExpression = null)
     {
         _context.ExpressionBuilder.Append($".Satisfy({mapperExpression}, {assertionExpression})");
-        return new CollectionAllSatisfyMappedAssertion<TItem, TMapped>(
+        return new CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped>(
             _context, mapper, assertion, mapperExpression ?? "mapper", assertionExpression ?? "assertion");
     }
 }
 
 [AssertionExtension("All")]
-public class CollectionAllAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class CollectionAllAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, bool> _predicate;
     private readonly string _predicateDescription;
 
     public CollectionAllAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         Func<TItem, bool> predicate,
         string predicateDescription)
         : base(context)
@@ -398,7 +406,7 @@ public class CollectionAllAssertion<TItem> : Sources.CollectionAssertionBase<TIt
         _predicateDescription = predicateDescription;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -435,13 +443,14 @@ public class CollectionAllAssertion<TItem> : Sources.CollectionAssertionBase<TIt
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
 [AssertionExtension("Any")]
-public class CollectionAnyAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class CollectionAnyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, bool> _predicate;
     private readonly string _predicateDescription;
 
     public CollectionAnyAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         Func<TItem, bool> predicate,
         string predicateDescription)
         : base(context)
@@ -450,7 +459,7 @@ public class CollectionAnyAssertion<TItem> : Sources.CollectionAssertionBase<TIt
         _predicateDescription = predicateDescription;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -485,17 +494,18 @@ public class CollectionAnyAssertion<TItem> : Sources.CollectionAssertionBase<TIt
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
 [AssertionExtension("HasSingleItem")]
-public class HasSingleItemAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private TItem? _singleItem;
 
     public HasSingleItemAssertion(
-        AssertionContext<IEnumerable<TItem>> context)
+        AssertionContext<TCollection> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -558,20 +568,21 @@ public class HasSingleItemAssertion<TItem> : Sources.CollectionAssertionBase<TIt
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
 [AssertionExtension("Contains")]
-public class CollectionContainsPredicateAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class CollectionContainsPredicateAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, bool> _predicate;
     private TItem? _foundItem;
 
     public CollectionContainsPredicateAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         Func<TItem, bool> predicate)
         : base(context)
     {
         _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -621,13 +632,14 @@ public class CollectionContainsPredicateAssertion<TItem> : Sources.CollectionAss
 /// Asserts that all items in the collection satisfy a custom assertion.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
-public class CollectionAllSatisfyAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class CollectionAllSatisfyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly Func<IAssertionSource<TItem>, Assertion<TItem>?> _assertion;
     private readonly string _assertionDescription;
 
     public CollectionAllSatisfyAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         Func<IAssertionSource<TItem>, Assertion<TItem>?> assertion,
         string assertionDescription)
         : base(context)
@@ -636,7 +648,7 @@ public class CollectionAllSatisfyAssertion<TItem> : Sources.CollectionAssertionB
         _assertionDescription = assertionDescription;
     }
 
-    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -680,7 +692,8 @@ public class CollectionAllSatisfyAssertion<TItem> : Sources.CollectionAssertionB
 /// Asserts that all items in the collection, when mapped, satisfy a custom assertion.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
-public class CollectionAllSatisfyMappedAssertion<TItem, TMapped> : Sources.CollectionAssertionBase<TItem>
+public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, TMapped> _mapper;
     private readonly Func<IAssertionSource<TMapped>, Assertion<TMapped>?> _assertion;
@@ -688,7 +701,7 @@ public class CollectionAllSatisfyMappedAssertion<TItem, TMapped> : Sources.Colle
     private readonly string _assertionDescription;
 
     public CollectionAllSatisfyMappedAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         Func<TItem, TMapped> mapper,
         Func<IAssertionSource<TMapped>, Assertion<TMapped>?> assertion,
         string mapperDescription,
@@ -701,7 +714,7 @@ public class CollectionAllSatisfyMappedAssertion<TItem, TMapped> : Sources.Colle
         _assertionDescription = assertionDescription;
     }
 
-    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -748,15 +761,16 @@ public class CollectionAllSatisfyMappedAssertion<TItem, TMapped> : Sources.Colle
 /// Uses runtime comparison via Comparer&lt;TItem&gt;.Default to allow instance method usage without constraints.
 /// </summary>
 [AssertionExtension("IsInOrder")]
-public class CollectionIsInOrderAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     public CollectionIsInOrderAssertion(
-        AssertionContext<IEnumerable<TItem>> context)
+        AssertionContext<TCollection> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -803,15 +817,16 @@ public class CollectionIsInOrderAssertion<TItem> : Sources.CollectionAssertionBa
 /// Uses runtime comparison via Comparer&lt;TItem&gt;.Default to allow instance method usage without constraints.
 /// </summary>
 [AssertionExtension("IsInDescendingOrder")]
-public class CollectionIsInDescendingOrderAssertion<TItem> : Sources.CollectionAssertionBase<TItem>
+public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     public CollectionIsInDescendingOrderAssertion(
-        AssertionContext<IEnumerable<TItem>> context)
+        AssertionContext<TCollection> context)
         : base(context)
     {
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -857,13 +872,14 @@ public class CollectionIsInDescendingOrderAssertion<TItem> : Sources.CollectionA
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// Available as an instance method on CollectionAssertionBase for proper type inference.
 /// </summary>
-public class CollectionIsOrderedByAssertion<TItem, TKey> : Sources.CollectionAssertionBase<TItem>
+public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, TKey> _keySelector;
     private readonly IComparer<TKey>? _comparer;
 
     public CollectionIsOrderedByAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         Func<TItem, TKey> keySelector,
         IComparer<TKey>? comparer = null)
         : base(context)
@@ -872,7 +888,7 @@ public class CollectionIsOrderedByAssertion<TItem, TKey> : Sources.CollectionAss
         _comparer = comparer;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
@@ -918,13 +934,14 @@ public class CollectionIsOrderedByAssertion<TItem, TKey> : Sources.CollectionAss
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// Available as an instance method on CollectionAssertionBase for proper type inference.
 /// </summary>
-public class CollectionIsOrderedByDescendingAssertion<TItem, TKey> : Sources.CollectionAssertionBase<TItem>
+public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, TKey> _keySelector;
     private readonly IComparer<TKey>? _comparer;
 
     public CollectionIsOrderedByDescendingAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         Func<TItem, TKey> keySelector,
         IComparer<TKey>? comparer = null)
         : base(context)
@@ -933,7 +950,7 @@ public class CollectionIsOrderedByDescendingAssertion<TItem, TKey> : Sources.Col
         _comparer = comparer;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
