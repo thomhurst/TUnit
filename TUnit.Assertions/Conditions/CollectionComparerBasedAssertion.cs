@@ -8,12 +8,14 @@ namespace TUnit.Assertions.Conditions;
 /// Base class for collection assertions that support custom equality comparers.
 /// Inherits from CollectionAssertionBase to ensure And/Or continuations preserve collection type awareness.
 /// </summary>
+/// <typeparam name="TCollection">The concrete collection type</typeparam>
 /// <typeparam name="TItem">The type of items being compared</typeparam>
-public abstract class CollectionComparerBasedAssertion<TItem> : CollectionAssertionBase<TItem>
+public abstract class CollectionComparerBasedAssertion<TCollection, TItem> : CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private IEqualityComparer<TItem>? _comparer;
 
-    protected CollectionComparerBasedAssertion(AssertionContext<IEnumerable<TItem>> context)
+    protected CollectionComparerBasedAssertion(AssertionContext<TCollection> context)
         : base(context)
     {
     }
