@@ -137,3 +137,71 @@ public class IsNotDefaultAssertion<TValue> : Assertion<TValue> where TValue : st
 
     protected override string GetExpectation() => $"to not be default({typeof(TValue).Name})";
 }
+
+/// <summary>
+/// Asserts that a reference type value is equal to the default value (null).
+/// For reference types, this is equivalent to IsNull().
+/// </summary>
+[AssertionExtension("IsDefault")]
+public class IsDefaultReferenceAssertion<TValue> : Assertion<TValue> where TValue : class
+{
+    public IsDefaultReferenceAssertion(
+        AssertionContext<TValue> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (EqualityComparer<TValue>.Default.Equals(value!, default!))
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"value is {value}"));
+    }
+
+    protected override string GetExpectation() => $"to be default({typeof(TValue).Name})";
+}
+
+/// <summary>
+/// Asserts that a reference type value is not the default value (not null).
+/// For reference types, this is equivalent to IsNotNull().
+/// </summary>
+[AssertionExtension("IsNotDefault")]
+public class IsNotDefaultReferenceAssertion<TValue> : Assertion<TValue> where TValue : class
+{
+    public IsNotDefaultReferenceAssertion(
+        AssertionContext<TValue> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (!EqualityComparer<TValue>.Default.Equals(value!, default!))
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"value is default({typeof(TValue).Name})"));
+    }
+
+    protected override string GetExpectation() => $"to not be default({typeof(TValue).Name})";
+}

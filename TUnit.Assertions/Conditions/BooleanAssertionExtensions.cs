@@ -16,4 +16,12 @@ public static partial class BooleanAssertionExtensions
     [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be false")]
     public static bool IsFalse(this bool value) => value == false;
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [GenerateAssertion(ExpectationMessage = "to be true")]
+    public static bool IsTrue(this bool? value) => value == true;
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [GenerateAssertion(ExpectationMessage = "to be false")]
+    public static bool IsFalse(this bool? value) => value == false;
 }
