@@ -223,10 +223,10 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     /// This instance method enables calling HasDistinctItems with proper type inference.
     /// Example: await Assert.That(list).HasDistinctItems();
     /// </summary>
-    public HasDistinctItemsAssertion<TItem> HasDistinctItems()
+    public HasDistinctItemsAssertion<TCollection, TItem> HasDistinctItems()
     {
         Context.ExpressionBuilder.Append(".HasDistinctItems()");
-        return new HasDistinctItemsAssertion<TItem>(Context);
+        return new HasDistinctItemsAssertion<TCollection, TItem>(Context);
     }
 
     /// <summary>

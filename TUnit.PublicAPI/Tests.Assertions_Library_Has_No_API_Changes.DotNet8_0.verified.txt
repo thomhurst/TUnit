@@ -320,8 +320,12 @@ namespace .Conditions
     {
         [.(ExpectationMessage="to be false")]
         public static bool IsFalse(this bool value) { }
+        [.(ExpectationMessage="to be false")]
+        public static bool IsFalse(this bool? value) { }
         [.(ExpectationMessage="to be true")]
         public static bool IsTrue(this bool value) { }
+        [.(ExpectationMessage="to be true")]
+        public static bool IsTrue(this bool? value) { }
     }
     [.<.CancellationToken>("CanBeCanceled", CustomName="CannotBeCanceled", ExpectationMessage="be cancellable", NegateLogic=true)]
     [.<.CancellationToken>("CanBeCanceled", ExpectationMessage="be cancellable")]
@@ -897,11 +901,11 @@ namespace .Conditions
         [.(ExpectationMessage="to not be an empty GUID")]
         public static bool IsNotEmptyGuid(this  value) { }
     }
-    public class HasDistinctItemsAssertion<TValue> : .<TValue>
-        where TValue : .IEnumerable
+    public class HasDistinctItemsAssertion<TCollection, TItem> : .<TCollection, TItem>
+        where TCollection : .<TItem>
     {
-        public HasDistinctItemsAssertion(.<TValue> context) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        public HasDistinctItemsAssertion(.<TCollection> context) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
     public class HasMessageContainingAssertion<TValue> : .<TValue>
@@ -985,6 +989,14 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("IsDefault")]
+    public class IsDefaultReferenceAssertion<TValue> : .<TValue>
+        where TValue :  class
+    {
+        public IsDefaultReferenceAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
     [.("IsEquatableOrEqualTo")]
     public class IsEquatableOrEqualToAssertion<TValue> : .<TValue, TValue>
     {
@@ -1026,6 +1038,14 @@ namespace .Conditions
         where TValue :  struct
     {
         public IsNotDefaultAssertion(.<TValue> context) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsNotDefault")]
+    public class IsNotDefaultReferenceAssertion<TValue> : .<TValue>
+        where TValue :  class
+    {
+        public IsNotDefaultReferenceAssertion(.<TValue> context) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -1305,6 +1325,7 @@ namespace .Conditions
     }
     [.<string>("IsNullOrEmpty", CustomName="IsNotNullOrEmpty", ExpectationMessage="be null or empty", NegateLogic=true)]
     [.<string>("IsNullOrEmpty", ExpectationMessage="be null or empty")]
+    [.<string>("IsNullOrWhiteSpace", CustomName="IsNotNullOrWhiteSpace", ExpectationMessage="be null, empty, or whitespace", NegateLogic=true)]
     [.<string>("IsNullOrWhiteSpace", ExpectationMessage="be null, empty, or whitespace")]
     public static class StringStaticMethodAssertions { }
     public class StructuralEquivalencyAssertion<TValue> : .<TValue>
@@ -1774,8 +1795,6 @@ namespace .Extensions
         public static ..DoesNotHaveSameValueAsAssertion<TEnum> DoesNotHaveSameValueAs<TEnum>(this .<TEnum> source,  otherEnumValue, [.("otherEnumValue")] string? expression = null)
             where TEnum :  struct,  { }
         public static .<TValue> EqualTo<TValue>(this .<TValue> source, TValue? expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> HasDistinctItems<TValue>(this .<TValue> source)
-            where TValue : .IEnumerable { }
         public static ..HasFlagAssertion<TEnum> HasFlag<TEnum>(this .<TEnum> source, TEnum expectedFlag, [.("expectedFlag")] string? expression = null)
             where TEnum :  struct,  { }
         public static ..LengthWrapper HasLength(this .<string> source) { }
@@ -1899,7 +1918,9 @@ namespace .Extensions
     public static class BooleanAssertionExtensions
     {
         public static ._IsFalse_Assertion IsFalse(this .<bool> source) { }
+        public static ._IsFalse_Assertion IsFalse(this .<bool?> source) { }
         public static ._IsTrue_Assertion IsTrue(this .<bool> source) { }
+        public static ._IsTrue_Assertion IsTrue(this .<bool?> source) { }
     }
     public static class CancellationTokenAssertionExtensions
     {
@@ -2943,6 +2964,11 @@ namespace .Extensions
         public static .<TValue> IsDefault<TValue>(this .<TValue> source)
             where TValue :  struct { }
     }
+    public static class IsDefaultReferenceAssertionExtensions
+    {
+        public static .<TValue> IsDefault<TValue>(this .<TValue> source)
+            where TValue :  class { }
+    }
     public static class IsEquatableOrEqualToAssertionExtensions
     {
         public static .<TValue> IsEquatableOrEqualTo<TValue>(this .<TValue> source, TValue expected, [.("expected")] string? expectedExpression = null) { }
@@ -2970,6 +2996,11 @@ namespace .Extensions
     {
         public static .<TValue> IsNotDefault<TValue>(this .<TValue> source)
             where TValue :  struct { }
+    }
+    public static class IsNotDefaultReferenceAssertionExtensions
+    {
+        public static .<TValue> IsNotDefault<TValue>(this .<TValue> source)
+            where TValue :  class { }
     }
     public static class IsNotInAssertionExtensions
     {
@@ -3028,6 +3059,18 @@ namespace .Extensions
     public static class NullAssertionExtensions
     {
         public static .<TValue> IsNull<TValue>(this .<TValue> source) { }
+    }
+    public sealed class NullableBool_IsFalse_Assertion : .<bool?>
+    {
+        public NullableBool_IsFalse_Assertion(.<bool?> context) { }
+        protected override .<.> CheckAsync(.<bool?> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class NullableBool_IsTrue_Assertion : .<bool?>
+    {
+        public NullableBool_IsTrue_Assertion(.<bool?> context) { }
+        protected override .<.> CheckAsync(.<bool?> metadata) { }
+        protected override string GetExpectation() { }
     }
     public static class NullableEquatableAssertionExtensions
     {
@@ -3245,6 +3288,7 @@ namespace .Extensions
     public static class StringStaticMethodAssertions
     {
         public static . IsNotNullOrEmpty(this .<string> source) { }
+        public static . IsNotNullOrWhiteSpace(this .<string> source) { }
         public static . IsNullOrEmpty(this .<string> source) { }
         public static . IsNullOrWhiteSpace(this .<string> source) { }
     }
@@ -3824,6 +3868,7 @@ namespace .Sources
         protected override string GetExpectation() { }
         public ..CountWrapper<TCollection, TItem> HasCount() { }
         public .<TCollection, TItem> HasCount(int expectedCount, [.("expectedCount")] string? expression = null) { }
+        public .<TCollection, TItem> HasDistinctItems() { }
         public .<TCollection, TItem> HasSingleItem() { }
         public .<TCollection, TItem> IsEmpty() { }
         public .<TCollection, TItem> IsInDescendingOrder() { }
