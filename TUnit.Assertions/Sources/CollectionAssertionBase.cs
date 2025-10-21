@@ -8,18 +8,20 @@ namespace TUnit.Assertions.Sources;
 
 /// <summary>
 /// Base class for all collection assertions that preserves type through And/Or chains.
-/// Implements IAssertionSource&lt;IEnumerable&lt;TItem&gt;&gt; to enable all collection and value extension methods.
+/// Implements IAssertionSource&lt;TCollection&gt; to enable all collection and value extension methods.
 /// All collection-specific operations (Contains, IsInOrder, etc.) are provided as instance methods.
 /// </summary>
+/// <typeparam name="TCollection">The concrete collection type (e.g., IEnumerable&lt;T&gt;, IReadOnlyDictionary&lt;K,V&gt;)</typeparam>
 /// <typeparam name="TItem">The type of items in the collection</typeparam>
-public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TItem>>, IAssertionSource<IEnumerable<TItem>>
+public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TCollection>, IAssertionSource<TCollection>
+    where TCollection : IEnumerable<TItem>
 {
     /// <summary>
     /// Explicit implementation of IAssertionSource.Context to expose the context publicly.
     /// </summary>
-    AssertionContext<IEnumerable<TItem>> IAssertionSource<IEnumerable<TItem>>.Context => Context;
+    AssertionContext<TCollection> IAssertionSource<TCollection>.Context => Context;
 
-    protected CollectionAssertionBase(AssertionContext<IEnumerable<TItem>> context)
+    protected CollectionAssertionBase(AssertionContext<TCollection> context)
         : base(context)
     {
     }
@@ -30,8 +32,8 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// Private protected means accessible only to derived classes within the same assembly.
     /// </summary>
     private protected CollectionAssertionBase(
-        AssertionContext<IEnumerable<TItem>> context,
-        Assertion<IEnumerable<TItem>> previousAssertion,
+        AssertionContext<TCollection> context,
+        Assertion<TCollection> previousAssertion,
         string combinerExpression,
         CombinerType combinerType)
         : base(context)
@@ -47,10 +49,10 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method allows single type parameter usage without needing to specify the source type.
     /// Example: await Assert.That(readOnlyList).IsTypeOf&lt;List&lt;double&gt;&gt;();
     /// </summary>
-    public TypeOfAssertion<IEnumerable<TItem>, TExpected> IsTypeOf<TExpected>()
+    public TypeOfAssertion<TCollection, TExpected> IsTypeOf<TExpected>()
     {
         Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
-        return new TypeOfAssertion<IEnumerable<TItem>, TExpected>(Context);
+        return new TypeOfAssertion<TCollection, TExpected>(Context);
     }
 
     /// <summary>
@@ -58,12 +60,12 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling Contains with proper type inference.
     /// Example: await Assert.That(list).Contains("value");
     /// </summary>
-    public CollectionContainsAssertion<TItem> Contains(
+    public CollectionContainsAssertion<TCollection, TItem> Contains(
         TItem expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".Contains({expression})");
-        return new CollectionContainsAssertion<TItem>(Context, expected);
+        return new CollectionContainsAssertion<TCollection, TItem>(Context, expected);
     }
 
     /// <summary>
@@ -71,12 +73,12 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling Contains with proper type inference.
     /// Example: await Assert.That(list).Contains(x => x > 5);
     /// </summary>
-    public CollectionContainsPredicateAssertion<TItem> Contains(
+    public CollectionContainsPredicateAssertion<TCollection, TItem> Contains(
         Func<TItem, bool> predicate,
         [CallerArgumentExpression(nameof(predicate))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".Contains({expression})");
-        return new CollectionContainsPredicateAssertion<TItem>(Context, predicate);
+        return new CollectionContainsPredicateAssertion<TCollection, TItem>(Context, predicate);
     }
 
     /// <summary>
@@ -84,12 +86,12 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling HasCount with proper type inference.
     /// Example: await Assert.That(list).HasCount(5);
     /// </summary>
-    public CollectionCountAssertion<TItem> HasCount(
+    public CollectionCountAssertion<TCollection, TItem> HasCount(
         int expectedCount,
         [CallerArgumentExpression(nameof(expectedCount))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".HasCount({expression})");
-        return new CollectionCountAssertion<TItem>(Context, expectedCount);
+        return new CollectionCountAssertion<TCollection, TItem>(Context, expectedCount);
     }
 
     /// <summary>
@@ -97,10 +99,10 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This enables the pattern: .HasCount().GreaterThan(5)
     /// Example: await Assert.That(list).HasCount().EqualTo(5);
     /// </summary>
-    public CountWrapper<TItem> HasCount()
+    public CountWrapper<TCollection, TItem> HasCount()
     {
         Context.ExpressionBuilder.Append(".HasCount()");
-        return new CountWrapper<TItem>(Context);
+        return new CountWrapper<TCollection, TItem>(Context);
     }
 
     /// <summary>
@@ -108,10 +110,10 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This enables fluent assertions on the count itself.
     /// Example: await Assert.That(list).Count().IsGreaterThan(5);
     /// </summary>
-    public CollectionCountValueAssertion<TItem> Count()
+    public CollectionCountValueAssertion<TCollection, TItem> Count()
     {
         Context.ExpressionBuilder.Append(".Count()");
-        return new CollectionCountValueAssertion<TItem>(Context, null);
+        return new CollectionCountValueAssertion<TCollection, TItem>(Context, null);
     }
 
     /// <summary>
@@ -119,12 +121,12 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This enables fluent assertions on filtered counts.
     /// Example: await Assert.That(list).Count(x => x > 10).IsEqualTo(3);
     /// </summary>
-    public CollectionCountValueAssertion<TItem> Count(
+    public CollectionCountValueAssertion<TCollection, TItem> Count(
         Func<TItem, bool> predicate,
         [CallerArgumentExpression(nameof(predicate))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".Count({expression})");
-        return new CollectionCountValueAssertion<TItem>(Context, predicate);
+        return new CollectionCountValueAssertion<TCollection, TItem>(Context, predicate);
     }
 
     /// <summary>
@@ -132,12 +134,12 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling IsOrderedBy with proper type inference.
     /// Example: await Assert.That(list).IsOrderedBy(x => x.Name);
     /// </summary>
-    public CollectionIsOrderedByAssertion<TItem, TKey> IsOrderedBy<TKey>(
+    public CollectionIsOrderedByAssertion<TCollection, TItem, TKey> IsOrderedBy<TKey>(
         Func<TItem, TKey> keySelector,
         [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".IsOrderedBy({expression})");
-        return new CollectionIsOrderedByAssertion<TItem, TKey>(Context, keySelector);
+        return new CollectionIsOrderedByAssertion<TCollection, TItem, TKey>(Context, keySelector);
     }
 
     /// <summary>
@@ -145,14 +147,14 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling IsOrderedBy with proper type inference.
     /// Example: await Assert.That(list).IsOrderedBy(x => x.Name, StringComparer.OrdinalIgnoreCase);
     /// </summary>
-    public CollectionIsOrderedByAssertion<TItem, TKey> IsOrderedBy<TKey>(
+    public CollectionIsOrderedByAssertion<TCollection, TItem, TKey> IsOrderedBy<TKey>(
         Func<TItem, TKey> keySelector,
         IComparer<TKey>? comparer,
         [CallerArgumentExpression(nameof(keySelector))] string? selectorExpression = null,
         [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
     {
         Context.ExpressionBuilder.Append($".IsOrderedBy({selectorExpression}, {comparerExpression})");
-        return new CollectionIsOrderedByAssertion<TItem, TKey>(Context, keySelector, comparer);
+        return new CollectionIsOrderedByAssertion<TCollection, TItem, TKey>(Context, keySelector, comparer);
     }
 
     /// <summary>
@@ -160,12 +162,12 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling IsOrderedByDescending with proper type inference.
     /// Example: await Assert.That(list).IsOrderedByDescending(x => x.Age);
     /// </summary>
-    public CollectionIsOrderedByDescendingAssertion<TItem, TKey> IsOrderedByDescending<TKey>(
+    public CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> IsOrderedByDescending<TKey>(
         Func<TItem, TKey> keySelector,
         [CallerArgumentExpression(nameof(keySelector))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".IsOrderedByDescending({expression})");
-        return new CollectionIsOrderedByDescendingAssertion<TItem, TKey>(Context, keySelector);
+        return new CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey>(Context, keySelector);
     }
 
     /// <summary>
@@ -173,14 +175,14 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling IsOrderedByDescending with proper type inference.
     /// Example: await Assert.That(list).IsOrderedByDescending(x => x.Name, StringComparer.OrdinalIgnoreCase);
     /// </summary>
-    public CollectionIsOrderedByDescendingAssertion<TItem, TKey> IsOrderedByDescending<TKey>(
+    public CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> IsOrderedByDescending<TKey>(
         Func<TItem, TKey> keySelector,
         IComparer<TKey>? comparer,
         [CallerArgumentExpression(nameof(keySelector))] string? selectorExpression = null,
         [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
     {
         Context.ExpressionBuilder.Append($".IsOrderedByDescending({selectorExpression}, {comparerExpression})");
-        return new CollectionIsOrderedByDescendingAssertion<TItem, TKey>(Context, keySelector, comparer);
+        return new CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey>(Context, keySelector, comparer);
     }
 
     /// <summary>
@@ -188,10 +190,10 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling IsEmpty with proper type inference.
     /// Example: await Assert.That(list).IsEmpty();
     /// </summary>
-    public CollectionIsEmptyAssertion<TItem> IsEmpty()
+    public CollectionIsEmptyAssertion<TCollection, TItem> IsEmpty()
     {
         Context.ExpressionBuilder.Append(".IsEmpty()");
-        return new CollectionIsEmptyAssertion<TItem>(Context);
+        return new CollectionIsEmptyAssertion<TCollection, TItem>(Context);
     }
 
     /// <summary>
@@ -199,10 +201,10 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling IsNotEmpty with proper type inference.
     /// Example: await Assert.That(list).IsNotEmpty();
     /// </summary>
-    public CollectionIsNotEmptyAssertion<TItem> IsNotEmpty()
+    public CollectionIsNotEmptyAssertion<TCollection, TItem> IsNotEmpty()
     {
         Context.ExpressionBuilder.Append(".IsNotEmpty()");
-        return new CollectionIsNotEmptyAssertion<TItem>(Context);
+        return new CollectionIsNotEmptyAssertion<TCollection, TItem>(Context);
     }
 
     /// <summary>
@@ -210,10 +212,10 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling HasSingleItem with proper type inference.
     /// Example: await Assert.That(list).HasSingleItem();
     /// </summary>
-    public HasSingleItemAssertion<TItem> HasSingleItem()
+    public HasSingleItemAssertion<TCollection, TItem> HasSingleItem()
     {
         Context.ExpressionBuilder.Append(".HasSingleItem()");
-        return new HasSingleItemAssertion<TItem>(Context);
+        return new HasSingleItemAssertion<TCollection, TItem>(Context);
     }
 
     /// <summary>
@@ -232,12 +234,12 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling DoesNotContain with proper type inference.
     /// Example: await Assert.That(list).DoesNotContain("value");
     /// </summary>
-    public CollectionDoesNotContainAssertion<TItem> DoesNotContain(
+    public CollectionDoesNotContainAssertion<TCollection, TItem> DoesNotContain(
         TItem expected,
         [CallerArgumentExpression(nameof(expected))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
-        return new CollectionDoesNotContainAssertion<TItem>(Context, expected);
+        return new CollectionDoesNotContainAssertion<TCollection, TItem>(Context, expected);
     }
 
     /// <summary>
@@ -245,12 +247,12 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling DoesNotContain with proper type inference.
     /// Example: await Assert.That(list).DoesNotContain(x => x > 10);
     /// </summary>
-    public CollectionDoesNotContainPredicateAssertion<TItem> DoesNotContain(
+    public CollectionDoesNotContainPredicateAssertion<TCollection, TItem> DoesNotContain(
         Func<TItem, bool> predicate,
         [CallerArgumentExpression(nameof(predicate))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".DoesNotContain({expression})");
-        return new CollectionDoesNotContainPredicateAssertion<TItem>(Context, predicate, expression ?? "predicate");
+        return new CollectionDoesNotContainPredicateAssertion<TCollection, TItem>(Context, predicate, expression ?? "predicate");
     }
 
     /// <summary>
@@ -258,12 +260,12 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling All with proper type inference.
     /// Example: await Assert.That(list).All(x => x > 0);
     /// </summary>
-    public CollectionAllAssertion<TItem> All(
+    public CollectionAllAssertion<TCollection, TItem> All(
         Func<TItem, bool> predicate,
         [CallerArgumentExpression(nameof(predicate))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".All({expression})");
-        return new CollectionAllAssertion<TItem>(Context, predicate, expression ?? "predicate");
+        return new CollectionAllAssertion<TCollection, TItem>(Context, predicate, expression ?? "predicate");
     }
 
     /// <summary>
@@ -271,10 +273,10 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling All().Satisfy() with proper type inference.
     /// Example: await Assert.That(list).All().Satisfy(item => item.IsNotNull());
     /// </summary>
-    public CollectionAllSatisfyHelper<TItem> All()
+    public CollectionAllSatisfyHelper<TCollection, TItem> All()
     {
         Context.ExpressionBuilder.Append(".All()");
-        return new CollectionAllSatisfyHelper<TItem>(Context);
+        return new CollectionAllSatisfyHelper<TCollection, TItem>(Context);
     }
 
     /// <summary>
@@ -282,12 +284,12 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling Any with proper type inference.
     /// Example: await Assert.That(list).Any(x => x > 10);
     /// </summary>
-    public CollectionAnyAssertion<TItem> Any(
+    public CollectionAnyAssertion<TCollection, TItem> Any(
         Func<TItem, bool> predicate,
         [CallerArgumentExpression(nameof(predicate))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".Any({expression})");
-        return new CollectionAnyAssertion<TItem>(Context, predicate, expression ?? "predicate");
+        return new CollectionAnyAssertion<TCollection, TItem>(Context, predicate, expression ?? "predicate");
     }
 
     /// <summary>
@@ -295,12 +297,12 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// This instance method enables calling ContainsOnly with proper type inference.
     /// Example: await Assert.That(list).ContainsOnly(x => x > 0);
     /// </summary>
-    public CollectionAllAssertion<TItem> ContainsOnly(
+    public CollectionAllAssertion<TCollection, TItem> ContainsOnly(
         Func<TItem, bool> predicate,
         [CallerArgumentExpression(nameof(predicate))] string? expression = null)
     {
         Context.ExpressionBuilder.Append($".ContainsOnly({expression})");
-        return new CollectionAllAssertion<TItem>(Context, predicate, expression ?? "predicate");
+        return new CollectionAllAssertion<TCollection, TItem>(Context, predicate, expression ?? "predicate");
     }
 
     /// <summary>
@@ -309,10 +311,10 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// Uses runtime comparison via Comparer&lt;TItem&gt;.Default.
     /// Example: await Assert.That(list).IsInOrder();
     /// </summary>
-    public CollectionIsInOrderAssertion<TItem> IsInOrder()
+    public CollectionIsInOrderAssertion<TCollection, TItem> IsInOrder()
     {
         Context.ExpressionBuilder.Append(".IsInOrder()");
-        return new CollectionIsInOrderAssertion<TItem>(Context);
+        return new CollectionIsInOrderAssertion<TCollection, TItem>(Context);
     }
 
     /// <summary>
@@ -321,22 +323,22 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// Uses runtime comparison via Comparer&lt;TItem&gt;.Default.
     /// Example: await Assert.That(list).IsInDescendingOrder();
     /// </summary>
-    public CollectionIsInDescendingOrderAssertion<TItem> IsInDescendingOrder()
+    public CollectionIsInDescendingOrderAssertion<TCollection, TItem> IsInDescendingOrder()
     {
         Context.ExpressionBuilder.Append(".IsInDescendingOrder()");
-        return new CollectionIsInDescendingOrderAssertion<TItem>(Context);
+        return new CollectionIsInDescendingOrderAssertion<TCollection, TItem>(Context);
     }
 
     /// <summary>
     /// Returns an And continuation that preserves collection type and item type.
     /// Overrides the base Assertion.And to return a collection-specific continuation.
     /// </summary>
-    public new CollectionAndContinuation<TItem> And
+    public new CollectionAndContinuation<TCollection, TItem> And
     {
         get
         {
-            ThrowIfMixingCombiner<Chaining.OrAssertion<IEnumerable<TItem>>>();
-            return new CollectionAndContinuation<TItem>(Context, InternalWrappedExecution ?? this);
+            ThrowIfMixingCombiner<Chaining.OrAssertion<TCollection>>();
+            return new CollectionAndContinuation<TCollection, TItem>(Context, InternalWrappedExecution ?? this);
         }
     }
 
@@ -344,12 +346,12 @@ public abstract class CollectionAssertionBase<TItem> : Assertion<IEnumerable<TIt
     /// Returns an Or continuation that preserves collection type and item type.
     /// Overrides the base Assertion.Or to return a collection-specific continuation.
     /// </summary>
-    public new CollectionOrContinuation<TItem> Or
+    public new CollectionOrContinuation<TCollection, TItem> Or
     {
         get
         {
-            ThrowIfMixingCombiner<Chaining.AndAssertion<IEnumerable<TItem>>>();
-            return new CollectionOrContinuation<TItem>(Context, InternalWrappedExecution ?? this);
+            ThrowIfMixingCombiner<Chaining.AndAssertion<TCollection>>();
+            return new CollectionOrContinuation<TCollection, TItem>(Context, InternalWrappedExecution ?? this);
         }
     }
 }
