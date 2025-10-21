@@ -14,13 +14,14 @@ namespace TUnit.Assertions.Conditions;
 /// </summary>
 [AssertionExtension("IsNotEquivalentTo")]
 [RequiresDynamicCode("Collection equivalency uses structural comparison for complex objects, which requires reflection and is not compatible with AOT")]
-public class NotEquivalentToAssertion<TItem> : CollectionComparerBasedAssertion<TItem>
+public class NotEquivalentToAssertion<TCollection, TItem> : CollectionComparerBasedAssertion<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
 {
     private readonly IEnumerable<TItem> _notExpected;
     private readonly CollectionOrdering _ordering;
 
     public NotEquivalentToAssertion(
-        AssertionContext<IEnumerable<TItem>> context,
+        AssertionContext<TCollection> context,
         IEnumerable<TItem> notExpected,
         CollectionOrdering ordering = CollectionOrdering.Any)
         : base(context)
@@ -29,14 +30,14 @@ public class NotEquivalentToAssertion<TItem> : CollectionComparerBasedAssertion<
         _ordering = ordering;
     }
 
-    public NotEquivalentToAssertion<TItem> Using(IEqualityComparer<TItem> comparer)
+    public NotEquivalentToAssertion<TCollection, TItem> Using(IEqualityComparer<TItem> comparer)
     {
         SetComparer(comparer);
         return this;
     }
 
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Collection equivalency uses structural comparison which requires reflection")]
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IEnumerable<TItem>> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;

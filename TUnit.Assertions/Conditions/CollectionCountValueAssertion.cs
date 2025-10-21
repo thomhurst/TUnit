@@ -7,17 +7,18 @@ namespace TUnit.Assertions.Conditions;
 /// Assertion that evaluates the count of a collection and provides numeric assertions on that count.
 /// Implements IAssertionSource&lt;int&gt; to enable all numeric assertion methods.
 /// </summary>
-public class CollectionCountValueAssertion<TItem> : Sources.ValueAssertion<int>
+public class CollectionCountValueAssertion<TCollection, TItem> : Sources.ValueAssertion<int>
+    where TCollection : IEnumerable<TItem>
 {
     public CollectionCountValueAssertion(
-        AssertionContext<IEnumerable<TItem>> collectionContext,
+        AssertionContext<TCollection> collectionContext,
         Func<TItem, bool>? predicate)
         : base(CreateIntContext(collectionContext, predicate))
     {
     }
 
     private static AssertionContext<int> CreateIntContext(
-        AssertionContext<IEnumerable<TItem>> collectionContext,
+        AssertionContext<TCollection> collectionContext,
         Func<TItem, bool>? predicate)
     {
         return collectionContext.Map<int>(collection =>
