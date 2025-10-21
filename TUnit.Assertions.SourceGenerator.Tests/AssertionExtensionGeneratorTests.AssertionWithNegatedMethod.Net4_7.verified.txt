@@ -4,6 +4,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Enums;
 using TUnit.Assertions.Tests.TestData;
 
 namespace TUnit.Assertions.Extensions;
@@ -19,7 +20,7 @@ public static class TrueAssertionExtensions
     /// </summary>
     public static TrueAssertion IsTrue(this IAssertionSource<bool> source)
     {
-        source.Context.ExpressionBuilder.Append($".IsTrue()");
+        source.Context.ExpressionBuilder.Append(".IsTrue(" + ")");
         return new TrueAssertion(source.Context);
     }
 
@@ -28,7 +29,7 @@ public static class TrueAssertionExtensions
     /// </summary>
     public static TrueAssertion IsFalse(this IAssertionSource<bool> source)
     {
-        source.Context.ExpressionBuilder.Append($".IsFalse()");
+        source.Context.ExpressionBuilder.Append(".IsFalse(" + ")");
         return new TrueAssertion(source.Context);
     }
 }

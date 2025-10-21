@@ -4,6 +4,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Enums;
 using TUnit.Assertions.Tests.TestData;
 
 namespace TUnit.Assertions.Extensions;
@@ -19,7 +20,8 @@ public static class EqualsAssertionExtensions
     /// </summary>
     public static EqualsAssertion<TValue> IsEqualTo<TValue>(this IAssertionSource<TValue> source, TValue expected, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
     {
-        source.Context.ExpressionBuilder.Append($".IsEqualTo({expectedExpression})");
+        source.Context.ExpressionBuilder.Append(".IsEqualTo("
+            + string.Join(", ", new[] { expectedExpression }.Where(e => e != null)) + ")");
         return new EqualsAssertion<TValue>(source.Context, expected);
     }
 
@@ -28,7 +30,8 @@ public static class EqualsAssertionExtensions
     /// </summary>
     public static EqualsAssertion<TValue> IsEqualTo<TValue>(this IAssertionSource<TValue> source, TValue expected, System.Collections.Generic.IEqualityComparer<TValue> comparer, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null, [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
     {
-        source.Context.ExpressionBuilder.Append($".IsEqualTo({expectedExpression}, {comparerExpression})");
+        source.Context.ExpressionBuilder.Append(".IsEqualTo("
+            + string.Join(", ", new[] { expectedExpression, comparerExpression }.Where(e => e != null)) + ")");
         return new EqualsAssertion<TValue>(source.Context, expected, comparer);
     }
 }
