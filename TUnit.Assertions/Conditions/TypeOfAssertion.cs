@@ -25,16 +25,8 @@ public class TypeOfAssertion<TFrom, TTo> : Assertion<TTo>
                     $"Value is of type {value?.GetType().Name ?? "null"}, not {typeof(TTo).Name}");
             }))
     {
-        // Transfer pending links from parent context to handle cross-type chaining
-        // e.g., Assert.That(obj).IsNotNull().And.IsTypeOf<string>()
-        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
-        if (pendingAssertion != null)
-        {
-            // Store the pending assertion execution as pre-work
-            // It will be executed before any assertions on the casted value
-            Context.PendingPreWork = async () => await pendingAssertion.ExecuteCoreAsync();
-        }
-
+        // Note: Pending link transfer is handled by AssertionContext<T>.Map()
+        // No need to duplicate that logic here
         _expectedType = typeof(TTo);
     }
 

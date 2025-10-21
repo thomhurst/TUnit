@@ -46,6 +46,8 @@ public sealed class AssertionContext<TValue>
     /// - Transferring the expression builder
     /// - Consuming pending links from the source context
     /// - Setting up pre-work to execute previous assertions before the transformation
+    ///
+    /// Uses lazy evaluation to prevent stack overflow in circular reference scenarios.
     /// </summary>
     /// <typeparam name="TNew">The target type after transformation</typeparam>
     /// <param name="evaluationFactory">Factory to create the new evaluation context from the current one</param>
