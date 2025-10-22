@@ -48,10 +48,9 @@ public class RuntimeBenchmarks : BenchmarkBase
     {
         var binPath = Path.Combine(UnifiedPath, "bin", "Release-NUNIT", Framework);
         var dllPath = Path.Combine(binPath, "UnifiedTests.dll");
-        var consoleRunner = Path.Combine(binPath, "nunit3-console.dll");
 
         await Cli.Wrap("dotnet")
-            .WithArguments([consoleRunner, dllPath, $"--where=class =~ {ClassName}", "--noheader"])
+            .WithArguments(["vstest", dllPath, $"--TestCaseFilter:FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
@@ -61,10 +60,9 @@ public class RuntimeBenchmarks : BenchmarkBase
     {
         var binPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT", Framework);
         var dllPath = Path.Combine(binPath, "UnifiedTests.dll");
-        var consoleRunner = Path.Combine(binPath, "xunit.console.dll");
 
         await Cli.Wrap("dotnet")
-            .WithArguments([consoleRunner, dllPath, "-class", $"UnifiedTests.{ClassName}", "-nologo"])
+            .WithArguments(["vstest", dllPath, $"--TestCaseFilter:FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }

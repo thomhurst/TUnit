@@ -12,8 +12,9 @@
     <IsTestProject>true</IsTestProject>
     <LangVersion>14</LangVersion>
     <OutputType Condition="'$(TestFramework)' == 'XUNIT3' OR '$(TestFramework)' == 'TUNIT' OR '$(TestFramework)' == 'MSTEST'">Exe</OutputType>
-    <UseMicrosoftTestingPlatformRunner Condition="'$(TestFramework)' == 'XUNIT3' OR '$(TestFramework)' == 'TUNIT' OR '$(TestFramework)' == 'MSTEST'">true</UseMicrosoftTestingPlatformRunner>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <UseMicrosoftTestingPlatformRunner Condition="'$(TestFramework)' == 'XUNIT3'">true</UseMicrosoftTestingPlatformRunner>
+      <EnableMSTestRunner Condition="''$(TestFramework)' == 'MSTEST'">true</EnableMSTestRunner>
+      <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <!--Custom output paths based on TestFramework -->
@@ -43,7 +44,7 @@
   <!-- xUnit v2 packages -->
   <ItemGroup Condition="'$(TestFramework)' == 'XUNIT'">
     <PackageReference Include="xunit" />
-    <PackageReference Include="xunit.runner.console">
+    <PackageReference Include="xunit.runner.visualstudio">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -61,7 +62,7 @@
   <!-- NUnit packages -->
   <ItemGroup Condition="'$(TestFramework)' == 'NUNIT'">
     <PackageReference Include="NUnit" />
-    <PackageReference Include="NUnit.ConsoleRunner" />
+    <PackageReference Include="NUnit3TestAdapter" />
   </ItemGroup>
 
   <!-- MSTest packages -->
