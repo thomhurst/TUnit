@@ -47,7 +47,7 @@ public class RuntimeBenchmarks : BenchmarkBase
     public async Task NUnit()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "UnifiedTests/UnifiedTests.csproj", "-p:TestFramework=NUNIT", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
+            .WithArguments(["test", "--project", "UnifiedTests/UnifiedTests.csproj", "-p:TestFramework=NUNIT", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
             .WithWorkingDirectory(Path.GetDirectoryName(UnifiedPath)!)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
@@ -57,7 +57,7 @@ public class RuntimeBenchmarks : BenchmarkBase
     public async Task xUnit()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "UnifiedTests/UnifiedTests.csproj", "-p:TestFramework=XUNIT", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
+            .WithArguments(["test", "--project", "UnifiedTests/UnifiedTests.csproj", "-p:TestFramework=XUNIT", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
             .WithWorkingDirectory(Path.GetDirectoryName(UnifiedPath)!)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
@@ -67,7 +67,7 @@ public class RuntimeBenchmarks : BenchmarkBase
     public async Task MSTest()
     {
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "UnifiedTests/UnifiedTests.csproj", "-p:TestFramework=MSTEST", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
+            .WithArguments(["test", "--project", "UnifiedTests/UnifiedTests.csproj", "-p:TestFramework=MSTEST", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
             .WithWorkingDirectory(Path.GetDirectoryName(UnifiedPath)!)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();

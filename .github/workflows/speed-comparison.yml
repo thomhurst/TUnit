@@ -86,6 +86,14 @@ jobs:
           name: test-builds-${{ matrix.os }}
           path: tools/speed-comparison/UnifiedTests/bin/
 
+      - name: Set Execute Permissions (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x tools/speed-comparison/UnifiedTests/bin/Release-*/*/UnifiedTests 2>/dev/null || true
+          chmod +x tools/speed-comparison/UnifiedTests/bin/Release-*-AOT/*/UnifiedTests 2>/dev/null || true
+          chmod +x tools/speed-comparison/UnifiedTests/bin/Release-*/*/xunit.v3.runner.console 2>/dev/null || true
+        working-directory: ${{ github.workspace }}
+
       - name: Run Benchmark
         run: dotnet run -c Release --framework net10.0 --allCategories=Runtime
         working-directory: "tools/speed-comparison/Tests.Benchmark"
