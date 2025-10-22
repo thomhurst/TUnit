@@ -10,7 +10,7 @@ public class ScopedEventReceiverTests
     internal static readonly object _lock = new();
     internal static readonly Dictionary<string, List<string>> _testStartEvents = new();
     internal static readonly Dictionary<string, List<string>> _testEndEvents = new();
-    
+
     internal static void RecordStartEvent(string testName, string source)
     {
         lock (_lock)
@@ -22,7 +22,7 @@ public class ScopedEventReceiverTests
             _testStartEvents[testName].Add(source);
         }
     }
-    
+
     internal static void RecordEndEvent(string testName, string source)
     {
         lock (_lock)
@@ -42,18 +42,18 @@ public class ScopedEventReceiverTests
     {
         // Wait a bit to ensure events have been recorded
         await Task.Delay(100);
-        
+
         // Method-level attributes should override assembly level
         List<string> startEvents;
         List<string> endEvents;
-        
+
         lock (_lock)
         {
             startEvents = _testStartEvents.GetValueOrDefault(nameof(TestWithMethodLevelEventReceivers)) ?? new List<string>();
             endEvents = _testEndEvents.GetValueOrDefault(nameof(TestWithMethodLevelEventReceivers)) ?? new List<string>();
         }
-        
-        
+
+
         await Assert.That(startEvents).Contains("method");
         await Assert.That(startEvents).DoesNotContain("assembly");
         // EndEvents might not be populated yet as they fire after the test
@@ -64,18 +64,18 @@ public class ScopedEventReceiverTests
     {
         // Wait a bit to ensure events have been recorded
         await Task.Delay(100);
-        
+
         // Should use assembly-level since no class-level overrides exist
         List<string> startEvents;
         List<string> endEvents;
-        
+
         lock (_lock)
         {
             startEvents = _testStartEvents.GetValueOrDefault(nameof(TestWithClassLevelEventReceivers)) ?? new List<string>();
             endEvents = _testEndEvents.GetValueOrDefault(nameof(TestWithClassLevelEventReceivers)) ?? new List<string>();
         }
-        
-        
+
+
         await Assert.That(startEvents).Contains("assembly");
         await Assert.That(startEvents).DoesNotContain("method");
     }
@@ -90,12 +90,12 @@ public class ScopedEventReceiverTests2
     {
         // Wait a bit to ensure events have been recorded
         await Task.Delay(100);
-        
+
         // Should use class-level since it overrides assembly level
         var methodName = nameof(TestWithOnlyClassLevelEventReceivers);
         var startEvents = new List<string>();
         var endEvents = new List<string>();
-        
+
         lock (ScopedEventReceiverTests._lock)
         {
             if (ScopedEventReceiverTests._testStartEvents.ContainsKey(methodName))
@@ -107,8 +107,8 @@ public class ScopedEventReceiverTests2
                 endEvents = ScopedEventReceiverTests._testEndEvents[methodName];
             }
         }
-        
-        
+
+
         // Assert outside of lock
         await Assert.That(startEvents).Contains("class");
         await Assert.That(startEvents).DoesNotContain("assembly");
@@ -116,7 +116,7 @@ public class ScopedEventReceiverTests2
 }
 
 // Custom event receiver attributes that implement IScopedAttribute
-public class TestStartLoggerAttribute : Attribute, ITestStartEventReceiver, IScopedAttribute<TestStartLoggerAttribute>
+public class TestStartLoggerAttribute : Attribute, ITestStartEventReceiver, IScopedAttribute
 {
     private readonly string _source;
 
@@ -132,9 +132,11 @@ public class TestStartLoggerAttribute : Attribute, ITestStartEventReceiver, ISco
         ScopedEventReceiverTests.RecordStartEvent(context.TestDetails.MethodName, _source);
         return default;
     }
+
+    public Type ScopeType => typeof(TestStartLoggerAttribute);
 }
 
-public class TestEndLoggerAttribute : Attribute, ITestEndEventReceiver, IScopedAttribute<TestEndLoggerAttribute>
+public class TestEndLoggerAttribute : Attribute, ITestEndEventReceiver, IScopedAttribute
 {
     private readonly string _source;
 
@@ -150,4 +152,6 @@ public class TestEndLoggerAttribute : Attribute, ITestEndEventReceiver, IScopedA
         ScopedEventReceiverTests.RecordEndEvent(context.TestDetails.MethodName, _source);
         return default;
     }
+
+    public Type ScopeType => typeof(TestEndLoggerAttribute);
 }

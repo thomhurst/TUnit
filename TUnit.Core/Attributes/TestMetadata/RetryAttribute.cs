@@ -38,7 +38,7 @@ namespace TUnit.Core;
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class RetryAttribute : TUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute<RetryAttribute>
+public class RetryAttribute : TUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute
 {
     /// <inheritdoc />
     public int Order => 0;
@@ -97,4 +97,6 @@ public class RetryAttribute : TUnitAttribute, ITestDiscoveryEventReceiver, IScop
         context.SetRetryLimit(Times, ShouldRetry);
         return default(ValueTask);
     }
+
+    public Type ScopeType => typeof(RetryAttribute);
 }

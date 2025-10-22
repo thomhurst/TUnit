@@ -2,7 +2,7 @@
 
 // Don't think there's a way to enable inheritance on this because the source generator needs to access the constructor argument
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public sealed class RepeatAttribute : TUnitAttribute, IScopedAttribute<RepeatAttribute>
+public sealed class RepeatAttribute : TUnitAttribute, IScopedAttribute
 {
     public int Times { get; }
 
@@ -15,4 +15,6 @@ public sealed class RepeatAttribute : TUnitAttribute, IScopedAttribute<RepeatAtt
 
         Times = times;
     }
+
+    public Type ScopeType => typeof(RepeatAttribute);
 }
