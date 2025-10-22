@@ -107,6 +107,9 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
+#endif
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
     {
         var tests = new List<AbstractExecutableTest>();
@@ -1086,6 +1089,9 @@ internal sealed class TestBuilder : ITestBuilder
         public Type[] ResolvedMethodGenericArguments { get; set; } = Type.EmptyTypes;
     }
 
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
+#endif
     public async IAsyncEnumerable<AbstractExecutableTest> BuildTestsStreamingAsync(
         TestMetadata metadata,
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -1221,6 +1227,9 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Generic type resolution for instance creation uses reflection")]
+#endif
     private Task<object?> CreateInstanceForMethodDataSources(
         TestMetadata metadata, int classDataAttributeIndex, int classDataLoopIndex, object?[] classData)
     {
@@ -1263,6 +1272,9 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Generic type resolution for test building uses reflection")]
+#endif
     private async Task<AbstractExecutableTest?> BuildSingleTestAsync(
         TestMetadata metadata,
         Func<Task<object?[]?>> classDataFactory,

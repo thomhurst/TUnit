@@ -566,9 +566,10 @@ namespace
         public static .DiscoveryResult Empty { get; }
     }
     [(.Class | .Method, Inherited=false)]
-    public sealed class DisplayNameAttribute : .DisplayNameFormatterAttribute, .IScopedAttribute, .IScopedAttribute<.DisplayNameAttribute>
+    public sealed class DisplayNameAttribute : .DisplayNameFormatterAttribute, .IScopedAttribute
     {
         public DisplayNameAttribute(string displayName) { }
+        public  ScopeType { get; }
         protected override string FormatDisplayName(.DiscoveredTestContext context) { }
     }
     [(.Assembly | .Class | .Method, Inherited=false)]
@@ -648,11 +649,12 @@ namespace
         public required string TestId { get; init; }
     }
     [(.Assembly | .Class | .Method)]
-    public class ExecutionPriorityAttribute : .SingleTUnitAttribute, .IScopedAttribute, .IScopedAttribute<.ExecutionPriorityAttribute>, ., .
+    public class ExecutionPriorityAttribute : .SingleTUnitAttribute, .IScopedAttribute, ., .
     {
         public ExecutionPriorityAttribute(. priority = 2) { }
         public int Order { get; }
         public . Priority { get; }
+        public  ScopeType { get; }
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
     }
     public class ExpandedTest
@@ -819,9 +821,10 @@ namespace
         .<.AbstractDynamicTest> CollectDynamicTests(string sessionId);
     }
     public interface IRequiresImmediateInitialization { }
-    public interface IScopedAttribute { }
-    public interface IScopedAttribute<T> : .IScopedAttribute
-        where T :  { }
+    public interface IScopedAttribute
+    {
+         ScopeType { get; }
+    }
     public interface ITestDefinition { }
     public interface ITypedDataSourceAttribute<T> : .IDataSourceAttribute
     {
@@ -922,13 +925,14 @@ namespace
         protected override bool PrintMembers(.StringBuilder stringBuilder) { }
     }
     [(.Assembly | .Class | .Method)]
-    public class NotInParallelAttribute : .SingleTUnitAttribute, .IScopedAttribute, .IScopedAttribute<.NotInParallelAttribute>, ., .
+    public class NotInParallelAttribute : .SingleTUnitAttribute, .IScopedAttribute, ., .
     {
         public NotInParallelAttribute() { }
         public NotInParallelAttribute(string constraintKey) { }
         public NotInParallelAttribute(string[] constraintKeys) { }
         public string[] ConstraintKeys { get; }
         public int Order { get; init; }
+        public  ScopeType { get; }
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
     }
     public class NotInParallelConstraint : <.NotInParallelConstraint>, .
@@ -1052,9 +1056,10 @@ namespace
         public static void Register( type, ..IPropertySource source) { }
     }
     [(.Assembly | .Class | .Method)]
-    public sealed class RepeatAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.RepeatAttribute>
+    public sealed class RepeatAttribute : .TUnitAttribute, .IScopedAttribute
     {
         public RepeatAttribute(int times) { }
+        public  ScopeType { get; }
         public int Times { get; }
     }
     public sealed class ResolvedDependency
@@ -1065,10 +1070,11 @@ namespace
         public required .AbstractExecutableTest Test { get; init; }
     }
     [(.Assembly | .Class | .Method)]
-    public class RetryAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.RetryAttribute>, ., .
+    public class RetryAttribute : .TUnitAttribute, .IScopedAttribute, ., .
     {
         public RetryAttribute(int times) { }
         public int Order { get; }
+        public  ScopeType { get; }
         public int Times { get; }
         public . OnTestDiscovered(.DiscoveredTestContext context) { }
         public virtual .<bool> ShouldRetry(.TestContext context,  exception, int currentRetryCount) { }
@@ -1448,10 +1454,11 @@ namespace
         public static bool IsTransient(this .TestState state) { }
     }
     [(.Assembly | .Class | .Method)]
-    public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, .IScopedAttribute<.TimeoutAttribute>, ., ., .
+    public class TimeoutAttribute : .TUnitAttribute, .IScopedAttribute, ., ., .
     {
         public TimeoutAttribute(int timeoutInMilliseconds) { }
         public int Order { get; }
+        public  ScopeType { get; }
         public  Timeout { get; }
         public . OnHookRegistered(.HookRegisteredContext context) { }
         public . OnTestDiscovered(.DiscoveredTestContext context) { }

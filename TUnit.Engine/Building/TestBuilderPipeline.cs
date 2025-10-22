@@ -207,6 +207,9 @@ internal sealed class TestBuilderPipeline
     /// <summary>
     /// Build tests from a single metadata item, yielding them as they're created
     /// </summary>
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
+#endif
     private async IAsyncEnumerable<AbstractExecutableTest> BuildTestsFromSingleMetadataAsync(TestMetadata metadata)
     {
         TestMetadata resolvedMetadata;
