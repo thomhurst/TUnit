@@ -288,7 +288,7 @@ public class AssertionTests
         Assert.That(throwingFunc, Throws.TypeOf<InvalidOperationException>());
         Assert.That(nonThrowingFunc, Throws.Nothing);
 #elif MSTEST
-        Assert.ThrowsException<InvalidOperationException>(() => throwingFunc());
+        Assert.Throws<InvalidOperationException>(() => throwingFunc());
         try
         {
             nonThrowingFunc();
