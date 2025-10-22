@@ -429,7 +429,6 @@ namespace .Conditions
         public .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
     }
-    [.("HasCount")]
     public class CollectionCountAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
@@ -458,7 +457,6 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.("IsEmpty")]
     public class CollectionIsEmptyAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
@@ -482,7 +480,6 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.("IsNotEmpty")]
     public class CollectionIsNotEmptyAssertion<TCollection, TItem> : .<TCollection, TItem>
         where TCollection : .<TItem>
     {
@@ -2115,11 +2112,6 @@ namespace .Extensions
         public static .<TCollection, TItem> Contains<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, [.("predicate")] string? predicateExpression = null)
             where TCollection : .<TItem> { }
     }
-    public static class CollectionCountAssertionExtensions
-    {
-        public static .<TCollection, TItem> HasCount<TCollection, TItem>(this .<TCollection> source, int expectedCount, [.("expectedCount")] string? expectedCountExpression = null)
-            where TCollection : .<TItem> { }
-    }
     public static class CollectionDoesNotContainAssertionExtensions
     {
         public static .<TCollection, TItem> DoesNotContain<TCollection, TItem>(this .<TCollection> source, TItem expected, .<TItem>? comparer = null, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null)
@@ -2130,11 +2122,6 @@ namespace .Extensions
         public static .<TCollection, TItem> DoesNotContain<TCollection, TItem>(this .<TCollection> source, <TItem, bool> predicate, string predicateDescription, [.("predicate")] string? predicateExpression = null, [.("predicateDescription")] string? predicateDescriptionExpression = null)
             where TCollection : .<TItem> { }
     }
-    public static class CollectionIsEmptyAssertionExtensions
-    {
-        public static .<TCollection, TItem> IsEmpty<TCollection, TItem>(this .<TCollection> source)
-            where TCollection : .<TItem> { }
-    }
     public static class CollectionIsInDescendingOrderAssertionExtensions
     {
         public static .<TCollection, TItem> IsInDescendingOrder<TCollection, TItem>(this .<TCollection> source)
@@ -2143,11 +2130,6 @@ namespace .Extensions
     public static class CollectionIsInOrderAssertionExtensions
     {
         public static .<TCollection, TItem> IsInOrder<TCollection, TItem>(this .<TCollection> source)
-            where TCollection : .<TItem> { }
-    }
-    public static class CollectionIsNotEmptyAssertionExtensions
-    {
-        public static .<TCollection, TItem> IsNotEmpty<TCollection, TItem>(this .<TCollection> source)
             where TCollection : .<TItem> { }
     }
     public static class CultureInfoAssertionExtensions

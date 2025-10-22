@@ -10,7 +10,6 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a collection/enumerable is empty.
 /// </summary>
-[AssertionExtension("IsEmpty")]
 public class CollectionIsEmptyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -82,7 +81,6 @@ public class CollectionIsEmptyAssertion<TCollection, TItem> : Sources.Collection
 /// <summary>
 /// Asserts that a collection/enumerable is NOT empty.
 /// </summary>
-[AssertionExtension("IsNotEmpty")]
 public class CollectionIsNotEmptyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
@@ -284,7 +282,6 @@ public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : So
 /// Asserts that a collection has a specific count/length.
 /// Inherits from CollectionAssertionBase to enable chaining of collection methods.
 /// </summary>
-[AssertionExtension("HasCount")]
 public class CollectionCountAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
