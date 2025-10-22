@@ -6,17 +6,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-time-benchmarks:
+  build-test-artifacts:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        class: [BasicTests, DataDrivenTests, SetupTeardownTests, AsyncTests, FixtureTests, ParallelTests, AssertionTests, RepeatTests]
       fail-fast: false
     runs-on: ${{ matrix.os }}
-    concurrency:
-      group: "speed-comparison-run-time-${{matrix.os}}-${{matrix.class}}"
-      cancel-in-progress: true
 
     steps:
       - uses: actions/checkout@v5
@@ -53,6 +49,42 @@ jobs:
           dotnet publish -c Release -p:TestFramework=TUNIT -p:Aot=true --framework net9.0 --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }} --output bin/Release-TUNIT-AOT/net9.0
           dotnet publish -c Release -p:TestFramework=TUNIT -p:Aot=true --framework net10.0 --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }} --output bin/Release-TUNIT-AOT/net10.0
         working-directory: "tools/speed-comparison/UnifiedTests"
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-builds-${{ matrix.os }}
+          path: tools/speed-comparison/UnifiedTests/bin/
+          retention-days: 1
+
+  run-time-benchmarks:
+    needs: build-test-artifacts
+    environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        class: [BasicTests, DataDrivenTests, SetupTeardownTests, AsyncTests, FixtureTests, ParallelTests, AssertionTests, RepeatTests]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    concurrency:
+      group: "speed-comparison-run-time-${{matrix.os}}-${{matrix.class}}"
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: test-builds-${{ matrix.os }}
+          path: tools/speed-comparison/UnifiedTests/bin/
 
       - name: Run Benchmark
         run: dotnet run -c Release --framework net10.0 --allCategories=Runtime
@@ -107,3 +139,4 @@ jobs:
           name: ${{ matrix.os }}_markdown_build_time
           path: |
             **/BenchmarkDotNet.Artifacts/**
+
