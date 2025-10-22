@@ -9,10 +9,7 @@ public class STAThreadExecutorAttribute : TUnitAttribute, ITestRegisteredEventRe
 {
     public int Order => 0;
 
-#if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-#endif
-    public ValueTask OnTestRegistered(TestRegisteredContext context)
+public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         var executor = new STAThreadExecutor();
         context.SetTestExecutor(executor);

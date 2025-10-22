@@ -12,9 +12,6 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 {
     private static readonly ConcurrentDictionary<object, Counter> _trackedObjects = new();
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Trackable object discovery uses reflection for property injection")]
-    #endif
     public void TrackObjects(TestContext testContext)
     {
         var alreadyTracked = testContext.TrackedObjects.SelectMany(x => x.Value).ToHashSet();

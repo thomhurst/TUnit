@@ -16,9 +16,6 @@ public class SkipAttribute : Attribute, ITestRegisteredEventReceiver
     public int Order => int.MinValue;
 
     /// <inheritdoc />
-#if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-#endif
     public async ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         if (await ShouldSkip(context))

@@ -37,9 +37,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     public async ValueTask InitializeAsync()
     {
         // Pre-compute all global hooks that don't depend on specific types/assemblies
@@ -55,9 +52,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         _afterEveryAssemblyHooks = BuildGlobalAfterEveryAssemblyHooks();
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildGlobalBeforeEveryTestHooksAsync()
     {
         var allHooks = new List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)>();
@@ -75,9 +69,6 @@ internal sealed class HookCollectionService : IHookCollectionService
             .ToList();
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildGlobalAfterEveryTestHooksAsync()
     {
         var allHooks = new List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)>();
@@ -280,9 +271,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         }
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     public async ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectBeforeTestHooksAsync(Type testClassType)
     {
         if (_beforeTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
@@ -295,9 +283,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         return hooks;
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildBeforeTestHooksAsync(Type type)
         {
             var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)> hooks)>();
@@ -353,9 +338,6 @@ internal sealed class HookCollectionService : IHookCollectionService
             return finalHooks;
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     public async ValueTask<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> CollectAfterTestHooksAsync(Type testClassType)
     {
         if (_afterTestHooksCache.TryGetValue(testClassType, out var cachedHooks))
@@ -368,9 +350,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         return hooks;
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildAfterTestHooksAsync(Type type)
         {
             var hooksByType = new List<(Type type, List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)> hooks)>();
@@ -653,9 +632,6 @@ internal sealed class HookCollectionService : IHookCollectionService
         };
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     private async Task<Func<TestContext, CancellationToken, Task>> CreateStaticHookDelegateAsync(StaticHookMethod<TestContext> hook)
     {
         // Process hook registration event receivers

@@ -71,10 +71,6 @@ internal sealed class ReflectionHookDiscoveryService
     /// Discovers and registers instance hooks for a specific closed generic type.
     /// This is needed because closed generic types are created at runtime and don't appear in assembly.GetTypes().
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
-    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
-    #endif
     public static void DiscoverInstanceHooksForType(Type closedGenericType)
     {
         if (SourceRegistrar.IsEnabled)

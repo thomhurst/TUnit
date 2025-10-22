@@ -27,10 +27,7 @@ public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute, ITestR
         await Task.CompletedTask;
     }
 
-#if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-#endif
-    public ValueTask OnTestRegistered(TestRegisteredContext context)
+public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         if(!string.IsNullOrEmpty(Skip))
         {
@@ -55,10 +52,7 @@ public sealed class ArgumentsAttribute<T>(T value) : TypedDataSourceAttribute<T>
         await default(ValueTask);
     }
 
-#if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-#endif
-    public ValueTask OnTestRegistered(TestRegisteredContext context)
+public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         if(!string.IsNullOrEmpty(Skip))
         {

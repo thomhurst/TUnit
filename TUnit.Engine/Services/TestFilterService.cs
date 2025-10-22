@@ -25,7 +25,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
         var filteredTests = new List<AbstractExecutableTest>();
         var filteredExplicitTests = new List<AbstractExecutableTest>();
-        
+
         foreach (var test in testNodes)
         {
             if (MatchesTest(testExecutionFilter, test))
@@ -56,9 +56,6 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         return filteredTests;
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-    #endif
     private async Task RegisterTest(AbstractExecutableTest test)
     {
         var discoveredTest = new DiscoveredTest<object>
@@ -92,9 +89,6 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-    #endif
     public async Task RegisterTestsAsync(IEnumerable<AbstractExecutableTest> tests)
     {
         foreach (var test in tests)
@@ -192,7 +186,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
     private IReadOnlyCollection<AbstractExecutableTest> FilterOutExplicitTests(IReadOnlyCollection<AbstractExecutableTest> testNodes)
     {
         var filteredTests = new List<AbstractExecutableTest>();
-        
+
         foreach (var test in testNodes)
         {
             if (!IsExplicitTest(test))
@@ -204,7 +198,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
                 logger.LogTrace($"Test {test.TestId} is explicit and no filter was specified, skipping.");
             }
         }
-        
+
         return filteredTests;
     }
 }

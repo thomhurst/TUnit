@@ -87,7 +87,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                 var spinWait = new SpinWait();
                 var lastTimeCheck = DateTime.UtcNow;
                 const int TimeCheckIntervalMs = 100;
-                
+
                 while (!task.IsCompleted)
                 {
                     var hadWork = dedicatedContext.ProcessPendingWork();
@@ -148,8 +148,8 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
     {
         if (task.IsFaulted)
         {
-            tcs.SetException(task.Exception!.InnerExceptions.Count == 1 
-                ? task.Exception.InnerException! 
+            tcs.SetException(task.Exception!.InnerExceptions.Count == 1
+                ? task.Exception.InnerException!
                 : task.Exception);
         }
         else if (task.IsCanceled)
@@ -319,16 +319,16 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                     // For .NET Standard 2.0 compatibility, use Task.Delay for timeout
                     var timeoutTask = Task.Delay(TimeSpan.FromMinutes(30));
                     var completedTask = await Task.WhenAny(tcs.Task, timeoutTask).ConfigureAwait(false);
-                    
+
                     if (completedTask == timeoutTask)
                     {
                         throw new TimeoutException("Synchronous operation on dedicated thread timed out after 30 minutes");
                     }
-                    
+
                     // Await the actual task to get its result or exception
                     await tcs.Task.ConfigureAwait(false);
                 });
-                
+
                 // This wait is safe because it's on a Task.Run thread without SynchronizationContext
                 waitTask.GetAwaiter().GetResult();
             }
@@ -377,10 +377,7 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         }
     }
 
-#if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-#endif
-    public ValueTask OnTestRegistered(TestRegisteredContext context)
+public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetParallelLimiter(new ProcessorCountParallelLimit());
         return default(ValueTask);

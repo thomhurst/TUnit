@@ -69,9 +69,6 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
         return testContext.Result?.State is TestState.Passed or TestState.Skipped;
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-    #endif
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         if (UseDefaultParallelLimiter)

@@ -14,9 +14,6 @@ internal static class PropertyInjectionPlanBuilder
     /// Creates an injection plan for source-generated mode.
     /// Walks the inheritance chain to include all injectable properties from base classes.
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("BaseType reflection required for inheritance support")]
-    #endif
     public static PropertyInjectionPlan BuildSourceGeneratedPlan(Type type)
     {
         var allProperties = new List<PropertyInjectionMetadata>();
@@ -63,7 +60,7 @@ internal static class PropertyInjectionPlanBuilder
     {
         var propertyDataSourcePairs = new List<(PropertyInfo property, IDataSourceAttribute dataSource)>();
         var processedProperties = new HashSet<string>();
-        
+
         // Walk up the inheritance chain to find all properties with data source attributes
         var currentType = type;
         while (currentType != null && currentType != typeof(object))
@@ -71,7 +68,7 @@ internal static class PropertyInjectionPlanBuilder
             var properties = currentType.GetProperties(
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
                 .Where(p => p.CanWrite || p.SetMethod?.IsPublic == false);  // Include init-only properties
-            
+
             foreach (var property in properties)
             {
                 // Skip if we've already processed a property with this name (overridden in derived class)
@@ -79,7 +76,7 @@ internal static class PropertyInjectionPlanBuilder
                 {
                     continue;
                 }
-                
+
                 // Check for data source attributes, including inherited attributes
                 foreach (var attr in property.GetCustomAttributes(inherit: true))
                 {
@@ -90,10 +87,10 @@ internal static class PropertyInjectionPlanBuilder
                     }
                 }
             }
-            
+
             currentType = currentType.BaseType;
         }
-        
+
         return new PropertyInjectionPlan
         {
             Type = type,
@@ -106,13 +103,11 @@ internal static class PropertyInjectionPlanBuilder
     /// <summary>
     /// Builds an injection plan based on the current execution mode.
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Property injection plan building requires reflection")]
-    #endif
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Source gen mode has its own path>")]
     public static PropertyInjectionPlan Build(Type type)
     {
-        return SourceRegistrar.IsEnabled 
-            ? BuildSourceGeneratedPlan(type) 
+        return SourceRegistrar.IsEnabled
+            ? BuildSourceGeneratedPlan(type)
             : BuildReflectionPlan(type);
     }
 }

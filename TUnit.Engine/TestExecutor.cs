@@ -51,9 +51,6 @@ internal class TestExecutor
     /// Creates a test executor delegate that wraps the provided executor with hook orchestration.
     /// Uses focused services that follow SRP to manage lifecycle and execution.
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     public async Task ExecuteAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {
 
