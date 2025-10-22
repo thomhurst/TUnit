@@ -30,13 +30,9 @@ public class RepeatTests
     [MemberData(nameof(RepeatData), 100)]
     public void RepeatedCalculationTest(int _)
 #elif MSTEST
-    // MSTest doesn't have Repeat, simulate with multiple DataRows (limited example)
+    // MSTest doesn't have Repeat, use DynamicData to generate 100 iterations
     [TestMethod]
-    [DataRow(1)]
-    [DataRow(2)]
-    [DataRow(3)]
-    [DataRow(4)]
-    [DataRow(5)]
+    [DynamicData(nameof(RepeatData100), DynamicDataSourceType.Method)]
     public void RepeatedCalculationTest(int _)
 #endif
     {
@@ -72,9 +68,7 @@ public class RepeatTests
     public async Task RepeatedAsyncTest(int _)
 #elif MSTEST
     [TestMethod]
-    [DataRow(1)]
-    [DataRow(2)]
-    [DataRow(3)]
+    [DynamicData(nameof(RepeatData50), DynamicDataSourceType.Method)]
     public async Task RepeatedAsyncTest(int _)
 #endif
     {
@@ -114,8 +108,7 @@ public class RepeatTests
     public void RepeatedStringOperationTest(int _)
 #elif MSTEST
     [TestMethod]
-    [DataRow(1)]
-    [DataRow(2)]
+    [DynamicData(nameof(RepeatData25), DynamicDataSourceType.Method)]
     public void RepeatedStringOperationTest(int _)
 #endif
     {
@@ -167,6 +160,32 @@ public class RepeatTests
     public static IEnumerable<object[]> RepeatData(int count)
     {
         for (int i = 0; i < count; i++)
+        {
+            yield return new object[] { i };
+        }
+    }
+#endif
+
+#if MSTEST
+    public static IEnumerable<object[]> RepeatData100()
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            yield return new object[] { i };
+        }
+    }
+
+    public static IEnumerable<object[]> RepeatData50()
+    {
+        for (int i = 0; i < 50; i++)
+        {
+            yield return new object[] { i };
+        }
+    }
+
+    public static IEnumerable<object[]> RepeatData25()
+    {
+        for (int i = 0; i < 25; i++)
         {
             yield return new object[] { i };
         }

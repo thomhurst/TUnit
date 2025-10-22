@@ -46,10 +46,10 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task NUnit()
     {
-        var dllPath = Path.Combine(UnifiedPath, "bin", "Release-NUNIT", Framework, "UnifiedTests.dll");
+        var projPath = Path.Combine(UnifiedPath, "UnifiedTests.csproj");
 
         await Cli.Wrap("dotnet")
-            .WithArguments(["vstest", dllPath, $"--TestCaseFilter:FullyQualifiedName~{ClassName}"])
+            .WithArguments(["test", projPath, "-p:TestFramework=NUNIT", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
@@ -57,10 +57,10 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task xUnit()
     {
-        var dllPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT", Framework, "UnifiedTests.dll");
+        var projPath = Path.Combine(UnifiedPath, "UnifiedTests.csproj");
 
         await Cli.Wrap("dotnet")
-            .WithArguments(["vstest", dllPath, $"--TestCaseFilter:FullyQualifiedName~{ClassName}"])
+            .WithArguments(["test", projPath, "-p:TestFramework=XUNIT", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
@@ -68,10 +68,10 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task MSTest()
     {
-        var dllPath = Path.Combine(UnifiedPath, "bin", "Release-MSTEST", Framework, "UnifiedTests.dll");
+        var projPath = Path.Combine(UnifiedPath, "UnifiedTests.csproj");
 
         await Cli.Wrap("dotnet")
-            .WithArguments(["vstest", dllPath, $"--TestCaseFilter:FullyQualifiedName~{ClassName}"])
+            .WithArguments(["test", projPath, "-p:TestFramework=MSTEST", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }

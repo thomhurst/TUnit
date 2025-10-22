@@ -41,7 +41,7 @@ public class FixtureTests : IDisposable
 [TestFixture]
 public class FixtureTests : IDisposable
 #elif XUNIT || XUNIT3
-public class FixtureTests : IDisposable, IClassFixture<TestDatabase>
+public class FixtureTests : IDisposable
 #else
 public class FixtureTests : IDisposable
 #endif
@@ -49,20 +49,11 @@ public class FixtureTests : IDisposable
     private readonly ITestDatabase _database;
     private readonly List<string> _testKeys;
 
-#if XUNIT || XUNIT3
-    public FixtureTests(TestDatabase database)
-    {
-        _database = database;
-        _testKeys = new List<string>();
-        SetupTest();
-    }
-#else
     public FixtureTests()
     {
         _database = new TestDatabase();
         _testKeys = new List<string>();
     }
-#endif
 
 #if TUNIT
     [Before(Test)]
@@ -80,11 +71,7 @@ public class FixtureTests : IDisposable
         _testKeys.Clear();
         for (var i = 0; i < 10; i++)
         {
-#if XUNIT || XUNIT3
-            var key = $"test_{Guid.NewGuid()}_{i}";
-#else
             var key = $"test_{i}";
-#endif
             _testKeys.Add(key);
             _database.Add(key, $"test_value_{i}");
         }
@@ -124,13 +111,17 @@ public class FixtureTests : IDisposable
     public void TestDatabaseOperations()
 #endif
     {
+#if XUNIT || XUNIT3
+        SetupTest();
+#endif
+
 #if TUNIT
         await Assert.That(_database.Count).IsGreaterThanOrEqualTo(110);
         var value = _database.Get("test_5");
         await Assert.That(value).IsEqualTo("test_value_5");
 #elif XUNIT || XUNIT3
         Assert.True(_database.Count >= 110);
-        var value = _database.Get(_testKeys[5]);
+        var value = _database.Get("test_5");
         Assert.Equal("test_value_5", value);
 #elif NUNIT
         Assert.That(_database.Count, Is.GreaterThanOrEqualTo(110));
