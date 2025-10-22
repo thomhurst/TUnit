@@ -331,7 +331,7 @@ public class StringIsNotEmptyAssertion : Assertion<string>
             return Task.FromResult(AssertionResult.Failed("value was null"));
         }
 
-        if (!string.IsNullOrWhiteSpace(value))
+        if (!string.IsNullOrEmpty(value))
         {
             return Task.FromResult(AssertionResult.Passed);
         }
@@ -369,7 +369,7 @@ public class StringIsEmptyAssertion : Assertion<string>
             return Task.FromResult(AssertionResult.Failed("value was null"));
         }
 
-        if (string.IsNullOrWhiteSpace(value))
+        if (value == string.Empty)
         {
             return Task.FromResult(AssertionResult.Passed);
         }
