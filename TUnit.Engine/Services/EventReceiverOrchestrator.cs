@@ -212,9 +212,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         }
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     public async ValueTask InvokeHookRegistrationEventReceiversAsync(HookRegisteredContext hookContext, CancellationToken cancellationToken)
     {
         // Filter scoped attributes to ensure only the highest priority one of each type is invoked

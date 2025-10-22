@@ -6,6 +6,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Engine.Services;
 
 namespace TUnit.Engine.Framework;
 
@@ -55,6 +56,12 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
             var serviceProvider = GetOrCreateServiceProvider(context);
 
             serviceProvider.Initializer.Initialize(context);
+
+            // Initialize hook collection service to pre-compute global hooks
+            if (serviceProvider.HookCollectionService is HookCollectionService hookCollectionService)
+            {
+                await hookCollectionService.InitializeAsync();
+            }
 
             GlobalContext.Current = serviceProvider.ContextProvider.GlobalContext;
             GlobalContext.Current.GlobalLogger = serviceProvider.Logger;
