@@ -23,6 +23,42 @@ public static class AotConversionHelper
             return sourceExpression;
         }
 
+        // Handle nullable types
+        var underlyingTargetType = targetType.NullableAnnotation == NullableAnnotation.Annotated || targetType.SpecialType == SpecialType.System_Nullable_T
+            ? ((INamedTypeSymbol)targetType).TypeArguments.FirstOrDefault() ?? targetType
+            : targetType;
+
+        // Enum conversions - use direct cast instead of Enum.ToObject
+        if (underlyingTargetType.TypeKind == TypeKind.Enum)
+        {
+            // For enums, generate a direct cast from the source value
+            // This avoids using Enum.ToObject which is not AOT-compatible
+            return $"({targetType.GloballyQualified()}){sourceExpression}";
+        }
+
+        // Array conversions - avoid Array.CreateInstance
+        if (underlyingTargetType is IArrayTypeSymbol arrayType)
+        {
+            var elementType = arrayType.ElementType;
+
+            // If source is also an array of the same element type, direct cast
+            if (sourceType is IArrayTypeSymbol sourceArray &&
+                sourceArray.ElementType.Equals(elementType, SymbolEqualityComparer.Default))
+            {
+                return sourceExpression;
+            }
+
+            // For single value to array conversion, generate array initialization syntax
+            // Example: new int[] { (int)value }
+            return $"(({sourceExpression}) is {targetType.GloballyQualified()} arr ? arr : new {elementType.GloballyQualified()}[] {{ ({elementType.GloballyQualified()}){sourceExpression} }})";
+        }
+
+        // Primitive type conversions - use direct casts when possible
+        if (IsPrimitiveConversion(sourceType, underlyingTargetType))
+        {
+            return $"({targetType.GloballyQualified()}){sourceExpression}";
+        }
+
         // Look for implicit conversion operators
         var implicitConversion = FindConversionOperator(sourceType, targetType, "op_Implicit");
         if (implicitConversion != null)
@@ -41,6 +77,57 @@ public static class AotConversionHelper
 
         // No special AOT conversion needed, let CastHelper handle it
         return null;
+    }
+
+    /// <summary>
+    /// Checks if a conversion between two types is a primitive conversion
+    /// </summary>
+    private static bool IsPrimitiveConversion(ITypeSymbol sourceType, ITypeSymbol targetType)
+    {
+        // Check if both are primitive types or one is object and the other is value type
+        var isPrimitive = sourceType.SpecialType switch
+        {
+            SpecialType.System_Boolean => true,
+            SpecialType.System_Char => true,
+            SpecialType.System_SByte => true,
+            SpecialType.System_Byte => true,
+            SpecialType.System_Int16 => true,
+            SpecialType.System_UInt16 => true,
+            SpecialType.System_Int32 => true,
+            SpecialType.System_UInt32 => true,
+            SpecialType.System_Int64 => true,
+            SpecialType.System_UInt64 => true,
+            SpecialType.System_Single => true,
+            SpecialType.System_Double => true,
+            SpecialType.System_Decimal => true,
+            SpecialType.System_Object => targetType.IsValueType,
+            _ => false
+        };
+
+        if (!isPrimitive)
+        {
+            return false;
+        }
+
+        var isTargetPrimitive = targetType.SpecialType switch
+        {
+            SpecialType.System_Boolean => true,
+            SpecialType.System_Char => true,
+            SpecialType.System_SByte => true,
+            SpecialType.System_Byte => true,
+            SpecialType.System_Int16 => true,
+            SpecialType.System_UInt16 => true,
+            SpecialType.System_Int32 => true,
+            SpecialType.System_UInt32 => true,
+            SpecialType.System_Int64 => true,
+            SpecialType.System_UInt64 => true,
+            SpecialType.System_Single => true,
+            SpecialType.System_Double => true,
+            SpecialType.System_Decimal => true,
+            _ => false
+        };
+
+        return isTargetPrimitive;
     }
 
     /// <summary>

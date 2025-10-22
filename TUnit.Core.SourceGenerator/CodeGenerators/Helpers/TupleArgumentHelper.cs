@@ -6,15 +6,56 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 public static class TupleArgumentHelper
 {
+    /// <summary>
+    /// Generates an AOT-compatible cast expression for converting from object? to the target type
+    /// </summary>
+    private static string GenerateCastExpression(ITypeSymbol targetType, string sourceExpression)
+    {
+        // Handle nullable types
+        ITypeSymbol underlyingTargetType;
+        if (targetType is INamedTypeSymbol namedType &&
+            (targetType.NullableAnnotation == NullableAnnotation.Annotated || targetType.SpecialType == SpecialType.System_Nullable_T))
+        {
+            underlyingTargetType = namedType.TypeArguments.FirstOrDefault() ?? targetType;
+        }
+        else
+        {
+            underlyingTargetType = targetType;
+        }
+
+        // For enums, generate a direct cast instead of using CastHelper.Cast which uses Enum.ToObject
+        // This avoids IL3050 warnings in AOT scenarios
+        if (underlyingTargetType.TypeKind == TypeKind.Enum)
+        {
+            return $"({targetType.GloballyQualified()}){sourceExpression}";
+        }
+
+        // For string, we can use a simple cast since it's already a reference type
+        if (targetType.SpecialType == SpecialType.System_String)
+        {
+            return $"({targetType.GloballyQualified()}){sourceExpression}";
+        }
+
+        // For value types (except enums which we handled above), use direct cast
+        // This works because boxing/unboxing is AOT-safe
+        if (underlyingTargetType.IsValueType && underlyingTargetType.TypeKind != TypeKind.Array)
+        {
+            return $"({targetType.GloballyQualified()}){sourceExpression}";
+        }
+
+        // For arrays and complex types, fall back to CastHelper which has proper AOT handling
+        return $"TUnit.Core.Helpers.CastHelper.Cast<{targetType.GloballyQualified()}>({sourceExpression})";
+    }
+
     public static List<string> GenerateArgumentAccess(ITypeSymbol parameterType, string argumentsArrayName, int baseIndex)
     {
         var argumentExpressions = new List<string>();
-        
+
         // For method parameters, tuples are NOT supported - the data source
         // must return already unpacked values matching the method signature
-        var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argumentsArrayName}[{baseIndex}])";
+        var castExpression = GenerateCastExpression(parameterType, $"{argumentsArrayName}[{baseIndex}]");
         argumentExpressions.Add(castExpression);
-        
+
         return argumentExpressions;
     }
 
@@ -24,15 +65,15 @@ public static class TupleArgumentHelper
     public static List<string> GenerateConstructorArgumentAccess(IList<ITypeSymbol> parameterTypes, string argumentsArrayName)
     {
         var argumentExpressions = new List<string>();
-        
+
         // Data sources already provide unwrapped arguments, so we just access by index
         for (var i = 0; i < parameterTypes.Count; i++)
         {
             var parameterType = parameterTypes[i];
-            var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argumentsArrayName}[{i}])";
+            var castExpression = GenerateCastExpression(parameterType, $"{argumentsArrayName}[{i}]");
             argumentExpressions.Add(castExpression);
         }
-        
+
         return argumentExpressions;
     }
 
@@ -45,14 +86,14 @@ public static class TupleArgumentHelper
     public static string GenerateMethodInvocationArguments(IList<IParameterSymbol> parameters, string argumentsArrayName)
     {
         var allArguments = new List<string>();
-        
+
         for (var i = 0; i < parameters.Count; i++)
         {
             var parameter = parameters[i];
-            var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{parameter.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
+            var castExpression = GenerateCastExpression(parameter.Type, $"{argumentsArrayName}[{i}]");
             allArguments.Add(castExpression);
         }
-        
+
         return string.Join(", ", allArguments);
     }
     
@@ -96,7 +137,7 @@ public static class TupleArgumentHelper
                 for (var i = 0; i < parameters.Count; i++)
                 {
                     var param = parameters[i];
-                    var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
+                    var castExpression = GenerateCastExpression(param.Type, $"{argumentsArrayName}[{i}]");
                     argumentExpressions.Add(castExpression);
                 }
             }
@@ -105,7 +146,7 @@ public static class TupleArgumentHelper
                 for (var i = 0; i < parameters.Count && i < argCount; i++)
                 {
                     var param = parameters[i];
-                    var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
+                    var castExpression = GenerateCastExpression(param.Type, $"{argumentsArrayName}[{i}]");
                     argumentExpressions.Add(castExpression);
                 }
             }
@@ -122,7 +163,7 @@ public static class TupleArgumentHelper
                 for (var i = 0; i < regularParamCount; i++)
                 {
                     var param = parameters[i];
-                    var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
+                    var castExpression = GenerateCastExpression(param.Type, $"{argumentsArrayName}[{i}]");
                     argumentExpressions.Add(castExpression);
                 }
             }
@@ -131,7 +172,7 @@ public static class TupleArgumentHelper
                 for (var i = 0; i < regularParamCount && i < argCount; i++)
                 {
                     var param = parameters[i];
-                    var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{param.Type.GloballyQualified()}>({argumentsArrayName}[{i}])";
+                    var castExpression = GenerateCastExpression(param.Type, $"{argumentsArrayName}[{i}]");
                     argumentExpressions.Add(castExpression);
                 }
             }
@@ -145,7 +186,7 @@ public static class TupleArgumentHelper
                 if (argCountExpression != null)
                 {
                     // Dynamic count - create array from remaining arguments
-                    var arrayInit = $"({argumentsArrayName}.Length > {regularParamCount} ? global::System.Linq.Enumerable.Range({regularParamCount}, {argCountExpression} - {regularParamCount}).Select(i => TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[i])).ToArray() : new {elementType.GloballyQualified()}[0])";
+                    var arrayInit = $"({argumentsArrayName}.Length > {regularParamCount} ? global::System.Linq.Enumerable.Range({regularParamCount}, {argCountExpression} - {regularParamCount}).Select(i => ({elementType.GloballyQualified()}){argumentsArrayName}[i]).ToArray() : new {elementType.GloballyQualified()}[0])";
                     argumentExpressions.Add(arrayInit);
                 }
                 else
@@ -165,7 +206,7 @@ public static class TupleArgumentHelper
                         // - T[] (passed directly, not wrapped in another array)
                         // - T (wrapped in array with single element)
                         var singleArg = $"{argumentsArrayName}[{regularParamCount}]";
-                        var checkAndCast = $"({singleArg} is null ? null : {singleArg} is {paramsParam.Type.GloballyQualified()} arr ? arr : new {elementType.GloballyQualified()}[] {{ TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({singleArg}) }})";
+                        var checkAndCast = $"({singleArg} is null ? null : {singleArg} is {paramsParam.Type.GloballyQualified()} arr ? arr : new {elementType.GloballyQualified()}[] {{ ({elementType.GloballyQualified()}){singleArg} }})";
                         argumentExpressions.Add(checkAndCast);
                     }
                     else
@@ -174,7 +215,7 @@ public static class TupleArgumentHelper
                         var arrayElements = new List<string>();
                         for (var i = regularParamCount; i < argCount; i++)
                         {
-                            arrayElements.Add($"TUnit.Core.Helpers.CastHelper.Cast<{elementType.GloballyQualified()}>({argumentsArrayName}[{i}])");
+                            arrayElements.Add($"({elementType.GloballyQualified()}){argumentsArrayName}[{i}]");
                         }
                         argumentExpressions.Add($"new {elementType.GloballyQualified()}[] {{ {string.Join(", ", arrayElements)} }}");
                     }
@@ -183,7 +224,7 @@ public static class TupleArgumentHelper
             else
             {
                 // Fallback if we can't determine element type
-                var castExpression = $"TUnit.Core.Helpers.CastHelper.Cast<{paramsParam.Type.GloballyQualified()}>({argumentsArrayName}[{regularParamCount}])";
+                var castExpression = GenerateCastExpression(paramsParam.Type, $"{argumentsArrayName}[{regularParamCount}]");
                 argumentExpressions.Add(castExpression);
             }
         }

@@ -6,11 +6,13 @@ using TUnit.Core.Converters;
 
 namespace TUnit.Core.Helpers;
 
-[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
-[UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 public static class CastHelper
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET
+    [RequiresDynamicCode("CastHelper uses reflection and dynamic code generation which may not be available in AOT scenarios. Use AotConverterRegistry for AOT-safe conversions.")]
+#endif
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(object? value)
     {
         if (value is null)
@@ -180,6 +182,10 @@ public static class CastHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NET
+    [RequiresDynamicCode("CastHelper uses reflection and dynamic code generation which may not be available in AOT scenarios. Use AotConverterRegistry for AOT-safe conversions.")]
+#endif
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
     public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, object? value)
     {
         if (value is null)
