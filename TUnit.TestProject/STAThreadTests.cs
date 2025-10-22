@@ -190,4 +190,36 @@ public class STAThreadTests
         await Task.Delay(1);
         throw new InvalidOperationException("Test exception");
     }
+
+    [Test, STAThreadExecutor]
+    public async Task STA_WithThrowsNothingAssertion()
+    {
+        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+
+        // Test that ThrowsNothing() preserves thread affinity
+        // This was broken in issue #3472 - actions ran on thread pool instead of STA thread
+        ApartmentState? capturedState = null;
+        await Assert.That(() =>
+        {
+            capturedState = Thread.CurrentThread.GetApartmentState();
+        }).ThrowsNothing();
+
+        await Assert.That(capturedState).IsEqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+    }
+
+    [Test, STAThreadExecutor]
+    public async Task STA_WithFuncAssertion()
+    {
+        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+
+        // Test that func assertions preserve thread affinity
+        var result = await Assert.That(() =>
+        {
+            return Thread.CurrentThread.GetApartmentState();
+        }).ThrowsNothing();
+
+        await Assert.That(result).IsEqualTo(ApartmentState.STA);
+        await Assert.That(Thread.CurrentThread.GetApartmentState()).IsEquatableOrEqualTo(ApartmentState.STA);
+    }
 }

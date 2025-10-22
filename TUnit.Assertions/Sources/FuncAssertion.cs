@@ -22,8 +22,7 @@ public class FuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
         {
             try
             {
-                // Run on thread pool to avoid blocking
-                var result = await Task.Run(func);
+                var result = func();
                 return (result, null);
             }
             catch (Exception ex)

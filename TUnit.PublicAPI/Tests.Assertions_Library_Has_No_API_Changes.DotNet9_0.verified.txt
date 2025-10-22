@@ -993,6 +993,14 @@ namespace .Conditions
         protected override string GetExpectation() { }
     }
     [.("IsDefault")]
+    public class IsDefaultNullableAssertion<TValue> : .<TValue?>
+        where TValue :  struct
+    {
+        public IsDefaultNullableAssertion(.<TValue?> context) { }
+        protected override .<.> CheckAsync(.<TValue?> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsDefault")]
     public class IsDefaultReferenceAssertion<TValue> : .<TValue>
         where TValue :  class
     {
@@ -1042,6 +1050,14 @@ namespace .Conditions
     {
         public IsNotDefaultAssertion(.<TValue> context) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("IsNotDefault")]
+    public class IsNotDefaultNullableAssertion<TValue> : .<TValue?>
+        where TValue :  struct
+    {
+        public IsNotDefaultNullableAssertion(.<TValue?> context) { }
+        protected override .<.> CheckAsync(.<TValue?> metadata) { }
         protected override string GetExpectation() { }
     }
     [.("IsNotDefault")]
@@ -2973,6 +2989,11 @@ namespace .Extensions
         public static .<TValue> IsDefault<TValue>(this .<TValue> source)
             where TValue :  struct { }
     }
+    public static class IsDefaultNullableAssertionExtensions
+    {
+        public static .<TValue> IsDefault<TValue>(this .<TValue?> source)
+            where TValue :  struct { }
+    }
     public static class IsDefaultReferenceAssertionExtensions
     {
         public static .<TValue> IsDefault<TValue>(this .<TValue> source)
@@ -3004,6 +3025,11 @@ namespace .Extensions
     public static class IsNotDefaultAssertionExtensions
     {
         public static .<TValue> IsNotDefault<TValue>(this .<TValue> source)
+            where TValue :  struct { }
+    }
+    public static class IsNotDefaultNullableAssertionExtensions
+    {
+        public static .<TValue> IsNotDefault<TValue>(this .<TValue?> source)
             where TValue :  struct { }
     }
     public static class IsNotDefaultReferenceAssertionExtensions
