@@ -10,7 +10,7 @@ internal sealed class TestDependencyResolver
     private readonly Dictionary<Type, List<AbstractExecutableTest>> _testsByType = new();
     private readonly Dictionary<string, List<AbstractExecutableTest>> _testsByMethodName = new();
     private readonly Dictionary<(Type ClassType, string MethodName), AbstractExecutableTest> _testLookupCache = new();
-    private readonly List<AbstractExecutableTest> _testsWithPendingDependencies =
+    private readonly HashSet<AbstractExecutableTest> _testsWithPendingDependencies =
     [
     ];
     private readonly HashSet<AbstractExecutableTest> _testsBeingResolved =
@@ -79,13 +79,10 @@ internal sealed class TestDependencyResolver
             foreach (var dependencyMetadata in test.Metadata.Dependencies)
             {
                 var matchingTests = FindMatchingTests(dependencyMetadata, test);
-                
+
                 if (matchingTests.Count == 0)
                 {
-                    if (!_testsWithPendingDependencies.Contains(test))
-                    {
-                        _testsWithPendingDependencies.Add(test);
-                    }
+                    _testsWithPendingDependencies.Add(test);
                     allResolved = false;
                 }
                 else

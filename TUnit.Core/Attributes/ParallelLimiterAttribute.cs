@@ -6,7 +6,7 @@ namespace TUnit.Core;
 /// Limits the number of tests that can run in parallel for a test assembly, class, or method.
 /// </summary>
 /// <typeparam name="TParallelLimit">
-/// The type that implements <see cref="IParallelLimit"/> and defines the maximum number 
+/// The type that implements <see cref="IParallelLimit"/> and defines the maximum number
 /// of tests that can execute concurrently.
 /// </typeparam>
 /// <remarks>
@@ -15,7 +15,7 @@ namespace TUnit.Core;
 /// class, or method, it limits how many tests from that scope can run simultaneously.
 /// </para>
 /// <para>
-/// The parallelism limit is defined by the <see cref="IParallelLimit.Limit"/> property of the 
+/// The parallelism limit is defined by the <see cref="IParallelLimit.Limit"/> property of the
 /// <typeparamref name="TParallelLimit"/> instance. This value is used to create a semaphore that
 /// controls concurrent test execution.
 /// </para>
@@ -31,14 +31,14 @@ namespace TUnit.Core;
 /// <code>
 /// // Apply to an assembly to limit all tests
 /// [assembly: ParallelLimiter&lt;DefaultParallelLimit&gt;]
-/// 
+///
 /// // Apply to a class to limit tests in that class
 /// [ParallelLimiter&lt;ParallelLimit3&gt;]
 /// public class MyTestClass
 /// {
 ///     // Tests in this class will run with a maximum of 3 in parallel
 /// }
-/// 
+///
 /// // Apply to a specific test method
 /// [Test]
 /// [ParallelLimiter&lt;ParallelLimit1&gt;]
@@ -57,10 +57,7 @@ public sealed class ParallelLimiterAttribute<TParallelLimit> : TUnitAttribute, I
     public int Order => 0;
 
     /// <inheritdoc />
-#if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-#endif
-    public ValueTask OnTestRegistered(TestRegisteredContext context)
+public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetParallelLimiter(new TParallelLimit());
         return default(ValueTask);

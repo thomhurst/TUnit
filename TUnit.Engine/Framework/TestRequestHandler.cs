@@ -8,7 +8,6 @@ namespace TUnit.Engine.Framework;
 internal sealed class TestRequestHandler : IRequestHandler
 {
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
     [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
     #endif
     public async Task HandleRequestAsync(TestExecutionRequest request, TUnitServiceProvider serviceProvider, ExecuteRequestContext context, ITestExecutionFilter? testExecutionFilter)
@@ -32,7 +31,6 @@ internal sealed class TestRequestHandler : IRequestHandler
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
     [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
     #endif
     private async Task HandleDiscoveryRequestAsync(
@@ -60,7 +58,6 @@ internal sealed class TestRequestHandler : IRequestHandler
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
     [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
     #endif
     private async Task HandleRunRequestAsync(

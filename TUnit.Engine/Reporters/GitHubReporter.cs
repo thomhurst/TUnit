@@ -98,7 +98,14 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
                 ?.FrameworkDisplayName
             ?? RuntimeInformation.FrameworkDescription;
 
-        var last = _updates.ToDictionary(x => x.Key, x => x.Value.Last());
+        var last = new Dictionary<string, TestNodeUpdateMessage>(_updates.Count);
+        foreach (var kvp in _updates)
+        {
+            if (kvp.Value.Count > 0)
+            {
+                last[kvp.Key] = kvp.Value[kvp.Value.Count - 1];
+            }
+        }
 
         var passedCount = last.Count(x =>
             x.Value.TestNode.Properties.AsEnumerable().Any(p => p is PassedTestNodeStateProperty));

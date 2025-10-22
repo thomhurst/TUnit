@@ -12,10 +12,7 @@ public class CultureAttribute(CultureInfo cultureInfo) : TUnitAttribute, ITestRe
 
     public int Order => 0;
 
-#if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-#endif
-    public ValueTask OnTestRegistered(TestRegisteredContext context)
+public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetTestExecutor(new CultureExecutor(cultureInfo));
         return default(ValueTask);

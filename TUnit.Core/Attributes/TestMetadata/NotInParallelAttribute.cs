@@ -3,7 +3,7 @@
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute<NotInParallelAttribute>
+public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute
 {
     public string[] ConstraintKeys { get; } = [];
 
@@ -39,4 +39,6 @@ public class NotInParallelAttribute : SingleTUnitAttribute, ITestDiscoveryEventR
         });
         return default(ValueTask);
     }
+
+    public Type ScopeType => typeof(NotInParallelAttribute);
 }

@@ -25,9 +25,6 @@ internal static class PropertyInjectionCache
     /// The plan builder will use source-generated metadata if available,
     /// otherwise falls back to reflection-based discovery.
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-    #endif
     public static PropertyInjectionPlan GetOrCreatePlan(Type type)
     {
         return _injectionPlans.GetOrAdd(type, _ => PropertyInjectionPlanBuilder.Build(type));
@@ -36,9 +33,6 @@ internal static class PropertyInjectionCache
     /// <summary>
     /// Checks if a type has injectable properties using caching.
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-    #endif
     public static bool HasInjectableProperties(Type type)
     {
         return _shouldInjectCache.GetOrAdd(type, t =>

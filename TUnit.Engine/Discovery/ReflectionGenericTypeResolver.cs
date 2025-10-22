@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TUnit.Core;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Discovery;
 
@@ -110,7 +111,7 @@ internal static class ReflectionGenericTypeResolver
             {
                 ParameterName = param.Name,
                 BaseTypeConstraint = param.BaseType != typeof(object) ? param.BaseType : null,
-                InterfaceConstraints = param.GetInterfaces(),
+                InterfaceConstraints = AssemblyReferenceCache.GetInterfaces(param),
                 HasDefaultConstructorConstraint = param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint),
                 HasReferenceTypeConstraint = param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint),
                 HasValueTypeConstraint = param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint),
@@ -160,7 +161,7 @@ internal static class ReflectionGenericTypeResolver
             {
                 ParameterName = param.Name,
                 BaseTypeConstraint = param.BaseType != typeof(object) ? param.BaseType : null,
-                InterfaceConstraints = param.GetInterfaces(),
+                InterfaceConstraints = AssemblyReferenceCache.GetInterfaces(param),
                 HasDefaultConstructorConstraint = param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint),
                 HasReferenceTypeConstraint = param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint),
                 HasValueTypeConstraint = param.GenericParameterAttributes.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint),

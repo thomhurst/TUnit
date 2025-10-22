@@ -8,6 +8,7 @@ using TUnit.Core;
 using TUnit.Core.Helpers;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Discovery;
 
@@ -320,7 +321,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // Don't return false here, continue with other checks
         }
 
-        var referencedAssemblies = assembly.GetReferencedAssemblies();
+        var referencedAssemblies = AssemblyReferenceCache.GetReferencedAssemblies(assembly);
         var hasTUnitReference = false;
         foreach (var reference in referencedAssemblies)
         {
@@ -1346,8 +1347,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
             else
             {
-                // Check interfaces implemented by the argument type
-                foreach (var iface in argType.GetInterfaces())
+                foreach (var iface in AssemblyReferenceCache.GetInterfaces(argType))
                 {
                     if (iface.IsGenericType && iface.GetGenericTypeDefinition() == paramGenDef)
                     {
@@ -1368,7 +1368,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // Handle non-generic types that implement generic interfaces
             var paramGenDef = paramType.GetGenericTypeDefinition();
 
-            foreach (var iface in argType.GetInterfaces())
+            foreach (var iface in AssemblyReferenceCache.GetInterfaces(argType))
             {
                 if (iface.IsGenericType && iface.GetGenericTypeDefinition() == paramGenDef)
                 {
@@ -1418,8 +1418,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return false;
         }
 
-        // Get all interfaces from the argument type
-        var argInterfaces = argType.GetInterfaces();
+        var argInterfaces = AssemblyReferenceCache.GetInterfaces(argType);
         if (argType.IsInterface)
         {
             argInterfaces = argInterfaces.Concat([argType]).ToArray();

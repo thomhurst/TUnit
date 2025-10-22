@@ -13,21 +13,21 @@ namespace TUnit.Core;
 /// </para>
 /// <para>
 /// The display name can include parameter placeholders in the format of "$parameterName" which will be
-/// replaced with the actual parameter values during test execution. For test methods, method parameters 
+/// replaced with the actual parameter values during test execution. For test methods, method parameters
 /// will be used for substitution. For test classes, constructor parameters will be used for substitution. For example:
 /// <code>
 /// [Test]
 /// [Arguments("John", 25)]
 /// [DisplayName("User $name is $age years old")]
 /// public void TestUser(string name, int age) { ... }
-/// 
+///
 /// [Arguments("TestData")]
 /// [DisplayName("Class with data: $data")]
 /// public class MyTestClass(string data) { ... }
 /// </code>
 /// </para>
 /// <para>
-/// When these tests run, the display names would appear as "User John is 25 years old" and 
+/// When these tests run, the display names would appear as "User John is 25 years old" and
 /// "Class with data: TestData" respectively.
 /// </para>
 /// </remarks>
@@ -36,7 +36,7 @@ namespace TUnit.Core;
 /// For methods, method parameter names can be referenced. For classes, constructor parameter names can be referenced.
 /// </param>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = false)]
-public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormatterAttribute, IScopedAttribute<DisplayNameAttribute>
+public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormatterAttribute, IScopedAttribute
 {
     /// <inheritdoc />
     protected override string FormatDisplayName(DiscoveredTestContext context)
@@ -77,4 +77,6 @@ public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormat
 
         return mutableDisplayName;
     }
+
+    public Type ScopeType => typeof(DisplayNameAttribute);
 }

@@ -107,10 +107,9 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
-    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
-    #endif
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
+#endif
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
     {
         var tests = new List<AbstractExecutableTest>();
@@ -609,9 +608,6 @@ internal sealed class TestBuilder : ITestBuilder
         return resolvedTypes;
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-    #endif
     private async Task<IDataSourceAttribute[]> GetDataSourcesAsync(IDataSourceAttribute[] dataSources)
     {
         if (dataSources.Length == 0)
@@ -632,9 +628,6 @@ internal sealed class TestBuilder : ITestBuilder
     /// Ensures a data source is initialized before use and returns data rows.
     /// This centralizes the initialization logic for all data source usage.
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-    #endif
     private async IAsyncEnumerable<Func<Task<object?[]?>>> GetInitializedDataRowsAsync(
         IDataSourceAttribute dataSource,
         DataGeneratorMetadata dataGeneratorMetadata)
@@ -722,9 +715,6 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-    #endif
     private async ValueTask<TestContext> CreateTestContextAsync(string testId, TestMetadata metadata, TestData testData, TestBuilderContext testBuilderContext)
     {
         // Use attributes from context if available, or create new ones
@@ -766,10 +756,6 @@ internal sealed class TestBuilder : ITestBuilder
         return context;
     }
 
-
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
     {
         var discoveredContext = new DiscoveredTestContext(
@@ -781,17 +767,11 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception)
     {
         return await CreateFailedTestForDataGenerationError(metadata, exception, new TestDataCombination());
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     private async Task<AbstractExecutableTest> CreateFailedTestForDataGenerationError(TestMetadata metadata, Exception exception, TestDataCombination combination)
     {
         var testId = TestIdentifierService.GenerateFailedTestId(metadata, combination);
@@ -811,9 +791,6 @@ internal sealed class TestBuilder : ITestBuilder
         };
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-    #endif
     private async Task<TestDetails> CreateFailedTestDetails(TestMetadata metadata, string testId)
     {
         return new TestDetails
@@ -834,9 +811,6 @@ internal sealed class TestBuilder : ITestBuilder
         };
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-    #endif
     private async Task<Attribute[]> InitializeAttributesAsync(Attribute[] attributes)
     {
         // Initialize any attributes that need property injection or implement IAsyncInitializer
@@ -871,18 +845,12 @@ internal sealed class TestBuilder : ITestBuilder
 
 
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     private async Task<AbstractExecutableTest> CreateFailedTestForInstanceDataSourceError(TestMetadata metadata, Exception exception)
     {
         var message = $"Failed to create instance for method data source expansion: {exception.Message}";
         return await CreateFailedTestForDataGenerationError(metadata, exception);
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     private async Task<AbstractExecutableTest> CreateFailedTestForClassDataSourceCircularDependency(TestMetadata metadata)
     {
         var instanceClassDataSources = metadata.ClassDataSources
@@ -1121,10 +1089,9 @@ internal sealed class TestBuilder : ITestBuilder
         public Type[] ResolvedMethodGenericArguments { get; set; } = Type.EmptyTypes;
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
-    #endif
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
+#endif
     public async IAsyncEnumerable<AbstractExecutableTest> BuildTestsStreamingAsync(
         TestMetadata metadata,
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -1188,14 +1155,14 @@ internal sealed class TestBuilder : ITestBuilder
             var classDataLoopIndex = 0;
 
             await foreach (var classDataFactory in GetInitializedDataRowsAsync(
-                classDataSource,
-                DataGeneratorMetadataCreator.CreateDataGeneratorMetadata(
-                    testMetadata: metadata,
-                    testSessionId: _sessionId,
-                    generatorType: DataGeneratorType.ClassParameters,
-                    testClassInstance: null,
-                    classInstanceArguments: null,
-                    contextAccessor)))
+                               classDataSource,
+                               DataGeneratorMetadataCreator.CreateDataGeneratorMetadata(
+                                   testMetadata: metadata,
+                                   testSessionId: _sessionId,
+                                   generatorType: DataGeneratorType.ClassParameters,
+                                   testClassInstance: null,
+                                   classInstanceArguments: null,
+                                   contextAccessor)).WithCancellation(cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 classDataLoopIndex++;
@@ -1260,9 +1227,9 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Generic type inference uses reflection on data sources and parameters")]
-    #endif
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Generic type resolution for instance creation uses reflection")]
+#endif
     private Task<object?> CreateInstanceForMethodDataSources(
         TestMetadata metadata, int classDataAttributeIndex, int classDataLoopIndex, object?[] classData)
     {
@@ -1305,10 +1272,9 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
-    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
-    #endif
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Generic type resolution for test building uses reflection")]
+#endif
     private async Task<AbstractExecutableTest?> BuildSingleTestAsync(
         TestMetadata metadata,
         Func<Task<object?[]?>> classDataFactory,

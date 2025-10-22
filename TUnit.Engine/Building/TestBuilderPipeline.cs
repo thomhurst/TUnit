@@ -118,9 +118,6 @@ internal sealed class TestBuilderPipeline
         return testGroups.SelectMany(x => x);
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     private async Task<AbstractExecutableTest[]> GenerateDynamicTests(TestMetadata metadata)
     {
         // Get attributes first
@@ -210,10 +207,9 @@ internal sealed class TestBuilderPipeline
     /// <summary>
     /// Build tests from a single metadata item, yielding them as they're created
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
-    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
-    #endif
+#if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
+#endif
     private async IAsyncEnumerable<AbstractExecutableTest> BuildTestsFromSingleMetadataAsync(TestMetadata metadata)
     {
         TestMetadata resolvedMetadata;
@@ -453,9 +449,6 @@ internal sealed class TestBuilderPipeline
         };
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
-    #endif
     private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
     {
         var discoveredContext = new DiscoveredTestContext(

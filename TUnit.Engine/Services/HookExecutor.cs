@@ -156,9 +156,6 @@ internal sealed class HookExecutor
         return exceptions;
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
-    #endif
     public async Task ExecuteBeforeTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassType = test.Metadata.TestClassType;
@@ -194,9 +191,6 @@ internal sealed class HookExecutor
         }
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
-    #endif
     public async Task ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassType = test.Metadata.TestClassType;

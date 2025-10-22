@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using TUnit.Core;
 using TUnit.Core.Helpers;
 
@@ -50,12 +51,16 @@ internal static class DisplayNameBuilder
             return string.Empty;
         }
 
-        var formattedArgs = new string[arguments.Length];
+        var sb = new StringBuilder();
         for (var i = 0; i < arguments.Length; i++)
         {
-            formattedArgs[i] = ArgumentFormatter.Format(arguments[i], []);
+            if (i > 0)
+            {
+                sb.Append(", ");
+            }
+            sb.Append(ArgumentFormatter.Format(arguments[i], []));
         }
-        return string.Join(", ", formattedArgs);
+        return sb.ToString();
     }
 
     /// <summary>
@@ -68,12 +73,16 @@ internal static class DisplayNameBuilder
             return string.Empty;
         }
 
-        var formattedArgs = new string[arguments.Length];
+        var sb = new StringBuilder();
         for (var i = 0; i < arguments.Length; i++)
         {
-            formattedArgs[i] = ArgumentFormatter.Format(arguments[i], formatters);
+            if (i > 0)
+            {
+                sb.Append(", ");
+            }
+            sb.Append(ArgumentFormatter.Format(arguments[i], formatters));
         }
-        return string.Join(", ", formattedArgs);
+        return sb.ToString();
     }
 
     /// <summary>

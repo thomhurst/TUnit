@@ -35,10 +35,10 @@ internal static class PropertyDataResolver
         {
             var args = await factory();
             var value = ResolveValueFromArgs(context.PropertyType, args);
-            
+
             // Resolve any Func<T> wrappers
             value = await ResolveDelegateValue(value);
-            
+
             // Initialize the resolved value if needed
             if (value != null)
             {
@@ -62,7 +62,7 @@ internal static class PropertyDataResolver
                         context.Events);
                 }
                 // Note: IAsyncInitializer will be called during execution phase by ObjectInitializationService
-                
+
                 return value;
             }
         }
@@ -74,13 +74,10 @@ internal static class PropertyDataResolver
     /// Gets an initialized data source from the context.
     /// Ensures the data source is fully initialized (including property injection) before returning it.
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-    #endif
     private static async Task<IDataSourceAttribute?> GetInitializedDataSourceAsync(PropertyInitializationContext context, DataSourceInitializer dataSourceInitializer)
     {
         IDataSourceAttribute? dataSource = null;
-        
+
         if (context.DataSource != null)
         {
             dataSource = context.DataSource;

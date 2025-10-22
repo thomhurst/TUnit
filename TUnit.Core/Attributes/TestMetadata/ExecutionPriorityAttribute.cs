@@ -4,7 +4,7 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class ExecutionPriorityAttribute : SingleTUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute<ExecutionPriorityAttribute>
+public class ExecutionPriorityAttribute : SingleTUnitAttribute, ITestDiscoveryEventReceiver, IScopedAttribute
 {
     public Priority Priority { get; }
     public int Order => 0;
@@ -19,4 +19,6 @@ public class ExecutionPriorityAttribute : SingleTUnitAttribute, ITestDiscoveryEv
         context.SetPriority(Priority);
         return default(ValueTask);
     }
+
+    public Type ScopeType => typeof(ExecutionPriorityAttribute);
 }

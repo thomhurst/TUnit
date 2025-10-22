@@ -9,7 +9,6 @@ namespace TUnit.Engine.Framework;
 internal interface IRequestHandler
 {
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
     [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
     #endif
     Task HandleRequestAsync(TestExecutionRequest request, TUnitServiceProvider serviceProvider, ExecuteRequestContext context, ITestExecutionFilter? testExecutionFilter);

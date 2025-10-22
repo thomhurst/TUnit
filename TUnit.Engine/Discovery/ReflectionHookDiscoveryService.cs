@@ -6,6 +6,7 @@ using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Core.Interfaces;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Discovery;
 
@@ -70,10 +71,6 @@ internal sealed class ReflectionHookDiscoveryService
     /// Discovers and registers instance hooks for a specific closed generic type.
     /// This is needed because closed generic types are created at runtime and don't appear in assembly.GetTypes().
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Hook discovery uses reflection on methods and attributes")]
-    [RequiresDynamicCode("Hook registration may involve dynamic delegate creation")]
-    #endif
     public static void DiscoverInstanceHooksForType(Type closedGenericType)
     {
         if (SourceRegistrar.IsEnabled)
@@ -227,8 +224,7 @@ internal sealed class ReflectionHookDiscoveryService
             return false;
         }
 
-        // Check if assembly references TUnit.Core
-        var referencedAssemblies = assembly.GetReferencedAssemblies();
+        var referencedAssemblies = AssemblyReferenceCache.GetReferencedAssemblies(assembly);
         var referencesTUnit = false;
         foreach (var refAssembly in referencedAssemblies)
         {

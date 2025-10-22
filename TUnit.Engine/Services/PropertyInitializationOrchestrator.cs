@@ -88,9 +88,7 @@ internal sealed class PropertyInitializationOrchestrator
     /// <summary>
     /// Handles the complete initialization flow for an object with properties.
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Reflection-based property initialization uses PropertyInfo")]
-    #endif
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Specific source gen path")]
     public async Task InitializeObjectWithPropertiesAsync(
         object instance,
         PropertyInjectionPlan plan,
