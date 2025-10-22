@@ -81,7 +81,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: test-builds-${{ matrix.os }}
           path: tools/speed-comparison/UnifiedTests/bin/
