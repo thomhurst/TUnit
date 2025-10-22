@@ -19,6 +19,10 @@ public class RuntimeBenchmarks : BenchmarkBase
 
         await Cli.Wrap(Path.Combine(aotPath, exeName))
             .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
+            .WithEnvironmentVariables(new Dictionary<string, string?>
+            {
+                ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true"
+            })
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
@@ -31,6 +35,10 @@ public class RuntimeBenchmarks : BenchmarkBase
 
         await Cli.Wrap(Path.Combine(binPath, exeName))
             .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
+            .WithEnvironmentVariables(new Dictionary<string, string?>
+            {
+                ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true"
+            })
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }

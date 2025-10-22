@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Utilities;
 
@@ -32,8 +33,7 @@ internal static class ScopedAttributeFilter
 
             var itemType = item.GetType();
 
-            // Check if this implements IScopedAttribute<T>
-            var scopedInterface = itemType.GetInterfaces()
+            var scopedInterface = AssemblyReferenceCache.GetInterfaces(itemType)
                 .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IScopedAttribute<>));
 
             if (scopedInterface != null)
@@ -69,7 +69,7 @@ internal static class ScopedAttributeFilter
 #endif
     public static bool IsScopedAttribute(Type type)
     {
-        return type.GetInterfaces()
+        return AssemblyReferenceCache.GetInterfaces(type)
             .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IScopedAttribute<>));
     }
 
@@ -87,7 +87,7 @@ internal static class ScopedAttributeFilter
         }
 
         var objType = obj.GetType();
-        var scopedInterface = objType.GetInterfaces()
+        var scopedInterface = AssemblyReferenceCache.GetInterfaces(objType)
             .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IScopedAttribute<>));
 
         return scopedInterface?.GetGenericArguments()[0];

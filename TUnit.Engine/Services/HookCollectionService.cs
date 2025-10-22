@@ -25,6 +25,35 @@ internal sealed class HookCollectionService : IHookCollectionService
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
     }
 
+    private static void SortAndAddHooks<TDelegate>(
+        List<Func<TestContext, CancellationToken, Task>> target,
+        List<(int order, int registrationIndex, TDelegate hook)> hooks)
+        where TDelegate : Delegate
+    {
+        hooks.Sort((a, b) => a.order != b.order
+            ? a.order.CompareTo(b.order)
+            : a.registrationIndex.CompareTo(b.registrationIndex));
+
+        foreach (var (_, _, hook) in hooks)
+        {
+            target.Add((Func<TestContext, CancellationToken, Task>)(object)hook);
+        }
+    }
+
+    private static void SortAndAddClassHooks(
+        List<Func<ClassHookContext, CancellationToken, Task>> target,
+        List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)> hooks)
+    {
+        hooks.Sort((a, b) => a.order != b.order
+            ? a.order.CompareTo(b.order)
+            : a.registrationIndex.CompareTo(b.registrationIndex));
+
+        foreach (var (_, _, hook) in hooks)
+        {
+            target.Add(hook);
+        }
+    }
+
     #if NET6_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Scoped attribute filtering uses Type.GetInterfaces and reflection")]
     #endif
@@ -115,7 +144,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             foreach (var (_, typeHooks) in hooksByType)
             {
                 // Within each type level, sort by Order then by RegistrationIndex
-                finalHooks.AddRange(typeHooks.OrderBy(static h => h.order).ThenBy(static h => h.registrationIndex).Select(static h => h.hook));
+                SortAndAddHooks(finalHooks, typeHooks);
             }
 
             return finalHooks;
@@ -187,7 +216,7 @@ internal sealed class HookCollectionService : IHookCollectionService
             foreach (var (_, typeHooks) in hooksByType)
             {
                 // Within each type level, sort by Order then by RegistrationIndex
-                finalHooks.AddRange(typeHooks.OrderBy(static h => h.order).ThenBy(static h => h.registrationIndex).Select(static h => h.hook));
+                SortAndAddHooks(finalHooks, typeHooks);
             }
 
             return finalHooks;
@@ -308,15 +337,12 @@ internal sealed class HookCollectionService : IHookCollectionService
                 currentType = currentType.BaseType;
             }
 
-            // For Before hooks: base class hooks run first
-            // Reverse the list since we collected from derived to base
             hooksByType.Reverse();
 
             var finalHooks = new List<Func<ClassHookContext, CancellationToken, Task>>();
             foreach (var (_, typeHooks) in hooksByType)
             {
-                // Within each type level, sort by Order then by RegistrationIndex
-                finalHooks.AddRange(typeHooks.OrderBy(static h => h.order).ThenBy(static h => h.registrationIndex).Select(static h => h.hook));
+                SortAndAddClassHooks(finalHooks, typeHooks);
             }
 
             return finalHooks;
@@ -368,14 +394,10 @@ internal sealed class HookCollectionService : IHookCollectionService
                 currentType = currentType.BaseType;
             }
 
-            // For After hooks: derived class hooks run first
-            // No need to reverse since we collected from derived to base
-
             var finalHooks = new List<Func<ClassHookContext, CancellationToken, Task>>();
             foreach (var (_, typeHooks) in hooksByType)
             {
-                // Within each type level, sort by Order then by RegistrationIndex
-                finalHooks.AddRange(typeHooks.OrderBy(static h => h.order).ThenBy(static h => h.registrationIndex).Select(static h => h.hook));
+                SortAndAddClassHooks(finalHooks, typeHooks);
             }
 
             return finalHooks;

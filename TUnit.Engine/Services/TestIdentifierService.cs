@@ -116,12 +116,15 @@ internal static class TestIdentifierService
 
         var sb = new StringBuilder();
         var name = type.Name;
-        
-        // Remove the `n suffix from generic type names
+
         var backtickIndex = name.IndexOf('`');
         if (backtickIndex > 0)
         {
+#if NET6_0_OR_GREATER
+            sb.Append(name.AsSpan(0, backtickIndex));
+#else
             sb.Append(name.Substring(0, backtickIndex));
+#endif
         }
         else
         {

@@ -98,8 +98,8 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
-        var executableTests = testList.Where(t => !testsInCircularDependencies.Contains(t)).ToList();
-        if (executableTests.Count == 0)
+        var executableTests = testList.Where(t => !testsInCircularDependencies.Contains(t)).ToArray();
+        if (executableTests.Length == 0)
         {
             await _logger.LogDebugAsync("No executable tests found after removing circular dependencies").ConfigureAwait(false);
             return true;

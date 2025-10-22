@@ -33,7 +33,8 @@ internal sealed class TestGroupingService : ITestGroupingService
     
     public async ValueTask<GroupedTests> GroupTestsByConstraintsAsync(IEnumerable<AbstractExecutableTest> tests)
     {
-        var testsWithKeys = new List<(AbstractExecutableTest Test, TestSortKey Key)>();
+        var testCount = tests is ICollection<AbstractExecutableTest> collection ? collection.Count : 0;
+        var testsWithKeys = new List<(AbstractExecutableTest Test, TestSortKey Key)>(testCount > 0 ? testCount : 16);
         foreach (var test in tests)
         {
             NotInParallelConstraint? notInParallelConstraint = null;
@@ -67,11 +68,12 @@ internal sealed class TestGroupingService : ITestGroupingService
             return a.Key.NotInParallelOrder.CompareTo(b.Key.NotInParallelOrder);
         });
 
-        var notInParallelList = new List<(AbstractExecutableTest Test, string ClassName, TestPriority Priority)>();
-        var keyedNotInParallelList = new List<(AbstractExecutableTest Test, string ClassName, IReadOnlyList<string> ConstraintKeys, TestPriority Priority)>();
-        var parallelTests = new List<AbstractExecutableTest>();
-        var parallelGroups = new Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>>(capacity: 16);
-        var constrainedParallelGroups = new Dictionary<string, (List<AbstractExecutableTest> Unconstrained, List<(AbstractExecutableTest, string, IReadOnlyList<string>, TestPriority)> Keyed)>(capacity: 16);
+        var estimatedCount = testsWithKeys.Count;
+        var notInParallelList = new List<(AbstractExecutableTest Test, string ClassName, TestPriority Priority)>(estimatedCount / 4);
+        var keyedNotInParallelList = new List<(AbstractExecutableTest Test, string ClassName, IReadOnlyList<string> ConstraintKeys, TestPriority Priority)>(estimatedCount / 8);
+        var parallelTests = new List<AbstractExecutableTest>(estimatedCount / 2);
+        var parallelGroups = new Dictionary<string, SortedDictionary<int, List<AbstractExecutableTest>>>(capacity: 8);
+        var constrainedParallelGroups = new Dictionary<string, (List<AbstractExecutableTest> Unconstrained, List<(AbstractExecutableTest, string, IReadOnlyList<string>, TestPriority)> Keyed)>(capacity: 8);
 
         foreach (var (test, sortKey) in testsWithKeys)
         {

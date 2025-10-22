@@ -6,6 +6,7 @@ using Polyfills;
 using TUnit.Core;
 using TUnit.Core.Hooks;
 using TUnit.Core.Interfaces;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Discovery;
 
@@ -227,8 +228,7 @@ internal sealed class ReflectionHookDiscoveryService
             return false;
         }
 
-        // Check if assembly references TUnit.Core
-        var referencedAssemblies = assembly.GetReferencedAssemblies();
+        var referencedAssemblies = AssemblyReferenceCache.GetReferencedAssemblies(assembly);
         var referencesTUnit = false;
         foreach (var refAssembly in referencedAssemblies)
         {

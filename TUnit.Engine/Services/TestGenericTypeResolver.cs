@@ -3,6 +3,7 @@ using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Engine.Building;
+using TUnit.Engine.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -522,8 +523,7 @@ internal sealed class TestGenericTypeResolver
         // Handle case where parameter is a generic interface and argument implements it
         if (parameterType is { IsGenericType: true, IsInterface: true })
         {
-            // Check if argument type implements the parameter interface
-            var implementedInterfaces = argumentType.GetInterfaces();
+            var implementedInterfaces = AssemblyReferenceCache.GetInterfaces(argumentType);
             foreach (var implementedInterface in implementedInterfaces)
             {
                 if (implementedInterface.IsGenericType)
