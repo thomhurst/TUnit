@@ -10,7 +10,6 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <OutputType Condition="'$(TestFramework)' == 'TUNIT'">Exe</OutputType>
     <OutputType Condition="'$(TestFramework)' == 'XUNIT3'">Exe</OutputType>
     <UseMicrosoftTestingPlatformRunner Condition="'$(TestFramework)' == 'XUNIT3'">true</UseMicrosoftTestingPlatformRunner>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>

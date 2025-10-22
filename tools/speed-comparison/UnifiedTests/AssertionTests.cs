@@ -169,15 +169,15 @@ public class AssertionTests
 
 #if TUNIT
         await Assert.That(numbers).IsNotNull();
-        await Assert.That(numbers).IsNotEmpty();
-        await Assert.That(numbers).HasCount(5);
+        await Assert.That(numbers.Count).IsGreaterThan(0);
+        await Assert.That(numbers.Count).IsEqualTo(5);
         await Assert.That(numbers).Contains(3);
         await Assert.That(numbers).DoesNotContain(10);
 
-        await Assert.That(empty).IsEmpty();
-        await Assert.That(empty).HasCount(0);
+        await Assert.That(empty.Count).IsEqualTo(0);
+        await Assert.That(empty.Count).IsEqualTo(0);
 
-        await Assert.That(duplicates).HasCount(6);
+        await Assert.That(duplicates.Length).IsEqualTo(6);
         await Assert.That(duplicates).Contains(2);
 #elif XUNIT || XUNIT3
         Assert.NotNull(numbers);
