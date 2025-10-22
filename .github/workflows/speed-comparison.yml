@@ -89,9 +89,8 @@ jobs:
       - name: Set Execute Permissions (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          chmod +x tools/speed-comparison/UnifiedTests/bin/Release-*/*/UnifiedTests 2>/dev/null || true
-          chmod +x tools/speed-comparison/UnifiedTests/bin/Release-*-AOT/*/UnifiedTests 2>/dev/null || true
-          chmod +x tools/speed-comparison/UnifiedTests/bin/Release-*/*/xunit.v3.runner.console 2>/dev/null || true
+          find tools/speed-comparison/UnifiedTests/bin -type f -name "UnifiedTests" -exec chmod +x {} \; 2>/dev/null || true
+          find tools/speed-comparison/UnifiedTests/bin -type f -name "xunit.v3.runner.console" -exec chmod +x {} \; 2>/dev/null || true
         working-directory: ${{ github.workspace }}
 
       - name: Run Benchmark

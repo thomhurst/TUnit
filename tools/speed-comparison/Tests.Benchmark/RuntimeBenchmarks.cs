@@ -46,9 +46,12 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task NUnit()
     {
+        var binPath = Path.Combine(UnifiedPath, "bin", "Release-NUNIT", Framework);
+        var dllPath = Path.Combine(binPath, "UnifiedTests.dll");
+        var consoleRunner = Path.Combine(binPath, "nunit3-console.dll");
+
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "--project", "UnifiedTests/UnifiedTests.csproj", "-p:TestFramework=NUNIT", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
-            .WithWorkingDirectory(Path.GetDirectoryName(UnifiedPath)!)
+            .WithArguments([consoleRunner, dllPath, $"--where=class =~ {ClassName}", "--noheader"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
@@ -56,9 +59,12 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task xUnit()
     {
+        var binPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT", Framework);
+        var dllPath = Path.Combine(binPath, "UnifiedTests.dll");
+        var consoleRunner = Path.Combine(binPath, "xunit.console.dll");
+
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", "--project", "UnifiedTests/UnifiedTests.csproj", "-p:TestFramework=XUNIT", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
-            .WithWorkingDirectory(Path.GetDirectoryName(UnifiedPath)!)
+            .WithArguments([consoleRunner, dllPath, "-class", $"UnifiedTests.{ClassName}", "-nologo"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
@@ -66,9 +72,15 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task MSTest()
     {
-        await Cli.Wrap("dotnet")
-            .WithArguments(["test", "--project", "UnifiedTests/UnifiedTests.csproj", "-p:TestFramework=MSTEST", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
-            .WithWorkingDirectory(Path.GetDirectoryName(UnifiedPath)!)
+        var binPath = Path.Combine(UnifiedPath, "bin", "Release-MSTEST", Framework);
+        var exeName = GetExecutableFileName();
+
+        await Cli.Wrap(Path.Combine(binPath, exeName))
+            .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
+            .WithEnvironmentVariables(new Dictionary<string, string?>
+            {
+                ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true"
+            })
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
