@@ -504,6 +504,13 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         protected override string GetExpectation() { }
     }
+    public class CollectionNotNullAssertion<TCollection, TItem> : .<TCollection, TItem>
+        where TCollection : .<TItem>
+    {
+        public CollectionNotNullAssertion(.<TCollection> context) { }
+        protected override .<.> CheckAsync(.<TCollection> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public abstract class ComparerBasedAssertion<TValue, TItem> : .<TValue>
     {
         protected ComparerBasedAssertion(.<TValue> context) { }
@@ -1847,6 +1854,8 @@ namespace .Extensions
             where TValue :  class { }
         public static .<TValue> IsNotNull<TValue>(this .<TValue?> source)
             where TValue :  struct { }
+        public static .<TCollection, TItem> IsNotNull<TCollection, TItem>(this .<TCollection, TItem> source)
+            where TCollection :  class, .<TItem> { }
         public static ..IsNotParsableIntoAssertion<T> IsNotParsableInto<[.(..None | ..PublicMethods | ..Interfaces)]  T>(this .<string> source) { }
         public static .<TValue> IsOfType<TValue>(this .<TValue> source,  expectedType, [.("expectedType")] string? expression = null) { }
         public static ..IsParsableIntoAssertion<T> IsParsableInto<[.(..None | ..PublicMethods | ..Interfaces)]  T>(this .<string> source) { }
