@@ -86,9 +86,9 @@ public class SetupTeardownTests : IDisposable
 #endif
 
 #if TUNIT
-        await Assert.That(_testData.Count).IsEqualTo(5);
+        await Assert.That(_testData).HasCount(5);
         await Assert.That(_testData[0]).IsEqualTo("Apple");
-        await Assert.That(_cache.Count).IsEqualTo(10);
+        await Assert.That(_cache).HasCount(10);
         await Assert.That(_cache[5]).IsEqualTo("Value_5");
 #elif XUNIT || XUNIT3
         Assert.Equal(5, _testData.Count);
@@ -109,7 +109,7 @@ public class SetupTeardownTests : IDisposable
 
         _testData.Add("Fig");
 #if TUNIT
-        await Assert.That(_testData.Count).IsEqualTo(6);
+        await Assert.That(_testData).HasCount(6);
 #elif XUNIT || XUNIT3
         Assert.Equal(6, _testData.Count);
         AfterEachTest();
@@ -139,8 +139,8 @@ public class SetupTeardownTests : IDisposable
 #endif
 
 #if TUNIT
-        await Assert.That(_testData.Count).IsEqualTo(5);
-        await Assert.That(_cache.Count).IsEqualTo(10);
+        await Assert.That(_testData).HasCount(5);
+        await Assert.That(_cache).HasCount(10);
 #elif XUNIT || XUNIT3
         Assert.Equal(5, _testData.Count);
         Assert.Equal(10, _cache.Count);
@@ -156,8 +156,8 @@ public class SetupTeardownTests : IDisposable
         _cache.Remove(0);
 
 #if TUNIT
-        await Assert.That(_testData.Count).IsEqualTo(4);
-        await Assert.That(_cache.Count).IsEqualTo(9);
+        await Assert.That(_testData).HasCount(4);
+        await Assert.That(_cache).HasCount(9);
 #elif XUNIT || XUNIT3
         Assert.Equal(4, _testData.Count);
         Assert.Equal(9, _cache.Count);

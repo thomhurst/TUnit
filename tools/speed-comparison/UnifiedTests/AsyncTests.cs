@@ -68,7 +68,7 @@ public class AsyncTests
         var sum = results.Sum();
 
 #if TUNIT
-        await Assert.That(results.Length).IsEqualTo(10);
+        await Assert.That(results).HasCount(10);
         await Assert.That(sum).IsEqualTo(285);
 #elif XUNIT || XUNIT3
         Assert.Equal(10, results.Length);

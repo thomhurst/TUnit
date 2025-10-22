@@ -10,6 +10,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <LangVersion>13</LangVersion>
     <OutputType Condition="'$(TestFramework)' == 'XUNIT3'">Exe</OutputType>
     <UseMicrosoftTestingPlatformRunner Condition="'$(TestFramework)' == 'XUNIT3'">true</UseMicrosoftTestingPlatformRunner>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -36,7 +37,7 @@
 
   <!-- TUnit packages -->
   <ItemGroup Condition="'$(TestFramework)' == 'TUNIT'">
-    <PackageReference Include="TUnit" VersionOverride="*" />
+    <PackageReference Include="TUnit" />
   </ItemGroup>
 
   <!-- xUnit v2 packages -->

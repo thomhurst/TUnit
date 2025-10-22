@@ -391,7 +391,7 @@ public class ThreadSafeTests
 
 #if TUNIT
         await Assert.That(results.Sum()).IsEqualTo(55);
-        await Assert.That(results.Length).IsEqualTo(5);
+        await Assert.That(results).HasCount(5);
         await Assert.That(results.All(r => r > 0)).IsTrue();
 #elif XUNIT || XUNIT3
         Assert.Equal(55, results.Sum());
