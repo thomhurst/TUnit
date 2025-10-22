@@ -25,7 +25,7 @@ public class DelegateAssertion : IAssertionSource<object?>, IDelegateAssertionSo
         {
             try
             {
-                await Task.Run(action);
+                action();
                 return (null, null);
             }
             catch (Exception ex)

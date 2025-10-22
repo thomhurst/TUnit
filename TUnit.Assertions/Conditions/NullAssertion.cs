@@ -139,6 +139,74 @@ public class IsNotDefaultAssertion<TValue> : Assertion<TValue> where TValue : st
 }
 
 /// <summary>
+/// Asserts that a nullable value type is equal to the default value (null).
+/// For nullable value types like bool?, int?, this checks if the value is null.
+/// </summary>
+[AssertionExtension("IsDefault")]
+public class IsDefaultNullableAssertion<TValue> : Assertion<TValue?> where TValue : struct
+{
+    public IsDefaultNullableAssertion(
+        AssertionContext<TValue?> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue?> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (!value.HasValue)
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"value is {value}"));
+    }
+
+    protected override string GetExpectation() => $"to be default({typeof(TValue).Name}?)";
+}
+
+/// <summary>
+/// Asserts that a nullable value type is not the default value (not null).
+/// For nullable value types like bool?, int?, this checks if the value has a value.
+/// </summary>
+[AssertionExtension("IsNotDefault")]
+public class IsNotDefaultNullableAssertion<TValue> : Assertion<TValue?> where TValue : struct
+{
+    public IsNotDefaultNullableAssertion(
+        AssertionContext<TValue?> context)
+        : base(context)
+    {
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue?> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+        }
+
+        if (value.HasValue)
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+        return Task.FromResult(AssertionResult.Failed($"value is default({typeof(TValue).Name}?)"));
+    }
+
+    protected override string GetExpectation() => $"to not be default({typeof(TValue).Name}?)";
+}
+
+/// <summary>
 /// Asserts that a reference type value is equal to the default value (null).
 /// For reference types, this is equivalent to IsNull().
 /// </summary>
