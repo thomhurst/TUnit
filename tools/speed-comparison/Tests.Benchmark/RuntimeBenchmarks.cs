@@ -46,10 +46,9 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task NUnit()
     {
-        var projPath = Path.Combine(UnifiedPath, "UnifiedTests.csproj");
-
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", projPath, "-p:TestFramework=NUNIT", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
+            .WithArguments(["test", "UnifiedTests/UnifiedTests.csproj", "-p:TestFramework=NUNIT", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
+            .WithWorkingDirectory(Path.GetDirectoryName(UnifiedPath)!)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
@@ -57,10 +56,9 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task xUnit()
     {
-        var projPath = Path.Combine(UnifiedPath, "UnifiedTests.csproj");
-
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", projPath, "-p:TestFramework=XUNIT", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
+            .WithArguments(["test", "UnifiedTests/UnifiedTests.csproj", "-p:TestFramework=XUNIT", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
+            .WithWorkingDirectory(Path.GetDirectoryName(UnifiedPath)!)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
@@ -68,10 +66,9 @@ public class RuntimeBenchmarks : BenchmarkBase
     [Benchmark]
     public async Task MSTest()
     {
-        var projPath = Path.Combine(UnifiedPath, "UnifiedTests.csproj");
-
         await Cli.Wrap("dotnet")
-            .WithArguments(["test", projPath, "-p:TestFramework=MSTEST", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
+            .WithArguments(["test", "UnifiedTests/UnifiedTests.csproj", "-p:TestFramework=MSTEST", "--framework", Framework, $"--filter:FullyQualifiedName~{ClassName}", "--no-build", "-c", "Release"])
+            .WithWorkingDirectory(Path.GetDirectoryName(UnifiedPath)!)
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
