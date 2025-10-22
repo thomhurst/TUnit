@@ -31,7 +31,7 @@ public class AssertionTests
         await Assert.That(value).IsEqualTo(42);
         await Assert.That(value).IsGreaterThan(40);
         await Assert.That(value).IsLessThan(50);
-        await Assert.That(value).IsBetween(40, 45).WithInclusiveBounds();
+        await Assert.That(value).IsBetween(40, 45).Inclusive();
 
         await Assert.That(pi).IsEqualTo(3.14159);
         await Assert.That(pi).IsGreaterThan(3.0);
