@@ -24,7 +24,7 @@
 | Test Dependencies | ❌ Not supported | ✅ **`[DependsOn]` chains** |
 | Resource Management | ❌ Manual lifecycle | ✅ **Automatic cleanup** |
 
-**Parallel by Default** - Tests run concurrently with smart dependency management
+**Parallel by Default** - Tests run concurrently with dependency management
 
 **Compile-Time Discovery** - Test structure is known before runtime
 
@@ -69,7 +69,7 @@ dotnet add package TUnit --prerelease
 <tr>
 <td width="50%">
 
-**Performance & Modern Platform**
+**Performance**
 - Source-generated tests (no reflection)
 - Parallel execution by default
 - Native AOT & trimming support
@@ -78,7 +78,7 @@ dotnet add package TUnit --prerelease
 </td>
 <td width="50%">
 
-**Advanced Test Control**
+**Test Control**
 - Test dependencies with `[DependsOn]`
 - Parallel limits & custom scheduling
 - Built-in analyzers & compile-time checks
@@ -98,7 +98,7 @@ dotnet add package TUnit --prerelease
 </td>
 <td>
 
-**Developer Experience**
+**Developer Tools**
 - Full dependency injection support
 - Lifecycle hooks
 - IDE integration (VS, Rider, VS Code)
@@ -239,7 +239,6 @@ public async Task Calculate_Sum(int a, int b, int expected)
         .IsEqualTo(expected);
 }
 ```
-**Fast, isolated, and reliable**
 
 </td>
 <td width="33%">
@@ -254,7 +253,6 @@ public async Task Login_After_Registration()
     await Assert.That(result.IsSuccess).IsTrue();
 }
 ```
-**Handle stateful workflows**
 
 </td>
 <td width="33%">
@@ -270,7 +268,6 @@ public async Task API_Handles_Concurrent_Requests()
         .HasStatusCode(HttpStatusCode.OK);
 }
 ```
-**Built-in performance testing**
 
 </td>
 </tr>
