@@ -19,10 +19,10 @@
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
         <LangVersion>14</LangVersion>
-        <UseMicrosoftTestingPlatformRunner Condition="'$(TestFramework)' == 'XUNIT3'">true</UseMicrosoftTestingPlatformRunner>
-        <EnableMSTestRunner Condition="'$(TestFramework)' == 'MSTEST'">true</EnableMSTestRunner>
+        <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+        <EnableMSTestRunner>true</EnableMSTestRunner>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-        <EnableNUnitRunner Condition="'$(TestFramework)' == 'NUNIT'">true</EnableNUnitRunner>
+        <EnableNUnitRunner>true</EnableNUnitRunner>
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
