@@ -62,11 +62,7 @@ public class RuntimeBenchmarks : BenchmarkBase
         var exeName = GetExecutableFileName();
 
         await Cli.Wrap(Path.Combine(binPath, exeName))
-            .WithArguments(["--treenode-filter",  $"/*/*/{ClassName}/*"])
-            .WithEnvironmentVariables(new Dictionary<string, string?>
-            {
-                ["TUNIT_DISABLE_GITHUB_REPORTER"] = "true"
-            })
+            .WithArguments(["--filter", $"FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
