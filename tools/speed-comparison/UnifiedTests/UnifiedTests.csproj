@@ -13,7 +13,7 @@
     <LangVersion>14</LangVersion>
     <OutputType Condition="'$(TestFramework)' == 'XUNIT3' OR '$(TestFramework)' == 'TUNIT' OR '$(TestFramework)' == 'MSTEST'">Exe</OutputType>
     <UseMicrosoftTestingPlatformRunner Condition="'$(TestFramework)' == 'XUNIT3'">true</UseMicrosoftTestingPlatformRunner>
-      <EnableMSTestRunner Condition="''$(TestFramework)' == 'MSTEST'">true</EnableMSTestRunner>
+      <EnableMSTestRunner Condition="'$(TestFramework)' == 'MSTEST'">true</EnableMSTestRunner>
       <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
