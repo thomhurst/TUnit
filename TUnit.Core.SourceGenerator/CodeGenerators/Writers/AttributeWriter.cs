@@ -20,6 +20,12 @@ public class AttributeWriter
             // Include attributes without syntax reference (from other assemblies) as long as they have an AttributeClass
             if (attributeData.ApplicationSyntaxReference is not null || attributeData.AttributeClass is not null)
             {
+                // Skip compiler-internal and assembly-level attributes
+                if (ShouldSkipCompilerInternalAttribute(attributeData))
+                {
+                    continue;
+                }
+
                 // Skip framework-specific attributes when targeting older frameworks
                 // We determine this by checking if we can compile the attribute
                 if (ShouldSkipFrameworkSpecificAttribute(compilation, attributeData))
@@ -28,8 +34,8 @@ public class AttributeWriter
                 }
 
                 // Skip attributes with compiler-generated type arguments
-                if (attributeData.ConstructorArguments.Any(arg => 
-                    arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol } && 
+                if (attributeData.ConstructorArguments.Any(arg =>
+                    arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol } &&
                     typeSymbol.IsCompilerGeneratedType()))
                 {
                     continue;
@@ -272,6 +278,32 @@ public class AttributeWriter
         return fullyQualifiedName.Contains("NullableAttribute") ||
                fullyQualifiedName.Contains("NullableContextAttribute") ||
                fullyQualifiedName.Contains("NullablePublicOnlyAttribute");
+    }
+
+    private static bool ShouldSkipCompilerInternalAttribute(AttributeData attributeData)
+    {
+        if (attributeData.AttributeClass == null)
+        {
+            return false;
+        }
+
+        var fullyQualifiedName = attributeData.AttributeClass.ToDisplayString();
+
+        // Skip compiler-internal attributes that should never be re-emitted
+        // System.Runtime.CompilerServices contains compiler-generated and structural metadata attributes
+        if (fullyQualifiedName.StartsWith("System.Runtime.CompilerServices."))
+        {
+            return true;
+        }
+
+        // Skip debugger attributes (compiler-generated for debugging support)
+        if (fullyQualifiedName.StartsWith("System.Diagnostics.Debugger"))
+        {
+            return true;
+        }
+
+        // Skip ParamArrayAttribute (compiler-generated for params keyword)
+        return fullyQualifiedName == "System.ParamArrayAttribute";
     }
 
 }
