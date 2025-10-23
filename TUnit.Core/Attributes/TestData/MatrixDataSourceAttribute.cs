@@ -7,13 +7,11 @@ namespace TUnit.Core;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 #if NET6_0_OR_GREATER
 [RequiresUnreferencedCode("MatrixDataSource uses reflection to access parameter attributes and test metadata. For AOT compatibility, consider using explicit data sources.")]
-[RequiresDynamicCode("MatrixDataSource may process enum types dynamically")]
 #endif
 public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttribute, IAccessesInstanceData
 {
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Matrix generation requires reflection")]
-    [RequiresDynamicCode("Matrix generation may process enum types dynamically")]
     #endif
     protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
@@ -171,15 +169,9 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
 
         if (resolvedType.IsEnum)
         {
-#if NET
-        var enumValues = Enum.GetValuesAsUnderlyingType(resolvedType)
-                             .Cast<object?>();
-#else
-#pragma warning disable IL3050 // Enum.GetValues is used for test data generation at discovery time, not in AOT scenarios
-            var enumValues = Enum.GetValues(resolvedType)
-                .Cast<object?>();
-#pragma warning restore IL3050
-#endif
+            var enumValues = Enum.GetValuesAsUnderlyingType(resolvedType)
+                                 .Cast<object?>();
+
             if (isNullable)
             {
                 enumValues = enumValues.Append(null);
@@ -190,11 +182,7 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
             }
 
             return enumValues
-#if NET
                .Except(matrixAttribute?.Excluding?.Select(e => Convert.ChangeType(e, Enum.GetUnderlyingType(resolvedType))) ?? [])
-#else
-                .Except(matrixAttribute?.Excluding ?? [])
-#endif
                 .ToArray();
         }
 
