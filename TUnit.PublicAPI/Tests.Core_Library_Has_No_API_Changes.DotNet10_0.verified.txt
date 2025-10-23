@@ -1943,7 +1943,13 @@ namespace .Helpers
         "have matching annotations.")]
     public static class CastHelper
     {
+        [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.", Justification=" is used for test data generation at discovery time, not in A" +
+            "OT-compiled test execution.")]
         public static object? Cast([.(..None | ..PublicMethods | ..NonPublicMethods)]  type, object? value) { }
+        [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.", Justification=" is used for test data generation at discovery time, not in A" +
+            "OT-compiled test execution.")]
         public static T? Cast<[.(..None | ..PublicMethods | ..NonPublicMethods)]  T>(object? value) { }
         public static .MethodInfo? GetConversionMethod([.(..None | ..PublicMethods | ..NonPublicMethods)]  baseType, [.(..None | ..PublicMethods | ..NonPublicMethods)]  targetType) { }
     }

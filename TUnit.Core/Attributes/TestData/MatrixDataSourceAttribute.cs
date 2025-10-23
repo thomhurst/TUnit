@@ -175,8 +175,10 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
         var enumValues = Enum.GetValuesAsUnderlyingType(resolvedType)
                              .Cast<object?>();
 #else
+#pragma warning disable IL3050 // Enum.GetValues is used for test data generation at discovery time, not in AOT scenarios
             var enumValues = Enum.GetValues(resolvedType)
                 .Cast<object?>();
+#pragma warning restore IL3050
 #endif
             if (isNullable)
             {

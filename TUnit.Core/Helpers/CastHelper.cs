@@ -11,6 +11,8 @@ namespace TUnit.Core.Helpers;
 public static class CastHelper
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.",
+        Justification = "Array.CreateInstance is used for test data generation at discovery time, not in AOT-compiled test execution.")]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(object? value)
     {
         if (value is null)
@@ -180,6 +182,8 @@ public static class CastHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.",
+        Justification = "Array.CreateInstance is used for test data generation at discovery time, not in AOT-compiled test execution.")]
     public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, object? value)
     {
         if (value is null)

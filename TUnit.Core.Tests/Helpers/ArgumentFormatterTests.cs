@@ -58,9 +58,39 @@ public class ArgumentFormatterTests
     public void FormatDefault_TupleWithNull_HandlesNullCorrectly()
     {
         var tuple = (1, null, "test");
-        
+
         var result = ArgumentFormatter.Format(tuple, []);
-        
+
         Assert.That(result, Is.EqualTo("(1, null, test)"));
+    }
+
+    [Test]
+    public void FormatDefault_StringWithDots_EscapesDotsWithMiddleDot()
+    {
+        var stringWithDots = "1.2.3";
+
+        var result = ArgumentFormatter.Format(stringWithDots, []);
+
+        Assert.That(result, Is.EqualTo("1·2·3"));
+    }
+
+    [Test]
+    public void FormatDefault_StringWithoutDots_ReturnsUnchanged()
+    {
+        var stringWithoutDots = "hello world";
+
+        var result = ArgumentFormatter.Format(stringWithoutDots, []);
+
+        Assert.That(result, Is.EqualTo("hello world"));
+    }
+
+    [Test]
+    public void FormatArguments_WithStringsContainingDots_EscapesDots()
+    {
+        var args = new object?[] { "hello", "with.dot", "1.2.3" };
+
+        var result = ArgumentFormatter.FormatArguments(args);
+
+        Assert.That(result, Is.EqualTo("hello, with·dot, 1·2·3"));
     }
 }
