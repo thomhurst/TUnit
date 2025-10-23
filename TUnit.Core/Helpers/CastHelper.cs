@@ -10,7 +10,6 @@ namespace TUnit.Core.Helpers;
 [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 public static class CastHelper
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(object? value)
     {
         if (value is null)
@@ -179,9 +178,6 @@ public static class CastHelper
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when AOT compiling.",
-        Justification = "Array.CreateInstance is used for test data generation at discovery time, not in AOT-compiled test execution.")]
     public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, object? value)
     {
         if (value is null)
@@ -212,35 +208,7 @@ public static class CastHelper
             && !value.GetType().IsArray  // Don't unwrap arrays
             && !typeof(IEnumerable).IsAssignableFrom(type))
         {
-            // Special handling for CustomAttributeTypedArgument collections in .NET Framework
-            var typeName = value.GetType().FullName;
-            if (typeName != null && typeName.Contains("CustomAttributeTypedArgument"))
-            {
-                // For ReadOnlyCollection<CustomAttributeTypedArgument>, we need to extract the actual values
-                var firstItem = enumerable.Cast<object>().FirstOrDefault();
-                if (firstItem != null)
-                {
-                    ThrowOnAot(value, underlyingType);
-                    // Use reflection to get the Value property
-                    var valueProperty = GetValuePropertySafe(firstItem.GetType());
-                    if (valueProperty != null)
-                    {
-                        value = valueProperty.GetValue(firstItem);
-                    }
-                    else
-                    {
-                        value = firstItem;
-                    }
-                }
-                else
-                {
-                    value = null;
-                }
-            }
-            else
-            {
-                value = enumerable.Cast<object>().ElementAtOrDefault(0);
-            }
+            value = enumerable.Cast<object>().ElementAtOrDefault(0);
         }
 
         if (underlyingType.IsEnum)
