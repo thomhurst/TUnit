@@ -1,0 +1,627 @@
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+
+namespace UnifiedTests;
+
+#if MSTEST
+[TestClass]
+#elif NUNIT
+[TestFixture]
+[Parallelizable(ParallelScope.All)]
+#endif
+public class MassiveParallelTests
+{
+    private static readonly ConcurrentBag<int> _executionRecords = new();
+    private static readonly ConcurrentDictionary<int, string> _threadData = new();
+
+#if TUNIT
+    [Test]
+    [Arguments(0)]
+    [Arguments(1)]
+    [Arguments(2)]
+    [Arguments(3)]
+    [Arguments(4)]
+    [Arguments(5)]
+    [Arguments(6)]
+    [Arguments(7)]
+    [Arguments(8)]
+    [Arguments(9)]
+    [Arguments(10)]
+    [Arguments(11)]
+    [Arguments(12)]
+    [Arguments(13)]
+    [Arguments(14)]
+    [Arguments(15)]
+    [Arguments(16)]
+    [Arguments(17)]
+    [Arguments(18)]
+    [Arguments(19)]
+    [Arguments(20)]
+    [Arguments(21)]
+    [Arguments(22)]
+    [Arguments(23)]
+    [Arguments(24)]
+    [Arguments(25)]
+    [Arguments(26)]
+    [Arguments(27)]
+    [Arguments(28)]
+    [Arguments(29)]
+    [Arguments(30)]
+    [Arguments(31)]
+    [Arguments(32)]
+    [Arguments(33)]
+    [Arguments(34)]
+    [Arguments(35)]
+    [Arguments(36)]
+    [Arguments(37)]
+    [Arguments(38)]
+    [Arguments(39)]
+    [Arguments(40)]
+    [Arguments(41)]
+    [Arguments(42)]
+    [Arguments(43)]
+    [Arguments(44)]
+    [Arguments(45)]
+    [Arguments(46)]
+    [Arguments(47)]
+    [Arguments(48)]
+    [Arguments(49)]
+    public async Task Parallel_CPUBound_Test(int taskId)
+#elif XUNIT || XUNIT3
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(7)]
+    [InlineData(8)]
+    [InlineData(9)]
+    [InlineData(10)]
+    [InlineData(11)]
+    [InlineData(12)]
+    [InlineData(13)]
+    [InlineData(14)]
+    [InlineData(15)]
+    [InlineData(16)]
+    [InlineData(17)]
+    [InlineData(18)]
+    [InlineData(19)]
+    [InlineData(20)]
+    [InlineData(21)]
+    [InlineData(22)]
+    [InlineData(23)]
+    [InlineData(24)]
+    [InlineData(25)]
+    [InlineData(26)]
+    [InlineData(27)]
+    [InlineData(28)]
+    [InlineData(29)]
+    [InlineData(30)]
+    [InlineData(31)]
+    [InlineData(32)]
+    [InlineData(33)]
+    [InlineData(34)]
+    [InlineData(35)]
+    [InlineData(36)]
+    [InlineData(37)]
+    [InlineData(38)]
+    [InlineData(39)]
+    [InlineData(40)]
+    [InlineData(41)]
+    [InlineData(42)]
+    [InlineData(43)]
+    [InlineData(44)]
+    [InlineData(45)]
+    [InlineData(46)]
+    [InlineData(47)]
+    [InlineData(48)]
+    [InlineData(49)]
+    public void Parallel_CPUBound_Test(int taskId)
+#elif NUNIT
+    [TestCase(0)]
+    [TestCase(1)]
+    [TestCase(2)]
+    [TestCase(3)]
+    [TestCase(4)]
+    [TestCase(5)]
+    [TestCase(6)]
+    [TestCase(7)]
+    [TestCase(8)]
+    [TestCase(9)]
+    [TestCase(10)]
+    [TestCase(11)]
+    [TestCase(12)]
+    [TestCase(13)]
+    [TestCase(14)]
+    [TestCase(15)]
+    [TestCase(16)]
+    [TestCase(17)]
+    [TestCase(18)]
+    [TestCase(19)]
+    [TestCase(20)]
+    [TestCase(21)]
+    [TestCase(22)]
+    [TestCase(23)]
+    [TestCase(24)]
+    [TestCase(25)]
+    [TestCase(26)]
+    [TestCase(27)]
+    [TestCase(28)]
+    [TestCase(29)]
+    [TestCase(30)]
+    [TestCase(31)]
+    [TestCase(32)]
+    [TestCase(33)]
+    [TestCase(34)]
+    [TestCase(35)]
+    [TestCase(36)]
+    [TestCase(37)]
+    [TestCase(38)]
+    [TestCase(39)]
+    [TestCase(40)]
+    [TestCase(41)]
+    [TestCase(42)]
+    [TestCase(43)]
+    [TestCase(44)]
+    [TestCase(45)]
+    [TestCase(46)]
+    [TestCase(47)]
+    [TestCase(48)]
+    [TestCase(49)]
+    public void Parallel_CPUBound_Test(int taskId)
+#elif MSTEST
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(1)]
+    [DataRow(2)]
+    [DataRow(3)]
+    [DataRow(4)]
+    [DataRow(5)]
+    [DataRow(6)]
+    [DataRow(7)]
+    [DataRow(8)]
+    [DataRow(9)]
+    [DataRow(10)]
+    [DataRow(11)]
+    [DataRow(12)]
+    [DataRow(13)]
+    [DataRow(14)]
+    [DataRow(15)]
+    [DataRow(16)]
+    [DataRow(17)]
+    [DataRow(18)]
+    [DataRow(19)]
+    [DataRow(20)]
+    [DataRow(21)]
+    [DataRow(22)]
+    [DataRow(23)]
+    [DataRow(24)]
+    [DataRow(25)]
+    [DataRow(26)]
+    [DataRow(27)]
+    [DataRow(28)]
+    [DataRow(29)]
+    [DataRow(30)]
+    [DataRow(31)]
+    [DataRow(32)]
+    [DataRow(33)]
+    [DataRow(34)]
+    [DataRow(35)]
+    [DataRow(36)]
+    [DataRow(37)]
+    [DataRow(38)]
+    [DataRow(39)]
+    [DataRow(40)]
+    [DataRow(41)]
+    [DataRow(42)]
+    [DataRow(43)]
+    [DataRow(44)]
+    [DataRow(45)]
+    [DataRow(46)]
+    [DataRow(47)]
+    [DataRow(48)]
+    [DataRow(49)]
+    public void Parallel_CPUBound_Test(int taskId)
+#endif
+    {
+        // Simulate CPU-intensive work
+        var result = PerformCPUWork(taskId);
+        _executionRecords.Add(taskId);
+        _threadData[Thread.CurrentThread.ManagedThreadId] = $"Task_{taskId}";
+
+#if TUNIT
+        await Assert.That(result).IsGreaterThan(0);
+        await Assert.That(result).IsEqualTo(CalculateExpectedResult(taskId));
+#elif XUNIT || XUNIT3
+        Assert.True(result > 0);
+        Assert.Equal(CalculateExpectedResult(taskId), result);
+#elif NUNIT
+        Assert.That(result, Is.GreaterThan(0));
+        Assert.That(result, Is.EqualTo(CalculateExpectedResult(taskId)));
+#elif MSTEST
+        Assert.IsTrue(result > 0);
+        Assert.AreEqual(CalculateExpectedResult(taskId), result);
+#endif
+    }
+
+#if TUNIT
+    [Test]
+    [Arguments(0)]
+    [Arguments(1)]
+    [Arguments(2)]
+    [Arguments(3)]
+    [Arguments(4)]
+    [Arguments(5)]
+    [Arguments(6)]
+    [Arguments(7)]
+    [Arguments(8)]
+    [Arguments(9)]
+    [Arguments(10)]
+    [Arguments(11)]
+    [Arguments(12)]
+    [Arguments(13)]
+    [Arguments(14)]
+    [Arguments(15)]
+    [Arguments(16)]
+    [Arguments(17)]
+    [Arguments(18)]
+    [Arguments(19)]
+    [Arguments(20)]
+    [Arguments(21)]
+    [Arguments(22)]
+    [Arguments(23)]
+    [Arguments(24)]
+    [Arguments(25)]
+    [Arguments(26)]
+    [Arguments(27)]
+    [Arguments(28)]
+    [Arguments(29)]
+    [Arguments(30)]
+    [Arguments(31)]
+    [Arguments(32)]
+    [Arguments(33)]
+    [Arguments(34)]
+    [Arguments(35)]
+    [Arguments(36)]
+    [Arguments(37)]
+    [Arguments(38)]
+    [Arguments(39)]
+    [Arguments(40)]
+    [Arguments(41)]
+    [Arguments(42)]
+    [Arguments(43)]
+    [Arguments(44)]
+    [Arguments(45)]
+    [Arguments(46)]
+    [Arguments(47)]
+    [Arguments(48)]
+    [Arguments(49)]
+    public async Task Parallel_IOBound_Test(int taskId)
+#elif XUNIT || XUNIT3
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(7)]
+    [InlineData(8)]
+    [InlineData(9)]
+    [InlineData(10)]
+    [InlineData(11)]
+    [InlineData(12)]
+    [InlineData(13)]
+    [InlineData(14)]
+    [InlineData(15)]
+    [InlineData(16)]
+    [InlineData(17)]
+    [InlineData(18)]
+    [InlineData(19)]
+    [InlineData(20)]
+    [InlineData(21)]
+    [InlineData(22)]
+    [InlineData(23)]
+    [InlineData(24)]
+    [InlineData(25)]
+    [InlineData(26)]
+    [InlineData(27)]
+    [InlineData(28)]
+    [InlineData(29)]
+    [InlineData(30)]
+    [InlineData(31)]
+    [InlineData(32)]
+    [InlineData(33)]
+    [InlineData(34)]
+    [InlineData(35)]
+    [InlineData(36)]
+    [InlineData(37)]
+    [InlineData(38)]
+    [InlineData(39)]
+    [InlineData(40)]
+    [InlineData(41)]
+    [InlineData(42)]
+    [InlineData(43)]
+    [InlineData(44)]
+    [InlineData(45)]
+    [InlineData(46)]
+    [InlineData(47)]
+    [InlineData(48)]
+    [InlineData(49)]
+    public async Task Parallel_IOBound_Test(int taskId)
+#elif NUNIT
+    [TestCase(0)]
+    [TestCase(1)]
+    [TestCase(2)]
+    [TestCase(3)]
+    [TestCase(4)]
+    [TestCase(5)]
+    [TestCase(6)]
+    [TestCase(7)]
+    [TestCase(8)]
+    [TestCase(9)]
+    [TestCase(10)]
+    [TestCase(11)]
+    [TestCase(12)]
+    [TestCase(13)]
+    [TestCase(14)]
+    [TestCase(15)]
+    [TestCase(16)]
+    [TestCase(17)]
+    [TestCase(18)]
+    [TestCase(19)]
+    [TestCase(20)]
+    [TestCase(21)]
+    [TestCase(22)]
+    [TestCase(23)]
+    [TestCase(24)]
+    [TestCase(25)]
+    [TestCase(26)]
+    [TestCase(27)]
+    [TestCase(28)]
+    [TestCase(29)]
+    [TestCase(30)]
+    [TestCase(31)]
+    [TestCase(32)]
+    [TestCase(33)]
+    [TestCase(34)]
+    [TestCase(35)]
+    [TestCase(36)]
+    [TestCase(37)]
+    [TestCase(38)]
+    [TestCase(39)]
+    [TestCase(40)]
+    [TestCase(41)]
+    [TestCase(42)]
+    [TestCase(43)]
+    [TestCase(44)]
+    [TestCase(45)]
+    [TestCase(46)]
+    [TestCase(47)]
+    [TestCase(48)]
+    [TestCase(49)]
+    public async Task Parallel_IOBound_Test(int taskId)
+#elif MSTEST
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(1)]
+    [DataRow(2)]
+    [DataRow(3)]
+    [DataRow(4)]
+    [DataRow(5)]
+    [DataRow(6)]
+    [DataRow(7)]
+    [DataRow(8)]
+    [DataRow(9)]
+    [DataRow(10)]
+    [DataRow(11)]
+    [DataRow(12)]
+    [DataRow(13)]
+    [DataRow(14)]
+    [DataRow(15)]
+    [DataRow(16)]
+    [DataRow(17)]
+    [DataRow(18)]
+    [DataRow(19)]
+    [DataRow(20)]
+    [DataRow(21)]
+    [DataRow(22)]
+    [DataRow(23)]
+    [DataRow(24)]
+    [DataRow(25)]
+    [DataRow(26)]
+    [DataRow(27)]
+    [DataRow(28)]
+    [DataRow(29)]
+    [DataRow(30)]
+    [DataRow(31)]
+    [DataRow(32)]
+    [DataRow(33)]
+    [DataRow(34)]
+    [DataRow(35)]
+    [DataRow(36)]
+    [DataRow(37)]
+    [DataRow(38)]
+    [DataRow(39)]
+    [DataRow(40)]
+    [DataRow(41)]
+    [DataRow(42)]
+    [DataRow(43)]
+    [DataRow(44)]
+    [DataRow(45)]
+    [DataRow(46)]
+    [DataRow(47)]
+    [DataRow(48)]
+    [DataRow(49)]
+    public async Task Parallel_IOBound_Test(int taskId)
+#endif
+    {
+        // Simulate I/O-bound work
+        await Task.Delay(1); // Minimal delay to keep benchmarks fast
+        var result = await PerformIOWorkAsync(taskId);
+        _executionRecords.Add(taskId + 100);
+
+#if TUNIT
+        await Assert.That(result).IsNotEmpty();
+        await Assert.That(result).Contains($"Task_{taskId}");
+#elif XUNIT || XUNIT3
+        Assert.NotEmpty(result);
+        Assert.Contains($"Task_{taskId}", result);
+#elif NUNIT
+        Assert.That(result, Is.Not.Empty);
+        Assert.That(result, Does.Contain($"Task_{taskId}"));
+#elif MSTEST
+        Assert.IsTrue(!string.IsNullOrEmpty(result));
+        Assert.IsTrue(result.Contains($"Task_{taskId}"));
+#endif
+    }
+
+#if TUNIT
+    [Test]
+    [Arguments(0, 100)]
+    [Arguments(1, 101)]
+    [Arguments(2, 102)]
+    [Arguments(3, 103)]
+    [Arguments(4, 104)]
+    [Arguments(5, 105)]
+    [Arguments(6, 106)]
+    [Arguments(7, 107)]
+    [Arguments(8, 108)]
+    [Arguments(9, 109)]
+    [Arguments(10, 110)]
+    [Arguments(11, 111)]
+    [Arguments(12, 112)]
+    [Arguments(13, 113)]
+    [Arguments(14, 114)]
+    [Arguments(15, 115)]
+    [Arguments(16, 116)]
+    [Arguments(17, 117)]
+    [Arguments(18, 118)]
+    [Arguments(19, 119)]
+    public async Task Parallel_Mixed_Test(int cpuValue, int ioValue)
+#elif XUNIT || XUNIT3
+    [Theory]
+    [InlineData(0, 100)]
+    [InlineData(1, 101)]
+    [InlineData(2, 102)]
+    [InlineData(3, 103)]
+    [InlineData(4, 104)]
+    [InlineData(5, 105)]
+    [InlineData(6, 106)]
+    [InlineData(7, 107)]
+    [InlineData(8, 108)]
+    [InlineData(9, 109)]
+    [InlineData(10, 110)]
+    [InlineData(11, 111)]
+    [InlineData(12, 112)]
+    [InlineData(13, 113)]
+    [InlineData(14, 114)]
+    [InlineData(15, 115)]
+    [InlineData(16, 116)]
+    [InlineData(17, 117)]
+    [InlineData(18, 118)]
+    [InlineData(19, 119)]
+    public async Task Parallel_Mixed_Test(int cpuValue, int ioValue)
+#elif NUNIT
+    [TestCase(0, 100)]
+    [TestCase(1, 101)]
+    [TestCase(2, 102)]
+    [TestCase(3, 103)]
+    [TestCase(4, 104)]
+    [TestCase(5, 105)]
+    [TestCase(6, 106)]
+    [TestCase(7, 107)]
+    [TestCase(8, 108)]
+    [TestCase(9, 109)]
+    [TestCase(10, 110)]
+    [TestCase(11, 111)]
+    [TestCase(12, 112)]
+    [TestCase(13, 113)]
+    [TestCase(14, 114)]
+    [TestCase(15, 115)]
+    [TestCase(16, 116)]
+    [TestCase(17, 117)]
+    [TestCase(18, 118)]
+    [TestCase(19, 119)]
+    public async Task Parallel_Mixed_Test(int cpuValue, int ioValue)
+#elif MSTEST
+    [TestMethod]
+    [DataRow(0, 100)]
+    [DataRow(1, 101)]
+    [DataRow(2, 102)]
+    [DataRow(3, 103)]
+    [DataRow(4, 104)]
+    [DataRow(5, 105)]
+    [DataRow(6, 106)]
+    [DataRow(7, 107)]
+    [DataRow(8, 108)]
+    [DataRow(9, 109)]
+    [DataRow(10, 110)]
+    [DataRow(11, 111)]
+    [DataRow(12, 112)]
+    [DataRow(13, 113)]
+    [DataRow(14, 114)]
+    [DataRow(15, 115)]
+    [DataRow(16, 116)]
+    [DataRow(17, 117)]
+    [DataRow(18, 118)]
+    [DataRow(19, 119)]
+    public async Task Parallel_Mixed_Test(int cpuValue, int ioValue)
+#endif
+    {
+        // Mix of CPU and I/O work
+        var cpuResult = PerformCPUWork(cpuValue);
+        await Task.Yield();
+        var ioResult = await PerformIOWorkAsync(ioValue);
+        var combined = $"{cpuResult}_{ioResult}";
+
+#if TUNIT
+        await Assert.That(cpuResult).IsGreaterThan(0);
+        await Assert.That(ioResult).IsNotEmpty();
+        await Assert.That(combined).Contains("_");
+#elif XUNIT || XUNIT3
+        Assert.True(cpuResult > 0);
+        Assert.NotEmpty(ioResult);
+        Assert.Contains("_", combined);
+#elif NUNIT
+        Assert.That(cpuResult, Is.GreaterThan(0));
+        Assert.That(ioResult, Is.Not.Empty);
+        Assert.That(combined, Does.Contain("_"));
+#elif MSTEST
+        Assert.IsTrue(cpuResult > 0);
+        Assert.IsTrue(!string.IsNullOrEmpty(ioResult));
+        Assert.IsTrue(combined.Contains("_"));
+#endif
+    }
+
+    private int PerformCPUWork(int taskId)
+    {
+        // Simulate CPU work with calculations
+        var sum = 0;
+        for (var i = 1; i <= 100; i++)
+        {
+            sum += (i * taskId) % 1000;
+        }
+        return sum;
+    }
+
+    private int CalculateExpectedResult(int taskId)
+    {
+        var sum = 0;
+        for (var i = 1; i <= 100; i++)
+        {
+            sum += (i * taskId) % 1000;
+        }
+        return sum;
+    }
+
+    private async Task<string> PerformIOWorkAsync(int taskId)
+    {
+        await Task.Yield();
+        return $"Task_{taskId}_Result_{Guid.NewGuid().ToString()[..8]}";
+    }
+}
