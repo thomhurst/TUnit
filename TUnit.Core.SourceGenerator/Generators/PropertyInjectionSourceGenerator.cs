@@ -238,7 +238,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         {
             if (propInfo.Property.SetMethod?.IsInitOnly == true)
             {
-                var propertyType = propInfo.Property.Type.ToDisplayString();
+                var propertyType = GetNonNullableTypeName(propInfo.Property.Type);
                 var backingFieldName = $"<{propInfo.Property.Name}>k__BackingField";
 
                 // Use the property's containing type for the UnsafeAccessor, not the derived class
@@ -276,7 +276,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static void GeneratePropertyMetadata(StringBuilder sb, PropertyWithDataSourceAttribute propInfo, INamedTypeSymbol classSymbol, string classTypeName)
     {
         var propertyName = propInfo.Property.Name;
-        var propertyType = propInfo.Property.Type.ToDisplayString();
+        var propertyType = GetNonNullableTypeName(propInfo.Property.Type);
         var propertyTypeForTypeof = GetNonNullableTypeString(propInfo.Property.Type);
         var attributeTypeName = propInfo.DataSourceAttribute.AttributeClass!.ToDisplayString();
         var attributeClass = propInfo.DataSourceAttribute.AttributeClass!;
@@ -339,7 +339,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
             sb.AppendLine("#if NET8_0_OR_GREATER");
             // Cast to the property's containing type if needed
-            var containingType = propInfo.Property.ContainingType.ToDisplayString();
+            var containingType = GetNonNullableTypeName(propInfo.Property.ContainingType);
             if (containingType != classTypeName)
             {
                 sb.AppendLine($"                Get{propInfo.Property.Name}BackingField(({containingType}){instanceVariableName}) = {castExpression};");
@@ -349,14 +349,14 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
                 sb.AppendLine($"                Get{propInfo.Property.Name}BackingField({instanceVariableName}) = {castExpression};");
             }
             sb.AppendLine("#else");
-            sb.AppendLine($"                var backingField = typeof({propInfo.Property.ContainingType.ToDisplayString()}).GetField(\"<{propInfo.Property.Name}>k__BackingField\",");
+            sb.AppendLine($"                var backingField = typeof({GetNonNullableTypeName(propInfo.Property.ContainingType)}).GetField(\"<{propInfo.Property.Name}>k__BackingField\",");
             sb.AppendLine("                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
             sb.AppendLine($"                backingField.SetValue({instanceVariableName}, value);");
             sb.AppendLine("#endif");
         }
         else if (propInfo.Property.IsStatic)
         {
-            var className = propInfo.Property.ContainingType.ToDisplayString();
+            var className = GetNonNullableTypeName(propInfo.Property.ContainingType);
             var castExpression = GetPropertyCastExpression(propInfo.Property, propertyType);
             sb.AppendLine($"                {className}.{propInfo.Property.Name} = {castExpression};");
         }
@@ -428,16 +428,16 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         {
             if (typeSymbol is INamedTypeSymbol { IsReferenceType: true })
             {
-                return typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString();
+                return typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated).GloballyQualified();
             }
         }
 
         if (typeSymbol is INamedTypeSymbol { IsGenericType: true, ConstructedFrom.SpecialType: SpecialType.System_Nullable_T } namedType)
         {
-            return namedType.TypeArguments[0].ToDisplayString();
+            return namedType.TypeArguments[0].GloballyQualified();
         }
 
-        var displayString = typeSymbol.ToDisplayString();
+        var displayString = typeSymbol.GloballyQualified();
 
         if (displayString.EndsWith("?"))
         {
@@ -446,6 +446,9 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         return displayString;
     }
+
+    // Alias for consistency
+    private static string GetNonNullableTypeName(ITypeSymbol typeSymbol) => GetNonNullableTypeString(typeSymbol);
 }
 
 internal sealed class ClassWithDataSourceProperties
