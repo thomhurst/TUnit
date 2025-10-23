@@ -9,7 +9,7 @@ namespace TUnit.Engine.Framework;
 internal interface IRequestHandler
 {
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Generic test instantiation requires MakeGenericType")]
     #endif
     Task HandleRequestAsync(TestExecutionRequest request, TUnitServiceProvider serviceProvider, ExecuteRequestContext context, ITestExecutionFilter? testExecutionFilter);
 }

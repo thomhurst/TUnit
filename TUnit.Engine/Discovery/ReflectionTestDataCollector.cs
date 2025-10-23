@@ -56,7 +56,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
-    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    [RequiresUnreferencedCode("Generic test instantiation requires MakeGenericType")]
     #endif
     private async Task<List<TestMetadata>> ProcessAssemblyAsync(Assembly assembly, SemaphoreSlim semaphore)
     {
@@ -87,7 +87,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
-    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    [RequiresUnreferencedCode("Generic test instantiation requires MakeGenericType")]
     #endif
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
@@ -146,7 +146,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Reflection-based test discovery requires dynamic access to types, methods, and attributes")]
-    [RequiresDynamicCode("Test discovery uses MakeGenericType and dynamic code generation")]
+    [RequiresUnreferencedCode("Test discovery uses MakeGenericType and dynamic code generation")]
     #endif
     public async IAsyncEnumerable<TestMetadata> CollectTestsStreamingAsync(
         string testSessionId,
@@ -342,7 +342,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
-    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    [RequiresUnreferencedCode("Generic test instantiation requires MakeGenericType")]
     #endif
     private static async Task<List<TestMetadata>> DiscoverTestsInAssembly(Assembly assembly)
     {
@@ -444,7 +444,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Assembly scanning uses dynamic type discovery and reflection")]
-    [RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    [RequiresUnreferencedCode("Generic test instantiation requires MakeGenericType")]
     #endif
     private static async IAsyncEnumerable<TestMetadata> DiscoverTestsInAssemblyStreamingAsync(
         Assembly assembly,
@@ -587,7 +587,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Generic type resolution requires reflection and dynamic type creation")]
-    [RequiresDynamicCode("Generic type instantiation uses MakeGenericType")]
+    [RequiresUnreferencedCode("Generic type instantiation uses MakeGenericType")]
     #endif
     private static async Task<List<TestMetadata>> DiscoverGenericTests(Type genericTypeDefinition)
     {
@@ -680,7 +680,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Generic type resolution requires reflection and dynamic type creation")]
-    [RequiresDynamicCode("Generic type instantiation uses MakeGenericType")]
+    [RequiresUnreferencedCode("Generic type instantiation uses MakeGenericType")]
     #endif
     private static async IAsyncEnumerable<TestMetadata> DiscoverGenericTestsStreamingAsync(
         Type genericTypeDefinition,
@@ -964,7 +964,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Instance creation uses reflection and Activator.CreateInstance")]
-    [RequiresDynamicCode("Generic type instantiation uses MakeGenericType and Activator")]
+    [RequiresUnreferencedCode("Generic type instantiation uses MakeGenericType and Activator")]
     #endif
     private static Func<Type[], object?[], object> CreateInstanceFactory([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClass)
     {
@@ -1027,7 +1027,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Test invocation uses reflection and MethodInfo.Invoke")]
-    [RequiresDynamicCode("Generic method instantiation uses MakeGenericMethod")]
+    [RequiresUnreferencedCode("Generic method instantiation uses MakeGenericMethod")]
     #endif
     private static Func<object, object?[], Task> CreateTestInvoker(Type testClass, MethodInfo testMethod)
     {
@@ -1243,7 +1243,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// </summary>
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Reflection-based factory uses ConstructorInfo.Invoke")]
-    [RequiresDynamicCode("Dynamic constructor invocation may require runtime code generation")]
+    [RequiresUnreferencedCode("Dynamic constructor invocation may require runtime code generation")]
     #endif
     private static Func<object?[], object> CreateReflectionInstanceFactory(ConstructorInfo ctor)
     {
@@ -1696,7 +1696,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test discovery uses reflection to scan assemblies and types")]
-    [RequiresDynamicCode("Dynamic test builders may use expression compilation")]
+    [RequiresUnreferencedCode("Dynamic test builders may use expression compilation")]
     #endif
     private async Task<List<TestMetadata>> DiscoverDynamicTests(string testSessionId)
     {
@@ -1789,7 +1789,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test discovery uses reflection to scan assemblies and types")]
-    [RequiresDynamicCode("Dynamic test builders may use expression compilation")]
+    [RequiresUnreferencedCode("Dynamic test builders may use expression compilation")]
     #endif
     private async IAsyncEnumerable<TestMetadata> DiscoverDynamicTestsStreamingAsync(
         string testSessionId,
@@ -1854,7 +1854,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test builder execution uses Activator.CreateInstance and MethodInfo.Invoke")]
-    [RequiresDynamicCode("Expression compilation is used for dynamic tests")]
+    [RequiresUnreferencedCode("Expression compilation is used for dynamic tests")]
     #endif
     private async Task<List<TestMetadata>> ExecuteDynamicTestBuilder(Type testClass, MethodInfo builderMethod, string testSessionId)
     {
@@ -1889,7 +1889,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
-    [RequiresDynamicCode("Expression compilation is used for dynamic test invocation")]
+    [RequiresUnreferencedCode("Expression compilation is used for dynamic test invocation")]
     #endif
     private async Task<List<TestMetadata>> ConvertDynamicTestToMetadata(AbstractDynamicTest abstractDynamicTest)
     {
@@ -1909,7 +1909,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test builder execution uses Activator.CreateInstance and MethodInfo.Invoke")]
-    [RequiresDynamicCode("Expression compilation is used for dynamic tests")]
+    [RequiresUnreferencedCode("Expression compilation is used for dynamic tests")]
     #endif
     private async IAsyncEnumerable<TestMetadata> ExecuteDynamicTestBuilderStreamingAsync(
         Type testClass, MethodInfo builderMethod, string testSessionId,
@@ -1994,7 +1994,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
-    [RequiresDynamicCode("Expression compilation is used for dynamic test invocation")]
+    [RequiresUnreferencedCode("Expression compilation is used for dynamic test invocation")]
     #endif
     private Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
     {
@@ -2048,7 +2048,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic instance factory uses Activator.CreateInstance")]
-    [RequiresDynamicCode("Generic type construction uses MakeGenericType")]
+    [RequiresUnreferencedCode("Generic type construction uses MakeGenericType")]
     #endif
     private static Func<Type[], object?[], object> CreateDynamicInstanceFactory(Type testClass, object?[]? predefinedClassArgs)
     {
@@ -2078,7 +2078,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test invoker uses expression compilation and reflection")]
-    [RequiresDynamicCode("LambdaExpression.Compile requires dynamic code generation")]
+    [RequiresUnreferencedCode("LambdaExpression.Compile requires dynamic code generation")]
     #endif
     private static Func<object, object?[], Task> CreateDynamicTestInvoker(DynamicDiscoveryResult result)
     {

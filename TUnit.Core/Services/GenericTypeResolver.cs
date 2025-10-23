@@ -9,8 +9,7 @@ namespace TUnit.Core.Services;
 /// Implementation of generic type resolution for test methods and classes
 /// </summary>
 #if NET6_0_OR_GREATER
-[RequiresDynamicCode("Generic type resolution requires runtime type generation")]
-[RequiresUnreferencedCode("Generic type resolution may access types not preserved by trimming")]
+[RequiresUnreferencedCode("Generic type resolution requires runtime type generation")]
 #endif
 public class GenericTypeResolver : IGenericTypeResolver
 {

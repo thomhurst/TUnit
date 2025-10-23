@@ -9,7 +9,7 @@ namespace TUnit.Engine.Discovery;
 /// </summary>
 #if NET6_0_OR_GREATER
 [RequiresUnreferencedCode("Hook discovery uses reflection to scan assemblies and types")]
-[RequiresDynamicCode("Hook delegate creation requires dynamic code generation")]
+[RequiresUnreferencedCode("Hook delegate creation requires dynamic code generation")]
 #endif
 internal sealed class ReflectionBasedHookDiscoveryService : IHookDiscoveryService
 {

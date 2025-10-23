@@ -6,12 +6,12 @@ using TUnit.Core.Converters;
 
 namespace TUnit.Core.Helpers;
 
-[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
+[UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when AOT compiling.")]
 [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
 public static class CastHelper
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.",
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when AOT compiling.",
         Justification = "Array.CreateInstance is used for test data generation at discovery time, not in AOT-compiled test execution.")]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(object? value)
     {
@@ -182,7 +182,7 @@ public static class CastHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.",
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresUnreferencedCodeAttribute' may break functionality when AOT compiling.",
         Justification = "Array.CreateInstance is used for test data generation at discovery time, not in AOT-compiled test execution.")]
     public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type, object? value)
     {

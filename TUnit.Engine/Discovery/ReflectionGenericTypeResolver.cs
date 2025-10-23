@@ -182,7 +182,7 @@ internal static class ReflectionGenericTypeResolver
     /// </summary>
 #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Concrete type creation uses Type.GetGenericArguments and reflection")]
-    [RequiresDynamicCode("Type construction uses MakeGenericType")]
+    [RequiresUnreferencedCode("Type construction uses MakeGenericType")]
 #endif
     public static Type CreateConcreteType(Type genericTypeDefinition, Type[] typeArguments)
     {

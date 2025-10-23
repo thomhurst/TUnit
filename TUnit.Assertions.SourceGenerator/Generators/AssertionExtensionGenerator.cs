@@ -92,13 +92,13 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             return null;
         }
 
-        // Check for RequiresDynamicCode attribute
-        var requiresDynamicCodeAttr = classSymbol.GetAttributes()
-            .FirstOrDefault(attr => attr.AttributeClass?.Name == "RequiresDynamicCodeAttribute");
-        string? requiresDynamicCodeMessage = null;
-        if (requiresDynamicCodeAttr != null && requiresDynamicCodeAttr.ConstructorArguments.Length > 0)
+        // Check for RequiresUnreferencedCode attribute
+        var RequiresUnreferencedCodeAttr = classSymbol.GetAttributes()
+            .FirstOrDefault(attr => attr.AttributeClass?.Name == "RequiresUnreferencedCodeAttribute");
+        string? RequiresUnreferencedCodeMessage = null;
+        if (RequiresUnreferencedCodeAttr != null && RequiresUnreferencedCodeAttr.ConstructorArguments.Length > 0)
         {
-            requiresDynamicCodeMessage = requiresDynamicCodeAttr.ConstructorArguments[0].Value?.ToString();
+            RequiresUnreferencedCodeMessage = RequiresUnreferencedCodeAttr.ConstructorArguments[0].Value?.ToString();
         }
 
         return new AssertionExtensionData(
@@ -108,7 +108,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             assertionBaseType,
             constructors,
             overloadPriority,
-            requiresDynamicCodeMessage
+            RequiresUnreferencedCodeMessage
         );
     }
 
@@ -153,7 +153,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 
         sourceBuilder.AppendLine($"namespace TUnit.Assertions.Extensions;");
         sourceBuilder.AppendLine();
-    
+
         // Extension class
         var extensionClassName = $"{data.ClassSymbol.Name}Extensions";
         sourceBuilder.AppendLine($"/// <summary>");
@@ -309,11 +309,11 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine($"    /// Extension method for {assertionType.Name}.");
         sourceBuilder.AppendLine("    /// </summary>");
 
-        // Add RequiresDynamicCode attribute if present
-        if (!string.IsNullOrEmpty(data.RequiresDynamicCodeMessage))
+        // Add RequiresUnreferencedCode attribute if present
+        if (!string.IsNullOrEmpty(data.RequiresUnreferencedCodeMessage))
         {
-            var escapedMessage = data.RequiresDynamicCodeMessage!.Replace("\"", "\\\"");
-            sourceBuilder.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresDynamicCode(\"{escapedMessage}\")]");
+            var escapedMessage = data.RequiresUnreferencedCodeMessage!.Replace("\"", "\\\"");
+            sourceBuilder.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{escapedMessage}\")]");
         }
 
         // Add OverloadResolutionPriority attribute only if priority > 0
@@ -454,6 +454,6 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         INamedTypeSymbol AssertionBaseType,
         ImmutableArray<IMethodSymbol> Constructors,
         int OverloadResolutionPriority,
-        string? RequiresDynamicCodeMessage
+        string? RequiresUnreferencedCodeMessage
     );
 }

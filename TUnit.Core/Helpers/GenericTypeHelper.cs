@@ -17,8 +17,9 @@ public static class GenericTypeHelper
     /// <exception cref="ArgumentNullException">Thrown when genericTypeDefinition is null</exception>
     /// <exception cref="ArgumentException">Thrown when type arguments don't match the generic type definition</exception>
     #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("MakeGenericType requires runtime code generation")]
     [RequiresDynamicCode("MakeGenericType requires runtime code generation")]
-    #endif
+#endif
     public static Type MakeGenericTypeSafe(Type genericTypeDefinition, params Type[] typeArguments)
     {
         if (genericTypeDefinition == null)
@@ -50,12 +51,7 @@ public static class GenericTypeHelper
         // The AOT analyzer will warn about incompatibility at compile time
         try
         {
-            // Reflection mode - use MakeGenericType directly
-            // Method is already annotated with RequiresDynamicCode, suppressing IL2055
-            [UnconditionalSuppressMessage("Trimming", "IL2055:MakeGenericType", Justification = "Method is already properly annotated with RequiresDynamicCode to indicate AOT incompatibility")]
-            static Type MakeGenericTypeUnsafe(Type genericType, Type[] args) => genericType.MakeGenericType(args);
-
-            return MakeGenericTypeUnsafe(genericTypeDefinition, typeArguments);
+            return genericTypeDefinition.MakeGenericType(typeArguments);
         }
         catch (ArgumentException ex)
         {

@@ -49,7 +49,7 @@ internal sealed class TestDiscoveryService : IDataProducer
     }
 
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Generic test instantiation requires MakeGenericType")]
     #endif
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken, bool isForExecution)
     {
@@ -163,7 +163,7 @@ internal sealed class TestDiscoveryService : IDataProducer
     /// Simplified streaming test discovery without channels - matches source generation approach
     /// </summary>
     #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Generic test instantiation requires MakeGenericType")]
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Generic test instantiation requires MakeGenericType")]
     #endif
     public async IAsyncEnumerable<AbstractExecutableTest> DiscoverTestsFullyStreamingAsync(
         string testSessionId,

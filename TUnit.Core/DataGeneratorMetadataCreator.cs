@@ -23,7 +23,7 @@ internal static class DataGeneratorMetadataCreator
         if (generatorType == DataGeneratorType.TestParameters && parametersToGenerate.Length > 0)
         {
             var lastParam = parametersToGenerate[parametersToGenerate.Length - 1];
-            if (lastParam.Type == typeof(System.Threading.CancellationToken))
+            if (lastParam.Type == typeof(CancellationToken))
             {
                 var newArray = new ParameterMetadata[parametersToGenerate.Length - 1];
                 Array.Copy(parametersToGenerate, 0, newArray, 0, parametersToGenerate.Length - 1);
@@ -201,9 +201,6 @@ internal static class DataGeneratorMetadataCreator
     /// <summary>
     /// Creates DataGeneratorMetadata for property injection using PropertyInfo (reflection mode).
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Property types are resolved through reflection")]
-    #endif
     public static DataGeneratorMetadata CreateForPropertyInjection(
         PropertyInfo property,
         Type containingType,
@@ -240,7 +237,7 @@ internal static class DataGeneratorMetadataCreator
         if (parameters.Length > 0)
         {
             var lastParam = parameters[parameters.Length - 1];
-            if (lastParam.Type == typeof(System.Threading.CancellationToken))
+            if (lastParam.Type == typeof(CancellationToken))
             {
                 var newArray = new ParameterMetadata[parameters.Length - 1];
                 Array.Copy(parameters, 0, newArray, 0, parameters.Length - 1);

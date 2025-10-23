@@ -5,14 +5,8 @@ using TUnit.Core.Extensions;
 namespace TUnit.Core;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-#if NET6_0_OR_GREATER
-[RequiresUnreferencedCode("MatrixDataSource uses reflection to access parameter attributes and test metadata. For AOT compatibility, consider using explicit data sources.")]
-#endif
 public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttribute, IAccessesInstanceData
 {
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Matrix generation requires reflection")]
-    #endif
     protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var parameterInformation = dataGeneratorMetadata
@@ -93,9 +87,6 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
             .ToArray();
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Test parameter types accessed through reflection")]
-    #endif
     private IReadOnlyList<object?> GetAllArguments(DataGeneratorMetadata dataGeneratorMetadata,
         ParameterMetadata sourceGeneratedParameterInformation)
     {
@@ -169,8 +160,12 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
 
         if (resolvedType.IsEnum)
         {
+#if NET5_0_OR_GREATER
             var enumValues = Enum.GetValuesAsUnderlyingType(resolvedType)
                                  .Cast<object?>();
+#else
+            var enumValues = Enum.GetValues(resolvedType).Cast<object?>();
+#endif
 
             if (isNullable)
             {

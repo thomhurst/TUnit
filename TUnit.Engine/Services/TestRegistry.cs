@@ -31,7 +31,7 @@ internal sealed class TestRegistry : ITestRegistry
         _sessionId = sessionId;
         _sessionCancellationToken = sessionCancellationToken;
     }
-    [RequiresDynamicCode("Adding dynamic tests requires runtime compilation and reflection which are not supported in native AOT scenarios.")]
+    [RequiresUnreferencedCode("Adding dynamic tests requires runtime compilation and reflection which are not supported in native AOT scenarios.")]
     [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
     public async Task AddDynamicTest<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
@@ -67,7 +67,7 @@ internal sealed class TestRegistry : ITestRegistry
     }
 
 #if NET6_0_OR_GREATER
-    [RequiresDynamicCode("Dynamic test processing uses expression compilation")]
+    [RequiresUnreferencedCode("Dynamic test processing uses expression compilation")]
     [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
 #endif
     private async Task ProcessPendingDynamicTests()
@@ -102,7 +102,7 @@ internal sealed class TestRegistry : ITestRegistry
         }
     }
 
-    [RequiresDynamicCode("Dynamic tests require runtime compilation of lambda expressions and are not supported in native AOT scenarios.")]
+    [RequiresUnreferencedCode("Dynamic tests require runtime compilation of lambda expressions and are not supported in native AOT scenarios.")]
     [RequiresUnreferencedCode("Method metadata creation uses reflection on parameters and types")]
     private async Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
     {
@@ -152,7 +152,7 @@ internal sealed class TestRegistry : ITestRegistry
         });
     }
 
-    [RequiresDynamicCode("Dynamic test instance creation requires Activator.CreateInstance which is not supported in native AOT scenarios.")]
+    [RequiresUnreferencedCode("Dynamic test instance creation requires Activator.CreateInstance which is not supported in native AOT scenarios.")]
     [UnconditionalSuppressMessage("Trimming",
         "IL2067:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call",
         Justification = "Dynamic tests require reflection")]
@@ -173,7 +173,7 @@ internal sealed class TestRegistry : ITestRegistry
         };
     }
 
-    [RequiresDynamicCode("Dynamic test invocation requires LambdaExpression.Compile() which is not supported in native AOT scenarios.")]
+    [RequiresUnreferencedCode("Dynamic test invocation requires LambdaExpression.Compile() which is not supported in native AOT scenarios.")]
     private static Func<object, object?[], Task> CreateRuntimeTestInvoker(DynamicDiscoveryResult result)
     {
         return async (instance, args) =>

@@ -43,7 +43,7 @@ internal static class TestDataCollectorFactory
     /// </summary>
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Falls back to reflection mode if no source-generated tests found")]
-    [RequiresDynamicCode("Falls back to reflection mode if no source-generated tests found")]
+    [RequiresUnreferencedCode("Falls back to reflection mode if no source-generated tests found")]
     #endif
     public static async Task<ITestDataCollector> CreateAutoDetectAsync(string testSessionId, Assembly[]? assembliesToScan = null)
     {

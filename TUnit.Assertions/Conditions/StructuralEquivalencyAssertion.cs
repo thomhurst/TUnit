@@ -10,6 +10,7 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that two objects are structurally equivalent by comparing their properties and fields.
 /// Supports partial equivalency and member exclusion.
 /// </summary>
+[RequiresUnreferencedCode("Uses reflection to compare object properties and fields.")]
 public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
 {
     private readonly object? _expected;
@@ -166,9 +167,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         }
 
         // Compare properties and fields
-#pragma warning disable IL2072 // GetType() does not preserve DynamicallyAccessedMembers - acceptable for runtime structural comparison
         var expectedMembers = GetMembersToCompare(expectedType);
-#pragma warning restore IL2072
 
         foreach (var member in expectedMembers)
         {
@@ -199,9 +198,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
             // In partial equivalency mode, skip members that don't exist on actual
             if (_usePartialEquivalency)
             {
-#pragma warning disable IL2072 // GetType() does not preserve DynamicallyAccessedMembers - acceptable for runtime structural comparison
                 var actualMember = GetMemberInfo(actualType, member.Name);
-#pragma warning restore IL2072
                 if (actualMember == null)
                 {
                     continue;
@@ -211,9 +208,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
             }
             else
             {
-#pragma warning disable IL2072 // GetType() does not preserve DynamicallyAccessedMembers - acceptable for runtime structural comparison
                 var actualMember = GetMemberInfo(actualType, member.Name);
-#pragma warning restore IL2072
                 if (actualMember == null)
                 {
                     return AssertionResult.Failed($"Property {memberPath} did not match{Environment.NewLine}Expected: {FormatValue(expectedValue)}{Environment.NewLine}Received: null");
@@ -231,9 +226,7 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         // In non-partial mode, check for extra properties on actual
         if (!_usePartialEquivalency)
         {
-#pragma warning disable IL2072 // GetType() does not preserve DynamicallyAccessedMembers - acceptable for runtime structural comparison
             var actualMembers = GetMembersToCompare(actualType);
-#pragma warning restore IL2072
             var expectedMemberNames = new HashSet<string>(expectedMembers.Select(m => m.Name));
 
             foreach (var member in actualMembers)
