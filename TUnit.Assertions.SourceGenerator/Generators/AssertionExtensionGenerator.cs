@@ -312,7 +312,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         // Add RequiresDynamicCode attribute if present
         if (!string.IsNullOrEmpty(data.RequiresDynamicCodeMessage))
         {
-            var escapedMessage = data.RequiresDynamicCodeMessage.Replace("\"", "\\\"");
+            var escapedMessage = data.RequiresDynamicCodeMessage!.Replace("\"", "\\\"");
             sourceBuilder.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresDynamicCode(\"{escapedMessage}\")]");
         }
 

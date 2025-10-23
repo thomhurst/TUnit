@@ -30,8 +30,8 @@ public class HasFlagAssertion<TEnum> : Assertion<TEnum>
         }
 
         // Use HasFlag method for enum flag checking
-        var enumValue = (Enum)(object)value;
-        var enumFlag = (Enum)(object)_expectedFlag;
+        var enumValue = (Enum)value;
+        var enumFlag = (Enum)_expectedFlag;
 
         if (enumValue.HasFlag(enumFlag))
         {
@@ -70,8 +70,8 @@ public class DoesNotHaveFlagAssertion<TEnum> : Assertion<TEnum>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
         }
 
-        var enumValue = (Enum)(object)value;
-        var enumFlag = (Enum)(object)_unexpectedFlag;
+        var enumValue = (Enum)value;
+        var enumFlag = (Enum)_unexpectedFlag;
 
         if (!enumValue.HasFlag(enumFlag))
         {
@@ -106,7 +106,11 @@ public class IsDefinedAssertion<TEnum> : Assertion<TEnum>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
         }
 
+#if NET
+        if (Enum.IsDefined(value))
+#else
         if (Enum.IsDefined(typeof(TEnum), value))
+#endif
         {
             return Task.FromResult(AssertionResult.Passed);
         }
@@ -139,7 +143,11 @@ public class IsNotDefinedAssertion<TEnum> : Assertion<TEnum>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}: {exception.Message}"));
         }
 
+#if NET
+        if (!Enum.IsDefined(value))
+#else
         if (!Enum.IsDefined(typeof(TEnum), value))
+#endif
         {
             return Task.FromResult(AssertionResult.Passed);
         }

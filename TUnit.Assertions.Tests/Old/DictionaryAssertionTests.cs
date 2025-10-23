@@ -32,7 +32,7 @@ public class DictionaryAssertionTests
     {
         var dictionary = new ReadDictionary();
 
-        await TUnitAssert.That((IReadOnlyDictionary<string, string>)dictionary).ContainsKey("Blah");
+        await TUnitAssert.That(dictionary).ContainsKey("Blah");
     }
 
     [Test]

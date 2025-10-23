@@ -22,7 +22,7 @@ public static class DataSourceProcessor
         }
         else if (data != null)
         {
-            items.Add([(object?)data]);
+            items.Add([data]);
         }
         
         return items;
