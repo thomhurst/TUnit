@@ -115,15 +115,9 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
                 return false;
             }
 
-            for (int i = 0; i < xList.Count; i++)
-            {
-                if (!CompareStructurally(xList[i], yList[i], visited))
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            // Use unordered comparison for collections (equivalency check)
+            // This matches the behavior of IsEquivalentTo by default
+            return CheckCollectionEquivalence(xList, yList, visited);
         }
 
         var members = GetMembersToCompare(xType);
@@ -137,6 +131,40 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
             {
                 return false;
             }
+        }
+
+        return true;
+    }
+
+    private bool CheckCollectionEquivalence(List<object?> actualList, List<object?> expectedList, HashSet<object> visited)
+    {
+        // Use linear search approach for structural equivalence
+        // This is similar to CollectionEquivalencyChecker.CheckUnorderedEquivalenceLinear
+        var remainingActual = new List<object?>(actualList);
+
+        foreach (var expectedItem in expectedList)
+        {
+            var foundIndex = -1;
+            for (int i = 0; i < remainingActual.Count; i++)
+            {
+                var actualItem = remainingActual[i];
+
+                bool areEqual = expectedItem == null && actualItem == null ||
+                               expectedItem != null && actualItem != null && CompareStructurally(expectedItem, actualItem, visited);
+
+                if (areEqual)
+                {
+                    foundIndex = i;
+                    break;
+                }
+            }
+
+            if (foundIndex == -1)
+            {
+                return false;
+            }
+
+            remainingActual.RemoveAt(foundIndex);
         }
 
         return true;

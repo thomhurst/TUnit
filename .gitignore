@@ -426,3 +426,7 @@ nul
 
 # Claude Code settings
 .claude/settings.local.json
+
+# .NET install scripts
+dotnet-install.sh
+dotnet-install.ps1
