@@ -8,12 +8,14 @@ Each framework implements the following test categories:
 
 1. **BasicTests** - Simple test methods with assertions and basic operations
 2. **DataDrivenTests** - Parameterized tests using framework-specific data sources
-3. **SetupTeardownTests** - Tests with lifecycle hooks (setup/teardown)
-4. **AsyncTests** - Realistic async patterns using in-memory operations
-5. **FixtureTests** - Class-level fixtures and resource management
-6. **ParallelTests** - Tests demonstrating parallel execution patterns
-7. **AssertionTests** - Various assertion patterns and complex validations
-8. **RepeatTests** - Repeated test execution scenarios
+3. **ConstructorCostTests** - Tests measuring expensive constructor initialization overhead
+4. **SetupTeardownTests** - Tests measuring setup/teardown hook overhead per test
+5. **SharedFixtureTests** - Tests measuring shared class-level fixture reuse efficiency
+6. **PerTestFixtureTests** - Tests measuring per-test isolated fixture creation overhead
+7. **AsyncTests** - Realistic async patterns using in-memory operations
+8. **ParallelTests** - Tests demonstrating parallel execution patterns
+9. **AssertionTests** - Various assertion patterns and complex validations
+10. **RepeatTests** - Repeated test execution scenarios
 
 ## Running Benchmarks
 
@@ -33,10 +35,12 @@ dotnet run -c Release --project Tests.Benchmark -- --filter "*RuntimeBenchmarks*
 
 # Available test class names:
 # - BasicTests
-# - DataDrivenTests  
+# - DataDrivenTests
+# - ConstructorCostTests
 # - SetupTeardownTests
+# - SharedFixtureTests
+# - PerTestFixtureTests
 # - AsyncTests
-# - FixtureTests
 # - ParallelTests
 # - AssertionTests
 # - RepeatTests
