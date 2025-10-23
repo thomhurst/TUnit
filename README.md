@@ -20,7 +20,7 @@
 |---------|----------------------|-----------|
 | Test Discovery | ❌ Runtime reflection | ✅ **Compile-time generation** |
 | Execution Speed | ❌ Sequential by default | ✅ **Parallel by default** |
-| Modern .NET | ⚠️ Limited AOT support | ✅ **Full Native AOT & trimming** |
+| Modern .NET | ⚠️ Limited AOT support | ✅ **Native AOT & trimming** |
 | Test Dependencies | ❌ Not supported | ✅ **`[DependsOn]` chains** |
 | Resource Management | ❌ Manual lifecycle | ✅ **Automatic cleanup** |
 
@@ -385,7 +385,7 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method       | Version | Mean    | Error    | StdDev   | Median  |
@@ -408,7 +408,7 @@ AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method       | Version | Mean    | Error    | StdDev   | Median  |
@@ -431,7 +431,7 @@ AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method       | Version | Mean    | Error    | StdDev   | Median  |
@@ -455,7 +455,7 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean      | Error     | StdDev    | Median    |
@@ -482,7 +482,7 @@ AMD EPYC 7763 2.61GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean      | Error     | StdDev    | Median    |
@@ -506,7 +506,7 @@ AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev    | Median      |
@@ -531,7 +531,7 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean       | Error    | StdDev    | Median     |
@@ -558,7 +558,7 @@ AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean      | Error     | StdDev    | Median    |
@@ -582,7 +582,7 @@ AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev    | Median      |
@@ -607,7 +607,7 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean      | Error     | StdDev   | Median    |
@@ -636,7 +636,7 @@ AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean      | Error     | StdDev    | Median    |
@@ -660,7 +660,7 @@ AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev    | Median      |
@@ -685,7 +685,7 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean      | Error     | StdDev   | Median    |
@@ -713,7 +713,7 @@ AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev    | Median      |
@@ -737,7 +737,7 @@ AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev     | Median      |
@@ -762,7 +762,7 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean      | Error     | StdDev   | Median    |
@@ -791,7 +791,7 @@ AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev    | Median      |
@@ -815,7 +815,7 @@ AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev    | Median      |
@@ -840,7 +840,7 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error      | StdDev    | Median      |
@@ -867,7 +867,7 @@ AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean      | Error     | StdDev    | Median    |
@@ -891,7 +891,7 @@ AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev    | Median      |
@@ -916,7 +916,7 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean      | Error     | StdDev    | Median    |
@@ -944,7 +944,7 @@ AMD EPYC 7763 2.90GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev    | Median      |
@@ -968,7 +968,7 @@ AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev    | Median      |
@@ -993,7 +993,7 @@ Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev    | Median      |
@@ -1017,7 +1017,7 @@ AMD EPYC 7763 3.14GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev    | Median      |
@@ -1041,7 +1041,7 @@ AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
   [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
   Job-YNJDZW : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
-Runtime=.NET 9.0  
+Runtime=.NET 9.0
 
 ```
 | Method    | Version | Mean        | Error     | StdDev    | Median      |

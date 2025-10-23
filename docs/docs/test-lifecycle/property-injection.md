@@ -9,12 +9,12 @@ The required keyword keeps your code clean and correct. If a property isn't pass
 
 Supported attributes for properties in AOT mode:
 - **Argument** - Compile-time constant values
-- **MethodDataSource** - Static method data sources  
+- **MethodDataSource** - Static method data sources
 - **ClassDataSource** - Static class-based data sources
 - **DataSourceGeneratorAttribute** - Source-generated data (first item only)
 - **ClassDataSource** - Dependency injection with service provider
 
-The AOT system generates strongly-typed property setters at compile time, eliminating reflection overhead and ensuring full Native AOT compatibility.
+The AOT system generates strongly-typed property setters at compile time, eliminating reflection overhead and ensuring Native AOT compatibility.
 
 ## Async Property Initialization
 
@@ -58,27 +58,27 @@ public class PropertySetterTests
     // Compile-time constant injection
     [Arguments("1")]
     public required string Property1 { get; init; }
-        
+
     // Static method data source injection
     [MethodDataSource(nameof(GetMethodData))]
     public required string Property2 { get; init; }
-        
+
     // Class-based data source injection
     [ClassDataSource<InnerModel>]
     public required InnerModel Property3 { get; init; }
-    
+
     // Globally shared data source
     [ClassDataSource<InnerModel>(Shared = SharedType.PerTestSession)]
     public required InnerModel Property4 { get; init; }
-    
+
     // Class-scoped shared data source
     [ClassDataSource<InnerModel>(Shared = SharedType.PerClass)]
     public required InnerModel Property5 { get; init; }
-    
+
     // Keyed shared data source
     [ClassDataSource<InnerModel>(Shared = SharedType.Keyed, Key = "Key")]
     public required InnerModel Property6 { get; init; }
-        
+
     // Source-generated data injection
     [DataSourceGeneratorTests.AutoFixtureGenerator<string>]
     public required string Property7 { get; init; }
@@ -86,7 +86,7 @@ public class PropertySetterTests
     // Service provider dependency injection
     [ClassDataSource<AsyncPropertyExample>]
     public required AsyncPropertyExample AsyncService { get; init; }
-    
+
     [Test]
     public async Task Test()
     {
@@ -95,7 +95,7 @@ public class PropertySetterTests
         await Assert.That(Property2).IsNotNull();
         await Assert.That(Property3).IsNotNull();
         await Assert.That(AsyncService.IsInitialized).IsTrue();
-        
+
         Console.WriteLine($"Property7: {Property7}");
     }
 
@@ -137,8 +137,8 @@ Here's a comprehensive example showing how to orchestrate multiple test containe
 public class InMemorySql : IAsyncInitializer, IAsyncDisposable
 {
     private TestcontainersContainer? _container;
-    
-    public TestcontainersContainer Container => _container 
+
+    public TestcontainersContainer Container => _container
         ?? throw new InvalidOperationException("Container not initialized");
 
     public async Task InitializeAsync()
@@ -147,7 +147,7 @@ public class InMemorySql : IAsyncInitializer, IAsyncDisposable
             .WithImage("postgres:latest")
             .WithEnvironment("POSTGRES_PASSWORD", "password")
             .Build();
-            
+
         await _container.StartAsync();
     }
 
@@ -164,8 +164,8 @@ public class InMemorySql : IAsyncInitializer, IAsyncDisposable
 public class InMemoryRedis : IAsyncInitializer, IAsyncDisposable
 {
     private TestcontainersContainer? _container;
-    
-    public TestcontainersContainer Container => _container 
+
+    public TestcontainersContainer Container => _container
         ?? throw new InvalidOperationException("Container not initialized");
 
     public async Task InitializeAsync()
@@ -173,7 +173,7 @@ public class InMemoryRedis : IAsyncInitializer, IAsyncDisposable
         _container = new TestcontainersBuilder<TestcontainersContainer>()
             .WithImage("redis:latest")
             .Build();
-            
+
         await _container.StartAsync();
     }
 
@@ -190,8 +190,8 @@ public class InMemoryRedis : IAsyncInitializer, IAsyncDisposable
 public class InMemoryMessageBus : IAsyncInitializer, IAsyncDisposable
 {
     private TestcontainersContainer? _container;
-    
-    public TestcontainersContainer Container => _container 
+
+    public TestcontainersContainer Container => _container
         ?? throw new InvalidOperationException("Container not initialized");
 
     public async Task InitializeAsync()
@@ -199,7 +199,7 @@ public class InMemoryMessageBus : IAsyncInitializer, IAsyncDisposable
         _container = new TestcontainersBuilder<TestcontainersContainer>()
             .WithImage("rabbitmq:3-management")
             .Build();
-            
+
         await _container.StartAsync();
     }
 
@@ -216,12 +216,12 @@ public class InMemoryMessageBus : IAsyncInitializer, IAsyncDisposable
 public class MessageBusUserInterface : IAsyncInitializer, IAsyncDisposable
 {
     private TestcontainersContainer? _container;
-    
+
     // Inject the message bus dependency - shared per test session
     [ClassDataSource<InMemoryMessageBus>(Shared = SharedType.PerTestSession)]
     public required InMemoryMessageBus MessageBus { get; init; }
-    
-    public TestcontainersContainer Container => _container 
+
+    public TestcontainersContainer Container => _container
         ?? throw new InvalidOperationException("Container not initialized");
 
     public async Task InitializeAsync()
@@ -284,7 +284,7 @@ public class IntegrationTests
     // Just inject what you need - TUnit handles the entire dependency graph
     [ClassDataSource<InMemoryWebApplicationFactory>]
     public required InMemoryWebApplicationFactory WebApplicationFactory { get; init; }
-    
+
     [ClassDataSource<MessageBusUserInterface>]
     public required MessageBusUserInterface MessageBusUI { get; init; }
 
@@ -293,11 +293,11 @@ public class IntegrationTests
     {
         // Everything is initialized in the correct order!
         var client = WebApplicationFactory.CreateClient();
-        
+
         // Test your application with all infrastructure running
         var response = await client.GetAsync("/api/products");
         await Assert.That(response.IsSuccessStatusCode).IsTrue();
-        
+
         // The MessageBusUI shares the same MessageBus instance as the WebApplicationFactory
         // because they both use SharedType.PerTestSession
     }
@@ -339,7 +339,7 @@ public class ConditionalService : IAsyncInitializer
 {
     [ClassDataSource<DatabaseService>(Shared = SharedType.PerTestSession)]
     public required DatabaseService Database { get; init; }
-    
+
     public async Task InitializeAsync()
     {
         if (await Database.RequiresMigration())

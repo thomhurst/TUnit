@@ -20,7 +20,7 @@
 |---------|----------------------|-----------|
 | Test Discovery | ❌ Runtime reflection | ✅ **Compile-time generation** |
 | Execution Speed | ❌ Sequential by default | ✅ **Parallel by default** |
-| Modern .NET | ⚠️ Limited AOT support | ✅ **Full Native AOT & trimming** |
+| Modern .NET | ⚠️ Limited AOT support | ✅ **Native AOT & trimming** |
 | Test Dependencies | ❌ Not supported | ✅ **`[DependsOn]` chains** |
 | Resource Management | ❌ Manual lifecycle | ✅ **Automatic cleanup** |
 
