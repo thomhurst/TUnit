@@ -29,9 +29,6 @@ jobs:
           dotnet build -c Release -p:TestFramework=TUNIT --framework net8.0
           dotnet build -c Release -p:TestFramework=TUNIT --framework net9.0
           dotnet build -c Release -p:TestFramework=TUNIT --framework net10.0
-          dotnet build -c Release -p:TestFramework=XUNIT --framework net8.0
-          dotnet build -c Release -p:TestFramework=XUNIT --framework net9.0
-          dotnet build -c Release -p:TestFramework=XUNIT --framework net10.0
           dotnet build -c Release -p:TestFramework=XUNIT3 --framework net8.0
           dotnet build -c Release -p:TestFramework=XUNIT3 --framework net9.0
           dotnet build -c Release -p:TestFramework=XUNIT3 --framework net10.0

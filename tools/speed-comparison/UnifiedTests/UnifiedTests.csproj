@@ -4,81 +4,72 @@
         <TestFramework>TUNIT</TestFramework>
     </PropertyGroup>
 
-  <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    <LangVersion>14</LangVersion>
-    <OutputType Condition="'$(TestFramework)' == 'XUNIT3' OR '$(TestFramework)' == 'TUNIT' OR '$(TestFramework)' == 'MSTEST'">Exe</OutputType>
-    <UseMicrosoftTestingPlatformRunner Condition="'$(TestFramework)' == 'XUNIT3'">true</UseMicrosoftTestingPlatformRunner>
-      <EnableMSTestRunner Condition="'$(TestFramework)' == 'MSTEST'">true</EnableMSTestRunner>
-      <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-  </PropertyGroup>
+    <!-- Define constants based on TestFramework property -->
+    <PropertyGroup>
+        <DefineConstants Condition="'$(TestFramework)' == 'TUNIT'">$(DefineConstants);TUNIT</DefineConstants>
+        <DefineConstants Condition="'$(TestFramework)' == 'XUNIT3'">$(DefineConstants);XUNIT3</DefineConstants>
+        <DefineConstants Condition="'$(TestFramework)' == 'NUNIT'">$(DefineConstants);NUNIT</DefineConstants>
+        <DefineConstants Condition="'$(TestFramework)' == 'MSTEST'">$(DefineConstants);MSTEST</DefineConstants>
+    </PropertyGroup>
 
-  <!--Custom output paths based on TestFramework -->
-  <PropertyGroup Condition="'$(TestFramework)' != ''">
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+        <LangVersion>14</LangVersion>
+        <UseMicrosoftTestingPlatformRunner Condition="'$(TestFramework)' == 'XUNIT3'">true</UseMicrosoftTestingPlatformRunner>
+        <EnableMSTestRunner Condition="'$(TestFramework)' == 'MSTEST'">true</EnableMSTestRunner>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <EnableNUnitRunner Condition="'$(TestFramework)' == 'NUNIT'">true</EnableNUnitRunner>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TestFramework)' != ''">
-    <OutputPath>bin\$(Configuration)-$(TestFramework)\$(TargetFramework)\</OutputPath>
-    <IntermediateOutputPath>obj\$(Configuration)-$(TestFramework)\$(TargetFramework)\</IntermediateOutputPath>
-  </PropertyGroup>
+    <!--Custom output paths based on TestFramework -->
+    <PropertyGroup Condition="'$(TestFramework)' != ''">
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    </PropertyGroup>
 
-  <!-- Define constants based on TestFramework property -->
-  <PropertyGroup>
-      <DefineConstants Condition="'$(TestFramework)' == 'TUNIT'">$(DefineConstants);TUNIT</DefineConstants>
-    <DefineConstants Condition="'$(TestFramework)' == 'XUNIT'">$(DefineConstants);XUNIT</DefineConstants>
-    <DefineConstants Condition="'$(TestFramework)' == 'XUNIT3'">$(DefineConstants);XUNIT3</DefineConstants>
-    <DefineConstants Condition="'$(TestFramework)' == 'NUNIT'">$(DefineConstants);NUNIT</DefineConstants>
-    <DefineConstants Condition="'$(TestFramework)' == 'MSTEST'">$(DefineConstants);MSTEST</DefineConstants>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(TestFramework)' != ''">
+        <OutputPath>bin\$(Configuration)-$(TestFramework)\$(TargetFramework)\</OutputPath>
+        <IntermediateOutputPath>obj\$(Configuration)-$(TestFramework)\$(TargetFramework)\</IntermediateOutputPath>
+    </PropertyGroup>
 
-  <!-- TUnit packages -->
-  <ItemGroup Condition="'$(TestFramework)' == 'TUNIT'">
-    <PackageReference Include="TUnit" />
-  </ItemGroup>
+    <!-- TUnit packages -->
+    <ItemGroup Condition="'$(TestFramework)' == 'TUNIT'">
+        <PackageReference Include="TUnit" />
+    </ItemGroup>
 
-  <!-- xUnit v2 packages -->
-  <ItemGroup Condition="'$(TestFramework)' == 'XUNIT'">
-    <PackageReference Include="xunit" />
-    <PackageReference Include="xunit.runner.visualstudio">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
+    <!-- xUnit v3 packages -->
+    <ItemGroup Condition="'$(TestFramework)' == 'XUNIT3'">
+        <PackageReference Include="xunit.v3" />
+        <PackageReference Include="xunit.runner.visualstudio">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
 
-  <!-- xUnit v3 packages -->
-  <ItemGroup Condition="'$(TestFramework)' == 'XUNIT3'">
-    <PackageReference Include="xunit.v3" />
-    <PackageReference Include="xunit.runner.visualstudio">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
+    <!-- NUnit packages -->
+    <ItemGroup Condition="'$(TestFramework)' == 'NUNIT'">
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit3TestAdapter" />
+    </ItemGroup>
 
-  <!-- NUnit packages -->
-  <ItemGroup Condition="'$(TestFramework)' == 'NUNIT'">
-    <PackageReference Include="NUnit" />
-    <PackageReference Include="NUnit3TestAdapter" />
-  </ItemGroup>
+    <!-- MSTest packages -->
+    <ItemGroup Condition="'$(TestFramework)' == 'MSTEST'">
+        <PackageReference Include="MSTest" />
+    </ItemGroup>
 
-  <!-- MSTest packages -->
-  <ItemGroup Condition="'$(TestFramework)' == 'MSTEST'">
-    <PackageReference Include="MSTest" />
-  </ItemGroup>
+    <!-- AOT and SingleFile configurations for TUnit -->
+    <PropertyGroup Condition="'$(TestFramework)' == 'TUNIT' AND '$(Aot)' == 'true'">
+        <PublishAot>true</PublishAot>
+        <PublishTrimmed>true</PublishTrimmed>
+    </PropertyGroup>
 
-  <!-- AOT and SingleFile configurations for TUnit -->
-  <PropertyGroup Condition="'$(TestFramework)' == 'TUNIT' AND '$(Aot)' == 'true'">
-    <PublishAot>true</PublishAot>
-    <PublishTrimmed>true</PublishTrimmed>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TestFramework)' == 'TUNIT' AND '$(SingleFile)' == 'true'">
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(TestFramework)' == 'TUNIT' AND '$(SingleFile)' == 'true'">
+        <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
+    </PropertyGroup>
 
 </Project>

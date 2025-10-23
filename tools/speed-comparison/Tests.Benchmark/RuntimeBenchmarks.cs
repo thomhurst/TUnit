@@ -56,18 +56,6 @@ public class RuntimeBenchmarks : BenchmarkBase
     }
 
     [Benchmark]
-    public async Task xUnit()
-    {
-        var binPath = Path.Combine(UnifiedPath, "bin", "Release-XUNIT", Framework);
-        var dllPath = Path.Combine(binPath, "UnifiedTests.dll");
-
-        await Cli.Wrap("dotnet")
-            .WithArguments(["vstest", dllPath, $"--TestCaseFilter:FullyQualifiedName~{ClassName}"])
-            .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
-            .ExecuteBufferedAsync();
-    }
-
-    [Benchmark]
     public async Task MSTest()
     {
         var binPath = Path.Combine(UnifiedPath, "bin", "Release-MSTEST", Framework);
