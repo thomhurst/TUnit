@@ -20,7 +20,6 @@ internal sealed class TestRegistry : ITestRegistry
     private readonly CancellationToken _sessionCancellationToken;
     private readonly string? _sessionId;
 
-
     public TestRegistry(TestBuilderPipeline testBuilderPipeline,
         ITestCoordinator testCoordinator,
         string sessionId,
@@ -31,8 +30,8 @@ internal sealed class TestRegistry : ITestRegistry
         _sessionId = sessionId;
         _sessionCancellationToken = sessionCancellationToken;
     }
-    [RequiresUnreferencedCode("Adding dynamic tests requires runtime compilation and reflection which are not supported in native AOT scenarios.")]
-    [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
+
+    [RequiresUnreferencedCode("Adding dynamic tests requires reflection which is not supported in native AOT scenarios.")]
     public async Task AddDynamicTest<[DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
@@ -66,10 +65,7 @@ internal sealed class TestRegistry : ITestRegistry
         await ProcessPendingDynamicTests();
     }
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Dynamic test processing uses expression compilation")]
-    [RequiresUnreferencedCode("Dynamic test metadata creation uses reflection")]
-#endif
+    [RequiresUnreferencedCode("Processing dynamic tests requires reflection which is not supported in native AOT scenarios.")]
     private async Task ProcessPendingDynamicTests()
     {
         var testsToProcess = new List<PendingDynamicTest>();
@@ -102,8 +98,7 @@ internal sealed class TestRegistry : ITestRegistry
         }
     }
 
-    [RequiresUnreferencedCode("Dynamic tests require runtime compilation of lambda expressions and are not supported in native AOT scenarios.")]
-    [RequiresUnreferencedCode("Method metadata creation uses reflection on parameters and types")]
+    [RequiresUnreferencedCode("Dynamic test metadata creation requires reflection which is not supported in native AOT scenarios.")]
     private async Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
     {
         if (result.TestClassType == null || result.TestMethod == null)

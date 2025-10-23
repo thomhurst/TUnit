@@ -15,18 +15,18 @@ public static class Sources
 
     public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.InstanceHookMethod>> BeforeTestHooks = new();
     public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.InstanceHookMethod>> AfterTestHooks = new();
-    public static readonly ConcurrentBag<Hooks.BeforeTestHookMethod> BeforeEveryTestHooks = new();
-    public static readonly ConcurrentBag<Hooks.AfterTestHookMethod> AfterEveryTestHooks = new();
+    public static readonly ConcurrentBag<Hooks.BeforeTestHookMethod> BeforeEveryTestHooks = [];
+    public static readonly ConcurrentBag<Hooks.AfterTestHookMethod> AfterEveryTestHooks = [];
     
     public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.BeforeClassHookMethod>> BeforeClassHooks = new();
     public static readonly ConcurrentDictionary<Type, ConcurrentBag<Hooks.AfterClassHookMethod>> AfterClassHooks = new();
-    public static readonly ConcurrentBag<Hooks.BeforeClassHookMethod> BeforeEveryClassHooks = new();
-    public static readonly ConcurrentBag<Hooks.AfterClassHookMethod> AfterEveryClassHooks = new();
+    public static readonly ConcurrentBag<Hooks.BeforeClassHookMethod> BeforeEveryClassHooks = [];
+    public static readonly ConcurrentBag<Hooks.AfterClassHookMethod> AfterEveryClassHooks = [];
     
     public static readonly ConcurrentDictionary<Assembly, ConcurrentBag<Hooks.BeforeAssemblyHookMethod>> BeforeAssemblyHooks = new();
     public static readonly ConcurrentDictionary<Assembly, ConcurrentBag<Hooks.AfterAssemblyHookMethod>> AfterAssemblyHooks = new();
-    public static readonly ConcurrentBag<Hooks.BeforeAssemblyHookMethod> BeforeEveryAssemblyHooks = new();
-    public static readonly ConcurrentBag<Hooks.AfterAssemblyHookMethod> AfterEveryAssemblyHooks = new();
+    public static readonly ConcurrentBag<Hooks.BeforeAssemblyHookMethod> BeforeEveryAssemblyHooks = [];
+    public static readonly ConcurrentBag<Hooks.AfterAssemblyHookMethod> AfterEveryAssemblyHooks = [];
     
     public static readonly ConcurrentBag<Hooks.BeforeTestSessionHookMethod> BeforeTestSessionHooks = [];
     public static readonly ConcurrentBag<Hooks.AfterTestSessionHookMethod> AfterTestSessionHooks = [];

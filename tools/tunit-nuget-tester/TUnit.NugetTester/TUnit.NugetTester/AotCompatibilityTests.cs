@@ -35,4 +35,17 @@ public class AotCompatibilityTests
         // This test verifies that using enum values in Arguments doesn't trigger IL3050
         await Assert.That(enumValue).IsDefined();
     }
+
+    // Test property injection with AOT - verifies no warnings when using property injection in source-gen mode
+    [Arguments("test value")]
+    public required string? InjectedProperty { get; set; }
+
+    [Test]
+    public async Task PropertyInjection_ShouldNotTriggerAotWarnings()
+    {
+        // This test verifies that property injection works with AOT via source generation
+        // The source generator creates PropertyInjectionData at compile time without using reflection
+        await Assert.That(InjectedProperty).IsNotNull();
+        await Assert.That(InjectedProperty).IsEqualTo("test value");
+    }
 }

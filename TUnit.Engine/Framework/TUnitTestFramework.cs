@@ -44,8 +44,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
     }
 
     #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Test data collector selection may use reflection-based discovery")]
-    [RequiresUnreferencedCode("Reflection mode test discovery uses dynamic code generation")]
     [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
     [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "Reflection mode is not used in AOT scenarios")]
     #endif
@@ -118,10 +116,6 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         return new CloseTestSessionResult { IsSuccess = isSuccess };
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Test data collector selection may use reflection-based discovery")]
-    [RequiresUnreferencedCode("Reflection mode test discovery uses dynamic code generation")]
-    #endif
     private TUnitServiceProvider GetOrCreateServiceProvider(ExecuteRequestContext context)
     {
         return _serviceProvidersPerSession.GetOrAdd(

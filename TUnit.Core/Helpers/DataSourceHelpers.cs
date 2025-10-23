@@ -529,7 +529,14 @@ public static class DataSourceHelpers
     /// <summary>
     /// Resolves a data source property value at runtime.
     /// This method handles all IDataSourceAttribute implementations generically.
+    /// Only used in reflection mode - in AOT/source-gen mode, property injection is handled by generated code.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access",
+        Justification = "This method is only used in reflection mode. In AOT/source-gen mode, property injection uses compile-time generated code.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling",
+        Justification = "This method is only used in reflection mode. In AOT/source-gen mode, property injection uses compile-time generated code.")]
+    #endif
     public static async Task<object?> ResolveDataSourceForPropertyAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type containingType, string propertyName, MethodMetadata testInformation, string testSessionId)
     {
         // Use PropertyInjectionService to resolve the data source attribute

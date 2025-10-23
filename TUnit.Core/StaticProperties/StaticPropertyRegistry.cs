@@ -8,7 +8,7 @@ namespace TUnit.Core.StaticProperties;
 /// </summary>
 public static class StaticPropertyRegistry
 {
-    private static readonly ConcurrentBag<StaticPropertyMetadata> _registeredProperties = new();
+    private static readonly ConcurrentBag<StaticPropertyMetadata> _registeredProperties = [];
     private static readonly ConcurrentDictionary<string, object> _initializedValues = new();
 
     /// <summary>

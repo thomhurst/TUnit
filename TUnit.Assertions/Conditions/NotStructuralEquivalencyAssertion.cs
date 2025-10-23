@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using TUnit.Assertions.Core;
 
@@ -6,6 +7,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that two objects are NOT structurally equivalent.
 /// </summary>
+[RequiresUnreferencedCode("Uses reflection for structural equivalency comparison")]
 public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
 {
     private readonly object? _notExpected;

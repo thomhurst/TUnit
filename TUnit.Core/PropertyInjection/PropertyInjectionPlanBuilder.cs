@@ -45,7 +45,7 @@ internal static class PropertyInjectionPlanBuilder
         {
             Type = type,
             SourceGeneratedProperties = sourceGenProps,
-            ReflectionProperties = Array.Empty<(PropertyInfo, IDataSourceAttribute)>(),
+            ReflectionProperties = [],
             HasProperties = sourceGenProps.Length > 0
         };
     }
@@ -94,7 +94,7 @@ internal static class PropertyInjectionPlanBuilder
         return new PropertyInjectionPlan
         {
             Type = type,
-            SourceGeneratedProperties = Array.Empty<PropertyInjectionMetadata>(),
+            SourceGeneratedProperties = [],
             ReflectionProperties = propertyDataSourcePairs.ToArray(),
             HasProperties = propertyDataSourcePairs.Count > 0
         };

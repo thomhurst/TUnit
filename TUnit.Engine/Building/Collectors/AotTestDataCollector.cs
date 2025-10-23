@@ -37,10 +37,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         return [..standardTestMetadatas, ..dynamicTestMetadatas];
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Dynamic test conversion requires expression compilation")]
-    [RequiresUnreferencedCode("Method extraction from expressions uses reflection")]
-    #endif
+    [RequiresUnreferencedCode("Dynamic test collection requires expression compilation and reflection")]
     private async IAsyncEnumerable<TestMetadata> CollectDynamicTestsStreaming(
         string testSessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -88,7 +85,6 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test conversion requires expression compilation")]
-    [RequiresUnreferencedCode("Method extraction from expressions uses reflection")]
     #endif
     private async IAsyncEnumerable<TestMetadata> ConvertDynamicTestToMetadataStreaming(
         AbstractDynamicTest abstractDynamicTest,
@@ -108,7 +104,6 @@ internal sealed class AotTestDataCollector : ITestDataCollector
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test metadata creation requires expression extraction and reflection")]
-    [RequiresUnreferencedCode("Method extraction from expressions uses reflection")]
     #endif
     private Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
     {
@@ -158,11 +153,9 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         });
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Dynamic instance creation uses Activator.CreateInstance and MakeGenericType")]
-    [RequiresUnreferencedCode("Dynamic type instantiation requires access to constructors")]
-    #endif
-    private static Func<Type[], object?[], object>? CreateAotDynamicInstanceFactory(Type testClass, object?[]? predefinedClassArgs)
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2055:Either the type on which the MakeGenericType is called can\'t be statically determined, or the type parameters to be used for generic arguments can\'t be statically determined.")]
+    private static Func<Type[], object?[], object>? CreateAotDynamicInstanceFactory([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type testClass, object?[]? predefinedClassArgs)
     {
         // Check if we have predefined args to use as defaults
         var hasPredefinedArgs = predefinedClassArgs is { Length: > 0 };
@@ -179,6 +172,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
                 {
                     return Activator.CreateInstance(closedType)!;
                 }
+
                 return Activator.CreateInstance(closedType, effectiveArgs)!;
             }
 
@@ -186,13 +180,13 @@ internal sealed class AotTestDataCollector : ITestDataCollector
             {
                 return Activator.CreateInstance(testClass)!;
             }
+
             return Activator.CreateInstance(testClass, effectiveArgs)!;
         };
     }
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test invocation requires LambdaExpression.Compile")]
-    [RequiresUnreferencedCode("Expression compilation and MethodInfo.Invoke use reflection")]
     #endif
     private static Func<object, object?[], Task> CreateAotDynamicTestInvoker(DynamicDiscoveryResult result)
     {

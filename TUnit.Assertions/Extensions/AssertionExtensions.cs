@@ -548,6 +548,7 @@ public static class AssertionExtensions
     /// Performs deep comparison of properties and fields.
     /// Supports .WithPartialEquivalency() and .IgnoringMember() for advanced scenarios.
     /// </summary>
+    [RequiresUnreferencedCode("Uses reflection to compare members")]
     public static StructuralEquivalencyAssertion<TValue> IsEquivalentTo<TValue>(
         this IAssertionSource<TValue> source,
         object? expected,
@@ -562,6 +563,7 @@ public static class AssertionExtensions
     /// Performs deep comparison of properties and fields.
     /// Supports .WithPartialEquivalency() and .IgnoringMember() for advanced scenarios.
     /// </summary>
+    [RequiresUnreferencedCode("Uses reflection to compare members")]
     public static NotStructuralEquivalencyAssertion<TValue> IsNotEquivalentTo<TValue>(
         this IAssertionSource<TValue> source,
         object? expected,

@@ -34,7 +34,7 @@ internal static class ClassMetadataHelper
                 Name = p.Name ?? $"param{i}",
                 TypeInfo = new ConcreteType(p.ParameterType),
                 ReflectionInfo = p
-            }).ToArray() ?? Array.Empty<ParameterMetadata>();
+            }).ToArray() ?? [];
 
             return new ClassMetadata
             {

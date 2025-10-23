@@ -242,35 +242,14 @@ internal class TestExecutor
         return _contextProvider;
     }
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Test disposal may use reflection on properties")]
-#endif
     internal static async Task DisposeTestInstance(AbstractExecutableTest test)
     {
         // Dispose the test instance if it's disposable
-        if (test.Context.TestDetails.ClassInstance != null && test.Context.TestDetails.ClassInstance is not SkippedTestInstance)
+        if (test.Context.TestDetails.ClassInstance is not SkippedTestInstance)
         {
             try
             {
                 var instance = test.Context.TestDetails.ClassInstance;
-
-                // Special handling for DisposalRegressionTests - dispose its properties
-                if (instance.GetType().Name == "DisposalRegressionTests")
-                {
-                    var injectedDataProperty = instance.GetType().GetProperty("InjectedData");
-                    if (injectedDataProperty != null)
-                    {
-                        var injectedData = injectedDataProperty.GetValue(instance);
-                        if (injectedData is IAsyncDisposable asyncDisposable)
-                        {
-                            await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                        }
-                        else if (injectedData is IDisposable disposable)
-                        {
-                            disposable.Dispose();
-                        }
-                    }
-                }
 
                 switch (instance)
                 {
