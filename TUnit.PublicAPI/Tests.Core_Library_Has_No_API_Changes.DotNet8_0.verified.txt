@@ -1871,22 +1871,12 @@ namespace .Helpers
         public static string FormatArguments(.<object?> arguments) { }
         public static string GetConstantValue(.TestContext testContext, object? o) { }
     }
-    [.("AOT", "IL3050:Calling members annotated with \'RequiresUnreferencedCodeAttribute\' may bre" +
-        "ak functionality when AOT compiling.")]
-    [.("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttr" +
-        "ibute\' in call to target method. The return value of the source method does not " +
-        "have matching annotations.")]
     public static class CastHelper
     {
-        [.("AOT", "IL3050:Calling members annotated with \'RequiresUnreferencedCodeAttribute\' may bre" +
-            "ak functionality when AOT compiling.", Justification=" is used for test data generation at discovery time, not in A" +
-            "OT-compiled test execution.")]
-        public static object? Cast([.(..None | ..PublicMethods | ..NonPublicMethods)]  type, object? value) { }
-        [.("AOT", "IL3050:Calling members annotated with \'RequiresUnreferencedCodeAttribute\' may bre" +
-            "ak functionality when AOT compiling.", Justification=" is used for test data generation at discovery time, not in A" +
-            "OT-compiled test execution.")]
-        public static T? Cast<[.(..None | ..PublicMethods | ..NonPublicMethods)]  T>(object? value) { }
-        public static .MethodInfo? GetConversionMethod([.(..None | ..PublicMethods | ..NonPublicMethods)]  baseType, [.(..None | ..PublicMethods | ..NonPublicMethods)]  targetType) { }
+        [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
+            "nctionality when AOT compiling.")]
+        public static object? Cast([.(..None | ..PublicParameterlessConstructor | ..PublicMethods | ..NonPublicMethods)]  type, object? value) { }
+        public static T? Cast<[.(..None | ..PublicParameterlessConstructor | ..PublicMethods | ..NonPublicMethods)]  T>(object? value) { }
     }
     public static class ClassConstructorHelper
     {
