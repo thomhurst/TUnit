@@ -1,6 +1,6 @@
 # Running your tests
 
-As TUnit is built on-top of the newer Microsoft.Testing.Platform, and combined with the fact that TUnit tests are source generated, running your tests is available in a variety of ways. 
+As TUnit is built on-top of the newer Microsoft.Testing.Platform, and combined with the fact that TUnit tests are source generated, running your tests is available in a variety of ways.
 
 :::info
 
@@ -72,9 +72,9 @@ Visual Studio is supported. The "Use testing platform server mode" option must b
 ![Visual Studio Settings](../../static/img/visual-studio.png)
 
 ## Rider
-Rider is supported. 
+Rider is supported.
 
-The [Enable Testing Platform support](https://www.jetbrains.com/help/rider/Reference__Options__Tools__Unit_Testing__VSTest.html) option must be selected in Settings > Build, Execution, Deployment > Unit Testing > VSTest.
+The Enable Testing Platform support option must be selected in Settings > Build, Execution, Deployment > Unit Testing > Testing Platform.
 
 ![Rider Settings](../../static/img/rider.png)
 
