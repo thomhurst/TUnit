@@ -317,7 +317,7 @@ TUnit works seamlessly across all major .NET development environments:
 ### JetBrains Rider
 ✅ **Fully supported**
 
-⚙️ **Setup**: Enable "Testing Platform support" in Settings > Build, Execution, Deployment > Unit Testing > VSTest
+⚙️ **Setup**: Enable "Testing Platform support" in Settings > Build, Execution, Deployment > Unit Testing > Testing Platform
 
 ### Visual Studio Code
 ✅ **Fully supported**
