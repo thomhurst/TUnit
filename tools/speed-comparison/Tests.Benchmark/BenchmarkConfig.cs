@@ -11,13 +11,13 @@ public class BenchmarkConfig : ManualConfig
 {
     public BenchmarkConfig()
     {
-        AddJob(Job.Default.WithRuntime(CoreRuntime.Core90));
+        AddJob(Job.Default.WithRuntime(CoreRuntime.Core10_0));
         AddLogger(ConsoleLogger.Default);
         AddExporter(MarkdownExporter.GitHub);
-        
+
         // Add the framework version column
         AddColumn(new FrameworkVersionColumn());
-        
+
         // Add default columns
         AddColumn(TargetMethodColumn.Method);
         AddColumn(StatisticColumn.Mean);
@@ -25,7 +25,7 @@ public class BenchmarkConfig : ManualConfig
         AddColumn(StatisticColumn.StdDev);
         AddColumn(StatisticColumn.Median);
         AddColumn(BaselineRatioColumn.RatioMean);
-        
+
         WithOptions(ConfigOptions.DisableLogFile);
     }
 }
