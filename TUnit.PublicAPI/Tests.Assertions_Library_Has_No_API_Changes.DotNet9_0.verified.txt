@@ -1181,6 +1181,7 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.("Uses reflection for structural equivalency comparison")]
     public class NotStructuralEquivalencyAssertion<TValue> : .<TValue>
     {
         public NotStructuralEquivalencyAssertion(.<TValue> context, object? notExpected, string? notExpectedExpression = null) { }
@@ -1364,6 +1365,7 @@ namespace .Conditions
     [.<string>("IsNullOrWhiteSpace", CustomName="IsNotNullOrWhiteSpace", ExpectationMessage="be null, empty, or whitespace", NegateLogic=true)]
     [.<string>("IsNullOrWhiteSpace", ExpectationMessage="be null, empty, or whitespace")]
     public static class StringStaticMethodAssertions { }
+    [.("Uses reflection to compare object properties and fields.")]
     public class StructuralEquivalencyAssertion<TValue> : .<TValue>
     {
         public StructuralEquivalencyAssertion(.<TValue> context, object? expected, string? expectedExpression = null) { }
@@ -1868,6 +1870,7 @@ namespace .Extensions
         public static ..IsDefinedAssertion<TEnum> IsDefined<TEnum>(this .<TEnum> source)
             where TEnum :  struct,  { }
         public static . IsEqualTo(this .<string> source, string? expected,  comparison, [.("expected")] string? expression = null) { }
+        [.("Uses reflection to compare members")]
         public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<TValue> IsIn<TValue>(this .<TValue> source, params TValue[] collection) { }
         public static .<TValue> IsNegative<TValue>(this .<TValue> source)
@@ -1877,6 +1880,7 @@ namespace .Extensions
         public static .<TTarget, TValue> IsNotAssignableTo<TTarget, TValue>(this .<TValue> source) { }
         public static ..IsNotDefinedAssertion<TEnum> IsNotDefined<TEnum>(this .<TEnum> source)
             where TEnum :  struct,  { }
+        [.("Uses reflection to compare members")]
         public static .<TValue> IsNotEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<TValue> IsNotIn<TValue>(this .<TValue> source, params TValue[] collection) { }
         public static .<TValue> IsNotNull<TValue>(this .<TValue> source)

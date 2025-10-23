@@ -1581,16 +1581,6 @@ namespace .Data
 }
 namespace .DataSources
 {
-    public static class DataSourceProcessor
-    {
-        public static .<.<object?[]>> ProcessGeneratorItemAsync(object? item) { }
-        public static .<object?[]> ProcessMethodDataSourceResult(object? result) { }
-        public static .<.<object?[]>> ProcessTypedArrayGeneratorItemAsync<T>(<.<T[]>> taskFunc) { }
-        public static .<.<object?[]>> ProcessTypedGeneratorItemAsync<T>(<.<T>> taskFunc) { }
-        public static object? ResolveTypedValue<T>(<T> func) { }
-        public static .<object?> ResolveTypedValueAsync<T>(<.<T>> taskFunc) { }
-        public static .<object?> ResolveValueAsync(object? value) { }
-    }
     public static class TestDataFormatter
     {
         public static string CreateDisplayName(.TestMetadata metadata, object?[] arguments, .TestDataCombination? dataCombination = null) { }
