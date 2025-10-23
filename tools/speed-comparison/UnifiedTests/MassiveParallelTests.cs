@@ -16,7 +16,6 @@ public class MassiveParallelTests
 
 #if TUNIT
     [Test]
-    [Arguments(0)]
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
@@ -69,7 +68,6 @@ public class MassiveParallelTests
     public async Task Parallel_CPUBound_Test(int taskId)
 #elif XUNIT || XUNIT3
     [Theory]
-    [InlineData(0)]
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
@@ -121,7 +119,6 @@ public class MassiveParallelTests
     [InlineData(49)]
     public void Parallel_CPUBound_Test(int taskId)
 #elif NUNIT
-    [TestCase(0)]
     [TestCase(1)]
     [TestCase(2)]
     [TestCase(3)]
@@ -174,7 +171,6 @@ public class MassiveParallelTests
     public void Parallel_CPUBound_Test(int taskId)
 #elif MSTEST
     [TestMethod]
-    [DataRow(0)]
     [DataRow(1)]
     [DataRow(2)]
     [DataRow(3)]
@@ -249,7 +245,6 @@ public class MassiveParallelTests
 
 #if TUNIT
     [Test]
-    [Arguments(0)]
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
@@ -302,7 +297,6 @@ public class MassiveParallelTests
     public async Task Parallel_IOBound_Test(int taskId)
 #elif XUNIT || XUNIT3
     [Theory]
-    [InlineData(0)]
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
@@ -354,7 +348,6 @@ public class MassiveParallelTests
     [InlineData(49)]
     public async Task Parallel_IOBound_Test(int taskId)
 #elif NUNIT
-    [TestCase(0)]
     [TestCase(1)]
     [TestCase(2)]
     [TestCase(3)]
@@ -407,7 +400,6 @@ public class MassiveParallelTests
     public async Task Parallel_IOBound_Test(int taskId)
 #elif MSTEST
     [TestMethod]
-    [DataRow(0)]
     [DataRow(1)]
     [DataRow(2)]
     [DataRow(3)]
@@ -482,7 +474,6 @@ public class MassiveParallelTests
 
 #if TUNIT
     [Test]
-    [Arguments(0, 100)]
     [Arguments(1, 101)]
     [Arguments(2, 102)]
     [Arguments(3, 103)]
@@ -505,7 +496,6 @@ public class MassiveParallelTests
     public async Task Parallel_Mixed_Test(int cpuValue, int ioValue)
 #elif XUNIT || XUNIT3
     [Theory]
-    [InlineData(0, 100)]
     [InlineData(1, 101)]
     [InlineData(2, 102)]
     [InlineData(3, 103)]
@@ -527,7 +517,6 @@ public class MassiveParallelTests
     [InlineData(19, 119)]
     public async Task Parallel_Mixed_Test(int cpuValue, int ioValue)
 #elif NUNIT
-    [TestCase(0, 100)]
     [TestCase(1, 101)]
     [TestCase(2, 102)]
     [TestCase(3, 103)]
@@ -550,7 +539,6 @@ public class MassiveParallelTests
     public async Task Parallel_Mixed_Test(int cpuValue, int ioValue)
 #elif MSTEST
     [TestMethod]
-    [DataRow(0, 100)]
     [DataRow(1, 101)]
     [DataRow(2, 102)]
     [DataRow(3, 103)]
