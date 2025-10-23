@@ -1843,9 +1843,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Indent();
             writer.AppendLine("// Arguments are unwrapped tuple elements, reconstruct the tuple");
 
-            // Build tuple reconstruction with proper casting
+            // Build tuple reconstruction with direct casting (AOT-safe)
             var tupleElements = singleTupleParam.TupleElements.Select((elem, i) =>
-                $"TUnit.Core.Helpers.CastHelper.Cast<{elem.Type.GloballyQualified()}>(args[{i}])").ToList();
+                $"({elem.Type.GloballyQualified()})args[{i}]").ToList();
             var tupleConstruction = $"({string.Join(", ", tupleElements)})";
 
             var methodCallReconstructed = hasCancellationToken
@@ -1866,8 +1866,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Indent();
             writer.AppendLine("// Rare case: tuple is wrapped as a single argument");
             var methodCallDirect = hasCancellationToken
-                ? $"instance.{methodName}(TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]), cancellationToken)"
-                : $"instance.{methodName}(TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]))";
+                ? $"instance.{methodName}(({singleTupleParam.GloballyQualified()})args[0], cancellationToken)"
+                : $"instance.{methodName}(({singleTupleParam.GloballyQualified()})args[0])";
             if (isAsync)
             {
                 writer.AppendLine($"await {methodCallDirect};");

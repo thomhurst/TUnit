@@ -122,7 +122,7 @@ internal sealed class BaseClass_Test_TestSource_GUID : global::TUnit.Core.Interf
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        await instance.Test((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -258,7 +258,7 @@ internal sealed class Tests_Test_TestSource_GUID : global::TUnit.Core.Interfaces
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        await instance.Test((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -394,7 +394,7 @@ internal sealed class Tests2_Test_TestSource_GUID : global::TUnit.Core.Interface
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        await instance.Test((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -530,7 +530,7 @@ internal sealed class Tests3_Test_TestSource_GUID : global::TUnit.Core.Interface
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        await instance.Test((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

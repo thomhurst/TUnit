@@ -73,7 +73,7 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_TestSource_GUI
                 switch (args.Length)
                 {
                     case 1:
-                        instance.DataSource_Class(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
+                        instance.DataSource_Class((global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -173,7 +173,7 @@ internal sealed class ClassDataSourceDrivenTests_DataSource_Class_Generic_TestSo
                 switch (args.Length)
                 {
                     case 1:
-                        instance.DataSource_Class_Generic(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
+                        instance.DataSource_Class_Generic((global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -273,7 +273,7 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_1_ClassDataS
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.IsInitialized_With_1_ClassDataSource(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]));
+                        await instance.IsInitialized_With_1_ClassDataSource((InitializableClass)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -379,7 +379,7 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_2_ClassDataS
                 switch (args.Length)
                 {
                     case 2:
-                        await instance.IsInitialized_With_2_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]));
+                        await instance.IsInitialized_With_2_ClassDataSources((InitializableClass)args[0], (InitializableClass)args[1]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
@@ -492,7 +492,7 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_3_ClassDataS
                 switch (args.Length)
                 {
                     case 3:
-                        await instance.IsInitialized_With_3_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[2]));
+                        await instance.IsInitialized_With_3_ClassDataSources((InitializableClass)args[0], (InitializableClass)args[1], (InitializableClass)args[2]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
@@ -612,7 +612,7 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_4_ClassDataS
                 switch (args.Length)
                 {
                     case 4:
-                        await instance.IsInitialized_With_4_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[3]));
+                        await instance.IsInitialized_With_4_ClassDataSources((InitializableClass)args[0], (InitializableClass)args[1], (InitializableClass)args[2], (InitializableClass)args[3]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 4 arguments, but got {args.Length}");
@@ -739,7 +739,7 @@ internal sealed class ClassDataSourceDrivenTests_IsInitialized_With_5_ClassDataS
                 switch (args.Length)
                 {
                     case 5:
-                        await instance.IsInitialized_With_5_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[4]));
+                        await instance.IsInitialized_With_5_ClassDataSources((InitializableClass)args[0], (InitializableClass)args[1], (InitializableClass)args[2], (InitializableClass)args[3], (InitializableClass)args[4]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 5 arguments, but got {args.Length}");

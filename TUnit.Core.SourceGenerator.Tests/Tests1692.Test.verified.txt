@@ -74,7 +74,7 @@ internal sealed class Tests_NullTest_TestSource_GUID : global::TUnit.Core.Interf
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.NullTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        await instance.NullTest((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

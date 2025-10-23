@@ -84,7 +84,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_TestSource_G
                 switch (args.Length)
                 {
                     case 1:
-                        instance.DataSource_Method(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        instance.DataSource_Method((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -195,7 +195,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method2_TestSource_
                 switch (args.Length)
                 {
                     case 1:
-                        instance.DataSource_Method2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        instance.DataSource_Method2((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -306,7 +306,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method_WithAction_T
                 switch (args.Length)
                 {
                     case 1:
-                        instance.DataSource_Method_WithAction(TUnit.Core.Helpers.CastHelper.Cast<global::System.Action>(args[0]));
+                        instance.DataSource_Method_WithAction((global::System.Action)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -432,7 +432,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method3_TestSource_
                 switch (args.Length)
                 {
                     case 1:
-                        instance.DataSource_Method3(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        instance.DataSource_Method3((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -585,7 +585,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_Method4_TestSource_
                 switch (args.Length)
                 {
                     case 1:
-                        instance.DataSource_Method4(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        instance.DataSource_Method4((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -696,7 +696,7 @@ internal sealed class MethodDataSourceDrivenTests_DataSource_WithBaseReturn_Test
                 switch (args.Length)
                 {
                     case 1:
-                        instance.DataSource_WithBaseReturn(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue>(args[0]));
+                        instance.DataSource_WithBaseReturn((global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -817,7 +817,7 @@ internal sealed class MethodDataSourceDrivenTests_EnumerableFuncArrayTest_TestSo
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.EnumerableFuncArrayTest(TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0]));
+                        await instance.EnumerableFuncArrayTest((string[])args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

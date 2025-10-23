@@ -158,7 +158,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
                 switch (args.Length)
                 {
                     case 1:
-                        instance.GenericMethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        instance.GenericMethodDataSource((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -271,7 +271,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
                 switch (args.Length)
                 {
                     case 1:
-                        instance.NonGenericMethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        instance.NonGenericMethodDataSource((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -707,7 +707,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_GenericMethodDataS
                 switch (args.Length)
                 {
                     case 1:
-                        instance.GenericMethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        instance.GenericMethodDataSource((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -820,7 +820,7 @@ internal sealed class InheritedTestsFromDifferentProjectTests_NonGenericMethodDa
                 switch (args.Length)
                 {
                     case 1:
-                        instance.NonGenericMethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        instance.NonGenericMethodDataSource((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

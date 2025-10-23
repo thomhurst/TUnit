@@ -87,7 +87,7 @@ internal sealed class AotDataSourceTest_TestWithDataSource_TestSource_GUID : glo
                 switch (args.Length)
                 {
                     case 3:
-                        instance.TestWithDataSource(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]));
+                        instance.TestWithDataSource((int)args[0], (int)args[1], (int)args[2]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");

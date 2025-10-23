@@ -73,7 +73,7 @@ internal sealed class ConstantArgumentsTests_String1_TestSource_GUID : global::T
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.String1(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        await instance.String1((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -172,7 +172,7 @@ internal sealed class ConstantArgumentsTests_Int_TestSource_GUID : global::TUnit
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Int(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        await instance.Int((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -271,7 +271,7 @@ internal sealed class ConstantArgumentsTests_Double_TestSource_GUID : global::TU
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Double(TUnit.Core.Helpers.CastHelper.Cast<double>(args[0]));
+                        await instance.Double((double)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -370,7 +370,7 @@ internal sealed class ConstantArgumentsTests_Float_TestSource_GUID : global::TUn
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Float(TUnit.Core.Helpers.CastHelper.Cast<float>(args[0]));
+                        await instance.Float((float)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -469,7 +469,7 @@ internal sealed class ConstantArgumentsTests_Long_TestSource_GUID : global::TUni
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Long(TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]));
+                        await instance.Long((long)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -568,7 +568,7 @@ internal sealed class ConstantArgumentsTests_UInt_TestSource_GUID : global::TUni
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.UInt(TUnit.Core.Helpers.CastHelper.Cast<uint>(args[0]));
+                        await instance.UInt((uint)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -667,7 +667,7 @@ internal sealed class ConstantArgumentsTests_ULong_TestSource_GUID : global::TUn
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.ULong(TUnit.Core.Helpers.CastHelper.Cast<ulong>(args[0]));
+                        await instance.ULong((ulong)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

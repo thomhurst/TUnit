@@ -73,7 +73,7 @@ internal sealed class Tests_Casted_Integer_To_Short_Converts_TestSource_GUID : g
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Casted_Integer_To_Short_Converts(TUnit.Core.Helpers.CastHelper.Cast<short>(args[0]));
+                        await instance.Casted_Integer_To_Short_Converts((short)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -172,7 +172,7 @@ internal sealed class Tests_Integer_To_Short_Converts_TestSource_GUID : global::
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Integer_To_Short_Converts(TUnit.Core.Helpers.CastHelper.Cast<short>(args[0]));
+                        await instance.Integer_To_Short_Converts((short)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

@@ -82,14 +82,14 @@ internal sealed class Tests_MethodDataSource_TestSource_GUID : global::TUnit.Cor
             },
             InstanceFactory = (typeArgs, args) =>
             {
-                return new global::TUnit.TestProject.Bugs._1821.Tests(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._1821.MyData>(args[0]));
+                return new global::TUnit.TestProject.Bugs._1821.Tests((global::TUnit.TestProject.Bugs._1821.MyData)args[0]);
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.MethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        await instance.MethodDataSource((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -197,14 +197,14 @@ internal sealed class Tests_MatrixDataSource_TestSource_GUID : global::TUnit.Cor
             },
             InstanceFactory = (typeArgs, args) =>
             {
-                return new global::TUnit.TestProject.Bugs._1821.Tests(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._1821.MyData>(args[0]));
+                return new global::TUnit.TestProject.Bugs._1821.Tests((global::TUnit.TestProject.Bugs._1821.MyData)args[0]);
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.MatrixDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        await instance.MatrixDataSource((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

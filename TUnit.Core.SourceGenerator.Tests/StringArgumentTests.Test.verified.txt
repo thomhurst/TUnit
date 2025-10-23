@@ -84,7 +84,7 @@ internal sealed class StringArgumentTests_Normal_TestSource_GUID : global::TUnit
                 switch (args.Length)
                 {
                     case 1:
-                        instance.Normal(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        instance.Normal((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -191,7 +191,7 @@ internal sealed class StringArgumentTests_Nullable_TestSource_GUID : global::TUn
                 switch (args.Length)
                 {
                     case 1:
-                        instance.Nullable(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        instance.Nullable((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

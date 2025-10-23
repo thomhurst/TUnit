@@ -75,7 +75,7 @@ internal sealed class DataDrivenTests_DataSource_Method_TestSource_GUID : global
                 switch (args.Length)
                 {
                     case 1:
-                        instance.DataSource_Method(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        instance.DataSource_Method((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -184,7 +184,7 @@ internal sealed class DataDrivenTests_DataSource_Method_TestSource_GUID : global
                 switch (args.Length)
                 {
                     case 2:
-                        instance.DataSource_Method(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]));
+                        instance.DataSource_Method((int)args[0], (string)args[1]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
@@ -286,7 +286,7 @@ internal sealed class DataDrivenTests_EnumValue_TestSource_GUID : global::TUnit.
                 switch (args.Length)
                 {
                     case 1:
-                        instance.EnumValue(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.TestEnum>(args[0]));
+                        instance.EnumValue((global::TUnit.TestProject.TestEnum)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -386,7 +386,7 @@ internal sealed class DataDrivenTests_NullValue_TestSource_GUID : global::TUnit.
                 switch (args.Length)
                 {
                     case 1:
-                        instance.NullValue(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        instance.NullValue((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -486,7 +486,7 @@ internal sealed class DataDrivenTests_EmptyString_TestSource_GUID : global::TUni
                 switch (args.Length)
                 {
                     case 1:
-                        instance.EmptyString(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        instance.EmptyString((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -586,7 +586,7 @@ internal sealed class DataDrivenTests_NonEmptyString_TestSource_GUID : global::T
                 switch (args.Length)
                 {
                     case 1:
-                        instance.NonEmptyString(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        instance.NonEmptyString((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -688,7 +688,7 @@ internal sealed class DataDrivenTests_BooleanString_TestSource_GUID : global::TU
                 switch (args.Length)
                 {
                     case 1:
-                        instance.BooleanString(TUnit.Core.Helpers.CastHelper.Cast<bool?>(args[0]));
+                        instance.BooleanString((bool?)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -788,7 +788,7 @@ internal sealed class DataDrivenTests_Type_TestSource_GUID : global::TUnit.Core.
                 switch (args.Length)
                 {
                     case 1:
-                        instance.Type(TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[0]));
+                        instance.Type((global::System.Type)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -888,7 +888,7 @@ internal sealed class DataDrivenTests_IntegerArray_TestSource_GUID : global::TUn
                 switch (args.Length)
                 {
                     case 1:
-                        instance.IntegerArray(TUnit.Core.Helpers.CastHelper.Cast<int[]>(args[0]));
+                        instance.IntegerArray((int[])args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -988,7 +988,7 @@ internal sealed class DataDrivenTests_IntMaxValue_TestSource_GUID : global::TUni
                 switch (args.Length)
                 {
                     case 1:
-                        instance.IntMaxValue(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        instance.IntMaxValue((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

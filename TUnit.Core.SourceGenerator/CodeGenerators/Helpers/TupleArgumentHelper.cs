@@ -7,44 +7,18 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 public static class TupleArgumentHelper
 {
     /// <summary>
-    /// Generates an AOT-compatible cast expression for converting from object? to the target type
+    /// Generates an AOT-compatible cast expression for converting from object? to the target type.
+    /// Since the source generator knows types at compile time, we can emit direct casts which are AOT-safe.
     /// </summary>
     private static string GenerateCastExpression(ITypeSymbol targetType, string sourceExpression)
     {
-        // Handle nullable types
-        ITypeSymbol underlyingTargetType;
-        if (targetType is INamedTypeSymbol namedType &&
-            (targetType.NullableAnnotation == NullableAnnotation.Annotated || targetType.SpecialType == SpecialType.System_Nullable_T))
-        {
-            underlyingTargetType = namedType.TypeArguments.FirstOrDefault() ?? targetType;
-        }
-        else
-        {
-            underlyingTargetType = targetType;
-        }
-
-        // For enums, generate a direct cast instead of using CastHelper.Cast which uses Enum.ToObject
-        // This avoids IL3050 warnings in AOT scenarios
-        if (underlyingTargetType.TypeKind == TypeKind.Enum)
-        {
-            return $"({targetType.GloballyQualified()}){sourceExpression}";
-        }
-
-        // For string, we can use a simple cast since it's already a reference type
-        if (targetType.SpecialType == SpecialType.System_String)
-        {
-            return $"({targetType.GloballyQualified()}){sourceExpression}";
-        }
-
-        // For value types (except enums which we handled above), use direct cast
-        // This works because boxing/unboxing is AOT-safe
-        if (underlyingTargetType.IsValueType && underlyingTargetType.TypeKind != TypeKind.Array)
-        {
-            return $"({targetType.GloballyQualified()}){sourceExpression}";
-        }
-
-        // For arrays and complex types, fall back to CastHelper which has proper AOT handling
-        return $"TUnit.Core.Helpers.CastHelper.Cast<{targetType.GloballyQualified()}>({sourceExpression})";
+        // For all types, generate a direct cast since the source generator knows the exact type at compile time.
+        // This is AOT-safe because:
+        // 1. The C# compiler handles boxing/unboxing automatically
+        // 2. No reflection is needed - the cast is resolved at compile time
+        // 3. If a cast fails at runtime, InvalidCastException is thrown (expected behavior)
+        // 4. For custom conversions, users can register converters in AotConverterRegistry
+        return $"({targetType.GloballyQualified()}){sourceExpression}";
     }
 
     public static List<string> GenerateArgumentAccess(ITypeSymbol parameterType, string argumentsArrayName, int baseIndex)

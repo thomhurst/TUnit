@@ -72,7 +72,7 @@ internal sealed class MyTests_Test1_TestSource_GUID : global::TUnit.Core.Interfa
             },
             InstanceFactory = (typeArgs, args) =>
             {
-                return new global::TUnit.TestProject.Bugs._1589.MyTests(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._1589.MyFixture>(args[0]));
+                return new global::TUnit.TestProject.Bugs._1589.MyTests((global::TUnit.TestProject.Bugs._1589.MyFixture)args[0]);
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {

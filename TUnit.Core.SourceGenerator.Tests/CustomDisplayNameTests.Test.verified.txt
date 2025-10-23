@@ -290,7 +290,7 @@ internal sealed class CustomDisplayNameTests_Test3_TestSource_GUID : global::TUn
                 switch (args.Length)
                 {
                     case 3:
-                        await instance.Test3(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
+                        await instance.Test3((string)args[0], (int)args[1], (bool)args[2]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
@@ -414,7 +414,7 @@ internal sealed class CustomDisplayNameTests_MethodDataSourceTest_TestSource_GUI
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.MethodDataSourceTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        await instance.MethodDataSourceTest((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -536,7 +536,7 @@ internal sealed class CustomDisplayNameTests_TestParameterNamePrefixBug_TestSour
                 switch (args.Length)
                 {
                     case 2:
-                        await instance.TestParameterNamePrefixBug(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]));
+                        await instance.TestParameterNamePrefixBug((int)args[0], (string)args[1]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
@@ -648,7 +648,7 @@ internal sealed class CustomDisplayNameTests_PasswordTest_TestSource_GUID : glob
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.PasswordTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        await instance.PasswordTest((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

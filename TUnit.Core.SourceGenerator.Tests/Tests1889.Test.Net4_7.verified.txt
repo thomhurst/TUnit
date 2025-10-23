@@ -156,7 +156,7 @@ internal sealed class DerivedTest_Test2_TestSource_GUID : global::TUnit.Core.Int
                 switch (args.Length)
                 {
                     case 1:
-                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]));
+                        instance.Test2((bool)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -258,7 +258,7 @@ internal sealed class DerivedTest_Test3_TestSource_GUID : global::TUnit.Core.Int
                 switch (args.Length)
                 {
                     case 1:
-                        instance.Test3(TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]));
+                        instance.Test3((bool)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

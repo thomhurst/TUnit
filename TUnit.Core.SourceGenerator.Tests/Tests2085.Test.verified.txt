@@ -73,7 +73,7 @@ internal sealed class Tests_Double_SpecialConsts_TestSource_GUID : global::TUnit
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Double_SpecialConsts(TUnit.Core.Helpers.CastHelper.Cast<double>(args[0]));
+                        await instance.Double_SpecialConsts((double)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -172,7 +172,7 @@ internal sealed class Tests_Float_SpecialConsts_TestSource_GUID : global::TUnit.
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Float_SpecialConsts(TUnit.Core.Helpers.CastHelper.Cast<float>(args[0]));
+                        await instance.Float_SpecialConsts((float)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

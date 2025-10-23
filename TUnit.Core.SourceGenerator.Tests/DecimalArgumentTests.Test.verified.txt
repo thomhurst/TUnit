@@ -82,7 +82,7 @@ internal sealed class DecimalArgumentTests_Transfer_TestSource_GUID : global::TU
                 switch (args.Length)
                 {
                     case 2:
-                        await instance.Transfer(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]));
+                        await instance.Transfer((decimal)args[0], (decimal)args[1]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
@@ -181,7 +181,7 @@ internal sealed class DecimalArgumentTests_SimpleDecimal_TestSource_GUID : globa
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.SimpleDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
+                        await instance.SimpleDecimal((decimal)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -280,7 +280,7 @@ internal sealed class DecimalArgumentTests_SmallDecimal_TestSource_GUID : global
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.SmallDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
+                        await instance.SmallDecimal((decimal)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -379,7 +379,7 @@ internal sealed class DecimalArgumentTests_MaxDecimal_TestSource_GUID : global::
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.MaxDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
+                        await instance.MaxDecimal((decimal)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -478,7 +478,7 @@ internal sealed class DecimalArgumentTests_MinDecimal_TestSource_GUID : global::
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.MinDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
+                        await instance.MinDecimal((decimal)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -577,7 +577,7 @@ internal sealed class DecimalArgumentTests_ExplicitDecimalValue_TestSource_GUID 
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.ExplicitDecimalValue(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
+                        await instance.ExplicitDecimalValue((decimal)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -690,7 +690,7 @@ internal sealed class DecimalArgumentTests_MultipleDecimals_TestSource_GUID : gl
                 switch (args.Length)
                 {
                     case 3:
-                        await instance.MultipleDecimals(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2]));
+                        await instance.MultipleDecimals((decimal)args[0], (decimal)args[1], (decimal)args[2]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
@@ -791,7 +791,7 @@ internal sealed class DecimalArgumentTests_Test_TestSource_GUID : global::TUnit.
                 switch (args.Length)
                 {
                     case 1:
-                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
+                        instance.Test((decimal)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -928,7 +928,7 @@ internal sealed class DecimalArgumentTests_TransactionDiscountCalculations_TestS
                 switch (args.Length)
                 {
                     case 6:
-                        instance.TransactionDiscountCalculations(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[5]));
+                        instance.TransactionDiscountCalculations((decimal)args[0], (decimal)args[1], (decimal)args[2], (decimal)args[3], (decimal)args[4], (bool)args[5]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 6 arguments, but got {args.Length}");
@@ -1028,7 +1028,7 @@ internal sealed class DecimalArgumentTests_Equality3_TestSource_GUID : global::T
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Equality3(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
+                        await instance.Equality3((decimal)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -1127,7 +1127,7 @@ internal sealed class DecimalArgumentTests_Equality4_TestSource_GUID : global::T
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Equality4(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
+                        await instance.Equality4((decimal)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -1226,7 +1226,7 @@ internal sealed class DecimalArgumentTests_TestMethod_TestSource_GUID : global::
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.TestMethod(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
+                        await instance.TestMethod((decimal)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

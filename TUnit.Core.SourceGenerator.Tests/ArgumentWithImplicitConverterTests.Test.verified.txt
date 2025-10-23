@@ -75,7 +75,7 @@ internal sealed class ArgumentWithImplicitConverterTests_Explicit_TestSource_GUI
                 switch (args.Length)
                 {
                     case 1:
-                        instance.Explicit(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ExplicitInteger>(args[0]));
+                        instance.Explicit((global::TUnit.TestProject.ExplicitInteger)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -177,7 +177,7 @@ internal sealed class ArgumentWithImplicitConverterTests_Implicit_TestSource_GUI
                 switch (args.Length)
                 {
                     case 1:
-                        instance.Implicit(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ImplicitInteger>(args[0]));
+                        instance.Implicit((global::TUnit.TestProject.ImplicitInteger)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

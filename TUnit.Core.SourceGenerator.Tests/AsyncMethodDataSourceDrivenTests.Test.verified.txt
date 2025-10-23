@@ -94,7 +94,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Sin
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.AsyncMethodDataSource_SingleValue(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        await instance.AsyncMethodDataSource_SingleValue((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -221,7 +221,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Tup
                 switch (args.Length)
                 {
                     case 2:
-                        await instance.AsyncMethodDataSource_Tuples(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]));
+                        await instance.AsyncMethodDataSource_Tuples((int)args[0], (string)args[1]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
@@ -341,7 +341,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Enu
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.AsyncMethodDataSource_Enumerable(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        await instance.AsyncMethodDataSource_Enumerable((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -461,7 +461,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Fun
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.AsyncMethodDataSource_Func(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        await instance.AsyncMethodDataSource_Func((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -581,7 +581,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Wit
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.AsyncMethodDataSource_WithArguments(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        await instance.AsyncMethodDataSource_WithArguments((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -701,7 +701,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_AsyncMethodDataSource_Ext
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.AsyncMethodDataSource_ExternalClass(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        await instance.AsyncMethodDataSource_ExternalClass((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -821,7 +821,7 @@ internal sealed class AsyncMethodDataSourceDrivenTests_ValueTaskMethodDataSource
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.ValueTaskMethodDataSource_SingleValue(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                        await instance.ValueTaskMethodDataSource_SingleValue((int)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

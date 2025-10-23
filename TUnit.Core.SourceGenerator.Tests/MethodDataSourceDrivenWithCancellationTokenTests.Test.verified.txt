@@ -193,7 +193,7 @@ internal sealed class MethodDataSourceDrivenWithCancellationTokenTests_MyTest_Te
                 switch (args.Length)
                 {
                     case 1:
-                        instance.MyTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
+                        instance.MyTest((int)args[0], context?.CancellationToken ?? System.Threading.CancellationToken.None);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");

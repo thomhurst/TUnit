@@ -143,7 +143,7 @@ internal sealed class Tests_Eight_Args_TestSource_GUID : global::TUnit.Core.Inte
                 switch (args.Length)
                 {
                     case 8:
-                        instance.Eight_Args(TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[6]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[7]));
+                        instance.Eight_Args((bool)args[0], (string)args[1], (string)args[2], (string)args[3], (string)args[4], (string)args[5], (string)args[6], (string)args[7]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 8 arguments, but got {args.Length}");
@@ -369,7 +369,7 @@ internal sealed class Tests_SixteenArgs_TestSource_GUID : global::TUnit.Core.Int
                 switch (args.Length)
                 {
                     case 16:
-                        instance.SixteenArgs(TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[6]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[7]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[8]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[9]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[10]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[11]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[12]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[13]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[14]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[15]));
+                        instance.SixteenArgs((bool)args[0], (string)args[1], (string)args[2], (string)args[3], (string)args[4], (string)args[5], (string)args[6], (string)args[7], (string)args[8], (string)args[9], (string)args[10], (string)args[11], (string)args[12], (string)args[13], (string)args[14], (string)args[15]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 16 arguments, but got {args.Length}");

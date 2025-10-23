@@ -100,7 +100,7 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test1_TestSource_GUID :
             },
             InstanceFactory = (typeArgs, args) =>
             {
-                return new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>(args[4]));
+                return new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests((global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1)args[0], (global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2)args[1], (global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3)args[2], (global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4)args[3], (global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5)args[4]);
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -227,7 +227,7 @@ internal sealed class MultipleClassDataSourceDrivenTests_Test2_TestSource_GUID :
             },
             InstanceFactory = (typeArgs, args) =>
             {
-                return new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>(args[4]));
+                return new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests((global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1)args[0], (global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2)args[1], (global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3)args[2], (global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4)args[3], (global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5)args[4]);
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {

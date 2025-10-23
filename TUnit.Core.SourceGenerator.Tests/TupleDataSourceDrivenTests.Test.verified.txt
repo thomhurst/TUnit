@@ -98,7 +98,7 @@ internal sealed class TupleDataSourceDrivenTests_DataSource_TupleMethod_TestSour
                 switch (args.Length)
                 {
                     case 3:
-                        instance.DataSource_TupleMethod(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
+                        instance.DataSource_TupleMethod((int)args[0], (string)args[1], (bool)args[2]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");

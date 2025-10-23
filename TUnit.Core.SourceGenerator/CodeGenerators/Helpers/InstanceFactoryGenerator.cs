@@ -143,9 +143,9 @@ public static class InstanceFactoryGenerator
                 
                 var parameterType = parameterTypes[i];
                 var argAccess = $"args[{i}]";
-                
-                // Use CastHelper which now has AOT converter registry support
-                writer.Append($"TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");
+
+                // Use direct cast for AOT compatibility (source generator knows types at compile time)
+                writer.Append($"({parameterType.GloballyQualified()}){argAccess}");
             }
 
             writer.Append(")");

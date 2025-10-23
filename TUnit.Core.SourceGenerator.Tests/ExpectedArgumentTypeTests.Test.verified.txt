@@ -92,7 +92,7 @@ internal sealed class ExpectedArgumentTypeTests_TypedArguments_TestSource_GUID :
                 switch (args.Length)
                 {
                     case 2:
-                        await instance.TypedArguments(TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1]));
+                        await instance.TypedArguments((object)args[0], (global::System.Type)args[1]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
@@ -212,7 +212,7 @@ internal sealed class ExpectedArgumentTypeTests_EnumTypes_TestSource_GUID : glob
                 switch (args.Length)
                 {
                     case 3:
-                        await instance.EnumTypes(TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[2]));
+                        await instance.EnumTypes((object)args[0], (global::System.Type)args[1], (global::System.Type)args[2]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");

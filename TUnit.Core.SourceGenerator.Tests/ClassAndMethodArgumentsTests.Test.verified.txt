@@ -71,7 +71,7 @@ internal sealed class ClassAndMethodArgumentsTests_Simple_TestSource_GUID : glob
             },
             InstanceFactory = (typeArgs, args) =>
             {
-                return new global::TUnit.TestProject.ClassAndMethodArgumentsTests(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                return new global::TUnit.TestProject.ClassAndMethodArgumentsTests((string)args[0]);
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
@@ -181,14 +181,14 @@ internal sealed class ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GU
             },
             InstanceFactory = (typeArgs, args) =>
             {
-                return new global::TUnit.TestProject.ClassAndMethodArgumentsTests(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                return new global::TUnit.TestProject.ClassAndMethodArgumentsTests((string)args[0]);
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.WithMethodLevel(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        await instance.WithMethodLevel((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -298,14 +298,14 @@ internal sealed class ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_G
             },
             InstanceFactory = (typeArgs, args) =>
             {
-                return new global::TUnit.TestProject.ClassAndMethodArgumentsTests(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                return new global::TUnit.TestProject.ClassAndMethodArgumentsTests((string)args[0]);
             },
             InvokeTypedTest = async (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.IgnoreParameters(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                        await instance.IgnoreParameters((string)args[0]);
                         break;
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
