@@ -10,7 +10,6 @@ namespace TUnit.Engine.Logging;
 public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger, VerbosityService verbosityService, LogLevelProvider logLevelProvider)
     : IOutputDeviceDataProducer, Core.Logging.ILogger
 {
-    private readonly bool _hideTestOutput = verbosityService.HideTestOutput;
     private readonly LogLevel _minimumLogLevel = logLevelProvider.LogLevel;
 
     private readonly MTPLoggerAdapter _adapter = new(logger);
@@ -91,7 +90,7 @@ public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevi
 
     public bool IsEnabled(LogLevel logLevel)
     {
-        return !_hideTestOutput && logLevel >= _minimumLogLevel && logger.IsEnabled(MTPLoggerAdapter.Map(logLevel));
+        return logLevel >= _minimumLogLevel;
     }
 
     public async Task LogErrorAsync(string message)
