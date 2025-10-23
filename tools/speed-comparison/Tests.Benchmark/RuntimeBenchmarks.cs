@@ -47,10 +47,10 @@ public class RuntimeBenchmarks : BenchmarkBase
     public async Task NUnit()
     {
         var binPath = Path.Combine(UnifiedPath, "bin", "Release-NUNIT", Framework);
-        var dllPath = Path.Combine(binPath, "UnifiedTests.dll");
+        var exeName = GetExecutableFileName();
 
-        await Cli.Wrap("dotnet")
-            .WithArguments(["vstest", dllPath, $"--TestCaseFilter:FullyQualifiedName~{ClassName}"])
+        await Cli.Wrap(Path.Combine(binPath, exeName))
+            .WithArguments(["--filter", $"FullyQualifiedName~{ClassName}"])
             .WithStandardOutputPipe(PipeTarget.ToStream(OutputStream))
             .ExecuteBufferedAsync();
     }
