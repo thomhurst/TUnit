@@ -99,7 +99,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             extension,
             outputDevice,
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
-            VerbosityService,
             logLevelProvider));
 
         // Create initialization services early as they're needed by other services

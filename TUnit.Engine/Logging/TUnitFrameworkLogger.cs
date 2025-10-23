@@ -7,7 +7,7 @@ using LogLevel = TUnit.Core.Logging.LogLevel;
 
 namespace TUnit.Engine.Logging;
 
-public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger, VerbosityService verbosityService, LogLevelProvider logLevelProvider)
+public class TUnitFrameworkLogger(IExtension extension, IOutputDevice outputDevice, ILogger logger, LogLevelProvider logLevelProvider)
     : IOutputDeviceDataProducer, Core.Logging.ILogger
 {
     private readonly LogLevel _minimumLogLevel = logLevelProvider.LogLevel;
