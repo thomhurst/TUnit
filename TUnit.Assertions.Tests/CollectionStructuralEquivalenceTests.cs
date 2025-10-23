@@ -186,6 +186,91 @@ public class CollectionStructuralEquivalenceTests
 
         await TUnitAssert.That(listA).IsEquivalentTo(listB).Using(StringComparer.OrdinalIgnoreCase);
     }
+
+    [Test]
+    public async Task Collections_With_Nested_Collections_Same_Order_Are_Equivalent()
+    {
+        var actual = new List<Person>
+        {
+            new()
+            {
+                Name = "Parent1",
+                Children =
+                [
+                    new Person { Name = "Child1", Children = [] },
+                    new Person { Name = "Child2", Children = [] }
+                ]
+            },
+            new()
+            {
+                Name = "Parent2",
+                Children = [new Person { Name = "Child3", Children = [] }]
+            }
+        };
+        
+        var expected = new List<Person>
+        {
+            new()
+            {
+                Name = "Parent1",
+                Children =
+                [
+                    new Person { Name = "Child1", Children = [] },
+                    new Person { Name = "Child2", Children = [] }
+                ]
+            },
+            new()
+            {
+                Name = "Parent2",
+                Children = [new Person { Name = "Child3", Children = [] }]
+            }
+        };
+        
+        await TUnitAssert.That(actual).IsEquivalentTo(expected);
+    }
+
+    [Test]
+    public async Task Collections_With_Nested_Collections_Different_Order_Are_Equivalent()
+    {
+        var actual = new List<Person>
+        {
+            new()
+            {
+                Name = "Parent1",
+                Children =
+                [
+                    new Person { Name = "Child2", Children = [] },
+                    new Person { Name = "Child1", Children = [] }
+                ]
+            },
+            new()
+            {
+                Name = "Parent2",
+                Children = [new Person { Name = "Child3", Children = [] }]
+            }
+        };
+        
+        var expected = new List<Person>
+        {
+            new()
+            {
+                Name = "Parent1",
+                Children =
+                [
+                    new Person { Name = "Child1", Children = [] },
+                    new Person { Name = "Child2", Children = [] }
+                ]
+            },
+            new()
+            {
+                Name = "Parent2",
+                Children = [new Person { Name = "Child3", Children = [] }]
+            }
+        };
+        
+        await TUnitAssert.That(actual).IsEquivalentTo(expected);
+    }
+
     public class Message
     {
         public string? Content { get; set; }
@@ -231,5 +316,11 @@ public class CollectionStructuralEquivalenceTests
         {
             return Content.GetHashCode();
         }
+    }
+
+    public class Person
+    {
+        public required string Name { get; init; }
+        public required List<Person> Children { get; init; }
     }
 }
