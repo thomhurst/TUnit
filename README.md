@@ -2,7 +2,7 @@
 
 # 🚀 The Modern Testing Framework for .NET
 
-**TUnit** is a next-generation testing framework for C# that outpaces traditional frameworks with **source-generated tests**, **parallel execution by default**, and **Native AOT support**. Built on the modern Microsoft.Testing.Platform, TUnit delivers faster test runs, better developer experience, and unmatched flexibility.
+**TUnit** is a modern testing framework for .NET that uses **source-generated tests**, **parallel execution by default**, and **Native AOT support**. Built on Microsoft.Testing.Platform, it's faster than traditional reflection-based frameworks and gives you more control over how your tests run.
 
 <div align="center">
 
@@ -14,7 +14,7 @@
 
 </div>
 
-## ⚡ Why Choose TUnit?
+## Why TUnit?
 
 | Feature | Traditional Frameworks | **TUnit** |
 |---------|----------------------|-----------|
@@ -22,33 +22,33 @@
 | Execution Speed | ❌ Sequential by default | ✅ **Parallel by default** |
 | Modern .NET | ⚠️ Limited AOT support | ✅ **Full Native AOT & trimming** |
 | Test Dependencies | ❌ Not supported | ✅ **`[DependsOn]` chains** |
-| Resource Management | ❌ Manual lifecycle | ✅ **Intelligent cleanup** |
+| Resource Management | ❌ Manual lifecycle | ✅ **Automatic cleanup** |
 
-⚡ **Parallel by Default** - Tests run concurrently with intelligent dependency management
+**Parallel by Default** - Tests run concurrently with smart dependency management
 
-🎯 **Compile-Time Discovery** - Know your test structure before runtime
+**Compile-Time Discovery** - Test structure is known before runtime
 
-🔧 **Modern .NET Ready** - Native AOT, trimming, and latest .NET features
+**Modern .NET Ready** - Native AOT, trimming, and latest .NET features
 
-🎭 **Extensible** - Customize data sources, attributes, and test behavior
+**Extensible** - Customize data sources, attributes, and test behavior
 
 ---
 
 <div align="center">
 
-## 📚 **[Complete Documentation & Learning Center](https://tunit.dev)**
+## **[Documentation](https://tunit.dev)**
 
-**🚀 New to TUnit?** Start with our **[Getting Started Guide](https://tunit.dev/docs/getting-started/installation)**
+**New to TUnit?** Start with the **[Getting Started Guide](https://tunit.dev/docs/getting-started/installation)**
 
-**🔄 Migrating?** See our **[Migration Guides](https://tunit.dev/docs/migration/xunit)**
+**Migrating?** See the **[Migration Guides](https://tunit.dev/docs/migration/xunit)**
 
-**🎯 Advanced Features?** Explore **[Data-Driven Testing](https://tunit.dev/docs/test-authoring/arguments)**, **[Test Dependencies](https://tunit.dev/docs/test-authoring/depends-on)**, and **[Parallelism Control](https://tunit.dev/docs/parallelism/not-in-parallel)**
+**Learn more:** **[Data-Driven Testing](https://tunit.dev/docs/test-authoring/arguments)**, **[Test Dependencies](https://tunit.dev/docs/test-authoring/depends-on)**, **[Parallelism Control](https://tunit.dev/docs/parallelism/not-in-parallel)**
 
 </div>
 
 ---
 
-## 🏁 Quick Start
+## Quick Start
 
 ### Using the Project Template (Recommended)
 ```bash
@@ -61,54 +61,54 @@ dotnet new TUnit -n "MyTestProject"
 dotnet add package TUnit --prerelease
 ```
 
-📖 **[📚 Complete Documentation & Guides](https://tunit.dev)** - Everything you need to master TUnit
+📖 **[Complete Documentation & Guides](https://tunit.dev)**
 
-## ✨ Key Features
+## Key Features
 
 <table>
 <tr>
 <td width="50%">
 
-**🚀 Performance & Modern Platform**
-- 🔥 Source-generated tests (no reflection)
-- ⚡ Parallel execution by default
-- 🚀 Native AOT & trimming support
-- 📈 Optimized for performance
+**Performance & Modern Platform**
+- Source-generated tests (no reflection)
+- Parallel execution by default
+- Native AOT & trimming support
+- Optimized for speed
 
 </td>
 <td width="50%">
 
-**🎯 Advanced Test Control**
-- 🔗 Test dependencies with `[DependsOn]`
-- 🎛️ Parallel limits & custom scheduling
-- 🛡️ Built-in analyzers & compile-time checks
-- 🎭 Custom attributes & extensible conditions
+**Advanced Test Control**
+- Test dependencies with `[DependsOn]`
+- Parallel limits & custom scheduling
+- Built-in analyzers & compile-time checks
+- Custom attributes & extensible conditions
 
 </td>
 </tr>
 <tr>
 <td>
 
-**📊 Rich Data & Assertions**
-- 📋 Multiple data sources (`[Arguments]`, `[Matrix]`, `[ClassData]`)
-- ✅ Fluent async assertions
-- 🔄 Smart retry logic & conditional execution
-- 📝 Rich test metadata & context
+**Data & Assertions**
+- Multiple data sources (`[Arguments]`, `[Matrix]`, `[ClassData]`)
+- Fluent async assertions
+- Retry logic & conditional execution
+- Test metadata & context
 
 </td>
 <td>
 
-**🔧 Developer Experience**
-- 💉 Full dependency injection support
-- 🪝 Comprehensive lifecycle hooks
-- 🎯 IDE integration (VS, Rider, VS Code)
-- 📚 Extensive documentation & examples
+**Developer Experience**
+- Full dependency injection support
+- Lifecycle hooks
+- IDE integration (VS, Rider, VS Code)
+- Documentation & examples
 
 </td>
 </tr>
 </table>
 
-## 📝 Simple Test Example
+## Simple Test Example
 
 ```csharp
 [Test]
@@ -130,7 +130,7 @@ public async Task User_Creation_Should_Set_Timestamp()
 }
 ```
 
-## 🎯 Data-Driven Testing
+## Data-Driven Testing
 
 ```csharp
 [Test]
@@ -155,7 +155,7 @@ public async Task Database_Operations_Work(
 }
 ```
 
-## 🔗 Advanced Test Orchestration
+## Advanced Test Orchestration
 
 ```csharp
 [Before(Class)]
@@ -199,7 +199,7 @@ public class LoadTestParallelLimit : IParallelLimit
 }
 ```
 
-## 🔧 Smart Test Control
+## Custom Test Control
 
 ```csharp
 // Custom conditional execution
@@ -222,13 +222,13 @@ public class RetryOnHttpErrorAttribute : RetryAttribute
 }
 ```
 
-## 🎯 Perfect For Every Testing Scenario
+## Common Use Cases
 
 <table>
 <tr>
 <td width="33%">
 
-### 🧪 **Unit Testing**
+### **Unit Testing**
 ```csharp
 [Test]
 [Arguments(1, 2, 3)]
@@ -244,7 +244,7 @@ public async Task Calculate_Sum(int a, int b, int expected)
 </td>
 <td width="33%">
 
-### 🔗 **Integration Testing**
+### **Integration Testing**
 ```csharp
 [Test, DependsOn(nameof(CreateUser))]
 public async Task Login_After_Registration()
@@ -254,12 +254,12 @@ public async Task Login_After_Registration()
     await Assert.That(result.IsSuccess).IsTrue();
 }
 ```
-**Stateful workflows made simple**
+**Handle stateful workflows**
 
 </td>
 <td width="33%">
 
-### ⚡ **Load Testing**
+### **Load Testing**
 ```csharp
 [Test]
 [ParallelLimit<LoadTestLimit>]
@@ -276,22 +276,20 @@ public async Task API_Handles_Concurrent_Requests()
 </tr>
 </table>
 
-## 🚀 What Makes TUnit Different?
+## What Makes TUnit Different?
 
-### **Compile-Time Intelligence**
-Tests are discovered at build time, not runtime - enabling faster discovery, better IDE integration, and precise resource lifecycle management.
+### **Compile-Time Test Discovery**
+Tests are discovered at build time, not runtime. This means faster discovery, better IDE integration, and more predictable resource management.
 
-### **Parallel-First Architecture**
-Built for concurrency from day one with `[DependsOn]` for test chains, `[ParallelLimit]` for resource control, and intelligent scheduling.
+### **Parallel by Default**
+Tests run in parallel by default. Use `[DependsOn]` to chain tests together, and `[ParallelLimit]` to control resource usage.
 
-### **Extensible by Design**
-The `DataSourceGenerator<T>` pattern and custom attribute system let you extend TUnit's capabilities without modifying core framework code.
+### **Extensible**
+The `DataSourceGenerator<T>` pattern and custom attribute system let you extend TUnit without modifying the framework.
 
-## 🏆 Community & Ecosystem
+## Community & Ecosystem
 
 <div align="center">
-
-**🌟 Join thousands of developers modernizing their testing**
 
 [![Downloads](https://img.shields.io/nuget/dt/TUnit?label=Downloads&color=blue)](https://www.nuget.org/packages/TUnit/)
 [![Contributors](https://img.shields.io/github/contributors/thomhurst/TUnit?label=Contributors)](https://github.com/thomhurst/TUnit/graphs/contributors)
@@ -299,15 +297,15 @@ The `DataSourceGenerator<T>` pattern and custom attribute system let you extend 
 
 </div>
 
-### 🤝 **Active Community**
-- 📚 **[Official Documentation](https://tunit.dev)** - Comprehensive guides, tutorials, and API reference
-- 💬 **[GitHub Discussions](https://github.com/thomhurst/TUnit/discussions)** - Get help and share ideas
-- 🐛 **[Issue Tracking](https://github.com/thomhurst/TUnit/issues)** - Report bugs and request features
-- 📢 **[Release Notes](https://github.com/thomhurst/TUnit/releases)** - Stay updated with latest improvements
+### **Resources**
+- **[Official Documentation](https://tunit.dev)** - Guides, tutorials, and API reference
+- **[GitHub Discussions](https://github.com/thomhurst/TUnit/discussions)** - Get help and share ideas
+- **[Issue Tracking](https://github.com/thomhurst/TUnit/issues)** - Report bugs and request features
+- **[Release Notes](https://github.com/thomhurst/TUnit/releases)** - Latest updates and changes
 
-## 🛠️ IDE Support
+## IDE Support
 
-TUnit works seamlessly across all major .NET development environments:
+TUnit works with all major .NET IDEs:
 
 ### Visual Studio (2022 17.13+)
 ✅ **Fully supported** - No additional configuration needed for latest versions
@@ -317,7 +315,7 @@ TUnit works seamlessly across all major .NET development environments:
 ### JetBrains Rider
 ✅ **Fully supported**
 
-⚙️ **Setup**: "Enable Testing Platform support" in Settings > Build, Execution, Deployment > Unit Testing > Testing Platform
+⚙️ **Setup**: Enable "Testing Platform support" in Settings > Build, Execution, Deployment > Unit Testing > Testing Platform
 
 ### Visual Studio Code
 ✅ **Fully supported**
@@ -327,22 +325,22 @@ TUnit works seamlessly across all major .NET development environments:
 ### Command Line
 ✅ **Full CLI support** - Works with `dotnet test`, `dotnet run`, and direct executable execution
 
-## 📦 Package Options
+## Package Options
 
 | Package | Use Case |
 |---------|----------|
-| **`TUnit`** | ⭐ **Start here** - Complete testing framework (includes Core + Engine + Assertions) |
-| **`TUnit.Core`** | 📚 Test libraries and shared components (no execution engine) |
-| **`TUnit.Engine`** | 🚀 Test execution engine and adapter (for test projects) |
-| **`TUnit.Assertions`** | ✅ Standalone assertions (works with any test framework) |
-| **`TUnit.Playwright`** | 🎭 Playwright integration with automatic lifecycle management |
+| **`TUnit`** | **Start here** - Complete testing framework (includes Core + Engine + Assertions) |
+| **`TUnit.Core`** | Test libraries and shared components (no execution engine) |
+| **`TUnit.Engine`** | Test execution engine and adapter (for test projects) |
+| **`TUnit.Assertions`** | Standalone assertions (works with any test framework) |
+| **`TUnit.Playwright`** | Playwright integration with automatic lifecycle management |
 
-## 🎯 Migration from Other Frameworks
+## Migration from Other Frameworks
 
-**Coming from NUnit or xUnit?** TUnit maintains familiar syntax while adding modern capabilities:
+**Coming from NUnit or xUnit?** TUnit uses familiar syntax with some additions:
 
 ```csharp
-// Enhanced with TUnit's advanced features
+// TUnit test with dependency management and retries
 [Test]
 [Arguments("value1")]
 [Arguments("value2")]
@@ -351,73 +349,28 @@ TUnit works seamlessly across all major .NET development environments:
 public async Task Modern_TUnit_Test(string value) { }
 ```
 
-📖 **Need help migrating?** Check our detailed **[Migration Guides](https://tunit.dev/docs/migration/xunit)** with step-by-step instructions for xUnit, NUnit, and MSTest.
+📖 **Need help migrating?** Check our **[Migration Guides](https://tunit.dev/docs/migration/xunit)** for xUnit, NUnit, and MSTest.
 
 
-## 💡 Current Status
+## Current Status
 
-The API is mostly stable, but may have some changes based on feedback or issues before v1.0 release.
+The API is mostly stable, but may have some changes based on feedback before the v1.0 release.
 
 ---
 
 <div align="center">
 
-## 🚀 Ready to Experience the Future of .NET Testing?
-
-### ⚡ **Start in 30 Seconds**
+## Getting Started
 
 ```bash
-# Create a new test project with examples
-dotnet new install TUnit.Templates && dotnet new TUnit -n "MyAwesomeTests"
+# Create a new test project
+dotnet new install TUnit.Templates && dotnet new TUnit -n "MyTestProject"
 
 # Or add to existing project
 dotnet add package TUnit --prerelease
 ```
 
-### 🎯 **Why Wait? Join the Movement**
-
-<table>
-<tr>
-<td align="center" width="25%">
-
-### 📈 **Performance**
-**Optimized execution**
-**Parallel by default**
-**Zero reflection overhead**
-
-</td>
-<td align="center" width="25%">
-
-### 🔮 **Future-Ready**
-**Native AOT support**
-**Latest .NET features**
-**Source generation**
-
-</td>
-<td align="center" width="25%">
-
-### 🛠️ **Developer Experience**
-**Compile-time checks**
-**Rich IDE integration**
-**Intelligent debugging**
-
-</td>
-<td align="center" width="25%">
-
-### 🎭 **Flexibility**
-**Test dependencies**
-**Custom attributes**
-**Extensible architecture**
-
-</td>
-</tr>
-</table>
-
----
-
-**📖 Learn More**: [tunit.dev](https://tunit.dev) | **💬 Get Help**: [GitHub Discussions](https://github.com/thomhurst/TUnit/discussions) | **⭐ Show Support**: [Star on GitHub](https://github.com/thomhurst/TUnit)
-
-*TUnit is actively developed and production-ready. Join our growing community of developers who've made the switch!*
+**Learn More**: [tunit.dev](https://tunit.dev) | **Get Help**: [GitHub Discussions](https://github.com/thomhurst/TUnit/discussions) | **Star on GitHub**: [github.com/thomhurst/TUnit](https://github.com/thomhurst/TUnit)
 
 </div>
 
