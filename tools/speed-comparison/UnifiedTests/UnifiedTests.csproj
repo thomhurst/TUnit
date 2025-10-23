@@ -23,6 +23,7 @@
         <EnableMSTestRunner Condition="'$(TestFramework)' == 'MSTEST'">true</EnableMSTestRunner>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <EnableNUnitRunner Condition="'$(TestFramework)' == 'NUNIT'">true</EnableNUnitRunner>
+        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
 
