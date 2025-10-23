@@ -21,6 +21,7 @@
         <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
         <PackageReference Include="TUnit">
             <VersionOverride Condition="'$(TUnitVersion)' != ''">$(TUnitVersion)</VersionOverride>
+            <VersionOverride>0.75.38-PullRequest3485.0</VersionOverride>
         </PackageReference>
         <PackageReference Include="Polyfill" />
     </ItemGroup>

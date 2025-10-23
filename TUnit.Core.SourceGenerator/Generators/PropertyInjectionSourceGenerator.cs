@@ -119,7 +119,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static bool IsPubliclyAccessible(INamedTypeSymbol typeSymbol)
     {
         // Check if the type itself is public or internal
-        if (typeSymbol.DeclaredAccessibility != Accessibility.Public && 
+        if (typeSymbol.DeclaredAccessibility != Accessibility.Public &&
             typeSymbol.DeclaredAccessibility != Accessibility.Internal)
         {
             return false;
@@ -130,7 +130,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         var containingType = typeSymbol.ContainingType;
         while (containingType != null)
         {
-            if (containingType.DeclaredAccessibility != Accessibility.Public && 
+            if (containingType.DeclaredAccessibility != Accessibility.Public &&
                 containingType.DeclaredAccessibility != Accessibility.Internal)
             {
                 return false;
@@ -161,10 +161,10 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         var sourceBuilder = new StringBuilder();
         WriteFileHeader(sourceBuilder);
-        
+
         // Generate individual module initializer for this class
         GenerateIndividualModuleInitializer(sourceBuilder, classInfo, sourceClassName);
-        
+
         // Generate property source for this class
         GeneratePropertySource(sourceBuilder, classInfo, sourceClassName);
 
@@ -188,7 +188,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     private static void GenerateIndividualModuleInitializer(StringBuilder sb, ClassWithDataSourceProperties classInfo, string sourceClassName)
     {
         var safeName = GetSafeClassName(classInfo.ClassSymbol);
-        
+
         sb.AppendLine($"internal static class {safeName}_PropertyInjectionInitializer");
         sb.AppendLine("{");
         sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
@@ -324,7 +324,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         // which is called by PropertyDataResolver.GetInitializedDataSourceAsync
         sb.AppendLine("                return dataSource;");
     }
-    
+
     private static bool IsCustomDataSource(INamedTypeSymbol attributeClass)
     {
         // Check if this class implements IDataSourceAttribute
@@ -351,7 +351,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             sb.AppendLine("#else");
             sb.AppendLine($"                var backingField = typeof({propInfo.Property.ContainingType.ToDisplayString()}).GetField(\"<{propInfo.Property.Name}>k__BackingField\",");
             sb.AppendLine("                    global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.NonPublic);");
-            sb.AppendLine($"                backingField?.SetValue({instanceVariableName}, value);");
+            sb.AppendLine($"                backingField.SetValue({instanceVariableName}, value);");
             sb.AppendLine("#endif");
         }
         else if (propInfo.Property.IsStatic)

@@ -9,8 +9,6 @@
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <NoWarn>$(NoWarn);NU1504</NoWarn>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Aot)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
@@ -25,6 +23,7 @@
         <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
         <PackageReference Include="TUnit">
             <VersionOverride Condition="'$(TUnitVersion)' != ''">$(TUnitVersion)</VersionOverride>
+            <VersionOverride>0.75.38-PullRequest3485.0</VersionOverride>
         </PackageReference>
         <PackageReference Include="Polyfill" />
     </ItemGroup>
