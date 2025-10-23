@@ -18,6 +18,11 @@ public static class CastHelper
     /// </summary>
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(object? value)
     {
+        if (value is T t)
+        {
+            return t;
+        }
+
         return (T?)Cast(typeof(T), value);
     }
 
