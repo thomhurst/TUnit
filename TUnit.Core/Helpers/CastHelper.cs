@@ -131,36 +131,39 @@ public static class CastHelper
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute'")]
     private static bool TryReflectionConversion(Type targetType, Type sourceType, object value, out object? result)
     {
-        // Ensure we're not in AOT mode
-        ThrowIfAot(sourceType, targetType);
+        // Check if we're in AOT mode - if so, skip reflection-based conversions
+        var isAotMode = IsAotMode();
 
-        // Handle array conversions
-        if (targetType.IsArray && TryConvertArray(targetType, sourceType, value, out result))
+        // Handle array conversions (requires dynamic code)
+        if (!isAotMode && targetType.IsArray && TryConvertArray(targetType, sourceType, value, out result))
         {
             return true;
         }
 
-        // Try custom conversion operators (op_Implicit, op_Explicit)
-        var conversionMethod = GetConversionMethodCached(sourceType, targetType);
-        if (conversionMethod != null)
+        // Try custom conversion operators (op_Implicit, op_Explicit) - requires dynamic code
+        if (!isAotMode)
         {
-            try
+            var conversionMethod = GetConversionMethodCached(sourceType, targetType);
+            if (conversionMethod != null)
             {
-                result = conversionMethod.Invoke(null, [value]);
-                return true;
-            }
-            catch (Exception ex) when (ex is NotSupportedException || ex is InvalidOperationException)
-            {
-                // Reflection invoke failed - likely in AOT scenario despite our check
-                // Try direct cast as fallback
                 try
                 {
-                    result = value;
+                    result = conversionMethod.Invoke(null, [value]);
                     return true;
                 }
-                catch
+                catch (Exception ex) when (ex is NotSupportedException || ex is InvalidOperationException)
                 {
-                    // Give up
+                    // Reflection invoke failed - likely in AOT scenario despite our check
+                    // Try direct cast as fallback
+                    try
+                    {
+                        result = value;
+                        return true;
+                    }
+                    catch
+                    {
+                        // Give up
+                    }
                 }
             }
         }
@@ -338,17 +341,12 @@ public static class CastHelper
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void ThrowIfAot(Type sourceType, Type targetType)
+    private static bool IsAotMode()
     {
 #if NET
-        if (!RuntimeFeature.IsDynamicCodeSupported)
-        {
-            throw new NotSupportedException(
-                $"Cannot convert {sourceType.Name} to {targetType.Name} in Native AOT mode. " +
-                $"Reflection-based type conversion is not supported in AOT compilation. " +
-                $"Consider registering a custom converter using AotConverterRegistry.Register() " +
-                $"or use types that support direct casting.");
-        }
+        return !RuntimeFeature.IsDynamicCodeSupported;
+#else
+        return false;
 #endif
     }
 }
