@@ -66,6 +66,12 @@ jobs:
       - name: Build
         run: dotnet build -c Release
 
+      - name: Publish AOT
+        run: dotnet publish TUnit.TestProject/TUnit.TestProject.csproj -c Release --use-current-runtime -p:Aot=true -o TESTPROJECT_AOT --framework net8.0
+
+      - name: Publish Single File
+        run: dotnet publish TUnit.TestProject/TUnit.TestProject.csproj -c Release --use-current-runtime -p:SingleFile=true -o TESTPROJECT_SINGLEFILE --framework net8.0
+
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
         with:
