@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace TUnit.Core;
 
 [DebuggerDisplay("{Type}")]
-public record ClassMetadata : MemberMetadata
+public record ClassMetadata : IMemberMetadata
 {
     private static readonly ConcurrentDictionary<string, ClassMetadata> Cache = [];
 
@@ -45,9 +45,10 @@ public record ClassMetadata : MemberMetadata
         DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
         | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties)]
-    public override required Type Type { get; init; }
+    public required Type Type { get; init; }
+
+    public required string Name { get; init; }
 
     public required string? Namespace { get; init; }
     public required AssemblyMetadata Assembly { get; init; }

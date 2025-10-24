@@ -294,7 +294,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         writer.Indent();
         writer.AppendLine("Type = global::TUnit.Core.Enums.DataGeneratorType.Property,");
         writer.AppendLine("TestBuilderContext = new global::TUnit.Core.TestBuilderContextAccessor(globalContext),");
-        writer.AppendLine("MembersToGenerate = new global::TUnit.Core.MemberMetadata[] { propertyMetadata },");
+        writer.AppendLine("MembersToGenerate = new global::TUnit.Core.IMemberMetadata[] { propertyMetadata },");
         writer.AppendLine("TestInformation = null,");
         writer.AppendLine("TestSessionId = global::TUnit.Core.TestSessionContext.Current?.Id ?? \"static-property-init\",");
         writer.AppendLine("TestClassInstance = null,");

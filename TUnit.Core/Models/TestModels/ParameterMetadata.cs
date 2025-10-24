@@ -7,24 +7,20 @@ namespace TUnit.Core;
 [DebuggerDisplay("{Type} {Name}")]
 public record ParameterMetadata<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
-        | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties)]
 T>() : ParameterMetadata(typeof(T));
 
 [DebuggerDisplay("{Type} {Name}")]
 public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
     | DynamicallyAccessedMemberTypes.NonPublicConstructors
-    | DynamicallyAccessedMemberTypes.PublicMethods
-    | DynamicallyAccessedMemberTypes.NonPublicMethods
-    | DynamicallyAccessedMemberTypes.PublicProperties)] Type Type) : MemberMetadata
+    | DynamicallyAccessedMemberTypes.PublicProperties)] Type Type) : IMemberMetadata
 {
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
-        | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties)]
-    public override Type Type { get; init; } = Type;
+    public Type Type { get; init; } = Type;
+
+    public required string Name { get; init; }
 
     public required TypeInfo TypeInfo { get; init; }
     public required ParameterInfo ReflectionInfo { get; set; }

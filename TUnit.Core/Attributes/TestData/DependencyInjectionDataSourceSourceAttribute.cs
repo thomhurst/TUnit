@@ -25,7 +25,14 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
             };
 
             return dataGeneratorMetadata.MembersToGenerate
-                .Select(m => m.Type)
+                .Select(m => m switch
+                {
+                    PropertyMetadata prop => prop.Type,
+                    ParameterMetadata param => param.Type,
+                    ClassMetadata cls => cls.Type,
+                    MethodMetadata method => method.Type,
+                    _ => throw new InvalidOperationException($"Unknown member type: {m.GetType()}")
+                })
                 .Select(x => Create(scope, x))
                 .ToArray();
         };

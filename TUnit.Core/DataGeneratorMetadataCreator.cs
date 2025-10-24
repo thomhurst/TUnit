@@ -31,7 +31,7 @@ internal static class DataGeneratorMetadataCreator
             }
         }
 
-        MemberMetadata[] membersToGenerate;
+        IMemberMetadata[] membersToGenerate;
         if (generatorType == DataGeneratorType.Property)
         {
             if (testMetadata.PropertyDataSources.Length > 0)
@@ -82,7 +82,7 @@ internal static class DataGeneratorMetadataCreator
         string testSessionId = "reflection-discovery")
     {
         // Determine which members we're generating for based on type
-        MemberMetadata[] membersToGenerate = generatorType switch
+        IMemberMetadata[] membersToGenerate = generatorType switch
         {
             DataGeneratorType.ClassParameters => methodMetadata.Class.Parameters,
             DataGeneratorType.TestParameters => FilterOutCancellationToken(methodMetadata.Parameters),

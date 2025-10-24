@@ -324,7 +324,7 @@ namespace
         public override int GetHashCode() { }
     }
     [.DebuggerDisplay("{Type}")]
-    public class ClassMetadata : .MemberMetadata, <.ClassMetadata>
+    public class ClassMetadata : <.ClassMetadata>, .IMemberMetadata
     {
         public ClassMetadata() { }
         public required .AssemblyMetadata Assembly { get; init; }
@@ -332,13 +332,14 @@ namespace
         public bool HasRequiredProperties { get; init; }
         public []? ImplementedInterfaces { get; init; }
         public <object>? InitializeRequiredProperties { get; init; }
+        public required string Name { get; init; }
         public required string? Namespace { get; init; }
         public <object>? ParameterlessFactory { get; init; }
         public required .ParameterMetadata[] Parameters { get; init; }
         public required .ClassMetadata? Parent { get; init; }
         public required .PropertyMetadata[] Properties { get; init; }
         public int TestConstructorIndex { get; init; }
-        public override required  Type { get; init; }
+        public required  Type { get; init; }
         public required .TypeInfo TypeInfo { get; init; }
         public virtual bool Equals(.ClassMetadata? other) { }
         public override int GetHashCode() { }
@@ -403,7 +404,7 @@ namespace
     {
         public DataGeneratorMetadata() { }
         public required object?[]? ClassInstanceArguments { get; init; }
-        public required .MemberMetadata[] MembersToGenerate { get; init; }
+        public required .IMemberMetadata[] MembersToGenerate { get; init; }
         public required .TestBuilderContextAccessor TestBuilderContext { get; init; }
         public required object? TestClassInstance { get; init; }
         public required .MethodMetadata? TestInformation { get; init; }
@@ -820,6 +821,10 @@ namespace
     {
         .<.AbstractDynamicTest> CollectDynamicTests(string sessionId);
     }
+    public interface IMemberMetadata
+    {
+        string Name { get; }
+    }
     public interface IRequiresImmediateInitialization { }
     public interface IScopedAttribute
     {
@@ -910,19 +915,20 @@ namespace
         public MethodDataSourceAttribute(string methodNameProvidingDataSource) { }
     }
     [.DebuggerDisplay("{Type}.{Name}")]
-    public class MethodMetadata : .MemberMetadata, <.MethodMetadata>
+    public class MethodMetadata : <.MethodMetadata>, .IMemberMetadata
     {
         public MethodMetadata() { }
         public required .ClassMetadata Class { get; init; }
         public required int GenericTypeCount { get; init; }
+        public required string Name { get; init; }
         public required .ParameterMetadata[] Parameters { get; init; }
         public ? ReturnType { get; init; }
         public required .TypeInfo ReturnTypeInfo { get; init; }
-        public override required  Type { get; init; }
+        public required  Type { get; init; }
         public required .TypeInfo TypeInfo { get; init; }
         public virtual bool Equals(.MethodMetadata? other) { }
         public override int GetHashCode() { }
-        protected override bool PrintMembers(.StringBuilder stringBuilder) { }
+        protected virtual bool PrintMembers(.StringBuilder stringBuilder) { }
     }
     [(.Assembly | .Class | .Method)]
     public class NotInParallelAttribute : .SingleTUnitAttribute, .IScopedAttribute, ., .
@@ -975,7 +981,7 @@ namespace
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
     [.DebuggerDisplay("{Type} {Name}")]
-    public class ParameterMetadata : .MemberMetadata, <.ParameterMetadata>
+    public class ParameterMetadata : <.ParameterMetadata>, .IMemberMetadata
     {
         public ParameterMetadata( Type) { }
         public object? CachedDefaultValue { get; init; }
@@ -985,9 +991,10 @@ namespace
         public bool IsNullable { get; init; }
         public bool IsOptional { get; }
         public bool IsParams { get; }
+        public required string Name { get; init; }
         public int Position { get; init; }
         public required .ParameterInfo ReflectionInfo { get; set; }
-        public override  Type { get; init; }
+        public  Type { get; init; }
         public required .TypeInfo TypeInfo { get; init; }
     }
     [.DebuggerDisplay("{Type} {Name}")]
@@ -1028,7 +1035,7 @@ namespace
         public  PropertyType { get; }
     }
     [.DebuggerDisplay("{Type} {Name})")]
-    public class PropertyMetadata : .MemberMetadata, <.PropertyMetadata>
+    public class PropertyMetadata : <.PropertyMetadata>, .IMemberMetadata
     {
         public PropertyMetadata() { }
         public required .ClassMetadata ClassMetadata { get; set; }
@@ -1039,9 +1046,10 @@ namespace
         public bool IsNullable { get; init; }
         public bool IsRequired { get; init; }
         public required bool IsStatic { get; init; }
+        public required string Name { get; init; }
         public required .PropertyInfo ReflectionInfo { get; init; }
         public <object, object?>? Setter { get; init; }
-        public override required  Type { get; init; }
+        public required  Type { get; init; }
     }
     public static class PropertySourceRegistry
     {

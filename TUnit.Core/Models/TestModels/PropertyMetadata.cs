@@ -5,14 +5,14 @@ using System.Reflection;
 namespace TUnit.Core;
 
 [DebuggerDisplay("{Type} {Name})")]
-public record PropertyMetadata : MemberMetadata
+public record PropertyMetadata : IMemberMetadata
 {
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
         | DynamicallyAccessedMemberTypes.NonPublicConstructors
-        | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.NonPublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties)]
-    public override required Type Type { get; init; }
+    public required Type Type { get; init; }
+
+    public required string Name { get; init; }
 
     public required PropertyInfo ReflectionInfo { get; init; }
 
