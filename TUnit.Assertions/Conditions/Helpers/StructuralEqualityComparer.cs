@@ -41,11 +41,6 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
             return EqualityComparer<T>.Default.Equals(x, y);
         }
 
-        if (typeof(IEquatable<T>).IsAssignableFrom(type))
-        {
-            return ((IEquatable<T>)x).Equals(y);
-        }
-
         return CompareStructurally(x, y, new HashSet<object>(new ReferenceEqualityComparer()));
     }
 
