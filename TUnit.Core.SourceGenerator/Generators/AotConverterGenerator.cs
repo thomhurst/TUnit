@@ -15,16 +15,11 @@ public class AotConverterGenerator : IIncrementalGenerator
             .Select((compilation, _) =>
             {
                 var conversionInfos = new List<ConversionInfo>();
+                var requireStrongName = compilation.Assembly.Identity.IsStrongName;
 
-                // Scan ALL types in the compilation (including source-generated) for conversion operators
-                // This must come first to ensure we catch all types before filtering
-                ScanAllTypesInCompilation(compilation, conversionInfos);
-
-                // Scan referenced assemblies for conversion operators
-                ScanReferencedAssemblies(compilation, conversionInfos);
-
-                // Scan method parameters for closed generic types like OneOf<TestEnum, TestEnum2>
-                ScanClosedGenericTypesInParameters(compilation, conversionInfos);
+                ScanAllTypesInCompilation(compilation, conversionInfos, requireStrongName);
+                ScanReferencedAssemblies(compilation, conversionInfos, requireStrongName);
+                ScanClosedGenericTypesInParameters(compilation, conversionInfos, requireStrongName);
 
                 return conversionInfos.ToImmutableArray();
             });
@@ -32,7 +27,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(allTypes, GenerateConverters!);
     }
 
-    private void ScanAllTypesInCompilation(Compilation compilation, List<ConversionInfo> conversionInfos)
+    private void ScanAllTypesInCompilation(Compilation compilation, List<ConversionInfo> conversionInfos, bool requireStrongName)
     {
         var compilationTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
@@ -41,6 +36,11 @@ public class AotConverterGenerator : IIncrementalGenerator
         foreach (var type in compilationTypes)
         {
             if (type.DeclaredAccessibility != Accessibility.Public)
+            {
+                continue;
+            }
+
+            if (requireStrongName && !type.ContainingAssembly.Identity.IsStrongName)
             {
                 continue;
             }
@@ -62,9 +62,8 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
     }
 
-    private void ScanClosedGenericTypesInParameters(Compilation compilation, List<ConversionInfo> conversionInfos)
+    private void ScanClosedGenericTypesInParameters(Compilation compilation, List<ConversionInfo> conversionInfos, bool requireStrongName)
     {
-        // Find all closed generic types used in method parameters
         var closedGenericTypesInUse = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
         foreach (var tree in compilation.SyntaxTrees)
@@ -72,7 +71,6 @@ public class AotConverterGenerator : IIncrementalGenerator
             var semanticModel = compilation.GetSemanticModel(tree);
             var root = tree.GetRoot();
 
-            // Find all method declarations
             var methods = root.DescendantNodes()
                 .OfType<MethodDeclarationSyntax>();
 
@@ -84,7 +82,6 @@ public class AotConverterGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                // Collect parameter types
                 foreach (var parameter in methodSymbol.Parameters)
                 {
                     CollectClosedGenericTypes(parameter.Type, closedGenericTypesInUse);
@@ -92,10 +89,13 @@ public class AotConverterGenerator : IIncrementalGenerator
             }
         }
 
-        // For each closed generic type, check if it has conversion operators
         foreach (var type in closedGenericTypesInUse)
         {
-            // Get all conversion operators from this type
+            if (requireStrongName && !type.ContainingAssembly.Identity.IsStrongName)
+            {
+                continue;
+            }
+
             var conversionOperators = type.GetMembers()
                 .OfType<IMethodSymbol>()
                 .Where(m => (m.Name == "op_Implicit" || m.Name == "op_Explicit") &&
@@ -133,16 +133,14 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
     }
 
-    private void ScanReferencedAssemblies(Compilation compilation, List<ConversionInfo> conversionInfos)
+    private void ScanReferencedAssemblies(Compilation compilation, List<ConversionInfo> conversionInfos, bool requireStrongName)
     {
-        // Get all types from referenced assemblies
         var referencedTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
         foreach (var reference in compilation.References)
         {
             if (compilation.GetAssemblyOrModuleSymbol(reference) is IAssemblySymbol assemblySymbol)
             {
-                // Skip System assemblies and other common assemblies that won't have test-relevant converters
                 var assemblyName = assemblySymbol.Name;
                 if (assemblyName.StartsWith("System.") ||
                     assemblyName.StartsWith("Microsoft.") ||
@@ -152,20 +150,22 @@ public class AotConverterGenerator : IIncrementalGenerator
                     continue;
                 }
 
+                if (requireStrongName && !assemblySymbol.Identity.IsStrongName)
+                {
+                    continue;
+                }
+
                 CollectTypesFromNamespace(assemblySymbol.GlobalNamespace, referencedTypes);
             }
         }
 
-        // Find conversion operators in referenced types
         foreach (var type in referencedTypes)
         {
-            // Only process public types
             if (type.DeclaredAccessibility != Accessibility.Public)
             {
                 continue;
             }
 
-            // Get all members and filter for conversion operators
             var conversionOperators = type.GetMembers()
                 .OfType<IMethodSymbol>()
                 .Where(m => (m.Name == "op_Implicit" || m.Name == "op_Explicit") &&
