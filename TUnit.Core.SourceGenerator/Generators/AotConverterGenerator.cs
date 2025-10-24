@@ -35,12 +35,7 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         foreach (var type in compilationTypes)
         {
-            if (type.DeclaredAccessibility != Accessibility.Public)
-            {
-                continue;
-            }
-
-            if (requireStrongName && !type.ContainingAssembly.Identity.IsStrongName)
+            if (!ShouldIncludeType(type, requireStrongName))
             {
                 continue;
             }
@@ -91,7 +86,7 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         foreach (var type in closedGenericTypesInUse)
         {
-            if (requireStrongName && !type.ContainingAssembly.Identity.IsStrongName)
+            if (!ShouldIncludeType(type, requireStrongName))
             {
                 continue;
             }
@@ -150,7 +145,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                if (requireStrongName && !assemblySymbol.Identity.IsStrongName)
+                if (!ShouldIncludeAssembly(assemblySymbol, requireStrongName))
                 {
                     continue;
                 }
@@ -208,6 +203,31 @@ public class AotConverterGenerator : IIncrementalGenerator
             types.Add(nestedType);
             CollectNestedTypes(nestedType, types);
         }
+    }
+
+    private bool ShouldIncludeType(INamedTypeSymbol type, bool requireStrongName)
+    {
+        if (type.DeclaredAccessibility != Accessibility.Public)
+        {
+            return false;
+        }
+
+        if (requireStrongName && type.ContainingAssembly?.Identity.IsStrongName != true)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool ShouldIncludeAssembly(IAssemblySymbol assembly, bool requireStrongName)
+    {
+        if (requireStrongName && assembly.Identity.IsStrongName != true)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     private bool IsAccessibleType(ITypeSymbol type)
