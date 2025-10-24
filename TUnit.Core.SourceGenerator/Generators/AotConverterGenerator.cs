@@ -55,7 +55,6 @@ public class AotConverterGenerator : IIncrementalGenerator
                     typesToScan.Add(parameter.Type);
                 }
 
-                // Scan method-level data source attributes
                 ScanAttributesForTypes(methodSymbol.GetAttributes(), typesToScan);
             }
 
@@ -75,7 +74,6 @@ public class AotConverterGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                // Scan class-level data source attributes
                 ScanAttributesForTypes(classSymbol.GetAttributes(), typesToScan);
 
                 foreach (var constructor in classSymbol.Constructors)
@@ -95,7 +93,7 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         foreach (var type in typesToScan)
         {
-            CollectConversionsForType(type, conversionInfos, requireStrongName);
+            CollectConversionsForType(type, conversionInfos, requireStrongName, compilation);
         }
     }
 
@@ -139,14 +137,11 @@ public class AotConverterGenerator : IIncrementalGenerator
                 continue;
             }
 
-            // Check if this attribute is a data source attribute by checking its base types
             if (!IsDataSourceAttribute(attribute.AttributeClass))
             {
                 continue;
             }
 
-            // Scan generic type arguments from the attribute itself
-            // e.g., ClassDataSource<T>, Arguments<T>
             if (attribute.AttributeClass.IsGenericType)
             {
                 foreach (var typeArg in attribute.AttributeClass.TypeArguments)
@@ -155,14 +150,11 @@ public class AotConverterGenerator : IIncrementalGenerator
                 }
             }
 
-            // Scan constructor arguments for Type values
-            // e.g., [ClassDataSource(typeof(IntDataSource1))]
             foreach (var arg in attribute.ConstructorArguments)
             {
                 ScanTypedConstantForTypes(arg, typesToScan);
             }
 
-            // Scan named arguments for Type values
             foreach (var namedArg in attribute.NamedArguments)
             {
                 ScanTypedConstantForTypes(namedArg.Value, typesToScan);
@@ -172,12 +164,9 @@ public class AotConverterGenerator : IIncrementalGenerator
 
     private bool IsDataSourceAttribute(INamedTypeSymbol attributeClass)
     {
-        // Check if the attribute implements IDataSourceAttribute interface
-        // or inherits from AsyncDataSourceGeneratorAttribute or AsyncUntypedDataSourceGeneratorAttribute
         var currentType = attributeClass;
         while (currentType != null)
         {
-            // Check if it's one of the known data source base types
             var fullName = currentType.ToDisplayString();
             if (fullName == WellKnownFullyQualifiedClassNames.AsyncDataSourceGeneratorAttribute.WithoutGlobalPrefix ||
                 fullName == WellKnownFullyQualifiedClassNames.AsyncUntypedDataSourceGeneratorAttribute.WithoutGlobalPrefix ||
@@ -186,7 +175,6 @@ public class AotConverterGenerator : IIncrementalGenerator
                 return true;
             }
 
-            // Check if it implements IDataSourceAttribute
             if (currentType.AllInterfaces.Any(i =>
                 i.ToDisplayString() == WellKnownFullyQualifiedClassNames.IDataSourceAttribute.WithoutGlobalPrefix))
             {
@@ -201,12 +189,10 @@ public class AotConverterGenerator : IIncrementalGenerator
 
     private void ScanTypedConstantForTypes(TypedConstant constant, HashSet<ITypeSymbol> typesToScan)
     {
-        // If the constant is a Type, add it
         if (constant.Kind == TypedConstantKind.Type && constant.Value is ITypeSymbol typeValue)
         {
             typesToScan.Add(typeValue);
         }
-        // If the constant is an array, scan each element
         else if (constant.Kind == TypedConstantKind.Array)
         {
             foreach (var element in constant.Values)
@@ -214,22 +200,20 @@ public class AotConverterGenerator : IIncrementalGenerator
                 ScanTypedConstantForTypes(element, typesToScan);
             }
         }
-        // If the constant is a primitive value, check its type for potential conversion needs
-        // e.g., [Arguments(1)] where 1 is an int that might need conversion
         else if (constant.Value != null && constant.Type != null)
         {
             typesToScan.Add(constant.Type);
         }
     }
 
-    private void CollectConversionsForType(ITypeSymbol type, List<ConversionInfo> conversionInfos, bool requireStrongName)
+    private void CollectConversionsForType(ITypeSymbol type, List<ConversionInfo> conversionInfos, bool requireStrongName, Compilation compilation)
     {
         if (type is not INamedTypeSymbol namedType)
         {
             return;
         }
 
-        if (!ShouldIncludeType(namedType, requireStrongName))
+        if (!ShouldIncludeType(namedType, requireStrongName, compilation))
         {
             return;
         }
@@ -242,7 +226,7 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         foreach (var method in conversionOperators)
         {
-            var conversionInfo = GetConversionInfoFromSymbol(method);
+            var conversionInfo = GetConversionInfoFromSymbol(method, compilation);
             if (conversionInfo != null)
             {
                 conversionInfos.Add(conversionInfo);
@@ -253,27 +237,46 @@ public class AotConverterGenerator : IIncrementalGenerator
         {
             foreach (var typeArg in namedType.TypeArguments)
             {
-                CollectConversionsForType(typeArg, conversionInfos, requireStrongName);
+                CollectConversionsForType(typeArg, conversionInfos, requireStrongName, compilation);
             }
         }
     }
 
-    private bool ShouldIncludeType(INamedTypeSymbol type, bool requireStrongName)
+    private bool ShouldIncludeType(INamedTypeSymbol type, bool requireStrongName, Compilation compilation)
     {
-        if (type.DeclaredAccessibility != Accessibility.Public)
+        if (type.DeclaredAccessibility == Accessibility.Public)
         {
-            return false;
+            if (requireStrongName && type.ContainingAssembly?.Identity.IsStrongName != true)
+            {
+                return false;
+            }
+            return true;
         }
 
-        if (requireStrongName && type.ContainingAssembly?.Identity.IsStrongName != true)
+        if (type.DeclaredAccessibility == Accessibility.Internal)
         {
-            return false;
+            var typeAssembly = type.ContainingAssembly;
+            var currentAssembly = compilation.Assembly;
+
+            if (SymbolEqualityComparer.Default.Equals(typeAssembly, currentAssembly))
+            {
+                return true;
+            }
+
+            if (typeAssembly != null && typeAssembly.GivesAccessTo(currentAssembly))
+            {
+                if (requireStrongName && typeAssembly.Identity.IsStrongName != true)
+                {
+                    return false;
+                }
+                return true;
+            }
         }
 
-        return true;
+        return false;
     }
 
-    private bool IsAccessibleType(ITypeSymbol type)
+    private bool IsAccessibleType(ITypeSymbol type, Compilation compilation)
     {
         if (type.SpecialType != SpecialType.None)
         {
@@ -287,7 +290,21 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         if (type is INamedTypeSymbol namedType)
         {
-            if (namedType.DeclaredAccessibility != Accessibility.Public)
+            if (namedType.DeclaredAccessibility == Accessibility.Public)
+            {
+            }
+            else if (namedType.DeclaredAccessibility == Accessibility.Internal)
+            {
+                var typeAssembly = namedType.ContainingAssembly;
+                var currentAssembly = compilation.Assembly;
+
+                if (!SymbolEqualityComparer.Default.Equals(typeAssembly, currentAssembly) &&
+                    !(typeAssembly?.GivesAccessTo(currentAssembly) ?? false))
+                {
+                    return false;
+                }
+            }
+            else
             {
                 return false;
             }
@@ -296,7 +313,7 @@ public class AotConverterGenerator : IIncrementalGenerator
             {
                 foreach (var typeArg in namedType.TypeArguments)
                 {
-                    if (!IsAccessibleType(typeArg))
+                    if (!IsAccessibleType(typeArg, compilation))
                     {
                         return false;
                     }
@@ -305,7 +322,7 @@ public class AotConverterGenerator : IIncrementalGenerator
 
             if (namedType.ContainingType != null)
             {
-                return IsAccessibleType(namedType.ContainingType);
+                return IsAccessibleType(namedType.ContainingType, compilation);
             }
 
             return true;
@@ -313,18 +330,18 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         if (type is IArrayTypeSymbol arrayType)
         {
-            return IsAccessibleType(arrayType.ElementType);
+            return IsAccessibleType(arrayType.ElementType, compilation);
         }
 
         if (type is IPointerTypeSymbol pointerType)
         {
-            return IsAccessibleType(pointerType.PointedAtType);
+            return IsAccessibleType(pointerType.PointedAtType, compilation);
         }
 
         return false;
     }
 
-    private ConversionInfo? GetConversionInfoFromSymbol(IMethodSymbol methodSymbol)
+    private ConversionInfo? GetConversionInfoFromSymbol(IMethodSymbol methodSymbol, Compilation compilation)
     {
         var containingType = methodSymbol.ContainingType;
         var sourceType = methodSymbol.Parameters[0].Type;
@@ -347,12 +364,12 @@ public class AotConverterGenerator : IIncrementalGenerator
             return null;
         }
 
-        if (!IsAccessibleType(containingType))
+        if (!IsAccessibleType(containingType, compilation))
         {
             return null;
         }
 
-        if (!IsAccessibleType(sourceType) || !IsAccessibleType(targetType))
+        if (!IsAccessibleType(sourceType, compilation) || !IsAccessibleType(targetType, compilation))
         {
             return null;
         }
@@ -409,7 +426,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         var converterIndex = 0;
         var registrations = new List<string>();
 
-        foreach (var conversion in uniqueConversions.Where(c => IsAccessibleType(c.SourceType) && IsAccessibleType(c.TargetType)))
+        foreach (var conversion in uniqueConversions)
         {
             var converterClassName = $"AotConverter_{converterIndex++}";
             var sourceTypeName = conversion.SourceType.GloballyQualified();
