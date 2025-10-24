@@ -230,4 +230,175 @@ public class IsNotNullAssertionSuppressorTests
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
             .RunAsync();
     }
+
+    [Test]
+    public async Task Suppresses_After_IsNotNull_At_Start_Of_Assertion_Chain()
+    {
+        const string code = """
+            #nullable enable
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    string? nullableString = GetNullableString();
+
+                    // IsNotNull at the START of the chain
+                    await Assert.That(nullableString).IsNotNull().And.Contains("test");
+
+                    // After the assertion chain, should be suppressed
+                    var length = {|#0:nullableString|}.Length;
+                }
+
+                private string? GetNullableString() => "test";
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Suppresses_After_IsNotNull_At_End_Of_Assertion_Chain()
+    {
+        const string code = """
+            #nullable enable
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    string? nullableString = GetNullableString();
+
+                    // IsNotNull at the END of the chain
+                    await Assert.That(nullableString).Contains("test").And.IsNotNull();
+
+                    // After the assertion chain, should be suppressed
+                    var length = {|#0:nullableString|}.Length;
+                }
+
+                private string? GetNullableString() => "test";
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Suppresses_After_IsNotNull_In_Middle_Of_Assertion_Chain()
+    {
+        const string code = """
+            #nullable enable
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    string? nullableString = GetNullableString();
+
+                    // IsNotNull in the MIDDLE of the chain
+                    await Assert.That(nullableString).Contains("t").And.IsNotNull().And.Contains("test");
+
+                    // After the assertion chain, should be suppressed
+                    var length = {|#0:nullableString|}.Length;
+                }
+
+                private string? GetNullableString() => "test";
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Suppresses_After_IsNotNull_With_Or_Chain()
+    {
+        const string code = """
+            #nullable enable
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    string? nullableString = GetNullableString();
+
+                    // IsNotNull with Or chain
+                    await Assert.That(nullableString).IsNotNull().Or.IsEqualTo("fallback");
+
+                    // After the assertion, should be suppressed
+                    var length = {|#0:nullableString|}.Length;
+                }
+
+                private string? GetNullableString() => "test";
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Suppresses_Multiple_Variables_With_Chained_Assertions()
+    {
+        const string code = """
+            #nullable enable
+            using TUnit.Assertions;
+            using TUnit.Assertions.Extensions;
+
+            public class MyTests
+            {
+                public async Task TestMethod()
+                {
+                    string? str1 = GetNullableString();
+                    string? str2 = GetNullableString();
+
+                    // Both variables asserted
+                    await Assert.That(str1).IsNotNull().And.Contains("test");
+                    await Assert.That(str2).IsNotNull();
+
+                    // Both should be suppressed
+                    var length1 = {|#0:str1|}.Length;
+                    var length2 = {|#1:str2|}.Length;
+                }
+
+                private string? GetNullableString() => "test";
+            }
+            """;
+
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .WithSpecificDiagnostics(CS8602)
+            .WithExpectedDiagnosticsResults(
+                CS8602.WithLocation(0).WithIsSuppressed(true),
+                CS8602.WithLocation(1).WithIsSuppressed(true)
+            )
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
 }
