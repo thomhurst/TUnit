@@ -15,10 +15,9 @@ public class AotConverterGenerator : IIncrementalGenerator
             .Select((compilation, _) =>
             {
                 var conversionInfos = new List<ConversionInfo>();
+                var requireStrongName = compilation.Assembly.Identity.IsStrongName;
 
-                ScanAllTypesInCompilation(compilation, conversionInfos);
-                ScanReferencedAssemblies(compilation, conversionInfos);
-                ScanClosedGenericTypesInParameters(compilation, conversionInfos);
+                ScanTestParameters(compilation, conversionInfos, requireStrongName);
 
                 return conversionInfos.ToImmutableArray();
             });
@@ -26,38 +25,9 @@ public class AotConverterGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(allTypes, GenerateConverters!);
     }
 
-    private void ScanAllTypesInCompilation(Compilation compilation, List<ConversionInfo> conversionInfos)
+    private void ScanTestParameters(Compilation compilation, List<ConversionInfo> conversionInfos, bool requireStrongName)
     {
-        var compilationTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-
-        CollectTypesFromNamespace(compilation.Assembly.GlobalNamespace, compilationTypes);
-
-        foreach (var type in compilationTypes)
-        {
-            if (!ShouldIncludeType(type))
-            {
-                continue;
-            }
-
-            var conversionOperators = type.GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where(m => m.Name is "op_Implicit" or "op_Explicit" &&
-                            m is { IsStatic: true, Parameters.Length: 1 });
-
-            foreach (var method in conversionOperators)
-            {
-                var conversionInfo = GetConversionInfoFromSymbol(method);
-                if (conversionInfo != null)
-                {
-                    conversionInfos.Add(conversionInfo);
-                }
-            }
-        }
-    }
-
-    private void ScanClosedGenericTypesInParameters(Compilation compilation, List<ConversionInfo> conversionInfos)
-    {
-        var closedGenericTypesInUse = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+        var typesToScan = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
 
         foreach (var tree in compilation.SyntaxTrees)
         {
@@ -75,130 +45,129 @@ public class AotConverterGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                foreach (var parameter in methodSymbol.Parameters)
-                {
-                    CollectClosedGenericTypes(parameter.Type, closedGenericTypesInUse);
-                }
-            }
-        }
-
-        foreach (var type in closedGenericTypesInUse)
-        {
-            if (!ShouldIncludeType(type))
-            {
-                continue;
-            }
-
-            var conversionOperators = type.GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where(m => m.Name is "op_Implicit" or "op_Explicit" &&
-                            m is { IsStatic: true, Parameters.Length: 1 });
-
-            foreach (var method in conversionOperators)
-            {
-                var conversionInfo = GetConversionInfoFromSymbol(method);
-                if (conversionInfo != null)
-                {
-                    conversionInfos.Add(conversionInfo);
-                }
-            }
-        }
-    }
-
-    private void CollectClosedGenericTypes(ITypeSymbol type, HashSet<INamedTypeSymbol> types)
-    {
-        if (type is INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } namedType)
-        {
-            types.Add(namedType);
-
-            // Recursively collect type arguments
-            foreach (var typeArg in namedType.TypeArguments)
-            {
-                CollectClosedGenericTypes(typeArg, types);
-            }
-        }
-
-        // Handle arrays
-        if (type is IArrayTypeSymbol arrayType)
-        {
-            CollectClosedGenericTypes(arrayType.ElementType, types);
-        }
-    }
-
-    private void ScanReferencedAssemblies(Compilation compilation, List<ConversionInfo> conversionInfos)
-    {
-        var referencedTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-
-        foreach (var reference in compilation.References)
-        {
-            if (compilation.GetAssemblyOrModuleSymbol(reference) is IAssemblySymbol assemblySymbol)
-            {
-                var assemblyName = assemblySymbol.Name;
-                if (assemblyName.StartsWith("System.") ||
-                    assemblyName.StartsWith("Microsoft.") ||
-                    assemblyName == "mscorlib" ||
-                    assemblyName == "netstandard")
+                if (!IsTestMethod(methodSymbol))
                 {
                     continue;
                 }
 
-                CollectTypesFromNamespace(assemblySymbol.GlobalNamespace, referencedTypes);
-            }
-        }
-
-        foreach (var type in referencedTypes)
-        {
-            if (type.DeclaredAccessibility != Accessibility.Public)
-            {
-                continue;
-            }
-
-            var conversionOperators = type.GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where(m => m.Name is "op_Implicit" or "op_Explicit" &&
-                            m is { IsStatic: true, Parameters.Length: 1 });
-
-            foreach (var method in conversionOperators)
-            {
-                var conversionInfo = GetConversionInfoFromSymbol(method);
-                if (conversionInfo != null)
+                foreach (var parameter in methodSymbol.Parameters)
                 {
-                    conversionInfos.Add(conversionInfo);
+                    typesToScan.Add(parameter.Type);
+                }
+            }
+
+            var classes = root.DescendantNodes()
+                .OfType<ClassDeclarationSyntax>();
+
+            foreach (var classDecl in classes)
+            {
+                var classSymbol = semanticModel.GetDeclaredSymbol(classDecl);
+                if (classSymbol == null)
+                {
+                    continue;
+                }
+
+                if (!IsTestClass(classSymbol))
+                {
+                    continue;
+                }
+
+                foreach (var constructor in classSymbol.Constructors)
+                {
+                    if (constructor.IsImplicitlyDeclared)
+                    {
+                        continue;
+                    }
+
+                    foreach (var parameter in constructor.Parameters)
+                    {
+                        typesToScan.Add(parameter.Type);
+                    }
                 }
             }
         }
+
+        foreach (var type in typesToScan)
+        {
+            CollectConversionsForType(type, conversionInfos, requireStrongName);
+        }
     }
 
-    private void CollectTypesFromNamespace(INamespaceSymbol namespaceSymbol, HashSet<INamedTypeSymbol> types)
+    private bool IsTestMethod(IMethodSymbol method)
     {
-        foreach (var member in namespaceSymbol.GetMembers())
+        return method.GetAttributes().Any(attr =>
         {
-            if (member is INamedTypeSymbol type)
+            var attrClass = attr.AttributeClass;
+            if (attrClass == null)
             {
-                types.Add(type);
-
-                // Recursively collect nested types
-                CollectNestedTypes(type, types);
+                return false;
             }
-            else if (member is INamespaceSymbol childNamespace)
+
+            var baseType = attrClass;
+            while (baseType != null)
             {
-                CollectTypesFromNamespace(childNamespace, types);
+                if (baseType.ToDisplayString() == WellKnownFullyQualifiedClassNames.BaseTestAttribute.WithoutGlobalPrefix)
+                {
+                    return true;
+                }
+                baseType = baseType.BaseType;
+            }
+
+            return false;
+        });
+    }
+
+    private bool IsTestClass(INamedTypeSymbol classSymbol)
+    {
+        return classSymbol.GetMembers()
+            .OfType<IMethodSymbol>()
+            .Any(IsTestMethod);
+    }
+
+    private void CollectConversionsForType(ITypeSymbol type, List<ConversionInfo> conversionInfos, bool requireStrongName)
+    {
+        if (type is not INamedTypeSymbol namedType)
+        {
+            return;
+        }
+
+        if (!ShouldIncludeType(namedType, requireStrongName))
+        {
+            return;
+        }
+
+        var conversionOperators = namedType.GetMembers()
+            .OfType<IMethodSymbol>()
+            .Where(m => (m.Name == "op_Implicit" || m.Name == "op_Explicit") &&
+                       m.IsStatic &&
+                       m.Parameters.Length == 1);
+
+        foreach (var method in conversionOperators)
+        {
+            var conversionInfo = GetConversionInfoFromSymbol(method);
+            if (conversionInfo != null)
+            {
+                conversionInfos.Add(conversionInfo);
+            }
+        }
+
+        if (namedType.IsGenericType)
+        {
+            foreach (var typeArg in namedType.TypeArguments)
+            {
+                CollectConversionsForType(typeArg, conversionInfos, requireStrongName);
             }
         }
     }
 
-    private void CollectNestedTypes(INamedTypeSymbol type, HashSet<INamedTypeSymbol> types)
-    {
-        foreach (var nestedType in type.GetTypeMembers())
-        {
-            types.Add(nestedType);
-            CollectNestedTypes(nestedType, types);
-        }
-    }
-
-    private bool ShouldIncludeType(INamedTypeSymbol type)
+    private bool ShouldIncludeType(INamedTypeSymbol type, bool requireStrongName)
     {
         if (type.DeclaredAccessibility != Accessibility.Public)
+        {
+            return false;
+        }
+
+        if (requireStrongName && type.ContainingAssembly?.Identity.IsStrongName != true)
         {
             return false;
         }
