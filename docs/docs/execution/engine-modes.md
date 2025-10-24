@@ -26,19 +26,70 @@ This is the standard mode used for all builds, whether debugging, running tests,
 
 ## Reflection Mode
 
-Reflection mode can be explicitly enabled using the `--reflection` command-line flag:
+Reflection mode can be explicitly enabled in several ways:
 
 - **Runtime Discovery**: Tests are discovered at runtime using reflection
 - **Dynamic Execution**: Uses traditional reflection-based test invocation
-- **Compatibility**: Useful for scenarios where source generation may not be suitable
+- **Compatibility**: Useful for scenarios where source generation may not be suitable (e.g., bUnit with Razor components)
 - **Legacy Support**: Maintains compatibility with reflection-dependent test patterns
 
-Enable reflection mode by running:
+### Enabling Reflection Mode
+
+There are three ways to enable reflection mode, listed in priority order:
+
+#### 1. Command-Line Flag (Highest Priority)
 ```bash
 dotnet test -- --reflection
 ```
 
-Alternatively, setting the environment variable `TUNIT_EXECUTION_MODE` to `reflection` enables the reflection engine mode globally.
+#### 2. Assembly Attribute (Recommended for Per-Project Configuration)
+Add to any `.cs` file in your test project (e.g., `AssemblyInfo.cs`):
+```csharp
+using TUnit.Core;
+
+[assembly: ReflectionMode]
+```
+
+This is the recommended approach when you need reflection mode for a specific test assembly, such as bUnit projects that test Razor components. The configuration is version-controlled and doesn't require external configuration files.
+
+**Example: bUnit Test Project**
+```csharp
+// Add this to enable reflection mode for your bUnit tests
+[assembly: ReflectionMode]
+
+namespace MyApp.Tests;
+
+public class CounterComponentTests : TestContext
+{
+    [Test]
+    public void CounterStartsAtZero()
+    {
+        // Test Razor components that are source-generated at compile time
+        var cut = RenderComponent<Counter>();
+        cut.Find("p").TextContent.ShouldBe("Current count: 0");
+    }
+}
+```
+
+#### 3. Environment Variable (Global Configuration)
+```bash
+# Windows
+set TUNIT_EXECUTION_MODE=reflection
+
+# Linux/macOS
+export TUNIT_EXECUTION_MODE=reflection
+```
+
+Alternatively, you can configure this in a `.runsettings` file:
+```xml
+<RunSettings>
+  <RunConfiguration>
+    <EnvironmentVariables>
+      <TUNIT_EXECUTION_MODE>reflection</TUNIT_EXECUTION_MODE>
+    </EnvironmentVariables>
+  </RunConfiguration>
+</RunSettings>
+```
 
 ## Native AOT Support
 

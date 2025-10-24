@@ -21,16 +21,16 @@ public class DelegateAssertion : IAssertionSource<object?>, IDelegateAssertionSo
         Action = action ?? throw new ArgumentNullException(nameof(action));
         var expressionBuilder = new StringBuilder();
         expressionBuilder.Append($"Assert.That({expression ?? "?"})");
-        var evaluationContext = new EvaluationContext<object?>(async () =>
+        var evaluationContext = new EvaluationContext<object?>(() =>
         {
             try
             {
                 action();
-                return (null, null);
+                return Task.FromResult<(object?, Exception?)>((null, null));
             }
             catch (Exception ex)
             {
-                return (null, ex);
+                return Task.FromResult<(object?, Exception?)>((null, ex));
             }
         });
         Context = new AssertionContext<object?>(evaluationContext, expressionBuilder);

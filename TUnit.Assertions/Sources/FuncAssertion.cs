@@ -18,16 +18,16 @@ public class FuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
     {
         var expressionBuilder = new StringBuilder();
         expressionBuilder.Append($"Assert.That({expression ?? "?"})");
-        var evaluationContext = new EvaluationContext<TValue>(async () =>
+        var evaluationContext = new EvaluationContext<TValue>(() =>
         {
             try
             {
                 var result = func();
-                return (result, null);
+                return Task.FromResult<(TValue?, Exception?)>((result, null));
             }
             catch (Exception ex)
             {
-                return (default(TValue), ex);
+                return Task.FromResult<(TValue?, Exception?)>((default(TValue), ex));
             }
         });
         Context = new AssertionContext<TValue>(evaluationContext, expressionBuilder);
