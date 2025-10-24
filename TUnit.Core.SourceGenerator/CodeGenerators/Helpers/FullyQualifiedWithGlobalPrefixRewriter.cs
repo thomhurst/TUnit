@@ -140,10 +140,17 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
     {
         var symbol = node.Type.GetSymbolInfo(semanticModel);
 
+        // If symbol is null (e.g., type doesn't exist), fall back to base implementation
+        // to let the compiler report the error rather than crashing the generator
+        if (symbol is null)
+        {
+            return base.VisitTypeOfExpression(node) ?? node;
+        }
+
         return SyntaxFactory
             .TypeOfExpression(
                 SyntaxFactory.ParseTypeName(
-                    symbol!.GloballyQualified())
+                    symbol.GloballyQualified())
             )
             .WithoutTrivia();
     }
@@ -159,6 +166,18 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
         {
             // nameof() syntax
             var argumentList = (ArgumentListSyntax) childNodes[1];
+
+            // Check if there are any arguments before accessing
+            if (argumentList.Arguments.Count == 0)
+            {
+                // Invalid nameof() with no arguments - return empty string literal
+                // This prevents IndexOutOfRangeException and allows the compiler to report the error
+                return SyntaxFactory.LiteralExpression(
+                    SyntaxKind.StringLiteralExpression,
+                    SyntaxFactory.Literal(string.Empty)
+                );
+            }
+
             var argumentExpression = argumentList.Arguments[0].Expression;
 
             if (argumentExpression is IdentifierNameSyntax identifierNameSyntax)
