@@ -15,11 +15,10 @@ public class AotConverterGenerator : IIncrementalGenerator
             .Select((compilation, _) =>
             {
                 var conversionInfos = new List<ConversionInfo>();
-                var requireStrongName = compilation.Assembly.Identity.IsStrongName;
 
-                ScanAllTypesInCompilation(compilation, conversionInfos, requireStrongName);
-                ScanReferencedAssemblies(compilation, conversionInfos, requireStrongName);
-                ScanClosedGenericTypesInParameters(compilation, conversionInfos, requireStrongName);
+                ScanAllTypesInCompilation(compilation, conversionInfos);
+                ScanReferencedAssemblies(compilation, conversionInfos);
+                ScanClosedGenericTypesInParameters(compilation, conversionInfos);
 
                 return conversionInfos.ToImmutableArray();
             });
@@ -27,7 +26,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(allTypes, GenerateConverters!);
     }
 
-    private void ScanAllTypesInCompilation(Compilation compilation, List<ConversionInfo> conversionInfos, bool requireStrongName)
+    private void ScanAllTypesInCompilation(Compilation compilation, List<ConversionInfo> conversionInfos)
     {
         var compilationTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
@@ -35,16 +34,15 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         foreach (var type in compilationTypes)
         {
-            if (!ShouldIncludeType(type, requireStrongName))
+            if (!ShouldIncludeType(type))
             {
                 continue;
             }
 
             var conversionOperators = type.GetMembers()
                 .OfType<IMethodSymbol>()
-                .Where(m => (m.Name == "op_Implicit" || m.Name == "op_Explicit") &&
-                           m.IsStatic &&
-                           m.Parameters.Length == 1);
+                .Where(m => m.Name is "op_Implicit" or "op_Explicit" &&
+                            m is { IsStatic: true, Parameters.Length: 1 });
 
             foreach (var method in conversionOperators)
             {
@@ -57,7 +55,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
     }
 
-    private void ScanClosedGenericTypesInParameters(Compilation compilation, List<ConversionInfo> conversionInfos, bool requireStrongName)
+    private void ScanClosedGenericTypesInParameters(Compilation compilation, List<ConversionInfo> conversionInfos)
     {
         var closedGenericTypesInUse = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
@@ -86,16 +84,15 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         foreach (var type in closedGenericTypesInUse)
         {
-            if (!ShouldIncludeType(type, requireStrongName))
+            if (!ShouldIncludeType(type))
             {
                 continue;
             }
 
             var conversionOperators = type.GetMembers()
                 .OfType<IMethodSymbol>()
-                .Where(m => (m.Name == "op_Implicit" || m.Name == "op_Explicit") &&
-                           m.IsStatic &&
-                           m.Parameters.Length == 1);
+                .Where(m => m.Name is "op_Implicit" or "op_Explicit" &&
+                            m is { IsStatic: true, Parameters.Length: 1 });
 
             foreach (var method in conversionOperators)
             {
@@ -110,7 +107,7 @@ public class AotConverterGenerator : IIncrementalGenerator
 
     private void CollectClosedGenericTypes(ITypeSymbol type, HashSet<INamedTypeSymbol> types)
     {
-        if (type is INamedTypeSymbol { IsGenericType: true } namedType && !namedType.IsUnboundGenericType)
+        if (type is INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } namedType)
         {
             types.Add(namedType);
 
@@ -128,7 +125,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
     }
 
-    private void ScanReferencedAssemblies(Compilation compilation, List<ConversionInfo> conversionInfos, bool requireStrongName)
+    private void ScanReferencedAssemblies(Compilation compilation, List<ConversionInfo> conversionInfos)
     {
         var referencedTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
@@ -141,11 +138,6 @@ public class AotConverterGenerator : IIncrementalGenerator
                     assemblyName.StartsWith("Microsoft.") ||
                     assemblyName == "mscorlib" ||
                     assemblyName == "netstandard")
-                {
-                    continue;
-                }
-
-                if (!ShouldIncludeAssembly(assemblySymbol, requireStrongName))
                 {
                     continue;
                 }
@@ -163,9 +155,8 @@ public class AotConverterGenerator : IIncrementalGenerator
 
             var conversionOperators = type.GetMembers()
                 .OfType<IMethodSymbol>()
-                .Where(m => (m.Name == "op_Implicit" || m.Name == "op_Explicit") &&
-                           m.IsStatic &&
-                           m.Parameters.Length == 1);
+                .Where(m => m.Name is "op_Implicit" or "op_Explicit" &&
+                            m is { IsStatic: true, Parameters.Length: 1 });
 
             foreach (var method in conversionOperators)
             {
@@ -205,24 +196,9 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
     }
 
-    private bool ShouldIncludeType(INamedTypeSymbol type, bool requireStrongName)
+    private bool ShouldIncludeType(INamedTypeSymbol type)
     {
         if (type.DeclaredAccessibility != Accessibility.Public)
-        {
-            return false;
-        }
-
-        if (requireStrongName && type.ContainingAssembly?.Identity.IsStrongName != true)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool ShouldIncludeAssembly(IAssemblySymbol assembly, bool requireStrongName)
-    {
-        if (requireStrongName && assembly.Identity.IsStrongName != true)
         {
             return false;
         }
@@ -389,7 +365,7 @@ public class AotConverterGenerator : IIncrementalGenerator
             // For nullable value types, we need to use the underlying type in the pattern
             // because you can't use nullable types in patterns in older C# versions
             var sourceType = conversion.SourceType;
-            var underlyingType = sourceType.IsValueType && sourceType is INamedTypeSymbol named && named.OriginalDefinition?.SpecialType == SpecialType.System_Nullable_T
+            var underlyingType = sourceType.IsValueType && sourceType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T }
                 ? ((INamedTypeSymbol)sourceType).TypeArguments[0]
                 : sourceType;
 

@@ -3681,7 +3681,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var baseTypeNamespace = baseTypeDef.ContainingNamespace?.ToDisplayString();
 
                 // Check for typed data source base classes more precisely
-                if ((baseTypeName == "DataSourceGeneratorAttribute" || baseTypeName == "AsyncDataSourceGeneratorAttribute") &&
+                if (baseTypeName is "DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute" &&
                     baseTypeNamespace?.Contains("TUnit.Core") == true)
                 {
                     // Get the type arguments from the base class
@@ -4580,7 +4580,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var namespaceName = current.ContainingNamespace?.ToDisplayString();
 
                 // Check for exact match of the typed base classes
-                if ((name == "DataSourceGeneratorAttribute" || name == "AsyncDataSourceGeneratorAttribute") &&
+                if (name is "DataSourceGeneratorAttribute" or "AsyncDataSourceGeneratorAttribute" &&
                     namespaceName?.Contains("TUnit.Core") == true)
                 {
                     return current;

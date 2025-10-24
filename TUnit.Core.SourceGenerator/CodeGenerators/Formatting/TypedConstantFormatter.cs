@@ -390,7 +390,7 @@ public class TypedConstantFormatter : ITypedConstantFormatter
         var needsEscape = false;
         foreach (var c in str)
         {
-            if (c == '\\' || c == '\r' || c == '\n' || c == '\t' || c == '"')
+            if (c is '\\' or '\r' or '\n' or '\t' or '"')
             {
                 needsEscape = true;
                 break;
