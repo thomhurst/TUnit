@@ -5,7 +5,6 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Engine.Building;
-using TUnit.Engine.Configuration;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
@@ -136,12 +135,8 @@ internal sealed class TestDiscoveryService : IDataProducer
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-        if (!Debugger.IsAttached)
-        {
-            // Configure from environment if needed
-            DiscoveryConfiguration.ConfigureFromEnvironment();
-            cts.CancelAfter(DiscoveryConfiguration.DiscoveryTimeout);
-        }
+        // Set a reasonable timeout for test discovery (5 minutes)
+        cts.CancelAfter(TimeSpan.FromMinutes(5));
 
         var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, cancellationToken).ConfigureAwait(false);
 
