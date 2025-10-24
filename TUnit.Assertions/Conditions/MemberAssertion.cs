@@ -144,6 +144,32 @@ public class AssertionSourceAdapter<T> : IAssertionSource<T>
 }
 
 /// <summary>
+/// Specialized adapter for collection member assertions.
+/// Implements IAssertionSource&lt;TCollection&gt; while providing collection assertion methods from CollectionAssertionBase.
+/// </summary>
+public class CollectionMemberAssertionAdapter<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+    where TCollection : IEnumerable<TItem>
+{
+    internal CollectionMemberAssertionAdapter(AssertionContext<TCollection> context)
+        : base(context)
+    {
+    }
+}
+
+/// <summary>
+/// Specialized adapter for dictionary member assertions.
+/// Implements IAssertionSource&lt;TDictionary&gt; while providing dictionary assertion methods from DictionaryAssertionBase.
+/// </summary>
+public class DictionaryMemberAssertionAdapter<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+    where TDictionary : IReadOnlyDictionary<TKey, TValue>
+{
+    internal DictionaryMemberAssertionAdapter(AssertionContext<TDictionary> context)
+        : base(context)
+    {
+    }
+}
+
+/// <summary>
 /// Combines a pending assertion with a member assertion using AND logic.
 /// Both assertions must pass for the overall assertion to succeed.
 /// </summary>

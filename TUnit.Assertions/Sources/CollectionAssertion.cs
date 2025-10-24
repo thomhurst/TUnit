@@ -17,6 +17,11 @@ public class CollectionAssertion<TItem> : CollectionAssertionBase<IEnumerable<TI
     {
     }
 
+    internal CollectionAssertion(AssertionContext<IEnumerable<TItem>> context)
+        : base(context)
+    {
+    }
+
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {
         var builder = new StringBuilder();
