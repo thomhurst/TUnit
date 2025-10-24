@@ -54,6 +54,9 @@ public class AotConverterGenerator : IIncrementalGenerator
                 {
                     typesToScan.Add(parameter.Type);
                 }
+
+                // Scan method-level data source attributes
+                ScanAttributesForTypes(methodSymbol.GetAttributes(), typesToScan);
             }
 
             var classes = root.DescendantNodes()
@@ -71,6 +74,9 @@ public class AotConverterGenerator : IIncrementalGenerator
                 {
                     continue;
                 }
+
+                // Scan class-level data source attributes
+                ScanAttributesForTypes(classSymbol.GetAttributes(), typesToScan);
 
                 foreach (var constructor in classSymbol.Constructors)
                 {
@@ -122,6 +128,98 @@ public class AotConverterGenerator : IIncrementalGenerator
         return classSymbol.GetMembers()
             .OfType<IMethodSymbol>()
             .Any(IsTestMethod);
+    }
+
+    private void ScanAttributesForTypes(ImmutableArray<AttributeData> attributes, HashSet<ITypeSymbol> typesToScan)
+    {
+        foreach (var attribute in attributes)
+        {
+            if (attribute.AttributeClass == null)
+            {
+                continue;
+            }
+
+            // Check if this attribute is a data source attribute by checking its base types
+            if (!IsDataSourceAttribute(attribute.AttributeClass))
+            {
+                continue;
+            }
+
+            // Scan generic type arguments from the attribute itself
+            // e.g., ClassDataSource<T>, Arguments<T>
+            if (attribute.AttributeClass.IsGenericType)
+            {
+                foreach (var typeArg in attribute.AttributeClass.TypeArguments)
+                {
+                    typesToScan.Add(typeArg);
+                }
+            }
+
+            // Scan constructor arguments for Type values
+            // e.g., [ClassDataSource(typeof(IntDataSource1))]
+            foreach (var arg in attribute.ConstructorArguments)
+            {
+                ScanTypedConstantForTypes(arg, typesToScan);
+            }
+
+            // Scan named arguments for Type values
+            foreach (var namedArg in attribute.NamedArguments)
+            {
+                ScanTypedConstantForTypes(namedArg.Value, typesToScan);
+            }
+        }
+    }
+
+    private bool IsDataSourceAttribute(INamedTypeSymbol attributeClass)
+    {
+        // Check if the attribute implements IDataSourceAttribute interface
+        // or inherits from AsyncDataSourceGeneratorAttribute or AsyncUntypedDataSourceGeneratorAttribute
+        var currentType = attributeClass;
+        while (currentType != null)
+        {
+            // Check if it's one of the known data source base types
+            var fullName = currentType.ToDisplayString();
+            if (fullName == WellKnownFullyQualifiedClassNames.AsyncDataSourceGeneratorAttribute.WithoutGlobalPrefix ||
+                fullName == WellKnownFullyQualifiedClassNames.AsyncUntypedDataSourceGeneratorAttribute.WithoutGlobalPrefix ||
+                fullName == WellKnownFullyQualifiedClassNames.ArgumentsAttribute.WithoutGlobalPrefix)
+            {
+                return true;
+            }
+
+            // Check if it implements IDataSourceAttribute
+            if (currentType.AllInterfaces.Any(i =>
+                i.ToDisplayString() == WellKnownFullyQualifiedClassNames.IDataSourceAttribute.WithoutGlobalPrefix))
+            {
+                return true;
+            }
+
+            currentType = currentType.BaseType;
+        }
+
+        return false;
+    }
+
+    private void ScanTypedConstantForTypes(TypedConstant constant, HashSet<ITypeSymbol> typesToScan)
+    {
+        // If the constant is a Type, add it
+        if (constant.Kind == TypedConstantKind.Type && constant.Value is ITypeSymbol typeValue)
+        {
+            typesToScan.Add(typeValue);
+        }
+        // If the constant is an array, scan each element
+        else if (constant.Kind == TypedConstantKind.Array)
+        {
+            foreach (var element in constant.Values)
+            {
+                ScanTypedConstantForTypes(element, typesToScan);
+            }
+        }
+        // If the constant is a primitive value, check its type for potential conversion needs
+        // e.g., [Arguments(1)] where 1 is an int that might need conversion
+        else if (constant.Value != null && constant.Type != null)
+        {
+            typesToScan.Add(constant.Type);
+        }
     }
 
     private void CollectConversionsForType(ITypeSymbol type, List<ConversionInfo> conversionInfos, bool requireStrongName)
