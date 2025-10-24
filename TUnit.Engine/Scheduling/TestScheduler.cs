@@ -227,26 +227,41 @@ internal sealed class TestScheduler : ITestScheduler
         AbstractExecutableTest test,
         CancellationToken cancellationToken)
     {
+        var taskStartTime = DateTime.UtcNow;
+        await _logger.LogDebugAsync($"[TASK START] Test '{test.TestId}' task started at {taskStartTime:HH:mm:ss.fff}").ConfigureAwait(false);
+
         // Check if test has parallel limit constraint
         if (test.Context.ParallelLimiter != null)
         {
             var limiterType = test.Context.ParallelLimiter.GetType().Name;
             var semaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
 
-            await _logger.LogDebugAsync($"Test '{test.TestId}': Waiting for ParallelLimiter '{limiterType}' (available: {semaphore.CurrentCount}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
+            var waitStartTime = DateTime.UtcNow;
+            await _logger.LogDebugAsync($"[SEMAPHORE WAIT START] Test '{test.TestId}' waiting for ParallelLimiter '{limiterType}' at {waitStartTime:HH:mm:ss.fff} (available: {semaphore.CurrentCount}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
 
             await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
-            await _logger.LogDebugAsync($"Test '{test.TestId}': Acquired ParallelLimiter '{limiterType}' (remaining: {semaphore.CurrentCount}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
+            var acquiredTime = DateTime.UtcNow;
+            var waitDuration = (acquiredTime - waitStartTime).TotalMilliseconds;
+            await _logger.LogDebugAsync($"[SEMAPHORE ACQUIRED] Test '{test.TestId}' acquired ParallelLimiter '{limiterType}' at {acquiredTime:HH:mm:ss.fff} after {waitDuration:F0}ms wait (remaining: {semaphore.CurrentCount}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
 
             try
             {
+                var execStartTime = DateTime.UtcNow;
+                await _logger.LogDebugAsync($"[TEST EXECUTION START] Test '{test.TestId}' starting execution at {execStartTime:HH:mm:ss.fff}").ConfigureAwait(false);
+
                 await _testRunner.ExecuteTestAsync(test, cancellationToken).ConfigureAwait(false);
+
+                var execEndTime = DateTime.UtcNow;
+                var execDuration = (execEndTime - execStartTime).TotalMilliseconds;
+                await _logger.LogDebugAsync($"[TEST EXECUTION END] Test '{test.TestId}' completed execution at {execEndTime:HH:mm:ss.fff} (duration: {execDuration:F0}ms)").ConfigureAwait(false);
             }
             finally
             {
                 semaphore.Release();
-                await _logger.LogDebugAsync($"Test '{test.TestId}': Released ParallelLimiter '{limiterType}' (available: {semaphore.CurrentCount}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
+                var releaseTime = DateTime.UtcNow;
+                var totalDuration = (releaseTime - taskStartTime).TotalMilliseconds;
+                await _logger.LogDebugAsync($"[SEMAPHORE RELEASED] Test '{test.TestId}' released ParallelLimiter '{limiterType}' at {releaseTime:HH:mm:ss.fff} (total task duration: {totalDuration:F0}ms, available: {semaphore.CurrentCount}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
             }
         }
         else
