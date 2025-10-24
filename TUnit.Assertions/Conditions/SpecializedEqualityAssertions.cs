@@ -310,6 +310,41 @@ public class LongEqualsAssertion : ToleranceBasedEqualsAssertion<long, long>
 }
 
 /// <summary>
+/// Asserts that a decimal value is equal to another, with optional tolerance.
+/// </summary>
+[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
+public class DecimalEqualsAssertion : ToleranceBasedEqualsAssertion<decimal, decimal>
+{
+    public DecimalEqualsAssertion(
+        AssertionContext<decimal> context,
+        decimal expected)
+        : base(context, expected)
+    {
+    }
+
+    protected override bool HasToleranceValue()
+    {
+        return true; // decimal? always has meaningful value when not null
+    }
+
+    protected override bool IsWithinTolerance(decimal actual, decimal expected, decimal tolerance)
+    {
+        var diff = Math.Abs(actual - expected);
+        return diff <= tolerance;
+    }
+
+    protected override object CalculateDifference(decimal actual, decimal expected)
+    {
+        return Math.Abs(actual - expected);
+    }
+
+    protected override bool AreExactlyEqual(decimal actual, decimal expected)
+    {
+        return actual == expected;
+    }
+}
+
+/// <summary>
 /// Asserts that a DateTimeOffset value is equal to another, with optional tolerance.
 /// </summary>
 [AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
