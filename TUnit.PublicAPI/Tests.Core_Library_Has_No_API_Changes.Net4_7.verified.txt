@@ -1063,6 +1063,11 @@ namespace
         public static ..IPropertySource? GetSource( type) { }
         public static void Register( type, ..IPropertySource source) { }
     }
+    [(.Assembly, AllowMultiple=false, Inherited=false)]
+    public sealed class ReflectionModeAttribute : 
+    {
+        public ReflectionModeAttribute() { }
+    }
     [(.Assembly | .Class | .Method)]
     public sealed class RepeatAttribute : .TUnitAttribute, .IScopedAttribute
     {

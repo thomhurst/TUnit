@@ -80,7 +80,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var logLevelProvider = Register(new LogLevelProvider(CommandLineOptions));
 
         // Determine execution mode early to create appropriate services
-        var useSourceGeneration = SourceRegistrar.IsEnabled = GetUseSourceGeneration(CommandLineOptions);
+        var useSourceGeneration = SourceRegistrar.IsEnabled = ExecutionModeHelper.IsSourceGenerationMode(CommandLineOptions);
 
         // Create and register mode-specific hook discovery service
         IHookDiscoveryService hookDiscoveryService;
@@ -275,51 +275,6 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         return service;
     }
 
-    private static bool GetUseSourceGeneration(ICommandLineOptions commandLineOptions)
-    {
-#if NET
-        if (!RuntimeFeature.IsDynamicCodeSupported)
-        {
-            return true; // Force source generation on AOT platforms
-        }
-#endif
-
-        if (commandLineOptions.TryGetOptionArgumentList(ReflectionModeCommandProvider.ReflectionMode, out _))
-        {
-            return false; // Reflection mode explicitly requested
-        }
-
-        // Check for command line option
-        if (commandLineOptions.TryGetOptionArgumentList("tunit-execution-mode", out var modes) && modes.Length > 0)
-        {
-            var mode = modes[0].ToLowerInvariant();
-            if (mode == "sourcegeneration" || mode == "aot")
-            {
-                return true;
-            }
-            else if (mode == "reflection")
-            {
-                return false;
-            }
-        }
-
-        // Check environment variable
-        var envMode = EnvironmentVariableCache.Get("TUNIT_EXECUTION_MODE");
-        if (!string.IsNullOrEmpty(envMode))
-        {
-            var mode = envMode!.ToLowerInvariant();
-            if (mode == "sourcegeneration" || mode == "aot")
-            {
-                return true;
-            }
-            else if (mode == "reflection")
-            {
-                return false;
-            }
-        }
-
-        return SourceRegistrar.IsEnabled;
-    }
 
     public async ValueTask DisposeAsync()
     {
