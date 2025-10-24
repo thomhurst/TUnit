@@ -346,7 +346,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         var converterIndex = 0;
         var registrations = new List<string>();
 
-        foreach (var conversion in uniqueConversions)
+        foreach (var conversion in uniqueConversions.Where(c => IsAccessibleType(c.SourceType) && IsAccessibleType(c.TargetType)))
         {
             var converterClassName = $"AotConverter_{converterIndex++}";
             var sourceTypeName = conversion.SourceType.GloballyQualified();
