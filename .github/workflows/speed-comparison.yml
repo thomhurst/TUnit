@@ -38,7 +38,7 @@ jobs:
         working-directory: "tools/speed-comparison/UnifiedTests"
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-builds-${{ matrix.os }}
           path: tools/speed-comparison/UnifiedTests/bin/
@@ -87,7 +87,7 @@ jobs:
           CLASS_NAME: ${{ matrix.class }}
 
       - name: Upload Markdown
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: ${{ matrix.os }}_markdown_run_time_${{ matrix.class }}
@@ -127,7 +127,7 @@ jobs:
         working-directory: "tools/speed-comparison/Tests.Benchmark"
 
       - name: Upload Markdown
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: ${{ matrix.os }}_markdown_build_time
