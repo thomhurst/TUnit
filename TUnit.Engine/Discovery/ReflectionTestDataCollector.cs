@@ -15,6 +15,7 @@ namespace TUnit.Engine.Discovery;
 /// Discovers tests at runtime using reflection with assembly scanning and caching
 [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode isn't used in AOT scenarios")]
 [UnconditionalSuppressMessage("Trimming", "IL2062", Justification = "Reflection mode isn't used in AOT scenarios")]
+[UnconditionalSuppressMessage("Trimming", "IL2065", Justification = "Reflection mode isn't used in AOT scenarios")]
 [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
 [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode isn't used in AOT scenarios")]
 [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Reflection mode isn't used in AOT scenarios")]
