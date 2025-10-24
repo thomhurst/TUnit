@@ -18,8 +18,6 @@ public sealed class PropertyInjectionMetadata
     [DynamicallyAccessedMembers(
         DynamicallyAccessedMemberTypes.PublicConstructors |
         DynamicallyAccessedMemberTypes.NonPublicConstructors |
-        DynamicallyAccessedMemberTypes.PublicMethods |
-        DynamicallyAccessedMemberTypes.NonPublicMethods |
         DynamicallyAccessedMemberTypes.PublicProperties)]
     public required Type PropertyType { get; init; }
 

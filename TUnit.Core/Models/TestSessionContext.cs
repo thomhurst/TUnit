@@ -27,7 +27,7 @@ public class TestSessionContext : Context
             Name = "StaticPropertyInitialization",
             TypeInfo = new ConcreteType(typeof(object)),
             ReturnTypeInfo = new ConcreteType(typeof(void)),
-            Parameters = Array.Empty<ParameterMetadata>(),
+            Parameters = [],
             GenericTypeCount = 0,
             Class = new ClassMetadata
             {
@@ -36,8 +36,8 @@ public class TestSessionContext : Context
                 Namespace = "TUnit.Core",
                 TypeInfo = new ConcreteType(typeof(object)),
                 Assembly = AssemblyMetadata.GetOrAdd("TUnit.Core", () => new AssemblyMetadata { Name = "TUnit.Core" }),
-                Properties = Array.Empty<PropertyMetadata>(),
-                Parameters = Array.Empty<ParameterMetadata>(),
+                Properties = [],
+                Parameters = [],
                 Parent = null
             }
         },

@@ -55,10 +55,7 @@ public static class AsyncConvert
                 | MethodImplOptions.AggressiveOptimization
 #endif
     )]
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("ConvertObject uses reflection to handle custom awaitable types and F# async. For AOT compatibility, use Task or ValueTask directly.")]
-    [RequiresDynamicCode("ConvertObject may require dynamic invocation for custom awaitable types. For AOT compatibility, use Task or ValueTask directly.")]
-    #endif
+
     public static async ValueTask ConvertObject(object? invoke)
     {
         if (invoke is Delegate @delegate)
@@ -116,17 +113,23 @@ public static class AsyncConvert
         }
     }
 
-    [System.Diagnostics.CodeAnalysis.DynamicDependency(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods, "Microsoft.FSharp.Control.FSharpAsync", "FSharp.Core")]
-    [System.Diagnostics.CodeAnalysis.DynamicDependency("StartAsTask", "Microsoft.FSharp.Control.FSharpAsync", "FSharp.Core")]
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("F# async support requires FSharp.Core types and reflection. For AOT, use Task-based APIs.")]
-    [RequiresDynamicCode("F# async interop requires MakeGenericMethod. For AOT, use Task-based APIs.")]
-    #endif
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, "Microsoft.FSharp.Control.FSharpAsync", "FSharp.Core")]
+    [DynamicDependency("StartAsTask", "Microsoft.FSharp.Control.FSharpAsync", "FSharp.Core")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
+    [UnconditionalSuppressMessage("Trimming", "IL2060:Call to \'System.Reflection.MethodInfo.MakeGenericMethod\' can not be statically analyzed. It\'s not possible to guarantee the availability of requirements of the generic method.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2077:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The source field does not have matching annotations.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break functionality when AOT compiling.")]
     private static ValueTask StartAsFSharpTask(object invoke, Type type)
     {
         var startAsTaskOpenGenericMethod = (_fSharpAsyncType ??= type.Assembly.GetType("Microsoft.FSharp.Control.FSharpAsync"))!
             .GetRuntimeMethods()
-            .First(m => m.Name == "StartAsTask");
+            .FirstOrDefault(m => m.Name == "StartAsTask");
+
+        if (startAsTaskOpenGenericMethod is null)
+        {
+            return default;
+        }
 
         var fSharpTask = (Task) startAsTaskOpenGenericMethod.MakeGenericMethod(type.GetGenericArguments()[0])
             .Invoke(null, [invoke, null, null])!;
@@ -143,16 +146,11 @@ public static class AsyncConvert
     /// <summary>
     /// Safely invokes F# async conversion with proper suppression for the call site.
     /// </summary>
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("F# async is an optional feature. AOT applications should use Task-based APIs.")]
-    [RequiresDynamicCode("F# async requires runtime code generation. This is documented as not AOT-compatible.")]
-    #endif
     private static async ValueTask StartAsFSharpTaskSafely(object invoke, Type type)
     {
         if (IsFSharpAsyncSupported())
         {
             await StartAsFSharpTask(invoke, type);
-            return;
         }
     }
 
@@ -181,10 +179,7 @@ public static class AsyncConvert
         }
     }
 
-    #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("GetAwaiter pattern detection requires reflection for custom awaitable types. For AOT, use Task/ValueTask.")]
-    [RequiresDynamicCode("Custom awaitable handling may require dynamic invocation. For AOT, use Task/ValueTask.")]
-    #endif
+    [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
     public static bool TryGetAwaitableTask(object awaitable, [NotNullWhen(true)] out Task? task)
     {
         var getAwaiter = awaitable.GetType().GetMethod("GetAwaiter", Type.EmptyTypes);

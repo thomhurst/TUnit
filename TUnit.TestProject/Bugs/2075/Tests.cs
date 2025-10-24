@@ -43,7 +43,18 @@ public class FromServiceProviderFactoryAttribute : UntypedDataSourceGeneratorAtt
 
         yield return () =>
         {
-            return dataGeneratorMetadata.MembersToGenerate.Select(x => ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, x.Type)).ToArray();
+            return dataGeneratorMetadata.MembersToGenerate.Select(x =>
+            {
+                var type = x switch
+                {
+                    PropertyMetadata prop => prop.Type,
+                    ParameterMetadata param => param.Type,
+                    ClassMetadata cls => cls.Type,
+                    MethodMetadata method => method.Type,
+                    _ => throw new InvalidOperationException($"Unknown member type: {x.GetType()}")
+                };
+                return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, type);
+            }).ToArray();
         };
     }
 }

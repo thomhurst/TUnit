@@ -20,7 +20,15 @@ public class AutoDataAttribute : UntypedDataSourceGeneratorAttribute
     {
         foreach (var member in dataGeneratorMetadata.MembersToGenerate)
         {
-            yield return Fixture.Create(member.Type, new SpecimenContext(Fixture));
+            var type = member switch
+            {
+                PropertyMetadata prop => prop.Type,
+                ParameterMetadata param => param.Type,
+                ClassMetadata cls => cls.Type,
+                MethodMetadata method => method.Type,
+                _ => throw new InvalidOperationException($"Unknown member type: {member.GetType()}")
+            };
+            yield return Fixture.Create(type, new SpecimenContext(Fixture));
         }
     }
 }

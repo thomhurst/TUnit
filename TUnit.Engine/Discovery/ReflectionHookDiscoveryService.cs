@@ -15,7 +15,6 @@ namespace TUnit.Engine.Discovery;
 /// </summary>
 #if NET6_0_OR_GREATER
 [RequiresUnreferencedCode("Uses reflection to access nested members")]
-[RequiresDynamicCode("Uses reflection to access nested members")]
 #endif
 internal sealed class ReflectionHookDiscoveryService
 {
@@ -150,7 +149,6 @@ internal sealed class ReflectionHookDiscoveryService
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Hook discovery scans assemblies and types using reflection")]
-    [RequiresDynamicCode("Hook delegate creation may require dynamic code generation")]
     #endif
     public static void DiscoverHooks()
     {

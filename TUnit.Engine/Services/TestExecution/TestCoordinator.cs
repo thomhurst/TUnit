@@ -46,18 +46,12 @@ internal sealed class TestCoordinator : ITestCoordinator
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         await _executionGuard.TryStartExecutionAsync(test.TestId,
             () => ExecuteTestInternalAsync(test, cancellationToken));
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
     private async Task ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         try

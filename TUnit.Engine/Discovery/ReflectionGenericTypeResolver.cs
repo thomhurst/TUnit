@@ -9,14 +9,13 @@ namespace TUnit.Engine.Discovery;
 /// <summary>
 /// Handles generic type resolution and instantiation for reflection-based test discovery
 /// </summary>
+[RequiresUnreferencedCode("Uses reflection to analyze and instantiate generic types")]
+[RequiresDynamicCode("Uses reflection to analyze and instantiate generic types")]
 internal static class ReflectionGenericTypeResolver
 {
     /// <summary>
     /// Determines generic type arguments from data row values
     /// </summary>
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Generic type argument determination uses reflection")]
-#endif
     public static Type[]? DetermineGenericTypeArguments(Type genericTypeDefinition, object?[] dataRow)
     {
 #if NET
@@ -79,9 +78,6 @@ internal static class ReflectionGenericTypeResolver
     /// <summary>
     /// Extracts generic type information including constraints
     /// </summary>
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Generic type info extraction uses reflection on type parameters")]
-#endif
     public static GenericTypeInfo? ExtractGenericTypeInfo(Type testClass)
     {
         // Handle both generic type definitions and constructed generic types
@@ -129,9 +125,6 @@ internal static class ReflectionGenericTypeResolver
     /// <summary>
     /// Extracts generic method information including parameter positions
     /// </summary>
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Generic method info extraction uses reflection on method parameters")]
-#endif
     public static GenericMethodInfo? ExtractGenericMethodInfo(MethodInfo method)
     {
         if (!method.IsGenericMethodDefinition)
@@ -180,10 +173,6 @@ internal static class ReflectionGenericTypeResolver
     /// <summary>
     /// Creates a concrete type from a generic type definition and validates the type arguments
     /// </summary>
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Concrete type creation uses Type.GetGenericArguments and reflection")]
-    [RequiresDynamicCode("Type construction uses MakeGenericType")]
-#endif
     public static Type CreateConcreteType(Type genericTypeDefinition, Type[] typeArguments)
     {
         var genericParams = genericTypeDefinition.GetGenericArguments();

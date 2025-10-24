@@ -10,7 +10,7 @@ namespace TUnit.Assertions.Conditions.Helpers;
 /// For complex objects, performs deep comparison of properties and fields.
 /// </summary>
 /// <typeparam name="T">The type of objects to compare</typeparam>
-[RequiresDynamicCode("Structural equality comparison uses reflection to access object members and is not compatible with AOT")]
+[RequiresUnreferencedCode("Structural equality comparison uses reflection to access object members and is not compatible with AOT")]
 public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
 {
     /// <summary>

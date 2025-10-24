@@ -23,7 +23,7 @@ public class DynamicTestBuilderContext
     public IReadOnlyList<AbstractDynamicTest> Tests => _tests.AsReadOnly();
 
     #if NET6_0_OR_GREATER
-    [RequiresDynamicCode("Adding dynamic tests requires reflection which is not supported in native AOT scenarios.")]
+    [RequiresUnreferencedCode("Adding dynamic tests requires reflection which is not supported in native AOT scenarios.")]
     #endif
     public void AddTest(AbstractDynamicTest test)
     {

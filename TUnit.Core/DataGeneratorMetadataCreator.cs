@@ -23,7 +23,7 @@ internal static class DataGeneratorMetadataCreator
         if (generatorType == DataGeneratorType.TestParameters && parametersToGenerate.Length > 0)
         {
             var lastParam = parametersToGenerate[parametersToGenerate.Length - 1];
-            if (lastParam.Type == typeof(System.Threading.CancellationToken))
+            if (lastParam.Type == typeof(CancellationToken))
             {
                 var newArray = new ParameterMetadata[parametersToGenerate.Length - 1];
                 Array.Copy(parametersToGenerate, 0, newArray, 0, parametersToGenerate.Length - 1);
@@ -31,7 +31,7 @@ internal static class DataGeneratorMetadataCreator
             }
         }
 
-        MemberMetadata[] membersToGenerate;
+        IMemberMetadata[] membersToGenerate;
         if (generatorType == DataGeneratorType.Property)
         {
             if (testMetadata.PropertyDataSources.Length > 0)
@@ -82,7 +82,7 @@ internal static class DataGeneratorMetadataCreator
         string testSessionId = "reflection-discovery")
     {
         // Determine which members we're generating for based on type
-        MemberMetadata[] membersToGenerate = generatorType switch
+        IMemberMetadata[] membersToGenerate = generatorType switch
         {
             DataGeneratorType.ClassParameters => methodMetadata.Class.Parameters,
             DataGeneratorType.TestParameters => FilterOutCancellationToken(methodMetadata.Parameters),
@@ -200,10 +200,15 @@ internal static class DataGeneratorMetadataCreator
 
     /// <summary>
     /// Creates DataGeneratorMetadata for property injection using PropertyInfo (reflection mode).
+    /// This method is only called in reflection mode, not in source-generated/AOT scenarios.
     /// </summary>
     #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Property types are resolved through reflection")]
-    #endif
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access",
+        Justification = "This method is only used in reflection mode. In AOT/source-gen mode, property injection uses compile-time generated PropertyMetadata.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling",
+        Justification = "This method is only used in reflection mode. In AOT/source-gen mode, property injection uses compile-time generated PropertyMetadata.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+#endif
     public static DataGeneratorMetadata CreateForPropertyInjection(
         PropertyInfo property,
         Type containingType,
@@ -240,7 +245,7 @@ internal static class DataGeneratorMetadataCreator
         if (parameters.Length > 0)
         {
             var lastParam = parameters[parameters.Length - 1];
-            if (lastParam.Type == typeof(System.Threading.CancellationToken))
+            if (lastParam.Type == typeof(CancellationToken))
             {
                 var newArray = new ParameterMetadata[parameters.Length - 1];
                 Array.Copy(parameters, 0, newArray, 0, parameters.Length - 1);
@@ -251,8 +256,13 @@ internal static class DataGeneratorMetadataCreator
     }
 
     #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Class metadata creation requires reflection")]
-    #endif
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access",
+        Justification = "This helper is only used in reflection mode. In AOT/source-gen mode, class metadata is generated at compile time.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Target method return value does not satisfy 'DynamicallyAccessedMembersAttribute'",
+        Justification = "This helper is only used in reflection mode. In AOT/source-gen mode, class metadata is generated at compile time.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The parameter of method does not have matching annotations.")]
+#endif
     private static ClassMetadata GetClassMetadataForType(Type type)
     {
         return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () =>
@@ -265,7 +275,7 @@ internal static class DataGeneratorMetadataCreator
                 Name = p.Name ?? $"param{i}",
                 TypeInfo = new ConcreteType(p.ParameterType),
                 ReflectionInfo = p
-            }).ToArray() ?? Array.Empty<ParameterMetadata>();
+            }).ToArray() ?? [];
 
             return new ClassMetadata
             {

@@ -19,8 +19,6 @@ internal static class ClassMetadataHelper
         [DynamicallyAccessedMembers(
             DynamicallyAccessedMemberTypes.PublicConstructors |
             DynamicallyAccessedMemberTypes.NonPublicConstructors |
-            DynamicallyAccessedMemberTypes.PublicMethods |
-            DynamicallyAccessedMemberTypes.NonPublicMethods |
             DynamicallyAccessedMemberTypes.PublicProperties)]
         Type type)
     {
@@ -34,7 +32,7 @@ internal static class ClassMetadataHelper
                 Name = p.Name ?? $"param{i}",
                 TypeInfo = new ConcreteType(p.ParameterType),
                 ReflectionInfo = p
-            }).ToArray() ?? Array.Empty<ParameterMetadata>();
+            }).ToArray() ?? [];
 
             return new ClassMetadata
             {

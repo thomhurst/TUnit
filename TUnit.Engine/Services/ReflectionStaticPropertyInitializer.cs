@@ -11,7 +11,6 @@ namespace TUnit.Engine.Services;
 /// </summary>
 #if NET6_0_OR_GREATER
 [RequiresUnreferencedCode("Uses reflection to discover and initialize static properties")]
-[RequiresDynamicCode("Static property initialization may require dynamic code generation")]
 #endif
 internal sealed class ReflectionStaticPropertyInitializer : IStaticPropertyInitializer
 {

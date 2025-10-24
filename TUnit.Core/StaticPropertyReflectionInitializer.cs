@@ -19,7 +19,7 @@ public static class StaticPropertyReflectionInitializer
     /// Initializes static properties with data sources for all loaded types
     /// </summary>
 #if NET6_0_OR_GREATER
-    [RequiresDynamicCode("Data source initialization may require dynamic code generation")]
+    [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
 #endif
     public static async Task InitializeAllStaticPropertiesAsync()
     {
@@ -50,7 +50,7 @@ public static class StaticPropertyReflectionInitializer
     /// Initializes static properties with data sources for a specific type
     /// </summary>
 #if NET6_0_OR_GREATER
-    [RequiresDynamicCode("Data source initialization may require dynamic code generation")]
+    [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
 #endif
     public static async Task InitializeStaticPropertiesForType(Type type)
     {
@@ -85,7 +85,7 @@ public static class StaticPropertyReflectionInitializer
     }
 
 #if NET6_0_OR_GREATER
-    [RequiresDynamicCode("Data source initialization may require dynamic code generation")]
+    [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
 #endif
     private static async Task InitializeStaticProperty(Type type, PropertyInfo property)
     {

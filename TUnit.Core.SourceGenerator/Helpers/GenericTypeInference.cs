@@ -166,7 +166,7 @@ internal static class GenericTypeInference
                     {
                         // Look for IInfersType<T> in the attribute's interfaces
                         var infersTypeInterface = attr.AttributeClass.AllInterfaces
-                            .FirstOrDefault(i => ((ISymbol)i).GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" && 
+                            .FirstOrDefault(i => i.GloballyQualifiedNonGeneric() == "global::TUnit.Core.Interfaces.IInfersType" && 
                                                  i.IsGenericType && 
                                                  i.TypeArguments.Length == 1);
                         

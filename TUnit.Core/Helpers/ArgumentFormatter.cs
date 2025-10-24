@@ -63,9 +63,16 @@ public static class ArgumentFormatter
             return toString;
         }
 
-        if (type.IsPrimitive || o is string)
+        if (type.IsPrimitive)
         {
             return toString;
+        }
+
+        if (o is string str)
+        {
+            // Replace dots with middle dot (·) to prevent VS Test Explorer from interpreting them as namespace separators
+            // Only do this if the string contains dots, to avoid unnecessary allocations
+            return str.Contains('.') ? str.Replace(".", "·") : str;
         }
 
         if (toString == type.FullName || toString == type.AssemblyQualifiedName)

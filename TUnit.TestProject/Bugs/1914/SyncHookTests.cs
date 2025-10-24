@@ -7,7 +7,7 @@ namespace TUnit.TestProject.Bugs._1914;
 [SkipNetFramework("ExecutionContext.Restore is not supported on .NET Framework")]
 [UnconditionalSuppressMessage("Usage", "TUnit0042:Global hooks should not be mixed with test classes to avoid confusion. Place them in their own class.")]
 [UnconditionalSuppressMessage("Usage", "TUnit0047:Call `context.AddAsyncLocalValues`")]
-[SuppressMessage("Usage", "TUnitAssertions0002:Assert statements must be awaited")]
+[UnconditionalSuppressMessage("Usage", "TUnitAssertions0002:Assert statements must be awaited")]
 public class SyncHookTests
 {
     private static readonly AsyncLocal<string> _0BeforeTestDiscoveryLocal = new();

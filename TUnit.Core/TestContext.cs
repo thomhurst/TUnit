@@ -195,7 +195,7 @@ public class TestContext : Context
 
     public object Lock { get; } = new();
 
-    public ConcurrentBag<Timing> Timings { get; } = new();
+    public ConcurrentBag<Timing> Timings { get; } = [];
 
     public IReadOnlyList<Artifact> Artifacts { get; } = new List<Artifact>();
 

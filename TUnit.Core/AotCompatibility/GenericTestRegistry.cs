@@ -91,7 +91,7 @@ public static class GenericTestRegistry
         AotCompatibleMethods.Add(method);
     }
 
-    private static readonly HashSet<MethodInfo> AotCompatibleMethods = new();
+    private static readonly HashSet<MethodInfo> AotCompatibleMethods = [];
 
     /// <summary>
     /// Checks if a method has been marked as AOT-compatible.

@@ -5,7 +5,7 @@ using System.Text;
 namespace TUnit.Core;
 
 [DebuggerDisplay("{Type}.{Name}")]
-public record MethodMetadata : MemberMetadata
+public record MethodMetadata : IMemberMetadata
 {
     public required ParameterMetadata[] Parameters { get; init; }
 
@@ -28,9 +28,11 @@ public record MethodMetadata : MemberMetadata
         | DynamicallyAccessedMemberTypes.PublicMethods
         | DynamicallyAccessedMemberTypes.NonPublicMethods
         | DynamicallyAccessedMemberTypes.PublicProperties)]
-    public override required Type Type { get; init; }
+    public required Type Type { get; init; }
 
-    protected override bool PrintMembers(StringBuilder stringBuilder)
+    public required string Name { get; init; }
+
+    protected virtual bool PrintMembers(StringBuilder stringBuilder)
     {
         stringBuilder.Append($"ReturnTypeInfo = {ReturnTypeInfo},");
         stringBuilder.Append($"GenericTypeCount = {GenericTypeCount},");

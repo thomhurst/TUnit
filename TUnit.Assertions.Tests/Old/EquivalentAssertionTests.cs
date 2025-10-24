@@ -98,7 +98,7 @@ public class EquivalentAssertionTests
         // Dictionaries are equivalent regardless of key order by default
         // Cast both to IEnumerable to use collection equivalency
         await TUnitAssert.That((IEnumerable<KeyValuePair<string, string>>)dict1)
-            .IsEquivalentTo((IEnumerable<KeyValuePair<string, string>>)dict2);
+            .IsEquivalentTo(dict2);
     }
 
     [Test]

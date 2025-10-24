@@ -331,7 +331,7 @@ public static class DataSourceHelpers
         // Only arrays and tuples are expanded (handled above)
         return [item];
     }
-    
+
     /// <summary>
     /// Converts an item to an object array, considering the expected parameter types.
     /// This version handles nested tuples correctly by checking if parameters expect tuples.
@@ -376,7 +376,7 @@ public static class DataSourceHelpers
                 {
                     return [item];
                 }
-                
+
                 return UnwrapTupleWithTypes(item, expectedTypes);
             }
             // Fall back to default unwrapping if no type info
@@ -386,7 +386,7 @@ public static class DataSourceHelpers
         // Don't expand IEnumerable - test methods expect the IEnumerable itself as a parameter
         return [item];
     }
-    
+
     /// <summary>
     /// Unwraps a tuple considering the expected parameter types.
     /// Preserves nested tuples when parameters expect tuple types.
@@ -404,12 +404,12 @@ public static class DataSourceHelpers
         {
             var result = new List<object?>();
             var typeIndex = 0;
-            
+
             for (var i = 0; i < tuple.Length && typeIndex < expectedTypes.Length; i++)
             {
                 var element = tuple[i];
                 var expectedType = expectedTypes[typeIndex];
-                
+
                 // Check if the expected type is a tuple type
                 if (IsTupleType(expectedType) && IsTuple(element))
                 {
@@ -424,7 +424,7 @@ public static class DataSourceHelpers
                     typeIndex++;
                 }
             }
-            
+
             return result.ToArray();
         }
 #endif
@@ -432,7 +432,7 @@ public static class DataSourceHelpers
         // Fallback to default unwrapping
         return UnwrapTupleAot(value);
     }
-    
+
     /// <summary>
     /// Checks if a Type represents a tuple type.
     /// </summary>
@@ -471,7 +471,7 @@ public static class DataSourceHelpers
 
 #if NET5_0_OR_GREATER || NETCOREAPP3_0_OR_GREATER
     // Fast path for modern .NET: ITuple covers all tuple types
-    return obj is System.Runtime.CompilerServices.ITuple;
+    return obj is ITuple;
 #else
         // Fallback: check for known tuple types
         var type = obj.GetType();
@@ -497,7 +497,7 @@ public static class DataSourceHelpers
             genericType == typeof(Tuple<,,,,,,>);
 #endif
     }
-    
+
     /// <summary>
     /// Tries to create an instance using a generated creation method that handles init-only properties.
     /// Returns true if successful, false if no creator is available.
@@ -509,14 +509,14 @@ public static class DataSourceHelpers
         {
             return (false, null);
         }
-        
+
         // Use the creator to create and initialize the instance
         var createdInstance = await creator(testInformation, testSessionId).ConfigureAwait(false);
         return (true, createdInstance);
     }
-    
+
     private static readonly Dictionary<Type, Func<MethodMetadata, string, Task<object>>> TypeCreators = new();
-    
+
     /// <summary>
     /// Registers a type creator function for types with init-only data source properties.
     /// Called by generated code.
@@ -525,14 +525,17 @@ public static class DataSourceHelpers
     {
         TypeCreators[typeof(T)] = async (metadata, sessionId) => (await creator(metadata, sessionId))!;
     }
-    
+
     /// <summary>
     /// Resolves a data source property value at runtime.
     /// This method handles all IDataSourceAttribute implementations generically.
+    /// Only used in reflection mode - in AOT/source-gen mode, property injection is handled by generated code.
     /// </summary>
     #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode("Property types are resolved through reflection")]
-    [RequiresDynamicCode("Data source resolution may require dynamic code generation")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access",
+        Justification = "This method is only used in reflection mode. In AOT/source-gen mode, property injection uses compile-time generated code.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling",
+        Justification = "This method is only used in reflection mode. In AOT/source-gen mode, property injection uses compile-time generated code.")]
     #endif
     public static async Task<object?> ResolveDataSourceForPropertyAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type containingType, string propertyName, MethodMetadata testInformation, string testSessionId)
     {

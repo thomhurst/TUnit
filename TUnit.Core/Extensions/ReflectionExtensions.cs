@@ -111,7 +111,6 @@ public static class ReflectionExtensions
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Attribute instantiation uses reflection for .NET Framework compatibility")]
-    [RequiresDynamicCode("Activator.CreateInstance required for attribute instantiation")]
     #endif
     private static Attribute[] GetAttributesViaCustomAttributeData(ICustomAttributeProvider provider, Type attributeType, bool inherit)
     {
@@ -177,7 +176,6 @@ public static class ReflectionExtensions
 
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Attribute instantiation uses reflection for .NET Framework compatibility")]
-    [RequiresDynamicCode("Activator.CreateInstance required for attribute instantiation")]
     #endif
     private static Attribute? CreateAttributeInstance(CustomAttributeData attributeData)
     {
@@ -203,7 +201,7 @@ public static class ReflectionExtensions
             // Check if constructor expects params array
             var constructor = attributeType.GetConstructors()
                 .FirstOrDefault(c => c.GetParameters().Length == constructorArgs.Length);
-            
+
             if (constructor != null && constructor.GetParameters().Length == 1)
             {
                 var param = constructor.GetParameters()[0];
@@ -277,7 +275,7 @@ public static class ReflectionExtensions
 
         return value;
     }
-    
+
     /// <summary>
     /// Gets the "Value" property from a type in an AOT-safer manner.
     /// </summary>
@@ -288,7 +286,7 @@ public static class ReflectionExtensions
     {
         return type.GetProperty("Value");
     }
-    
+
     /// <summary>
     /// Gets the "Value" property from a runtime type.
     /// </summary>

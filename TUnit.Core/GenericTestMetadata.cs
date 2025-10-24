@@ -126,7 +126,7 @@ public sealed class GenericTestMetadata : TestMetadata
                         typeArgs = testContext.TestDetails.TestClassArguments?.OfType<Type>().ToArray() ?? Type.EmptyTypes;
                     }
 
-                    var instance = InstanceFactory(typeArgs, context.ClassArguments ?? Array.Empty<object?>());
+                    var instance = InstanceFactory(typeArgs, context.ClassArguments ?? []);
 
                     // Property injection is handled by SingleTestExecutor after instance creation
                     return instance;
