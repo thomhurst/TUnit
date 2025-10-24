@@ -237,13 +237,15 @@ internal sealed class TestScheduler : ITestScheduler
             var semaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
 
             var waitStartTime = DateTime.UtcNow;
-            await _logger.LogDebugAsync($"[SEMAPHORE WAIT START] Test '{test.TestId}' waiting for ParallelLimiter '{limiterType}' at {waitStartTime:HH:mm:ss.fff} (available: {semaphore.CurrentCount}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
+            var availableBeforeWait = semaphore.CurrentCount;
+            await _logger.LogDebugAsync($"[SEMAPHORE WAIT START] Test '{test.TestId}' waiting for ParallelLimiter '{limiterType}' at {waitStartTime:HH:mm:ss.fff} (available: {availableBeforeWait}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
 
             await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             var acquiredTime = DateTime.UtcNow;
             var waitDuration = (acquiredTime - waitStartTime).TotalMilliseconds;
-            await _logger.LogDebugAsync($"[SEMAPHORE ACQUIRED] Test '{test.TestId}' acquired ParallelLimiter '{limiterType}' at {acquiredTime:HH:mm:ss.fff} after {waitDuration:F0}ms wait (remaining: {semaphore.CurrentCount}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
+            var remainingAfterAcquire = semaphore.CurrentCount;
+            await _logger.LogDebugAsync($"[SEMAPHORE ACQUIRED] Test '{test.TestId}' acquired ParallelLimiter '{limiterType}' at {acquiredTime:HH:mm:ss.fff} after {waitDuration:F0}ms wait (remaining: {remainingAfterAcquire}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
 
             try
             {
@@ -258,10 +260,12 @@ internal sealed class TestScheduler : ITestScheduler
             }
             finally
             {
+                var availableBeforeRelease = semaphore.CurrentCount;
                 semaphore.Release();
+                var availableAfterRelease = semaphore.CurrentCount;
                 var releaseTime = DateTime.UtcNow;
                 var totalDuration = (releaseTime - taskStartTime).TotalMilliseconds;
-                await _logger.LogDebugAsync($"[SEMAPHORE RELEASED] Test '{test.TestId}' released ParallelLimiter '{limiterType}' at {releaseTime:HH:mm:ss.fff} (total task duration: {totalDuration:F0}ms, available: {semaphore.CurrentCount}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
+                await _logger.LogDebugAsync($"[SEMAPHORE RELEASED] Test '{test.TestId}' released ParallelLimiter '{limiterType}' at {releaseTime:HH:mm:ss.fff} (total task duration: {totalDuration:F0}ms, available: {availableBeforeRelease}/{test.Context.ParallelLimiter.Limit} → {availableAfterRelease}/{test.Context.ParallelLimiter.Limit})").ConfigureAwait(false);
             }
         }
         else
