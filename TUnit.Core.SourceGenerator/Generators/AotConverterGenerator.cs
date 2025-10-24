@@ -28,6 +28,9 @@ public class AotConverterGenerator : IIncrementalGenerator
                 // Scan referenced assemblies for conversion operators
                 ScanReferencedAssemblies(compilation, conversionInfos);
 
+                // Scan method parameters for closed generic types like OneOf<TestEnum, TestEnum2>
+                ScanClosedGenericTypesInParameters(compilation, conversionInfos);
+
                 return conversionInfos.ToImmutableArray();
             });
 
@@ -107,6 +110,77 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
 
         return false;
+    }
+
+    private void ScanClosedGenericTypesInParameters(Compilation compilation, List<ConversionInfo> conversionInfos)
+    {
+        // Find all closed generic types used in method parameters
+        var closedGenericTypesInUse = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+
+        foreach (var tree in compilation.SyntaxTrees)
+        {
+            var semanticModel = compilation.GetSemanticModel(tree);
+            var root = tree.GetRoot();
+
+            // Find all method declarations
+            var methods = root.DescendantNodes()
+                .OfType<MethodDeclarationSyntax>();
+
+            foreach (var method in methods)
+            {
+                var methodSymbol = semanticModel.GetDeclaredSymbol(method);
+                if (methodSymbol == null)
+                {
+                    continue;
+                }
+
+                // Collect parameter types
+                foreach (var parameter in methodSymbol.Parameters)
+                {
+                    CollectClosedGenericTypes(parameter.Type, closedGenericTypesInUse);
+                }
+            }
+        }
+
+        // For each closed generic type, check if it has conversion operators
+        foreach (var type in closedGenericTypesInUse)
+        {
+            // Get all conversion operators from this type
+            var conversionOperators = type.GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where(m => (m.Name == "op_Implicit" || m.Name == "op_Explicit") &&
+                           m.IsStatic &&
+                           m.Parameters.Length == 1);
+
+            foreach (var method in conversionOperators)
+            {
+                var conversionInfo = GetConversionInfoFromSymbol(method);
+                if (conversionInfo != null)
+                {
+                    conversionInfos.Add(conversionInfo);
+                }
+            }
+        }
+    }
+
+    private void CollectClosedGenericTypes(ITypeSymbol type, HashSet<INamedTypeSymbol> types)
+    {
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType && !namedType.IsUnboundGenericType)
+        {
+            types.Add(namedType);
+
+            // Recursively collect type arguments
+            foreach (var typeArg in namedType.TypeArguments)
+            {
+                CollectClosedGenericTypes(typeArg, types);
+            }
+        }
+
+        // Handle arrays
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            CollectClosedGenericTypes(arrayType.ElementType, types);
+        }
     }
 
     private void ScanReferencedAssemblies(Compilation compilation, List<ConversionInfo> conversionInfos)
@@ -318,7 +392,10 @@ public class AotConverterGenerator : IIncrementalGenerator
             writer.AppendLine($"if (value is {patternTypeName} typedValue)");
             writer.AppendLine("{");
             writer.Indent();
+
+            // Use regular cast syntax - it works fine in AOT when types are known at compile-time
             writer.AppendLine($"return ({targetTypeName})typedValue;");
+
             writer.Unindent();
             writer.AppendLine("}");
             writer.AppendLine("return value; // Return original value if type doesn't match");
