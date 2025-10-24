@@ -336,7 +336,7 @@ public class CollectionCountAssertion<TCollection, TItem> : Sources.CollectionAs
             return Task.FromResult(AssertionResult.Passed);
         }
 
-        return Task.FromResult(AssertionResult.Failed($"found count {actualCount}"));
+        return Task.FromResult(AssertionResult.Failed($"found {actualCount}"));
     }
 
     protected override string GetExpectation() => $"to have count {_expectedCount}";

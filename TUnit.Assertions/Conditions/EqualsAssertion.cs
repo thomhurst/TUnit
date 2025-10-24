@@ -212,7 +212,7 @@ public class EqualsAssertion<TValue> : Assertion<TValue>
         return (true, null);
     }
 
-    protected override string GetExpectation() => $"to be equal to {_expected}";
+    protected override string GetExpectation() => $"to be equal to {(_expected is string s ? $"\"{s}\"" : _expected)}";
 
     /// <summary>
     /// Comparer that uses reference equality instead of value equality.
