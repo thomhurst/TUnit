@@ -16,7 +16,7 @@ public static class CastHelper
     /// Attempts to cast or convert a value to the specified type T.
     /// Uses a layered approach: fast paths first (AOT-safe), then reflection fallbacks.
     /// </summary>
-    public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(object? value)
+    public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(object? value)
     {
         if (value is T t)
         {
@@ -34,7 +34,7 @@ public static class CastHelper
     /// 3. Reflection fallback: custom operators, arrays (throws in AOT)
     /// </summary>
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
-    public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type, object? value)
+    public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type, object? value)
     {
         // Fast path: handle null
         if (value is null)

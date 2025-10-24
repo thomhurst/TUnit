@@ -1883,8 +1883,8 @@ namespace .Helpers
     {
         [.("AOT", "IL3050:Calling members annotated with \'RequiresDynamicCodeAttribute\' may break fu" +
             "nctionality when AOT compiling.")]
-        public static object? Cast([.(..None | ..PublicParameterlessConstructor | ..PublicMethods)]  type, object? value) { }
-        public static T? Cast<[.(..None | ..PublicParameterlessConstructor | ..PublicMethods)]  T>(object? value) { }
+        public static object? Cast([.(..PublicParameterlessConstructor)]  type, object? value) { }
+        public static T? Cast<[.(..PublicParameterlessConstructor)]  T>(object? value) { }
     }
     public static class ClassConstructorHelper
     {
