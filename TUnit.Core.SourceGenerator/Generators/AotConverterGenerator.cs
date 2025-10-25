@@ -440,8 +440,8 @@ public class AotConverterGenerator : IIncrementalGenerator
             // For nullable value types, we need to use the underlying type in the pattern
             // because you can't use nullable types in patterns in older C# versions
             var sourceType = conversion.SourceType;
-            var underlyingType = sourceType.IsValueType && sourceType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T }
-                ? ((INamedTypeSymbol)sourceType).TypeArguments[0]
+            var underlyingType = sourceType.IsValueType && sourceType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } symbol
+                ? symbol.TypeArguments[0]
                 : sourceType;
 
             var patternTypeName = underlyingType.GloballyQualified();
