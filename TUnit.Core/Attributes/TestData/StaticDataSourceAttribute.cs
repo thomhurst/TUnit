@@ -7,12 +7,15 @@ namespace TUnit.Core;
 internal sealed class StaticDataSourceAttribute : Attribute, IDataSourceAttribute
 {
     private readonly object?[][] _data;
-    
+
+    /// <inheritdoc />
+    public bool SkipIfEmpty { get; set; }
+
     public StaticDataSourceAttribute(params object?[][] data)
     {
         _data = data ?? throw new ArgumentNullException(nameof(data));
     }
-    
+
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         foreach (var row in _data)

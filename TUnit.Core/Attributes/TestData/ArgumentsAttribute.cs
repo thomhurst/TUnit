@@ -36,6 +36,9 @@ public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute, ITestR
 
     public string? Skip { get; set; }
 
+    /// <inheritdoc />
+    public bool SkipIfEmpty { get; set; }
+
     public ArgumentsAttribute(params object?[]? values)
     {
         if (values == null || values.Length == 0)
@@ -72,6 +75,9 @@ public ValueTask OnTestRegistered(TestRegisteredContext context)
 public sealed class ArgumentsAttribute<T>(T value) : TypedDataSourceAttribute<T>, ITestRegisteredEventReceiver
 {
     public string? Skip { get; set; }
+
+    /// <inheritdoc />
+    public override bool SkipIfEmpty { get; set; }
 
     public override async IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {

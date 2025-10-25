@@ -6,6 +6,9 @@ namespace TUnit.Core;
 /// </summary>
 internal sealed class EmptyDataSourceAttribute : Attribute, IDataSourceAttribute
 {
+    /// <inheritdoc />
+    public bool SkipIfEmpty { get; set; }
+
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () => Task.FromResult<object?[]?>([

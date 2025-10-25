@@ -3,7 +3,10 @@
 internal class NoDataSource : IDataSourceAttribute
 {
     public static readonly NoDataSource Instance = new();
-    
+
+    /// <inheritdoc />
+    public bool SkipIfEmpty { get; set; }
+
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         yield return () => Task.FromResult<object?[]?>([]);
