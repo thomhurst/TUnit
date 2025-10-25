@@ -5,7 +5,7 @@ namespace TUnit.TestProject;
 public class GlobalSetup
 {
     [Before(TestDiscovery)]
-    public void SetupAotConverters()
+    public static void SetupAotConverters()
     {
         AotConverterRegistry.Register<string, MixedMatrixTestsUnion1>(value => new MixedMatrixTestsUnion1(value));
         AotConverterRegistry.Register<MixedMatrixTests.Enum4, MixedMatrixTestsUnion1>(value => new MixedMatrixTestsUnion1(value));
