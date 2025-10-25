@@ -170,7 +170,7 @@ internal sealed class TestScheduler : ITestScheduler
                 // Use Task.Run to ensure tasks start immediately without blocking on logging in ExecuteTestWithParallelLimitAsync
                 var parallelTasks = groupedTests.Parallel.Select(test =>
                 {
-                    return test.ExecutionTask ??= Task.Run(async () => await ExecuteTestWithParallelLimitAsync(test, cancellationToken), CancellationToken.None);
+                    return test.ExecutionTask ??= Task.Run(() => ExecuteTestWithParallelLimitAsync(test, cancellationToken), CancellationToken.None);
                 }).ToArray();
 
                 await WaitForTasksWithFailFastHandling(parallelTasks, cancellationToken).ConfigureAwait(false);
@@ -331,7 +331,7 @@ internal sealed class TestScheduler : ITestScheduler
                 // No limit - start all unconstrained tests at once
                 foreach (var test in constrainedTests.UnconstrainedTests)
                 {
-                    test.ExecutionTask ??= ExecuteTestWithParallelLimitAsync(test, cancellationToken);
+                    test.ExecutionTask ??= Task.Run(() => ExecuteTestWithParallelLimitAsync(test, cancellationToken), CancellationToken.None);
                     unconstrainedTasks.Add(test.ExecutionTask);
                 }
             }
