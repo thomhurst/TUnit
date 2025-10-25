@@ -71,8 +71,9 @@ namespace
         public ArgumentsAttribute(params object?[]? values) { }
         public int Order { get; }
         public string? Skip { get; set; }
+        public bool SkipIfEmpty { get; set; }
         public object?[] Values { get; }
-        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__8))]
+        [.(typeof(.ArgumentsAttribute.<GetDataRowsAsync>d__12))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
@@ -82,7 +83,8 @@ namespace
         public ArgumentsAttribute(T value) { }
         public int Order { get; }
         public string? Skip { get; set; }
-        [.(typeof(.ArgumentsAttribute<T>.<GetTypedDataRowsAsync>d__6))]
+        public override bool SkipIfEmpty { get; set; }
+        [.(typeof(.ArgumentsAttribute<T>.<GetTypedDataRowsAsync>d__10))]
         public override .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
@@ -181,7 +183,8 @@ namespace
     public abstract class AsyncUntypedDataSourceGeneratorAttribute : , .IDataSourceAttribute
     {
         protected AsyncUntypedDataSourceGeneratorAttribute() { }
-        [.(typeof(.AsyncUntypedDataSourceGeneratorAttribute.<GenerateAsync>d__1))]
+        public virtual bool SkipIfEmpty { get; set; }
+        [.(typeof(.AsyncUntypedDataSourceGeneratorAttribute.<GenerateAsync>d__5))]
         public .<<.<object?[]?>>> GenerateAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         protected abstract .<<.<object?[]?>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata);
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
@@ -833,6 +836,7 @@ namespace
     public interface IAccessesInstanceData { }
     public interface IDataSourceAttribute
     {
+        bool SkipIfEmpty { get; set; }
         .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
     }
     public interface IDynamicTestCreatorLocation
@@ -939,11 +943,12 @@ namespace
         public ? ClassProvidingDataSource { get; }
         public <.DataGeneratorMetadata, .<<.<object?[]?>>>>? Factory { get; set; }
         public string MethodNameProvidingDataSource { get; }
+        public bool SkipIfEmpty { get; set; }
         [.("Trimming", "IL2072", Justification="Method data sources require runtime discovery. AOT users should use Factory prope" +
             "rty.")]
         [.("Trimming", "IL2075", Justification="Method data sources require runtime discovery. AOT users should use Factory prope" +
             "rty.")]
-        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__17))]
+        [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__21))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     [(.Class | .Method | .Property, AllowMultiple=true)]
@@ -1545,7 +1550,8 @@ namespace
     public abstract class TypedDataSourceAttribute<T> : , .IDataSourceAttribute, .ITypedDataSourceAttribute<T>
     {
         protected TypedDataSourceAttribute() { }
-        [.(typeof(.TypedDataSourceAttribute<T>.<GetDataRowsAsync>d__1))]
+        public virtual bool SkipIfEmpty { get; set; }
+        [.(typeof(.TypedDataSourceAttribute<T>.<GetDataRowsAsync>d__5))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public abstract .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata);
     }

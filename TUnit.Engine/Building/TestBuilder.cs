@@ -166,6 +166,7 @@ internal sealed class TestBuilder : ITestBuilder
                 classDataAttributeIndex++;
 
                 var classDataLoopIndex = 0;
+                var hasAnyClassData = false;
                 await foreach (var classDataFactory in GetInitializedDataRowsAsync(
                                    classDataSource,
                                    DataGeneratorMetadataCreator.CreateDataGeneratorMetadata
@@ -178,6 +179,7 @@ internal sealed class TestBuilder : ITestBuilder
                                        contextAccessor
                                    )))
                 {
+                    hasAnyClassData = true;
                     classDataLoopIndex++;
 
                     var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
@@ -238,6 +240,7 @@ internal sealed class TestBuilder : ITestBuilder
                         methodDataAttributeIndex++;
 
                         var methodDataLoopIndex = 0;
+                        var hasAnyMethodData = false;
                         await foreach (var methodDataFactory in GetInitializedDataRowsAsync(
                                            methodDataSource,
                                            DataGeneratorMetadataCreator.CreateDataGeneratorMetadata
@@ -250,6 +253,7 @@ internal sealed class TestBuilder : ITestBuilder
                                                contextAccessor
                                            )))
                         {
+                            hasAnyMethodData = true;
                             methodDataLoopIndex++;
 
                             for (var i = 0; i < repeatCount + 1; i++)
@@ -387,7 +391,101 @@ internal sealed class TestBuilder : ITestBuilder
                                 // Context already updated at the beginning of the loop before calling factories
                             }
                         }
+
+                        // If no data was yielded and SkipIfEmpty is true, create a skipped test
+                        if (!hasAnyMethodData && methodDataSource.SkipIfEmpty)
+                        {
+                            const string skipReason = "Data source returned no data";
+
+                            Type[] resolvedClassGenericArgs;
+                            try
+                            {
+                                resolvedClassGenericArgs = metadata.TestClassType.IsGenericTypeDefinition
+                                    ? TryInferClassGenericsFromDataSources(metadata)
+                                    : Type.EmptyTypes;
+                            }
+                            catch
+                            {
+                                resolvedClassGenericArgs = Type.EmptyTypes;
+                            }
+
+                            var testData = new TestData
+                            {
+                                TestClassInstanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance),
+                                ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                                ClassDataLoopIndex = classDataLoopIndex,
+                                ClassData = classData,
+                                MethodDataSourceAttributeIndex = methodDataAttributeIndex,
+                                MethodDataLoopIndex = 1, // Use 1 since we're creating a single skipped test
+                                MethodData = [],
+                                RepeatIndex = 0,
+                                InheritanceDepth = metadata.InheritanceDepth,
+                                ResolvedClassGenericArguments = resolvedClassGenericArgs,
+                                ResolvedMethodGenericArguments = Type.EmptyTypes
+                            };
+
+                            var testSpecificContext = new TestBuilderContext
+                            {
+                                TestMetadata = metadata.MethodMetadata,
+                                Events = new TestContextEvents(),
+                                ObjectBag = new Dictionary<string, object?>(),
+                                ClassConstructor = testBuilderContext.ClassConstructor,
+                                DataSourceAttribute = methodDataSource,
+                                InitializedAttributes = attributes
+                            };
+
+                            var test = await BuildTestAsync(metadata, testData, testSpecificContext);
+                            test.Context.SkipReason = skipReason;
+                            tests.Add(test);
+                        }
                     }
+                }
+
+                // If no class data was yielded and SkipIfEmpty is true, create a skipped test
+                if (!hasAnyClassData && classDataSource.SkipIfEmpty)
+                {
+                    const string skipReason = "Data source returned no data";
+
+                    Type[] resolvedClassGenericArgs;
+                    try
+                    {
+                        resolvedClassGenericArgs = metadata.TestClassType.IsGenericTypeDefinition
+                            ? TryInferClassGenericsFromDataSources(metadata)
+                            : Type.EmptyTypes;
+                    }
+                    catch
+                    {
+                        resolvedClassGenericArgs = Type.EmptyTypes;
+                    }
+
+                    var testData = new TestData
+                    {
+                        TestClassInstanceFactory = () => Task.FromResult<object>(SkippedTestInstance.Instance),
+                        ClassDataSourceAttributeIndex = classDataAttributeIndex,
+                        ClassDataLoopIndex = 1, // Use 1 since we're creating a single skipped test
+                        ClassData = [],
+                        MethodDataSourceAttributeIndex = 0,
+                        MethodDataLoopIndex = 0,
+                        MethodData = [],
+                        RepeatIndex = 0,
+                        InheritanceDepth = metadata.InheritanceDepth,
+                        ResolvedClassGenericArguments = resolvedClassGenericArgs,
+                        ResolvedMethodGenericArguments = Type.EmptyTypes
+                    };
+
+                    var testSpecificContext = new TestBuilderContext
+                    {
+                        TestMetadata = metadata.MethodMetadata,
+                        Events = new TestContextEvents(),
+                        ObjectBag = new Dictionary<string, object?>(),
+                        ClassConstructor = testBuilderContext.ClassConstructor,
+                        DataSourceAttribute = classDataSource,
+                        InitializedAttributes = attributes
+                    };
+
+                    var test = await BuildTestAsync(metadata, testData, testSpecificContext);
+                    test.Context.SkipReason = skipReason;
+                    tests.Add(test);
                 }
             }
         }

@@ -9,13 +9,16 @@ internal sealed class DelegateDataSourceAttribute : Attribute, IDataSourceAttrib
     private readonly Func<DataGeneratorMetadata, IAsyncEnumerable<object?[]>> _factory;
     private readonly bool _isShared;
     private List<Func<Task<object?[]?>>>? _cachedFactories;
-    
+
+    /// <inheritdoc />
+    public bool SkipIfEmpty { get; set; }
+
     public DelegateDataSourceAttribute(Func<DataGeneratorMetadata, IAsyncEnumerable<object?[]>> factory, bool isShared = false)
     {
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         _isShared = isShared;
     }
-    
+
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (_isShared && _cachedFactories != null)

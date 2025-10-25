@@ -28,6 +28,9 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
     public object?[] Arguments { get; set; } = [];
 
+    /// <inheritdoc />
+    public bool SkipIfEmpty { get; set; }
+
     public MethodDataSourceAttribute(string methodNameProvidingDataSource)
     {
         if (methodNameProvidingDataSource is null or { Length: < 1 })
@@ -163,7 +166,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             }
 
             // If the async enumerable was empty, yield one empty result like NoDataSource does
-            if (!hasAnyItems)
+            // unless SkipIfEmpty is true, in which case we yield nothing (test will be skipped)
+            if (!hasAnyItems && !SkipIfEmpty)
             {
                 yield return () => Task.FromResult<object?[]?>([]);
             }
@@ -188,7 +192,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 }
 
                 // If the enumerable was empty, yield one empty result like NoDataSource does
-                if (!hasAnyItems)
+                // unless SkipIfEmpty is true, in which case we yield nothing (test will be skipped)
+                if (!hasAnyItems && !SkipIfEmpty)
                 {
                     yield return () => Task.FromResult<object?[]?>([]);
                 }
@@ -215,7 +220,8 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             }
 
             // If the enumerable was empty, yield one empty result like NoDataSource does
-            if (!hasAnyItems)
+            // unless SkipIfEmpty is true, in which case we yield nothing (test will be skipped)
+            if (!hasAnyItems && !SkipIfEmpty)
             {
                 yield return () => Task.FromResult<object?[]?>([]);
             }

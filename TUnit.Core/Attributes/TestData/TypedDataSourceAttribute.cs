@@ -4,8 +4,11 @@ namespace TUnit.Core;
 
 public abstract class TypedDataSourceAttribute<T> : Attribute, ITypedDataSourceAttribute<T>
 {
+    /// <inheritdoc />
+    public virtual bool SkipIfEmpty { get; set; }
+
     public abstract IAsyncEnumerable<Func<Task<T>>> GetTypedDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata);
-    
+
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         // This method provides compatibility with the IDataSourceAttribute interface.
