@@ -601,7 +601,10 @@ public class AotConverterGenerator : IIncrementalGenerator
                 writer.AppendLine($"if (value is {sourcePatternTypeName} sourceTypedValue)");
                 writer.AppendLine("{");
                 writer.Indent();
-                writer.AppendLine($"return ({targetTypeName})sourceTypedValue;");
+                // Use variable assignment to force conversion operator invocation (not cast expression)
+                // Cast expressions don't reliably invoke user-defined operators with boxed values
+                writer.AppendLine($"{targetTypeName} converted = sourceTypedValue;");
+                writer.AppendLine("return converted;");
                 writer.Unindent();
                 writer.AppendLine("}");
             }
