@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
 using TUnit.Core;
 
-namespace TUnit.Analyzers.Tests;
+namespace TUnit.Assertions.Analyzers.Tests;
 
 /// <summary>
 /// Tests for the IsNotNullAssertionSuppressor which suppresses nullability warnings

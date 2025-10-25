@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace TUnit.Analyzers;
+namespace TUnit.Assertions.Analyzers;
 
 /// <summary>
 /// Suppresses nullability warnings (CS8600, CS8602, CS8604, CS8618) for variables
