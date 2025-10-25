@@ -3,6 +3,8 @@ namespace TUnit.TestProject;
 // Data source class that returns tuples for constructor parameters
 public class TupleDataSource : IDataSourceAttribute
 {
+    public bool SkipIfEmpty { get; set; }
+
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         // Return tuples that should be unwrapped into constructor parameters
