@@ -207,7 +207,8 @@ internal sealed class TestScheduler : ITestScheduler
         {
             var tasks = tests.Select(test =>
                 test.ExecutionTask ??= Task.Run(() => ExecuteSingleTestAsync(test, cancellationToken), CancellationToken.None)
-            ).ToArray();
+            );
+
             await WaitForTasksWithFailFastHandling(tasks, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -286,12 +287,12 @@ internal sealed class TestScheduler : ITestScheduler
             {
                 parallelLimiterSemaphore?.Release();
             }
-        }).ToArray();
+        });
 
         await WaitForTasksWithFailFastHandling(tasks, cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task WaitForTasksWithFailFastHandling(Task[] tasks, CancellationToken cancellationToken)
+    private async Task WaitForTasksWithFailFastHandling(IEnumerable<Task> tasks, CancellationToken cancellationToken)
     {
         try
         {
