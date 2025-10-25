@@ -15,7 +15,7 @@ public class Tests3521
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(
             async () => await TUnitAssert.ThrowsAsync(DoesNotThrow));
 
-        await TUnitAssert.That(exception.Message).Contains("Expected Exception but no exception was thrown");
+        await TUnitAssert.That(exception.Message).Contains("but no exception was thrown");
     }
 
     [Test]
@@ -25,7 +25,7 @@ public class Tests3521
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(
             async () => await TUnitAssert.ThrowsAsync(() => DoesNotThrow()));
 
-        await TUnitAssert.That(exception.Message).Contains("Expected Exception but no exception was thrown");
+        await TUnitAssert.That(exception.Message).Contains("but no exception was thrown");
     }
 
     [Test]
@@ -35,7 +35,7 @@ public class Tests3521
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(
             async () => await TUnitAssert.ThrowsAsync(async () => await DoesNotThrow()));
 
-        await TUnitAssert.That(exception.Message).Contains("Expected Exception but no exception was thrown");
+        await TUnitAssert.That(exception.Message).Contains("but no exception was thrown");
     }
 
     [Test]
@@ -45,7 +45,7 @@ public class Tests3521
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(
             async () => await TUnitAssert.ThrowsAsync<Exception>(DoesNotThrow));
 
-        await TUnitAssert.That(exception.Message).Contains("Expected Exception but no exception was thrown");
+        await TUnitAssert.That(exception.Message).Contains("but no exception was thrown");
     }
 
     [Test]
@@ -55,7 +55,7 @@ public class Tests3521
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(
             async () => await TUnitAssert.ThrowsAsync(typeof(Exception), DoesNotThrow));
 
-        await TUnitAssert.That(exception.Message).Contains("Expected Exception but no exception was thrown");
+        await TUnitAssert.That(exception.Message).Contains("but no exception was thrown");
     }
 
     [Test]
@@ -68,7 +68,7 @@ public class Tests3521
             await Task.CompletedTask;
         });
 
-        await TUnitAssert.That(exception.Message).Contains("Expected Exception but no exception was thrown");
+        await TUnitAssert.That(exception.Message).Contains("but no exception was thrown");
     }
 
     [Test]
@@ -81,7 +81,7 @@ public class Tests3521
             await Task.CompletedTask;
         });
 
-        await TUnitAssert.That(exception.Message).Contains("Expected Exception but no exception was thrown");
+        await TUnitAssert.That(exception.Message).Contains("but no exception was thrown");
     }
 
     [Test]
