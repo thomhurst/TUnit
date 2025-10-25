@@ -588,7 +588,7 @@ public class AotConverterGenerator : IIncrementalGenerator
             //    This handles cases that require an implicit conversion.
             if (!SymbolEqualityComparer.Default.Equals(sourceType, targetType))
             {
-                // Safer way to get the underlying type for a pattern match using C# pattern matching
+                // For pattern matching, we must unwrap nullable types (C# language requirement - CS8116)
                 ITypeSymbol typeForSourcePattern = sourceType;
                 if (sourceType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T, TypeArguments.Length: > 0 } nullableSourceType)
                 {
@@ -596,13 +596,16 @@ public class AotConverterGenerator : IIncrementalGenerator
                 }
 
                 var sourcePatternTypeName = typeForSourcePattern.GloballyQualified();
+                // For the cast, use the ORIGINAL source type (including nullable wrapper) to match operator signature
+                var sourceCastTypeName = sourceType.GloballyQualified();
 
                 writer.AppendLine(); // Add a blank line for readability
                 writer.AppendLine($"if (value is {sourcePatternTypeName} sourceTypedValue)");
                 writer.AppendLine("{");
                 writer.Indent();
-                // This cast will correctly invoke the implicit operator.
-                writer.AppendLine($"return ({targetTypeName})sourceTypedValue;");
+                // Cast via the original source type to invoke the correct implicit/explicit operator
+                // This ensures AOT compatibility by matching the operator signature exactly
+                writer.AppendLine($"return ({targetTypeName})({sourceCastTypeName})sourceTypedValue;");
                 writer.Unindent();
                 writer.AppendLine("}");
             }
