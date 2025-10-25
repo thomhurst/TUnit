@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
@@ -33,7 +34,12 @@ public static partial class CSharpCodeRefactoringVerifier<TCodeRefactoring>
                     return solution;
                 }
 
-                compilationOptions = compilationOptions.WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
+                compilationOptions = compilationOptions
+                    .WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions
+                        .SetItems(CSharpVerifierHelper.NullableWarnings)
+                        // Suppress analyzer release tracking warnings - we're testing TUnit analyzers, not release tracking
+                        .SetItem("RS2007", ReportDiagnostic.Suppress)
+                        .SetItem("RS2008", ReportDiagnostic.Suppress));
 
                 solution = solution.WithProjectCompilationOptions(projectId, compilationOptions)
                     .WithProjectParseOptions(projectId, parseOptions.WithLanguageVersion(LanguageVersion.Preview));
