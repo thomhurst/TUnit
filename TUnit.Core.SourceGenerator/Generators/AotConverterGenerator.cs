@@ -52,6 +52,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                 foreach (var parameter in methodSymbol.Parameters)
                 {
                     typesToScan.Add(parameter.Type);
+                    ScanAttributesForTypes(parameter.GetAttributes(), typesToScan);
                 }
 
                 ScanAttributesForTypes(methodSymbol.GetAttributes(), typesToScan);
@@ -85,6 +86,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                     foreach (var parameter in constructor.Parameters)
                     {
                         typesToScan.Add(parameter.Type);
+                        ScanAttributesForTypes(parameter.GetAttributes(), typesToScan);
                     }
                 }
             }
