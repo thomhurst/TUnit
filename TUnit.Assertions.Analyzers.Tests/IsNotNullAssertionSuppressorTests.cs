@@ -16,12 +16,14 @@ public class IsNotNullAssertionSuppressorTests
 {
     private static readonly DiagnosticResult CS8602 = new("CS8602", DiagnosticSeverity.Warning);
     private static readonly DiagnosticResult CS8604 = new("CS8604", DiagnosticSeverity.Warning);
+    private static readonly DiagnosticResult CS1591 = new("CS1591", DiagnosticSeverity.Warning);
 
     [Test]
     public async Task Suppresses_CS8602_After_IsNotNull_Assertion()
     {
         const string code = """
             #nullable enable
+            using System.Threading.Tasks;
             using TUnit.Assertions;
             using TUnit.Assertions.Extensions;
 
@@ -44,6 +46,7 @@ public class IsNotNullAssertionSuppressorTests
 
         await AnalyzerTestHelpers
             .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8602)
             .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
@@ -55,6 +58,7 @@ public class IsNotNullAssertionSuppressorTests
     {
         const string code = """
             #nullable enable
+            using System.Threading.Tasks;
             using TUnit.Assertions;
             using TUnit.Assertions.Extensions;
 
@@ -78,6 +82,7 @@ public class IsNotNullAssertionSuppressorTests
 
         await AnalyzerTestHelpers
             .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8604)
             .WithExpectedDiagnosticsResults(CS8604.WithLocation(0).WithIsSuppressed(true))
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
@@ -89,12 +94,13 @@ public class IsNotNullAssertionSuppressorTests
     {
         const string code = """
             #nullable enable
+            using System.Threading.Tasks;
             using TUnit.Assertions;
             using TUnit.Assertions.Extensions;
 
             public class MyTests
             {
-                public async Task TestMethod()
+                public void TestMethod()
                 {
                     string? nullableString = GetNullableString();
 
@@ -110,6 +116,7 @@ public class IsNotNullAssertionSuppressorTests
 
         await AnalyzerTestHelpers
             .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8602)
             .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(false))
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
@@ -121,6 +128,7 @@ public class IsNotNullAssertionSuppressorTests
     {
         const string code = """
             #nullable enable
+            using System.Threading.Tasks;
             using TUnit.Assertions;
             using TUnit.Assertions.Extensions;
 
@@ -145,6 +153,7 @@ public class IsNotNullAssertionSuppressorTests
 
         await AnalyzerTestHelpers
             .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8602)
             .WithExpectedDiagnosticsResults(
                 CS8602.WithLocation(0).WithIsSuppressed(true),
@@ -160,6 +169,7 @@ public class IsNotNullAssertionSuppressorTests
     {
         const string code = """
             #nullable enable
+            using System.Threading.Tasks;
             using TUnit.Assertions;
             using TUnit.Assertions.Extensions;
 
@@ -185,6 +195,7 @@ public class IsNotNullAssertionSuppressorTests
 
         await AnalyzerTestHelpers
             .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8602)
             .WithExpectedDiagnosticsResults(
                 CS8602.WithLocation(0).WithIsSuppressed(true),
@@ -199,6 +210,7 @@ public class IsNotNullAssertionSuppressorTests
     {
         const string code = """
             #nullable enable
+            using System.Threading.Tasks;
             using TUnit.Assertions;
             using TUnit.Assertions.Extensions;
 
@@ -225,6 +237,7 @@ public class IsNotNullAssertionSuppressorTests
 
         await AnalyzerTestHelpers
             .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8602)
             .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
@@ -236,6 +249,7 @@ public class IsNotNullAssertionSuppressorTests
     {
         const string code = """
             #nullable enable
+            using System.Threading.Tasks;
             using TUnit.Assertions;
             using TUnit.Assertions.Extensions;
 
@@ -258,6 +272,7 @@ public class IsNotNullAssertionSuppressorTests
 
         await AnalyzerTestHelpers
             .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8602)
             .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
@@ -269,6 +284,7 @@ public class IsNotNullAssertionSuppressorTests
     {
         const string code = """
             #nullable enable
+            using System.Threading.Tasks;
             using TUnit.Assertions;
             using TUnit.Assertions.Extensions;
 
@@ -291,6 +307,7 @@ public class IsNotNullAssertionSuppressorTests
 
         await AnalyzerTestHelpers
             .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8602)
             .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
@@ -302,6 +319,7 @@ public class IsNotNullAssertionSuppressorTests
     {
         const string code = """
             #nullable enable
+            using System.Threading.Tasks;
             using TUnit.Assertions;
             using TUnit.Assertions.Extensions;
 
@@ -324,6 +342,7 @@ public class IsNotNullAssertionSuppressorTests
 
         await AnalyzerTestHelpers
             .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8602)
             .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
@@ -335,6 +354,7 @@ public class IsNotNullAssertionSuppressorTests
     {
         const string code = """
             #nullable enable
+            using System.Threading.Tasks;
             using TUnit.Assertions;
             using TUnit.Assertions.Extensions;
 
@@ -357,6 +377,7 @@ public class IsNotNullAssertionSuppressorTests
 
         await AnalyzerTestHelpers
             .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8602)
             .WithExpectedDiagnosticsResults(CS8602.WithLocation(0).WithIsSuppressed(true))
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
@@ -368,6 +389,7 @@ public class IsNotNullAssertionSuppressorTests
     {
         const string code = """
             #nullable enable
+            using System.Threading.Tasks;
             using TUnit.Assertions;
             using TUnit.Assertions.Extensions;
 
@@ -393,6 +415,7 @@ public class IsNotNullAssertionSuppressorTests
 
         await AnalyzerTestHelpers
             .CreateSuppressorTest<IsNotNullAssertionSuppressor>(code)
+            .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8602)
             .WithExpectedDiagnosticsResults(
                 CS8602.WithLocation(0).WithIsSuppressed(true),

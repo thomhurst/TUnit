@@ -10,19 +10,6 @@ namespace TUnit.Assertions.Analyzers.Tests;
 
 public static class AnalyzerTestHelpers
 {
-    private static ReferenceAssemblies GetReferenceAssemblies()
-    {
-#if NET472
-        return ReferenceAssemblies.NetFramework.Net472.Default;
-#elif NET8_0
-        return ReferenceAssemblies.Net.Net80;
-#elif NET9_0 || NET10_0_OR_GREATER
-        return ReferenceAssemblies.Net.Net90;
-#else
-        return ReferenceAssemblies.Net.Net80; // Default fallback
-#endif
-    }
-
     public static CSharpAnalyzerTest<TAnalyzer, DefaultVerifier> CreateAnalyzerTest<TAnalyzer>(
         [StringSyntax("c#-test")] string inputSource
     )
@@ -33,8 +20,12 @@ public static class AnalyzerTestHelpers
             TestState =
             {
                 Sources = { inputSource },
-                ReferenceAssemblies = GetReferenceAssemblies()
-                    .AddPackages([new PackageIdentity("xunit.v3.assert", "2.0.0")]),
+                ReferenceAssemblies = new ReferenceAssemblies(
+                    "net8.0",
+                    new PackageIdentity(
+                        "Microsoft.NETCore.App.Ref",
+                        "8.0.0"),
+                    Path.Combine("ref", "net8.0")),
             },
         };
 
@@ -140,11 +131,13 @@ public static class AnalyzerTestHelpers
     )
         where TSuppressor : DiagnosticSuppressor, new()
     {
+        var currentVersion = Environment.Version.Major;
+        var referenceAssemblies = GetReferenceAssembliesForCurrentVersion(currentVersion);
+
         var test = new CSharpSuppressorTest<TSuppressor, DefaultVerifier>
         {
             TestCode = inputSource,
-            ReferenceAssemblies = GetReferenceAssemblies()
-                .AddPackages([new PackageIdentity("xunit.v3.assert", "2.0.0")])
+            ReferenceAssemblies = referenceAssemblies
         };
 
         test.TestState.AdditionalReferences
@@ -154,6 +147,25 @@ public static class AnalyzerTestHelpers
             ]);
 
         return test;
+    }
+
+    private static ReferenceAssemblies GetReferenceAssembliesForCurrentVersion(int currentVersion)
+    {
+        if (currentVersion == 4)
+        {
+            return new ReferenceAssemblies(
+                "net48",
+                new PackageIdentity("Microsoft.NETFramework.ReferenceAssemblies.net48", "1.0.3"),
+                Path.Combine("ref", "net48"));
+        }
+
+        return new ReferenceAssemblies(
+            $"net{currentVersion}.0",
+            new PackageIdentity(
+                "Microsoft.NETCore.App.Ref",
+                $"{currentVersion}.0.0"),
+            Path.Combine("ref", $"net{currentVersion}.0")
+        );
     }
 
     public static CSharpSuppressorTest<TSuppressor, DefaultVerifier> CreateSuppressorTest<TSuppressor, TAnalyzer>(
