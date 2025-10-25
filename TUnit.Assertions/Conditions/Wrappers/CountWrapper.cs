@@ -2,6 +2,7 @@ using System.Collections;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions.Wrappers;
@@ -21,6 +22,16 @@ public class CountWrapper<TCollection, TItem> : IAssertionSource<TCollection>
     }
 
     AssertionContext<TCollection> IAssertionSource<TCollection>.Context => _context;
+
+    /// <summary>
+    /// Not supported on CountWrapper - use IsTypeOf on the assertion source before calling HasCount().
+    /// </summary>
+    TypeOfAssertion<TCollection, TExpected> IAssertionSource<TCollection>.IsTypeOf<TExpected>()
+    {
+        throw new NotSupportedException(
+            "IsTypeOf is not supported after HasCount(). " +
+            "Use: Assert.That(value).IsTypeOf<List<int>>().HasCount().EqualTo(5)");
+    }
 
     /// <summary>
     /// Asserts that the collection count is equal to the expected count.

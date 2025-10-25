@@ -46,8 +46,8 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
 
     /// <summary>
     /// Asserts that the collection is of the specified type and returns an assertion on the casted value.
-    /// This instance method allows single type parameter usage without needing to specify the source type.
-    /// Example: await Assert.That(readOnlyList).IsTypeOf&lt;List&lt;double&gt;&gt;();
+    /// This allows chaining additional assertions on the typed value.
+    /// Example: await Assert.That((IEnumerable<int>)list).IsTypeOf<List<int>>().And.HasCount(5);
     /// </summary>
     public TypeOfAssertion<TCollection, TExpected> IsTypeOf<TExpected>()
     {

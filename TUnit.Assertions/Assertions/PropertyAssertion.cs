@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Assertions;
@@ -109,6 +110,16 @@ public class PropertyAssertionResult<TObject> : IAssertionSource<TObject>
             }
             await _propertyAssertion.AssertAsync();
         };
+    }
+
+    /// <summary>
+    /// Asserts that the parent object is of the specified type and returns an assertion on the casted value.
+    /// Example: await Assert.That(obj).HasProperty(x => x.Name).IsEqualTo("test").IsTypeOf<DerivedClass>();
+    /// </summary>
+    public TypeOfAssertion<TObject, TExpected> IsTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
+        return new TypeOfAssertion<TObject, TExpected>(Context);
     }
 
     /// <summary>
