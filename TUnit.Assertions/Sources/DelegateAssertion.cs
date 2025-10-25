@@ -37,6 +37,16 @@ public class DelegateAssertion : IAssertionSource<object?>, IDelegateAssertionSo
     }
 
     /// <summary>
+    /// Asserts that the value is of the specified type and returns an assertion on the casted value.
+    /// Example: await Assert.That(() => SomeMethod()).IsTypeOf<string>();
+    /// </summary>
+    public TypeOfAssertion<object?, TExpected> IsTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
+        return new TypeOfAssertion<object?, TExpected>(Context);
+    }
+
+    /// <summary>
     /// Asserts that the delegate throws the specified exception type (or subclass).
     /// Instance method to avoid C# type inference issues with extension methods.
     /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;InvalidOperationException&gt;();

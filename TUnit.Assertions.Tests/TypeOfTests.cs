@@ -68,11 +68,11 @@ public class TypeOfTests
     }
 
     [Test]
-    public async Task IsTypeOf_NullableInt_WithTwoTypeParameters_Success()
+    public async Task IsTypeOf_NullableInt_Success()
     {
         int? nullableInt = 42;
 
-        var result = await Assert.That(nullableInt).IsTypeOf<int?, int?>();
+        var result = await Assert.That(nullableInt).IsTypeOf<int?>();
 
         await Assert.That(result).IsEqualTo(42);
     }
@@ -126,8 +126,8 @@ public class TypeOfTests
     {
         int number = 42;
 
-        // Using two type parameters - should work with unboxed value types
-        var result = await Assert.That(number).IsTypeOf<int, int>();
+        // Now works with single type parameter - source type is inferred
+        var result = await Assert.That(number).IsTypeOf<int>();
 
         await Assert.That(result).IsEqualTo(42);
     }
@@ -137,7 +137,7 @@ public class TypeOfTests
     {
         var date = new DateTime(2025, 10, 14, 12, 30, 0);
 
-        var result = await Assert.That(date).IsTypeOf<DateTime, DateTime>();
+        var result = await Assert.That(date).IsTypeOf<DateTime>();
 
         await Assert.That(result).IsEqualTo(date);
     }
@@ -147,7 +147,7 @@ public class TypeOfTests
     {
         var guid = Guid.NewGuid();
 
-        var result = await Assert.That(guid).IsTypeOf<Guid, Guid>();
+        var result = await Assert.That(guid).IsTypeOf<Guid>();
 
         await Assert.That(result).IsEqualTo(guid);
     }
@@ -157,7 +157,7 @@ public class TypeOfTests
     {
         bool value = true;
 
-        var result = await Assert.That(value).IsTypeOf<bool, bool>();
+        var result = await Assert.That(value).IsTypeOf<bool>();
 
         await Assert.That(result).IsTrue();
     }
@@ -167,7 +167,7 @@ public class TypeOfTests
     {
         double value = 3.14159;
 
-        var result = await Assert.That(value).IsTypeOf<double, double>();
+        var result = await Assert.That(value).IsTypeOf<double>();
 
         await Assert.That(result).IsEqualTo(3.14159);
     }
@@ -177,7 +177,7 @@ public class TypeOfTests
     {
         var customStruct = new CustomStruct { Value = 99, Name = "Unboxed" };
 
-        var result = await Assert.That(customStruct).IsTypeOf<CustomStruct, CustomStruct>();
+        var result = await Assert.That(customStruct).IsTypeOf<CustomStruct>();
 
         await Assert.That(result.Value).IsEqualTo(99);
         await Assert.That(result.Name).IsEqualTo("Unboxed");
@@ -320,8 +320,8 @@ public class TypeOfTests
         // Real-world scenario: have a base type and want to assert/cast to derived type
         IEnumerable<string> enumerable = new List<string> { "a", "b", "c" };
 
-        // Check if it's actually a List<string>
-        var result = await Assert.That(enumerable).IsTypeOf<List<string>, IEnumerable<string>>();
+        // Check if it's actually a List<string> - now with single type parameter
+        var result = await Assert.That(enumerable).IsTypeOf<List<string>>();
 
         await Assert.That(result.Count).IsEqualTo(3);
     }
@@ -366,7 +366,7 @@ public class TypeOfTests
     {
         IEnumerable<int> enumerable = new int[] { 10, 20, 30 };
 
-        var result = await Assert.That(enumerable).IsTypeOf<int[], IEnumerable<int>>();
+        var result = await Assert.That(enumerable).IsTypeOf<int[]>();
 
         await Assert.That(result.Length).IsEqualTo(3);
         await Assert.That(result[1]).IsEqualTo(20);
@@ -402,7 +402,7 @@ public class TypeOfTests
     {
         IEnumerable<string> enumerable = new HashSet<string> { "alpha", "beta", "gamma" };
 
-        var result = await Assert.That(enumerable).IsTypeOf<HashSet<string>, IEnumerable<string>>();
+        var result = await Assert.That(enumerable).IsTypeOf<HashSet<string>>();
 
         await Assert.That(result.Count).IsEqualTo(3);
         await Assert.That(result.Contains("beta")).IsTrue();
@@ -608,7 +608,7 @@ public class TypeOfTests
     {
         IEnumerable<int> enumerable = new LinkedList<int>(new[] { 10, 20, 30 });
 
-        var result = await Assert.That(enumerable).IsTypeOf<LinkedList<int>, IEnumerable<int>>();
+        var result = await Assert.That(enumerable).IsTypeOf<LinkedList<int>>();
 
         await Assert.That(result.Count).IsEqualTo(3);
         await Assert.That(result.First!.Value).IsEqualTo(10);

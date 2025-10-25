@@ -153,18 +153,6 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that the value is of the specified type and returns an assertion on the casted value.
-    /// This extension method variant requires specifying both TExpected and TValue type parameters.
-    /// Example: await Assert.That(enumerable).IsTypeOf&lt;int[], IEnumerable&lt;int&gt;&gt;();
-    /// </summary>
-    public static TypeOfAssertion<TValue, TExpected> IsTypeOf<TExpected, TValue>(
-        this IAssertionSource<TValue> source)
-    {
-        source.Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
-        return new TypeOfAssertion<TValue, TExpected>(source.Context);
-    }
-
-    /// <summary>
     /// Asserts that the value is of the specified type (runtime Type parameter).
     /// Example: await Assert.That(obj).IsOfType(typeof(string));
     /// </summary>

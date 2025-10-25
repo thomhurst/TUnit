@@ -34,6 +34,16 @@ public class FuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
     }
 
     /// <summary>
+    /// Asserts that the value is of the specified type and returns an assertion on the casted value.
+    /// Example: await Assert.That(() => GetValue()).IsTypeOf<string>();
+    /// </summary>
+    public TypeOfAssertion<TValue, TExpected> IsTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
+        return new TypeOfAssertion<TValue, TExpected>(Context);
+    }
+
+    /// <summary>
     /// Asserts that the function throws the specified exception type (or subclass).
     /// Instance method to avoid C# type inference issues with extension methods.
     /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;InvalidOperationException&gt;();

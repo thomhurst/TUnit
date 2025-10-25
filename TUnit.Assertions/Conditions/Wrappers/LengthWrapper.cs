@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Text;
+using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Conditions.Wrappers;
@@ -18,6 +19,16 @@ public class LengthWrapper : IAssertionSource<string>
     }
 
     AssertionContext<string> IAssertionSource<string>.Context => _context;
+
+    /// <summary>
+    /// Not supported on LengthWrapper - use IsTypeOf on the assertion source before calling HasLength().
+    /// </summary>
+    TypeOfAssertion<string, TExpected> IAssertionSource<string>.IsTypeOf<TExpected>()
+    {
+        throw new NotSupportedException(
+            "IsTypeOf is not supported after HasLength(). " +
+            "Use: Assert.That(value).IsTypeOf<string>().HasLength().EqualTo(5)");
+    }
 
     /// <summary>
     /// Asserts that the string length is equal to the expected length.

@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
 namespace TUnit.Assertions.Assertions.Strings;
@@ -240,6 +241,16 @@ public class WhenParsedIntoAssertion<[DynamicallyAccessedMembers(DynamicallyAcce
         }
 
         _formatProvider = formatProvider;
+    }
+
+    /// <summary>
+    /// Asserts that the parsed value is of the specified type and returns an assertion on the casted value.
+    /// Example: await Assert.That("123").WhenParsedInto<object>().IsTypeOf<int>();
+    /// </summary>
+    public TypeOfAssertion<T, TExpected> IsTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
+        return new TypeOfAssertion<T, TExpected>(Context);
     }
 
     /// <summary>

@@ -34,6 +34,16 @@ public class AsyncFuncAssertion<TValue> : IAssertionSource<TValue>, IDelegateAss
     }
 
     /// <summary>
+    /// Asserts that the async function result is of the specified type and returns an assertion on the casted value.
+    /// Example: await Assert.That(async () => await GetValueAsync()).IsTypeOf<string>();
+    /// </summary>
+    public TypeOfAssertion<TValue, TExpected> IsTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
+        return new TypeOfAssertion<TValue, TExpected>(Context);
+    }
+
+    /// <summary>
     /// Asserts that the async function throws the specified exception type (or subclass).
     /// Instance method to avoid C# type inference issues with extension methods.
     /// Example: await Assert.That(async () => await ThrowingMethodAsync()).Throws&lt;InvalidOperationException&gt;();

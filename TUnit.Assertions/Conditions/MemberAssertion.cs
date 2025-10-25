@@ -141,6 +141,16 @@ public class AssertionSourceAdapter<T> : IAssertionSource<T>
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
     }
+
+    /// <summary>
+    /// Asserts that the value is of the specified type and returns an assertion on the casted value.
+    /// Example: await Assert.That(obj).Member(x => x.Property).Satisfies(val => val.IsTypeOf<string>());
+    /// </summary>
+    public TypeOfAssertion<T, TExpected> IsTypeOf<TExpected>()
+    {
+        Context.ExpressionBuilder.Append($".IsTypeOf<{typeof(TExpected).Name}>()");
+        return new TypeOfAssertion<T, TExpected>(Context);
+    }
 }
 
 /// <summary>
