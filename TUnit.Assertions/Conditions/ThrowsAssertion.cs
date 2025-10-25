@@ -199,6 +199,30 @@ public class ThrowsAssertion<TException> : BaseThrowsAssertion<TException, Throw
         Context.ExpressionBuilder.Append($".WithParameterName(\"{expectedParameterName}\")");
         return new ExceptionParameterNameAssertion<TException>(Context, expectedParameterName);
     }
+
+    /// <summary>
+    /// Adds runtime Type-based exception checking for non-generic Throws scenarios.
+    /// Returns a specialized assertion that validates against the provided Type.
+    /// </summary>
+    public async Task<Exception?> WithExceptionType(Type expectedExceptionType)
+    {
+        if (!typeof(Exception).IsAssignableFrom(expectedExceptionType))
+        {
+            throw new ArgumentException($"Type {expectedExceptionType.Name} must be an Exception type", nameof(expectedExceptionType));
+        }
+
+        // Await the current assertion to get the exception
+        await this;
+        var (exception, _) = await Context.GetAsync();
+
+        // Now validate it's the correct type
+        if (exception != null && !expectedExceptionType.IsInstanceOfType(exception))
+        {
+            throw new Exceptions.AssertionException($"Expected {expectedExceptionType.Name} but got {exception.GetType().Name}: {exception.Message}");
+        }
+
+        return exception;
+    }
 }
 
 /// <summary>
