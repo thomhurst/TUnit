@@ -101,6 +101,7 @@ public abstract class InvokableTestBase(TestMode testMode)
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_AOT_",
                     "--timeout", "5m",
+                    "--detailed-stacktrace",
                     ..runOptions.AdditionalArguments
                 ]
             )
@@ -135,6 +136,7 @@ public abstract class InvokableTestBase(TestMode testMode)
                     "--diagnostic-verbosity", "Debug",
                     "--diagnostic", "--diagnostic-file-prefix", $"log_{GetType().Name}_SINGLEFILE_",
                     "--timeout", "5m",
+                    "--detailed-stacktrace",
                     ..runOptions.AdditionalArguments
                 ]
             )
