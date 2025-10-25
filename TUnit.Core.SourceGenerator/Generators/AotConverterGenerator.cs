@@ -596,16 +596,12 @@ public class AotConverterGenerator : IIncrementalGenerator
                 }
 
                 var sourcePatternTypeName = typeForSourcePattern.GloballyQualified();
-                // For the cast, use the ORIGINAL source type (including nullable wrapper) to match operator signature
-                var sourceCastTypeName = sourceType.GloballyQualified();
 
-                writer.AppendLine(); // Add a blank line for readability
+                writer.AppendLine();
                 writer.AppendLine($"if (value is {sourcePatternTypeName} sourceTypedValue)");
                 writer.AppendLine("{");
                 writer.Indent();
-                // Cast via the original source type to invoke the correct implicit/explicit operator
-                // This ensures AOT compatibility by matching the operator signature exactly
-                writer.AppendLine($"return ({targetTypeName})({sourceCastTypeName})sourceTypedValue;");
+                writer.AppendLine($"return ({targetTypeName})sourceTypedValue;");
                 writer.Unindent();
                 writer.AppendLine("}");
             }
