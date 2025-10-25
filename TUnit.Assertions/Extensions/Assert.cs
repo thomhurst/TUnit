@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Sources;
 
@@ -9,6 +11,7 @@ namespace TUnit.Assertions;
 /// Entry point for all assertions.
 /// Provides Assert.That() overloads for different source types.
 /// </summary>
+[SuppressMessage("Usage", "TUnitAssertions0002:Assert statement not awaited")]
 public static class Assert
 {
     /// <summary>
@@ -189,7 +192,7 @@ public static class Assert
             action();
             throw new AssertionException($"Expected {typeof(TException).Name} but no exception was thrown");
         }
-        catch (TException ex)
+        catch (TException ex) when (ex is not AssertionException)
         {
             return ex;
         }
@@ -216,7 +219,7 @@ public static class Assert
             action();
             throw new AssertionException($"Expected {exceptionType.Name} but no exception was thrown");
         }
-        catch (Exception ex) when (exceptionType.IsInstanceOfType(ex))
+        catch (Exception ex) when (exceptionType.IsInstanceOfType(ex) && ex is not AssertionException)
         {
             return ex;
         }
@@ -245,106 +248,56 @@ public static class Assert
     /// Asserts that the async action throws the specified exception type and returns the exception.
     /// Example: var exception = await Assert.ThrowsAsync&lt;InvalidOperationException&gt;(async () => await ThrowingMethodAsync());
     /// </summary>
-    public static async Task<TException> ThrowsAsync<TException>(Func<Task> action)
+    public static ThrowsAssertion<TException> ThrowsAsync<TException>(Func<Task> action)
         where TException : Exception
     {
-        try
-        {
-            await action();
-            throw new AssertionException($"Expected {typeof(TException).Name} but no exception was thrown");
-        }
-        catch (TException ex)
-        {
-            return ex;
-        }
-        catch (Exception ex)
-        {
-            throw new AssertionException($"Expected {typeof(TException).Name} but got {ex.GetType().Name}: {ex.Message}");
-        }
+        return That(action).Throws<TException>();
     }
 
     /// <summary>
     /// Asserts that the async action throws the specified exception type with the expected parameter name (for ArgumentException types) and returns the exception.
     /// Example: var exception = await Assert.ThrowsAsync&lt;ArgumentNullException&gt;("paramName", async () => await ThrowingMethodAsync());
     /// </summary>
-    public static async Task<TException> ThrowsAsync<TException>(string parameterName, Func<Task> action)
+    public static Task<TException> ThrowsAsync<TException>(string parameterName, Func<Task> action)
         where TException : ArgumentException
     {
-        var exception = await ThrowsAsync<TException>(action);
-        if (exception.ParamName != parameterName)
-        {
-            throw new AssertionException($"Expected {typeof(TException).Name} with ParamName '{parameterName}' but got ParamName '{exception.ParamName}'");
-        }
-        return exception;
+        return That(action).Throws<TException>(parameterName);
     }
 
     /// <summary>
     /// Asserts that the async action throws any exception (defaults to Exception).
     /// Example: var exception = await Assert.ThrowsAsync(async () => await ThrowingMethodAsync());
     /// </summary>
-    public static async Task<Exception> ThrowsAsync(Func<Task> action)
+    public static ThrowsAssertion<Exception> ThrowsAsync(Func<Task> action)
     {
-        return await ThrowsAsync<Exception>(action);
+        return That(action).Throws<Exception>();
     }
 
     /// <summary>
     /// Asserts that the Task throws any exception (defaults to Exception).
     /// Example: var exception = await Assert.ThrowsAsync(Task.FromException(new Exception()));
     /// </summary>
-    public static async Task<Exception> ThrowsAsync(Task task)
+    public static ThrowsAssertion<Exception> ThrowsAsync(Task task)
     {
-        try
-        {
-            await task;
-            throw new AssertionException("Expected an exception but none was thrown");
-        }
-        catch (Exception ex) when (ex is not AssertionException)
-        {
-            return ex;
-        }
+        return That(task).Throws<Exception>();
     }
 
     /// <summary>
     /// Asserts that the ValueTask throws any exception (defaults to Exception).
     /// Example: var exception = await Assert.ThrowsAsync(new ValueTask(Task.FromException(new Exception())));
     /// </summary>
-    public static async Task<Exception> ThrowsAsync(ValueTask task)
+    public static ThrowsAssertion<Exception> ThrowsAsync(ValueTask task)
     {
-        try
-        {
-            await task;
-            throw new AssertionException("Expected an exception but none was thrown");
-        }
-        catch (Exception ex) when (ex is not AssertionException)
-        {
-            return ex;
-        }
+        return That(task.AsTask()).Throws<Exception>();
     }
 
     /// <summary>
     /// Asserts that the specified exception type is thrown and returns the exception.
     /// Non-generic version that takes a Type parameter at runtime.
     /// </summary>
-    public static async Task<Exception?> ThrowsAsync(Type exceptionType, Func<Task> action)
+    public static Task<Exception?> ThrowsAsync(Type exceptionType, Func<Task> action)
     {
-        if (!typeof(Exception).IsAssignableFrom(exceptionType))
-        {
-            throw new ArgumentException($"Type {exceptionType.Name} must be an Exception type", nameof(exceptionType));
-        }
-
-        try
-        {
-            await action();
-            throw new AssertionException($"Expected {exceptionType.Name} but no exception was thrown");
-        }
-        catch (Exception ex) when (exceptionType.IsInstanceOfType(ex))
-        {
-            return ex;
-        }
-        catch (Exception ex)
-        {
-            throw new AssertionException($"Expected {exceptionType.Name} but got {ex.GetType().Name}: {ex.Message}");
-        }
+        return That(action).Throws(exceptionType);
     }
 
     /// <summary>
@@ -388,36 +341,19 @@ public static class Assert
     /// Asserts that exactly the specified exception type is thrown (not subclasses) and returns the exception.
     /// Example: var exception = await Assert.ThrowsExactlyAsync&lt;InvalidOperationException&gt;(async () => await ThrowingMethodAsync());
     /// </summary>
-    public static async Task<TException> ThrowsExactlyAsync<TException>(Func<Task> action)
+    public static ThrowsExactlyAssertion<TException> ThrowsExactlyAsync<TException>(Func<Task> action)
         where TException : Exception
     {
-        try
-        {
-            await action();
-            throw new AssertionException($"Expected exactly {typeof(TException).Name} but no exception was thrown");
-        }
-        catch (Exception ex) when (ex.GetType() == typeof(TException))
-        {
-            return (TException)ex;
-        }
-        catch (Exception ex)
-        {
-            throw new AssertionException($"Expected exactly {typeof(TException).Name} but got {ex.GetType().Name}: {ex.Message}");
-        }
+        return That(action).ThrowsExactly<TException>();
     }
 
     /// <summary>
     /// Asserts that exactly the specified exception type is thrown (not subclasses) with the expected parameter name (for ArgumentException types) and returns the exception.
     /// Example: var exception = await Assert.ThrowsExactlyAsync&lt;ArgumentNullException&gt;("paramName", async () => await ThrowingMethodAsync());
     /// </summary>
-    public static async Task<TException> ThrowsExactlyAsync<TException>(string parameterName, Func<Task> action)
+    public static Task<TException> ThrowsExactlyAsync<TException>(string parameterName, Func<Task> action)
         where TException : ArgumentException
     {
-        var exception = await ThrowsExactlyAsync<TException>(action);
-        if (exception.ParamName != parameterName)
-        {
-            throw new AssertionException($"Expected {typeof(TException).Name} with ParamName '{parameterName}' but got ParamName '{exception.ParamName}'");
-        }
-        return exception;
+        return That(action).ThrowsExactly<TException>(parameterName);
     }
 }
