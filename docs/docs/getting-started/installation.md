@@ -59,3 +59,10 @@ This should NOT be used with TUnit. It'll stop test discovery from working prope
 If you are still targeting .NET Framework, TUnit will try to Polyfill some missing types that are used by the compiler, such as the `ModuleInitialiserAttribute`.
 
 If you have issues with other Polyfill libraries also defining them, in your project files, you can define the property `<EnableTUnitPolyfills>false</EnableTUnitPolyfills>` to stop TUnit generating them for you.
+
+### Central Package Management (CPM)
+TUnit is fully compatible with NuGet Central Package Management. When CPM is enabled (via `Directory.Packages.props`), TUnit will automatically inject the Polyfill package using `VersionOverride`, so you don't need to manually add it to your `Directory.Packages.props` file.
+
+If you prefer to manage the Polyfill version yourself, you can:
+- Add `<PackageVersion Include="Polyfill" Version="x.x.x" />` to your `Directory.Packages.props`, OR
+- Disable automatic injection with `<EnableTUnitPolyfills>false</EnableTUnitPolyfills>` and add it manually
