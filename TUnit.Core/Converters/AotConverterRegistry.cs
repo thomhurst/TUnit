@@ -8,7 +8,7 @@ namespace TUnit.Core.Converters;
 public static class AotConverterRegistry
 {
     private static readonly ConcurrentDictionary<(Type Source, Type Target), IAotConverter> Converters = new();
-    
+
     /// <summary>
     /// Registers a converter
     /// </summary>
@@ -16,7 +16,15 @@ public static class AotConverterRegistry
     {
         Converters.TryAdd((converter.SourceType, converter.TargetType), converter);
     }
-    
+
+    /// <summary>
+    /// Registers a converter
+    /// </summary>
+    public static void Register<TSource, TTarget>(Func<TSource, TTarget> converter)
+    {
+        Converters.TryAdd((typeof(TSource), typeof(TTarget)), new FuncAotConverter<TSource, TTarget>(converter));
+    }
+
     /// <summary>
     /// Tries to get a converter for the specified types
     /// </summary>
@@ -24,7 +32,7 @@ public static class AotConverterRegistry
     {
         return Converters.TryGetValue((sourceType, targetType), out converter);
     }
-    
+
     /// <summary>
     /// Tries to convert a value using a registered converter
     /// </summary>
@@ -35,7 +43,7 @@ public static class AotConverterRegistry
             result = converter.Convert(value);
             return true;
         }
-        
+
         result = null;
         return false;
     }

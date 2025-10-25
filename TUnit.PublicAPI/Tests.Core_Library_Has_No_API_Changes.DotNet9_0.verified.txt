@@ -1616,8 +1616,16 @@ namespace .Converters
     public static class AotConverterRegistry
     {
         public static void Register(. converter) { }
+        public static void Register<TSource, TTarget>(<TSource, TTarget> converter) { }
         public static bool TryConvert( sourceType,  targetType, object? value, out object? result) { }
         public static bool TryGetConverter( sourceType,  targetType, out .? converter) { }
+    }
+    public class FuncAotConverter<TSource, TTarget> : .
+    {
+        public FuncAotConverter(<TSource, TTarget> converter) { }
+        public  SourceType { get; }
+        public  TargetType { get; }
+        public object? Convert(object? value) { }
     }
     public interface IAotConverter
     {
