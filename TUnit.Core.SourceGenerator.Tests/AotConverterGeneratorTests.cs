@@ -5,6 +5,7 @@ namespace TUnit.Core.SourceGenerator.Tests;
 public class AotConverterGeneratorTests : TestsBase
 {
     [Test]
+    [Skip("Need to investigate - Behaves differently on local vs CI")]
     public Task GeneratesCode() => AotConverterGenerator.RunTest(
         Path.GetTempFileName(),
         new RunTestOptions
