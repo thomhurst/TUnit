@@ -125,6 +125,7 @@ namespace .Assertions
     {
         public .<TObject> Context { get; }
         public .<TObject?> GetAwaiter() { }
+        public .<TObject, TExpected> IsTypeOf<TExpected>() { }
     }
     public class PropertyAssertion<TObject, TProperty>
     {
@@ -155,6 +156,7 @@ namespace .
         public WhenParsedIntoAssertion(.<string> stringContext, ? formatProvider = null) { }
         protected override .<.> CheckAsync(.<T> metadata) { }
         protected override string GetExpectation() { }
+        public .<T, TExpected> IsTypeOf<TExpected>() { }
         public ..WhenParsedIntoAssertion<T> WithFormatProvider( formatProvider) { }
     }
 }
@@ -285,6 +287,7 @@ namespace .Conditions
     {
         public AssertionSourceAdapter(.<T> context) { }
         public .<T> Context { get; }
+        public .<T, TExpected> IsTypeOf<TExpected>() { }
     }
     public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
     {
@@ -1615,6 +1618,7 @@ namespace .Core
     public interface IAssertionSource<TValue> : .
     {
         .<TValue> Context { get; }
+        .<TValue, TExpected> IsTypeOf<TExpected>();
     }
     public interface IDelegateAssertionSource<TValue> : ., .<TValue> { }
     public class OrContinuation<TValue> : .<TValue> { }
@@ -1771,7 +1775,6 @@ namespace .Extensions
             where TValue : <TValue> { }
         public static .<TValue> IsPositive<TValue>(this .<TValue?> source)
             where TValue :  struct, <TValue> { }
-        public static .<TValue, TExpected> IsTypeOf<TExpected, TValue>(this .<TValue> source) { }
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<.<TItem>>> assertions) { }
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, object> assertions) { }
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
@@ -3543,6 +3546,7 @@ namespace .Sources
         public .<.> IsNotCanceled() { }
         public .<.> IsNotCompleted() { }
         public .<.> IsNotFaulted() { }
+        public .<object?, TExpected> IsTypeOf<TExpected>() { }
         public .<TException> Throws<TException>()
             where TException :  { }
         public .<TException> ThrowsExactly<TException>()
@@ -3552,6 +3556,7 @@ namespace .Sources
     {
         public AsyncFuncAssertion(<.<TValue?>> func, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TValue, TExpected> IsTypeOf<TExpected>() { }
         public .<TException> Throws<TException>()
             where TException :  { }
         public .<TException> ThrowsExactly<TException>()
@@ -3596,6 +3601,7 @@ namespace .Sources
     {
         public DelegateAssertion( action, string? expression) { }
         public .<object?> Context { get; }
+        public .<object?, TExpected> IsTypeOf<TExpected>() { }
         public .<TException> Throws<TException>()
             where TException :  { }
         public .<TException> ThrowsExactly<TException>()
@@ -3620,6 +3626,7 @@ namespace .Sources
     {
         public FuncAssertion(<TValue?> func, string? expression) { }
         public .<TValue> Context { get; }
+        public .<TValue, TExpected> IsTypeOf<TExpected>() { }
         public .<TException> Throws<TException>()
             where TException :  { }
         public .<TException> ThrowsExactly<TException>()
@@ -3635,6 +3642,7 @@ namespace .Sources
         public .<.<TValue>> IsNotCanceled() { }
         public .<.<TValue>> IsNotCompleted() { }
         public .<.<TValue>> IsNotFaulted() { }
+        public .<TValue, TExpected> IsTypeOf<TExpected>() { }
         public .<TException> Throws<TException>()
             where TException :  { }
         public .<TException> ThrowsExactly<TException>()
