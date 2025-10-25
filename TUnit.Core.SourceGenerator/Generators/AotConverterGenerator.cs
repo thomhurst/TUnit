@@ -15,9 +15,8 @@ public class AotConverterGenerator : IIncrementalGenerator
             .Select((compilation, _) =>
             {
                 var conversionInfos = new List<ConversionInfo>();
-                var requireStrongName = compilation.Assembly.Identity.IsStrongName;
 
-                ScanTestParameters(compilation, conversionInfos, requireStrongName);
+                ScanTestParameters(compilation, conversionInfos);
 
                 return conversionInfos.ToImmutableArray();
             });
@@ -25,7 +24,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(allTypes, GenerateConverters!);
     }
 
-    private void ScanTestParameters(Compilation compilation, List<ConversionInfo> conversionInfos, bool requireStrongName)
+    private void ScanTestParameters(Compilation compilation, List<ConversionInfo> conversionInfos)
     {
         var typesToScan = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
 
@@ -93,7 +92,7 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         foreach (var type in typesToScan)
         {
-            CollectConversionsForType(type, conversionInfos, requireStrongName, compilation);
+            CollectConversionsForType(type, conversionInfos, compilation);
         }
     }
 
@@ -206,14 +205,14 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
     }
 
-    private void CollectConversionsForType(ITypeSymbol type, List<ConversionInfo> conversionInfos, bool requireStrongName, Compilation compilation)
+    private void CollectConversionsForType(ITypeSymbol type, List<ConversionInfo> conversionInfos, Compilation compilation)
     {
         if (type is not INamedTypeSymbol namedType)
         {
             return;
         }
 
-        if (!ShouldIncludeType(namedType, requireStrongName, compilation))
+        if (!ShouldIncludeType(namedType, compilation))
         {
             return;
         }
@@ -237,19 +236,15 @@ public class AotConverterGenerator : IIncrementalGenerator
         {
             foreach (var typeArg in namedType.TypeArguments)
             {
-                CollectConversionsForType(typeArg, conversionInfos, requireStrongName, compilation);
+                CollectConversionsForType(typeArg, conversionInfos, compilation);
             }
         }
     }
 
-    private bool ShouldIncludeType(INamedTypeSymbol type, bool requireStrongName, Compilation compilation)
+    private bool ShouldIncludeType(INamedTypeSymbol type, Compilation compilation)
     {
         if (type.DeclaredAccessibility == Accessibility.Public)
         {
-            if (requireStrongName && type.ContainingAssembly?.Identity.IsStrongName != true)
-            {
-                return false;
-            }
             return true;
         }
 
@@ -265,10 +260,6 @@ public class AotConverterGenerator : IIncrementalGenerator
 
             if (typeAssembly != null && typeAssembly.GivesAccessTo(currentAssembly))
             {
-                if (requireStrongName && typeAssembly.Identity.IsStrongName != true)
-                {
-                    return false;
-                }
                 return true;
             }
         }
