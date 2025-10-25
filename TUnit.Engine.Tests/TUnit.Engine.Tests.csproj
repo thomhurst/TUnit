@@ -12,8 +12,14 @@
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
         <PackageReference Include="CliWrap" />
         <PackageReference Include="Shouldly" />
-        <PackageReference Include="Sourcy.DotNet" />
-        <PackageReference Include="Sourcy.Git" />
+        <PackageReference Include="Sourcy.DotNet">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Sourcy.Git">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="trxparser" />
     </ItemGroup>
 
