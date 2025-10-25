@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,24 +13,51 @@ public class AotConverterGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var allTypes = context.CompilationProvider
-            .Select((compilation, _) =>
+            .Select((compilation, ct) =>
             {
-                var conversionInfos = new List<ConversionInfo>();
-
-                ScanTestParameters(compilation, conversionInfos);
-
-                return conversionInfos.ToImmutableArray();
+                try
+                {
+                    var conversionInfos = new List<ConversionInfo>();
+                    ScanTestParameters(compilation, conversionInfos, ct);
+                    return conversionInfos.ToImmutableArray();
+                }
+                catch (NullReferenceException ex)
+                {
+                    var stackTrace = ex.StackTrace ?? "No stack trace";
+                    throw new InvalidOperationException($"NullReferenceException in ScanTestParameters: {ex.Message}\nStack: {stackTrace}", ex);
+                }
             });
 
-        context.RegisterSourceOutput(allTypes, GenerateConverters!);
+        context.RegisterSourceOutput(allTypes, (spc, source) =>
+        {
+            try
+            {
+                GenerateConverters(spc, source);
+            }
+            catch (Exception e)
+            {
+                spc.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        id: "TUNITGEN001",
+                        title: "TUnit.AotConverterGenerator Failed",
+                        messageFormat: "Generator failed with exception: {0}",
+                        category: "TUnit.Generator",
+                        defaultSeverity: DiagnosticSeverity.Error,
+                        isEnabledByDefault: true,
+                        description: e.ToString()),
+                    Location.None));
+            }
+        });
     }
 
-    private void ScanTestParameters(Compilation compilation, List<ConversionInfo> conversionInfos)
+    private void ScanTestParameters(Compilation compilation, List<ConversionInfo> conversionInfos, CancellationToken cancellationToken)
     {
         var typesToScan = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
 
         foreach (var tree in compilation.SyntaxTrees)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var semanticModel = compilation.GetSemanticModel(tree);
             var root = tree.GetRoot();
 
@@ -94,6 +122,7 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         foreach (var type in typesToScan)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             CollectConversionsForType(type, conversionInfos, compilation);
         }
     }
@@ -190,18 +219,24 @@ public class AotConverterGenerator : IIncrementalGenerator
 
     private void ScanTypedConstantForTypes(TypedConstant constant, HashSet<ITypeSymbol> typesToScan)
     {
-        if (constant.Kind == TypedConstantKind.Type && constant.Value is ITypeSymbol typeValue)
+        if (constant.IsNull)
+        {
+            return;
+        }
+
+        if (constant is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeValue })
         {
             typesToScan.Add(typeValue);
         }
-        else if (constant.Kind == TypedConstantKind.Array)
+
+        else if (constant is { Kind: TypedConstantKind.Array, IsNull: false })
         {
             foreach (var element in constant.Values)
             {
                 ScanTypedConstantForTypes(element, typesToScan);
             }
         }
-        else if (constant.Value != null && constant.Type != null)
+        else if (constant.Kind != TypedConstantKind.Array && constant is { Value: not null, Type: not null })
         {
             typesToScan.Add(constant.Type);
         }
@@ -222,8 +257,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         var conversionOperators = namedType.GetMembers()
             .OfType<IMethodSymbol>()
             .Where(m => (m.Name == "op_Implicit" || m.Name == "op_Explicit") &&
-                       m.IsStatic &&
-                       m.Parameters.Length == 1);
+                        m is { IsStatic: true, Parameters.Length: 1 });
 
         foreach (var method in conversionOperators)
         {
@@ -245,6 +279,19 @@ public class AotConverterGenerator : IIncrementalGenerator
 
     private bool ShouldIncludeType(INamedTypeSymbol type, Compilation compilation)
     {
+        var typeAssembly = type.ContainingAssembly;
+        var currentAssembly = compilation.Assembly;
+
+        if (currentAssembly == null)
+        {
+            return false;
+        }
+
+        if (SymbolEqualityComparer.Default.Equals(typeAssembly, currentAssembly))
+        {
+            return true;
+        }
+
         if (type.DeclaredAccessibility == Accessibility.Public)
         {
             return true;
@@ -252,14 +299,6 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         if (type.DeclaredAccessibility == Accessibility.Internal)
         {
-            var typeAssembly = type.ContainingAssembly;
-            var currentAssembly = compilation.Assembly;
-
-            if (SymbolEqualityComparer.Default.Equals(typeAssembly, currentAssembly))
-            {
-                return true;
-            }
-
             if (typeAssembly != null && typeAssembly.GivesAccessTo(currentAssembly))
             {
                 return true;
@@ -271,6 +310,11 @@ public class AotConverterGenerator : IIncrementalGenerator
 
     private bool IsAccessibleType(ITypeSymbol type, Compilation compilation)
     {
+        if (type == null || compilation == null)
+        {
+            return false;
+        }
+
         if (type.SpecialType != SpecialType.None)
         {
             return true;
@@ -283,22 +327,31 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         if (type is INamedTypeSymbol namedType)
         {
+            var typeAssembly = namedType.ContainingAssembly;
+            var currentAssembly = compilation.Assembly;
+
+            if (currentAssembly != null && SymbolEqualityComparer.Default.Equals(typeAssembly, currentAssembly))
+            {
+                return true;
+            }
+
             if (namedType.DeclaredAccessibility == Accessibility.Public)
             {
+                return true;
             }
-            else if (namedType.DeclaredAccessibility == Accessibility.Internal)
-            {
-                var typeAssembly = namedType.ContainingAssembly;
-                var currentAssembly = compilation.Assembly;
 
-                if (!SymbolEqualityComparer.Default.Equals(typeAssembly, currentAssembly) &&
-                    !(typeAssembly?.GivesAccessTo(currentAssembly) ?? false))
+            if (namedType.DeclaredAccessibility == Accessibility.Internal)
+            {
+                if (currentAssembly == null)
                 {
                     return false;
                 }
-            }
-            else
-            {
+
+                if (typeAssembly != null && typeAssembly.GivesAccessTo(currentAssembly))
+                {
+                    return true;
+                }
+
                 return false;
             }
 
@@ -318,7 +371,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                 return IsAccessibleType(namedType.ContainingType, compilation);
             }
 
-            return true;
+            return false;
         }
 
         if (type is IArrayTypeSymbol arrayType)
@@ -337,6 +390,11 @@ public class AotConverterGenerator : IIncrementalGenerator
     private ConversionInfo? GetConversionInfoFromSymbol(IMethodSymbol methodSymbol, Compilation compilation)
     {
         var containingType = methodSymbol.ContainingType;
+        if (containingType == null)
+        {
+            return null;
+        }
+
         var sourceType = methodSymbol.Parameters[0].Type;
         var targetType = methodSymbol.ReturnType;
         var isImplicit = methodSymbol.Name == "op_Implicit";
@@ -457,6 +515,39 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         foreach (var conversion in uniqueConversions)
         {
+            try
+            {
+                if (conversion.SourceType == null || conversion.TargetType == null)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        new DiagnosticDescriptor(
+                            id: "TUNITGEN002",
+                            title: "Null type in conversion",
+                            messageFormat: "Skipping converter generation: SourceType={0}, TargetType={1}",
+                            category: "TUnit.Generator",
+                            defaultSeverity: DiagnosticSeverity.Warning,
+                            isEnabledByDefault: true),
+                        Location.None,
+                        conversion.SourceType?.ToDisplayString() ?? "null",
+                        conversion.TargetType?.ToDisplayString() ?? "null"));
+                    continue;
+                }
+            }
+            catch (Exception ex)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        id: "TUNITGEN003",
+                        title: "Error checking conversion types",
+                        messageFormat: "Error during null check: {0}",
+                        category: "TUnit.Generator",
+                        defaultSeverity: DiagnosticSeverity.Warning,
+                        isEnabledByDefault: true),
+                    Location.None,
+                    ex.ToString()));
+                continue;
+            }
+
             var converterClassName = $"AotConverter_{converterIndex++}";
             var sourceTypeName = conversion.SourceType.GloballyQualified();
             var targetTypeName = conversion.TargetType.GloballyQualified();
@@ -475,24 +566,47 @@ public class AotConverterGenerator : IIncrementalGenerator
 
             writer.AppendLine("if (value == null) return null;");
 
-            // For nullable value types, we need to use the underlying type in the pattern
-            // because you can't use nullable types in patterns in older C# versions
+            // Use Zen's more robust approach for handling nullable types and type checks
             var sourceType = conversion.SourceType;
-            var underlyingType = sourceType.IsValueType && sourceType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } symbol
-                ? symbol.TypeArguments[0]
-                : sourceType;
+            var targetType = conversion.TargetType;
 
-            var patternTypeName = underlyingType.GloballyQualified();
+            ITypeSymbol typeForTargetPattern = targetType;
+            if (targetType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T, TypeArguments.Length: > 0 } nullableTargetType)
+            {
+                typeForTargetPattern = nullableTargetType.TypeArguments[0];
+            }
+            var targetPatternTypeName = typeForTargetPattern.GloballyQualified();
 
-            writer.AppendLine($"if (value is {patternTypeName} typedValue)");
+            writer.AppendLine($"if (value is {targetPatternTypeName} targetTypedValue)");
             writer.AppendLine("{");
             writer.Indent();
-
-            // Use regular cast syntax - it works fine in AOT when types are known at compile-time
-            writer.AppendLine($"return ({targetTypeName})typedValue;");
-
+            writer.AppendLine("return targetTypedValue;");
             writer.Unindent();
             writer.AppendLine("}");
+
+            // 2. If types are different, generate the fallback check for the source type.
+            //    This handles cases that require an implicit conversion.
+            if (!SymbolEqualityComparer.Default.Equals(sourceType, targetType))
+            {
+                // Safer way to get the underlying type for a pattern match using C# pattern matching
+                ITypeSymbol typeForSourcePattern = sourceType;
+                if (sourceType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T, TypeArguments.Length: > 0 } nullableSourceType)
+                {
+                    typeForSourcePattern = nullableSourceType.TypeArguments[0];
+                }
+
+                var sourcePatternTypeName = typeForSourcePattern.GloballyQualified();
+
+                writer.AppendLine(); // Add a blank line for readability
+                writer.AppendLine($"if (value is {sourcePatternTypeName} sourceTypedValue)");
+                writer.AppendLine("{");
+                writer.Indent();
+                // This cast will correctly invoke the implicit operator.
+                writer.AppendLine($"return ({targetTypeName})sourceTypedValue;");
+                writer.Unindent();
+                writer.AppendLine("}");
+            }
+
             writer.AppendLine("return value; // Return original value if type doesn't match");
 
             writer.Unindent();
