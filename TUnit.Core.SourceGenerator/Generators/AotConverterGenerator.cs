@@ -346,6 +346,11 @@ public class AotConverterGenerator : IIncrementalGenerator
             return null;
         }
 
+        if (TypeContainsGenericTypeParameters(sourceType) || TypeContainsGenericTypeParameters(targetType))
+        {
+            return null;
+        }
+
         if (sourceType.IsRefLikeType || targetType.IsRefLikeType)
         {
             return null;
@@ -375,6 +380,37 @@ public class AotConverterGenerator : IIncrementalGenerator
             IsImplicit = isImplicit,
             MethodSymbol = methodSymbol
         };
+    }
+
+    private bool TypeContainsGenericTypeParameters(ITypeSymbol type)
+    {
+        if (type.TypeKind == TypeKind.TypeParameter)
+        {
+            return true;
+        }
+
+        if (type is INamedTypeSymbol namedTypeSymbol)
+        {
+            foreach (var typeArgument in namedTypeSymbol.TypeArguments)
+            {
+                if (TypeContainsGenericTypeParameters(typeArgument))
+                {
+                    return true;
+                }
+            }
+        }
+
+        if (type is IArrayTypeSymbol arrayTypeSymbol)
+        {
+            return TypeContainsGenericTypeParameters(arrayTypeSymbol.ElementType);
+        }
+
+        if (type is IPointerTypeSymbol pointerTypeSymbol)
+        {
+            return TypeContainsGenericTypeParameters(pointerTypeSymbol.PointedAtType);
+        }
+
+        return false;
     }
 
     private void GenerateConverters(SourceProductionContext context, ImmutableArray<ConversionInfo> conversions)
