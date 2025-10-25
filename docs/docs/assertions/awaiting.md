@@ -36,6 +36,216 @@ This won't:
 TUnit is able to take in asynchronous delegates. To be able to assert on these, we need to execute the code. We want to avoid sync-over-async, as this can cause problems and block the thread pool, slowing down your test suite.
 And with how fast .NET has become, the overhead of `Task`s and `async` methods shouldn't be noticeable.
 
+## Using Return Values from Awaited Assertions
+
+When you `await` an assertion in TUnit, it returns a reference to the subject that was asserted on. This allows you to capture the validated value and use it in subsequent operations or assertions, creating a fluent and readable test flow.
+
+This is particularly useful when you want to:
+- Chain related assertions on the same value
+- Use a validated value in further test logic
+- Avoid redundant variable assignments
+- Create more expressive tests
+
+### Basic Return Value Usage
+
+The simplest case is capturing the subject after asserting on it:
+
+```csharp
+[Test]
+public async Task ReturnValue_BasicUsage()
+{
+    // The assertion returns the subject being asserted on
+    int result = await Assert.That(42).IsGreaterThan(0);
+    
+    // You can now use 'result' which equals 42
+    await Assert.That(result * 2).IsEqualTo(84);
+}
+```
+
+### Practical Example: API Response Validation
+
+```csharp
+[Test]
+public async Task ValidateAndUseApiResponse()
+{
+    var response = await _httpClient.GetAsync("/api/users/123");
+    
+    // Assert on status code and capture response for further use
+    var validatedResponse = await Assert.That(response.StatusCode)
+        .IsEqualTo(HttpStatusCode.OK);
+    
+    // Deserialize and validate user data
+    var user = await response.Content.ReadFromJsonAsync<User>();
+    var validatedUser = await Assert.That(user).IsNotNull();
+    
+    // Now use the validated user object with confidence
+    await Assert.That(validatedUser.Email).Contains("@");
+    await Assert.That(validatedUser.Id).IsEqualTo(123);
+}
+```
+
+### Chaining Operations on Validated Values
+
+```csharp
+[Test]
+public async Task ProcessValidatedConfiguration()
+{
+    var config = LoadConfiguration();
+    
+    // Validate and capture the timeout value
+    int timeout = await Assert.That(config.TimeoutSeconds)
+        .IsGreaterThan(0)
+        .And.IsLessThan(300);
+    
+    // Use validated timeout in actual operation
+    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));
+    var result = await PerformOperationAsync(cts.Token);
+    
+    await Assert.That(result).IsNotNull();
+}
+```
+
+### Type Conversion with Return Values
+
+```csharp
+[Test]
+public async Task ParseAndValidateInput()
+{
+    string input = "12345";
+    
+    // Parse string to int and validate in one expression
+    int parsedValue = await Assert.That(input)
+        .HasLength().IsBetween(1, 10)
+        .And.WhenParsedInto<int>()
+        .IsGreaterThan(1000);
+    
+    // Use the parsed and validated value
+    var doubled = parsedValue * 2;
+    await Assert.That(doubled).IsEqualTo(24690);
+}
+```
+
+### Exception Handling with Return Values
+
+```csharp
+[Test]
+public async Task CaptureAndInspectException()
+{
+    // Capture the thrown exception for detailed inspection
+    var exception = await Assert.That(() => DivideByZero(10, 0))
+        .Throws<DivideByZeroException>();
+    
+    // Inspect exception properties
+    await Assert.That(exception.Message).IsNotEmpty();
+    await Assert.That(exception.StackTrace).Contains("DivideByZero");
+    
+    // Could log or analyze the exception further
+    Console.WriteLine($"Caught expected exception: {exception.GetType().Name}");
+}
+```
+
+### Collection Filtering with Return Values
+
+```csharp
+[Test]
+public async Task FindAndValidateCollectionItem()
+{
+    var products = GetProducts();
+    
+    // Find a specific product and validate it exists
+    var expensiveProduct = await Assert.That(products)
+        .Contains(p => p.Price > 1000);
+    
+    // Use the found product for further assertions
+    await Assert.That(expensiveProduct.Name).IsNotNull();
+    await Assert.That(expensiveProduct.Category).IsEqualTo("Premium");
+    await Assert.That(expensiveProduct.InStock).IsTrue();
+    
+    // Can even use it in business logic
+    var discount = CalculateDiscount(expensiveProduct);
+    await Assert.That(discount).IsGreaterThan(0);
+}
+```
+
+### Complex Workflow Validation
+
+```csharp
+[Test]
+public async Task ValidateMultiStepProcess()
+{
+    var order = CreateOrder();
+    
+    // Validate initial state and capture order
+    var validatedOrder = await Assert.That(order.Status)
+        .IsEqualTo(OrderStatus.Pending);
+    
+    // Process the order
+    await ProcessOrderAsync(order);
+    
+    // Validate updated state
+    var completedOrder = await Assert.That(order.Status)
+        .IsEqualTo(OrderStatus.Completed);
+    
+    // Use validated order for final checks
+    await Assert.That(order.ProcessedDate).IsNotNull();
+    await Assert.That(order.ProcessedDate.Value)
+        .IsGreaterThan(DateTime.UtcNow.AddMinutes(-1));
+}
+```
+
+### Combining Multiple Return Values
+
+```csharp
+[Test]
+public async Task ValidateRelatedObjects()
+{
+    var customer = await GetCustomerAsync(customerId: 42);
+    
+    // Validate customer and capture
+    var validCustomer = await Assert.That(customer).IsNotNull();
+    
+    // Validate nested property and capture
+    var address = await Assert.That(validCustomer.Address).IsNotNull();
+    
+    // Validate address fields using captured references
+    await Assert.That(address.ZipCode).HasLength(5);
+    await Assert.That(address.Country).IsEqualTo("USA");
+    
+    // Use both validated objects together
+    var fullAddress = $"{validCustomer.Name}, {address.Street}, {address.City}";
+    await Assert.That(fullAddress).Contains(validCustomer.Name);
+}
+```
+
+### Type Casting with Confidence
+
+```csharp
+[Test]
+public async Task CastAndUseSpecificType()
+{
+    object shape = new Circle { Radius = 5.0 };
+    
+    // Assert type and capture strongly-typed reference
+    var circle = await Assert.That(shape).IsTypeOf<Circle>();
+    
+    // Now you can use circle-specific properties without casting
+    await Assert.That(circle.Radius).IsEqualTo(5.0);
+    
+    var area = Math.PI * circle.Radius * circle.Radius;
+    await Assert.That(area).IsEqualTo(Math.PI * 25).Within(0.0001);
+}
+```
+
+### Best Practices
+
+When using return values from assertions:
+
+1. **Use descriptive variable names**: The returned value should have a meaningful name that indicates it's been validated
+2. **Chain related assertions**: When asserting on the same value multiple times, use `.And` to chain assertions
+3. **Leverage type conversions**: Use `WhenParsedInto<T>()` and `IsTypeOf<T>()` to get strongly-typed values
+4. **Keep it readable**: Don't create overly complex chains - break into multiple assertions if needed
+5. **Remember it's a reference**: The returned value is the same reference as the input (not a copy), so modifications affect the original
+
 ## Complex Assertion Examples
 
 ### Chaining Multiple Assertions
