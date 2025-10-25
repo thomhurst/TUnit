@@ -1898,11 +1898,20 @@ namespace .Extensions
         public static .<TValue> IsPositive<TValue>(this .<TValue?> source)
             where TValue :  struct, <TValue> { }
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<.<TItem>>> assertions) { }
+        [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
+            "Object, TItem, TTransformed> overload with strongly-typed assertions.")]
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, object> assertions) { }
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
+        [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
+            "Object, TMember, TTransformed> overload with strongly-typed assertions.")]
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, object> assertions) { }
+        public static .<TObject> Member<TObject, TItem, TTransformed>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<.<TKey, TValue>>> assertions) { }
+        [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
+            "Object, TKey, TValue, TTransformed> overload with strongly-typed assertions.")]
         public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, object> assertions) { }
+        public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
+        public static .<TObject> Member<TObject, TKey, TValue, TTransformed>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<TTransformed>> assertions) { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
         public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped>> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
         public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }

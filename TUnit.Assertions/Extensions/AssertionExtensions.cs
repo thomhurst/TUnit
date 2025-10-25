@@ -168,6 +168,60 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts on a dictionary member of an object using a lambda selector and assertion lambda.
     /// The assertion lambda receives dictionary assertion methods (ContainsKey, ContainsValue, IsEmpty, etc.).
+    /// Supports type transformations like IsTypeOf within the assertion lambda.
+    /// After the member assertion completes, returns to the parent object context for further chaining.
+    /// Example: await Assert.That(myObject).Member(x => x.Attributes, attrs => attrs.ContainsKey("status").And.IsNotEmpty());
+    /// </summary>
+    [OverloadResolutionPriority(3)]
+    public static MemberAssertionResult<TObject> Member<TObject, TKey, TValue, TTransformed>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, IReadOnlyDictionary<TKey, TValue>>> memberSelector,
+        Func<DictionaryMemberAssertionAdapter<IReadOnlyDictionary<TKey, TValue>, TKey, TValue>, Assertion<TTransformed>> assertions)
+    {
+        var parentContext = source.Context;
+        var memberPath = GetMemberPath(memberSelector);
+
+        parentContext.ExpressionBuilder.Append($".Member(x => x.{memberPath}, ...)");
+
+        // Check if there's a pending link (from .And or .Or) that needs to be consumed
+        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
+
+        // Map to member context
+        var memberContext = parentContext.Map<IReadOnlyDictionary<TKey, TValue>>(obj =>
+        {
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
+            }
+
+            var compiled = memberSelector.Compile();
+            return compiled(obj);
+        });
+
+        // Create a DictionaryMemberAssertionAdapter for the member
+        var dictionaryAdapter = new DictionaryMemberAssertionAdapter<IReadOnlyDictionary<TKey, TValue>, TKey, TValue>(memberContext);
+        var memberAssertion = assertions(dictionaryAdapter);
+
+        // Type-erase to object? for storage - using TTransformed instead of dictionary type
+        var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
+
+        // If there was a pending link, wrap both assertions together
+        if (pendingAssertion != null && combinerType != null)
+        {
+            // Create a combined wrapper that executes the pending assertion first (or together for Or)
+            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
+                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
+                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
+
+            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
+        }
+
+        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Asserts on a dictionary member of an object using a lambda selector and assertion lambda.
+    /// The assertion lambda receives dictionary assertion methods (ContainsKey, ContainsValue, IsEmpty, etc.).
     /// After the member assertion completes, returns to the parent object context for further chaining.
     /// Example: await Assert.That(myObject).Member(x => x.Attributes, attrs => attrs.ContainsKey("status").And.IsNotEmpty());
     /// </summary>
@@ -223,8 +277,10 @@ public static class AssertionExtensions
     /// The assertion lambda receives dictionary assertion methods (ContainsKey, ContainsValue, IsEmpty, etc.).
     /// After the member assertion completes, returns to the parent object context for further chaining.
     /// Example: await Assert.That(myObject).Member(x => x.Attributes, attrs => attrs.ContainsKey("status").And.IsNotEmpty());
+    /// Note: This overload exists for backward compatibility. For AOT compatibility, use the TTransformed overload instead.
     /// </summary>
     [OverloadResolutionPriority(2)]
+    [RequiresDynamicCode("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<TObject, TKey, TValue, TTransformed> overload with strongly-typed assertions.")]
     public static MemberAssertionResult<TObject> Member<TObject, TKey, TValue>(
         this IAssertionSource<TObject> source,
         Expression<Func<TObject, IReadOnlyDictionary<TKey, TValue>>> memberSelector,
@@ -255,11 +311,65 @@ public static class AssertionExtensions
         var memberAssertionObj = assertions(dictionaryAdapter);
 
         // Type-erase to object? for storage
-        var erasedAssertion = WrapMemberAssertion<IReadOnlyDictionary<TKey, TValue>>(memberAssertionObj);
+        var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
 
         // If there was a pending link, wrap both assertions together
         if (pendingAssertion != null && combinerType != null)
         {
+            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
+                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
+                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
+
+            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
+        }
+
+        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Asserts on a collection member of an object using a lambda selector and assertion lambda.
+    /// The assertion lambda receives collection assertion methods (HasCount, Contains, IsEmpty, etc.).
+    /// Supports type transformations like IsTypeOf within the assertion lambda.
+    /// After the member assertion completes, returns to the parent object context for further chaining.
+    /// Example: await Assert.That(myObject).Member(x => x.Tags, tags => tags.HasCount(1).And.Contains("value"));
+    /// </summary>
+    [OverloadResolutionPriority(2)]
+    public static MemberAssertionResult<TObject> Member<TObject, TItem, TTransformed>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, IEnumerable<TItem>>> memberSelector,
+        Func<CollectionMemberAssertionAdapter<IEnumerable<TItem>, TItem>, Assertion<TTransformed>> assertions)
+    {
+        var parentContext = source.Context;
+        var memberPath = GetMemberPath(memberSelector);
+
+        parentContext.ExpressionBuilder.Append($".Member(x => x.{memberPath}, ...)");
+
+        // Check if there's a pending link (from .And or .Or) that needs to be consumed
+        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
+
+        // Map to member context
+        var memberContext = parentContext.Map<IEnumerable<TItem>>(obj =>
+        {
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
+            }
+
+            var compiled = memberSelector.Compile();
+            return compiled(obj);
+        });
+
+        // Create a CollectionMemberAssertionAdapter for the member
+        var collectionAdapter = new CollectionMemberAssertionAdapter<IEnumerable<TItem>, TItem>(memberContext);
+        var memberAssertion = assertions(collectionAdapter);
+
+        // Type-erase to object? for storage - using TTransformed instead of collection type
+        var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
+
+        // If there was a pending link, wrap both assertions together
+        if (pendingAssertion != null && combinerType != null)
+        {
+            // Create a combined wrapper that executes the pending assertion first (or together for Or)
             Assertion<object?> combinedAssertion = combinerType == CombinerType.And
                 ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
                 : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
@@ -328,8 +438,10 @@ public static class AssertionExtensions
     /// The assertion lambda receives collection assertion methods (HasCount, Contains, IsEmpty, etc.).
     /// After the member assertion completes, returns to the parent object context for further chaining.
     /// Example: await Assert.That(myObject).Member(x => x.Tags, tags => tags.HasCount(1).And.Contains("value"));
+    /// Note: This overload exists for backward compatibility. For AOT compatibility, use the TTransformed overload instead.
     /// </summary>
     [OverloadResolutionPriority(1)]
+    [RequiresDynamicCode("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<TObject, TItem, TTransformed> overload with strongly-typed assertions.")]
     public static MemberAssertionResult<TObject> Member<TObject, TItem>(
         this IAssertionSource<TObject> source,
         Expression<Func<TObject, IEnumerable<TItem>>> memberSelector,
@@ -360,11 +472,65 @@ public static class AssertionExtensions
         var memberAssertionObj = assertions(collectionAdapter);
 
         // Type-erase to object? for storage
-        var erasedAssertion = WrapMemberAssertion<IEnumerable<TItem>>(memberAssertionObj);
+        var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
 
         // If there was a pending link, wrap both assertions together
         if (pendingAssertion != null && combinerType != null)
         {
+            Assertion<object?> combinedAssertion = combinerType == CombinerType.And
+                ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
+                : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
+
+            return new MemberAssertionResult<TObject>(parentContext, combinedAssertion);
+        }
+
+        return new MemberAssertionResult<TObject>(parentContext, erasedAssertion);
+    }
+
+    /// <summary>
+    /// Asserts on a member of an object using a lambda selector and assertion lambda.
+    /// The assertion lambda receives the member value and can perform any assertions on it.
+    /// Supports type transformations like IsTypeOf within the assertion lambda.
+    /// After the member assertion completes, returns to the parent object context for further chaining.
+    /// Example: await Assert.That(myObject).Member(x => x.PropertyName, value => value.IsTypeOf<string>().And.IsEqualTo(expectedValue));
+    /// </summary>
+    [OverloadResolutionPriority(1)]
+    public static MemberAssertionResult<TObject> Member<TObject, TMember, TTransformed>(
+        this IAssertionSource<TObject> source,
+        Expression<Func<TObject, TMember>> memberSelector,
+        Func<IAssertionSource<TMember>, Assertion<TTransformed>> assertions)
+    {
+        var parentContext = source.Context;
+        var memberPath = GetMemberPath(memberSelector);
+
+        parentContext.ExpressionBuilder.Append($".Member(x => x.{memberPath}, ...)");
+
+        // Check if there's a pending link (from .And or .Or) that needs to be consumed
+        var (pendingAssertion, combinerType) = parentContext.ConsumePendingLink();
+
+        // Map to member context
+        var memberContext = parentContext.Map<TMember>(obj =>
+        {
+            if (obj == null)
+            {
+                throw new InvalidOperationException($"Object `{typeof(TObject).Name}` was null");
+            }
+
+            var compiled = memberSelector.Compile();
+            return compiled(obj);
+        });
+
+        // Let user build assertion via lambda
+        var memberSource = new AssertionSourceAdapter<TMember>(memberContext);
+        var memberAssertion = assertions(memberSource);
+
+        // Type-erase to object? for storage - using TTransformed instead of member type
+        var erasedAssertion = new TypeErasedAssertion<TTransformed>(memberAssertion);
+
+        // If there was a pending link, wrap both assertions together
+        if (pendingAssertion != null && combinerType != null)
+        {
+            // Create a combined wrapper that executes the pending assertion first (or together for Or)
             Assertion<object?> combinedAssertion = combinerType == CombinerType.And
                 ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
                 : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
@@ -432,7 +598,9 @@ public static class AssertionExtensions
     /// The assertion lambda receives the member value and can perform any assertions on it.
     /// After the member assertion completes, returns to the parent object context for further chaining.
     /// Example: await Assert.That(myObject).Member(x => x.PropertyName, value => value.IsEqualTo(expectedValue));
+    /// Note: This overload exists for backward compatibility. For AOT compatibility, use the TTransformed overload instead.
     /// </summary>
+    [RequiresDynamicCode("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<TObject, TMember, TTransformed> overload with strongly-typed assertions.")]
     public static MemberAssertionResult<TObject> Member<TObject, TMember>(
         this IAssertionSource<TObject> source,
         Expression<Func<TObject, TMember>> memberSelector,
@@ -463,7 +631,7 @@ public static class AssertionExtensions
         var memberAssertionObj = assertions(memberSource);
 
         // Type-erase to object? for storage
-        var erasedAssertion = WrapMemberAssertion<TMember>(memberAssertionObj);
+        var erasedAssertion = WrapMemberAssertion(memberAssertionObj);
 
         // If there was a pending link, wrap both assertions together
         if (pendingAssertion != null && combinerType != null)
@@ -480,17 +648,46 @@ public static class AssertionExtensions
 
     /// <summary>
     /// Helper method to wrap member assertions for type erasure.
+    /// Uses reflection to handle assertions of any type, including type-transformed assertions.
+    /// Note: This fallback path uses reflection for legacy object-based overloads.
+    /// New code should use the TTransformed overloads which are AOT-compatible.
     /// </summary>
-    private static Assertion<object?> WrapMemberAssertion<TMember>(object memberAssertion)
+    [RequiresDynamicCode("Uses reflection to dynamically construct TypeErasedAssertion<T>. For AOT compatibility, use the strongly-typed TTransformed overloads instead of object-returning lambdas.")]
+    private static Assertion<object?> WrapMemberAssertion(object memberAssertion)
     {
-        if (memberAssertion is Assertion<TMember> standardAssertion)
+        if (memberAssertion is null)
         {
-            return new TypeErasedAssertion<TMember>(standardAssertion);
+            throw new InvalidOperationException("Member assertion cannot be null.");
+        }
+
+        var type = memberAssertion.GetType();
+
+        // Walk up the inheritance chain to find the Assertion<T> base class
+        Type? assertionBaseType = null;
+        var currentType = type;
+        while (currentType != null && currentType != typeof(object))
+        {
+            if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == typeof(Assertion<>))
+            {
+                assertionBaseType = currentType;
+                break;
+            }
+            currentType = currentType.BaseType;
+        }
+
+        if (assertionBaseType != null)
+        {
+            // Extract the generic type parameter from Assertion<T>
+            var memberType = assertionBaseType.GetGenericArguments()[0];
+
+            // Create TypeErasedAssertion<T> dynamically using the discovered type
+            var typeErasedAssertionType = typeof(TypeErasedAssertion<>).MakeGenericType(memberType);
+            return (Assertion<object?>)Activator.CreateInstance(typeErasedAssertionType, memberAssertion)!;
         }
 
         throw new InvalidOperationException(
-            $"Member assertion returned unexpected type: {memberAssertion.GetType()}. " +
-            $"Expected Assertion<{typeof(TMember).Name}>.");
+            $"Member assertion returned unexpected type: {type.Name}. " +
+            "Expected a type inheriting from Assertion<T>.");
     }
 
     private static string GetMemberPath<TObject, TMember>(Expression<Func<TObject, TMember>> expression)
