@@ -15,7 +15,6 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly TUnitFrameworkLogger _logger;
     private readonly ITestGroupingService _groupingService;
     private readonly ITUnitMessageBus _messageBus;
-    private readonly ICommandLineOptions _commandLineOptions;
     private readonly ParallelLimitLockProvider _parallelLimitLockProvider;
     private readonly TestStateManager _testStateManager;
     private readonly TestRunner _testRunner;
@@ -23,6 +22,8 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly IConstraintKeyScheduler _constraintKeyScheduler;
     private readonly HookExecutor _hookExecutor;
     private readonly StaticPropertyHandler _staticPropertyHandler;
+    private readonly int _maxParallelism;
+    private readonly SemaphoreSlim? _maxParallelismSemaphore;
 
     public TestScheduler(
         TUnitFrameworkLogger logger,
@@ -40,7 +41,6 @@ internal sealed class TestScheduler : ITestScheduler
         _logger = logger;
         _groupingService = groupingService;
         _messageBus = messageBus;
-        _commandLineOptions = commandLineOptions;
         _parallelLimitLockProvider = parallelLimitLockProvider;
         _testStateManager = testStateManager;
         _testRunner = testRunner;
@@ -48,6 +48,12 @@ internal sealed class TestScheduler : ITestScheduler
         _constraintKeyScheduler = constraintKeyScheduler;
         _hookExecutor = hookExecutor;
         _staticPropertyHandler = staticPropertyHandler;
+
+        _maxParallelism = GetMaxParallelism(logger, commandLineOptions);
+
+        _maxParallelismSemaphore = _maxParallelism == int.MaxValue
+            ? null
+            : new SemaphoreSlim(_maxParallelism, _maxParallelism);
     }
 
     #if NET6_0_OR_GREATER
@@ -140,34 +146,16 @@ internal sealed class TestScheduler : ITestScheduler
         GroupedTests groupedTests,
         CancellationToken cancellationToken)
     {
-        // Check if maximum parallel tests limit is specified
-        int? maxParallelism = null;
-        if (_commandLineOptions.TryGetOptionArgumentList(
-                MaximumParallelTestsCommandProvider.MaximumParallelTests,
-                out var args) && args.Length > 0)
-        {
-            if (int.TryParse(args[0], out var maxParallelTests) && maxParallelTests > 0)
-            {
-                maxParallelism = maxParallelTests;
-                await _logger.LogDebugAsync($"Maximum parallel tests limit set to {maxParallelTests}").ConfigureAwait(false);
-            }
-        }
-        // Execute all test groups with proper isolation to prevent race conditions between class-level hooks
-
-        // 1. Execute parallel tests (no constraints, can run freely in parallel)
         if (groupedTests.Parallel.Length > 0)
         {
             await _logger.LogDebugAsync($"Starting {groupedTests.Parallel.Length} parallel tests").ConfigureAwait(false);
 
-            if (maxParallelism is > 0)
+            if (_maxParallelism > 0)
             {
-                // Use worker pool pattern to respect maximum parallel tests limit
-                await ExecuteParallelTestsWithLimitAsync(groupedTests.Parallel, maxParallelism.Value, cancellationToken).ConfigureAwait(false);
+                await ExecuteParallelTestsWithLimitAsync(groupedTests.Parallel, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                // No limit - start all tests at once
-                // Use Task.Run to ensure tasks start immediately without blocking on logging in ExecuteTestWithParallelLimitAsync
                 var parallelTasks = groupedTests.Parallel.Select(test =>
                 {
                     return test.ExecutionTask ??= Task.Run(() => ExecuteTestWithParallelLimitAsync(test, cancellationToken), CancellationToken.None);
@@ -177,8 +165,6 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
-        // 2. Execute parallel groups SEQUENTIALLY to prevent race conditions between class-level hooks
-        // Each group completes entirely (including After(Class)) before the next group starts (including Before(Class))
         foreach (var group in groupedTests.ParallelGroups)
         {
             var groupName = group.Key;
@@ -189,10 +175,9 @@ internal sealed class TestScheduler : ITestScheduler
 
             await _logger.LogDebugAsync($"Starting parallel group '{groupName}' with {orderedTests.Length} orders").ConfigureAwait(false);
 
-            await ExecuteParallelGroupAsync(groupName, orderedTests, maxParallelism, cancellationToken).ConfigureAwait(false);
+            await ExecuteParallelGroupAsync(groupName, orderedTests, cancellationToken).ConfigureAwait(false);
         }
 
-        // 2b. Execute constrained parallel groups (groups with both ParallelGroup and NotInParallel)
         foreach (var kvp in groupedTests.ConstrainedParallelGroups)
         {
             var groupName = kvp.Key;
@@ -200,17 +185,15 @@ internal sealed class TestScheduler : ITestScheduler
 
             await _logger.LogDebugAsync($"Starting constrained parallel group '{groupName}' with {constrainedTests.UnconstrainedTests.Length} unconstrained and {constrainedTests.KeyedTests.Length} keyed tests").ConfigureAwait(false);
 
-            await ExecuteConstrainedParallelGroupAsync(groupName, constrainedTests, maxParallelism, cancellationToken).ConfigureAwait(false);
+            await ExecuteConstrainedParallelGroupAsync(groupName, constrainedTests, cancellationToken).ConfigureAwait(false);
         }
 
-        // 3. Execute keyed NotInParallel tests using ConstraintKeyScheduler for proper coordination
         if (groupedTests.KeyedNotInParallel.Length > 0)
         {
             await _logger.LogDebugAsync($"Starting {groupedTests.KeyedNotInParallel.Length} keyed NotInParallel tests").ConfigureAwait(false);
             await _constraintKeyScheduler.ExecuteTestsWithConstraintsAsync(groupedTests.KeyedNotInParallel, cancellationToken).ConfigureAwait(false);
         }
 
-        // 4. Execute global NotInParallel tests (completely sequential, after everything else)
         if (groupedTests.NotInParallel.Length > 0)
         {
             await _logger.LogDebugAsync($"Starting {groupedTests.NotInParallel.Length} global NotInParallel tests").ConfigureAwait(false);
@@ -219,7 +202,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ExecuteTestWithParallelLimitAsync(
@@ -229,7 +212,6 @@ internal sealed class TestScheduler : ITestScheduler
         var taskStartTime = DateTime.UtcNow;
         await _logger.LogDebugAsync($"[TASK START] Test '{test.TestId}' task started at {taskStartTime:HH:mm:ss.fff}").ConfigureAwait(false);
 
-        // Check if test has parallel limit constraint
         if (test.Context.ParallelLimiter != null)
         {
             var limiterType = test.Context.ParallelLimiter.GetType().Name;
@@ -274,25 +256,22 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ExecuteParallelGroupAsync(
         string groupName,
         AbstractExecutableTest[] orderedTests,
-        int? maxParallelism,
         CancellationToken cancellationToken)
     {
         await _logger.LogDebugAsync($"Executing parallel group '{groupName}' with {orderedTests.Length} tests").ConfigureAwait(false);
 
-        if (maxParallelism is > 0)
+        if (_maxParallelism is > 0)
         {
-            // Use worker pool pattern to respect maximum parallel tests limit
-            await ExecuteParallelTestsWithLimitAsync(orderedTests, maxParallelism.Value, cancellationToken).ConfigureAwait(false);
+            await ExecuteParallelTestsWithLimitAsync(orderedTests, cancellationToken).ConfigureAwait(false);
         }
         else
         {
-            // No limit - start all tests at once
             var orderTasks = orderedTests.Select(test =>
             {
                 return test.ExecutionTask ??= Task.Run(() => ExecuteTestWithParallelLimitAsync(test, cancellationToken), CancellationToken.None);
@@ -302,33 +281,28 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ExecuteConstrainedParallelGroupAsync(
         string groupName,
         GroupedConstrainedTests constrainedTests,
-        int? maxParallelism,
         CancellationToken cancellationToken)
     {
         await _logger.LogDebugAsync($"Executing constrained parallel group '{groupName}'").ConfigureAwait(false);
 
-        // Start unconstrained tests (can run in parallel)
         var unconstrainedTasks = new List<Task>();
         if (constrainedTests.UnconstrainedTests.Length > 0)
         {
-            if (maxParallelism is > 0)
+            if (_maxParallelism is > 0)
             {
-                // Respect maximum parallel tests limit for unconstrained tests
                 var unconstrainedTask = ExecuteParallelTestsWithLimitAsync(
                     constrainedTests.UnconstrainedTests,
-                    maxParallelism.Value,
                     cancellationToken);
                 unconstrainedTasks.Add(unconstrainedTask);
             }
             else
             {
-                // No limit - start all unconstrained tests at once
                 foreach (var test in constrainedTests.UnconstrainedTests)
                 {
                     test.ExecutionTask ??= Task.Run(() => ExecuteTestWithParallelLimitAsync(test, cancellationToken), CancellationToken.None);
@@ -337,7 +311,6 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
-        // Execute keyed tests using the constraint key scheduler
         Task? keyedTask = null;
         if (constrainedTests.KeyedTests.Length > 0)
         {
@@ -346,7 +319,6 @@ internal sealed class TestScheduler : ITestScheduler
                 cancellationToken).AsTask();
         }
 
-        // Wait for both unconstrained and keyed tests to complete
         var allTasks = unconstrainedTasks.ToList();
         if (keyedTask != null)
         {
@@ -359,7 +331,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ExecuteSequentiallyAsync(
@@ -376,36 +348,19 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
     #endif
     private async Task ExecuteParallelTestsWithLimitAsync(
         AbstractExecutableTest[] tests,
-        int maxParallelism,
         CancellationToken cancellationToken)
     {
-        await _logger.LogDebugAsync($"Starting {tests.Length} tests with global max parallelism: {maxParallelism}").ConfigureAwait(false);
+        await _logger.LogDebugAsync($"Starting {tests.Length} tests with global max parallelism: {_maxParallelism}").ConfigureAwait(false);
 
-        // Global semaphore limits total concurrent test execution
-        var globalSemaphore = new SemaphoreSlim(maxParallelism, maxParallelism);
-
-        // Start all tests concurrently using two-phase acquisition pattern:
-        // Phase 1: Acquire ParallelLimiter (if test has one) - wait for constrained resource
-        // Phase 2: Acquire global semaphore - claim execution slot
-        //
-        // This ordering prevents resource underutilization: tests wait for constrained
-        // resources BEFORE claiming global slots, so global slots are only held during
-        // actual test execution, not during waiting for constrained resources.
-        //
-        // This is deadlock-free because:
-        // - All tests acquire ParallelLimiter BEFORE global semaphore
-        // - No test ever holds global while waiting for ParallelLimiter
-        // - Therefore, no circular wait can occur
         var tasks = tests.Select(async test =>
         {
             SemaphoreSlim? parallelLimiterSemaphore = null;
 
-            // Phase 1: Acquire ParallelLimiter first (if test has one)
             if (test.Context.ParallelLimiter != null)
             {
                 var limiterName = test.Context.ParallelLimiter.GetType().Name;
@@ -419,32 +374,29 @@ internal sealed class TestScheduler : ITestScheduler
 
             try
             {
-                // Phase 2: Acquire global semaphore
-                // At this point, we have the constrained resource (if needed),
-                // so we can immediately use the global slot for execution
-                await _logger.LogDebugAsync($"Test '{test.TestId}': [Phase 2] Acquiring global semaphore (available: {globalSemaphore.CurrentCount}/{maxParallelism})").ConfigureAwait(false);
+                await _logger.LogDebugAsync($"Test '{test.TestId}': [Phase 2] Acquiring global semaphore (available: {_maxParallelismSemaphore?.CurrentCount}/{_maxParallelism})").ConfigureAwait(false);
 
-                await globalSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                if (_maxParallelismSemaphore != null)
+                {
+                    await _maxParallelismSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                }
 
-                var slotsUsed = maxParallelism - globalSemaphore.CurrentCount;
-                await _logger.LogDebugAsync($"Test '{test.TestId}': [Phase 2] Acquired global semaphore - executing (global slots used: {slotsUsed}/{maxParallelism})").ConfigureAwait(false);
+                var slotsUsed = _maxParallelism - _maxParallelismSemaphore?.CurrentCount;
+                await _logger.LogDebugAsync($"Test '{test.TestId}': [Phase 2] Acquired global semaphore - executing (global slots used: {slotsUsed}/{_maxParallelism})").ConfigureAwait(false);
 
                 try
                 {
-                    // Execute the test
                     test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken);
                     await test.ExecutionTask.ConfigureAwait(false);
                 }
                 finally
                 {
-                    // Always release global semaphore after execution
-                    globalSemaphore.Release();
-                    await _logger.LogDebugAsync($"Test '{test.TestId}': [Phase 2] Released global semaphore (available: {globalSemaphore.CurrentCount}/{maxParallelism})").ConfigureAwait(false);
+                    _maxParallelismSemaphore?.Release();
+                    await _logger.LogDebugAsync($"Test '{test.TestId}': [Phase 2] Released global semaphore (available: {_maxParallelismSemaphore?.CurrentCount}/{_maxParallelism})").ConfigureAwait(false);
                 }
             }
             finally
             {
-                // Always release ParallelLimiter semaphore (if we acquired one)
                 if (parallelLimiterSemaphore != null)
                 {
                     parallelLimiterSemaphore.Release();
@@ -453,42 +405,41 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }).ToArray();
 
-        // Wait for all tests to complete, handling fail-fast correctly
         await WaitForTasksWithFailFastHandling(tasks, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>
-    /// Waits for multiple tasks to complete, handling fail-fast cancellation properly.
-    /// When fail-fast is triggered, we only want to bubble up the first real failure,
-    /// not the cancellation exceptions from other tests that were cancelled as a result.
-    /// </summary>
     private async Task WaitForTasksWithFailFastHandling(Task[] tasks, CancellationToken cancellationToken)
     {
         try
         {
-            // Wait for all tasks to complete, even if some fail
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
         catch (Exception)
         {
-            // Check if this is a fail-fast scenario
             if (cancellationToken.IsCancellationRequested)
             {
-                // Get the first failure that triggered fail-fast
                 var firstFailure = _testRunner.GetFirstFailFastException();
 
-                // If we have a stored first failure, throw that instead of the aggregated exceptions
                 if (firstFailure != null)
                 {
                     throw firstFailure;
                 }
-
-                // If no stored failure, this was a user-initiated cancellation
-                // Let the original exception bubble up
             }
 
-            // Re-throw the original exception (either cancellation or non-fail-fast failure)
             throw;
         }
+    }
+
+    private static int GetMaxParallelism(ILogger logger, ICommandLineOptions commandLineOptions)
+    {
+        if (!commandLineOptions.TryGetOptionArgumentList(
+                MaximumParallelTestsCommandProvider.MaximumParallelTests,
+                out var args) || args.Length <= 0 || !int.TryParse(args[0], out var maxParallelTests) || maxParallelTests <= 0)
+        {
+            return int.MaxValue;
+        }
+
+        logger.LogDebug($"Maximum parallel tests limit set to {maxParallelTests}");
+        return maxParallelTests;
     }
 }
