@@ -1398,6 +1398,7 @@ namespace .Conditions
         public ThrowsAssertion(.<TException> context) { }
         protected override bool IsExactTypeMatch { get; }
         protected override bool CheckExceptionType( actualException, out string? errorMessage) { }
+        public .<?> WithExceptionType( expectedExceptionType) { }
         public .<> WithInnerException() { }
         public .<TException> WithMessage(string expectedMessage) { }
         public .<TException> WithMessage(string expectedMessage,  comparison) { }
@@ -3890,9 +3891,12 @@ namespace .Sources
         public .<.> IsNotCompletedSuccessfully() { }
         public .<.> IsNotFaulted() { }
         public .<object?, TExpected> IsTypeOf<TExpected>() { }
+        public .<?> Throws( exceptionType) { }
         public .<TException> Throws<TException>()
             where TException :  { }
         public .<TException> ThrowsExactly<TException>()
+            where TException :  { }
+        public .<TException> ThrowsExactly<TException>(string parameterName)
             where TException :  { }
     }
     public class AsyncFuncAssertion<TValue> : ., .<TValue>, .<TValue>

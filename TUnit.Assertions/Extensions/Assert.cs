@@ -255,13 +255,14 @@ public static class Assert
     }
 
     /// <summary>
-    /// Asserts that the async action throws the specified exception type with the expected parameter name (for ArgumentException types) and returns the exception.
-    /// Example: var exception = await Assert.ThrowsAsync&lt;ArgumentNullException&gt;("paramName", async () => await ThrowingMethodAsync());
+    /// Asserts that the async action throws the specified exception type with the expected parameter name (for ArgumentException types).
+    /// Uses fluent API - chain .WithParameterName() for parameter validation.
+    /// Example: await Assert.ThrowsAsync&lt;ArgumentNullException&gt;("paramName", async () => await ThrowingMethodAsync());
     /// </summary>
-    public static Task<TException> ThrowsAsync<TException>(string parameterName, Func<Task> action)
+    public static ExceptionParameterNameAssertion<TException> ThrowsAsync<TException>(string parameterName, Func<Task> action)
         where TException : ArgumentException
     {
-        return That(action).Throws<TException>(parameterName);
+        return That(action).Throws<TException>().WithParameterName(parameterName);
     }
 
     /// <summary>
@@ -348,10 +349,11 @@ public static class Assert
     }
 
     /// <summary>
-    /// Asserts that exactly the specified exception type is thrown (not subclasses) with the expected parameter name (for ArgumentException types) and returns the exception.
-    /// Example: var exception = await Assert.ThrowsExactlyAsync&lt;ArgumentNullException&gt;("paramName", async () => await ThrowingMethodAsync());
+    /// Asserts that exactly the specified exception type is thrown (not subclasses) with the expected parameter name (for ArgumentException types).
+    /// Uses fluent API - chain .WithParameterName() for parameter validation.
+    /// Example: await Assert.ThrowsExactlyAsync&lt;ArgumentNullException&gt;("paramName", async () => await ThrowingMethodAsync());
     /// </summary>
-    public static Task<TException> ThrowsExactlyAsync<TException>(string parameterName, Func<Task> action)
+    public static ExceptionParameterNameAssertion<TException> ThrowsExactlyAsync<TException>(string parameterName, Func<Task> action)
         where TException : ArgumentException
     {
         return That(action).ThrowsExactly<TException>(parameterName);

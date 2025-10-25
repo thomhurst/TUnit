@@ -166,4 +166,28 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
         var mappedContext = Context.MapException<TException>();
         return new ThrowsExactlyAssertion<TException>(mappedContext);
     }
+
+    /// <summary>
+    /// Asserts that the async delegate throws the specified exception type (runtime Type parameter).
+    /// Non-generic version for dynamic exception type checking.
+    /// Example: await Assert.That(async () => await ThrowingMethodAsync()).Throws(typeof(InvalidOperationException));
+    /// </summary>
+    public Task<Exception?> Throws(Type exceptionType)
+    {
+        Context.ExpressionBuilder.Append($".Throws({exceptionType.Name})");
+        // Delegate to the generic Throws<Exception>() and add runtime type checking
+        var assertion = Throws<Exception>();
+        // Return the assertion with runtime type filtering applied
+        return assertion.WithExceptionType(exceptionType);
+    }
+
+    /// <summary>
+    /// Asserts that the async delegate throws exactly the specified exception type with the expected parameter name.
+    /// For ArgumentException types only.
+    /// Example: await Assert.That(async () => await ThrowingMethodAsync()).ThrowsExactly&lt;ArgumentNullException&gt;("paramName");
+    /// </summary>
+    public ExceptionParameterNameAssertion<TException> ThrowsExactly<TException>(string parameterName) where TException : ArgumentException
+    {
+        return ThrowsExactly<TException>().WithParameterName(parameterName);
+    }
 }
