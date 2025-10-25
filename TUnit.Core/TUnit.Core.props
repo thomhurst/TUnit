@@ -20,6 +20,19 @@
         <TUnitImplicitUsings>true</TUnitImplicitUsings>
     </PropertyGroup>
 
+    <Target Name="DetectPolyfillReference" BeforeTargets="PrepareForBuild">
+        <!-- Check if Polyfill is already defined by user (via PackageReference or PackageVersion for CPM) -->
+        <ItemGroup>
+            <_PolyfillPackageReference Include="@(PackageReference)"
+                Condition="'%(PackageReference.Identity)' == 'Polyfill'" />
+            <_PolyfillPackageVersion Include="@(PackageVersion)"
+                Condition="'%(PackageVersion.Identity)' == 'Polyfill'" />
+        </ItemGroup>
+        <PropertyGroup>
+            <_PolyfillAlreadyDefined Condition="'@(_PolyfillPackageReference)' != '' Or '@(_PolyfillPackageVersion)' != ''">true</_PolyfillAlreadyDefined>
+        </PropertyGroup>
+    </Target>
+
     <PropertyGroup>
         <!-- Default to enabling polyfills for older frameworks -->
         <EnableTUnitPolyfills Condition="'$(EnableTUnitPolyfills)' == '' and ('$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFrameworkIdentifier)' == '.NETFramework')">true</EnableTUnitPolyfills>
