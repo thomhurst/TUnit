@@ -36,6 +36,29 @@ This won't:
 TUnit is able to take in asynchronous delegates. To be able to assert on these, we need to execute the code. We want to avoid sync-over-async, as this can cause problems and block the thread pool, slowing down your test suite.
 And with how fast .NET has become, the overhead of `Task`s and `async` methods shouldn't be noticeable.
 
+## Using Return Values from Awaited Assertions
+
+When you `await` an assertion in TUnit, it returns a reference to the subject that was asserted on. This allows you to capture the validated value and use it in subsequent operations or assertions, creating a fluent and readable test flow.
+
+### Type Casting with Confidence
+
+```csharp
+[Test]
+public async Task CastAndUseSpecificType()
+{
+    object shape = new Circle { Radius = 5.0 };
+    
+    // Assert type and capture strongly-typed reference
+    var circle = await Assert.That(shape).IsTypeOf<Circle>();
+    
+    // Now you can use circle-specific properties without casting
+    await Assert.That(circle.Radius).IsEqualTo(5.0);
+    
+    var area = Math.PI * circle.Radius * circle.Radius;
+    await Assert.That(area).IsEqualTo(Math.PI * 25).Within(0.0001);
+}
+```
+
 ## Complex Assertion Examples
 
 ### Chaining Multiple Assertions
