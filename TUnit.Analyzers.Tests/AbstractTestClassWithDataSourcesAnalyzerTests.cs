@@ -170,4 +170,83 @@ public class AbstractTestClassWithDataSourcesAnalyzerTests
                     .WithArguments("AbstractTestBase")
             );
     }
+
+    [Test]
+    public async Task No_Warning_When_Concrete_Class_With_InheritsTests_Exists()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                [InheritsTests]
+                public class Tests1 : Tests { }
+
+                [InheritsTests]
+                public class Tests2 : Tests { }
+
+                public abstract class Tests
+                {
+                    [Test]
+                    [Arguments(true)]
+                    [Arguments(false)]
+                    public void TestName(bool flag) { }
+
+                    [Test]
+                    public void TestName2() { }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task No_Warning_When_Single_Concrete_Class_With_InheritsTests_Exists()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+                using System.Collections.Generic;
+
+                [InheritsTests]
+                public class ConcreteTest : AbstractTestBase { }
+
+                public abstract class AbstractTestBase
+                {
+                    public static IEnumerable<int> TestData() => new[] { 1, 2, 3 };
+
+                    [Test]
+                    [MethodDataSource(nameof(TestData))]
+                    public void DataDrivenTest(int value)
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
+    public async Task Warning_When_Concrete_Class_Exists_But_No_InheritsTests()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class Tests1 : Tests { }
+
+                public abstract class {|#0:Tests|}
+                {
+                    [Test]
+                    [Arguments(true)]
+                    [Arguments(false)]
+                    public void TestName(bool flag) { }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.AbstractTestClassWithDataSources)
+                    .WithLocation(0)
+                    .WithArguments("Tests")
+            );
+    }
 }
