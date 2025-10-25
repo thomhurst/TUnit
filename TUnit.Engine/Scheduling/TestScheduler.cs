@@ -167,9 +167,10 @@ internal sealed class TestScheduler : ITestScheduler
             else
             {
                 // No limit - start all tests at once
+                // Use Task.Run to ensure tasks start immediately without blocking on logging in ExecuteTestWithParallelLimitAsync
                 var parallelTasks = groupedTests.Parallel.Select(test =>
                 {
-                    var task = ExecuteTestWithParallelLimitAsync(test, cancellationToken);
+                    var task = Task.Run(() => ExecuteTestWithParallelLimitAsync(test, cancellationToken), cancellationToken);
                     test.ExecutionTask = task;
                     return task;
                 }).ToArray();
