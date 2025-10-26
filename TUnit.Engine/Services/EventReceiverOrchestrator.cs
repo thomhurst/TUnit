@@ -221,11 +221,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     {
         if (!_registry.HasFirstTestInSessionReceivers())
         {
-            return default; // Fast path - no allocation
+            return default;
         }
 
-        // Use GetOrAdd to ensure exactly one task is created per session and all tests await it
-        // Wrap cached Task in ValueTask to avoid async state machine allocation
         var task = _firstTestInSessionTasks.GetOrAdd("session",
             _ => InvokeFirstTestInSessionEventReceiversCoreAsync(context, sessionContext, cancellationToken));
         return new ValueTask(task);
@@ -252,12 +250,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     {
         if (!_registry.HasFirstTestInAssemblyReceivers())
         {
-            return default; // Fast path - no allocation
+            return default;
         }
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
-        // Use GetOrAdd to ensure exactly one task is created per assembly and all tests await it
-        // Wrap cached Task in ValueTask to avoid async state machine allocation
         var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName,
             _ => InvokeFirstTestInAssemblyEventReceiversCoreAsync(context, assemblyContext, cancellationToken));
         return new ValueTask(task);
@@ -284,12 +280,10 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     {
         if (!_registry.HasFirstTestInClassReceivers())
         {
-            return default; // Fast path - no allocation
+            return default;
         }
 
         var classType = classContext.ClassType;
-        // Use GetOrAdd to ensure exactly one task is created per class and all tests await it
-        // Wrap cached Task in ValueTask to avoid async state machine allocation
         var task = _firstTestInClassTasks.GetOrAdd(classType,
             _ => InvokeFirstTestInClassEventReceiversCoreAsync(context, classContext, cancellationToken));
         return new ValueTask(task);

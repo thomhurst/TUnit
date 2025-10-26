@@ -241,7 +241,6 @@ internal sealed class HookExecutor
         // Execute After(Test) hooks first (specific hooks run before global hooks for cleanup)
         var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType).ConfigureAwait(false);
 
-        // Fast path: skip if no After hooks registered
         if (afterTestHooks.Count > 0)
         {
             foreach (var hook in afterTestHooks)
@@ -261,7 +260,6 @@ internal sealed class HookExecutor
         // Execute AfterEvery(Test) hooks after After hooks (global test hooks run last for cleanup)
         var afterEveryTestHooks = await _hookCollectionService.CollectAfterEveryTestHooksAsync(testClassType).ConfigureAwait(false);
 
-        // Fast path: skip if no AfterEvery hooks registered
         if (afterEveryTestHooks.Count > 0)
         {
             foreach (var hook in afterEveryTestHooks)
