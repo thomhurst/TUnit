@@ -214,20 +214,21 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     // First/Last event methods with fast-path checks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask InvokeFirstTestInSessionEventReceiversAsync(
+    public ValueTask InvokeFirstTestInSessionEventReceiversAsync(
         TestContext context,
         TestSessionContext sessionContext,
         CancellationToken cancellationToken)
     {
         if (!_registry.HasFirstTestInSessionReceivers())
         {
-            return;
+            return default; // Fast path - no allocation
         }
 
         // Use GetOrAdd to ensure exactly one task is created per session and all tests await it
+        // Wrap cached Task in ValueTask to avoid async state machine allocation
         var task = _firstTestInSessionTasks.GetOrAdd("session",
             _ => InvokeFirstTestInSessionEventReceiversCoreAsync(context, sessionContext, cancellationToken));
-        await task;
+        return new ValueTask(task);
     }
 
     private async Task InvokeFirstTestInSessionEventReceiversCoreAsync(
@@ -244,21 +245,22 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask InvokeFirstTestInAssemblyEventReceiversAsync(
+    public ValueTask InvokeFirstTestInAssemblyEventReceiversAsync(
         TestContext context,
         AssemblyHookContext assemblyContext,
         CancellationToken cancellationToken)
     {
         if (!_registry.HasFirstTestInAssemblyReceivers())
         {
-            return;
+            return default; // Fast path - no allocation
         }
 
         var assemblyName = assemblyContext.Assembly.GetName().FullName ?? "";
         // Use GetOrAdd to ensure exactly one task is created per assembly and all tests await it
+        // Wrap cached Task in ValueTask to avoid async state machine allocation
         var task = _firstTestInAssemblyTasks.GetOrAdd(assemblyName,
             _ => InvokeFirstTestInAssemblyEventReceiversCoreAsync(context, assemblyContext, cancellationToken));
-        await task;
+        return new ValueTask(task);
     }
 
     private async Task InvokeFirstTestInAssemblyEventReceiversCoreAsync(
@@ -275,21 +277,22 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask InvokeFirstTestInClassEventReceiversAsync(
+    public ValueTask InvokeFirstTestInClassEventReceiversAsync(
         TestContext context,
         ClassHookContext classContext,
         CancellationToken cancellationToken)
     {
         if (!_registry.HasFirstTestInClassReceivers())
         {
-            return;
+            return default; // Fast path - no allocation
         }
 
         var classType = classContext.ClassType;
         // Use GetOrAdd to ensure exactly one task is created per class and all tests await it
+        // Wrap cached Task in ValueTask to avoid async state machine allocation
         var task = _firstTestInClassTasks.GetOrAdd(classType,
             _ => InvokeFirstTestInClassEventReceiversCoreAsync(context, classContext, cancellationToken));
-        await task;
+        return new ValueTask(task);
     }
 
     private async Task InvokeFirstTestInClassEventReceiversCoreAsync(

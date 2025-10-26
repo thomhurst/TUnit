@@ -17,11 +17,16 @@ internal sealed class BeforeHookTaskCache
     private Task? _beforeTestSessionTask;
     private readonly object _testSessionLock = new();
 
-    public Task GetOrCreateBeforeTestSessionTask(Func<Task> taskFactory)
+    /// <summary>
+    /// Gets or creates the Before Test Session task. Returns ValueTask for optimal performance
+    /// when the cached task is already completed. Must be awaited exactly once per call.
+    /// </summary>
+    public ValueTask GetOrCreateBeforeTestSessionTask(Func<ValueTask> taskFactory)
     {
         if (_beforeTestSessionTask != null)
         {
-            return _beforeTestSessionTask;
+            // Fast path: return completed task wrapped in ValueTask (no allocation)
+            return new ValueTask(_beforeTestSessionTask);
         }
 
         lock (_testSessionLock)
@@ -29,21 +34,35 @@ internal sealed class BeforeHookTaskCache
             // Double-check after acquiring lock
             if (_beforeTestSessionTask == null)
             {
-                _beforeTestSessionTask = taskFactory();
+                _beforeTestSessionTask = taskFactory().AsTask();
             }
-            return _beforeTestSessionTask;
+            return new ValueTask(_beforeTestSessionTask);
         }
     }
 
-    public Task GetOrCreateBeforeAssemblyTask(Assembly assembly, Func<Assembly, Task> taskFactory)
+    /// <summary>
+    /// Gets or creates the Before Assembly task. Returns ValueTask for optimal performance
+    /// when the cached task is already completed. Must be awaited exactly once per call.
+    /// </summary>
+    public ValueTask GetOrCreateBeforeAssemblyTask(Assembly assembly, Func<Assembly, ValueTask> taskFactory)
     {
-        return _beforeAssemblyTasks.GetOrAdd(assembly, taskFactory);
+        // Cache stores Task (already completed on subsequent calls)
+        // Wrap in ValueTask - compiler optimizes completed task case
+        var task = _beforeAssemblyTasks.GetOrAdd(assembly, a => taskFactory(a).AsTask());
+        return new ValueTask(task);
     }
 
-    public Task GetOrCreateBeforeClassTask(
+    /// <summary>
+    /// Gets or creates the Before Class task. Returns ValueTask for optimal performance
+    /// when the cached task is already completed. Must be awaited exactly once per call.
+    /// </summary>
+    public ValueTask GetOrCreateBeforeClassTask(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
-        Type testClass, Func<Type, Task> taskFactory)
+        Type testClass, Func<Type, ValueTask> taskFactory)
     {
-        return _beforeClassTasks.GetOrAdd(testClass, taskFactory);
+        // Cache stores Task (already completed on subsequent calls)
+        // Wrap in ValueTask - compiler optimizes completed task case
+        var task = _beforeClassTasks.GetOrAdd(testClass, t => taskFactory(t).AsTask());
+        return new ValueTask(task);
     }
 }
