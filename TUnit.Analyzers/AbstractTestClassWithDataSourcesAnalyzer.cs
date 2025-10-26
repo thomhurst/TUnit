@@ -99,8 +99,8 @@ public class AbstractTestClassWithDataSourcesAnalyzer : ConcurrentDiagnosticAnal
 
     private static bool HasConcreteInheritingClassesWithInheritsTests(SymbolAnalysisContext context, INamedTypeSymbol abstractClass)
     {
-        // Get all named types in the compilation
-        var allTypes = GetAllNamedTypes(context.Compilation.Assembly.GlobalNamespace);
+        // Get all named types in the compilation (including referenced assemblies)
+        var allTypes = GetAllNamedTypes(context.Compilation.GlobalNamespace);
 
         // Check if any concrete class inherits from the abstract class and has [InheritsTests]
         foreach (var type in allTypes)
