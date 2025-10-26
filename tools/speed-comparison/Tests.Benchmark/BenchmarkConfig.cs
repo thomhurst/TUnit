@@ -4,6 +4,7 @@ using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Loggers;
+using Perfolizer.Mathematics.OutlierDetection;
 
 namespace Tests.Benchmark;
 
@@ -11,10 +12,10 @@ public class BenchmarkConfig : ManualConfig
 {
     public BenchmarkConfig()
     {
-        // Configure job for CI compatibility - prevents power plan enforcement
-        // Note: GitHub Actions may still show priority warnings, which are harmless
-        var job = Job.Default
+        var job = Job.RyuJitX64
             .WithRuntime(CoreRuntime.Core10_0)
+            .WithGcConcurrent(true)
+            .WithGcServer(true)
             .DontEnforcePowerPlan();
 
         AddJob(job);
