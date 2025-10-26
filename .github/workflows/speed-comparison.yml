@@ -45,7 +45,7 @@ jobs:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
     strategy:
       matrix:
-        class: [DataDrivenTests, AsyncTests, ScaleTests, MatrixTests, LifecycleTests, MassiveParallelTests]
+        class: [DataDrivenTests, AsyncTests, ScaleTests, MatrixTests, MassiveParallelTests]
       fail-fast: false
     runs-on: ubuntu-latest
     concurrency:
