@@ -43,11 +43,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     public void RegisterReceivers(TestContext context, CancellationToken cancellationToken)
     {
-        var eligibleObjects = context.GetEligibleEventObjects().ToArray();
+        var objectsToRegister = new List<object>();
 
-        var objectsToRegister = new List<object>(eligibleObjects.Length);
-
-        foreach (var obj in eligibleObjects)
+        foreach (var obj in context.GetEligibleEventObjects())
         {
             if (_initializedObjects.Add(obj)) // Add returns false if already present
             {
@@ -178,9 +176,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     public async ValueTask InvokeTestDiscoveryEventReceiversAsync(TestContext context, DiscoveredTestContext discoveredContext, CancellationToken cancellationToken)
     {
         var eventReceivers = context.GetEligibleEventObjects()
-            .OfType<ITestDiscoveryEventReceiver>()
-            .OrderBy(static r => r.Order)
-            .ToList();
+            .OfType<ITestDiscoveryEventReceiver>();
 
         // Filter scoped attributes to ensure only the highest priority one of each type is invoked
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);

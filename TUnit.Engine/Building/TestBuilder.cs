@@ -813,16 +813,15 @@ internal sealed class TestBuilder : ITestBuilder
     private static string? GetBasicSkipReason(TestMetadata metadata, Attribute[]? cachedAttributes = null)
     {
         var attributes = cachedAttributes ?? metadata.AttributeFactory();
-        var skipAttributes = attributes.OfType<SkipAttribute>().ToList();
+        var skipAttributes = attributes.OfType<SkipAttribute>();
 
-        if (skipAttributes.Count == 0)
-        {
-            return null; // No skip attributes
-        }
+        SkipAttribute? firstSkipAttribute = null;
 
         // Check if all skip attributes are basic (non-derived) SkipAttribute instances
         foreach (var skipAttribute in skipAttributes)
         {
+            firstSkipAttribute ??= skipAttribute;
+
             var attributeType = skipAttribute.GetType();
             if (attributeType != typeof(SkipAttribute))
             {
@@ -832,8 +831,8 @@ internal sealed class TestBuilder : ITestBuilder
         }
 
         // All skip attributes are basic SkipAttribute instances
-        // Return the first reason (they all should skip)
-        return skipAttributes[0].Reason;
+        // Return the first reason (they all should skip), or null if no skip attributes
+        return firstSkipAttribute?.Reason;
     }
 
 

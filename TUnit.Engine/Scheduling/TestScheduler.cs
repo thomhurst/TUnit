@@ -162,9 +162,8 @@ internal sealed class TestScheduler : ITestScheduler
 
         foreach (var group in groupedTests.ParallelGroups)
         {
-            var orderedPairs = group.Value.OrderBy(t => t.Key).ToList();
             var orderedTests = new List<AbstractExecutableTest>();
-            foreach (var kvp in orderedPairs)
+            foreach (var kvp in group.Value.OrderBy(t => t.Key))
             {
                 orderedTests.AddRange(kvp.Value);
             }
