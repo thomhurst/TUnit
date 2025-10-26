@@ -11,7 +11,13 @@ public class BenchmarkConfig : ManualConfig
 {
     public BenchmarkConfig()
     {
-        AddJob(Job.Default.WithRuntime(CoreRuntime.Core10_0));
+        // Configure job for CI compatibility - prevents power plan enforcement
+        // Note: GitHub Actions may still show priority warnings, which are harmless
+        var job = Job.Default
+            .WithRuntime(CoreRuntime.Core10_0)
+            .DontEnforcePowerPlan();
+
+        AddJob(job);
         AddLogger(ConsoleLogger.Default);
         AddExporter(MarkdownExporter.GitHub);
 
