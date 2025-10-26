@@ -932,8 +932,6 @@ internal sealed class TestBuilder : ITestBuilder
         var testDetails = await CreateFailedTestDetails(metadata, testId);
         var context = CreateFailedTestContext(metadata, testDetails);
 
-        await InvokeDiscoveryEventReceiversAsync(context);
-
         return new FailedExecutableTest(exception)
         {
             TestId = testId,
