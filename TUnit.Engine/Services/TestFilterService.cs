@@ -70,7 +70,16 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
         test.Context.InternalDiscoveredTest = discoveredTest;
 
-        await testArgumentRegistrationService.OnTestRegistered(registeredContext);
+        try
+        {
+            await testArgumentRegistrationService.OnTestRegistered(registeredContext);
+        }
+        catch (Exception ex)
+        {
+            // Mark the test as failed and skip further event receiver processing
+            test.SetResult(TestState.Failed, ex);
+            return;
+        }
 
         var eventObjects = test.Context.GetEligibleEventObjects();
 
