@@ -26,7 +26,7 @@ internal sealed class EventReceiverRegistry
     
     private volatile EventTypes _registeredEvents = EventTypes.None;
     private readonly Dictionary<Type, object[]> _receiversByType = new();
-    private readonly Dictionary<Type, Array> _cachedTypedReceivers = new(); // Cache typed arrays
+    private readonly Dictionary<Type, Array> _cachedTypedReceivers = new();
     private readonly ReaderWriterLockSlim _lock = new();
     
     /// <summary>
@@ -81,7 +81,6 @@ internal sealed class EventReceiverRegistry
         RegisterIfImplements<IFirstTestInClassEventReceiver>(receiver);
         RegisterIfImplements<ILastTestInClassEventReceiver>(receiver);
 
-        // Invalidate cache when new receivers are added
         _cachedTypedReceivers.Clear();
     }
     
@@ -140,10 +139,6 @@ internal sealed class EventReceiverRegistry
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasAnyReceivers() => _registeredEvents != EventTypes.None;
     
-    /// <summary>
-    /// Get receivers of specific type (for invocation)
-    /// Caches typed arrays to avoid repeated allocations and casts
-    /// </summary>
     public T[] GetReceiversOfType<T>() where T : class
     {
         var typeKey = typeof(T);
@@ -151,7 +146,6 @@ internal sealed class EventReceiverRegistry
         _lock.EnterReadLock();
         try
         {
-            // Check cache first (hot path optimization)
             if (_cachedTypedReceivers.TryGetValue(typeKey, out var cached))
             {
                 return (T[])cached;
@@ -162,17 +156,14 @@ internal sealed class EventReceiverRegistry
             _lock.ExitReadLock();
         }
 
-        // Cache miss - need to create typed array
         _lock.EnterUpgradeableReadLock();
         try
         {
-            // Double-check in case another thread populated cache
             if (_cachedTypedReceivers.TryGetValue(typeKey, out var cached))
             {
                 return (T[])cached;
             }
 
-            // Create and cache typed array
             if (_receiversByType.TryGetValue(typeKey, out var receivers))
             {
                 var typedArray = new T[receivers.Length];
@@ -194,7 +185,6 @@ internal sealed class EventReceiverRegistry
                 return typedArray;
             }
 
-            // No receivers registered for this type
             T[] emptyArray = [];
             _lock.EnterWriteLock();
             try
