@@ -16,7 +16,6 @@ public class IsNotNullAssertionSuppressorTests
 {
     private static readonly DiagnosticResult CS8602 = new("CS8602", DiagnosticSeverity.Warning);
     private static readonly DiagnosticResult CS8604 = new("CS8604", DiagnosticSeverity.Warning);
-    private static readonly DiagnosticResult CS1591 = new("CS1591", DiagnosticSeverity.Warning);
 
     [Test]
     public async Task Suppresses_CS8602_After_IsNotNull_Assertion()
