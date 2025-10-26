@@ -155,9 +155,8 @@ public class IsNotNullAssertionSuppressorTests
             .IgnoringDiagnostics("CS1591")
             .WithSpecificDiagnostics(CS8602)
             .WithExpectedDiagnosticsResults(
-                CS8602.WithLocation(0).WithIsSuppressed(true),
-                CS8602.WithLocation(1).WithIsSuppressed(true),
-                CS8604.WithLocation(2).WithIsSuppressed(true)
+                // Only the first usage generates a warning; subsequent uses benefit from flow analysis
+                CS8602.WithLocation(0).WithIsSuppressed(true)
             )
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
             .RunAsync();

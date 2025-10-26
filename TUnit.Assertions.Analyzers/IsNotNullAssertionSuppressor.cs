@@ -133,6 +133,7 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         CancellationToken cancellationToken)
     {
         // Pattern: await Assert.That(variable).IsNotNull()
+        // or: await Assert.That(variable).Contains("test").And.IsNotNull()
         // or: Assert.That(variable).IsNotNull().GetAwaiter().GetResult()
 
         var invocations = statement.DescendantNodes().OfType<InvocationExpressionSyntax>();
@@ -140,21 +141,14 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         foreach (var invocation in invocations)
         {
             // Check if this is a call to IsNotNull()
-            if (invocation.Expression is not MemberAccessExpressionSyntax
-                {
-                    Name.Identifier.Text: "IsNotNull",
-                    Expression: InvocationExpressionSyntax assertThatCall
-                })
+            if (invocation.Expression is not MemberAccessExpressionSyntax { Name.Identifier.Text: "IsNotNull" })
             {
                 continue;
             }
 
-            // Check if the Assert.That call is being made
-            if (assertThatCall.Expression is not MemberAccessExpressionSyntax
-                {
-                    Name.Identifier.Text: "That",
-                    Expression: IdentifierNameSyntax { Identifier.Text: "Assert" }
-                })
+            // Walk up the expression chain to find Assert.That() call
+            var assertThatCall = FindAssertThatInChain(invocation);
+            if (assertThatCall is null)
             {
                 continue;
             }
@@ -178,6 +172,42 @@ public class IsNotNullAssertionSuppressor : DiagnosticSuppressor
         }
 
         return false;
+    }
+
+    private InvocationExpressionSyntax? FindAssertThatInChain(InvocationExpressionSyntax invocation)
+    {
+        // Walk up the expression chain looking for Assert.That()
+        var current = invocation.Expression;
+
+        while (current is not null)
+        {
+            if (current is InvocationExpressionSyntax invocationExpr)
+            {
+                // Check if this is Assert.That()
+                if (invocationExpr.Expression is MemberAccessExpressionSyntax
+                    {
+                        Name.Identifier.Text: "That",
+                        Expression: IdentifierNameSyntax { Identifier.Text: "Assert" }
+                    })
+                {
+                    return invocationExpr;
+                }
+
+                // Continue walking up from this invocation
+                current = invocationExpr.Expression;
+            }
+            else if (current is MemberAccessExpressionSyntax memberAccess)
+            {
+                // Move to the expression being accessed
+                current = memberAccess.Expression;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return null;
     }
 
     private void Suppress(SuppressionAnalysisContext context, Diagnostic diagnostic)
