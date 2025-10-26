@@ -5,14 +5,6 @@ namespace
     {
         public static void Fail(string reason) { }
         public static  Multiple() { }
-        public static void NotNull<T>([.] T? value, [.("value")] string? expression = null)
-            where T :  class { }
-        public static void NotNull<T>([.] T? value, [.("value")] string? expression = null)
-            where T :  struct { }
-        public static void Null<T>(T? value, [.("value")] string? expression = null)
-            where T :  class { }
-        public static void Null<T>(T? value, [.("value")] string? expression = null)
-            where T :  struct { }
         public static . That( action, [.("action")] string? expression = null) { }
         public static .<object?> That(.IEnumerable value, [.("value")] string? expression = null) { }
         public static . That(<.> action, [.("action")] string? expression = null) { }
