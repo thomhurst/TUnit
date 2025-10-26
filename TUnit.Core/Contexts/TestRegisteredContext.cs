@@ -35,6 +35,15 @@ public class TestRegisteredContext
     }
 
     /// <summary>
+    /// Sets a custom hook executor that will be used for all test-level hooks (Before/After Test).
+    /// This allows you to wrap hook execution in custom logic (e.g., running on a specific thread).
+    /// </summary>
+    public void SetHookExecutor(IHookExecutor executor)
+    {
+        TestContext.CustomHookExecutor = executor;
+    }
+
+    /// <summary>
     /// Sets the parallel limiter for the test
     /// </summary>
     public void SetParallelLimiter(IParallelLimit parallelLimit)

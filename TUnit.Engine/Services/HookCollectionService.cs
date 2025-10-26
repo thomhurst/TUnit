@@ -621,14 +621,41 @@ internal sealed class HookCollectionService : IHookCollectionService
 
         return async (context, cancellationToken) =>
         {
-            var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
-                (ctx, ct) => hook.ExecuteAsync(ctx, ct),
-                context,
-                hook.Timeout,
-                hook.Name,
-                cancellationToken);
+            // Check at EXECUTION time if a custom executor should be used
+            if (context.CustomHookExecutor != null)
+            {
+                // BYPASS the hook's default executor and call the custom executor directly
+                var customExecutor = context.CustomHookExecutor;
 
-            await timeoutAction();
+                // Skip skipped test instances
+                if (context.TestDetails.ClassInstance is SkippedTestInstance)
+                {
+                    return;
+                }
+
+                if (context.TestDetails.ClassInstance is PlaceholderInstance)
+                {
+                    throw new InvalidOperationException($"Cannot execute instance hook {hook.Name} because the test instance has not been created yet. This is likely a framework bug.");
+                }
+
+                await customExecutor.ExecuteBeforeTestHook(
+                    hook.MethodInfo,
+                    context,
+                    () => hook.Body!.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
+                );
+            }
+            else
+            {
+                // No custom executor, use normal execution path
+                var timeoutAction = HookTimeoutHelper.CreateTimeoutHookAction(
+                    (ctx, ct) => hook.ExecuteAsync(ctx, ct),
+                    context,
+                    hook.Timeout,
+                    hook.Name,
+                    cancellationToken);
+
+                await timeoutAction();
+            }
         };
     }
 
