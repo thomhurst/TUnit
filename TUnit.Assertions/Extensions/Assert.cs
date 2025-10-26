@@ -192,7 +192,7 @@ public static class Assert
             action();
             throw new AssertionException($"Expected {typeof(TException).Name} but no exception was thrown");
         }
-        catch (TException ex) when (ex is not AssertionException)
+        catch (TException ex) when (typeof(AssertionException).IsAssignableFrom(typeof(TException)) || ex is not AssertionException)
         {
             return ex;
         }
@@ -219,7 +219,7 @@ public static class Assert
             action();
             throw new AssertionException($"Expected {exceptionType.Name} but no exception was thrown");
         }
-        catch (Exception ex) when (exceptionType.IsInstanceOfType(ex) && ex is not AssertionException)
+        catch (Exception ex) when (exceptionType.IsInstanceOfType(ex) && (typeof(AssertionException).IsAssignableFrom(exceptionType) || ex is not AssertionException))
         {
             return ex;
         }
