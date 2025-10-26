@@ -192,7 +192,7 @@ public static class Assert
             action();
             throw new AssertionException($"Expected {typeof(TException).Name} but no exception was thrown");
         }
-        catch (TException ex) when (ex is not AssertionException)
+        catch (TException ex) when (typeof(AssertionException).IsAssignableFrom(typeof(TException)) || ex is not AssertionException)
         {
             return ex;
         }
@@ -219,7 +219,7 @@ public static class Assert
             action();
             throw new AssertionException($"Expected {exceptionType.Name} but no exception was thrown");
         }
-        catch (Exception ex) when (exceptionType.IsInstanceOfType(ex) && ex is not AssertionException)
+        catch (Exception ex) when (exceptionType.IsInstanceOfType(ex) && (typeof(AssertionException).IsAssignableFrom(exceptionType) || ex is not AssertionException))
         {
             return ex;
         }
@@ -357,5 +357,80 @@ public static class Assert
         where TException : ArgumentException
     {
         return That(action).ThrowsExactly<TException>(parameterName);
+    }
+
+    /// <summary>
+    /// Asserts that a value is not null (for reference types).
+    /// This method properly updates null-state flow analysis, allowing the compiler to treat the value as non-null after this assertion.
+    /// Unlike Assert.That(x).IsNotNull() (fluent API), this method changes the compiler's null-state tracking.
+    /// Example: Assert.NotNull(myString); // After this, myString is treated as non-null
+    /// </summary>
+    /// <param name="value">The value to check for null</param>
+    /// <param name="expression">The expression being asserted (captured automatically)</param>
+    /// <exception cref="AssertionException">Thrown if the value is null</exception>
+    public static void NotNull<T>(
+        [NotNull] T? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+        where T : class
+    {
+        if (value is null)
+        {
+            throw new AssertionException($"Expected {expression ?? "value"} to not be null, but it was null");
+        }
+    }
+
+    /// <summary>
+    /// Asserts that a nullable value type is not null.
+    /// This method properly updates null-state flow analysis, allowing the compiler to treat the value as non-null after this assertion.
+    /// Example: Assert.NotNull(myNullableInt); // After this, myNullableInt is treated as having a value
+    /// </summary>
+    /// <param name="value">The nullable value to check</param>
+    /// <param name="expression">The expression being asserted (captured automatically)</param>
+    /// <exception cref="AssertionException">Thrown if the value is null</exception>
+    public static void NotNull<T>(
+        [NotNull] T? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+        where T : struct
+    {
+        if (!value.HasValue)
+        {
+            throw new AssertionException($"Expected {expression ?? "value"} to not be null, but it was null");
+        }
+    }
+
+    /// <summary>
+    /// Asserts that a value is null (for reference types).
+    /// Example: Assert.Null(myString);
+    /// </summary>
+    /// <param name="value">The value to check for null</param>
+    /// <param name="expression">The expression being asserted (captured automatically)</param>
+    /// <exception cref="AssertionException">Thrown if the value is not null</exception>
+    public static void Null<T>(
+        T? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+        where T : class
+    {
+        if (value is not null)
+        {
+            throw new AssertionException($"Expected {expression ?? "value"} to be null, but it was {value}");
+        }
+    }
+
+    /// <summary>
+    /// Asserts that a nullable value type is null.
+    /// Example: Assert.Null(myNullableInt);
+    /// </summary>
+    /// <param name="value">The nullable value to check</param>
+    /// <param name="expression">The expression being asserted (captured automatically)</param>
+    /// <exception cref="AssertionException">Thrown if the value is not null</exception>
+    public static void Null<T>(
+        T? value,
+        [CallerArgumentExpression(nameof(value))] string? expression = null)
+        where T : struct
+    {
+        if (value.HasValue)
+        {
+            throw new AssertionException($"Expected {expression ?? "value"} to be null, but it was {value.Value}");
+        }
     }
 }
