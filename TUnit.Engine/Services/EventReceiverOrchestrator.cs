@@ -12,7 +12,6 @@ using TUnit.Engine.Utilities;
 
 namespace TUnit.Engine.Services;
 
-/// Optimized event receiver orchestrator with fast-path checks, batching, and lifecycle tracking
 internal sealed class EventReceiverOrchestrator : IDisposable
 {
     private readonly EventReceiverRegistry _registry = new();
@@ -50,14 +49,13 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             if (_initializedObjects.Add(obj)) // Add returns false if already present
             {
                 // For First event receivers, only register one instance per type
-                var objType = obj.GetType();
                 bool isFirstEventReceiver = obj is IFirstTestInTestSessionEventReceiver ||
                                            obj is IFirstTestInAssemblyEventReceiver ||
                                            obj is IFirstTestInClassEventReceiver;
 
                 if (isFirstEventReceiver)
                 {
-                    if (_registeredFirstEventReceiverTypes.Add(objType))
+                    if (_registeredFirstEventReceiverTypes.Add(obj.GetType()))
                     {
                         // First instance of this type, register it
                         objectsToRegister.Add(obj);
@@ -95,24 +93,14 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
             context.GetEligibleEventObjects()
                 .OfType<ITestStartEventReceiver>()
                 .OrderBy(static r => r.Order));
 
-        // Batch invocation for multiple receivers
-        if (filteredReceivers.Count > 3)
+        foreach (var receiver in filteredReceivers)
         {
-            await InvokeBatchedAsync(filteredReceivers.ToArray(), r => r.OnTestStart(context), cancellationToken);
-        }
-        else
-        {
-            // Sequential for small counts
-            foreach (var receiver in filteredReceivers)
-            {
-                await receiver.OnTestStart(context);
-            }
+            await receiver.OnTestStart(context);
         }
     }
 
@@ -452,33 +440,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
                 counter.Increment();
             }
         }
-    }
-
-    /// <summary>
-    /// Batch multiple receiver invocations
-    /// </summary>
-    private async ValueTask InvokeBatchedAsync<T>(
-        T[] receivers,
-        Func<T, ValueTask> invoker,
-        CancellationToken cancellationToken) where T : IEventReceiver
-    {
-        // Parallelize for larger counts
-        var tasks = new Task[receivers.Length];
-        for (var i = 0; i < receivers.Length; i++)
-        {
-            var receiver = receivers[i];
-            tasks[i] = InvokeReceiverAsync(receiver, invoker, cancellationToken);
-        }
-
-        await Task.WhenAll(tasks);
-    }
-
-    private async Task InvokeReceiverAsync<T>(
-        T receiver,
-        Func<T, ValueTask> invoker,
-        CancellationToken cancellationToken) where T : IEventReceiver
-    {
-        await invoker(receiver);
     }
 
     public void Dispose()

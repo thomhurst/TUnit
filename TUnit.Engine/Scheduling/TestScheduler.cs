@@ -1,3 +1,4 @@
+using System.Buffers;
 using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
@@ -219,14 +220,21 @@ internal sealed class TestScheduler : ITestScheduler
         }
         else
         {
-            var tasks = new Task[tests.Length];
-            for (var i = 0; i < tests.Length; i++)
+            var tasks = ArrayPool<Task>.Shared.Rent(tests.Length);
+            try
             {
-                var test = tests[i];
-                tasks[i] = test.ExecutionTask ??= Task.Run(() => ExecuteSingleTestAsync(test, cancellationToken), CancellationToken.None);
-            }
+                for (var i = 0; i < tests.Length; i++)
+                {
+                    var test = tests[i];
+                    tasks[i] = test.ExecutionTask ??= Task.Run(() => ExecuteSingleTestAsync(test, cancellationToken), CancellationToken.None);
+                }
 
-            await WaitForTasksWithFailFastHandling(tasks, cancellationToken).ConfigureAwait(false);
+                await WaitForTasksWithFailFastHandling(new ArraySegment<Task>(tasks, 0, tests.Length), cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                ArrayPool<Task>.Shared.Return(tasks);
+            }
         }
     }
 
@@ -277,41 +285,48 @@ internal sealed class TestScheduler : ITestScheduler
         AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)
     {
-        var tasks = new Task[tests.Length];
-        for (var i = 0; i < tests.Length; i++)
+        var tasks = ArrayPool<Task>.Shared.Rent(tests.Length);
+        try
         {
-            var test = tests[i];
-            tasks[i] = Task.Run(async () =>
+            for (var i = 0; i < tests.Length; i++)
             {
-                SemaphoreSlim? parallelLimiterSemaphore = null;
-
-                if (test.Context.ParallelLimiter != null)
+                var test = tests[i];
+                tasks[i] = Task.Run(async () =>
                 {
-                    parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
-                    await parallelLimiterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-                }
+                    SemaphoreSlim? parallelLimiterSemaphore = null;
 
-                try
-                {
-                    await _maxParallelismSemaphore!.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    if (test.Context.ParallelLimiter != null)
+                    {
+                        parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
+                        await parallelLimiterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    }
+
                     try
                     {
-                        test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken);
-                        await test.ExecutionTask.ConfigureAwait(false);
+                        await _maxParallelismSemaphore!.WaitAsync(cancellationToken).ConfigureAwait(false);
+                        try
+                        {
+                            test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken);
+                            await test.ExecutionTask.ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            _maxParallelismSemaphore.Release();
+                        }
                     }
                     finally
                     {
-                        _maxParallelismSemaphore.Release();
+                        parallelLimiterSemaphore?.Release();
                     }
-                }
-                finally
-                {
-                    parallelLimiterSemaphore?.Release();
-                }
-            }, CancellationToken.None);
-        }
+                }, CancellationToken.None);
+            }
 
-        await WaitForTasksWithFailFastHandling(tasks, cancellationToken).ConfigureAwait(false);
+            await WaitForTasksWithFailFastHandling(new ArraySegment<Task>(tasks, 0, tests.Length), cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            ArrayPool<Task>.Shared.Return(tasks);
+        }
     }
 
     private async Task WaitForTasksWithFailFastHandling(IEnumerable<Task> tasks, CancellationToken cancellationToken)
