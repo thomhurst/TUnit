@@ -18,8 +18,30 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
     public AssertionContext<object?> Context { get; }
     AssertionContext<Task> IAssertionSource<Task>.Context => TaskContext;
 
-    private AssertionContext<Task> TaskContext { get; }
+    private AssertionContext<Task>? _taskContext;
     internal Func<Task> AsyncAction { get; }
+
+    // Lazy-initialize TaskContext to avoid allocating StringBuilder when not used
+    private AssertionContext<Task> TaskContext
+    {
+        get
+        {
+            if (_taskContext == null)
+            {
+                var taskExpressionBuilder = StringBuilderPool.Get();
+                taskExpressionBuilder.Append(Context.ExpressionBuilder.ToString());
+                var taskEvaluationContext = new EvaluationContext<Task>(() =>
+                {
+                    // Return the task object itself without awaiting it
+                    // This allows IsCompleted, IsCanceled, IsFaulted, etc. to check task properties synchronously
+                    var task = AsyncAction();
+                    return Task.FromResult<(Task?, Exception?)>((task, null));
+                });
+                _taskContext = new AssertionContext<Task>(taskEvaluationContext, taskExpressionBuilder);
+            }
+            return _taskContext;
+        }
+    }
 
     public AsyncDelegateAssertion(Func<Task> action, string? expression)
     {
@@ -39,19 +61,6 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
             }
         });
         Context = new AssertionContext<object?>(evaluationContext, expressionBuilder);
-
-        // Create a TaskContext for Task-specific assertions
-        // DO NOT await the task here - we want to check its state synchronously
-        var taskExpressionBuilder = StringBuilderPool.Get();
-        taskExpressionBuilder.Append(expressionBuilder.ToString());
-        var taskEvaluationContext = new EvaluationContext<Task>(() =>
-        {
-            // Return the task object itself without awaiting it
-            // This allows IsCompleted, IsCanceled, IsFaulted, etc. to check task properties synchronously
-            var task = action();
-            return Task.FromResult<(Task?, Exception?)>((task, null));
-        });
-        TaskContext = new AssertionContext<Task>(taskEvaluationContext, taskExpressionBuilder);
     }
 
     // Forwarding methods for Task state assertions

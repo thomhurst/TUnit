@@ -75,30 +75,41 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
         }
 
         // Create a temporary StructuralEquivalencyAssertion to reuse the comparison logic
-        var tempAssertion = new StructuralEquivalencyAssertion<TValue>(
-            new AssertionContext<TValue>(Context.Evaluation, StringBuilderPool.Get()),
-            _notExpected);
-
-        if (_usePartialEquivalency)
+        // Use try-finally to ensure StringBuilder is returned to pool
+        StringBuilder? tempBuilder = null;
+        try
         {
-            tempAssertion.WithPartialEquivalency();
+            tempBuilder = StringBuilderPool.Get();
+            var tempAssertion = new StructuralEquivalencyAssertion<TValue>(
+                new AssertionContext<TValue>(Context.Evaluation, tempBuilder),
+                _notExpected);
+
+            if (_usePartialEquivalency)
+            {
+                tempAssertion.WithPartialEquivalency();
+            }
+
+            foreach (var member in _ignoredMembers)
+                tempAssertion.IgnoringMember(member);
+
+            foreach (var type in _ignoredTypes)
+                tempAssertion.IgnoringType(type);
+
+            var result = tempAssertion.CompareObjects(value, _notExpected, "", new HashSet<object>(new ReferenceEqualityComparer()));
+
+            // Invert the result - we want them to NOT be equivalent
+            if (result.IsPassed)
+            {
+                return Task.FromResult(AssertionResult.Failed("objects are equivalent but should not be"));
+            }
+
+            return Task.FromResult(AssertionResult.Passed);
         }
-
-        foreach (var member in _ignoredMembers)
-            tempAssertion.IgnoringMember(member);
-
-        foreach (var type in _ignoredTypes)
-            tempAssertion.IgnoringType(type);
-
-        var result = tempAssertion.CompareObjects(value, _notExpected, "", new HashSet<object>(new ReferenceEqualityComparer()));
-
-        // Invert the result - we want them to NOT be equivalent
-        if (result.IsPassed)
+        finally
         {
-            return Task.FromResult(AssertionResult.Failed("objects are equivalent but should not be"));
+            // Return StringBuilder to pool to prevent leak
+            StringBuilderPool.Return(tempBuilder);
         }
-
-        return Task.FromResult(AssertionResult.Passed);
     }
 
     private sealed class ReferenceEqualityComparer : IEqualityComparer<object>

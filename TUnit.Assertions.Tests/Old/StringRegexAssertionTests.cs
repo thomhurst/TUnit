@@ -29,11 +29,11 @@ public partial class StringRegexAssertionTests
     private static partial Regex FindHello123WorldRegex();
 
     [Test]
-    public async Task Matches_WithValidPattern_GeneratedRegexPattern_Succeeds() 
+    public async Task Matches_WithValidPattern_GeneratedRegexPattern_Succeeds()
     {
         var text = "Hello123World";
         var regex = FindHello123WorldRegex();
-        
+
         await TUnitAssert.That(text).Matches(regex);
     }
 #endif
@@ -83,7 +83,7 @@ public partial class StringRegexAssertionTests
 
         await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
-             Expected text match pattern
+             Expected text match regex
              but The regex "^\d+$" does not match with "{text}"
 
              at Assert.That(text).Matches(pattern)
@@ -94,22 +94,22 @@ public partial class StringRegexAssertionTests
 #if NET // Needed because NetFramework doesn't support partial methods
     [GeneratedRegex(@"^\d+$")]
     private static partial Regex Matches_FindNumberRegex();
-    
+
     [Test]
     [Arguments(typeof(ArgumentNullException), null)]
     [Arguments(typeof(TUnitAssertionException), "Hello123World")]
-    public async Task Matches_WithInvalidPattern_GeneratedRegexPattern_Throws(Type exceptionType, string? text) 
+    public async Task Matches_WithInvalidPattern_GeneratedRegexPattern_Throws(Type exceptionType, string? text)
     {
         var regex = Matches_FindNumberRegex();
-        
+
         Func<Task> action = async () => await TUnitAssert.That(text).Matches(regex);
 
         var exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
-        if (exceptionType != typeof(TUnitAssertionException)) 
+        if (exceptionType != typeof(TUnitAssertionException))
         {
             return;
         }
-        
+
         await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text match regex
@@ -165,11 +165,11 @@ public partial class StringRegexAssertionTests
     private static partial Regex DoesNotMatch_FindNumberOnlyRegex();
 
     [Test]
-    public async Task DoesNotMatch_WithValidPattern_GeneratedRegexPattern_Succeeds() 
+    public async Task DoesNotMatch_WithValidPattern_GeneratedRegexPattern_Succeeds()
     {
         var text = "Hello123World";
         var regex = DoesNotMatch_FindNumberOnlyRegex();
-        
+
         await TUnitAssert.That(text).DoesNotMatch(regex);
     }
 #endif
@@ -219,7 +219,7 @@ public partial class StringRegexAssertionTests
 
         await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
-             Expected text to not match with pattern
+             Expected text to not match with regex
              but The regex "^\d+$" matches with "{text}"
 
              at Assert.That(text).DoesNotMatch(pattern)
@@ -234,18 +234,18 @@ public partial class StringRegexAssertionTests
     [Test]
     [Arguments(typeof(ArgumentNullException), null)]
     [Arguments(typeof(TUnitAssertionException), "123")]
-    public async Task DoesNotMatch_WithInvalidPattern_GeneratedRegexPattern_Throws(Type exceptionType, string? text) 
+    public async Task DoesNotMatch_WithInvalidPattern_GeneratedRegexPattern_Throws(Type exceptionType, string? text)
     {
         var regex = FindNumberRegex();
-        
+
         Func<Task> action = async () => await TUnitAssert.That(text).DoesNotMatch(regex);
 
         var exception = await TUnitAssert.ThrowsAsync(exceptionType, action);
-        if (exceptionType != typeof(TUnitAssertionException)) 
+        if (exceptionType != typeof(TUnitAssertionException))
         {
             return;
         }
-        
+
         await TUnitAssert.That(exception!.Message).IsEqualTo(
             $"""
              Expected text to not match with regex

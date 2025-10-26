@@ -17,10 +17,34 @@ public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
     public AssertionContext<TValue> Context { get; }
     AssertionContext<Task<TValue?>> IAssertionSource<Task<TValue?>>.Context => TaskContext;
 
-    private AssertionContext<Task<TValue?>> TaskContext { get; }
+    private readonly Task<TValue?> _task;
+    private AssertionContext<Task<TValue?>>? _taskContext;
+
+    // Lazy-initialize TaskContext to avoid allocating StringBuilder when not used
+    private AssertionContext<Task<TValue?>> TaskContext
+    {
+        get
+        {
+            if (_taskContext == null)
+            {
+                var taskExpressionBuilder = StringBuilderPool.Get();
+                taskExpressionBuilder.Append(Context.ExpressionBuilder.ToString());
+                var taskEvaluationContext = new EvaluationContext<Task<TValue?>>(() =>
+                {
+                    // Return the task object itself without awaiting it
+                    // This allows IsCompleted, IsCanceled, IsFaulted, etc. to check task properties synchronously
+                    return Task.FromResult<(Task<TValue?>?, Exception?)>((_task, null));
+                });
+
+                _taskContext = new AssertionContext<Task<TValue?>>(taskEvaluationContext, taskExpressionBuilder);
+            }
+            return _taskContext;
+        }
+    }
 
     public TaskAssertion(Task<TValue?> task, string? expression)
     {
+        _task = task;
         var expressionBuilder = StringBuilderPool.Get();
         expressionBuilder.Append($"Assert.That({expression ?? "?"})");
 
@@ -38,19 +62,6 @@ public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
             }
         });
         Context = new AssertionContext<TValue>(evaluationContext, expressionBuilder);
-
-        // Context for task state assertions (e.g., IsCompleted on the Task<TValue>)
-        // DO NOT await the task here - we want to check its state synchronously
-        var taskExpressionBuilder = StringBuilderPool.Get();
-        taskExpressionBuilder.Append(expressionBuilder.ToString());
-        var taskEvaluationContext = new EvaluationContext<Task<TValue?>>(() =>
-        {
-            // Return the task object itself without awaiting it
-            // This allows IsCompleted, IsCanceled, IsFaulted, etc. to check task properties synchronously
-            return Task.FromResult<(Task<TValue?>?, Exception?)>((task, null));
-        });
-
-        TaskContext = new AssertionContext<Task<TValue?>>(taskEvaluationContext, taskExpressionBuilder);
     }
 
     /// <summary>
