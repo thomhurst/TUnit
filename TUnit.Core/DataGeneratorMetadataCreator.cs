@@ -22,7 +22,7 @@ internal static class DataGeneratorMetadataCreator
         // Filter out CancellationToken if it's the last parameter (handled by the engine)
         if (generatorType == DataGeneratorType.TestParameters && parametersToGenerate.Length > 0)
         {
-            var lastParam = parametersToGenerate[parametersToGenerate.Length - 1];
+            var lastParam = parametersToGenerate[^1];
             if (lastParam.Type == typeof(CancellationToken))
             {
                 var newArray = new ParameterMetadata[parametersToGenerate.Length - 1];
@@ -244,7 +244,7 @@ internal static class DataGeneratorMetadataCreator
     {
         if (parameters.Length > 0)
         {
-            var lastParam = parameters[parameters.Length - 1];
+            var lastParam = parameters[^1];
             if (lastParam.Type == typeof(CancellationToken))
             {
                 var newArray = new ParameterMetadata[parameters.Length - 1];

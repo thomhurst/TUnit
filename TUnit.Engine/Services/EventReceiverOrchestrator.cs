@@ -45,7 +45,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     {
         var eligibleObjects = context.GetEligibleEventObjects().ToArray();
 
-        var objectsToRegister = new List<object>();
+        var objectsToRegister = new List<object>(eligibleObjects.Length);
 
         foreach (var obj in eligibleObjects)
         {
@@ -427,7 +427,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     /// </summary>
     public void InitializeTestCounts(IEnumerable<TestContext> allTestContexts)
     {
-        var contexts = allTestContexts.ToList();
+        var contexts = allTestContexts as IList<TestContext> ?? allTestContexts.ToList();
         _sessionTestCount = contexts.Count;
 
         // Clear first-event tracking to ensure clean state for each test execution
@@ -438,8 +438,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         foreach (var group in contexts.GroupBy(c => c.ClassContext.AssemblyContext.Assembly.GetName().FullName))
         {
             var counter = _assemblyTestCounts.GetOrAdd(group.Key, static _ => new Counter());
+            var groupCount = group.Count();
 
-            for (var i = 0; i < group.Count(); i++)
+            for (var i = 0; i < groupCount; i++)
             {
                 counter.Increment();
             }
@@ -448,8 +449,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         foreach (var group in contexts.GroupBy(c => c.ClassContext.ClassType))
         {
             var counter = _classTestCounts.GetOrAdd(group.Key, static _ => new Counter());
+            var groupCount = group.Count();
 
-            for (var i = 0; i < group.Count(); i++)
+            for (var i = 0; i < groupCount; i++)
             {
                 counter.Increment();
             }

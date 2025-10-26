@@ -63,6 +63,7 @@
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
         <PackageReference Include="Microsoft.CSharp" />
         <PackageReference Include="System.Text.Json" />
+        <PackageReference Include="System.Collections.Immutable" />
     </ItemGroup>
     <ItemGroup>
       <Compile Remove="IClassDataSourceAttribute.cs" />

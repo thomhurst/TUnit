@@ -1,7 +1,11 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System.Collections.Immutable;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
+/// <summary>
+/// Lock-free async event implementation using immutable snapshots for better concurrent performance.
+/// </summary>
 public class AsyncEvent<TEventArgs>
 {
     public int Order
@@ -11,17 +15,19 @@ public class AsyncEvent<TEventArgs>
         {
             field = value;
 
-            if (InvocationList.Count > 0)
+            var snapshot = _invocationList;
+            if (snapshot.Count > 0)
             {
-                InvocationList[^1].Order = field;
+                snapshot[^1].Order = field;
             }
         }
     } = int.MaxValue / 2;
 
-    internal List<Invocation> InvocationList { get; } = [];
+    private volatile ImmutableList<Invocation> _invocationList = ImmutableList<Invocation>.Empty;
+
+    internal ImmutableList<Invocation> InvocationList => _invocationList;
 
     private static readonly Lock _newEventLock = new();
-    private readonly Lock _locker = new();
 
     public class Invocation(Func<object, TEventArgs, ValueTask> factory, int order) : IEventReceiver
     {
@@ -51,11 +57,17 @@ public class AsyncEvent<TEventArgs>
             e ??= new AsyncEvent<TEventArgs>();
         }
 
-        lock (e._locker)
+        // Lock-free add using Interlocked.CompareExchange
+        var newInvocation = new Invocation(callback, e.Order);
+        ImmutableList<Invocation> current, updated;
+        do
         {
-            e.InvocationList.Add(new Invocation(callback, e.Order));
-            e.Order = int.MaxValue / 2;
+            current = e._invocationList;
+            updated = current.Add(newInvocation);
         }
+        while (Interlocked.CompareExchange(ref e._invocationList, updated, current) != current);
+
+        e.Order = int.MaxValue / 2;
 
         return e;
     }
@@ -67,11 +79,17 @@ public class AsyncEvent<TEventArgs>
             throw new NullReferenceException("callback is null");
         }
 
-        lock (_locker)
+        // Lock-free insert using Interlocked.CompareExchange
+        var newInvocation = new Invocation(callback, Order);
+        ImmutableList<Invocation> current, updated;
+        do
         {
-            InvocationList.Insert(0, new Invocation(callback, Order));
-            Order = int.MaxValue / 2;
+            current = _invocationList;
+            updated = current.Insert(0, newInvocation);
         }
+        while (Interlocked.CompareExchange(ref _invocationList, updated, current) != current);
+
+        Order = int.MaxValue / 2;
 
         return this;
     }
