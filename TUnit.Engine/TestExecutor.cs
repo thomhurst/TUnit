@@ -40,7 +40,7 @@ internal class TestExecutor
     /// Ensures that Before(TestSession) hooks have been executed.
     /// This is called before creating test instances to ensure resources are available.
     /// </summary>
-    public async Task EnsureTestSessionHooksExecutedAsync()
+    public async ValueTask EnsureTestSessionHooksExecutedAsync()
     {
         // Get or create and cache Before hooks - these run only once
         await _beforeHookTaskCache.GetOrCreateBeforeTestSessionTask(() =>
@@ -51,7 +51,7 @@ internal class TestExecutor
     /// Creates a test executor delegate that wraps the provided executor with hook orchestration.
     /// Uses focused services that follow SRP to manage lifecycle and execution.
     /// </summary>
-    public async Task ExecuteAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
+    public async ValueTask ExecuteAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {
 
         var testClass = executableTest.Metadata.TestClassType;
@@ -106,7 +106,7 @@ internal class TestExecutor
                 : null;
 
             await TimeoutHelper.ExecuteWithTimeoutAsync(
-                ct => ExecuteTestAsync(executableTest, ct),
+                ct => ExecuteTestAsync(executableTest, ct).AsTask(),
                 testTimeout,
                 cancellationToken,
                 timeoutMessage).ConfigureAwait(false);
@@ -163,7 +163,7 @@ internal class TestExecutor
         }
     }
 
-    private static async Task ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
+    private static async ValueTask ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {
         // Skip the actual test invocation for skipped tests
         if (executableTest.Context.TestDetails.ClassInstance is SkippedTestInstance ||
@@ -186,7 +186,7 @@ internal class TestExecutor
         }
     }
 
-    internal async Task<List<Exception>> ExecuteAfterClassAssemblyHooks(AbstractExecutableTest executableTest,
+    internal async ValueTask<List<Exception>> ExecuteAfterClassAssemblyHooks(AbstractExecutableTest executableTest,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties
             | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, Assembly testAssembly, CancellationToken cancellationToken)
@@ -213,7 +213,7 @@ internal class TestExecutor
     /// Execute session-level after hooks once at the end of test execution.
     /// Returns any exceptions that occurred during hook execution.
     /// </summary>
-    public async Task<List<Exception>> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
+    public async ValueTask<List<Exception>> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
         return await _hookExecutor.ExecuteAfterTestSessionHooksAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -221,7 +221,7 @@ internal class TestExecutor
     /// <summary>
     /// Execute discovery-level before hooks.
     /// </summary>
-    public async Task ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    public async ValueTask ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
         await _hookExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -229,7 +229,7 @@ internal class TestExecutor
     /// <summary>
     /// Execute discovery-level after hooks.
     /// </summary>
-    public async Task ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    public async ValueTask ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
         await _hookExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -242,7 +242,7 @@ internal class TestExecutor
         return _contextProvider;
     }
 
-    internal static async Task DisposeTestInstance(AbstractExecutableTest test)
+    internal static async ValueTask DisposeTestInstance(AbstractExecutableTest test)
     {
         // Dispose the test instance if it's disposable
         if (test.Context.TestDetails.ClassInstance is not SkippedTestInstance)

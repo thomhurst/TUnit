@@ -15,7 +15,7 @@ public class ValueAssertion<TValue> : IAssertionSource<TValue>
 
     public ValueAssertion(TValue? value, string? expression)
     {
-        var expressionBuilder = new StringBuilder();
+        var expressionBuilder = StringBuilderPool.Get();
         expressionBuilder.Append($"Assert.That({expression ?? "?"})");
         Context = new AssertionContext<TValue>(value, expressionBuilder);
     }

@@ -19,7 +19,7 @@ public class CompletesWithinActionAssertion : Assertion<object?>
         AssertionContext<object?>? context = null)
         : base(context ?? new AssertionContext<object?>(
             new EvaluationContext<object?>(() => Task.FromResult<(object?, Exception?)>((null, null))),
-            new StringBuilder()))
+            StringBuilderPool.Get()))
     {
         _action = action ?? throw new ArgumentNullException(nameof(action));
         _timeout = timeout;
@@ -77,7 +77,7 @@ public class CompletesWithinAsyncAssertion : Assertion<object?>
         AssertionContext<object?>? context = null)
         : base(context ?? new AssertionContext<object?>(
             new EvaluationContext<object?>(() => Task.FromResult<(object?, Exception?)>((null, null))),
-            new StringBuilder()))
+            StringBuilderPool.Get()))
     {
         _asyncAction = asyncAction ?? throw new ArgumentNullException(nameof(asyncAction));
         _timeout = timeout;

@@ -24,7 +24,7 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
     public AsyncDelegateAssertion(Func<Task> action, string? expression)
     {
         AsyncAction = action ?? throw new ArgumentNullException(nameof(action));
-        var expressionBuilder = new StringBuilder();
+        var expressionBuilder = StringBuilderPool.Get();
         expressionBuilder.Append($"Assert.That({expression ?? "?"})");
         var evaluationContext = new EvaluationContext<object?>(async () =>
         {
@@ -42,7 +42,7 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
 
         // Create a TaskContext for Task-specific assertions
         // DO NOT await the task here - we want to check its state synchronously
-        var taskExpressionBuilder = new StringBuilder();
+        var taskExpressionBuilder = StringBuilderPool.Get();
         taskExpressionBuilder.Append(expressionBuilder.ToString());
         var taskEvaluationContext = new EvaluationContext<Task>(() =>
         {

@@ -21,7 +21,7 @@ public class DictionaryAssertion<TKey, TValue> : DictionaryAssertionBase<IReadOn
         IReadOnlyDictionary<TKey, TValue> value,
         string? expression)
     {
-        var expressionBuilder = new StringBuilder();
+        var expressionBuilder = StringBuilderPool.Get();
         expressionBuilder.Append($"Assert.That({expression ?? "?"})");
         return new AssertionContext<IReadOnlyDictionary<TKey, TValue>>(value, expressionBuilder);
     }

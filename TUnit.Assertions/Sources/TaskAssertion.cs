@@ -21,7 +21,7 @@ public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
 
     public TaskAssertion(Task<TValue?> task, string? expression)
     {
-        var expressionBuilder = new StringBuilder();
+        var expressionBuilder = StringBuilderPool.Get();
         expressionBuilder.Append($"Assert.That({expression ?? "?"})");
 
         // Context for result assertions (e.g., IsEqualTo on the TValue result)
@@ -41,7 +41,7 @@ public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
 
         // Context for task state assertions (e.g., IsCompleted on the Task<TValue>)
         // DO NOT await the task here - we want to check its state synchronously
-        var taskExpressionBuilder = new StringBuilder();
+        var taskExpressionBuilder = StringBuilderPool.Get();
         taskExpressionBuilder.Append(expressionBuilder.ToString());
         var taskEvaluationContext = new EvaluationContext<Task<TValue?>>(() =>
         {

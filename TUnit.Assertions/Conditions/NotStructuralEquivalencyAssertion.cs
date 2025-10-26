@@ -76,7 +76,7 @@ public class NotStructuralEquivalencyAssertion<TValue> : Assertion<TValue>
 
         // Create a temporary StructuralEquivalencyAssertion to reuse the comparison logic
         var tempAssertion = new StructuralEquivalencyAssertion<TValue>(
-            new AssertionContext<TValue>(Context.Evaluation, new StringBuilder()),
+            new AssertionContext<TValue>(Context.Evaluation, StringBuilderPool.Get()),
             _notExpected);
 
         if (_usePartialEquivalency)

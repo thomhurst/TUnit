@@ -24,7 +24,7 @@ public class CollectionAssertion<TItem> : CollectionAssertionBase<IEnumerable<TI
 
     private static StringBuilder CreateExpressionBuilder(string? expression)
     {
-        var builder = new StringBuilder();
+        var builder = StringBuilderPool.Get();
         builder.Append($"Assert.That({expression ?? "?"})");
         return builder;
     }

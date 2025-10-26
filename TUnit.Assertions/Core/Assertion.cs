@@ -105,16 +105,29 @@ public abstract class Assertion<TValue>
     /// Evaluates the context (if not already evaluated), checks the condition,
     /// and throws if the assertion fails (or adds to AssertionScope if within Assert.Multiple).
     /// If this assertion is part of an And/Or chain, delegates to the wrapper.
+    /// Returns the StringBuilder to the pool after execution completes.
     /// </summary>
     public virtual async Task<TValue?> AssertAsync()
     {
-        // If part of an And/Or chain, delegate to the wrapper
-        if (_wrappedExecution != null)
+        try
         {
-            return await _wrappedExecution.AssertAsync();
-        }
+            // If part of an And/Or chain, delegate to the wrapper
+            if (_wrappedExecution != null)
+            {
+                return await _wrappedExecution.AssertAsync();
+            }
 
-        return await ExecuteCoreAsync();
+            return await ExecuteCoreAsync();
+        }
+        finally
+        {
+            // Return StringBuilder to pool after assertion completes
+            // Only do this for the top-level assertion (not wrapped executions)
+            if (_wrappedExecution == null)
+            {
+                StringBuilderPool.Return(Context.ExpressionBuilder);
+            }
+        }
     }
 
     /// <summary>
