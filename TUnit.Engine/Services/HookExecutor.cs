@@ -28,9 +28,14 @@ internal sealed class HookExecutor
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
     }
 
-    public async Task ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
+    public async ValueTask ExecuteBeforeTestSessionHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeTestSessionHooksAsync().ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return;
+        }
 
         foreach (var hook in hooks)
         {
@@ -48,10 +53,16 @@ internal sealed class HookExecutor
         }
     }
 
-    public async Task<List<Exception>> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
+    public async ValueTask<List<Exception>> ExecuteAfterTestSessionHooksAsync(CancellationToken cancellationToken)
     {
         var exceptions = new List<Exception>();
         var hooks = await _hookCollectionService.CollectAfterTestSessionHooksAsync().ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return exceptions;
+        }
+
         foreach (var hook in hooks)
         {
             try
@@ -70,9 +81,15 @@ internal sealed class HookExecutor
         return exceptions;
     }
 
-    public async Task ExecuteBeforeAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
+    public async ValueTask ExecuteBeforeAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeAssemblyHooksAsync(assembly).ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return;
+        }
+
         foreach (var hook in hooks)
         {
             try
@@ -88,10 +105,16 @@ internal sealed class HookExecutor
         }
     }
 
-    public async Task<List<Exception>> ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
+    public async ValueTask<List<Exception>> ExecuteAfterAssemblyHooksAsync(Assembly assembly, CancellationToken cancellationToken)
     {
         var exceptions = new List<Exception>();
         var hooks = await _hookCollectionService.CollectAfterAssemblyHooksAsync(assembly).ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return exceptions;
+        }
+
         foreach (var hook in hooks)
         {
             try
@@ -111,11 +134,17 @@ internal sealed class HookExecutor
         return exceptions;
     }
 
-    public async Task ExecuteBeforeClassHooksAsync(
+    public async ValueTask ExecuteBeforeClassHooksAsync(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeClassHooksAsync(testClass).ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return;
+        }
+
         foreach (var hook in hooks)
         {
             try
@@ -131,12 +160,18 @@ internal sealed class HookExecutor
         }
     }
 
-    public async Task<List<Exception>> ExecuteAfterClassHooksAsync(
+    public async ValueTask<List<Exception>> ExecuteAfterClassHooksAsync(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type testClass, CancellationToken cancellationToken)
     {
         var exceptions = new List<Exception>();
         var hooks = await _hookCollectionService.CollectAfterClassHooksAsync(testClass).ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return exceptions;
+        }
+
         foreach (var hook in hooks)
         {
             try
@@ -156,79 +191,101 @@ internal sealed class HookExecutor
         return exceptions;
     }
 
-    public async Task ExecuteBeforeTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public async ValueTask ExecuteBeforeTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassType = test.Metadata.TestClassType;
 
         // Execute BeforeEvery(Test) hooks first (global test hooks run before specific hooks)
         var beforeEveryTestHooks = await _hookCollectionService.CollectBeforeEveryTestHooksAsync(testClassType).ConfigureAwait(false);
-        foreach (var hook in beforeEveryTestHooks)
+
+        if (beforeEveryTestHooks.Count > 0)
         {
-            try
+            foreach (var hook in beforeEveryTestHooks)
             {
-                test.Context.RestoreExecutionContext();
-                await hook(test.Context, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw new BeforeTestException("BeforeEveryTest hook failed", ex);
+                try
+                {
+                    test.Context.RestoreExecutionContext();
+                    await hook(test.Context, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    throw new BeforeTestException("BeforeEveryTest hook failed", ex);
+                }
             }
         }
 
         // Execute Before(Test) hooks after BeforeEvery hooks
         var beforeTestHooks = await _hookCollectionService.CollectBeforeTestHooksAsync(testClassType).ConfigureAwait(false);
-        foreach (var hook in beforeTestHooks)
+
+        if (beforeTestHooks.Count > 0)
         {
-            try
+            foreach (var hook in beforeTestHooks)
             {
-                test.Context.RestoreExecutionContext();
-                await hook(test.Context, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw new BeforeTestException("BeforeTest hook failed", ex);
+                try
+                {
+                    test.Context.RestoreExecutionContext();
+                    await hook(test.Context, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    throw new BeforeTestException("BeforeTest hook failed", ex);
+                }
             }
         }
     }
 
-    public async Task ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public async ValueTask ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassType = test.Metadata.TestClassType;
 
         // Execute After(Test) hooks first (specific hooks run before global hooks for cleanup)
         var afterTestHooks = await _hookCollectionService.CollectAfterTestHooksAsync(testClassType).ConfigureAwait(false);
-        foreach (var hook in afterTestHooks)
+
+        if (afterTestHooks.Count > 0)
         {
-            try
+            foreach (var hook in afterTestHooks)
             {
-                test.Context.RestoreExecutionContext();
-                await hook(test.Context, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw new AfterTestException("AfterTest hook failed", ex);
+                try
+                {
+                    test.Context.RestoreExecutionContext();
+                    await hook(test.Context, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    throw new AfterTestException("AfterTest hook failed", ex);
+                }
             }
         }
 
         // Execute AfterEvery(Test) hooks after After hooks (global test hooks run last for cleanup)
         var afterEveryTestHooks = await _hookCollectionService.CollectAfterEveryTestHooksAsync(testClassType).ConfigureAwait(false);
-        foreach (var hook in afterEveryTestHooks)
+
+        if (afterEveryTestHooks.Count > 0)
         {
-            try
+            foreach (var hook in afterEveryTestHooks)
             {
-                test.Context.RestoreExecutionContext();
-                await hook(test.Context, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw new AfterTestException("AfterEveryTest hook failed", ex);
+                try
+                {
+                    test.Context.RestoreExecutionContext();
+                    await hook(test.Context, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    throw new AfterTestException("AfterEveryTest hook failed", ex);
+                }
             }
         }
     }
 
-    public async Task ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    public async ValueTask ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectBeforeTestDiscoveryHooksAsync().ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return;
+        }
+
         foreach (var hook in hooks)
         {
             try
@@ -243,9 +300,15 @@ internal sealed class HookExecutor
         }
     }
 
-    public async Task ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
+    public async ValueTask ExecuteAfterTestDiscoveryHooksAsync(CancellationToken cancellationToken)
     {
         var hooks = await _hookCollectionService.CollectAfterTestDiscoveryHooksAsync().ConfigureAwait(false);
+
+        if (hooks.Count == 0)
+        {
+            return;
+        }
+
         foreach (var hook in hooks)
         {
             try

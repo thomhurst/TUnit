@@ -26,6 +26,7 @@ internal sealed class EventReceiverRegistry
     
     private volatile EventTypes _registeredEvents = EventTypes.None;
     private readonly Dictionary<Type, object[]> _receiversByType = new();
+    private readonly Dictionary<Type, Array> _cachedTypedReceivers = new();
     private readonly ReaderWriterLockSlim _lock = new();
     
     /// <summary>
@@ -66,7 +67,7 @@ internal sealed class EventReceiverRegistry
     private void RegisterReceiverInternal(object receiver)
     {
         UpdateEventFlags(receiver);
-        
+
         // Register for each interface type the object implements
         // We use a simpler approach that doesn't require reflection
         RegisterIfImplements<ITestStartEventReceiver>(receiver);
@@ -79,6 +80,8 @@ internal sealed class EventReceiverRegistry
         RegisterIfImplements<ILastTestInAssemblyEventReceiver>(receiver);
         RegisterIfImplements<IFirstTestInClassEventReceiver>(receiver);
         RegisterIfImplements<ILastTestInClassEventReceiver>(receiver);
+
+        _cachedTypedReceivers.Clear();
     }
     
     private void RegisterIfImplements<T>(object receiver) where T : class
@@ -136,30 +139,67 @@ internal sealed class EventReceiverRegistry
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasAnyReceivers() => _registeredEvents != EventTypes.None;
     
-    /// <summary>
-    /// Get receivers of specific type (for invocation)
-    /// </summary>
     public T[] GetReceiversOfType<T>() where T : class
     {
+        var typeKey = typeof(T);
+
         _lock.EnterReadLock();
         try
         {
-            if (_receiversByType.TryGetValue(typeof(T), out var receivers))
+            if (_cachedTypedReceivers.TryGetValue(typeKey, out var cached))
             {
-                // Cast array to specific type
+                return (T[])cached;
+            }
+        }
+        finally
+        {
+            _lock.ExitReadLock();
+        }
+
+        _lock.EnterUpgradeableReadLock();
+        try
+        {
+            if (_cachedTypedReceivers.TryGetValue(typeKey, out var cached))
+            {
+                return (T[])cached;
+            }
+
+            if (_receiversByType.TryGetValue(typeKey, out var receivers))
+            {
                 var typedArray = new T[receivers.Length];
                 for (var i = 0; i < receivers.Length; i++)
                 {
                     typedArray[i] = (T)receivers[i];
                 }
+
+                _lock.EnterWriteLock();
+                try
+                {
+                    _cachedTypedReceivers[typeKey] = typedArray;
+                }
+                finally
+                {
+                    _lock.ExitWriteLock();
+                }
+
                 return typedArray;
             }
-            return [
-            ];
+
+            T[] emptyArray = [];
+            _lock.EnterWriteLock();
+            try
+            {
+                _cachedTypedReceivers[typeKey] = emptyArray;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+            return emptyArray;
         }
         finally
         {
-            _lock.ExitReadLock();
+            _lock.ExitUpgradeableReadLock();
         }
     }
     

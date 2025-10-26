@@ -17,33 +17,34 @@ internal sealed class BeforeHookTaskCache
     private Task? _beforeTestSessionTask;
     private readonly object _testSessionLock = new();
 
-    public Task GetOrCreateBeforeTestSessionTask(Func<Task> taskFactory)
+    public ValueTask GetOrCreateBeforeTestSessionTask(Func<ValueTask> taskFactory)
     {
         if (_beforeTestSessionTask != null)
         {
-            return _beforeTestSessionTask;
+            return new ValueTask(_beforeTestSessionTask);
         }
 
         lock (_testSessionLock)
         {
-            // Double-check after acquiring lock
             if (_beforeTestSessionTask == null)
             {
-                _beforeTestSessionTask = taskFactory();
+                _beforeTestSessionTask = taskFactory().AsTask();
             }
-            return _beforeTestSessionTask;
+            return new ValueTask(_beforeTestSessionTask);
         }
     }
 
-    public Task GetOrCreateBeforeAssemblyTask(Assembly assembly, Func<Assembly, Task> taskFactory)
+    public ValueTask GetOrCreateBeforeAssemblyTask(Assembly assembly, Func<Assembly, ValueTask> taskFactory)
     {
-        return _beforeAssemblyTasks.GetOrAdd(assembly, taskFactory);
+        var task = _beforeAssemblyTasks.GetOrAdd(assembly, a => taskFactory(a).AsTask());
+        return new ValueTask(task);
     }
 
-    public Task GetOrCreateBeforeClassTask(
+    public ValueTask GetOrCreateBeforeClassTask(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
-        Type testClass, Func<Type, Task> taskFactory)
+        Type testClass, Func<Type, ValueTask> taskFactory)
     {
-        return _beforeClassTasks.GetOrAdd(testClass, taskFactory);
+        var task = _beforeClassTasks.GetOrAdd(testClass, t => taskFactory(t).AsTask());
+        return new ValueTask(task);
     }
 }
