@@ -85,9 +85,6 @@ public class CompletesWithinAsyncAssertion : Assertion<object?>
 
     protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<object?> metadata)
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
         var stopwatch = Stopwatch.StartNew();
         using var cts = new CancellationTokenSource(_timeout);
 

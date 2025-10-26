@@ -496,12 +496,11 @@ public class StringMatchesAssertion : Assertion<string>
 
     protected override string GetExpectation()
     {
-        // Check expression builder to detect if variable was named "regex" (GeneratedRegex pattern)
-        var expression = Context.ExpressionBuilder.ToString();
-        if (expression.Contains(".Matches(regex)") || expression.Contains(".Matches(Matches_"))
+        if (_regex != null)
         {
             return "text match regex";
         }
+
         return "text match pattern";
     }
 }
@@ -581,12 +580,11 @@ public class StringDoesNotMatchAssertion : Assertion<string>
 
     protected override string GetExpectation()
     {
-        // Check expression builder to detect if variable was named "regex" (GeneratedRegex pattern)
-        var expression = Context.ExpressionBuilder.ToString();
-        if (expression.Contains(".DoesNotMatch(regex)") || expression.Contains(".DoesNotMatch(DoesNotMatch_") || expression.Contains(".DoesNotMatch(FindNumber"))
+        if (_regex != null)
         {
             return "text to not match with regex";
         }
+
         return "text to not match with pattern";
     }
 }
