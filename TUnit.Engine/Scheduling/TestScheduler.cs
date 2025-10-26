@@ -316,14 +316,46 @@ internal sealed class TestScheduler : ITestScheduler
 
     private static int GetMaxParallelism(ILogger logger, ICommandLineOptions commandLineOptions)
     {
-        if (!commandLineOptions.TryGetOptionArgumentList(
+        // Check command line argument first (highest priority)
+        if (commandLineOptions.TryGetOptionArgumentList(
                 MaximumParallelTestsCommandProvider.MaximumParallelTests,
-                out var args) || args.Length <= 0 || !int.TryParse(args[0], out var maxParallelTests) || maxParallelTests <= 0)
+                out var args) && args.Length > 0 && int.TryParse(args[0], out var maxParallelTests))
         {
-            return int.MaxValue;
+            if (maxParallelTests == 0)
+            {
+                // 0 means unlimited (backwards compat for advanced users)
+                logger.LogDebug("Maximum parallel tests: unlimited (from command line)");
+                return int.MaxValue;
+            }
+
+            if (maxParallelTests > 0)
+            {
+                logger.LogDebug($"Maximum parallel tests limit set to {maxParallelTests} (from command line)");
+                return maxParallelTests;
+            }
         }
 
-        logger.LogDebug($"Maximum parallel tests limit set to {maxParallelTests}");
-        return maxParallelTests;
+        // Check environment variable (second priority)
+        if (Environment.GetEnvironmentVariable("TUNIT_MAX_PARALLEL_TESTS") is string envVar
+            && int.TryParse(envVar, out var envLimit))
+        {
+            if (envLimit == 0)
+            {
+                logger.LogDebug("Maximum parallel tests: unlimited (from TUNIT_MAX_PARALLEL_TESTS environment variable)");
+                return int.MaxValue;
+            }
+
+            if (envLimit > 0)
+            {
+                logger.LogDebug($"Maximum parallel tests limit set to {envLimit} (from TUNIT_MAX_PARALLEL_TESTS environment variable)");
+                return envLimit;
+            }
+        }
+
+        // Default: 4x CPU cores (balances CPU-bound and I/O-bound tests)
+        // This prevents resource exhaustion (DB connections, memory, etc.) while allowing I/O overlap
+        var defaultLimit = Environment.ProcessorCount * 4;
+        logger.LogDebug($"Maximum parallel tests limit defaulting to {defaultLimit} ({Environment.ProcessorCount} processors * 4)");
+        return defaultLimit;
     }
 }
