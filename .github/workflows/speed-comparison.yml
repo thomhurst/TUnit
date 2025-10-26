@@ -8,11 +8,7 @@ on:
 jobs:
   build-test-artifacts:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v5
@@ -34,13 +30,13 @@ jobs:
 
       - name: Publish TUnit AOT
         run: |
-          dotnet publish -c Release -p:TestFramework=TUNIT -p:Aot=true --runtime ${{ matrix.os == 'windows-latest' && 'win-x64' || matrix.os == 'ubuntu-latest' && 'linux-x64' || 'osx-arm64' }} --output bin/Release-TUNIT-AOT/net10.0
+          dotnet publish -c Release -p:TestFramework=TUNIT -p:Aot=true --use-current-runtime --output bin/Release-TUNIT-AOT/net10.0
         working-directory: "tools/speed-comparison/UnifiedTests"
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v5
         with:
-          name: test-builds-${{ matrix.os }}
+          name: test-builds-ubuntu
           path: tools/speed-comparison/UnifiedTests/bin/
           retention-days: 1
 
@@ -49,12 +45,11 @@ jobs:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
         class: [DataDrivenTests, AsyncTests, ScaleTests, MatrixTests, LifecycleTests, MassiveParallelTests]
       fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     concurrency:
-      group: "speed-comparison-run-time-${{matrix.os}}-${{matrix.class}}"
+      group: "speed-comparison-run-time-${{matrix.class}}"
       cancel-in-progress: true
 
     steps:
@@ -70,11 +65,10 @@ jobs:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v6
         with:
-          name: test-builds-${{ matrix.os }}
+          name: test-builds-ubuntu
           path: tools/speed-comparison/UnifiedTests/bin/
 
-      - name: Set Execute Permissions (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Set Execute Permissions
         run: |
           find tools/speed-comparison/UnifiedTests/bin -type f -name "UnifiedTests" -exec chmod +x {} \; 2>/dev/null || true
           find tools/speed-comparison/UnifiedTests/bin -type f -name "xunit.v3.runner.console" -exec chmod +x {} \; 2>/dev/null || true
@@ -90,21 +84,16 @@ jobs:
         uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: ${{ matrix.os }}_markdown_run_time_${{ matrix.class }}
+          name: ubuntu_markdown_run_time_${{ matrix.class }}
           path: |
             **/BenchmarkDotNet.Artifacts/**
 
 
   build-time-benchmarks:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        # framework: [net8.0, net9.0]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     concurrency:
-      group: "speed-comparison-build-time-${{matrix.os}}"
+      group: "speed-comparison-build-time"
       cancel-in-progress: true
 
     steps:
@@ -130,7 +119,7 @@ jobs:
         uses: actions/upload-artifact@v5
         if: always()
         with:
-          name: ${{ matrix.os }}_markdown_build_time
+          name: ubuntu_markdown_build_time
           path: |
             **/BenchmarkDotNet.Artifacts/**
 
