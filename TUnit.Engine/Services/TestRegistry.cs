@@ -58,7 +58,9 @@ internal sealed class TestRegistry : ITestRegistry
         {
             DiscoveryResult = discoveryResult,
             SourceContext = context,
-            TestClassType = typeof(T)
+            TestClassType = typeof(T),
+            ParentTestId = dynamicTest.ParentTestId,
+            ObjectBag = dynamicTest.ObjectBag
         });
 
         // Process pending tests immediately
@@ -86,7 +88,7 @@ internal sealed class TestRegistry : ITestRegistry
         foreach (var pendingTest in testsToProcess)
         {
             var result = pendingTest.DiscoveryResult;
-            var metadata = await CreateMetadataFromDynamicDiscoveryResult(result);
+            var metadata = await CreateMetadataFromDynamicDiscoveryResult(result, pendingTest.ParentTestId, pendingTest.ObjectBag);
             testMetadataList.Add(metadata);
         }
 
@@ -99,7 +101,7 @@ internal sealed class TestRegistry : ITestRegistry
     }
 
     [RequiresUnreferencedCode("Dynamic test metadata creation requires reflection which is not supported in native AOT scenarios.")]
-    private async Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
+    private async Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result, Guid? parentTestId, Dictionary<string, object?> objectBag)
     {
         if (result.TestClassType == null || result.TestMethod == null)
         {
@@ -125,7 +127,7 @@ internal sealed class TestRegistry : ITestRegistry
 
         var testName = methodInfo.Name;
 
-        return await Task.FromResult<TestMetadata>(new RuntimeDynamicTestMetadata(result.TestClassType, methodInfo, result)
+        return await Task.FromResult<TestMetadata>(new RuntimeDynamicTestMetadata(result.TestClassType, methodInfo, result, parentTestId, objectBag)
         {
             TestName = testName,
             TestClassType = result.TestClassType,
@@ -206,6 +208,8 @@ internal sealed class TestRegistry : ITestRegistry
         public required DynamicDiscoveryResult DiscoveryResult { get; init; }
         public required TestContext SourceContext { get; init; }
         public required Type TestClassType { get; init; }
+        public Guid? ParentTestId { get; init; }
+        public Dictionary<string, object?> ObjectBag { get; init; } = new();
     }
 
 
@@ -214,12 +218,16 @@ internal sealed class TestRegistry : ITestRegistry
         private readonly DynamicDiscoveryResult _dynamicResult;
         private readonly Type _testClass;
         private readonly MethodInfo _testMethod;
+        private readonly Guid? _parentTestId;
+        private readonly Dictionary<string, object?> _objectBag;
 
-        public RuntimeDynamicTestMetadata(Type testClass, MethodInfo testMethod, DynamicDiscoveryResult dynamicResult)
+        public RuntimeDynamicTestMetadata(Type testClass, MethodInfo testMethod, DynamicDiscoveryResult dynamicResult, Guid? parentTestId, Dictionary<string, object?> objectBag)
         {
             _testClass = testClass;
             _testMethod = testMethod;
             _dynamicResult = dynamicResult;
+            _parentTestId = parentTestId;
+            _objectBag = objectBag;
         }
 
         public override Func<ExecutableTestCreationContext, TestMetadata, AbstractExecutableTest> CreateExecutableTestFactory
@@ -250,7 +258,7 @@ internal sealed class TestRegistry : ITestRegistry
 
                 var invokeTest = metadata.TestInvoker ?? throw new InvalidOperationException("Test invoker is null");
 
-                return new ExecutableTest(createInstance,
+                var executableTest = new ExecutableTest(createInstance,
                     async (instance, args, context, ct) =>
                     {
                         await invokeTest(instance, args);
@@ -262,6 +270,21 @@ internal sealed class TestRegistry : ITestRegistry
                     ClassArguments = modifiedContext.ClassArguments,
                     Context = modifiedContext.Context
                 };
+
+                // Set property test metadata if provided
+                if (_parentTestId.HasValue)
+                {
+                    executableTest.Context.TestDetails.ParentTestId = _parentTestId;
+                    executableTest.Context.TestDetails.RelationshipType = TestRelationshipType.PropertyTestShrink;
+                }
+
+                // Copy object bag entries to test context
+                foreach (var entry in _objectBag)
+                {
+                    executableTest.Context.ObjectBag[entry.Key] = entry.Value;
+                }
+
+                return executableTest;
             };
         }
     }

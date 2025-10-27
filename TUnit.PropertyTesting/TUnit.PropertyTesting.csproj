@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="..\Library.props" />
+
+    <ItemGroup>
+        <ProjectReference Include="..\TUnit.Core\TUnit.Core.csproj" />
+    </ItemGroup>
+
+    <Import Project="..\Library.targets" />
+
+</Project>

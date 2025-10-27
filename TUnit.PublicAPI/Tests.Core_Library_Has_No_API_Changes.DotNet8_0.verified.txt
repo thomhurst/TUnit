@@ -644,6 +644,8 @@ namespace
         public .<> Attributes { get; set; }
         public string? CreatorFilePath { get; set; }
         public int? CreatorLineNumber { get; set; }
+        public .<string, object?> ObjectBag { get; set; }
+        public ? ParentTestId { get; set; }
         public object?[]? TestClassArguments { get; set; }
         public .<<T>>? TestMethod { get; set; }
         public object?[]? TestMethodArguments { get; set; }
@@ -1380,6 +1382,7 @@ namespace
         public TestDetails() { }
         public required .<> Attributes { get; init; }
         public .<string> Categories { get; }
+        public .<> ChildTestIds { get; set; }
         public [] ClassGenericArguments { get; set; }
         public required object ClassInstance { get; set; }
         public object?[] ClassMetadataArguments { get; }
@@ -1389,6 +1392,8 @@ namespace
         public [] MethodGenericArguments { get; set; }
         public required .MethodMetadata MethodMetadata { get; set; }
         public required string MethodName { get; init; }
+        public ? ParentTestId { get; set; }
+        public .TestRelationshipType RelationshipType { get; set; }
         public int RetryLimit { get; set; }
         public required  ReturnType { get; set; }
         public required object?[] TestClassArguments { get; set; }
@@ -1477,6 +1482,12 @@ namespace
         public void SetHookExecutor(. executor) { }
         public void SetParallelLimiter(. parallelLimit) { }
         public void SetTestExecutor(. executor) { }
+    }
+    public enum TestRelationshipType
+    {
+        Independent = 0,
+        PropertyTestOriginal = 1,
+        PropertyTestShrink = 2,
     }
     public class TestResult : <.TestResult>
     {
@@ -2226,6 +2237,10 @@ namespace .Interfaces
     {
         . OnFirstTestInTestSession(.TestSessionContext current, .TestContext testContext);
     }
+    public interface IGenerator<out T>
+    {
+        T Generate( random);
+    }
     public interface IGenericTypeResolver
     {
         [] ResolveGenericClassArguments([.(..PublicConstructors)]  genericTypeDefinition, object?[] constructorArguments);
@@ -2269,6 +2284,10 @@ namespace .Interfaces
     public interface IParallelLimit
     {
         int Limit { get; }
+    }
+    public interface IShrinker<T>
+    {
+        .<T> Shrink(T value);
     }
     public interface ISourceGeneratedTestRegistry
     {
@@ -2440,6 +2459,29 @@ namespace .Models
         public ? MethodInvoker { get; set; }
     }
 }
+namespace .PropertyTesting
+{
+    public static class PropertyTestExtensions
+    {
+        public static  GetOriginalTestId(this .TestContext context) { }
+        public static .? GetPropertyTestMetadata(this .TestContext context) { }
+        public static long GetRandomSeed(this .TestContext context) { }
+        public static int GetShrinkAttempt(this .TestContext context) { }
+        public static bool IsPropertyTest(this .TestContext context) { }
+        public static bool IsShrinkingTest(this .TestContext context) { }
+        public static void SetPropertyTestMetadata(this .TestContext context, . metadata) { }
+    }
+    public class PropertyTestMetadata
+    {
+        public PropertyTestMetadata() { }
+        public bool IsShrinkingTest { get; set; }
+        public int MaxShrinkAttempts { get; set; }
+        public object?[]? OriginalFailingInputs { get; set; }
+        public  OriginalTestId { get; set; }
+        public long RandomSeed { get; set; }
+        public int ShrinkAttempt { get; set; }
+    }
+}
 namespace .Services
 {
     [.("Generic type resolution requires runtime type generation")]
@@ -2475,6 +2517,16 @@ namespace .Services
             where T :  class { }
         public static T? GetService<T>(this  serviceProvider)
             where T :  class { }
+    }
+    public class ShrinkLimiter
+    {
+        public ShrinkLimiter(int maxAttempts = 1000) { }
+        public int MaxAttempts { get; }
+        public bool CanShrink( originalTestId) { }
+        public int GetAttemptCount( originalTestId) { }
+        public int IncrementAndGet( originalTestId) { }
+        public void Reset( originalTestId) { }
+        public void ResetAll() { }
     }
     public class TestExecutionRegistry : .
     {

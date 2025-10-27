@@ -43,6 +43,23 @@ public class TestDetails
     /// Will be Type.EmptyTypes if the class is not generic.
     /// </summary>
     public Type[] ClassGenericArguments { get; set; } = Type.EmptyTypes;
+
+    /// <summary>
+    /// Parent test ID for property-based testing shrink relationships.
+    /// Null for original tests, set to the original test ID for shrunk variants.
+    /// </summary>
+    public Guid? ParentTestId { get; set; }
+
+    /// <summary>
+    /// Child test IDs for property-based testing shrink relationships.
+    /// Contains IDs of dynamically registered shrunk tests.
+    /// </summary>
+    public List<Guid> ChildTestIds { get; set; } = [];
+
+    /// <summary>
+    /// Type of relationship this test has in property-based testing scenarios.
+    /// </summary>
+    public TestRelationshipType RelationshipType { get; set; } = TestRelationshipType.Independent;
 }
 
 /// <summary>

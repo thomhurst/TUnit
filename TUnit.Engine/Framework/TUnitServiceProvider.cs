@@ -135,6 +135,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         EventReceiverOrchestrator = Register(new EventReceiverOrchestrator(Logger, trackableObjectGraphProvider));
         HookCollectionService = Register<IHookCollectionService>(new HookCollectionService(EventReceiverOrchestrator));
 
+        // Register ShrinkLimiter for property-based testing
+        Register(new TUnit.Core.Services.ShrinkLimiter());
+
         ParallelLimitLockProvider = Register(new ParallelLimitLockProvider());
 
         ContextProvider = Register(new ContextProvider(this, TestSessionId, Filter?.ToString()));

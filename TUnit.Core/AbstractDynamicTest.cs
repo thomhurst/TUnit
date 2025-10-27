@@ -87,6 +87,18 @@ public class DynamicTest<[DynamicallyAccessedMembers(
     /// </summary>
     public int? CreatorLineNumber { get; set; }
 
+    /// <summary>
+    /// Parent test ID for property-based testing shrink relationships.
+    /// Set to the original test ID when creating shrunk test variants.
+    /// </summary>
+    public Guid? ParentTestId { get; set; }
+
+    /// <summary>
+    /// Object bag for storing arbitrary data with the dynamic test.
+    /// Used for passing property test metadata to shrunk tests.
+    /// </summary>
+    public Dictionary<string, object?> ObjectBag { get; set; } = new();
+
     public override IEnumerable<DiscoveryResult> GetTests()
     {
         var result = new DynamicDiscoveryResult
