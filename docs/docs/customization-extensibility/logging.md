@@ -20,3 +20,12 @@ If you want to override this, you can inherit from `TUnitLogger` or `DefaultLogg
     return logLevel >= LogLevel.Error;
 }
 ```
+
+## Log Level Command Line
+If you are executing tests via the command line, you can set the log level via the `--log-level` argument:
+
+```
+dotnet run --log-level Warning
+```
+
+The above will show only logs that are `Warning` or higher (e.g. `Error`, `Critical`) while executing the test.
