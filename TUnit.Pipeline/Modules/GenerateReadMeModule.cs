@@ -58,18 +58,28 @@ public class GenerateReadMeModule : Module<File>
 
         var fileContents = new StringBuilder();
 
-        // Grouping is by Scenario
-        foreach (var groupedArtifacts in artifacts.Artifacts
+        // Expected artifact name pattern: ubuntu_markdown_{build_time|run_time_{class}}
+        // Example: ubuntu_markdown_run_time_AsyncTests, ubuntu_markdown_build_time
+        var benchmarkArtifacts = artifacts.Artifacts
+            .Where(x => x.Name.StartsWith("ubuntu_markdown_"))
+            .ToList();
+
+        if (benchmarkArtifacts.Count == 0)
+        {
+            context.Logger.LogWarning("No benchmark markdown artifacts found.");
+            return null;
+        }
+
+        // Grouping is by Scenario (e.g., "markdown_run_time_AsyncTests" or "markdown_build_time")
+        foreach (var groupedArtifacts in benchmarkArtifacts
                      .OrderBy(x => x.Name)
-                     .GroupBy(x => x.Name.Split("_", 2)[1]))
+                     .GroupBy(x => x.Name.Substring("ubuntu_".Length)))
         {
             fileContents.AppendLine($"### Scenario: {GetScenario(groupedArtifacts.Key)}");
 
             foreach (var artifact in groupedArtifacts.OrderBy(x => x.Name))
             {
-                var operatingSystem = artifact.Name.Split("_")[0];
-
-                context.Logger.LogInformation("Processing artifact: {ArtifactName} for OS: {OperatingSystem}", artifact.Name, operatingSystem);
+                context.Logger.LogInformation("Processing artifact: {ArtifactName}", artifact.Name);
 
                 var stream = await context.GitHub().Client.Actions.Artifacts.DownloadArtifact(
                     context.GitHub().RepositoryInfo.Owner,
@@ -87,12 +97,10 @@ public class GenerateReadMeModule : Module<File>
                 var contents = await markdownFile.ReadAsync(cancellationToken);
 
                 fileContents.AppendLine();
-                fileContents.AppendLine($"#### {operatingSystem}");
-                fileContents.AppendLine();
                 fileContents.AppendLine(contents);
                 fileContents.AppendLine();
 
-                context.Logger.LogInformation("Added contents from {MarkdownFile} for OS: {OperatingSystem}", markdownFile.Name, operatingSystem);
+                context.Logger.LogInformation("Added contents from {MarkdownFile}", markdownFile.Name);
             }
         }
 
