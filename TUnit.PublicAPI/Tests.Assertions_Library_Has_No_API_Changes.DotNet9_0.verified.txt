@@ -1591,6 +1591,12 @@ namespace .Conditions
         [.(ExpectationMessage="to not be a major version")]
         public static bool IsNotMajorVersion(this  value) { }
     }
+    public class WaitsForAssertion<TValue> : .<TValue>
+    {
+        public WaitsForAssertion(.<TValue> context, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default) { }
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
     [.<>("IsAlive", CustomName="IsNotAlive", ExpectationMessage="be alive", NegateLogic=true)]
     [.<>("IsAlive", ExpectationMessage="be alive")]
     [.<>("TrackResurrection", CustomName="DoesNotTrackResurrection", ExpectationMessage="track resurrection", NegateLogic=true)]
@@ -1714,6 +1720,10 @@ namespace .Core
         public .<TNew> Map<TNew>(<TValue?, TNew?> mapper) { }
         public .<TException> MapException<TException>()
             where TException :  { }
+        [return: .(new string?[]?[] {
+                "Value",
+                "Exception"})]
+        public .<<TValue?, ?>> ReevaluateAsync() { }
     }
     public readonly struct EvaluationMetadata<TValue>
     {
@@ -1952,6 +1962,7 @@ namespace .Extensions
         public static .<TException> ThrowsException<TException, TValue>(this .<TValue> source)
             where TException :  { }
         public static .<TValue> ThrowsNothing<TValue>(this .<TValue> source) { }
+        public static .<TValue> WaitsFor<TValue>(this .<TValue> source, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default, [.("timeout")] string? timeoutExpression = null, [.("pollingInterval")] string? pollingIntervalExpression = null) { }
         public static ..WhenParsedIntoAssertion<T> WhenParsedInto<[.(..None | ..PublicMethods | ..Interfaces)]  T>(this .<string> source) { }
         public static .<TException> WithMessage<TException>(this .<TException> source, string expectedMessage, [.("expectedMessage")] string? expression = null)
             where TException :  { }

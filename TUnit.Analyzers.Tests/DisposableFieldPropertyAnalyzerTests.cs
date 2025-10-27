@@ -494,4 +494,60 @@ public class DisposableFieldPropertyAnalyzerTests
                 """
             );
     }
+    
+    
+    [Test]
+    [Arguments("Class")]
+    [Arguments("Assembly")]
+    [Arguments("TestSession")]
+    public async Task Bug3213(string hook)
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                $$"""
+                  using System.Net.Http;
+                  using TUnit.Core;
+                  
+                  [ClassDataSource<string>]
+                  public class ControllerTests {
+                      readonly ServerFixture _fixture;
+                  
+                      public ControllerTests(string value) {
+                          listener = new();
+                      }
+                  
+                      [Test]
+                      public async Task RecordPaymentUsingMappedCommand(CancellationToken cancellationToken) {
+                          using var client = _fixture.GetClient();
+                  
+                          var bookRoom = ServerFixture.GetBookRoom();
+                  
+                          await client.PostJsonAsync("/book", bookRoom, cancellationToken: cancellationToken);
+                  
+                          var registerPayment = new RegisterPaymentHttp(bookRoom.BookingId, bookRoom.RoomId, 100, DateTimeOffset.Now);
+                  
+                          var request  = new RestRequest("/v2/pay").AddJsonBody(registerPayment);
+                          var response = await client.ExecutePostAsync<Result<BookingState>.Ok>(request, cancellationToken: cancellationToken);
+                          response.StatusCode.ShouldBe(HttpStatusCode.OK);
+                  
+                          var expected = new BookingEvents.BookingFullyPaid(registerPayment.PaidAt);
+                  
+                          var events = await _fixture.ReadStream<Booking>(bookRoom.BookingId);
+                          var last   = events.LastOrDefault();
+                          last.Payload.ShouldBeEquivalentTo(expected);
+                      }
+                  
+                      static TestEventListener? listener;
+                  
+                      [After(Class)]
+                      public static void Dispose() => listener?.Dispose();
+                  
+                      [Before(Class)]
+                      public static void BeforeClass() => listener = new();
+                  }
+                  
+                  }
+                  """
+            );
+    }
 }
