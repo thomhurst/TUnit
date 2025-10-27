@@ -111,7 +111,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                     // This ensures each retry gets a fresh instance
                     if (test.Context.Events.OnDispose?.InvocationList != null)
                     {
-                        foreach (var invocation in test.Context.Events.OnDispose.InvocationList.OrderBy(x => x.Order))
+                        foreach (var invocation in test.Context.Events.OnDispose.InvocationList)
                         {
                             try
                             {

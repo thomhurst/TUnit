@@ -1,41 +1,14 @@
-﻿using System.Collections.Immutable;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-/// <summary>
-/// Lock-free async event implementation using immutable snapshots for better concurrent performance.
-/// </summary>
 public class AsyncEvent<TEventArgs>
 {
-    public int Order
-    {
-        get;
-        set
-        {
-            field = value;
-
-            var snapshot = _invocationList;
-            if (snapshot.Count > 0)
-            {
-                snapshot[^1].Order = field;
-            }
-        }
-    } = int.MaxValue / 2;
-
-    private volatile ImmutableList<Invocation> _invocationList = ImmutableList<Invocation>.Empty;
-
-    internal ImmutableList<Invocation> InvocationList => _invocationList;
-
-    private static readonly Lock _newEventLock = new();
+    private List<Invocation>? _handlers;
 
     public class Invocation(Func<object, TEventArgs, ValueTask> factory, int order) : IEventReceiver
     {
-        public int Order
-        {
-            get;
-            internal set;
-        } = order;
+        public int Order { get; } = order;
 
         public async ValueTask InvokeAsync(object sender, TEventArgs eventArgs)
         {
@@ -43,54 +16,70 @@ public class AsyncEvent<TEventArgs>
         }
     }
 
-    public static AsyncEvent<TEventArgs> operator +(
-        AsyncEvent<TEventArgs>? e, Func<object, TEventArgs, ValueTask> callback
-        )
+    public void Add(Func<object, TEventArgs, ValueTask> callback, int order = int.MaxValue / 2)
     {
         if (callback == null)
         {
-            throw new NullReferenceException("callback is null");
+            throw new ArgumentNullException(nameof(callback));
         }
 
-        lock (_newEventLock)
+        var invocation = new Invocation(callback, order);
+        var insertIndex = FindInsertionIndex(order);
+        (_handlers ??= []).Insert(insertIndex, invocation);
+    }
+
+    public void AddAt(Func<object, TEventArgs, ValueTask> callback, int index, int order = int.MaxValue / 2)
+    {
+        if (callback == null)
         {
-            e ??= new AsyncEvent<TEventArgs>();
+            throw new ArgumentNullException(nameof(callback));
         }
 
-        // Lock-free add using Interlocked.CompareExchange
-        var newInvocation = new Invocation(callback, e.Order);
-        ImmutableList<Invocation> current, updated;
-        do
+        var invocation = new Invocation(callback, order);
+        var handlers = _handlers ??= [];
+        var clampedIndex = index < 0 ? 0 : (index > handlers.Count ? handlers.Count : index);
+        handlers.Insert(clampedIndex, invocation);
+    }
+
+    public IReadOnlyList<Invocation> InvocationList
+    {
+        get
         {
-            current = e._invocationList;
-            updated = current.Add(newInvocation);
+            if (_handlers == null)
+            {
+                return [];
+            }
+
+            return _handlers;
+
         }
-        while (Interlocked.CompareExchange(ref e._invocationList, updated, current) != current);
-
-        e.Order = int.MaxValue / 2;
-
-        return e;
     }
 
     public AsyncEvent<TEventArgs> InsertAtFront(Func<object, TEventArgs, ValueTask> callback)
     {
-        if (callback == null)
-        {
-            throw new NullReferenceException("callback is null");
-        }
-
-        // Lock-free insert using Interlocked.CompareExchange
-        var newInvocation = new Invocation(callback, Order);
-        ImmutableList<Invocation> current, updated;
-        do
-        {
-            current = _invocationList;
-            updated = current.Insert(0, newInvocation);
-        }
-        while (Interlocked.CompareExchange(ref _invocationList, updated, current) != current);
-
-        Order = int.MaxValue / 2;
-
+        AddAt(callback, 0);
         return this;
+    }
+
+    public static AsyncEvent<TEventArgs> operator +(
+        AsyncEvent<TEventArgs>? e, Func<object, TEventArgs, ValueTask> callback)
+    {
+        e ??= new AsyncEvent<TEventArgs>();
+        e.Add(callback);
+        return e;
+    }
+
+    private int FindInsertionIndex(int order)
+    {
+        int left = 0, right = (_handlers ??= []).Count;
+        while (left < right)
+        {
+            var mid = left + (right - left) / 2;
+            if (_handlers[mid].Order <= order)
+                left = mid + 1;
+            else
+                right = mid;
+        }
+        return left;
     }
 }
