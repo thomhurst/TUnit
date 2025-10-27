@@ -16,7 +16,7 @@ internal sealed class CircularDependencyDetector
     public List<(AbstractExecutableTest Test, List<AbstractExecutableTest> DependencyChain)> DetectCircularDependencies(
         IEnumerable<AbstractExecutableTest> tests)
     {
-        var testList = tests.ToList();
+        var testList = tests as IList<AbstractExecutableTest> ?? tests.ToList();
         var circularDependencies = new List<(AbstractExecutableTest Test, List<AbstractExecutableTest> DependencyChain)>();
         var visitedStates = new Dictionary<string, VisitState>(capacity: testList.Count);
 
@@ -27,7 +27,8 @@ internal sealed class CircularDependencyDetector
                 continue;
             }
 
-            var path = new List<AbstractExecutableTest>();
+            // Typical cycle depth is small (2-5 tests), pre-size to 4
+            var path = new List<AbstractExecutableTest>(4);
             if (HasCycleDfs(test, testList, visitedStates, path))
             {
                 // Found a cycle - add all tests in the cycle to circular dependencies
@@ -47,9 +48,9 @@ internal sealed class CircularDependencyDetector
     }
 
     private bool HasCycleDfs(
-        AbstractExecutableTest test, 
-        List<AbstractExecutableTest> allTests,
-        Dictionary<string, VisitState> visitedStates, 
+        AbstractExecutableTest test,
+        IList<AbstractExecutableTest> allTests,
+        Dictionary<string, VisitState> visitedStates,
         List<AbstractExecutableTest> currentPath)
     {
         if (visitedStates.TryGetValue(test.TestId, out var state))

@@ -15,7 +15,7 @@ public class StopExecutionCapability : IGracefulStopTestExecutionCapability
 
         if (OnStopRequested != null)
         {
-            foreach (var invocation in OnStopRequested.InvocationList.OrderBy(x => x.Order))
+            foreach (var invocation in OnStopRequested.InvocationList)
             {
                 await invocation.InvokeAsync(this, EventArgs.Empty);
             }

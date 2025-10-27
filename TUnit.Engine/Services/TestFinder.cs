@@ -33,11 +33,11 @@ internal class TestFinder : ITestFinder
     /// <summary>
     /// Gets test contexts by name and parameters
     /// </summary>
-    public TestContext[] GetTestsByNameAndParameters(string testName, IEnumerable<Type> methodParameterTypes,
-        Type classType, IEnumerable<Type> classParameterTypes, IEnumerable<object?> classArguments)
+    public TestContext[] GetTestsByNameAndParameters(string testName, IEnumerable<Type>? methodParameterTypes,
+        Type classType, IEnumerable<Type>? classParameterTypes, IEnumerable<object?>? classArguments)
     {
-        var paramTypes = methodParameterTypes?.ToArray() ?? [];
-        var classParamTypes = classParameterTypes?.ToArray() ?? [];
+        var paramTypes = methodParameterTypes as Type[] ?? methodParameterTypes?.ToArray() ?? [];
+        var classParamTypes = classParameterTypes as Type[] ?? classParameterTypes?.ToArray() ?? [];
 
         var allTests = _discoveryService.GetCachedTestContexts();
         var results = new List<TestContext>();
@@ -63,7 +63,7 @@ internal class TestFinder : ITestFinder
                 continue;
             }
 
-            var testParams = test.TestDetails.MethodMetadata.Parameters.ToArray();
+            var testParams = test.TestDetails.MethodMetadata.Parameters;
             var testParamTypes = new Type[testParams.Length];
             for (int i = 0; i < testParams.Length; i++)
             {
@@ -101,10 +101,23 @@ internal class TestFinder : ITestFinder
         return true;
     }
 
-    private bool ClassParametersMatch(TestContext context, Type[] classParamTypes, IEnumerable<object?> classArguments)
+    private bool ClassParametersMatch(TestContext context, Type[] classParamTypes, IEnumerable<object?>? classArguments)
     {
         // For now, just check parameter count
-        var argCount = classArguments?.Count() ?? 0;
+        int argCount;
+        if (classArguments == null)
+        {
+            argCount = 0;
+        }
+        else if (classArguments is ICollection<object?> collection)
+        {
+            argCount = collection.Count;
+        }
+        else
+        {
+            argCount = classArguments.Count();
+        }
+
         var actualArgCount = context.TestDetails?.TestClassArguments?.Length ?? 0;
         return argCount == actualArgCount;
     }

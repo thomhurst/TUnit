@@ -1,3 +1,4 @@
+using System.Buffers;
 using Microsoft.Testing.Platform.CommandLine;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
@@ -83,12 +84,11 @@ internal sealed class TestScheduler : ITestScheduler
         foreach (var (test, dependencyChain) in circularDependencies)
         {
             // Format the error message to match the expected format
-            var simpleNames = dependencyChain.Select(t =>
+            var simpleNames = new List<string>(dependencyChain.Count);
+            foreach (var t in dependencyChain)
             {
-                var className = t.Metadata.TestClassType.Name;
-                var testName = t.Metadata.TestMethodName;
-                return $"{className}.{testName}";
-            }).ToList();
+                simpleNames.Add($"{t.Metadata.TestClassType.Name}.{t.Metadata.TestMethodName}");
+            }
 
             var errorMessage = $"DependsOn Conflict: {string.Join(" > ", simpleNames)}";
             var exception = new CircularDependencyException(errorMessage);
@@ -104,8 +104,17 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
-        var executableTests = testList.Where(t => !testsInCircularDependencies.Contains(t)).ToArray();
-        if (executableTests.Length == 0)
+        var executableTests = new List<AbstractExecutableTest>(testList.Count);
+        foreach (var test in testList)
+        {
+            if (!testsInCircularDependencies.Contains(test))
+            {
+                executableTests.Add(test);
+            }
+        }
+
+        var executableTestsArray = executableTests.ToArray();
+        if (executableTestsArray.Length == 0)
         {
             await _logger.LogDebugAsync("No executable tests found after removing circular dependencies").ConfigureAwait(false);
             return true;
@@ -118,7 +127,7 @@ internal sealed class TestScheduler : ITestScheduler
         _staticPropertyHandler.TrackStaticProperties();
 
         // Group tests by their parallel constraints
-        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
+        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTestsArray).ConfigureAwait(false);
 
         // Execute tests according to their grouping
         await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
@@ -154,9 +163,15 @@ internal sealed class TestScheduler : ITestScheduler
 
         foreach (var group in groupedTests.ParallelGroups)
         {
-            var orderedTests = group.Value.OrderBy(t => t.Key).SelectMany(x => x.Value).ToArray();
-            await _logger.LogDebugAsync($"Starting parallel group '{group.Key}' with {orderedTests.Length} orders").ConfigureAwait(false);
-            await ExecuteTestsAsync(orderedTests, cancellationToken).ConfigureAwait(false);
+            var orderedTests = new List<AbstractExecutableTest>();
+            foreach (var kvp in group.Value.OrderBy(t => t.Key))
+            {
+                orderedTests.AddRange(kvp.Value);
+            }
+            var orderedTestsArray = orderedTests.ToArray();
+
+            await _logger.LogDebugAsync($"Starting parallel group '{group.Key}' with {orderedTestsArray.Length} orders").ConfigureAwait(false);
+            await ExecuteTestsAsync(orderedTestsArray, cancellationToken).ConfigureAwait(false);
         }
 
         foreach (var kvp in groupedTests.ConstrainedParallelGroups)
@@ -205,11 +220,21 @@ internal sealed class TestScheduler : ITestScheduler
         }
         else
         {
-            var tasks = tests.Select(test =>
-                test.ExecutionTask ??= Task.Run(() => ExecuteSingleTestAsync(test, cancellationToken), CancellationToken.None)
-            );
+            var tasks = ArrayPool<Task>.Shared.Rent(tests.Length);
+            try
+            {
+                for (var i = 0; i < tests.Length; i++)
+                {
+                    var test = tests[i];
+                    tasks[i] = test.ExecutionTask ??= Task.Run(() => ExecuteSingleTestAsync(test, cancellationToken), CancellationToken.None);
+                }
 
-            await WaitForTasksWithFailFastHandling(tasks, cancellationToken).ConfigureAwait(false);
+                await WaitForTasksWithFailFastHandling(new ArraySegment<Task>(tasks, 0, tests.Length), cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                ArrayPool<Task>.Shared.Return(tasks);
+            }
         }
     }
 
@@ -260,36 +285,48 @@ internal sealed class TestScheduler : ITestScheduler
         AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)
     {
-        var tasks = tests.Select(async test =>
+        var tasks = ArrayPool<Task>.Shared.Rent(tests.Length);
+        try
         {
-            SemaphoreSlim? parallelLimiterSemaphore = null;
-
-            if (test.Context.ParallelLimiter != null)
+            for (var i = 0; i < tests.Length; i++)
             {
-                parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
-                await parallelLimiterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            try
-            {
-                await _maxParallelismSemaphore!.WaitAsync(cancellationToken).ConfigureAwait(false);
-                try
+                var test = tests[i];
+                tasks[i] = Task.Run(async () =>
                 {
-                    test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken);
-                    await test.ExecutionTask.ConfigureAwait(false);
-                }
-                finally
-                {
-                    _maxParallelismSemaphore.Release();
-                }
-            }
-            finally
-            {
-                parallelLimiterSemaphore?.Release();
-            }
-        });
+                    SemaphoreSlim? parallelLimiterSemaphore = null;
 
-        await WaitForTasksWithFailFastHandling(tasks, cancellationToken).ConfigureAwait(false);
+                    if (test.Context.ParallelLimiter != null)
+                    {
+                        parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
+                        await parallelLimiterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    }
+
+                    try
+                    {
+                        await _maxParallelismSemaphore!.WaitAsync(cancellationToken).ConfigureAwait(false);
+                        try
+                        {
+                            test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken);
+                            await test.ExecutionTask.ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            _maxParallelismSemaphore.Release();
+                        }
+                    }
+                    finally
+                    {
+                        parallelLimiterSemaphore?.Release();
+                    }
+                }, CancellationToken.None);
+            }
+
+            await WaitForTasksWithFailFastHandling(new ArraySegment<Task>(tasks, 0, tests.Length), cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            ArrayPool<Task>.Shared.Return(tasks);
+        }
     }
 
     private async Task WaitForTasksWithFailFastHandling(IEnumerable<Task> tasks, CancellationToken cancellationToken)

@@ -12,7 +12,6 @@ using TUnit.Engine.Utilities;
 
 namespace TUnit.Engine.Services;
 
-/// Optimized event receiver orchestrator with fast-path checks, batching, and lifecycle tracking
 internal sealed class EventReceiverOrchestrator : IDisposable
 {
     private readonly EventReceiverRegistry _registry = new();
@@ -43,23 +42,20 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     public void RegisterReceivers(TestContext context, CancellationToken cancellationToken)
     {
-        var eligibleObjects = context.GetEligibleEventObjects().ToArray();
-
         var objectsToRegister = new List<object>();
 
-        foreach (var obj in eligibleObjects)
+        foreach (var obj in context.GetEligibleEventObjects())
         {
             if (_initializedObjects.Add(obj)) // Add returns false if already present
             {
                 // For First event receivers, only register one instance per type
-                var objType = obj.GetType();
                 bool isFirstEventReceiver = obj is IFirstTestInTestSessionEventReceiver ||
                                            obj is IFirstTestInAssemblyEventReceiver ||
                                            obj is IFirstTestInClassEventReceiver;
 
                 if (isFirstEventReceiver)
                 {
-                    if (_registeredFirstEventReceiverTypes.Add(objType))
+                    if (_registeredFirstEventReceiverTypes.Add(obj.GetType()))
                     {
                         // First instance of this type, register it
                         objectsToRegister.Add(obj);
@@ -97,24 +93,14 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
             context.GetEligibleEventObjects()
                 .OfType<ITestStartEventReceiver>()
                 .OrderBy(static r => r.Order));
 
-        // Batch invocation for multiple receivers
-        if (filteredReceivers.Count > 3)
+        foreach (var receiver in filteredReceivers)
         {
-            await InvokeBatchedAsync(filteredReceivers.ToArray(), r => r.OnTestStart(context), cancellationToken);
-        }
-        else
-        {
-            // Sequential for small counts
-            foreach (var receiver in filteredReceivers)
-            {
-                await receiver.OnTestStart(context);
-            }
+            await receiver.OnTestStart(context);
         }
     }
 
@@ -178,9 +164,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     public async ValueTask InvokeTestDiscoveryEventReceiversAsync(TestContext context, DiscoveredTestContext discoveredContext, CancellationToken cancellationToken)
     {
         var eventReceivers = context.GetEligibleEventObjects()
-            .OfType<ITestDiscoveryEventReceiver>()
-            .OrderBy(static r => r.Order)
-            .ToList();
+            .OfType<ITestDiscoveryEventReceiver>();
 
         // Filter scoped attributes to ensure only the highest priority one of each type is invoked
         var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(eventReceivers);
@@ -427,7 +411,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     /// </summary>
     public void InitializeTestCounts(IEnumerable<TestContext> allTestContexts)
     {
-        var contexts = allTestContexts.ToList();
+        var contexts = allTestContexts as IList<TestContext> ?? allTestContexts.ToList();
         _sessionTestCount = contexts.Count;
 
         // Clear first-event tracking to ensure clean state for each test execution
@@ -438,8 +422,9 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         foreach (var group in contexts.GroupBy(c => c.ClassContext.AssemblyContext.Assembly.GetName().FullName))
         {
             var counter = _assemblyTestCounts.GetOrAdd(group.Key, static _ => new Counter());
+            var groupCount = group.Count();
 
-            for (var i = 0; i < group.Count(); i++)
+            for (var i = 0; i < groupCount; i++)
             {
                 counter.Increment();
             }
@@ -448,39 +433,13 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         foreach (var group in contexts.GroupBy(c => c.ClassContext.ClassType))
         {
             var counter = _classTestCounts.GetOrAdd(group.Key, static _ => new Counter());
+            var groupCount = group.Count();
 
-            for (var i = 0; i < group.Count(); i++)
+            for (var i = 0; i < groupCount; i++)
             {
                 counter.Increment();
             }
         }
-    }
-
-    /// <summary>
-    /// Batch multiple receiver invocations
-    /// </summary>
-    private async ValueTask InvokeBatchedAsync<T>(
-        T[] receivers,
-        Func<T, ValueTask> invoker,
-        CancellationToken cancellationToken) where T : IEventReceiver
-    {
-        // Parallelize for larger counts
-        var tasks = new Task[receivers.Length];
-        for (var i = 0; i < receivers.Length; i++)
-        {
-            var receiver = receivers[i];
-            tasks[i] = InvokeReceiverAsync(receiver, invoker, cancellationToken);
-        }
-
-        await Task.WhenAll(tasks);
-    }
-
-    private async Task InvokeReceiverAsync<T>(
-        T receiver,
-        Func<T, ValueTask> invoker,
-        CancellationToken cancellationToken) where T : IEventReceiver
-    {
-        await invoker(receiver);
     }
 
     public void Dispose()

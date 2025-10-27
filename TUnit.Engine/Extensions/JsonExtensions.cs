@@ -7,27 +7,45 @@ internal static class JsonExtensions
 {
     public static TestSessionJson ToJsonModel(this TestSessionContext context)
     {
+        var assemblies = new TestAssemblyJson[context.Assemblies.Count];
+        for (var i = 0; i < context.Assemblies.Count; i++)
+        {
+            assemblies[i] = context.Assemblies[i].ToJsonModel();
+        }
+
         return new TestSessionJson
         {
-            Assemblies = context.Assemblies.Select(static x => x.ToJsonModel()).ToArray()
+            Assemblies = assemblies
         };
     }
 
     public static TestAssemblyJson ToJsonModel(this AssemblyHookContext context)
     {
+        var classes = new TestClassJson[context.TestClasses.Count];
+        for (var i = 0; i < context.TestClasses.Count; i++)
+        {
+            classes[i] = context.TestClasses[i].ToJsonModel();
+        }
+
         return new TestAssemblyJson
         {
             AssemblyName = context.Assembly.GetName().FullName,
-            Classes = context.TestClasses.Select(static x => x.ToJsonModel()).ToArray()
+            Classes = classes
         };
     }
 
     public static TestClassJson ToJsonModel(this ClassHookContext context)
     {
+        var tests = new TestJson[context.Tests.Count];
+        for (var i = 0; i < context.Tests.Count; i++)
+        {
+            tests[i] = context.Tests[i].ToJsonModel();
+        }
+
         return new TestClassJson
         {
             Type = context.ClassType.FullName,
-            Tests = context.Tests.Select(static x => x.ToJsonModel()).ToArray()
+            Tests = tests
         };
     }
 
@@ -37,6 +55,28 @@ internal static class JsonExtensions
         if (testDetails == null)
         {
             throw new InvalidOperationException("TestDetails is null");
+        }
+
+        Type[]? classParameterTypes = testDetails.TestClassParameterTypes;
+        string[] classParamTypeNames;
+        if (classParameterTypes != null)
+        {
+            classParamTypeNames = new string[classParameterTypes.Length];
+            for (var i = 0; i < classParameterTypes.Length; i++)
+            {
+                classParamTypeNames[i] = classParameterTypes[i].FullName ?? "Unknown";
+            }
+        }
+        else
+        {
+            classParamTypeNames = [];
+        }
+
+        var methodParameters = testDetails.MethodMetadata.Parameters;
+        var methodParamTypeNames = new string[methodParameters.Length];
+        for (var i = 0; i < methodParameters.Length; i++)
+        {
+            methodParamTypeNames[i] = methodParameters[i].Type.FullName ?? "Unknown";
         }
 
         return new TestJson
@@ -58,8 +98,8 @@ internal static class JsonExtensions
             TestFilePath = testDetails.TestFilePath,
             TestLineNumber = testDetails.TestLineNumber,
             TestMethodArguments = testDetails.TestMethodArguments,
-            TestClassParameterTypes = testDetails.TestClassParameterTypes?.Select(static x => x.FullName ?? "Unknown").ToArray() ?? [],
-            TestMethodParameterTypes = testDetails.MethodMetadata.Parameters.Select(static p => p.Type.FullName ?? "Unknown").ToArray(),
+            TestClassParameterTypes = classParamTypeNames,
+            TestMethodParameterTypes = methodParamTypeNames,
         };
     }
 

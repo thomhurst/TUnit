@@ -34,8 +34,9 @@ internal static class CollectionEquivalencyChecker
             return CheckResult.Failure("collection was null");
         }
 
-        var actualList = actual.ToList();
-        var expectedList = expected.ToList();
+        // Optimize for collections that are already lists to avoid re-enumeration
+        var actualList = actual is List<TItem> actualListCasted ? actualListCasted : actual.ToList();
+        var expectedList = expected is List<TItem> expectedListCasted ? expectedListCasted : expected.ToList();
 
         // Check counts first
         if (actualList.Count != expectedList.Count)

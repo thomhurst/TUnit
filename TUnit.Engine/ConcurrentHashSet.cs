@@ -1,122 +1,34 @@
-﻿namespace TUnit.Engine;
+using System.Collections.Concurrent;
 
-internal class ConcurrentHashSet<T>
+namespace TUnit.Engine;
+
+/// <summary>
+/// Thread-safe hash set implementation using ConcurrentDictionary for better performance.
+/// Provides lock-free reads and fine-grained locking for writes.
+/// </summary>
+internal class ConcurrentHashSet<T> where T : notnull
 {
-    private readonly ReaderWriterLockSlim _lock = new(LockRecursionPolicy.SupportsRecursion);
-    private readonly HashSet<T> _hashSet = [];
-
-    #region Implementation of ICollection<T> ...ish
+    private readonly ConcurrentDictionary<T, byte> _dictionary = new();
 
     public bool Add(T item)
     {
-        _lock.EnterWriteLock();
-
-        try
-        {
-            return _hashSet.Add(item);
-        }
-        finally
-        {
-            if (_lock.IsWriteLockHeld)
-            {
-                _lock.ExitWriteLock();
-            }
-        }
+        return _dictionary.TryAdd(item, 0);
     }
 
     public void Clear()
     {
-        _lock.EnterWriteLock();
-
-        try
-        {
-            _hashSet.Clear();
-        }
-        finally
-        {
-            if (_lock.IsWriteLockHeld)
-            {
-                _lock.ExitWriteLock();
-            }
-        }
+        _dictionary.Clear();
     }
 
     public bool Contains(T item)
     {
-        _lock.EnterReadLock();
-
-        try
-        {
-            return _hashSet.Contains(item);
-        }
-        finally
-        {
-            if (_lock.IsReadLockHeld)
-            {
-                _lock.ExitReadLock();
-            }
-        }
+        return _dictionary.ContainsKey(item);
     }
 
     public bool Remove(T item)
     {
-        _lock.EnterWriteLock();
-
-        try
-        {
-            return _hashSet.Remove(item);
-        }
-        finally
-        {
-            if (_lock.IsWriteLockHeld)
-            {
-                _lock.ExitWriteLock();
-            }
-        }
+        return _dictionary.TryRemove(item, out _);
     }
 
-    public int Count
-    {
-        get
-        {
-            _lock.EnterReadLock();
-
-            try
-            {
-                return _hashSet.Count;
-            }
-            finally
-            {
-                if (_lock.IsReadLockHeld)
-                {
-                    _lock.ExitReadLock();
-                }
-            }
-        }
-    }
-
-    #endregion
-
-    #region Dispose
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _lock.Dispose();
-        }
-    }
-
-    ~ConcurrentHashSet()
-    {
-        Dispose(false);
-    }
-
-    #endregion
+    public int Count => _dictionary.Count;
 }

@@ -54,7 +54,7 @@ internal sealed class HookCollectionService : IHookCollectionService
 
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildGlobalBeforeEveryTestHooksAsync()
     {
-        var allHooks = new List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)>();
+        var allHooks = new List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)>(Sources.BeforeEveryTestHooks.Count);
 
         foreach (var hook in Sources.BeforeEveryTestHooks)
         {
@@ -71,7 +71,7 @@ internal sealed class HookCollectionService : IHookCollectionService
 
     private async Task<IReadOnlyList<Func<TestContext, CancellationToken, Task>>> BuildGlobalAfterEveryTestHooksAsync()
     {
-        var allHooks = new List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)>();
+        var allHooks = new List<(int order, int registrationIndex, Func<TestContext, CancellationToken, Task> hook)>(Sources.AfterEveryTestHooks.Count);
 
         foreach (var hook in Sources.AfterEveryTestHooks)
         {
@@ -88,7 +88,7 @@ internal sealed class HookCollectionService : IHookCollectionService
 
     private IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>> BuildGlobalBeforeTestSessionHooks()
     {
-        var allHooks = new List<(int order, int registrationIndex, Func<TestSessionContext, CancellationToken, Task> hook)>();
+        var allHooks = new List<(int order, int registrationIndex, Func<TestSessionContext, CancellationToken, Task> hook)>(Sources.BeforeTestSessionHooks.Count);
 
         foreach (var hook in Sources.BeforeTestSessionHooks)
         {
@@ -105,7 +105,7 @@ internal sealed class HookCollectionService : IHookCollectionService
 
     private IReadOnlyList<Func<TestSessionContext, CancellationToken, Task>> BuildGlobalAfterTestSessionHooks()
     {
-        var allHooks = new List<(int order, int registrationIndex, Func<TestSessionContext, CancellationToken, Task> hook)>();
+        var allHooks = new List<(int order, int registrationIndex, Func<TestSessionContext, CancellationToken, Task> hook)>(Sources.AfterTestSessionHooks.Count);
 
         foreach (var hook in Sources.AfterTestSessionHooks)
         {
@@ -122,7 +122,7 @@ internal sealed class HookCollectionService : IHookCollectionService
 
     private IReadOnlyList<Func<BeforeTestDiscoveryContext, CancellationToken, Task>> BuildGlobalBeforeTestDiscoveryHooks()
     {
-        var allHooks = new List<(int order, int registrationIndex, Func<BeforeTestDiscoveryContext, CancellationToken, Task> hook)>();
+        var allHooks = new List<(int order, int registrationIndex, Func<BeforeTestDiscoveryContext, CancellationToken, Task> hook)>(Sources.BeforeTestDiscoveryHooks.Count);
 
         foreach (var hook in Sources.BeforeTestDiscoveryHooks)
         {
@@ -139,7 +139,7 @@ internal sealed class HookCollectionService : IHookCollectionService
 
     private IReadOnlyList<Func<TestDiscoveryContext, CancellationToken, Task>> BuildGlobalAfterTestDiscoveryHooks()
     {
-        var allHooks = new List<(int order, int registrationIndex, Func<TestDiscoveryContext, CancellationToken, Task> hook)>();
+        var allHooks = new List<(int order, int registrationIndex, Func<TestDiscoveryContext, CancellationToken, Task> hook)>(Sources.AfterTestDiscoveryHooks.Count);
 
         foreach (var hook in Sources.AfterTestDiscoveryHooks)
         {
@@ -156,7 +156,7 @@ internal sealed class HookCollectionService : IHookCollectionService
 
     private IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> BuildGlobalBeforeEveryClassHooks()
     {
-        var allHooks = new List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)>();
+        var allHooks = new List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)>(Sources.BeforeEveryClassHooks.Count);
 
         foreach (var hook in Sources.BeforeEveryClassHooks)
         {
@@ -173,7 +173,7 @@ internal sealed class HookCollectionService : IHookCollectionService
 
     private IReadOnlyList<Func<ClassHookContext, CancellationToken, Task>> BuildGlobalAfterEveryClassHooks()
     {
-        var allHooks = new List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)>();
+        var allHooks = new List<(int order, int registrationIndex, Func<ClassHookContext, CancellationToken, Task> hook)>(Sources.AfterEveryClassHooks.Count);
 
         foreach (var hook in Sources.AfterEveryClassHooks)
         {
@@ -190,7 +190,7 @@ internal sealed class HookCollectionService : IHookCollectionService
 
     private IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>> BuildGlobalBeforeEveryAssemblyHooks()
     {
-        var allHooks = new List<(int order, int registrationIndex, Func<AssemblyHookContext, CancellationToken, Task> hook)>();
+        var allHooks = new List<(int order, int registrationIndex, Func<AssemblyHookContext, CancellationToken, Task> hook)>(Sources.BeforeEveryAssemblyHooks.Count);
 
         foreach (var hook in Sources.BeforeEveryAssemblyHooks)
         {
@@ -207,7 +207,7 @@ internal sealed class HookCollectionService : IHookCollectionService
 
     private IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>> BuildGlobalAfterEveryAssemblyHooks()
     {
-        var allHooks = new List<(int order, int registrationIndex, Func<AssemblyHookContext, CancellationToken, Task> hook)>();
+        var allHooks = new List<(int order, int registrationIndex, Func<AssemblyHookContext, CancellationToken, Task> hook)>(Sources.AfterEveryAssemblyHooks.Count);
 
         foreach (var hook in Sources.AfterEveryAssemblyHooks)
         {
@@ -530,15 +530,17 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         var hooks = _beforeAssemblyHooksCache.GetOrAdd(assembly, asm =>
         {
-            var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>();
-
-            if (Sources.BeforeAssemblyHooks.TryGetValue(asm, out var assemblyHooks))
+            if (!Sources.BeforeAssemblyHooks.TryGetValue(asm, out var assemblyHooks))
             {
-                foreach (var hook in assemblyHooks)
-                {
-                    var hookFunc = CreateAssemblyHookDelegate(hook);
-                    allHooks.Add((hook.Order, hookFunc));
-                }
+                return [];
+            }
+
+            var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>(assemblyHooks.Count);
+
+            foreach (var hook in assemblyHooks)
+            {
+                var hookFunc = CreateAssemblyHookDelegate(hook);
+                allHooks.Add((hook.Order, hookFunc));
             }
 
             return allHooks
@@ -554,15 +556,17 @@ internal sealed class HookCollectionService : IHookCollectionService
     {
         var hooks = _afterAssemblyHooksCache.GetOrAdd(assembly, asm =>
         {
-            var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>();
-
-            if (Sources.AfterAssemblyHooks.TryGetValue(asm, out var assemblyHooks))
+            if (!Sources.AfterAssemblyHooks.TryGetValue(asm, out var assemblyHooks))
             {
-                foreach (var hook in assemblyHooks)
-                {
-                    var hookFunc = CreateAssemblyHookDelegate(hook);
-                    allHooks.Add((hook.Order, hookFunc));
-                }
+                return [];
+            }
+
+            var allHooks = new List<(int order, Func<AssemblyHookContext, CancellationToken, Task> hook)>(assemblyHooks.Count);
+
+            foreach (var hook in assemblyHooks)
+            {
+                var hookFunc = CreateAssemblyHookDelegate(hook);
+                allHooks.Add((hook.Order, hookFunc));
             }
 
             return allHooks

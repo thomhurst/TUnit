@@ -169,7 +169,9 @@ namespace
     public class AsyncEvent<TEventArgs>
     {
         public AsyncEvent() { }
-        public int Order { get; set; }
+        public .<.AsyncEvent<TEventArgs>.Invocation> InvocationList { get; }
+        public void Add(<object, TEventArgs, .> callback, int order = 1073741823) { }
+        public void AddAt(<object, TEventArgs, .> callback, int index, int order = 1073741823) { }
         public .AsyncEvent<TEventArgs> InsertAtFront(<object, TEventArgs, .> callback) { }
         public static .AsyncEvent<TEventArgs> operator +(.AsyncEvent<TEventArgs>? e, <object, TEventArgs, .> callback) { }
         public class Invocation : .
