@@ -802,6 +802,11 @@ internal sealed class TestBuilder : ITestBuilder
 
         await InvokeDiscoveryEventReceiversAsync(context);
 
+        // Clear the cached display name after discovery events
+        // This ensures that ArgumentDisplayFormatterAttribute and similar attributes
+        // have a chance to register their formatters before the display name is finalized
+        context.InvalidateDisplayNameCache();
+
         return test;
     }
 
