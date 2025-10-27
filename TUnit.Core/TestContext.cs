@@ -242,6 +242,15 @@ public class TestContext : Context
         return _cachedDisplayName;
     }
 
+    /// <summary>
+    /// Clears the cached display name, forcing it to be recomputed on next access.
+    /// This is called after discovery event receivers run to ensure custom argument formatters are applied.
+    /// </summary>
+    internal void InvalidateDisplayNameCache()
+    {
+        _cachedDisplayName = null;
+    }
+
     public Dictionary<string, object?> ObjectBag => _testBuilderContext.ObjectBag;
 
     public bool ReportResult { get; set; } = true;
