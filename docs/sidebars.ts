@@ -148,6 +148,15 @@ const sidebars: SidebarsConfig = {
       ],
     },
     {
+        type: 'category',
+        label: 'Advanced',
+        items: [
+            'advanced/exception-handling',
+            'advanced/extension-points',
+            'advanced/performance-best-practices',
+        ],
+    },
+    {
       type: 'category',
       label: 'Migration Guides',
       items: [
