@@ -22,7 +22,7 @@ If you want to override this, you can inherit from `TUnitLogger` or `DefaultLogg
 ```
 
 ## Log Level Command Line
-If you are executing tests via the command line, you can set the log level via the `--loglevel` argument:
+If you are executing tests via the command line, you can set the log level via the `--log-level` argument:
 
 ```
 dotnet run --log-level Warning
