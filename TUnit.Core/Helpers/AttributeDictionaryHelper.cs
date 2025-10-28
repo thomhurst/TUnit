@@ -7,6 +7,9 @@ namespace TUnit.Core.Helpers;
 /// </summary>
 public static class AttributeDictionaryHelper
 {
+    private static readonly IReadOnlyDictionary<Type, IReadOnlyList<Attribute>> EmptyDictionary =
+        new ReadOnlyDictionary<Type, IReadOnlyList<Attribute>>(new Dictionary<Type, IReadOnlyList<Attribute>>());
+
     /// <summary>
     /// Converts an array of attributes to a read-only dictionary grouped by type.
     /// </summary>
@@ -14,7 +17,7 @@ public static class AttributeDictionaryHelper
     {
         if (attributes.Length == 0)
         {
-            return [];
+            return EmptyDictionary;
         }
 
         var dictionary = new Dictionary<Type, IReadOnlyList<Attribute>>();
@@ -44,5 +47,5 @@ public static class AttributeDictionaryHelper
     /// <summary>
     /// Gets an empty read-only attribute dictionary.
     /// </summary>
-    public static IReadOnlyDictionary<Type, IReadOnlyList<Attribute>> Empty => [];
+    public static IReadOnlyDictionary<Type, IReadOnlyList<Attribute>> Empty => EmptyDictionary;
 }

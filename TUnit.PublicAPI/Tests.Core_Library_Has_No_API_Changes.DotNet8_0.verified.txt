@@ -1374,7 +1374,7 @@ namespace
     public class TestDetails
     {
         public TestDetails() { }
-        public required .<> Attributes { get; init; }
+        public required .<, .<>> AttributesByType { get; init; }
         public .<string> Categories { get; }
         public [] ClassGenericArguments { get; set; }
         public required object ClassInstance { get; set; }
@@ -1396,6 +1396,11 @@ namespace
         public required object?[] TestMethodArguments { get; set; }
         public required string TestName { get; init; }
         public ? Timeout { get; set; }
+        public .<> GetAllAttributes() { }
+        public .<T> GetAttributes<T>()
+            where T :  { }
+        public bool HasAttribute<T>()
+            where T :  { }
     }
     public class TestDetails<T> : .TestDetails
         where T :  class
@@ -1906,6 +1911,11 @@ namespace .Helpers
         public static string Format(object? o, .<<object?, string?>> formatters) { }
         public static string FormatArguments(.<object?> arguments) { }
         public static string GetConstantValue(.TestContext testContext, object? o) { }
+    }
+    public static class AttributeDictionaryHelper
+    {
+        public static .<, .<>> Empty { get; }
+        public static .<, .<>> ToAttributeDictionary(this [] attributes) { }
     }
     public static class CastHelper
     {
