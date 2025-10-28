@@ -129,4 +129,16 @@ public class AssertionFromAttribute : Attribute
     /// When false (default), the generator automatically determines the pattern.
     /// </summary>
     public bool TreatAsInstance { get; set; }
+
+    /// <summary>
+    /// Optional custom expectation message shown in assertion failures.
+    /// If not specified, a default message based on the method name will be used.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// [AssertionFrom(typeof(double), "IsNaN", ExpectationMessage = "be NaN")]
+    /// // Generates failure message: "Expected value to be NaN"
+    /// </code>
+    /// </example>
+    public string? ExpectationMessage { get; set; }
 }
