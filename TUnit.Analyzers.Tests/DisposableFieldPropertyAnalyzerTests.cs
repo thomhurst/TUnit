@@ -505,15 +505,49 @@ public class DisposableFieldPropertyAnalyzerTests
         await Verifier
             .VerifyAnalyzerAsync(
                 $$"""
+                  using System;
+                  using System.Linq;
+                  using System.Net;
                   using System.Net.Http;
+                  using System.Threading;
+                  using System.Threading.Tasks;
                   using TUnit.Core;
-                  
+
+                  record RegisterPaymentHttp(string BookingId, string RoomId, decimal Amount, DateTimeOffset PaidAt);
+                  record BookingState;
+                  class Result<T> { public class Ok { public HttpStatusCode StatusCode { get; set; } } }
+                  class BookingEvents { public record BookingFullyPaid(DateTimeOffset PaidAt); }
+                  class Booking { public object Payload { get; set; } = null!; }
+                  class RestRequest {
+                      public RestRequest(string path) { }
+                      public RestRequest AddJsonBody(object obj) => this;
+                  }
+                  class ServerFixture {
+                      public HttpClient GetClient() => null!;
+                      public static BookRoom GetBookRoom() => null!;
+                      public Task<System.Collections.Generic.IEnumerable<Booking>> ReadStream<T>(string id) => Task.FromResult(Enumerable.Empty<Booking>());
+                  }
+                  class BookRoom {
+                      public string BookingId => string.Empty;
+                      public string RoomId => string.Empty;
+                  }
+                  class TestEventListener : IDisposable {
+                      public void Dispose() { }
+                  }
+                  static class HttpClientExtensions {
+                      public static Task PostJsonAsync(this HttpClient client, string path, object body, CancellationToken cancellationToken) => Task.CompletedTask;
+                      public static Task<TResult> ExecutePostAsync<TResult>(this HttpClient client, RestRequest request, CancellationToken cancellationToken) => Task.FromResult<TResult>(default!);
+                  }
+                  static class ObjectExtensions {
+                      public static void ShouldBe(this object obj, object expected) { }
+                      public static void ShouldBeEquivalentTo(this object obj, object expected) { }
+                  }
+
                   [ClassDataSource<string>]
                   public class ControllerTests {
-                      readonly ServerFixture _fixture;
-                  
+                      readonly ServerFixture _fixture = null!;
+
                       public ControllerTests(string value) {
-                          listener = new();
                       }
                   
                       [Test]
@@ -534,18 +568,16 @@ public class DisposableFieldPropertyAnalyzerTests
                   
                           var events = await _fixture.ReadStream<Booking>(bookRoom.BookingId);
                           var last   = events.LastOrDefault();
-                          last.Payload.ShouldBeEquivalentTo(expected);
+                          last!.Payload.ShouldBeEquivalentTo(expected);
                       }
                   
                       static TestEventListener? listener;
-                  
-                      [After(Class)]
+
+                      [After(HookType.{{hook}})]
                       public static void Dispose() => listener?.Dispose();
-                  
-                      [Before(Class)]
+
+                      [Before(HookType.{{hook}})]
                       public static void BeforeClass() => listener = new();
-                  }
-                  
                   }
                   """
             );
