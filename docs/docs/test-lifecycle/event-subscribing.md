@@ -37,11 +37,12 @@ public class DependencyInjectionClassConstructor : IClassConstructor, ITestEndEv
     private readonly IServiceProvider _serviceProvider = CreateServiceProvider();
     private AsyncServiceScope _scope;
     
-    public T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>() where T : class
+    public Task<object> Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type type, ClassConstructorMetadata classConstructorMetadata)
     {
         _scope = _serviceProvider.CreateAsyncScope();
-        
-        return ActivatorUtilities.GetServiceOrCreateInstance<T>(_scope.ServiceProvider);
+
+        var instance = ActivatorUtilities.GetServiceOrCreateInstance(_scope.ServiceProvider, type);
+        return Task.FromResult(instance);
     }
 
     public ValueTask OnTestEnd(TestContext testContext)

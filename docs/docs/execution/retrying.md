@@ -43,7 +43,7 @@ public class RetryTransientHttpAttribute : RetryAttribute
     {
     }
 
-    public override Task<bool> ShouldRetry(TestInformation testInformation, Exception exception)
+    public override Task<bool> ShouldRetry(TestContext context, Exception exception, int currentRetryCount)
     {
         if (exception is HttpRequestException requestException)
         {

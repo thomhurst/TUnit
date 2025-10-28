@@ -69,7 +69,7 @@ public class MyTestClass
     [After(Test)]
     public async Task AfterEachTest()
     {
-        await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current.TestInformation.TestName}");
+        await new HttpClient().GetAsync($"https://localhost/test-finished-notifier?testName={TestContext.Current.TestDetails.TestName}");
     }
 
     [Test]
