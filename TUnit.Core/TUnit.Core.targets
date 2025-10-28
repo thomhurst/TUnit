@@ -55,4 +55,13 @@
         <PackageReference Include="System.ValueTuple" VersionOverride="$(_TUnitSystemValueTupleVersion)" />
     </ItemGroup>
 
+    <!-- Validate System.ValueTuple availability and provide helpful messages if issues occur -->
+    <Target Name="_TUnitEnsureSystemValueTuple"
+            BeforeTargets="GenerateBuildDependencyFile"
+            Condition="'$(_TUnitNeedsSystemValueTuple)' == 'true'">
+        <Warning Condition="!Exists('$(NuGetPackageRoot)system.valuetuple')"
+                 Code="TUNIT002"
+                 Text="TUnit attempted to automatically add System.ValueTuple package for $(TargetFramework) but it may not be available. This package is required for .NET Framework projects. If you encounter runtime errors, you can manually add it with: &lt;PackageReference Include=&quot;System.ValueTuple&quot; Version=&quot;4.5.0&quot; /&gt;" />
+    </Target>
+
 </Project>
