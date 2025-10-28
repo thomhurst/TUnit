@@ -75,6 +75,10 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             {
                 continue;
             }
+
+                // Track if this is an unbound generic type for special handling
+                var isUnboundGeneric = containingType.IsUnboundGenericType;
+
                 string? customName = null;
                 if (attributeData.NamedArguments.Any(na => na.Key == "CustomName"))
                 {
@@ -123,7 +127,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     negateLogic,
                     requiresGenericTypeParameter,
                     treatAsInstance,
-                    expectationMessage
+                    expectationMessage,
+                    isUnboundGeneric
                 );
 
                 attributeDataList.Add(new AttributeWithClassData(classSymbol, createAssertionAttributeData));
@@ -199,6 +204,9 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     continue;
                 }
 
+                // Track if this is an unbound generic type for special handling
+                var isUnboundGeneric = containingType.IsUnboundGenericType;
+
                 string? customName = null;
                 bool negateLogic = false;
                 bool requiresGenericTypeParameter = false;
@@ -235,7 +243,8 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                     negateLogic,
                     requiresGenericTypeParameter,
                     treatAsInstance,
-                    expectationMessage
+                    expectationMessage,
+                    isUnboundGeneric
                 );
 
                 attributeDataList.Add(new AttributeWithClassData(classSymbol, createAssertionAttributeData));
@@ -360,8 +369,33 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         {
             var attributeData = attributeWithClassData.AttributeData;
 
+            // For unbound generic types, we need to temporarily construct them for member lookup
+            var typeForMemberLookup = attributeData.ContainingType;
+            if (attributeData.IsUnboundGeneric && typeForMemberLookup.IsUnboundGenericType)
+            {
+                // Get System.Object by searching through the type's containing assembly references
+                INamedTypeSymbol? objectType = null;
+
+                // Look through the referenced assemblies to find System.Object
+                foreach (var refAssembly in typeForMemberLookup.ContainingAssembly.Modules.FirstOrDefault()?.ReferencedAssemblySymbols ?? Enumerable.Empty<IAssemblySymbol>())
+                {
+                    var systemNs = refAssembly.GlobalNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "System");
+                    if (systemNs != null)
+                    {
+                        objectType = systemNs.GetTypeMembers("Object").FirstOrDefault();
+                        if (objectType != null) break;
+                    }
+                }
+
+                if (objectType != null)
+                {
+                    var typeArgs = Enumerable.Repeat<ITypeSymbol>(objectType, typeForMemberLookup.TypeParameters.Length).ToArray();
+                    typeForMemberLookup = typeForMemberLookup.Construct(typeArgs);
+                }
+            }
+
             // First try to find methods
-            var methodMembers = attributeData.ContainingType.GetMembers(attributeData.MethodName)
+            var methodMembers = typeForMemberLookup.GetMembers(attributeData.MethodName)
                 .OfType<IMethodSymbol>()
                 .Where(m => IsValidReturnType(m.ReturnType, out _) &&
                            (attributeData.TreatAsInstance ?
@@ -385,10 +419,10 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             var propertyMembers = new List<IPropertySymbol>();
             if (!methodMembers.Any())
             {
-                propertyMembers = attributeData.ContainingType.GetMembers(attributeData.MethodName)
+                propertyMembers = typeForMemberLookup.GetMembers(attributeData.MethodName)
                     .OfType<IPropertySymbol>()
                     .Where(p => p.Type.SpecialType == SpecialType.System_Boolean &&
-                        p is { GetMethod: not null, IsStatic: false } && SymbolEqualityComparer.Default.Equals(p.ContainingType, attributeData.TargetType))
+                        p is { GetMethod: not null, IsStatic: false })
                     .ToList();
             }
 
@@ -405,15 +439,20 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 
             if (!matchingMethods.Any())
             {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    new DiagnosticDescriptor(
-                        "TU0001",
-                        "Method not found",
-                        $"No boolean method '{attributeData.MethodName}' found on type '{attributeData.ContainingType.ToDisplayString()}'",
-                        "TUnit.Assertions",
-                        DiagnosticSeverity.Error,
-                        true),
-                    Location.None));
+                // For unbound generic types, we'll generate generic methods even if we can't find the property now
+                // The property will exist on the constructed type at runtime
+                if (!attributeData.IsUnboundGeneric)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        new DiagnosticDescriptor(
+                            "TU0001",
+                            "Method not found",
+                            $"No boolean method '{attributeData.MethodName}' found on type '{attributeData.ContainingType.ToDisplayString()}'",
+                            "TUnit.Assertions",
+                            DiagnosticSeverity.Error,
+                            true),
+                        Location.None));
+                }
                 continue;
             }
 
@@ -556,6 +595,21 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             // Generate: public class TaskIsCompletedAssertion<TTask> : Assertion<TTask> where TTask : System.Threading.Tasks.Task
             sourceBuilder.AppendLine($"public class {className}<TTask> : Assertion<TTask>");
             sourceBuilder.AppendLine($"    where TTask : {targetTypeName}");
+        }
+        else if (attributeData.IsUnboundGeneric)
+        {
+            // For unbound generic types like Memory<T>, generate generic assertion class
+            // Generate type parameter names: T, T1, T2, etc.
+            var typeParamCount = attributeData.TargetType.TypeParameters.Length;
+            var typeParamNames = typeParamCount == 1 ? new[] { "T" } :
+                                 Enumerable.Range(1, typeParamCount).Select(i => $"T{i}").ToArray();
+            var typeParamsList = string.Join(", ", typeParamNames);
+
+            // Generate assertion class with generic parameters
+            // Example: public class MemoryIsEmptyAssertion<T> : Assertion<Memory<T>>
+            var unboundTypeName = attributeData.TargetType.Name;  // e.g., "Memory"
+            var constructedTargetType = $"{unboundTypeName}<{typeParamsList}>";  // e.g., "Memory<T>"
+            sourceBuilder.AppendLine($"public class {className}<{typeParamsList}> : Assertion<{constructedTargetType}>");
         }
         else if (hasMethodTypeParameters)
         {
@@ -1062,6 +1116,19 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             // For Task, generate a generic method that works with Task and Task<T>
             sourceBuilder.Append($"    public static {assertConditionClassName}<TTask> {generatedMethodName}<TTask>(this IAssertionSource<TTask> source");
         }
+        else if (attributeData.IsUnboundGeneric)
+        {
+            // For unbound generic types like Memory<T>, generate generic extension method
+            var typeParamCount = attributeData.TargetType.TypeParameters.Length;
+            var typeParamNames = typeParamCount == 1 ? new[] { "T" } :
+                                 Enumerable.Range(1, typeParamCount).Select(i => $"T{i}").ToArray();
+            var typeParamsList = string.Join(", ", typeParamNames);
+
+            var unboundTypeName = attributeData.TargetType.Name;
+            var constructedTargetType = $"{unboundTypeName}<{typeParamsList}>";
+            // Example: public static MemoryIsEmptyAssertion<T> IsEmpty<T>(this IAssertionSource<Memory<T>> source
+            sourceBuilder.Append($"    public static {assertConditionClassName}<{typeParamsList}> {generatedMethodName}<{typeParamsList}>(this IAssertionSource<{constructedTargetType}> source");
+        }
         else if (hasMethodTypeParameters)
         {
             // Method has generic type parameters - include them in the extension method
@@ -1161,6 +1228,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         bool NegateLogic,
         bool RequiresGenericTypeParameter,
         bool TreatAsInstance,
-        string? ExpectationMessage
+        string? ExpectationMessage,
+        bool IsUnboundGeneric
     );
 }

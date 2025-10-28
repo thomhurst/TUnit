@@ -223,6 +223,7 @@ namespace .Attributes
         public AssertionFromAttribute( targetType,  containingType, string methodName) { }
         public ? ContainingType { get; }
         public string? CustomName { get; set; }
+        public string? ExpectationMessage { get; set; }
         public string MethodName { get; }
         public bool NegateLogic { get; set; }
         public bool RequiresGenericTypeParameter { get; set; }
@@ -335,6 +336,15 @@ namespace .Conditions
         public .<TValue> InclusiveMaximum() { }
         public .<TValue> InclusiveMinimum() { }
     }
+    [.<.BigInteger>("IsEven", CustomName="IsNotEven", ExpectationMessage="be even", NegateLogic=true)]
+    [.<.BigInteger>("IsEven", ExpectationMessage="be even")]
+    [.<.BigInteger>("IsOne", CustomName="IsNotOne", ExpectationMessage="be one", NegateLogic=true)]
+    [.<.BigInteger>("IsOne", ExpectationMessage="be one")]
+    [.<.BigInteger>("IsPowerOfTwo", CustomName="IsNotPowerOfTwo", ExpectationMessage="be a power of two", NegateLogic=true)]
+    [.<.BigInteger>("IsPowerOfTwo", ExpectationMessage="be a power of two")]
+    [.<.BigInteger>("IsZero", CustomName="IsNotZero", ExpectationMessage="be zero", NegateLogic=true)]
+    [.<.BigInteger>("IsZero", ExpectationMessage="be zero")]
+    public static class BigIntegerAssertionExtensions { }
     public static class BooleanAssertionExtensions
     {
         [.(ExpectationMessage="to be false")]
@@ -548,6 +558,13 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<object?> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.<.Cookie>("Expired", CustomName="IsNotExpired", ExpectationMessage="be expired", NegateLogic=true)]
+    [.<.Cookie>("Expired", ExpectationMessage="be expired")]
+    [.<.Cookie>("HttpOnly", CustomName="IsNotHttpOnly", ExpectationMessage="be HTTP-only", NegateLogic=true)]
+    [.<.Cookie>("HttpOnly", ExpectationMessage="be HTTP-only")]
+    [.<.Cookie>("Secure", CustomName="IsNotSecure", ExpectationMessage="be secure", NegateLogic=true)]
+    [.<.Cookie>("Secure", ExpectationMessage="be secure")]
+    public static class CookieAssertionExtensions { }
     [.<.CultureInfo>("IsNeutralCulture", CustomName="IsNotNeutralCulture", ExpectationMessage="be a neutral culture", NegateLogic=true)]
     [.<.CultureInfo>("IsNeutralCulture", ExpectationMessage="be a neutral culture")]
     [.<.CultureInfo>("IsReadOnly", ExpectationMessage="be read-only culture")]
@@ -754,6 +771,21 @@ namespace .Conditions
         [.(ExpectationMessage="to be a system directory")]
         public static bool IsSystemDirectory(this .DirectoryInfo value) { }
     }
+    [.<double>("IsFinite", CustomName="IsNotFinite", ExpectationMessage="be finite", NegateLogic=true)]
+    [.<double>("IsFinite", ExpectationMessage="be finite")]
+    [.<double>("IsInfinity", CustomName="IsNotInfinity", ExpectationMessage="be infinity", NegateLogic=true)]
+    [.<double>("IsInfinity", ExpectationMessage="be infinity")]
+    [.<double>("IsNaN", CustomName="IsNotNaN", ExpectationMessage="be NaN", NegateLogic=true)]
+    [.<double>("IsNaN", ExpectationMessage="be NaN")]
+    [.<double>("IsNegativeInfinity", CustomName="IsNotNegativeInfinity", ExpectationMessage="be negative infinity", NegateLogic=true)]
+    [.<double>("IsNegativeInfinity", ExpectationMessage="be negative infinity")]
+    [.<double>("IsNormal", CustomName="IsNotNormal", ExpectationMessage="be normal", NegateLogic=true)]
+    [.<double>("IsNormal", ExpectationMessage="be normal")]
+    [.<double>("IsPositiveInfinity", CustomName="IsNotPositiveInfinity", ExpectationMessage="be positive infinity", NegateLogic=true)]
+    [.<double>("IsPositiveInfinity", ExpectationMessage="be positive infinity")]
+    [.<double>("IsSubnormal", CustomName="IsNotSubnormal", ExpectationMessage="be subnormal", NegateLogic=true)]
+    [.<double>("IsSubnormal", ExpectationMessage="be subnormal")]
+    public static class DoubleAssertionExtensions { }
     [.("IsEqualTo", OverloadResolutionPriority=2)]
     public class DoubleEqualsAssertion : .<double, double>
     {
@@ -971,6 +1003,9 @@ namespace .Conditions
         public .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
     }
+    [.<.>("IsSuccessStatusCode", CustomName="IsNotSuccessStatusCode", ExpectationMessage="have a success status code", NegateLogic=true)]
+    [.<.>("IsSuccessStatusCode", ExpectationMessage="have a success status code")]
+    public static class HttpResponseMessageAssertionExtensions { }
     public static class HttpStatusCodeAssertionExtensions
     {
         [.(ExpectationMessage="to be a client error status code (4xx)")]
@@ -1215,6 +1250,9 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.(typeof(int?), "HasValue", CustomName="DoesNotHaveValue", ExpectationMessage="have a value", NegateLogic=true)]
+    [.(typeof(int?), "HasValue", ExpectationMessage="have a value")]
+    public static class NullableAssertionExtensions { }
     [.("IsEquatableTo")]
     public class NullableEquatableAssertion<TActual, TExpected> : .<TActual?>
         where TActual :  struct, <TExpected>
@@ -1241,6 +1279,33 @@ namespace .Conditions
         [.(ExpectationMessage="to be the all range")]
         public static bool IsAll(this  value) { }
     }
+    [.<.Rune>("IsAscii", CustomName="IsNotAscii", ExpectationMessage="be ASCII", NegateLogic=true)]
+    [.<.Rune>("IsAscii", ExpectationMessage="be ASCII")]
+    [.<.Rune>("IsBmp", CustomName="IsNotBmp", ExpectationMessage="be in the Basic Multilingual Plane", NegateLogic=true)]
+    [.<.Rune>("IsBmp", ExpectationMessage="be in the Basic Multilingual Plane")]
+    [.<.Rune>(typeof(.Rune), "IsControl", CustomName="IsNotControl", ExpectationMessage="be a control character", NegateLogic=true)]
+    [.<.Rune>(typeof(.Rune), "IsControl", ExpectationMessage="be a control character")]
+    [.<.Rune>(typeof(.Rune), "IsDigit", CustomName="IsNotDigit", ExpectationMessage="be a digit", NegateLogic=true)]
+    [.<.Rune>(typeof(.Rune), "IsDigit", ExpectationMessage="be a digit")]
+    [.<.Rune>(typeof(.Rune), "IsLetter", CustomName="IsNotLetter", ExpectationMessage="be a letter", NegateLogic=true)]
+    [.<.Rune>(typeof(.Rune), "IsLetter", ExpectationMessage="be a letter")]
+    [.<.Rune>(typeof(.Rune), "IsLetterOrDigit", CustomName="IsNotLetterOrDigit", ExpectationMessage="be a letter or digit", NegateLogic=true)]
+    [.<.Rune>(typeof(.Rune), "IsLetterOrDigit", ExpectationMessage="be a letter or digit")]
+    [.<.Rune>(typeof(.Rune), "IsLower", CustomName="IsNotLower", ExpectationMessage="be lowercase", NegateLogic=true)]
+    [.<.Rune>(typeof(.Rune), "IsLower", ExpectationMessage="be lowercase")]
+    [.<.Rune>(typeof(.Rune), "IsNumber", CustomName="IsNotNumber", ExpectationMessage="be a number", NegateLogic=true)]
+    [.<.Rune>(typeof(.Rune), "IsNumber", ExpectationMessage="be a number")]
+    [.<.Rune>(typeof(.Rune), "IsPunctuation", CustomName="IsNotPunctuation", ExpectationMessage="be punctuation", NegateLogic=true)]
+    [.<.Rune>(typeof(.Rune), "IsPunctuation", ExpectationMessage="be punctuation")]
+    [.<.Rune>(typeof(.Rune), "IsSeparator", CustomName="IsNotSeparator", ExpectationMessage="be a separator", NegateLogic=true)]
+    [.<.Rune>(typeof(.Rune), "IsSeparator", ExpectationMessage="be a separator")]
+    [.<.Rune>(typeof(.Rune), "IsSymbol", CustomName="IsNotSymbol", ExpectationMessage="be a symbol", NegateLogic=true)]
+    [.<.Rune>(typeof(.Rune), "IsSymbol", ExpectationMessage="be a symbol")]
+    [.<.Rune>(typeof(.Rune), "IsUpper", CustomName="IsNotUpper", ExpectationMessage="be uppercase", NegateLogic=true)]
+    [.<.Rune>(typeof(.Rune), "IsUpper", ExpectationMessage="be uppercase")]
+    [.<.Rune>(typeof(.Rune), "IsWhiteSpace", CustomName="IsNotWhiteSpace", ExpectationMessage="be whitespace", NegateLogic=true)]
+    [.<.Rune>(typeof(.Rune), "IsWhiteSpace", ExpectationMessage="be whitespace")]
+    public static class RuneAssertionExtensions { }
     [.("IsSameReferenceAs")]
     public class SameReferenceAssertion<TValue> : .<TValue>
     {
@@ -1254,6 +1319,26 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
+    [.<float>("IsFinite", CustomName="IsNotFinite", ExpectationMessage="be finite", NegateLogic=true)]
+    [.<float>("IsFinite", ExpectationMessage="be finite")]
+    [.<float>("IsInfinity", CustomName="IsNotInfinity", ExpectationMessage="be infinity", NegateLogic=true)]
+    [.<float>("IsInfinity", ExpectationMessage="be infinity")]
+    [.<float>("IsNaN", CustomName="IsNotNaN", ExpectationMessage="be NaN", NegateLogic=true)]
+    [.<float>("IsNaN", ExpectationMessage="be NaN")]
+    [.<float>("IsNegativeInfinity", CustomName="IsNotNegativeInfinity", ExpectationMessage="be negative infinity", NegateLogic=true)]
+    [.<float>("IsNegativeInfinity", ExpectationMessage="be negative infinity")]
+    [.<float>("IsNormal", CustomName="IsNotNormal", ExpectationMessage="be normal", NegateLogic=true)]
+    [.<float>("IsNormal", ExpectationMessage="be normal")]
+    [.<float>("IsPositiveInfinity", CustomName="IsNotPositiveInfinity", ExpectationMessage="be positive infinity", NegateLogic=true)]
+    [.<float>("IsPositiveInfinity", ExpectationMessage="be positive infinity")]
+    [.<float>("IsSubnormal", CustomName="IsNotSubnormal", ExpectationMessage="be subnormal", NegateLogic=true)]
+    [.<float>("IsSubnormal", ExpectationMessage="be subnormal")]
+    public static class SingleAssertionExtensions { }
+    [.(typeof(<!0>), "IsEmpty", CustomName="IsNotEmpty", ExpectationMessage="be empty", NegateLogic=true)]
+    [.(typeof(<!0>), "IsEmpty", ExpectationMessage="be empty")]
+    [.(typeof(<!0>), "IsEmpty", CustomName="IsNotEmpty", ExpectationMessage="be empty", NegateLogic=true)]
+    [.(typeof(<!0>), "IsEmpty", ExpectationMessage="be empty")]
+    public static class SpanAssertionExtensions { }
     [.<.Stream>("CanRead", CustomName="CannotRead", ExpectationMessage="be readable", NegateLogic=true)]
     [.<.Stream>("CanRead", ExpectationMessage="be readable")]
     [.<.Stream>("CanSeek", CustomName="CannotSeek", ExpectationMessage="be seekable", NegateLogic=true)]
@@ -1580,6 +1665,15 @@ namespace .Conditions
     [.<>("UserEscaped", CustomName="IsNotUserEscaped", ExpectationMessage="be user-escaped", NegateLogic=true)]
     [.<>("UserEscaped", ExpectationMessage="be user-escaped")]
     public static class UriAssertionExtensions { }
+    [.<.>("IsCanceled", CustomName="IsNotCanceled", ExpectationMessage="be canceled", NegateLogic=true)]
+    [.<.>("IsCanceled", ExpectationMessage="be canceled")]
+    [.<.>("IsCompleted", CustomName="IsNotCompleted", ExpectationMessage="be completed", NegateLogic=true)]
+    [.<.>("IsCompleted", ExpectationMessage="be completed")]
+    [.<.>("IsCompletedSuccessfully", CustomName="IsNotCompletedSuccessfully", ExpectationMessage="be completed successfully", NegateLogic=true)]
+    [.<.>("IsCompletedSuccessfully", ExpectationMessage="be completed successfully")]
+    [.<.>("IsFaulted", CustomName="IsNotFaulted", ExpectationMessage="be faulted", NegateLogic=true)]
+    [.<.>("IsFaulted", ExpectationMessage="be faulted")]
+    public static class ValueTaskAssertionExtensions { }
     public static class VersionAssertionExtensions
     {
         [.(ExpectationMessage="to have a build number")]
@@ -1985,6 +2079,41 @@ namespace .Extensions
         public static .<TValue> IsBetween<TValue>(this .<TValue> source, TValue minimum, TValue maximum, [.("minimum")] string? minimumExpression = null, [.("maximum")] string? maximumExpression = null)
             where TValue : <TValue> { }
     }
+    public static class BigIntegerAssertionExtensions
+    {
+        public static . IsEven(this .<.BigInteger> source) { }
+        public static . IsNotEven(this .<.BigInteger> source) { }
+        public static . IsNotOne(this .<.BigInteger> source) { }
+        public static . IsNotPowerOfTwo(this .<.BigInteger> source) { }
+        public static . IsNotZero(this .<.BigInteger> source) { }
+        public static . IsOne(this .<.BigInteger> source) { }
+        public static . IsPowerOfTwo(this .<.BigInteger> source) { }
+        public static . IsZero(this .<.BigInteger> source) { }
+    }
+    public class BigIntegerIsEvenAssertion : .<.BigInteger>
+    {
+        public BigIntegerIsEvenAssertion(.<.BigInteger> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.BigInteger> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class BigIntegerIsOneAssertion : .<.BigInteger>
+    {
+        public BigIntegerIsOneAssertion(.<.BigInteger> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.BigInteger> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class BigIntegerIsPowerOfTwoAssertion : .<.BigInteger>
+    {
+        public BigIntegerIsPowerOfTwoAssertion(.<.BigInteger> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.BigInteger> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class BigIntegerIsZeroAssertion : .<.BigInteger>
+    {
+        public BigIntegerIsZeroAssertion(.<.BigInteger> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.BigInteger> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public sealed class Bool_IsFalse_Assertion : .<bool>
     {
         public Bool_IsFalse_Assertion(.<bool> context) { }
@@ -2191,6 +2320,33 @@ namespace .Extensions
     {
         public static .<TCollection, TItem> IsInOrder<TCollection, TItem>(this .<TCollection> source)
             where TCollection : .<TItem> { }
+    }
+    public static class CookieAssertionExtensions
+    {
+        public static . Expired(this .<.Cookie> source) { }
+        public static . HttpOnly(this .<.Cookie> source) { }
+        public static . IsNotExpired(this .<.Cookie> source) { }
+        public static . IsNotHttpOnly(this .<.Cookie> source) { }
+        public static . IsNotSecure(this .<.Cookie> source) { }
+        public static . Secure(this .<.Cookie> source) { }
+    }
+    public class CookieExpiredAssertion : .<.Cookie>
+    {
+        public CookieExpiredAssertion(.<.Cookie> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Cookie> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CookieHttpOnlyAssertion : .<.Cookie>
+    {
+        public CookieHttpOnlyAssertion(.<.Cookie> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Cookie> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class CookieSecureAssertion : .<.Cookie>
+    {
+        public CookieSecureAssertion(.<.Cookie> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Cookie> metadata) { }
+        protected override string GetExpectation() { }
     }
     public static class CultureInfoAssertionExtensions
     {
@@ -2626,9 +2782,68 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.DirectoryInfo> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class DoubleAssertionExtensions
+    {
+        public static . IsFinite(this .<double> source) { }
+        public static . IsInfinity(this .<double> source) { }
+        public static . IsNaN(this .<double> source) { }
+        public static . IsNegativeInfinity(this .<double> source) { }
+        public static . IsNormal(this .<double> source) { }
+        public static . IsNotFinite(this .<double> source) { }
+        public static . IsNotInfinity(this .<double> source) { }
+        public static . IsNotNaN(this .<double> source) { }
+        public static . IsNotNegativeInfinity(this .<double> source) { }
+        public static . IsNotNormal(this .<double> source) { }
+        public static . IsNotPositiveInfinity(this .<double> source) { }
+        public static . IsNotSubnormal(this .<double> source) { }
+        public static . IsPositiveInfinity(this .<double> source) { }
+        public static . IsSubnormal(this .<double> source) { }
+    }
     public static class DoubleEqualsAssertionExtensions
     {
         public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public class DoubleIsFiniteWithDoubleAssertion : .<double>
+    {
+        public DoubleIsFiniteWithDoubleAssertion(.<double> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class DoubleIsInfinityWithDoubleAssertion : .<double>
+    {
+        public DoubleIsInfinityWithDoubleAssertion(.<double> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class DoubleIsNaNWithDoubleAssertion : .<double>
+    {
+        public DoubleIsNaNWithDoubleAssertion(.<double> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class DoubleIsNegativeInfinityWithDoubleAssertion : .<double>
+    {
+        public DoubleIsNegativeInfinityWithDoubleAssertion(.<double> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class DoubleIsNormalWithDoubleAssertion : .<double>
+    {
+        public DoubleIsNormalWithDoubleAssertion(.<double> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class DoubleIsPositiveInfinityWithDoubleAssertion : .<double>
+    {
+        public DoubleIsPositiveInfinityWithDoubleAssertion(.<double> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class DoubleIsSubnormalWithDoubleAssertion : .<double>
+    {
+        public DoubleIsSubnormalWithDoubleAssertion(.<double> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
+        protected override string GetExpectation() { }
     }
     public static class EncodingAssertionExtensions
     {
@@ -2853,6 +3068,48 @@ namespace .Extensions
     {
         public static . IsEqualTo(this .<float> source, float expected, [.("expected")] string? expectedExpression = null) { }
     }
+    public class FloatIsFiniteWithFloatAssertion : .<float>
+    {
+        public FloatIsFiniteWithFloatAssertion(.<float> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<float> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class FloatIsInfinityWithFloatAssertion : .<float>
+    {
+        public FloatIsInfinityWithFloatAssertion(.<float> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<float> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class FloatIsNaNWithFloatAssertion : .<float>
+    {
+        public FloatIsNaNWithFloatAssertion(.<float> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<float> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class FloatIsNegativeInfinityWithFloatAssertion : .<float>
+    {
+        public FloatIsNegativeInfinityWithFloatAssertion(.<float> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<float> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class FloatIsNormalWithFloatAssertion : .<float>
+    {
+        public FloatIsNormalWithFloatAssertion(.<float> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<float> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class FloatIsPositiveInfinityWithFloatAssertion : .<float>
+    {
+        public FloatIsPositiveInfinityWithFloatAssertion(.<float> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<float> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class FloatIsSubnormalWithFloatAssertion : .<float>
+    {
+        public FloatIsSubnormalWithFloatAssertion(.<float> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<float> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public static class GreaterThanAssertionExtensions
     {
         public static .<TValue> IsGreaterThan<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
@@ -2884,6 +3141,17 @@ namespace .Extensions
     {
         public static .<TCollection, TItem> HasSingleItem<TCollection, TItem>(this .<TCollection> source)
             where TCollection : .<TItem> { }
+    }
+    public static class HttpResponseMessageAssertionExtensions
+    {
+        public static . IsNotSuccessStatusCode(this .<.> source) { }
+        public static . IsSuccessStatusCode(this .<.> source) { }
+    }
+    public class HttpResponseMessageIsSuccessStatusCodeAssertion : .<.>
+    {
+        public HttpResponseMessageIsSuccessStatusCodeAssertion(.<.> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
     }
     public static class HttpStatusCodeAssertionExtensions
     {
@@ -3141,6 +3409,11 @@ namespace .Extensions
     {
         public static .<TValue> IsNull<TValue>(this .<TValue> source) { }
     }
+    public static class NullableAssertionExtensions
+    {
+        public static . DoesNotHaveValue(this .<int?> source) { }
+        public static . HasValue(this .<int?> source) { }
+    }
     public sealed class NullableBool_IsFalse_Assertion : .<bool?>
     {
         public NullableBool_IsFalse_Assertion(.<bool?> context) { }
@@ -3157,6 +3430,12 @@ namespace .Extensions
     {
         public static .<TActual, TExpected> IsEquatableTo<TActual, TExpected>(this .<TActual?> source, TExpected expected, [.("expected")] string? expectedExpression = null)
             where TActual :  struct, <TExpected> { }
+    }
+    public class NullableHasValueAssertion : .<int?>
+    {
+        public NullableHasValueAssertion(.<int?> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<int?> metadata) { }
+        protected override string GetExpectation() { }
     }
     public static class ProcessAssertionExtensions
     {
@@ -3234,10 +3513,135 @@ namespace .Extensions
         public static . Matches(this .<string> source, . regex, [.("regex")] string? regexExpression = null) { }
         public static . Matches(this .<string> source, string pattern, [.("pattern")] string? patternExpression = null) { }
     }
+    public static class RuneAssertionExtensions
+    {
+        public static . IsAscii(this .<.Rune> source) { }
+        public static . IsBmp(this .<.Rune> source) { }
+        public static . IsControl(this .<.Rune> source) { }
+        public static . IsDigit(this .<.Rune> source) { }
+        public static . IsLetter(this .<.Rune> source) { }
+        public static . IsLetterOrDigit(this .<.Rune> source) { }
+        public static . IsLower(this .<.Rune> source) { }
+        public static . IsNotAscii(this .<.Rune> source) { }
+        public static . IsNotBmp(this .<.Rune> source) { }
+        public static . IsNotControl(this .<.Rune> source) { }
+        public static . IsNotDigit(this .<.Rune> source) { }
+        public static . IsNotLetter(this .<.Rune> source) { }
+        public static . IsNotLetterOrDigit(this .<.Rune> source) { }
+        public static . IsNotLower(this .<.Rune> source) { }
+        public static . IsNotNumber(this .<.Rune> source) { }
+        public static . IsNotPunctuation(this .<.Rune> source) { }
+        public static . IsNotSeparator(this .<.Rune> source) { }
+        public static . IsNotSymbol(this .<.Rune> source) { }
+        public static . IsNotUpper(this .<.Rune> source) { }
+        public static . IsNotWhiteSpace(this .<.Rune> source) { }
+        public static . IsNumber(this .<.Rune> source) { }
+        public static . IsPunctuation(this .<.Rune> source) { }
+        public static . IsSeparator(this .<.Rune> source) { }
+        public static . IsSymbol(this .<.Rune> source) { }
+        public static . IsUpper(this .<.Rune> source) { }
+        public static . IsWhiteSpace(this .<.Rune> source) { }
+    }
+    public class RuneIsAsciiAssertion : .<.Rune>
+    {
+        public RuneIsAsciiAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RuneIsBmpAssertion : .<.Rune>
+    {
+        public RuneIsBmpAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RuneIsControlWithRuneAssertion : .<.Rune>
+    {
+        public RuneIsControlWithRuneAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RuneIsDigitWithRuneAssertion : .<.Rune>
+    {
+        public RuneIsDigitWithRuneAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RuneIsLetterOrDigitWithRuneAssertion : .<.Rune>
+    {
+        public RuneIsLetterOrDigitWithRuneAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RuneIsLetterWithRuneAssertion : .<.Rune>
+    {
+        public RuneIsLetterWithRuneAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RuneIsLowerWithRuneAssertion : .<.Rune>
+    {
+        public RuneIsLowerWithRuneAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RuneIsNumberWithRuneAssertion : .<.Rune>
+    {
+        public RuneIsNumberWithRuneAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RuneIsPunctuationWithRuneAssertion : .<.Rune>
+    {
+        public RuneIsPunctuationWithRuneAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RuneIsSeparatorWithRuneAssertion : .<.Rune>
+    {
+        public RuneIsSeparatorWithRuneAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RuneIsSymbolWithRuneAssertion : .<.Rune>
+    {
+        public RuneIsSymbolWithRuneAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RuneIsUpperWithRuneAssertion : .<.Rune>
+    {
+        public RuneIsUpperWithRuneAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RuneIsWhiteSpaceWithRuneAssertion : .<.Rune>
+    {
+        public RuneIsWhiteSpaceWithRuneAssertion(.<.Rune> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.Rune> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public static class SameReferenceAssertionExtensions
     {
         public static .<TValue> IsSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
     }
+    public static class SingleAssertionExtensions
+    {
+        public static . IsFinite(this .<float> source) { }
+        public static . IsInfinity(this .<float> source) { }
+        public static . IsNaN(this .<float> source) { }
+        public static . IsNegativeInfinity(this .<float> source) { }
+        public static . IsNormal(this .<float> source) { }
+        public static . IsNotFinite(this .<float> source) { }
+        public static . IsNotInfinity(this .<float> source) { }
+        public static . IsNotNaN(this .<float> source) { }
+        public static . IsNotNegativeInfinity(this .<float> source) { }
+        public static . IsNotNormal(this .<float> source) { }
+        public static . IsNotPositiveInfinity(this .<float> source) { }
+        public static . IsNotSubnormal(this .<float> source) { }
+        public static . IsPositiveInfinity(this .<float> source) { }
+        public static . IsSubnormal(this .<float> source) { }
+    }
+    public static class SpanAssertionExtensions { }
     public static class StreamAssertionExtensions
     {
         public static . CanRead(this .<.Stream> source) { }
@@ -3815,6 +4219,41 @@ namespace .Extensions
     {
         public UriUserEscapedAssertion(.<> context, bool negated = false) { }
         protected override .<.> CheckAsync(.<> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class ValueTaskAssertionExtensions
+    {
+        public static . IsCanceled(this .<.> source) { }
+        public static . IsCompleted(this .<.> source) { }
+        public static . IsCompletedSuccessfully(this .<.> source) { }
+        public static . IsFaulted(this .<.> source) { }
+        public static . IsNotCanceled(this .<.> source) { }
+        public static . IsNotCompleted(this .<.> source) { }
+        public static . IsNotCompletedSuccessfully(this .<.> source) { }
+        public static . IsNotFaulted(this .<.> source) { }
+    }
+    public class ValueTaskIsCanceledAssertion : .<.>
+    {
+        public ValueTaskIsCanceledAssertion(.<.> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class ValueTaskIsCompletedAssertion : .<.>
+    {
+        public ValueTaskIsCompletedAssertion(.<.> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class ValueTaskIsCompletedSuccessfullyAssertion : .<.>
+    {
+        public ValueTaskIsCompletedSuccessfullyAssertion(.<.> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class ValueTaskIsFaultedAssertion : .<.>
+    {
+        public ValueTaskIsFaultedAssertion(.<.> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
         protected override string GetExpectation() { }
     }
     public static class VersionAssertionExtensions
