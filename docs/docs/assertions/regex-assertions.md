@@ -286,6 +286,6 @@ public async Task RegexAssertionErrors()
 
 ## Related Assertions
 
-- [String Assertions](string-assertions.md) - Basic string validation
+- [String Assertions](string.md) - Basic string validation
 - [Member Assertions](member-assertions.md) - Object property validation
-- [Collection Assertions](collection-assertions.md) - Collection validation
+- [Collection Assertions](collections.md) - Collection validation
