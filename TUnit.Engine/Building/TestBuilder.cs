@@ -1599,19 +1599,48 @@ internal sealed class TestBuilder : ITestBuilder
     /// </summary>
 #pragma warning disable TPEXP
     private bool CouldMatchTreeNodeFilter(TreeNodeFilter filter, TestMetadata metadata)
-#pragma warning restore TPEXP
     {
+        var filterString = filter.Filter;
+
+        // No filter means match all
+        if (string.IsNullOrEmpty(filterString))
+        {
+            return true;
+        }
+
+        // If the filter contains property conditions, strip them for path-only matching
+        // Property conditions will be evaluated in the second pass after tests are fully built
+        TreeNodeFilter pathOnlyFilter;
+        if (filterString.Contains('['))
+        {
+            // Strip all property conditions: [key=value]
+            // Use regex to remove all [...] blocks
+            var strippedFilterString = System.Text.RegularExpressions.Regex.Replace(filterString, @"\[([^\]]*)\]", "");
+
+            // Create a new TreeNodeFilter with the stripped filter string using reflection
+            pathOnlyFilter = CreateTreeNodeFilterViaReflection(strippedFilterString);
+        }
+        else
+        {
+            pathOnlyFilter = filter;
+        }
+
         var path = BuildPathFromMetadata(metadata);
-        var emptyPropertyBag = new PropertyBag(new List<IProperty>());
-
-        // For filters with property conditions, we cannot pre-filter accurately
-        // because properties are only available after the test is fully built.
-        // However, we can still check if the path portion matches.
-        // The platform's filter will handle property conditions in the second pass.
-        var matches = filter.MatchesFilter(path, emptyPropertyBag);
-
-        return matches;
+        var emptyPropertyBag = new PropertyBag();
+        return pathOnlyFilter.MatchesFilter(path, emptyPropertyBag);
     }
+
+    /// <summary>
+    /// Creates a TreeNodeFilter instance via reflection since it doesn't have a public constructor.
+    /// </summary>
+    private static TreeNodeFilter CreateTreeNodeFilterViaReflection(string filterString)
+    {
+        var constructor = typeof(TreeNodeFilter).GetConstructors(
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)[0];
+
+        return (TreeNodeFilter)constructor.Invoke(new object[] { filterString });
+    }
+#pragma warning restore TPEXP
 
     /// <summary>
     /// Builds the test path from metadata, matching the format used by TestFilterService.
