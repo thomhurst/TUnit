@@ -53,15 +53,40 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.nuget/packages
+            ~/.local/share/NuGet
+            %LocalAppData%\NuGet\v3-cache
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
       - name: Docker Setup Docker
         if: matrix.os == 'ubuntu-latest'
         uses: docker/setup-docker-action@v4.4.0
 
-      - name: Install Playwright Dependencies
-        run: npx playwright install-deps
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/Library/Caches/ms-playwright
+            ~/AppData/Local/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json', '**/package.json', '**/Directory.Packages.props') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
 
-      - name: Install Playwright Browsers
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Install Playwright (browsers only)
         run: npx playwright install
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
 
       - name: Build
         run: dotnet build -c Release
