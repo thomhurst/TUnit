@@ -1602,11 +1602,12 @@ internal sealed class TestBuilder : ITestBuilder
 #pragma warning restore TPEXP
     {
         var path = BuildPathFromMetadata(metadata);
-
-        // Use the actual filter matching logic with the test path
-        // For now, pass empty property bag since we're doing a lightweight check
-        // Properties from attributes would require calling AttributeFactory which might be too expensive
         var emptyPropertyBag = new PropertyBag(new List<IProperty>());
+
+        // For filters with property conditions, we cannot pre-filter accurately
+        // because properties are only available after the test is fully built.
+        // However, we can still check if the path portion matches.
+        // The platform's filter will handle property conditions in the second pass.
         var matches = filter.MatchesFilter(path, emptyPropertyBag);
 
         return matches;
