@@ -83,9 +83,9 @@
     <PackageVersion Include="TUnit.Assertions.FSharp" Version="0.75.38-PullRequest3485.0" />
     <PackageVersion Include="Verify" Version="31.1.0" />
     <PackageVersion Include="Verify.NUnit" Version="31.1.0" />
-    <PackageVersion Include="TUnit" Version="0.79.0" />
-    <PackageVersion Include="TUnit.Core" Version="0.79.0" />
-    <PackageVersion Include="TUnit.Assertions" Version="0.79.0" />
+    <PackageVersion Include="TUnit" Version="0.80.0" />
+    <PackageVersion Include="TUnit.Core" Version="0.80.0" />
+    <PackageVersion Include="TUnit.Assertions" Version="0.80.0" />
     <PackageVersion Include="Verify.TUnit" Version="31.1.0" />
     <PackageVersion Include="Vogen" Version="8.0.2" />
     <PackageVersion Include="xunit" Version="2.9.3" />
