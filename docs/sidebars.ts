@@ -153,6 +153,7 @@ const sidebars: SidebarsConfig = {
         items: [
             'advanced/exception-handling',
             'advanced/extension-points',
+            'advanced/test-variants',
             'advanced/performance-best-practices',
         ],
     },

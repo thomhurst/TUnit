@@ -36,15 +36,17 @@ public class DynamicDiscoveryResult : DiscoveryResult
         | DynamicallyAccessedMemberTypes.NonPublicFields)]
     public Type? TestClassType { get; set; }
 
-    /// <summary>
-    /// The file path where the dynamic test was created
-    /// </summary>
     public string? CreatorFilePath { get; set; }
 
-    /// <summary>
-    /// The line number where the dynamic test was created
-    /// </summary>
     public int? CreatorLineNumber { get; set; }
+
+    public string? ParentTestId { get; set; }
+
+    public Enums.TestRelationship? Relationship { get; set; }
+
+    public Dictionary<string, object?>? Properties { get; set; }
+
+    public string? DisplayName { get; set; }
 }
 
 public abstract class AbstractDynamicTest
