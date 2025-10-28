@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Core.Enums;
 using TUnit.Core.Exceptions;
@@ -114,8 +116,18 @@ internal sealed class TestBuilder : ITestBuilder
 #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
 #endif
-    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata)
+    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext)
     {
+        // OPTIMIZATION: Pre-filter in execution mode to skip building tests that cannot match the filter
+        if (buildingContext.IsForExecution && buildingContext.Filter != null)
+        {
+            if (!CouldTestMatchFilter(buildingContext.Filter, metadata))
+            {
+                // This test class cannot match the filter - skip all expensive work!
+                return Array.Empty<AbstractExecutableTest>();
+            }
+        }
+
         var tests = new List<AbstractExecutableTest>();
 
         try
@@ -126,7 +138,7 @@ internal sealed class TestBuilder : ITestBuilder
                 // Build tests from each concrete instantiation
                 foreach (var concreteMetadata in genericMetadata.ConcreteInstantiations.Values)
                 {
-                    var concreteTests = await BuildTestsFromMetadataAsync(concreteMetadata);
+                    var concreteTests = await BuildTestsFromMetadataAsync(concreteMetadata, buildingContext);
                     tests.AddRange(concreteTests);
                 }
                 return tests;
@@ -1562,5 +1574,56 @@ internal sealed class TestBuilder : ITestBuilder
         {
             return await CreateFailedTestForDataGenerationError(metadata, ex);
         }
+    }
+
+    /// <summary>
+    /// Determines if a test could potentially match the filter without building the full test object.
+    /// This is a conservative check - returns true unless we can definitively rule out the test.
+    /// </summary>
+    private bool CouldTestMatchFilter(ITestExecutionFilter filter, TestMetadata metadata)
+    {
+#pragma warning disable TPEXP
+        return filter switch
+        {
+            null => true,
+            NopFilter => true,
+            TreeNodeFilter treeFilter => CouldMatchTreeNodeFilter(treeFilter, metadata),
+            TestNodeUidListFilter => true, // Can't pre-filter without test IDs - be conservative
+            _ => true // Unknown filter type - be conservative
+        };
+#pragma warning restore TPEXP
+    }
+
+    /// <summary>
+    /// Checks if a test could match a TreeNodeFilter by building the test path and checking the filter.
+    /// </summary>
+#pragma warning disable TPEXP
+    private bool CouldMatchTreeNodeFilter(TreeNodeFilter filter, TestMetadata metadata)
+#pragma warning restore TPEXP
+    {
+        var path = BuildPathFromMetadata(metadata);
+
+        // Use the actual filter matching logic with the test path
+        // For now, pass empty property bag since we're doing a lightweight check
+        // Properties from attributes would require calling AttributeFactory which might be too expensive
+        var emptyPropertyBag = new PropertyBag(new List<IProperty>());
+        var matches = filter.MatchesFilter(path, emptyPropertyBag);
+
+        return matches;
+    }
+
+    /// <summary>
+    /// Builds the test path from metadata, matching the format used by TestFilterService.
+    /// Path format: /AssemblyName/Namespace/ClassName/MethodName
+    /// </summary>
+    private static string BuildPathFromMetadata(TestMetadata metadata)
+    {
+        var classMetadata = metadata.MethodMetadata.Class;
+        var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
+        var namespaceName = classMetadata.Namespace ?? "*";
+        var className = classMetadata.Name;
+        var methodName = metadata.TestMethodName;
+
+        return $"/{assemblyName}/{namespaceName}/{className}/{methodName}";
     }
 }

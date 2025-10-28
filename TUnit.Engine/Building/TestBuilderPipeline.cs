@@ -61,7 +61,9 @@ internal sealed class TestBuilderPipeline
     {
         var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
 
-        return await BuildTestsFromMetadataAsync(collectedMetadata).ConfigureAwait(false);
+        // For this method (non-streaming), we're not in execution mode so no filter optimization
+        var buildingContext = new TestBuildingContext(IsForExecution: false, Filter: null);
+        return await BuildTestsFromMetadataAsync(collectedMetadata, buildingContext).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -71,6 +73,7 @@ internal sealed class TestBuilderPipeline
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsStreamingAsync(
         string testSessionId,
+        TestBuildingContext buildingContext,
         CancellationToken cancellationToken = default)
     {
         // Get metadata streaming if supported
@@ -78,7 +81,7 @@ internal sealed class TestBuilderPipeline
         var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
 
         return await collectedMetadata
-            .SelectManyAsync(BuildTestsFromSingleMetadataAsync, cancellationToken: cancellationToken)
+            .SelectManyAsync(metadata => BuildTestsFromSingleMetadataAsync(metadata, buildingContext), cancellationToken: cancellationToken)
             .ProcessInParallel(cancellationToken: cancellationToken);
     }
 
@@ -93,7 +96,7 @@ internal sealed class TestBuilderPipeline
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
-    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(IEnumerable<TestMetadata> testMetadata)
+    public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(IEnumerable<TestMetadata> testMetadata, TestBuildingContext buildingContext)
     {
         var testGroups = await testMetadata.SelectAsync(async metadata =>
             {
@@ -105,7 +108,7 @@ internal sealed class TestBuilderPipeline
                         return await GenerateDynamicTests(metadata).ConfigureAwait(false);
                     }
 
-                    return await _testBuilder.BuildTestsFromMetadataAsync(metadata).ConfigureAwait(false);
+                    return await _testBuilder.BuildTestsFromMetadataAsync(metadata, buildingContext).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -210,7 +213,7 @@ internal sealed class TestBuilderPipeline
 #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
 #endif
-    private async IAsyncEnumerable<AbstractExecutableTest> BuildTestsFromSingleMetadataAsync(TestMetadata metadata)
+    private async IAsyncEnumerable<AbstractExecutableTest> BuildTestsFromSingleMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext)
     {
         TestMetadata resolvedMetadata;
         Exception? resolutionError = null;
@@ -324,7 +327,7 @@ internal sealed class TestBuilderPipeline
             else
             {
                 // Normal test metadata goes through the standard test builder
-                var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(resolvedMetadata).ConfigureAwait(false);
+                var testsFromMetadata = await _testBuilder.BuildTestsFromMetadataAsync(resolvedMetadata, buildingContext).ConfigureAwait(false);
                 testsToYield = new List<AbstractExecutableTest>(testsFromMetadata);
             }
         }

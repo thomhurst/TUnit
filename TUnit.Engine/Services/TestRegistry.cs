@@ -90,7 +90,9 @@ internal sealed class TestRegistry : ITestRegistry
             testMetadataList.Add(metadata);
         }
 
-        var builtTests = await _testBuilderPipeline!.BuildTestsFromMetadataAsync(testMetadataList);
+        // These are dynamic tests registered after discovery, so not in execution mode with a filter
+        var buildingContext = new Building.TestBuildingContext(IsForExecution: false, Filter: null);
+        var builtTests = await _testBuilderPipeline!.BuildTestsFromMetadataAsync(testMetadataList, buildingContext);
 
         foreach (var test in builtTests)
         {

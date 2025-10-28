@@ -55,12 +55,15 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
 
+        // Create building context for optimization
+        var buildingContext = new Building.TestBuildingContext(isForExecution, filter);
+
         // Stage 1: Stream independent tests immediately while buffering dependent tests
         var independentTests = new List<AbstractExecutableTest>();
         var dependentTests = new List<AbstractExecutableTest>();
         var allTests = new List<AbstractExecutableTest>();
 
-        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, cancellationToken).ConfigureAwait(false))
+        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, buildingContext, cancellationToken).ConfigureAwait(false))
         {
             allTests.Add(test);
 
@@ -131,6 +134,7 @@ internal sealed class TestDiscoveryService : IDataProducer
     /// Streams test discovery for parallel discovery and execution
     private async IAsyncEnumerable<AbstractExecutableTest> DiscoverTestsStreamAsync(
         string testSessionId,
+        Building.TestBuildingContext buildingContext,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -138,7 +142,7 @@ internal sealed class TestDiscoveryService : IDataProducer
         // Set a reasonable timeout for test discovery (5 minutes)
         cts.CancelAfter(TimeSpan.FromMinutes(5));
 
-        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, cancellationToken).ConfigureAwait(false);
+        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, buildingContext, cancellationToken).ConfigureAwait(false);
 
         foreach (var test in tests)
         {
@@ -164,9 +168,12 @@ internal sealed class TestDiscoveryService : IDataProducer
     {
         await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
+        // Create building context - this is for discovery/streaming, not execution filtering
+        var buildingContext = new Building.TestBuildingContext(IsForExecution: false, Filter: null);
+
         // Collect all tests first (like source generation mode does)
         var allTests = new List<AbstractExecutableTest>();
-        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, cancellationToken).ConfigureAwait(false))
+        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, buildingContext, cancellationToken).ConfigureAwait(false))
         {
             allTests.Add(test);
         }
