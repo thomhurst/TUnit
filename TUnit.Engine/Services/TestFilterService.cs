@@ -41,9 +41,9 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             }
         }
 
-        if (filteredTests.Count > 0 && filteredExplicitTests.Count > 0)
+        if (filteredTests.Count > 0)
         {
-            logger.LogTrace($"Filter matched both explicit and non-explicit tests. Excluding {filteredExplicitTests.Count} explicit tests.");
+            logger.LogTrace($"Filter matched {filteredTests.Count} non-explicit tests. Excluding {filteredExplicitTests.Count} explicit tests.");
             return filteredTests;
         }
 
