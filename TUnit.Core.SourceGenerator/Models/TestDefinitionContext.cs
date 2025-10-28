@@ -39,7 +39,6 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
 
         var testIndex = 0;
 
-        // If no attributes, create tests based on repeat count
         if (!classDataAttrs.Any() && !methodDataAttrs.Any())
         {
             for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
@@ -56,7 +55,6 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
             yield break;
         }
 
-        // If we have class data but no method data
         if (classDataAttrs.Any() && !methodDataAttrs.Any())
         {
             foreach (var classAttr in classDataAttrs)
@@ -74,7 +72,6 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
                 }
             }
         }
-        // If we have method data but no class data
         else if (!classDataAttrs.Any() && methodDataAttrs.Any())
         {
             foreach (var methodAttr in methodDataAttrs)

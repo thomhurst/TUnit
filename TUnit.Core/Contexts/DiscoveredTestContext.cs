@@ -68,16 +68,6 @@ public class DiscoveredTestContext
     {
         TestContext.AddParallelConstraint(constraint);
     }
-    
-    /// <summary>
-    /// Sets the parallel constraint, replacing any existing constraints.
-    /// Maintained for backward compatibility.
-    /// </summary>
-    [Obsolete("Use AddParallelConstraint to support multiple constraints. This method replaces all existing constraints.")]
-    public void SetParallelConstraint(IParallelConstraint constraint)
-    {
-        TestContext.ParallelConstraint = constraint;
-    }
 
     public void AddArgumentDisplayFormatter(ArgumentDisplayFormatter formatter)
     {

@@ -246,36 +246,6 @@ namespace .Attributes
         public  TargetType { get; }
         public bool TreatAsInstance { get; set; }
     }
-    [(.Class, AllowMultiple=true)]
-    [("Use AssertionFromAttribute instead. This attribute will be removed in a future ve" +
-        "rsion.")]
-    public class CreateAssertionAttribute : 
-    {
-        public CreateAssertionAttribute( targetType, string methodName) { }
-        public CreateAssertionAttribute( targetType,  containingType, string methodName) { }
-        public ? ContainingType { get; }
-        public string? CustomName { get; set; }
-        public string MethodName { get; }
-        public bool NegateLogic { get; set; }
-        public bool RequiresGenericTypeParameter { get; set; }
-        public  TargetType { get; }
-        public bool TreatAsInstance { get; set; }
-    }
-    [(.Class, AllowMultiple=true)]
-    [("Use AssertionFromAttribute<T> instead. This attribute will be removed in a future" +
-        " version.")]
-    public class CreateAssertionAttribute<TTarget> : 
-    {
-        public CreateAssertionAttribute(string methodName) { }
-        public CreateAssertionAttribute( containingType, string methodName) { }
-        public ? ContainingType { get; }
-        public string? CustomName { get; set; }
-        public string MethodName { get; }
-        public bool NegateLogic { get; set; }
-        public bool RequiresGenericTypeParameter { get; set; }
-        public  TargetType { get; }
-        public bool TreatAsInstance { get; set; }
-    }
     [(.Method, AllowMultiple=false, Inherited=false)]
     public sealed class GenerateAssertionAttribute : 
     {

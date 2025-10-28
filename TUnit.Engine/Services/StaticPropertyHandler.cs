@@ -46,7 +46,6 @@ internal sealed class StaticPropertyHandler
         {
             try
             {
-                // Call the generated initializer
                 var value = await property.InitializerAsync();
 
                 if (value != null)

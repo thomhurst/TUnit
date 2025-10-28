@@ -67,7 +67,6 @@ internal sealed class TestDiscoveryService : IDataProducer
         {
             allTests.Add(test);
 
-            // Check if this test has dependencies based on metadata
             if (test.Metadata.Dependencies.Length > 0)
             {
                 // Buffer tests with dependencies for later resolution
@@ -219,7 +218,6 @@ internal sealed class TestDiscoveryService : IDataProducer
 
             foreach (var test in remainingTests)
             {
-                // Check if all dependencies have been yielded
                 var allDependenciesYielded = test.Dependencies.All(dep => yieldedTests.Contains(dep.Test.TestId));
 
                 if (allDependenciesYielded)

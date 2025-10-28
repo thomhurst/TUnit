@@ -121,7 +121,6 @@ public class TestMetadataGenerationContext : IEquatable<TestMetadataGenerationCo
         {
             foreach (var attr in param.GetAttributes())
             {
-                // Check if it's a data source attribute that requires runtime resolution
                 if (IsRuntimeDataSourceAttribute(attr, testInfo.TypeSymbol))
                 {
                     return false;

@@ -208,7 +208,6 @@ public static class AssertionExtensions
         // If there was a pending link, wrap both assertions together
         if (pendingAssertion != null && combinerType != null)
         {
-            // Create a combined wrapper that executes the pending assertion first (or together for Or)
             Assertion<object?> combinedAssertion = combinerType == CombinerType.And
                 ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
                 : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
@@ -261,7 +260,6 @@ public static class AssertionExtensions
         // If there was a pending link, wrap both assertions together
         if (pendingAssertion != null && combinerType != null)
         {
-            // Create a combined wrapper that executes the pending assertion first (or together for Or)
             Assertion<object?> combinedAssertion = combinerType == CombinerType.And
                 ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
                 : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
@@ -369,7 +367,6 @@ public static class AssertionExtensions
         // If there was a pending link, wrap both assertions together
         if (pendingAssertion != null && combinerType != null)
         {
-            // Create a combined wrapper that executes the pending assertion first (or together for Or)
             Assertion<object?> combinedAssertion = combinerType == CombinerType.And
                 ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
                 : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
@@ -422,7 +419,6 @@ public static class AssertionExtensions
         // If there was a pending link, wrap both assertions together
         if (pendingAssertion != null && combinerType != null)
         {
-            // Create a combined wrapper that executes the pending assertion first (or together for Or)
             Assertion<object?> combinedAssertion = combinerType == CombinerType.And
                 ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
                 : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
@@ -530,7 +526,6 @@ public static class AssertionExtensions
         // If there was a pending link, wrap both assertions together
         if (pendingAssertion != null && combinerType != null)
         {
-            // Create a combined wrapper that executes the pending assertion first (or together for Or)
             Assertion<object?> combinedAssertion = combinerType == CombinerType.And
                 ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
                 : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);
@@ -582,7 +577,6 @@ public static class AssertionExtensions
         // If there was a pending link, wrap both assertions together
         if (pendingAssertion != null && combinerType != null)
         {
-            // Create a combined wrapper that executes the pending assertion first (or together for Or)
             Assertion<object?> combinedAssertion = combinerType == CombinerType.And
                 ? new CombinedAndAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion)
                 : new CombinedOrAssertion<TObject>(parentContext, pendingAssertion, erasedAssertion);

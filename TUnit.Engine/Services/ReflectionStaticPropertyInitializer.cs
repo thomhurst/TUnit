@@ -25,14 +25,12 @@ internal sealed class ReflectionStaticPropertyInitializer : IStaticPropertyIniti
     {
         try
         {
-            // Execute all registered global initializers from source generation
             while (Sources.GlobalInitializers.TryDequeue(out var initializer))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 await initializer();
             }
 
-            // Additionally, initialize static properties discovered via reflection
             await StaticPropertyReflectionInitializer.InitializeAllStaticPropertiesAsync();
         }
         catch (Exception ex)

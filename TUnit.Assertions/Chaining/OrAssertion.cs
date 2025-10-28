@@ -75,7 +75,6 @@ public class OrAssertion<TValue> : Assertion<TValue>
                 // Both failed - build combined message
                 var secondException = currentScope.GetLastException();
 
-                // Remove both individual exceptions and add combined one
                 currentScope.RemoveLastExceptions(2);
 
                 var combinedExpectation = BuildCombinedExpectation();

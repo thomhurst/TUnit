@@ -35,7 +35,6 @@ public class PropertyAssertion<TObject, TProperty>
     {
         _parentContext.ExpressionBuilder.Append($".IsEqualTo({expected})");
 
-        // Create assertion on the property and wrap it with type erasure
         var assertion = new Conditions.EqualsAssertion<TProperty>(_propertyContext, expected);
         var erasedAssertion = new Conditions.TypeErasedAssertion<TProperty>(assertion);
 
@@ -132,10 +131,8 @@ public class PropertyAssertionResult<TObject> : IAssertionSource<TObject>
 
     private async Task<TObject?> ExecuteAsync()
     {
-        // Execute the property assertion
         await _propertyAssertion.AssertAsync();
 
-        // Return the parent object value
         var (parentValue, _) = await Context.GetAsync();
         return parentValue;
     }

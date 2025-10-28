@@ -52,7 +52,6 @@ public abstract class Assertion<TValue>
         var (previous, combiner) = context.ConsumePendingLink();
         if (previous != null)
         {
-            // Create wrapper based on combiner type
             _wrappedExecution = combiner == CombinerType.And
                 ? new Chaining.AndAssertion<TValue>(previous, this)
                 : new Chaining.OrAssertion<TValue>(previous, this);

@@ -1,261 +1,989 @@
-# GitHub Copilot Instructions for TUnit
+# TUnit Development Guide for AI Assistants
 
-## IMPORTANT: Read This First
+## Table of Contents
+- [Critical Rules - READ FIRST](#critical-rules---read-first)
+- [Quick Reference](#quick-reference)
+- [Project Overview](#project-overview)
+- [Architecture](#architecture)
+- [Development Workflow](#development-workflow)
+- [Code Style Standards](#code-style-standards)
+- [Testing Guidelines](#testing-guidelines)
+- [Performance Requirements](#performance-requirements)
+- [Common Patterns](#common-patterns)
+- [Troubleshooting](#troubleshooting)
 
-When assisting with TUnit development:
-1. **ALWAYS** maintain behavioral parity between source-generated and reflection modes
-2. **ALWAYS** run `dotnet test TUnit.PublicAPI` when modifying public APIs in TUnit.Core, TUnit.Engine, or TUnit.Playwright
-3. **ALWAYS** run source generator tests when changing source generator output
-4. **NEVER** use VSTest APIs - use Microsoft.Testing.Platform instead
-5. **PREFER** performance over convenience - this framework may be used by millions
-6. **FOLLOW** modern C# patterns and the coding standards outlined below
+---
 
-## Repository Overview
+## Critical Rules - READ FIRST
 
-TUnit is a modern .NET testing framework designed as an alternative to xUnit, NUnit, and MSTest. It leverages the newer Microsoft.Testing.Platform instead of the legacy VSTest framework, providing improved performance and modern .NET capabilities.
+### The Five Commandments
 
-## Key Architecture Concepts
+1. **DUAL-MODE IMPLEMENTATION IS MANDATORY**
+   - Every feature MUST work identically in both execution modes:
+     - **Source-Generated Mode**: Compile-time code generation via `TUnit.Core.SourceGenerator`
+     - **Reflection Mode**: Runtime discovery via `TUnit.Engine`
+   - Test both modes explicitly. Never assume parity without verification.
+   - If you only implement in one mode, the feature is incomplete and MUST NOT be merged.
 
-### Dual Execution Modes
-TUnit operates in two distinct execution modes that must maintain behavioral parity:
-
-1. **Source Generated Mode**: Uses compile-time source generation for optimal performance
-2. **Reflection Mode**: Uses runtime reflection for dynamic scenarios
-
-**Critical Rule**: Both modes must produce identical end-user behavior. Any feature or bug fix must be implemented consistently across both execution paths.
-
-### Core Components
-- **TUnit.Core**: Core abstractions and interfaces
-- **TUnit.Engine**: Test discovery and execution engine
-- **TUnit.Core.SourceGenerator**: Compile-time test generation
-- **TUnit.Assertions**: Fluent assertion library
-- **TUnit.Analyzers**: Roslyn analyzers for compile-time validation
-
-## Coding Standards and Best Practices
-
-### .NET Modern Syntax
-- Use collection initializers: `List<string> list = []` instead of `List<string> list = new()`
-- Leverage pattern matching, records, and modern C# features
-- Use file-scoped namespaces where appropriate
-- Prefer `var` for local variables when type is obvious
-
-### Code Formatting
-- Always use braces for control structures, even single-line statements:
-  ```csharp
-  if (condition)
-  {
-      DoSomething();
-  }
-  ```
-- Maintain consistent spacing between methods and logical code blocks
-- Use expression-bodied members for simple properties and methods
-- Follow standard .NET naming conventions (PascalCase for public members, _camelCase for private fields)
-- Don't pollute code with unnecessary comments; use meaningful names instead
-
-### Performance Considerations
-- **Critical**: TUnit may be used by millions of developers - performance is paramount
-- Avoid unnecessary allocations in hot paths
-- Use `ValueTask` over `Task` for potentially synchronous operations
-- Leverage object pooling for frequently created objects
-- Consider memory usage patterns, especially in test discovery and execution
-
-### Architecture Principles
-- **Single Responsibility Principle**: Classes should have one reason to change
-- **Avoid Over-engineering**: Prefer simple, maintainable solutions
-- **Composition over Inheritance**: Use dependency injection and composition patterns
-- **Immutability**: Prefer immutable data structures where possible
-
-## Testing Framework Specifics
-
-### Microsoft.Testing.Platform Integration
-- Use Microsoft.Testing.Platform APIs instead of VSTest
-- Test filtering syntax: `dotnet test -- --treenode-filter /Assembly/Namespace/ClassName/TestName`
-- Understand the platform's execution model and lifecycle hooks
-
-### Data Generation and Attributes
-- Support multiple data source attributes: `[Arguments]`, `[MethodDataSource]`, `[ClassDataSource]`, etc.
-- Reuse existing data generation logic instead of duplicating code
-- Maintain consistency between reflection and source-generated approaches
-
-### Test Discovery and Execution
-- Test discovery should be fast and efficient
-- Support dynamic test generation while maintaining type safety
-- Handle edge cases gracefully (generic types, inheritance, etc.)
-
-## Common Patterns and Conventions
-
-### Error Handling
-- Use specific exception types with meaningful messages
-- Provide contextual information in error messages for debugging
-- Handle reflection failures gracefully with fallback mechanisms
-
-### Async/Await
-- Use `ValueTask` for performance-critical async operations
-- Properly handle `CancellationToken` throughout the pipeline
-- Avoid async void except for event handlers
-
-### Reflection Usage
-- Use `[UnconditionalSuppressMessage]` attributes appropriately for AOT/trimming
-- Cache reflection results where possible for performance
-- Provide both reflection and source-generated code paths
-
-## Code Review Guidelines
-
-### When Adding New Features
-1. Implement in both source-generated and reflection modes
-2. Add corresponding analyzer rules if applicable
-3. Include comprehensive tests covering edge cases
-4. Verify performance impact with benchmarks if relevant
-5. Update documentation and ensure API consistency
-
-### When Fixing Bugs
-1. Identify if the issue affects one or both execution modes
-2. Write a failing test that reproduces the issue
-3. Fix the bug in all affected code paths
-4. Verify the fix doesn't introduce performance regressions
-
-### Code Quality Checklist
-- [ ] No unused using statements
-- [ ] Proper null handling (nullable reference types)
-- [ ] Appropriate access modifiers
-- [ ] XML documentation for public APIs
-- [ ] No magic strings or numbers (use constants)
-- [ ] Proper disposal of resources
-
-## Testing and Validation
-
-### Test Categories
-- Unit tests for individual components
-- Integration tests for cross-component functionality
-- Performance benchmarks for critical paths
-- Analyzer tests for compile-time validation
-- Source generator snapshot tests
-- Public API snapshot tests
-
-### Source Generator Changes
-
-**CRITICAL**: When modifying what the source generator emits:
-
-1. **Run the source generator tests**:
-   ```bash
-   dotnet test TUnit.Core.SourceGenerator.Tests
-   ```
-
-2. **Accept any changed snapshots**:
-   - The test will generate `.received.txt` files showing the new generated output
-   - Review these files to ensure your changes are intentional and correct
-   - Convert the received files to verified files:
+2. **SNAPSHOT TESTS ARE NON-NEGOTIABLE**
+   - After ANY change to source generator output:
      ```bash
-     # Windows
-     for %f in (*.received.txt) do move /Y "%f" "%~nf.verified.txt"
-     
-     # Linux/macOS
-     for file in *.received.txt; do mv "$file" "${file%.received.txt}.verified.txt"; done
+     dotnet test TUnit.Core.SourceGenerator.Tests
+     # Review .received.txt files, then:
+     for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done  # Linux/macOS
+     for %f in (*.received.txt) do move /Y "%f" "%~nf.verified.txt"  # Windows
      ```
-   - Or manually rename each `.received.txt` file to `.verified.txt`
-
-3. **Commit the updated snapshots**:
-   - Include the updated `.verified.txt` files in your commit
-   - These snapshots ensure source generation consistency
-
-### Public API Changes
-
-**CRITICAL**: When modifying any public API in TUnit.Core, TUnit.Engine, or TUnit.Playwright (adding, removing, or changing public methods, properties, or types):
-
-1. **Run the Public API test**:
-   ```bash
-   dotnet test TUnit.PublicAPI
-   ```
-
-2. **Update the API snapshots**:
-   - The test will generate `.received.txt` files showing the current API surface
-   - Review these files to ensure your changes are intentional
-   - Convert the received files to verified files:
+   - After ANY public API change (TUnit.Core, TUnit.Engine, TUnit.Assertions):
      ```bash
-     # Windows
-     for %f in (*.received.txt) do move /Y "%f" "%~nf.verified.txt"
-     
-     # Linux/macOS
-     for file in *.received.txt; do mv "$file" "${file%.received.txt}.verified.txt"; done
+     dotnet test TUnit.PublicAPI
+     # Review and accept snapshots as above
      ```
-   - Or manually rename each `.received.txt` file to `.verified.txt`
+   - Commit ALL `.verified.txt` files. These are the source of truth.
 
-3. **Commit the updated snapshots**:
-   - Include the updated `.verified.txt` files in your commit
-   - These snapshots track the public API surface and prevent accidental breaking changes
+3. **NEVER USE VSTest APIs**
+   - This project uses **Microsoft.Testing.Platform** exclusively
+   - VSTest is legacy and incompatible with TUnit's architecture
+   - If you see `Microsoft.VisualStudio.TestPlatform`, it's wrong
 
-### Compatibility Testing
-- Test against multiple .NET versions (.NET 6, 8, 9+)
-- Verify AOT and trimming compatibility
-- Test source generation in various project configurations
+4. **PERFORMANCE IS A FEATURE**
+   - TUnit is used by millions of tests daily
+   - Every allocation in discovery/execution hot paths matters
+   - Profile before and after for any changes in critical paths
+   - Use `ValueTask`, object pooling, and cached reflection
 
-## Common Gotchas and Pitfalls
+5. **AOT/TRIMMING COMPATIBILITY IS REQUIRED**
+   - All code must work with Native AOT and IL trimming
+   - Use `[DynamicallyAccessedMembers]` and `[UnconditionalSuppressMessage]` appropriately
+   - Test changes with AOT-compiled projects when touching reflection
 
-1. **Execution Mode Inconsistency**: Always verify behavior matches between modes
-2. **Performance Regressions**: Profile code changes in test discovery and execution
-3. **AOT/Trimming Issues**: Be careful with reflection usage and dynamic code
-4. **Thread Safety**: Ensure thread-safe patterns in concurrent test execution
-5. **Memory Leaks**: Properly dispose of resources and avoid circular references
+---
 
-## Dependencies and Third-Party Libraries
+## Quick Reference
 
-- Minimize external dependencies for core functionality
-- Use Microsoft.Extensions.* packages for common functionality
-- Prefer .NET BCL types over third-party alternatives
-- Keep analyzer dependencies minimal to avoid version conflicts
-
-## Documentation Standards
-
-- Use triple-slash comments for public APIs
-- Include code examples in documentation
-- Document performance characteristics for critical APIs
-- Maintain README files for major components
-
-## Questions to Ask When Making Changes
-
-1. Does this change affect both execution modes?
-2. Is this the most performant approach?
-3. Does this follow established patterns in the codebase?
-4. Are there any breaking changes or compatibility concerns?
-5. How will this behave under high load or with many tests?
-6. Does this require new analyzer rules or diagnostics?
-
-## IDE and Tooling
-
-- Use EditorConfig settings for consistent formatting
-- Leverage Roslyn analyzers for code quality
-- Run performance benchmarks for critical changes
-- Use the project's specific MSBuild properties and targets
-
-## Critical Reminders for Every Change
-
-### Before Submitting Any Code:
-1. **Test Both Modes**: Verify your changes work identically in both source-generated and reflection modes
-2. **Check Source Generator**: If changing source generator output, run `dotnet test TUnit.Core.SourceGenerator.Tests` and accept snapshots
-3. **Check Public API**: If modifying TUnit.Core, TUnit.Engine, or TUnit.Playwright public APIs, run `dotnet test TUnit.PublicAPI` and accept snapshots
-4. **Performance Impact**: Consider if your change affects test discovery or execution performance
-5. **Breaking Changes**: Ensure no unintentional breaking changes to the public API
-6. **Documentation**: Update relevant documentation for any public API changes
-
-### Quick Commands Reference:
+### Most Common Commands
 ```bash
 # Run all tests
 dotnet test
 
-# Run source generator tests
+# Test source generator + accept snapshots
 dotnet test TUnit.Core.SourceGenerator.Tests
+for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
 
-# Run public API tests
+# Test public API + accept snapshots
 dotnet test TUnit.PublicAPI
+for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
 
-# Convert received to verified files (Windows)
-for %f in (*.received.txt) do move /Y "%f" "%~nf.verified.txt"
-
-# Convert received to verified files (Linux/macOS)
-for file in *.received.txt; do mv "$file" "${file%.received.txt}.verified.txt"; done
-
-# Run specific test
+# Run specific test by tree node filter
 dotnet test -- --treenode-filter "/Assembly/Namespace/ClassName/TestName"
+
+# Run tests excluding performance tests
+dotnet test -- --treenode-filter "/*/*/*/*[Category!=Performance]"
+
+# Build in release mode
+dotnet build -c Release
+
+# Test AOT compilation
+dotnet publish -c Release -p:PublishAot=true
 ```
 
-Remember: TUnit aims to be a fast, modern, and reliable testing framework. Every change should contribute to these goals while maintaining the simplicity and developer experience that makes testing enjoyable.
+### Snapshot Workflow Quick Ref
+```
+┌─────────────────────────────────────────────────────────┐
+│ 1. Make change to source generator or public API       │
+│ 2. Run relevant test: dotnet test [Project]            │
+│ 3. If snapshots differ, review .received.txt files     │
+│ 4. If changes are correct, rename to .verified.txt     │
+│ 5. Commit .verified.txt files                          │
+│ 6. NEVER commit .received.txt files                    │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Test Filter Syntax
+```bash
+# Single test
+--treenode-filter "/TUnit.TestProject/Namespace/ClassName/TestMethodName"
+
+# All tests in a class
+--treenode-filter "/*/*/ClassName/*"
+
+# Multiple patterns (OR logic)
+--treenode-filter "Pattern1|Pattern2"
+
+# Exclude by category
+--treenode-filter "/*/*/*/*[Category!=Performance]"
+```
+
+---
+
+## Project Overview
+
+### What is TUnit?
+
+TUnit is a **modern .NET testing framework** that prioritizes:
+- **Performance**: Source-generated tests, parallel by default
+- **Modern .NET**: Native AOT, trimming, latest C# features
+- **Microsoft.Testing.Platform**: Not VSTest (legacy)
+- **Developer Experience**: Fluent assertions, minimal boilerplate
+
+### Key Differentiators
+- **Compile-time test discovery** via source generators
+- **Parallel execution** by default with dependency management
+- **Dual execution modes** (source-gen + reflection) for flexibility
+- **Built-in assertions** with detailed failure messages
+- **Property-based testing** support
+- **Dynamic test variants** for data-driven scenarios
+
+---
+
+## Architecture
+
+### Execution Modes
+
+TUnit has two execution paths that **MUST** behave identically:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    USER TEST CODE                               │
+│  [Test] public void MyTest() { ... }                           │
+└────────────┬────────────────────────────────┬───────────────────┘
+             │                                │
+             ▼                                ▼
+    ┌────────────────────┐         ┌─────────────────────┐
+    │  SOURCE-GENERATED  │         │  REFLECTION MODE    │
+    │       MODE         │         │                     │
+    │                    │         │                     │
+    │ TUnit.Core.        │         │  TUnit.Engine       │
+    │   SourceGenerator  │         │                     │
+    │                    │         │                     │
+    │ Generates code at  │         │ Discovers tests at  │
+    │ compile time       │         │ runtime via         │
+    │                    │         │ reflection          │
+    └─────────┬──────────┘         └──────────┬──────────┘
+              │                               │
+              │                               │
+              └───────────────┬───────────────┘
+                              ▼
+                    ┌──────────────────┐
+                    │   TUnit.Engine   │
+                    │   (Execution)    │
+                    └──────────────────┘
+                              │
+                              ▼
+                    ┌──────────────────┐
+                    │ Microsoft.Testing│
+                    │    .Platform     │
+                    └──────────────────┘
+```
+
+### Core Projects
+
+| Project | Purpose | Notes |
+|---------|---------|-------|
+| **TUnit.Core** | Abstractions, interfaces, attributes | Public API surface |
+| **TUnit.Engine** | Test discovery & execution (reflection) | Runtime path |
+| **TUnit.Core.SourceGenerator** | Compile-time test generation | Compile-time path |
+| **TUnit.Assertions** | Fluent assertion library | Separate from core |
+| **TUnit.Assertions.SourceGenerator** | Generates custom assertions | Extensibility |
+| **TUnit.Analyzers** | Roslyn analyzers & code fixes | Compile-time safety |
+| **TUnit.PropertyTesting** | Property-based testing support | New feature |
+| **TUnit.Playwright** | Playwright integration | Browser testing |
+
+### Roslyn Version Projects
+- `*.Roslyn414`, `*.Roslyn44`, `*.Roslyn47`: Multi-targeting for different Roslyn versions
+- Ensures compatibility across VS versions and .NET SDK versions
+
+### Test Projects
+- **TUnit.TestProject**: Integration tests (uses TUnit to test itself)
+- **TUnit.Engine.Tests**: Engine-specific tests
+- **TUnit.Assertions.Tests**: Assertion library tests
+- **TUnit.Core.SourceGenerator.Tests**: Source generator snapshot tests
+- **TUnit.PublicAPI**: Public API snapshot tests (prevents breaking changes)
+
+---
+
+## Development Workflow
+
+### Adding a New Feature
+
+#### Step-by-Step Process
+
+1. **Design Phase**
+   ```
+   ┌─────────────────────────────────────────────────────┐
+   │ Ask yourself:                                       │
+   │ • Does this require dual-mode implementation?       │
+   │ • Will this affect public API?                      │
+   │ • Does this need an analyzer rule?                  │
+   │ • What's the performance impact?                    │
+   │ • Is this AOT/trimming compatible?                  │
+   └─────────────────────────────────────────────────────┘
+   ```
+
+2. **Implementation**
+   - **Write tests FIRST** (TDD approach)
+   - Implement in `TUnit.Core` (if new abstractions needed)
+   - Implement in `TUnit.Core.SourceGenerator` (source-gen path)
+   - Implement in `TUnit.Engine` (reflection path)
+   - Add analyzer rule if misuse is possible
+
+3. **Verification**
+   ```bash
+   # Run all tests
+   dotnet test
+
+   # If source generator changed, accept snapshots
+   cd TUnit.Core.SourceGenerator.Tests
+   dotnet test
+   # Review .received.txt files
+   for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
+
+   # If public API changed, accept snapshots
+   cd TUnit.PublicAPI
+   dotnet test
+   # Review .received.txt files
+   for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
+   ```
+
+4. **Performance Check**
+   ```bash
+   # Run benchmarks (if touching hot paths)
+   cd TUnit.Performance.Tests
+   dotnet run -c Release --framework net9.0
+   ```
+
+5. **AOT Verification** (if touching reflection)
+   ```bash
+   cd TUnit.TestProject
+   dotnet publish -c Release -p:PublishAot=true --use-current-runtime
+   ```
+
+### Fixing a Bug
+
+#### Step-by-Step Process
+
+1. **Reproduce**
+   - Write a failing test that demonstrates the bug
+   - Identify which execution mode(s) are affected
+
+2. **Fix**
+   - Fix in source generator (if affected)
+   - Fix in reflection engine (if affected)
+   - Ensure both modes now pass the test
+
+3. **Verify No Regression**
+   ```bash
+   # Run full test suite
+   dotnet test
+
+   # Check performance hasn't regressed
+   # (if fix is in hot path)
+   ```
+
+4. **Accept Snapshots** (if applicable)
+   - Follow snapshot workflow above
+
+---
+
+## Code Style Standards
+
+### Modern C# - Required Syntax
+
+```csharp
+// ✅ CORRECT: Use collection expressions (C# 12+)
+List<string> items = [];
+string[] array = ["a", "b", "c"];
+Dictionary<string, int> dict = [];
+
+// ❌ WRONG: Don't use old initialization syntax
+List<string> items = new List<string>();
+string[] array = new string[] { "a", "b", "c" };
+
+// ✅ CORRECT: Use var when type is obvious
+var testName = GetTestName();
+var results = ExecuteTests();
+
+// ❌ WRONG: Explicit types for obvious cases
+string testName = GetTestName();
+List<TestResult> results = ExecuteTests();
+
+// ✅ CORRECT: Always use braces, even for single lines
+if (condition)
+{
+    DoSomething();
+}
+
+// ❌ WRONG: No braces
+if (condition)
+    DoSomething();
+
+// ✅ CORRECT: File-scoped namespaces
+namespace TUnit.Core.Features;
+
+public class MyClass { }
+
+// ❌ WRONG: Traditional namespace blocks (unless multiple namespaces in file)
+namespace TUnit.Core.Features
+{
+    public class MyClass { }
+}
+
+// ✅ CORRECT: Pattern matching
+if (obj is TestContext context)
+{
+    ProcessContext(context);
+}
+
+// ✅ CORRECT: Switch expressions
+var result = status switch
+{
+    TestStatus.Passed => "✓",
+    TestStatus.Failed => "✗",
+    TestStatus.Skipped => "⊘",
+    _ => "?"
+};
+
+// ✅ CORRECT: Target-typed new
+TestContext context = new(testName, metadata);
+
+// ✅ CORRECT: Record types for immutable data
+public record TestMetadata(string Name, string FilePath, int LineNumber);
+
+// ✅ CORRECT: Required properties (C# 11+)
+public required string TestName { get; init; }
+
+// ✅ CORRECT: Raw string literals for multi-line strings
+string code = """
+    public void TestMethod()
+    {
+        Assert.That(value).IsEqualTo(expected);
+    }
+    """;
+```
+
+### Naming Conventions
+
+```csharp
+// Public members: PascalCase
+public string TestName { get; }
+public void ExecuteTest() { }
+public const int MaxRetries = 3;
+
+// Private fields: _camelCase
+private readonly ITestExecutor _executor;
+private string _cachedResult;
+
+// Local variables: camelCase
+var testContext = new TestContext();
+int retryCount = 0;
+
+// Type parameters: T prefix for single, descriptive for multiple
+public class Repository<T> { }
+public class Converter<TSource, TDestination> { }
+
+// Interfaces: I prefix
+public interface ITestExecutor { }
+
+// Async methods: Async suffix
+public async Task<TestResult> ExecuteTestAsync(CancellationToken ct) { }
+```
+
+### Async/Await Patterns
+
+```csharp
+// ✅ CORRECT: Use ValueTask for potentially sync operations
+public ValueTask<TestResult> ExecuteAsync(CancellationToken ct)
+{
+    if (IsCached)
+    {
+        return new ValueTask<TestResult>(cachedResult);
+    }
+
+    return ExecuteAsyncCore(ct);
+}
+
+// ✅ CORRECT: Always accept CancellationToken
+public async Task<TestResult> RunTestAsync(CancellationToken cancellationToken)
+{
+    await PrepareAsync(cancellationToken);
+    return await ExecuteAsync(cancellationToken);
+}
+
+// ✅ CORRECT: ConfigureAwait(false) in library code
+var result = await ExecuteAsync().ConfigureAwait(false);
+
+// ❌ WRONG: NEVER block on async code
+var result = ExecuteAsync().Result;  // DEADLOCK RISK
+var result = ExecuteAsync().GetAwaiter().GetResult();  // DEADLOCK RISK
+```
+
+### Nullable Reference Types
+
+```csharp
+// ✅ CORRECT: Explicit nullability annotations
+public string? TryGetTestName(TestContext context)
+{
+    return context.Metadata?.Name;
+}
+
+// ✅ CORRECT: Null-forgiving operator when you know it's safe
+var testName = context.Metadata!.Name;
+
+// ✅ CORRECT: Null-coalescing
+var name = context.Metadata?.Name ?? "UnknownTest";
+
+// ✅ CORRECT: Required non-nullable properties
+public required string TestName { get; init; }
+```
+
+### Performance-Critical Code
+
+```csharp
+// ✅ CORRECT: Object pooling for frequently allocated objects
+private static readonly ObjectPool<StringBuilder> StringBuilderPool =
+    ObjectPool.Create<StringBuilder>();
+
+public string BuildMessage()
+{
+    var builder = StringBuilderPool.Get();
+    try
+    {
+        builder.Append("Test: ");
+        builder.Append(TestName);
+        return builder.ToString();
+    }
+    finally
+    {
+        builder.Clear();
+        StringBuilderPool.Return(builder);
+    }
+}
+
+// ✅ CORRECT: Span<T> for stack-allocated buffers
+Span<char> buffer = stackalloc char[256];
+
+// ✅ CORRECT: Avoid allocations in hot paths
+// Cache reflection results
+private static readonly MethodInfo ExecuteMethod =
+    typeof(TestRunner).GetMethod(nameof(Execute))!;
+
+// ✅ CORRECT: Use static readonly for constant data
+private static readonly string[] ReservedNames = ["Test", "Setup", "Cleanup"];
+```
+
+### Anti-Patterns to Avoid
+
+```csharp
+// ❌ WRONG: Catching generic exceptions without re-throwing
+try { }
+catch (Exception) { } // Swallows all errors
+
+// ✅ CORRECT: Catch specific exceptions or re-throw
+try { }
+catch (InvalidOperationException ex)
+{
+    Log(ex);
+    throw;
+}
+
+// ❌ WRONG: Using Task.Run in library code (pushes threading choice to consumers)
+public Task DoWorkAsync() => Task.Run(() => DoWork());
+
+// ✅ CORRECT: Properly async all the way
+public async Task DoWorkAsync() => await ActualAsyncWork();
+
+// ❌ WRONG: Unnecessary LINQ in hot paths
+var count = tests.Where(t => t.IsPassed).Count();
+
+// ✅ CORRECT: Direct iteration
+int count = 0;
+foreach (var test in tests)
+{
+    if (test.IsPassed) count++;
+}
+
+// ❌ WRONG: String concatenation in loops
+string result = "";
+foreach (var item in items)
+{
+    result += item;
+}
+
+// ✅ CORRECT: StringBuilder or collection expressions
+var builder = new StringBuilder();
+foreach (var item in items)
+{
+    builder.Append(item);
+}
+```
+
+---
+
+## Testing Guidelines
+
+### Test Categories
+
+1. **Unit Tests** (`TUnit.Core.Tests`, `TUnit.UnitTests`)
+   - Test individual components in isolation
+   - Fast execution, no external dependencies
+   - Mock dependencies
+
+2. **Integration Tests** (`TUnit.TestProject`, `TUnit.Engine.Tests`)
+   - Test interactions between components
+   - Use TUnit to test itself (dogfooding)
+   - Verify dual-mode parity
+
+3. **Snapshot Tests** (`TUnit.Core.SourceGenerator.Tests`, `TUnit.PublicAPI`)
+   - Verify source generator output
+   - Track public API surface
+   - Prevent unintended breaking changes
+
+4. **Performance Tests** (`TUnit.Performance.Tests`)
+   - Benchmark critical paths
+   - Compare against other frameworks
+   - Track performance regressions
+
+### Writing Tests
+
+```csharp
+// ✅ CORRECT: Descriptive test names
+[Test]
+public async Task ExecuteTest_WhenTestPasses_ReturnsPassedStatus()
+{
+    // Arrange
+    var test = CreatePassingTest();
+
+    // Act
+    var result = await test.ExecuteAsync();
+
+    // Assert
+    await Assert.That(result.Status).IsEqualTo(TestStatus.Passed);
+}
+
+// ✅ CORRECT: Test both execution modes explicitly
+[Test]
+[Arguments(ExecutionMode.SourceGenerated)]
+[Arguments(ExecutionMode.Reflection)]
+public async Task MyFeature_WorksInBothModes(ExecutionMode mode)
+{
+    // Test implementation
+}
+
+// ✅ CORRECT: Use Categories for grouping
+[Test]
+[Category("Performance")]
+public void MyPerformanceTest() { }
+
+// Run without performance tests:
+// dotnet test -- --treenode-filter "/*/*/*/*[Category!=Performance]"
+```
+
+### Snapshot Testing
+
+```csharp
+// In TUnit.Core.SourceGenerator.Tests
+
+[Test]
+public Task GeneratesCorrectCode_ForSimpleTest()
+{
+    string source = """
+        using TUnit.Core;
+
+        public class MyTests
+        {
+            [Test]
+            public void SimpleTest() { }
+        }
+        """;
+
+    return VerifySourceGenerator(source);
+}
+
+// This will:
+// 1. Run the source generator
+// 2. Capture the generated code
+// 3. Compare to MyTestName.verified.txt
+// 4. Create MyTestName.received.txt if different
+// 5. Fail test if difference found
+```
+
+**Accepting Snapshots:**
+```bash
+# After verifying .received.txt files are correct:
+cd TUnit.Core.SourceGenerator.Tests
+for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
+
+# Commit the .verified.txt files
+git add *.verified.txt
+git commit -m "Update source generator snapshots"
+```
+
+---
+
+## Performance Requirements
+
+### Performance Budget
+
+| Operation | Target | Critical |
+|-----------|--------|----------|
+| Test discovery | < 100ms per 1000 tests | Hot path |
+| Test execution overhead | < 1ms per test | Hot path |
+| Source generation | < 1s per 1000 tests | Compile-time |
+| Memory per test | < 1KB average | At scale |
+
+### Hot Paths (Optimize Aggressively)
+
+1. **Test Discovery**
+   - Source generator: Generating test registration code
+   - Reflection engine: Scanning assemblies for test attributes
+
+2. **Test Execution**
+   - Test invocation
+   - Assertion evaluation
+   - Result collection
+
+3. **Data Generation**
+   - Argument expansion
+   - Data source evaluation
+
+### Performance Checklist
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ Before committing changes to hot paths:                │
+│ □ Profiled with BenchmarkDotNet                        │
+│ □ No new allocations in tight loops                    │
+│ □ Reflection results cached                            │
+│ □ String operations minimized                          │
+│ □ LINQ avoided in hot paths (use loops)                │
+│ □ ValueTask used for potentially sync operations       │
+│ □ Compared before/after performance                    │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Performance Patterns
+
+```csharp
+// ✅ CORRECT: Cache reflection results
+private static readonly Dictionary<Type, MethodInfo[]> TestMethodCache = new();
+
+public MethodInfo[] GetTestMethods(Type type)
+{
+    if (!TestMethodCache.TryGetValue(type, out var methods))
+    {
+        methods = type.GetMethods()
+            .Where(m => m.GetCustomAttribute<TestAttribute>() != null)
+            .ToArray();
+        TestMethodCache[type] = methods;
+    }
+    return methods;
+}
+
+// ✅ CORRECT: Use spans to avoid allocations
+public void ProcessTestName(ReadOnlySpan<char> name)
+{
+    // Work with span, no string allocation
+}
+
+// ✅ CORRECT: ArrayPool for temporary buffers
+var buffer = ArrayPool<byte>.Shared.Rent(size);
+try
+{
+    // Use buffer
+}
+finally
+{
+    ArrayPool<byte>.Shared.Return(buffer);
+}
+```
+
+---
+
+## Common Patterns
+
+### Implementing Dual-Mode Features
+
+#### Pattern: New Test Lifecycle Hook
+
+```csharp
+// 1. Define in TUnit.Core (abstraction)
+namespace TUnit.Core;
+
+[AttributeUsage(AttributeTargets.Method)]
+public class BeforeAllTestsAttribute : Attribute
+{
+}
+
+// 2. Implement in TUnit.Core.SourceGenerator
+// Generates code like:
+/*
+await MyTestClass.GlobalSetup();
+*/
+
+// 3. Implement in TUnit.Engine (reflection)
+public class ReflectionTestDiscoverer
+{
+    private async Task DiscoverHooksAsync(Type testClass)
+    {
+        var hookMethods = testClass.GetMethods()
+            .Where(m => m.GetCustomAttribute<BeforeAllTestsAttribute>() != null);
+
+        foreach (var method in hookMethods)
+        {
+            RegisterHook(method);
+        }
+    }
+}
+
+// 4. Write tests for BOTH modes
+[Test]
+[Arguments(ExecutionMode.SourceGenerated)]
+[Arguments(ExecutionMode.Reflection)]
+public async Task BeforeAllTestsHook_ExecutesOnce(ExecutionMode mode)
+{
+    // Test implementation
+}
+```
+
+### Adding Analyzer Rules
+
+```csharp
+// TUnit.Analyzers/Rules/TestMethodMustBePublic.cs
+
+[DiagnosticAnalyzer(LanguageNames.CSharp)]
+public class TestMethodMustBePublicAnalyzer : DiagnosticAnalyzer
+{
+    public const string DiagnosticId = "TUNIT0001";
+
+    private static readonly DiagnosticDescriptor Rule = new(
+        DiagnosticId,
+        title: "Test method must be public",
+        messageFormat: "Test method '{0}' must be public",
+        category: "Design",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    public override void Initialize(AnalysisContext context)
+    {
+        context.RegisterSymbolAction(AnalyzeMethod, SymbolKind.Method);
+    }
+
+    private void AnalyzeMethod(SymbolAnalysisContext context)
+    {
+        var method = (IMethodSymbol)context.Symbol;
+
+        if (method.GetAttributes().Any(a => a.AttributeClass?.Name == "TestAttribute"))
+        {
+            if (method.DeclaredAccessibility != Accessibility.Public)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    Rule,
+                    method.Locations[0],
+                    method.Name));
+            }
+        }
+    }
+}
+```
+
+### Adding Assertions
+
+```csharp
+// TUnit.Assertions/Extensions/NumericAssertions.cs
+
+public static class NumericAssertions
+{
+    public static InvokableValueAssertionBuilder<TActual> IsPositive<TActual>(
+        this IValueSource<TActual> valueSource)
+        where TActual : IComparable<TActual>
+    {
+        return valueSource.RegisterAssertion(
+            new DelegateAssertion<TActual, TActual>(
+                (value, _, _) =>
+                {
+                    if (value.CompareTo(default!) <= 0)
+                    {
+                        return AssertionResult.Failed($"Expected positive value but was {value}");
+                    }
+                    return AssertionResult.Passed;
+                },
+                (actual, expected) => $"{actual} is positive"));
+    }
+}
+
+// Usage:
+await Assert.That(value).IsPositive();
+```
+
+---
+
+## Troubleshooting
+
+### Snapshot Tests Failing
+
+**Problem**: `TUnit.Core.SourceGenerator.Tests` or `TUnit.PublicAPI` failing with "Snapshots don't match"
+
+**Solution**:
+```bash
+# 1. Review the .received.txt files to see what changed
+cd TUnit.Core.SourceGenerator.Tests  # or TUnit.PublicAPI
+ls *.received.txt
+
+# 2. If changes are intentional (you modified the generator or public API):
+for f in *.received.txt; do mv "$f" "${f%.received.txt}.verified.txt"; done
+
+# 3. Commit the updated .verified.txt files
+git add *.verified.txt
+git commit -m "Update snapshots after [your change]"
+
+# 4. NEVER commit .received.txt files
+git status  # Ensure no .received.txt files are staged
+```
+
+### Tests Pass Locally But Fail in CI
+
+**Common Causes**:
+1. **Snapshot mismatch**: Forgot to commit `.verified.txt` files
+2. **Platform differences**: Line ending issues (CRLF vs LF)
+3. **Timing issues**: Race conditions in parallel tests
+4. **Environment differences**: Missing dependencies
+
+**Solution**:
+```bash
+# Check for uncommitted snapshots
+git status | grep verified.txt
+
+# Check line endings
+git config core.autocrlf  # Should be consistent
+
+# Run tests with same parallelization as CI
+dotnet test --parallel
+```
+
+### Dual-Mode Behavior Differs
+
+**Problem**: Test passes in source-generated mode but fails in reflection mode (or vice versa)
+
+**Diagnostic Process**:
+```bash
+# 1. Run test in specific mode
+dotnet test -- --treenode-filter "/*/*/*/YourTest*"
+
+# 2. Check generated code
+# Look in obj/Debug/net9.0/generated/TUnit.Core.SourceGenerator/
+
+# 3. Debug reflection path
+# Set breakpoint in TUnit.Engine code
+
+# 4. Common issues:
+# - Attribute not checked in reflection path
+# - Different data expansion logic
+# - Missing hook invocation
+# - Incorrect test metadata
+```
+
+**Solution**: Implement missing logic in the other execution mode
+
+### AOT Compilation Fails
+
+**Problem**: `dotnet publish -p:PublishAot=true` fails
+
+**Common Causes**:
+1. Dynamic code generation (not supported in AOT)
+2. Reflection without proper annotations
+3. Missing `[DynamicallyAccessedMembers]` attributes
+
+**Solution**:
+```csharp
+// ✅ CORRECT: Annotate methods that use reflection
+public void DiscoverTests(
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
+    Type testClass)
+{
+    var methods = testClass.GetMethods();  // Safe - annotated
+}
+
+// ✅ CORRECT: Suppress warnings when you know it's safe
+[UnconditionalSuppressMessage("Trimming", "IL2070",
+    Justification = "Test methods are preserved by source generator")]
+public void InvokeTestMethod(MethodInfo method) { }
+```
+
+### Performance Regression
+
+**Problem**: Tests run slower after changes
+
+**Diagnostic**:
+```bash
+# Run performance benchmarks
+cd TUnit.Performance.Tests
+dotnet run -c Release --framework net9.0
+
+# Profile with dotnet-trace
+dotnet trace collect -- dotnet test
+
+# Analyze with PerfView or similar
+```
+
+**Common Causes**:
+- Added LINQ in hot path (use loops instead)
+- Missing caching of reflection results
+- Unnecessary allocations (use object pooling)
+- Synchronous blocking on async code
+
+---
+
+## Pre-Commit Checklist
+
+Before committing ANY code, verify:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ □ All tests pass: dotnet test                              │
+│ □ If source generator changed:                             │
+│   • Ran TUnit.Core.SourceGenerator.Tests                   │
+│   • Reviewed and accepted snapshots (.verified.txt)        │
+│   • Committed .verified.txt files                          │
+│ □ If public API changed:                                   │
+│   • Ran TUnit.PublicAPI tests                              │
+│   • Reviewed and accepted snapshots                        │
+│   • Committed .verified.txt files                          │
+│ □ If dual-mode feature:                                    │
+│   • Implemented in BOTH source-gen and reflection          │
+│   • Tested both modes explicitly                           │
+│   • Verified identical behavior                            │
+│ □ If performance-critical:                                 │
+│   • Profiled before and after                              │
+│   • No performance regression                              │
+│   • Minimized allocations                                  │
+│ □ If touching reflection:                                  │
+│   • Tested with AOT: dotnet publish -p:PublishAot=true     │
+│   • Added proper DynamicallyAccessedMembers annotations    │
+│ □ Code follows style guide                                 │
+│ □ No breaking changes (or documented if unavoidable)       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Additional Resources
+
+- **Documentation**: https://tunit.dev
+- **Contributing Guide**: `.github/CONTRIBUTING.md`
+- **Issues**: https://github.com/thomhurst/TUnit/issues
+- **Discussions**: https://github.com/thomhurst/TUnit/discussions
+
+---
+
+## Philosophy
+
+TUnit aims to be: **fast, modern, reliable, and enjoyable to use**.
+
+Every change should advance these goals:
+- **Fast**: Optimize for performance. Millions of tests depend on it.
+- **Modern**: Leverage latest .NET features. Support AOT, trimming, latest C#.
+- **Reliable**: Dual-mode parity. Comprehensive tests. No breaking changes without major version bump.
+- **Enjoyable**: Great error messages. Intuitive API. Minimal boilerplate.
+
+When in doubt, ask: "Does this make TUnit faster, more modern, more reliable, or more enjoyable to use?"
+
+If the answer is no, reconsider the change.
