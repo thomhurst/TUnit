@@ -123,7 +123,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             var concreteMethod = FindConcreteMethodImplementation(classInfo.TypeSymbol, method);
 
-            var inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
+            // Calculate inheritance depth using concrete method if available
+            var methodToCheck = concreteMethod ?? method;
+            var inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, methodToCheck);
 
             // Skip methods declared directly on this class (inheritance depth = 0)
             // Those are already handled by the regular test method registration
@@ -172,7 +174,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static int CalculateInheritanceDepth(INamedTypeSymbol testClass, IMethodSymbol testMethod)
     {
-        if (testMethod.ContainingType.Equals(testClass, SymbolEqualityComparer.Default))
+        var methodContainingType = testMethod.ContainingType.OriginalDefinition;
+        var testClassOriginal = testClass.OriginalDefinition;
+
+        if (SymbolEqualityComparer.Default.Equals(methodContainingType, testClassOriginal))
         {
             return 0;
         }
@@ -183,7 +188,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         while (currentType != null)
         {
             depth++;
-            if (testMethod.ContainingType.Equals(currentType, SymbolEqualityComparer.Default))
+            var currentTypeOriginal = currentType.OriginalDefinition;
+            if (SymbolEqualityComparer.Default.Equals(methodContainingType, currentTypeOriginal))
             {
                 return depth;
             }

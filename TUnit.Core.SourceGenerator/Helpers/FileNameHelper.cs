@@ -102,9 +102,10 @@ internal static class FileNameHelper
 
         foreach (var c in input)
         {
-            // Replace invalid filename characters with underscore
+            // Replace invalid filename characters and special type characters with underscore
             if (c == '<' || c == '>' || c == ':' || c == '"' || c == '/' || c == '\\' ||
-                c == '|' || c == '?' || c == '*' || c == '.' || c == ',' || c == ' ')
+                c == '|' || c == '?' || c == '*' || c == '.' || c == ',' || c == ' ' ||
+                c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}')
             {
                 sb.Append('_');
             }
