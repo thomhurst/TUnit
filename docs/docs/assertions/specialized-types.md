@@ -443,7 +443,7 @@ public async Task IP_Not_IPv6()
 }
 ```
 
-## Lazy<T> Assertions
+## Lazy\<T\> Assertions
 
 ### IsValueCreated / IsNotValueCreated
 
