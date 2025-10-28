@@ -50,6 +50,32 @@ public sealed class EvaluationContext<TValue>
     }
 
     /// <summary>
+    /// Re-evaluates the source by bypassing the cache and invoking the evaluator again.
+    /// Used by polling assertions like WaitsFor that need to observe changing values.
+    /// For immediate values (created without an evaluator), returns the cached value.
+    /// </summary>
+    /// <returns>The freshly evaluated value and any exception that occurred</returns>
+    public async Task<(TValue? Value, Exception? Exception)> ReevaluateAsync()
+    {
+        if (_evaluator == null)
+        {
+            return (_value, _exception);
+        }
+
+        var startTime = DateTimeOffset.Now;
+        var (value, exception) = await _evaluator();
+        var endTime = DateTimeOffset.Now;
+
+        _value = value;
+        _exception = exception;
+        _startTime = startTime;
+        _endTime = endTime;
+        _evaluated = true;
+
+        return (value, exception);
+    }
+
+    /// <summary>
     /// Creates a derived context by mapping the value to a different type.
     /// Used for type transformations like IsTypeOf&lt;T&gt;().
     /// The mapping function is only called if evaluation succeeds (no exception).
