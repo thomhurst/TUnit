@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using TUnit.Assertions.Assertions.Regex;
 using TUnit.Assertions.Attributes;
 using TUnit.Assertions.Core;
 
@@ -422,20 +423,18 @@ public class StringLengthAssertion : Assertion<string>
 }
 
 /// <summary>
-/// Asserts that a string matches a regular expression pattern.
+/// Asserts that a string matches a regular expression pattern and returns a collection of all matches.
 /// </summary>
-[AssertionExtension("Matches")]
-public class StringMatchesAssertion : Assertion<string>
+public class StringMatchesAssertion : Assertion<RegexMatchCollection>
 {
     private readonly string _pattern;
     private readonly Regex? _regex;
     private RegexOptions _options = RegexOptions.None;
-    private Match? _cachedMatch;
 
     public StringMatchesAssertion(
         AssertionContext<string> context,
         string pattern)
-        : base(context)
+        : base(CreateMappedContext(context, pattern, null, RegexOptions.None))
     {
         _pattern = pattern;
         _regex = null;
@@ -444,61 +443,87 @@ public class StringMatchesAssertion : Assertion<string>
     public StringMatchesAssertion(
         AssertionContext<string> context,
         Regex regex)
-        : base(context)
+        : base(CreateMappedContext(context, regex.ToString(), regex, RegexOptions.None))
     {
         _pattern = regex.ToString();
         _regex = regex;
     }
 
+    // Private constructor for chaining methods like IgnoringCase
+    private StringMatchesAssertion(
+        AssertionContext<RegexMatchCollection> mappedContext,
+        string pattern,
+        Regex? regex,
+        RegexOptions options)
+        : base(mappedContext)
+    {
+        _pattern = pattern;
+        _regex = regex;
+        _options = options;
+    }
+
     public StringMatchesAssertion IgnoringCase()
     {
-        _options |= RegexOptions.IgnoreCase;
+        var newOptions = _options | RegexOptions.IgnoreCase;
         Context.ExpressionBuilder.Append(".IgnoringCase()");
-        return this;
+        return new StringMatchesAssertion(Context, _pattern, _regex, newOptions);
     }
 
     public StringMatchesAssertion WithOptions(RegexOptions options)
     {
-        _options = options;
         Context.ExpressionBuilder.Append($".WithOptions({options})");
-        return this;
+        return new StringMatchesAssertion(Context, _pattern, _regex, options);
     }
 
-    /// <summary>
-    /// Gets the cached regex match result after the assertion has been executed.
-    /// Returns null if the assertion hasn't been executed yet or if the match failed.
-    /// </summary>
-    public Match? GetMatch() => _cachedMatch;
+    private static AssertionContext<RegexMatchCollection> CreateMappedContext(
+        AssertionContext<string> context,
+        string pattern,
+        Regex? regex,
+        RegexOptions options)
+    {
+        return context.Map<RegexMatchCollection>(stringValue =>
+        {
+            // Validate the regex pattern first (by creating a Regex object if we don't have one)
+            // This ensures RegexParseException is thrown before ArgumentNullException for invalid patterns
+            var regexObj = regex ?? new Regex(pattern, options);
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+            // Now check if value is null and throw ArgumentNullException
+            if (stringValue == null)
+            {
+                throw new ArgumentNullException(nameof(stringValue), "value was null");
+            }
+
+            // Perform the matches
+            var matches = regexObj.Matches(stringValue);
+
+            if (matches.Count == 0)
+            {
+                throw new InvalidOperationException($"The regex \"{pattern}\" does not match with \"{stringValue}\"");
+            }
+
+            return new RegexMatchCollection(matches);
+        });
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<RegexMatchCollection> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
 
         if (exception != null)
         {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().Name}"));
+            // Check what type of exception it is
+            if (exception is InvalidOperationException)
+            {
+                return Task.FromResult(AssertionResult.Failed(exception.Message));
+            }
+            // Rethrow native exceptions (ArgumentNullException, RegexParseException, RegexMatchTimeoutException)
+            // so they can be tested with .Throws<T>()
+            throw exception;
         }
 
-        // Validate the regex pattern first (by creating a Regex object if we don't have one)
-        // This ensures RegexParseException is thrown before ArgumentNullException for invalid patterns
-        var regex = _regex ?? new Regex(_pattern, _options);
-
-        // Now check if value is null and throw ArgumentNullException
-        if (value == null)
-        {
-            throw new ArgumentNullException(nameof(value), "value was null");
-        }
-        // Use the validated regex to check the match and cache it
-        var match = regex.Match(value);
-        _cachedMatch = match;
-
-        if (match.Success)
-        {
-            return Task.FromResult(AssertionResult.Passed);
-        }
-
-        return Task.FromResult(AssertionResult.Failed($"The regex \"{_pattern}\" does not match with \"{value}\""));
+        // If we have a RegexMatchCollection, at least one match succeeded
+        return Task.FromResult(AssertionResult.Passed);
     }
 
     protected override string GetExpectation()

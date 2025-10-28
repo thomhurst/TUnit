@@ -148,17 +148,40 @@ namespace .Assertions
 }
 namespace .
 {
-    public class RegexMatchResult
+    public class GroupAssertion : .<..RegexMatchCollection>
+    {
+        protected override .<.> CheckAsync(.<..RegexMatchCollection> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class MatchAssertion : .<..RegexMatchCollection>
+    {
+        protected override .<.> CheckAsync(.<..RegexMatchCollection> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class MatchGroupAssertion : .<..RegexMatch>
+    {
+        protected override .<.> CheckAsync(.<..RegexMatch> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class MatchIndexAssertion : .<..RegexMatch>
+    {
+        protected override .<.> CheckAsync(.<..RegexMatch> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public class RegexMatch
     {
         public int Index { get; }
         public int Length { get; }
         public string Value { get; }
-        public string Group(int groupIndex) { }
-        public string Group(string groupName) { }
+        public string GetGroup(int groupIndex) { }
+        public string GetGroup(string groupName) { }
     }
-    public static class StringMatchesAssertionExtensions
+    public class RegexMatchCollection : .<..RegexMatch>, .<..RegexMatch>, .<..RegexMatch>, .IEnumerable
     {
-        public static .<..RegexMatchResult> GetMatchAsync(this . assertion) { }
+        public int Count { get; }
+        public ..RegexMatch First { get; }
+        public ..RegexMatch this[int index] { get; }
+        public .<..RegexMatch> GetEnumerator() { }
     }
 }
 namespace .
@@ -1366,14 +1389,12 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
     }
-    [.("Matches")]
-    public class StringMatchesAssertion : .<string>
+    public class StringMatchesAssertion : .<..RegexMatchCollection>
     {
         public StringMatchesAssertion(.<string> context, . regex) { }
         public StringMatchesAssertion(.<string> context, string pattern) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
+        protected override .<.> CheckAsync(.<..RegexMatchCollection> metadata) { }
         protected override string GetExpectation() { }
-        public .? GetMatch() { }
         public . IgnoringCase() { }
         public . WithOptions(. options) { }
     }
@@ -3248,6 +3269,19 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class RegexAssertionExtensions
+    {
+        public static ..MatchGroupAssertion Group(this .<..RegexMatch> continuation, int groupIndex, <.<string>, .<string>?> assertion) { }
+        public static ..MatchGroupAssertion Group(this .<..RegexMatch> continuation, string groupName, <.<string>, .<string>?> assertion) { }
+        public static ..GroupAssertion Group(this .<..RegexMatchCollection> continuation, int groupIndex, <.<string>, .<string>?> assertion) { }
+        public static ..GroupAssertion Group(this .<..RegexMatchCollection> continuation, string groupName, <.<string>, .<string>?> assertion) { }
+        public static ..MatchGroupAssertion Group(this .<..RegexMatch> source, int groupIndex, <.<string>, .<string>?> assertion) { }
+        public static ..MatchGroupAssertion Group(this .<..RegexMatch> source, string groupName, <.<string>, .<string>?> assertion) { }
+        public static ..MatchIndexAssertion Match(this .<..RegexMatchCollection> continuation, int index) { }
+        public static ..MatchAssertion Match(this .<..RegexMatchCollection> continuation, int index, <.<..RegexMatch>, .<..RegexMatch>?> assertion) { }
+        public static . Matches(this .<string> source, . regex, [.("regex")] string? regexExpression = null) { }
+        public static . Matches(this .<string> source, string pattern, [.("pattern")] string? patternExpression = null) { }
+    }
     public static class SameReferenceAssertionExtensions
     {
         public static .<TValue> IsSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
@@ -3383,11 +3417,6 @@ namespace .Extensions
         public StringIsNullOrWhiteSpaceWithStringAssertion(.<string> context, bool negated = false) { }
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
-    }
-    public static class StringMatchesAssertionExtensions
-    {
-        public static . Matches(this .<string> source, . regex, [.("regex")] string? regexExpression = null) { }
-        public static . Matches(this .<string> source, string pattern, [.("pattern")] string? patternExpression = null) { }
     }
     public static class StringStartsWithAssertionExtensions
     {

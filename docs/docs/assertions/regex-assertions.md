@@ -38,10 +38,10 @@ public async Task NamedGroupAssertions()
     var email = "john.doe@example.com";
     var pattern = @"(?<username>[\w.]+)@(?<domain>[\w.]+)";
 
-    // Assert on named capture groups
+    // Assert on named capture groups (requires .And before .Group())
     await Assert.That(email)
         .Matches(pattern)
-        .Group("username", user => user.IsEqualTo("john.doe"))
+        .And.Group("username", user => user.IsEqualTo("john.doe"))
         .And.Group("domain", domain => domain.IsEqualTo("example.com"));
 }
 ```
@@ -58,10 +58,34 @@ public async Task IndexedGroupAssertions()
     // Assert on indexed capture groups (1-based, 0 is full match)
     await Assert.That(date)
         .Matches(pattern)
-        .Group(0, full => full.IsEqualTo("2025-10-28"))
+        .And.Group(0, full => full.IsEqualTo("2025-10-28"))
         .And.Group(1, year => year.IsEqualTo("2025"))
         .And.Group(2, month => month.IsEqualTo("10"))
         .And.Group(3, day => day.IsEqualTo("28"));
+}
+```
+
+## Multiple Matches
+
+When a regex matches multiple times in a string, you can access specific matches using `.Match(index)`:
+
+```csharp
+[Test]
+public async Task MultipleMatchAssertions()
+{
+    var text = "test123 hello456 world789";
+    var pattern = @"\w+\d+";
+
+    // Assert on first match
+    await Assert.That(text)
+        .Matches(pattern)
+        .And.Match(0)
+        .And.Group(0, match => match.IsEqualTo("test123"));
+
+    // Use lambda pattern to assert on a specific match
+    await Assert.That(text)
+        .Matches(pattern)
+        .And.Match(1, match => match.Group(0, g => g.IsEqualTo("hello456")));
 }
 ```
 
@@ -105,7 +129,7 @@ public async Task ComplexPatternAssertions()
 
     await Assert.That(logEntry)
         .Matches(pattern)
-        .Group("date", date => date.IsEqualTo("2025-10-28"))
+        .And.Group("date", date => date.IsEqualTo("2025-10-28"))
         .And.Group("time", time => time.StartsWith("14"))
         .And.Group("level", level => level.IsEqualTo("ERROR"))
         .And.Group("message", msg => msg.Contains("timeout"));
@@ -123,7 +147,7 @@ public async Task ProductCodeValidation()
 
     await Assert.That(product)
         .Matches(pattern)
-        .Group("code", code => code.StartsWith("ABC"))
+        .And.Group("code", code => code.StartsWith("ABC"))
         .And.Group("price", price => price.Contains(".99"))
         .And.Group("stock", stock => stock.HasLength(2));
 }
@@ -140,7 +164,7 @@ public async Task UrlParsingAssertions()
 
     await Assert.That(url)
         .Matches(pattern)
-        .Group("protocol", p => p.IsEqualTo("https"))
+        .And.Group("protocol", p => p.IsEqualTo("https"))
         .And.Group("host", h => h.Contains("api"))
         .And.Group("port", p => p.IsEqualTo("8080"))
         .And.Group("path", p => p.StartsWith("users/"))
@@ -188,7 +212,7 @@ public partial class MyTests
         // Source-generated regex provides better performance
         await Assert.That(date)
             .Matches(DatePattern())
-            .Group("year", y => y.IsEqualTo("2025"))
+            .And.Group("year", y => y.IsEqualTo("2025"))
             .And.Group("month", m => m.IsEqualTo("10"))
             .And.Group("day", d => d.IsEqualTo("28"));
     }
@@ -210,13 +234,13 @@ public async Task OptionalGroupAssertions()
     // Phone with area code
     await Assert.That(phone1)
         .Matches(pattern)
-        .Group("area", area => area.IsEqualTo("555"))
+        .And.Group("area", area => area.IsEqualTo("555"))
         .And.Group("prefix", p => p.IsEqualTo("123"));
 
     // Phone without area code (optional group is empty)
     await Assert.That(phone2)
         .Matches(pattern)
-        .Group("area", area => area.IsEqualTo(""))
+        .And.Group("area", area => area.IsEqualTo(""))
         .And.Group("prefix", p => p.IsEqualTo("123"));
 }
 ```
@@ -232,7 +256,7 @@ public async Task CompleteEmailValidation()
 
     await Assert.That(email)
         .Matches(pattern)
-        .Group("local", local => local.StartsWith("john"))
+        .And.Group("local", local => local.StartsWith("john"))
         .And.Group("subdomain", sub => sub.IsEqualTo("mail"))
         .And.Group("domain", domain => domain.IsEqualTo("example"))
         .And.Group("tld", tld => tld.HasLength(3))
