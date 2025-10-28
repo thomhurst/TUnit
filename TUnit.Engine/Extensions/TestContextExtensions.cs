@@ -17,6 +17,15 @@ internal static class TestContextExtensions
 
     public static IEnumerable<object> GetEligibleEventObjects(this TestContext testContext)
     {
-        return GetInternal(testContext).OfType<object>();
+        // Return cached result if available
+        if (testContext.CachedEligibleEventObjects != null)
+        {
+            return testContext.CachedEligibleEventObjects;
+        }
+
+        // Materialize and cache the result
+        var result = GetInternal(testContext).OfType<object>().ToArray();
+        testContext.CachedEligibleEventObjects = result;
+        return result;
     }
 }

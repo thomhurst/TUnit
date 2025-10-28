@@ -198,7 +198,9 @@ internal sealed class TestBuilder : ITestBuilder
                     hasAnyClassData = true;
                     classDataLoopIndex++;
 
-                    var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+                    // Cache the class data result to avoid calling classDataFactory() twice
+                    var classDataResult = await classDataFactory() ?? [];
+                    var classData = DataUnwrapper.Unwrap(classDataResult);
 
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
 
@@ -283,7 +285,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     DataSourceAttribute = methodDataSource
                                 };
 
-                                classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
+                                // Reuse cached classDataResult instead of calling classDataFactory() again
+                                classData = DataUnwrapper.Unwrap(classDataResult);
                                 var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
                                 // For concrete generic instantiations, check if the data is compatible with the expected types

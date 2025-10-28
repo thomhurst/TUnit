@@ -37,9 +37,9 @@ public class TestContext : Context
 
     internal static readonly Dictionary<string, List<string>> InternalParametersDictionary = new();
 
-    private readonly StringWriter _outputWriter = new();
+    private StringWriter? _outputWriter;
 
-    private readonly StringWriter _errorWriter = new();
+    private StringWriter? _errorWriter;
 
     public static new TestContext? Current
     {
@@ -168,17 +168,19 @@ public class TestContext : Context
 
     public void WriteLine(string message)
     {
+        _outputWriter ??= new StringWriter();
         _outputWriter.WriteLine(message);
     }
 
     public void WriteError(string message)
     {
+        _errorWriter ??= new StringWriter();
         _errorWriter.WriteLine(message);
     }
 
-    public string GetOutput() => _outputWriter.ToString();
+    public string GetOutput() => _outputWriter?.ToString() ?? string.Empty;
 
-    public new string GetErrorOutput() => _errorWriter.ToString();
+    public new string GetErrorOutput() => _errorWriter?.ToString() ?? string.Empty;
 
     public T? GetService<T>() where T : class
     {
@@ -199,6 +201,8 @@ public class TestContext : Context
     public IReadOnlyList<Artifact> Artifacts { get; } = new List<Artifact>();
 
     internal IClassConstructor? ClassConstructor => _testBuilderContext.ClassConstructor;
+
+    internal object[]? CachedEligibleEventObjects { get; set; }
 
     public string GetDisplayName()
     {

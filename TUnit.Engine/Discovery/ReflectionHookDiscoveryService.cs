@@ -21,6 +21,8 @@ internal sealed class ReflectionHookDiscoveryService
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
     private static readonly ConcurrentDictionary<string, bool> _registeredMethods = new();
     private static readonly ConcurrentDictionary<MethodInfo, string> _methodKeyCache = new();
+    // Cache attribute lookups to avoid repeated reflection calls in hot paths
+    private static readonly ConcurrentDictionary<MethodInfo, (BeforeAttribute?, AfterAttribute?, BeforeEveryAttribute?, AfterEveryAttribute?)> _attributeCache = new();
     private static int _registrationIndex = 0;
     private static int _discoveryRunCount = 0;
 
@@ -41,6 +43,21 @@ internal sealed class ReflectionHookDiscoveryService
                 paramTypes[i] = parameters[i].ParameterType.FullName ?? "unknown";
             }
             return $"{m.DeclaringType?.FullName}.{m.Name}({string.Join(",", paramTypes)})";
+        });
+    }
+
+    /// <summary>
+    /// Get cached hook attributes for a method to avoid repeated GetCustomAttribute calls
+    /// </summary>
+    private static (BeforeAttribute?, AfterAttribute?, BeforeEveryAttribute?, AfterEveryAttribute?) GetCachedAttributes(MethodInfo method)
+    {
+        return _attributeCache.GetOrAdd(method, m =>
+        {
+            var beforeAttr = m.GetCustomAttribute<BeforeAttribute>();
+            var afterAttr = m.GetCustomAttribute<AfterAttribute>();
+            var beforeEveryAttr = m.GetCustomAttribute<BeforeEveryAttribute>();
+            var afterEveryAttr = m.GetCustomAttribute<AfterEveryAttribute>();
+            return (beforeAttr, afterAttr, beforeEveryAttr, afterEveryAttr);
         });
     }
 
@@ -105,11 +122,8 @@ internal sealed class ReflectionHookDiscoveryService
             var methods = typeInChain.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
                 .OrderBy(m =>
                 {
-                    // Get the minimum order from all hook attributes on this method
-                    var beforeAttr = m.GetCustomAttribute<BeforeAttribute>();
-                    var afterAttr = m.GetCustomAttribute<AfterAttribute>();
-                    var beforeEveryAttr = m.GetCustomAttribute<BeforeEveryAttribute>();
-                    var afterEveryAttr = m.GetCustomAttribute<AfterEveryAttribute>();
+                    // Get the minimum order from cached hook attributes
+                    var (beforeAttr, afterAttr, beforeEveryAttr, afterEveryAttr) = GetCachedAttributes(m);
 
                     var orders = new List<int>();
                     if (beforeAttr != null) orders.Add(beforeAttr.Order);
@@ -291,11 +305,8 @@ internal sealed class ReflectionHookDiscoveryService
             var methods = typeInChain.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
                 .OrderBy(m =>
                 {
-                    // Get the minimum order from all hook attributes on this method
-                    var beforeAttr = m.GetCustomAttribute<BeforeAttribute>();
-                    var afterAttr = m.GetCustomAttribute<AfterAttribute>();
-                    var beforeEveryAttr = m.GetCustomAttribute<BeforeEveryAttribute>();
-                    var afterEveryAttr = m.GetCustomAttribute<AfterEveryAttribute>();
+                    // Get the minimum order from cached hook attributes
+                    var (beforeAttr, afterAttr, beforeEveryAttr, afterEveryAttr) = GetCachedAttributes(m);
 
                     var orders = new List<int>();
                     if (beforeAttr != null) orders.Add(beforeAttr.Order);
