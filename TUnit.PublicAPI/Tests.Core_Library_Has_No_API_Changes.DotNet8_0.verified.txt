@@ -619,7 +619,6 @@ namespace
         public .? TestMethod { get; set; }
         public object?[]? TestMethodArguments { get; set; }
     }
-    [.("TUnitWIP0001")]
     public class DynamicTestBuilderAttribute : .BaseTestAttribute
     {
         public DynamicTestBuilderAttribute([.] string file = "", [.] int line = 0) { }
