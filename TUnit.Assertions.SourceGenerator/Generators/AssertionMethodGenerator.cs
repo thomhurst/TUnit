@@ -369,8 +369,33 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
         {
             var attributeData = attributeWithClassData.AttributeData;
 
+            // For unbound generic types, we need to temporarily construct them for member lookup
+            var typeForMemberLookup = attributeData.ContainingType;
+            if (attributeData.IsUnboundGeneric && typeForMemberLookup.IsUnboundGenericType)
+            {
+                // Get System.Object by searching through the type's containing assembly references
+                INamedTypeSymbol? objectType = null;
+
+                // Look through the referenced assemblies to find System.Object
+                foreach (var refAssembly in typeForMemberLookup.ContainingAssembly.Modules.FirstOrDefault()?.ReferencedAssemblySymbols ?? Enumerable.Empty<IAssemblySymbol>())
+                {
+                    var systemNs = refAssembly.GlobalNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "System");
+                    if (systemNs != null)
+                    {
+                        objectType = systemNs.GetTypeMembers("Object").FirstOrDefault();
+                        if (objectType != null) break;
+                    }
+                }
+
+                if (objectType != null)
+                {
+                    var typeArgs = Enumerable.Repeat<ITypeSymbol>(objectType, typeForMemberLookup.TypeParameters.Length).ToArray();
+                    typeForMemberLookup = typeForMemberLookup.Construct(typeArgs);
+                }
+            }
+
             // First try to find methods
-            var methodMembers = attributeData.ContainingType.GetMembers(attributeData.MethodName)
+            var methodMembers = typeForMemberLookup.GetMembers(attributeData.MethodName)
                 .OfType<IMethodSymbol>()
                 .Where(m => IsValidReturnType(m.ReturnType, out _) &&
                            (attributeData.TreatAsInstance ?
@@ -394,31 +419,6 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             var propertyMembers = new List<IPropertySymbol>();
             if (!methodMembers.Any())
             {
-                // For unbound generic types, we need to temporarily construct them for member lookup
-                var typeForMemberLookup = attributeData.ContainingType;
-                if (attributeData.IsUnboundGeneric && typeForMemberLookup.TypeParameters.Length > 0)
-                {
-                    // Find System.Object type - look in the global namespace for mscorlib/System.Runtime references
-                    INamedTypeSymbol? objectType = null;
-                    foreach (var refAssembly in typeForMemberLookup.ContainingAssembly.Modules.FirstOrDefault()?.ReferencedAssemblySymbols ?? Enumerable.Empty<IAssemblySymbol>())
-                    {
-                        var systemNs = refAssembly.GlobalNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "System");
-                        if (systemNs != null)
-                        {
-                            objectType = systemNs.GetTypeMembers("Object").FirstOrDefault();
-                            if (objectType != null) break;
-                        }
-                    }
-
-                    if (objectType != null)
-                    {
-                        var typeArgs = new ITypeSymbol[typeForMemberLookup.TypeParameters.Length];
-                        for (int i = 0; i < typeArgs.Length; i++)
-                            typeArgs[i] = objectType;
-                        typeForMemberLookup = typeForMemberLookup.Construct(typeArgs);
-                    }
-                }
-
                 propertyMembers = typeForMemberLookup.GetMembers(attributeData.MethodName)
                     .OfType<IPropertySymbol>()
                     .Where(p => p.Type.SpecialType == SpecialType.System_Boolean &&
