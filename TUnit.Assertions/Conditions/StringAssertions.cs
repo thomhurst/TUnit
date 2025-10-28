@@ -430,6 +430,7 @@ public class StringMatchesAssertion : Assertion<string>
     private readonly string _pattern;
     private readonly Regex? _regex;
     private RegexOptions _options = RegexOptions.None;
+    private Match? _cachedMatch;
 
     public StringMatchesAssertion(
         AssertionContext<string> context,
@@ -463,6 +464,12 @@ public class StringMatchesAssertion : Assertion<string>
         return this;
     }
 
+    /// <summary>
+    /// Gets the cached regex match result after the assertion has been executed.
+    /// Returns null if the assertion hasn't been executed yet or if the match failed.
+    /// </summary>
+    public Match? GetMatch() => _cachedMatch;
+
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
     {
         var value = metadata.Value;
@@ -482,11 +489,11 @@ public class StringMatchesAssertion : Assertion<string>
         {
             throw new ArgumentNullException(nameof(value), "value was null");
         }
+        // Use the validated regex to check the match and cache it
+        var match = regex.Match(value);
+        _cachedMatch = match;
 
-        // Use the validated regex to check the match
-        bool isMatch = regex.IsMatch(value);
-
-        if (isMatch)
+        if (match.Success)
         {
             return Task.FromResult(AssertionResult.Passed);
         }

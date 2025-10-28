@@ -148,6 +148,21 @@ namespace .Assertions
 }
 namespace .
 {
+    public class RegexMatchResult
+    {
+        public int Index { get; }
+        public int Length { get; }
+        public string Value { get; }
+        public string Group(int groupIndex) { }
+        public string Group(string groupName) { }
+    }
+    public static class StringMatchesAssertionExtensions
+    {
+        public static .<..RegexMatchResult> GetMatchAsync(this . assertion) { }
+    }
+}
+namespace .
+{
     public class IsNotParsableIntoAssertion<[.(..None | ..PublicMethods | ..Interfaces)]  T> : .<string>
     {
         public IsNotParsableIntoAssertion(.<string> context) { }
@@ -1358,6 +1373,7 @@ namespace .Conditions
         public StringMatchesAssertion(.<string> context, string pattern) { }
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
+        public .? GetMatch() { }
         public . IgnoringCase() { }
         public . WithOptions(. options) { }
     }
