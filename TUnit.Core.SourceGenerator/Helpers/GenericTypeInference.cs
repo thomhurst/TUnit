@@ -128,7 +128,6 @@ internal static class GenericTypeInference
         {
             var parameter = method.Parameters[i];
             
-            // Check if this parameter uses a type parameter
             if (parameter.Type is ITypeParameterSymbol typeParam)
             {
                 // Get the corresponding argument value from the attribute

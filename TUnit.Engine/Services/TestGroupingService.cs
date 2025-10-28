@@ -227,7 +227,6 @@ internal sealed class TestGroupingService : ITestGroupingService
         }
         else
         {
-            // Add test only once with all its constraint keys
             keyedNotInParallelList.Add((test, className, constraint.NotInParallelConstraintKeys, testPriority));
         }
     }

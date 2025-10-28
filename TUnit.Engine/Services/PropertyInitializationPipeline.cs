@@ -62,7 +62,6 @@ internal sealed class PropertyInitializationPipeline
     {
         try
         {
-            // Execute before steps
             foreach (var step in _beforeSteps)
             {
                 await step(context);
@@ -88,7 +87,6 @@ internal sealed class PropertyInitializationPipeline
                     $"of type '{context.PropertyType.Name}' on '{context.Instance.GetType().Name}'");
             }
 
-            // Execute after steps
             foreach (var step in _afterSteps)
             {
                 await step(context);

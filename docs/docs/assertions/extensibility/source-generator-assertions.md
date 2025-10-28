@@ -382,24 +382,6 @@ await Assert.That(number)
 
 ---
 
-## Migration from CreateAssertion
-
-If you're using the old `CreateAssertionAttribute`:
-
-```csharp
-// Old (still works, but deprecated):
-[CreateAssertion<string>("StartsWith")]
-public static partial class StringAssertionExtensions { }
-
-// New:
-[AssertionFrom<string>(nameof(string.StartsWith), ExpectationMessage = "to start with {value}")]
-public static partial class StringAssertionExtensions { }
-```
-
-The old attribute shows an obsolete warning but continues to work for backward compatibility.
-
----
-
 ## Complete Example
 
 Here's a comprehensive example showing all features:

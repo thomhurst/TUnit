@@ -20,7 +20,6 @@ internal sealed class SourceGenStaticPropertyInitializer : IStaticPropertyInitia
     {
         try
         {
-            // Execute all registered global initializers from source generation
             while (Sources.GlobalInitializers.TryDequeue(out var initializer))
             {
                 cancellationToken.ThrowIfCancellationRequested();

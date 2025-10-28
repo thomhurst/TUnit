@@ -337,7 +337,6 @@ public class TestContext : Context
         // Use the current test's class type by default
         var classType = TestDetails.ClassType;
 
-        // Call GetTestsByNameAndParameters with empty parameter lists to get all tests with this name
         var tests = testFinder.GetTestsByNameAndParameters(
             testName,
             [
@@ -363,7 +362,6 @@ public class TestContext : Context
     {
         var testFinder = ServiceProvider.GetService<ITestFinder>()!;
 
-        // Call GetTestsByNameAndParameters with empty parameter lists to get all tests with this name
         return testFinder.GetTestsByNameAndParameters(
             testName,
             [

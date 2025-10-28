@@ -47,14 +47,12 @@ internal static class InterfaceCache
     {
         return _implementsCache.GetOrAdd((type, "System.Collections.Generic.IAsyncEnumerable<T>"), key =>
         {
-            // Check if the type itself is an IAsyncEnumerable<T>
             if (key.Type is INamedTypeSymbol { IsGenericType: true } namedType &&
                 namedType.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>")
             {
                 return true;
             }
 
-            // Check if the type implements IAsyncEnumerable<T>
             return key.Type.AllInterfaces.Any(i =>
                 i.IsGenericType &&
                 i.OriginalDefinition.ToDisplayString() == "System.Collections.Generic.IAsyncEnumerable<T>");

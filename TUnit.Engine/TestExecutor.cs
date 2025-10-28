@@ -59,7 +59,6 @@ internal class TestExecutor
 
         try
         {
-            // Ensure TestSession hooks have been executed
             await EnsureTestSessionHooksExecutedAsync().ConfigureAwait(false);
 
             // Event receivers have their own internal coordination to run once
@@ -94,7 +93,6 @@ internal class TestExecutor
 
             await _hookExecutor.ExecuteBeforeTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
 
-            // Invoke test start event receivers
             await _eventReceiverOrchestrator.InvokeTestStartEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
 
             executableTest.Context.RestoreExecutionContext();
@@ -128,7 +126,6 @@ internal class TestExecutor
                 // Run After(Test) hooks
                 await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
 
-                // Invoke test end event receivers
                 await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
             }
             catch
@@ -155,7 +152,6 @@ internal class TestExecutor
                 // Run After(Test) hooks
                 await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
 
-                // Invoke test end event receivers
                 await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
             }
             // Note: Test instance disposal and After(Class/Assembly/Session) hooks

@@ -64,10 +64,8 @@ public class MemberAssertionResult<TObject>
 
     private async Task<TObject?> ExecuteAsync()
     {
-        // Execute the member assertion
         await _memberAssertion.AssertAsync();
 
-        // Return the parent object value
         var (parentValue, _) = await _parentContext.GetAsync();
         return parentValue;
     }
@@ -89,17 +87,14 @@ internal class MemberExecutionWrapper<TObject> : Assertion<TObject>
 
     public override async Task<TObject?> AssertAsync()
     {
-        // Execute the member assertion
         await _memberAssertion.AssertAsync();
 
-        // Return the parent object value for further chaining
         var (parentValue, _) = await Context.GetAsync();
         return parentValue;
     }
 
     protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TObject> metadata)
     {
-        // Execute the member assertion
         await _memberAssertion.AssertAsync();
         return AssertionResult.Passed;
     }

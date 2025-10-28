@@ -40,13 +40,11 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
         });
         Context = new AssertionContext<object?>(evaluationContext, expressionBuilder);
 
-        // Create a TaskContext for Task-specific assertions
         // DO NOT await the task here - we want to check its state synchronously
         var taskExpressionBuilder = new StringBuilder();
         taskExpressionBuilder.Append(expressionBuilder.ToString());
         var taskEvaluationContext = new EvaluationContext<Task>(() =>
         {
-            // Return the task object itself without awaiting it
             // This allows IsCompleted, IsCanceled, IsFaulted, etc. to check task properties synchronously
             var task = action();
             return Task.FromResult<(Task?, Exception?)>((task, null));
@@ -177,7 +175,6 @@ public class AsyncDelegateAssertion : IAssertionSource<object?>, IDelegateAssert
         Context.ExpressionBuilder.Append($".Throws({exceptionType.Name})");
         // Delegate to the generic Throws<Exception>() and add runtime type checking
         var assertion = Throws<Exception>();
-        // Return the assertion with runtime type filtering applied
         return assertion.WithExceptionType(exceptionType);
     }
 
