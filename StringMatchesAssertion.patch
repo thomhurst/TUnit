@@ -1,0 +1,88 @@
+REQUIRED CHANGES TO: TUnit.Assertions/Conditions/StringAssertions.cs
+
+This patch adds Match caching to StringMatchesAssertion class to enable clean, reflection-free access to regex match results.
+
+================================================================================
+CHANGE 1: Add _cachedMatch field
+================================================================================
+Location: Line 432 (after "private RegexOptions _options = RegexOptions.None;")
+
+ADD THIS LINE:
+    private Match? _cachedMatch;
+
+So it becomes:
+    private readonly string _pattern;
+    private readonly Regex? _regex;
+    private RegexOptions _options = RegexOptions.None;
+    private Match? _cachedMatch;  // <-- ADD THIS LINE
+
+================================================================================
+CHANGE 2: Add GetMatch() method
+================================================================================
+Location: After line 464 (after the WithOptions() method, before CheckAsync())
+
+ADD THIS METHOD:
+    /// <summary>
+    /// Gets the cached regex match result after the assertion has been executed.
+    /// Returns null if the assertion hasn't been executed yet or if the match failed.
+    /// </summary>
+    public Match? GetMatch() => _cachedMatch;
+
+So it becomes:
+    public StringMatchesAssertion WithOptions(RegexOptions options)
+    {
+        _options = options;
+        Context.ExpressionBuilder.Append($".WithOptions({options})");
+        return this;
+    }
+
+    /// <summary>
+    /// Gets the cached regex match result after the assertion has been executed.
+    /// Returns null if the assertion hasn't been executed yet or if the match failed.
+    /// </summary>
+    public Match? GetMatch() => _cachedMatch;  // <-- ADD THIS METHOD
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    {
+
+================================================================================
+CHANGE 3: Modify CheckAsync() to cache the Match
+================================================================================
+Location: Lines 486-492 in CheckAsync() method
+
+REPLACE THIS:
+        // Use the validated regex to check the match
+        bool isMatch = regex.IsMatch(value);
+
+        if (isMatch)
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+WITH THIS:
+        // Use the validated regex to check the match and cache it
+        var match = regex.Match(value);
+        _cachedMatch = match;
+
+        if (match.Success)
+        {
+            return Task.FromResult(AssertionResult.Passed);
+        }
+
+EXPLANATION:
+- Changed from regex.IsMatch(value) to regex.Match(value) to get the Match object
+- Store the Match in _cachedMatch field
+- Changed from checking isMatch to checking match.Success
+
+================================================================================
+SUMMARY
+================================================================================
+These changes enable StringMatchesAssertionExtensions.GetMatchAsync() to work
+without reflection by calling the new GetMatch() method.
+
+The implementation follows SOLID, KISS, DRY, and SRP principles:
+- Single Responsibility: StringMatchesAssertion now caches its match
+- Open/Closed: API extended without modifying existing behavior
+- No reflection: Clean, AOT-compatible code
+- DRY: Match is performed once and cached
+- KISS: Simple, straightforward implementation
