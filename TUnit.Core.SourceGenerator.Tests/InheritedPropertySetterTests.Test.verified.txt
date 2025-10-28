@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class PropertySetterTests_Test_TestSource_EF64BFA5 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     #if NET8_0_OR_GREATER
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property2>k__BackingField")]
@@ -330,12 +330,12 @@ internal sealed class PropertySetterTests_Test_TestSource_GUID : global::TUnit.C
         yield break;
     }
 }
-internal static class PropertySetterTests_Test_ModuleInitializer_GUID
+internal static class PropertySetterTests_Test_ModuleInitializer_EF64BFA5
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PropertySetterTests), new PropertySetterTests_Test_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PropertySetterTests), new PropertySetterTests_Test_TestSource_EF64BFA5());
     }
 }
 
@@ -347,7 +347,7 @@ internal static class PropertySetterTests_Test_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class InheritedPropertySetterTests_Test_TestSource_6B148DC0 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     #if NET8_0_OR_GREATER
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property2>k__BackingField")]
@@ -574,11 +574,11 @@ internal sealed class InheritedPropertySetterTests_Test_TestSource_GUID : global
         yield break;
     }
 }
-internal static class InheritedPropertySetterTests_Test_ModuleInitializer_GUID
+internal static class InheritedPropertySetterTests_Test_ModuleInitializer_6B148DC0
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.InheritedPropertySetterTests), new InheritedPropertySetterTests_Test_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.InheritedPropertySetterTests), new InheritedPropertySetterTests_Test_TestSource_6B148DC0());
     }
 }

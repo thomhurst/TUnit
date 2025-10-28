@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ArgumentWithImplicitConverterTests_Explicit_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class ArgumentWithImplicitConverterTests_Explicit_TestSource_9F3D7C51 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -88,12 +88,12 @@ internal sealed class ArgumentWithImplicitConverterTests_Explicit_TestSource_GUI
         yield break;
     }
 }
-internal static class ArgumentWithImplicitConverterTests_Explicit_ModuleInitializer_GUID
+internal static class ArgumentWithImplicitConverterTests_Explicit_ModuleInitializer_9F3D7C51
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), new ArgumentWithImplicitConverterTests_Explicit_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), new ArgumentWithImplicitConverterTests_Explicit_TestSource_9F3D7C51());
     }
 }
 
@@ -105,7 +105,7 @@ internal static class ArgumentWithImplicitConverterTests_Explicit_ModuleInitiali
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ArgumentWithImplicitConverterTests_Implicit_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class ArgumentWithImplicitConverterTests_Implicit_TestSource_D2358E9B : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -190,11 +190,11 @@ internal sealed class ArgumentWithImplicitConverterTests_Implicit_TestSource_GUI
         yield break;
     }
 }
-internal static class ArgumentWithImplicitConverterTests_Implicit_ModuleInitializer_GUID
+internal static class ArgumentWithImplicitConverterTests_Implicit_ModuleInitializer_D2358E9B
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), new ArgumentWithImplicitConverterTests_Implicit_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ArgumentWithImplicitConverterTests), new ArgumentWithImplicitConverterTests_Implicit_TestSource_D2358E9B());
     }
 }

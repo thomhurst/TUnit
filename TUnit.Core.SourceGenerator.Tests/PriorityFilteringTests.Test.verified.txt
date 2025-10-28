@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class PriorityFilteringTests_High_1_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class PriorityFilteringTests_High_1_TestSource_5734DB80 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -66,12 +66,12 @@ internal sealed class PriorityFilteringTests_High_1_TestSource_GUID : global::TU
         yield break;
     }
 }
-internal static class PriorityFilteringTests_High_1_ModuleInitializer_GUID
+internal static class PriorityFilteringTests_High_1_ModuleInitializer_5734DB80
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_High_1_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_High_1_TestSource_5734DB80());
     }
 }
 
@@ -83,7 +83,7 @@ internal static class PriorityFilteringTests_High_1_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class PriorityFilteringTests_High_2_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class PriorityFilteringTests_High_2_TestSource_725F755A : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -146,12 +146,12 @@ internal sealed class PriorityFilteringTests_High_2_TestSource_GUID : global::TU
         yield break;
     }
 }
-internal static class PriorityFilteringTests_High_2_ModuleInitializer_GUID
+internal static class PriorityFilteringTests_High_2_ModuleInitializer_725F755A
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_High_2_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_High_2_TestSource_725F755A());
     }
 }
 
@@ -163,7 +163,7 @@ internal static class PriorityFilteringTests_High_2_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class PriorityFilteringTests_High_3_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class PriorityFilteringTests_High_3_TestSource_B1B024F8 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -226,12 +226,12 @@ internal sealed class PriorityFilteringTests_High_3_TestSource_GUID : global::TU
         yield break;
     }
 }
-internal static class PriorityFilteringTests_High_3_ModuleInitializer_GUID
+internal static class PriorityFilteringTests_High_3_ModuleInitializer_B1B024F8
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_High_3_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_High_3_TestSource_B1B024F8());
     }
 }
 
@@ -243,7 +243,7 @@ internal static class PriorityFilteringTests_High_3_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class PriorityFilteringTests_Medium_1_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class PriorityFilteringTests_Medium_1_TestSource_1048EE54 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -306,12 +306,12 @@ internal sealed class PriorityFilteringTests_Medium_1_TestSource_GUID : global::
         yield break;
     }
 }
-internal static class PriorityFilteringTests_Medium_1_ModuleInitializer_GUID
+internal static class PriorityFilteringTests_Medium_1_ModuleInitializer_1048EE54
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_Medium_1_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_Medium_1_TestSource_1048EE54());
     }
 }
 
@@ -323,7 +323,7 @@ internal static class PriorityFilteringTests_Medium_1_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class PriorityFilteringTests_Medium_2_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class PriorityFilteringTests_Medium_2_TestSource_42272C87 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -386,12 +386,12 @@ internal sealed class PriorityFilteringTests_Medium_2_TestSource_GUID : global::
         yield break;
     }
 }
-internal static class PriorityFilteringTests_Medium_2_ModuleInitializer_GUID
+internal static class PriorityFilteringTests_Medium_2_ModuleInitializer_42272C87
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_Medium_2_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_Medium_2_TestSource_42272C87());
     }
 }
 
@@ -403,7 +403,7 @@ internal static class PriorityFilteringTests_Medium_2_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class PriorityFilteringTests_Low_1_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class PriorityFilteringTests_Low_1_TestSource_C28EC2CF : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -466,11 +466,11 @@ internal sealed class PriorityFilteringTests_Low_1_TestSource_GUID : global::TUn
         yield break;
     }
 }
-internal static class PriorityFilteringTests_Low_1_ModuleInitializer_GUID
+internal static class PriorityFilteringTests_Low_1_ModuleInitializer_C28EC2CF
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_Low_1_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.PriorityFilteringTests), new PriorityFilteringTests_Low_1_TestSource_C28EC2CF());
     }
 }

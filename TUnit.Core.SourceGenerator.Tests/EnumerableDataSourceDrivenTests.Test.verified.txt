@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method_TestSource_9C00D8D2 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -106,12 +106,12 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method_TestSour
         yield break;
     }
 }
-internal static class EnumerableDataSourceDrivenTests_DataSource_Method_ModuleInitializer_GUID
+internal static class EnumerableDataSourceDrivenTests_DataSource_Method_ModuleInitializer_9C00D8D2
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), new EnumerableDataSourceDrivenTests_DataSource_Method_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), new EnumerableDataSourceDrivenTests_DataSource_Method_TestSource_9C00D8D2());
     }
 }
 
@@ -123,7 +123,7 @@ internal static class EnumerableDataSourceDrivenTests_DataSource_Method_ModuleIn
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method2_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method2_TestSource_C7F4D4D3 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -226,12 +226,12 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_Method2_TestSou
         yield break;
     }
 }
-internal static class EnumerableDataSourceDrivenTests_DataSource_Method2_ModuleInitializer_GUID
+internal static class EnumerableDataSourceDrivenTests_DataSource_Method2_ModuleInitializer_C7F4D4D3
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), new EnumerableDataSourceDrivenTests_DataSource_Method2_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), new EnumerableDataSourceDrivenTests_DataSource_Method2_TestSource_C7F4D4D3());
     }
 }
 
@@ -243,7 +243,7 @@ internal static class EnumerableDataSourceDrivenTests_DataSource_Method2_ModuleI
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_TestSource_13FB4A46 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -347,11 +347,11 @@ internal sealed class EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_
         yield break;
     }
 }
-internal static class EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_ModuleInitializer_GUID
+internal static class EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_ModuleInitializer_13FB4A46
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), new EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.EnumerableDataSourceDrivenTests), new EnumerableDataSourceDrivenTests_DataSource_WithBaseReturn_TestSource_13FB4A46());
     }
 }

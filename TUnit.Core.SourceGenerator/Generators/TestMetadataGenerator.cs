@@ -202,7 +202,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             GenerateFileHeader(writer);
             GenerateTestMetadata(writer, testMethod);
 
-            var fileName = $"{testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_{Guid.NewGuid():N}.g.cs";
+            var fileName = FileNameHelper.GetDeterministicFileNameForMethod(testMethod.TypeSymbol, testMethod.MethodSymbol);
             context.AddSource(fileName, SourceText.From(writer.ToString(), Encoding.UTF8));
         }
         catch (Exception ex)
@@ -240,10 +240,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var className = testMethod.TypeSymbol.GloballyQualified();
         var methodName = testMethod.MethodSymbol.Name;
-        var guid = Guid.NewGuid().ToString("N");
-        var combinationGuid = Guid.NewGuid().ToString("N").Substring(0, 8);
 
-        writer.AppendLine($"internal sealed class {testMethod.TypeSymbol.Name}_{methodName}_TestSource_{guid} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
+        // Use deterministic hash instead of random GUID (fixes content-based caching)
+        var fullSignature = $"{testMethod.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}::{testMethod.MethodSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}";
+        var deterministicHash = FileNameHelper.GetStableHash(fullSignature);
+        var combinationHash = deterministicHash.Substring(0, Math.Min(8, deterministicHash.Length));
+
+        writer.AppendLine($"internal sealed class {testMethod.TypeSymbol.Name}_{methodName}_TestSource_{deterministicHash} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -283,16 +286,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArguments || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType || hasMethodDataSourceForGenericType)
             {
-                GenerateGenericTestWithConcreteTypes(writer, testMethod, className, combinationGuid);
+                GenerateGenericTestWithConcreteTypes(writer, testMethod, className, combinationHash);
             }
             else
             {
-                GenerateTestMetadataInstance(writer, testMethod, className, combinationGuid);
+                GenerateTestMetadataInstance(writer, testMethod, className, combinationHash);
             }
         }
         else
         {
-            GenerateTestMetadataInstance(writer, testMethod, className, combinationGuid);
+            GenerateTestMetadataInstance(writer, testMethod, className, combinationHash);
         }
 
         writer.AppendLine("yield break;");
@@ -302,7 +305,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
 
-        GenerateModuleInitializer(writer, testMethod, guid);
+        GenerateModuleInitializer(writer, testMethod, deterministicHash);
     }
 
     private static void GenerateSpecificGenericInstantiation(

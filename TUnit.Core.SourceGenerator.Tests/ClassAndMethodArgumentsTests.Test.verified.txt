@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ClassAndMethodArgumentsTests_Simple_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class ClassAndMethodArgumentsTests_Simple_TestSource_9F734165 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -83,12 +83,12 @@ internal sealed class ClassAndMethodArgumentsTests_Simple_TestSource_GUID : glob
         yield break;
     }
 }
-internal static class ClassAndMethodArgumentsTests_Simple_ModuleInitializer_GUID
+internal static class ClassAndMethodArgumentsTests_Simple_ModuleInitializer_9F734165
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), new ClassAndMethodArgumentsTests_Simple_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), new ClassAndMethodArgumentsTests_Simple_TestSource_9F734165());
     }
 }
 
@@ -100,7 +100,7 @@ internal static class ClassAndMethodArgumentsTests_Simple_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_7B41EB3E : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -200,12 +200,12 @@ internal sealed class ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GU
         yield break;
     }
 }
-internal static class ClassAndMethodArgumentsTests_WithMethodLevel_ModuleInitializer_GUID
+internal static class ClassAndMethodArgumentsTests_WithMethodLevel_ModuleInitializer_7B41EB3E
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), new ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), new ClassAndMethodArgumentsTests_WithMethodLevel_TestSource_7B41EB3E());
     }
 }
 
@@ -217,7 +217,7 @@ internal static class ClassAndMethodArgumentsTests_WithMethodLevel_ModuleInitial
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_F761F654 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -317,11 +317,11 @@ internal sealed class ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_G
         yield break;
     }
 }
-internal static class ClassAndMethodArgumentsTests_IgnoreParameters_ModuleInitializer_GUID
+internal static class ClassAndMethodArgumentsTests_IgnoreParameters_ModuleInitializer_F761F654
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), new ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests), new ClassAndMethodArgumentsTests_IgnoreParameters_TestSource_F761F654());
     }
 }

@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSource_BC79F0A1 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -421,11 +421,11 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
         yield break;
     }
 }
-internal static class GenericMethodTests_AggregateBy_HasExpectedOutput_ModuleInitializer_GUID
+internal static class GenericMethodTests_AggregateBy_HasExpectedOutput_ModuleInitializer_BC79F0A1
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.GenericMethodTests), new GenericMethodTests_AggregateBy_HasExpectedOutput_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.GenericMethodTests), new GenericMethodTests_AggregateBy_HasExpectedOutput_TestSource_BC79F0A1());
     }
 }

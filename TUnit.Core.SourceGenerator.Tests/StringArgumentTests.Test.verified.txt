@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class StringArgumentTests_Normal_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class StringArgumentTests_Normal_TestSource_9D525906 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -97,12 +97,12 @@ internal sealed class StringArgumentTests_Normal_TestSource_GUID : global::TUnit
         yield break;
     }
 }
-internal static class StringArgumentTests_Normal_ModuleInitializer_GUID
+internal static class StringArgumentTests_Normal_ModuleInitializer_9D525906
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.StringArgumentTests), new StringArgumentTests_Normal_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.StringArgumentTests), new StringArgumentTests_Normal_TestSource_9D525906());
     }
 }
 
@@ -114,7 +114,7 @@ internal static class StringArgumentTests_Normal_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class StringArgumentTests_Nullable_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class StringArgumentTests_Nullable_TestSource_848AB2FC : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -204,11 +204,11 @@ internal sealed class StringArgumentTests_Nullable_TestSource_GUID : global::TUn
         yield break;
     }
 }
-internal static class StringArgumentTests_Nullable_ModuleInitializer_GUID
+internal static class StringArgumentTests_Nullable_ModuleInitializer_848AB2FC
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.StringArgumentTests), new StringArgumentTests_Nullable_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.StringArgumentTests), new StringArgumentTests_Nullable_TestSource_848AB2FC());
     }
 }

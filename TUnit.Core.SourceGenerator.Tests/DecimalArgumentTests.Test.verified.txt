@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class DecimalArgumentTests_Transfer_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class DecimalArgumentTests_Transfer_TestSource_8F2805AD : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -94,12 +94,12 @@ internal sealed class DecimalArgumentTests_Transfer_TestSource_GUID : global::TU
         yield break;
     }
 }
-internal static class DecimalArgumentTests_Transfer_ModuleInitializer_GUID
+internal static class DecimalArgumentTests_Transfer_ModuleInitializer_8F2805AD
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_Transfer_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_Transfer_TestSource_8F2805AD());
     }
 }
 
@@ -111,7 +111,7 @@ internal static class DecimalArgumentTests_Transfer_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class DecimalArgumentTests_SimpleDecimal_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class DecimalArgumentTests_SimpleDecimal_TestSource_71E0BB96 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -193,12 +193,12 @@ internal sealed class DecimalArgumentTests_SimpleDecimal_TestSource_GUID : globa
         yield break;
     }
 }
-internal static class DecimalArgumentTests_SimpleDecimal_ModuleInitializer_GUID
+internal static class DecimalArgumentTests_SimpleDecimal_ModuleInitializer_71E0BB96
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_SimpleDecimal_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_SimpleDecimal_TestSource_71E0BB96());
     }
 }
 
@@ -210,7 +210,7 @@ internal static class DecimalArgumentTests_SimpleDecimal_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class DecimalArgumentTests_SmallDecimal_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class DecimalArgumentTests_SmallDecimal_TestSource_E68A8577 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -292,12 +292,12 @@ internal sealed class DecimalArgumentTests_SmallDecimal_TestSource_GUID : global
         yield break;
     }
 }
-internal static class DecimalArgumentTests_SmallDecimal_ModuleInitializer_GUID
+internal static class DecimalArgumentTests_SmallDecimal_ModuleInitializer_E68A8577
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_SmallDecimal_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_SmallDecimal_TestSource_E68A8577());
     }
 }
 
@@ -309,7 +309,7 @@ internal static class DecimalArgumentTests_SmallDecimal_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class DecimalArgumentTests_MaxDecimal_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class DecimalArgumentTests_MaxDecimal_TestSource_EBFC073F : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -391,12 +391,12 @@ internal sealed class DecimalArgumentTests_MaxDecimal_TestSource_GUID : global::
         yield break;
     }
 }
-internal static class DecimalArgumentTests_MaxDecimal_ModuleInitializer_GUID
+internal static class DecimalArgumentTests_MaxDecimal_ModuleInitializer_EBFC073F
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_MaxDecimal_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_MaxDecimal_TestSource_EBFC073F());
     }
 }
 
@@ -408,7 +408,7 @@ internal static class DecimalArgumentTests_MaxDecimal_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class DecimalArgumentTests_MinDecimal_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class DecimalArgumentTests_MinDecimal_TestSource_6048C600 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -490,12 +490,12 @@ internal sealed class DecimalArgumentTests_MinDecimal_TestSource_GUID : global::
         yield break;
     }
 }
-internal static class DecimalArgumentTests_MinDecimal_ModuleInitializer_GUID
+internal static class DecimalArgumentTests_MinDecimal_ModuleInitializer_6048C600
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_MinDecimal_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_MinDecimal_TestSource_6048C600());
     }
 }
 
@@ -507,7 +507,7 @@ internal static class DecimalArgumentTests_MinDecimal_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class DecimalArgumentTests_ExplicitDecimalValue_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class DecimalArgumentTests_ExplicitDecimalValue_TestSource_61F13C6F : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -589,12 +589,12 @@ internal sealed class DecimalArgumentTests_ExplicitDecimalValue_TestSource_GUID 
         yield break;
     }
 }
-internal static class DecimalArgumentTests_ExplicitDecimalValue_ModuleInitializer_GUID
+internal static class DecimalArgumentTests_ExplicitDecimalValue_ModuleInitializer_61F13C6F
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_ExplicitDecimalValue_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_ExplicitDecimalValue_TestSource_61F13C6F());
     }
 }
 
@@ -606,7 +606,7 @@ internal static class DecimalArgumentTests_ExplicitDecimalValue_ModuleInitialize
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class DecimalArgumentTests_MultipleDecimals_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class DecimalArgumentTests_MultipleDecimals_TestSource_9691FEA8 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -702,12 +702,12 @@ internal sealed class DecimalArgumentTests_MultipleDecimals_TestSource_GUID : gl
         yield break;
     }
 }
-internal static class DecimalArgumentTests_MultipleDecimals_ModuleInitializer_GUID
+internal static class DecimalArgumentTests_MultipleDecimals_ModuleInitializer_9691FEA8
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_MultipleDecimals_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_MultipleDecimals_TestSource_9691FEA8());
     }
 }
 
@@ -719,7 +719,7 @@ internal static class DecimalArgumentTests_MultipleDecimals_ModuleInitializer_GU
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class DecimalArgumentTests_Test_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class DecimalArgumentTests_Test_TestSource_EDF60682 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -804,12 +804,12 @@ internal sealed class DecimalArgumentTests_Test_TestSource_GUID : global::TUnit.
         yield break;
     }
 }
-internal static class DecimalArgumentTests_Test_ModuleInitializer_GUID
+internal static class DecimalArgumentTests_Test_ModuleInitializer_EDF60682
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_Test_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_Test_TestSource_EDF60682());
     }
 }
 
@@ -821,7 +821,7 @@ internal static class DecimalArgumentTests_Test_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class DecimalArgumentTests_TransactionDiscountCalculations_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class DecimalArgumentTests_TransactionDiscountCalculations_TestSource_5182B648 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -941,12 +941,12 @@ internal sealed class DecimalArgumentTests_TransactionDiscountCalculations_TestS
         yield break;
     }
 }
-internal static class DecimalArgumentTests_TransactionDiscountCalculations_ModuleInitializer_GUID
+internal static class DecimalArgumentTests_TransactionDiscountCalculations_ModuleInitializer_5182B648
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_TransactionDiscountCalculations_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_TransactionDiscountCalculations_TestSource_5182B648());
     }
 }
 
@@ -958,7 +958,7 @@ internal static class DecimalArgumentTests_TransactionDiscountCalculations_Modul
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class DecimalArgumentTests_Equality3_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class DecimalArgumentTests_Equality3_TestSource_F895768B : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1040,12 +1040,12 @@ internal sealed class DecimalArgumentTests_Equality3_TestSource_GUID : global::T
         yield break;
     }
 }
-internal static class DecimalArgumentTests_Equality3_ModuleInitializer_GUID
+internal static class DecimalArgumentTests_Equality3_ModuleInitializer_F895768B
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_Equality3_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_Equality3_TestSource_F895768B());
     }
 }
 
@@ -1057,7 +1057,7 @@ internal static class DecimalArgumentTests_Equality3_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class DecimalArgumentTests_Equality4_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class DecimalArgumentTests_Equality4_TestSource_9B784FE5 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1139,12 +1139,12 @@ internal sealed class DecimalArgumentTests_Equality4_TestSource_GUID : global::T
         yield break;
     }
 }
-internal static class DecimalArgumentTests_Equality4_ModuleInitializer_GUID
+internal static class DecimalArgumentTests_Equality4_ModuleInitializer_9B784FE5
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_Equality4_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_Equality4_TestSource_9B784FE5());
     }
 }
 
@@ -1156,7 +1156,7 @@ internal static class DecimalArgumentTests_Equality4_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class DecimalArgumentTests_TestMethod_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class DecimalArgumentTests_TestMethod_TestSource_B29DFD5A : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1238,11 +1238,11 @@ internal sealed class DecimalArgumentTests_TestMethod_TestSource_GUID : global::
         yield break;
     }
 }
-internal static class DecimalArgumentTests_TestMethod_ModuleInitializer_GUID
+internal static class DecimalArgumentTests_TestMethod_ModuleInitializer_B29DFD5A
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_TestMethod_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DecimalArgumentTests), new DecimalArgumentTests_TestMethod_TestSource_B29DFD5A());
     }
 }

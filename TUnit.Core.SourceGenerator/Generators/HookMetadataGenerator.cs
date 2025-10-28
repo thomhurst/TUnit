@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 using TUnit.Core.SourceGenerator.Extensions;
+using TUnit.Core.SourceGenerator.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Generators;
 
@@ -132,38 +133,14 @@ public class HookMetadataGenerator : IIncrementalGenerator
 
     private static string GetSafeFileName(HookMethodMetadata hook)
     {
-        var typeName = hook.TypeSymbol.Name;
-        var methodName = hook.MethodSymbol.Name;
-        
-        // Remove generic type parameters from type name for file safety
-        if (hook.TypeSymbol.IsGenericType)
-        {
-            var genericIndex = typeName.IndexOf('`');
-            if (genericIndex > 0)
-            {
-                typeName = typeName.Substring(0, genericIndex);
-            }
-        }
+        // Use FileNameHelper for deterministic naming (fixes GUID issue that breaks incremental compilation)
+        var baseFileName = FileNameHelper.GetDeterministicFileNameForMethod(hook.TypeSymbol, hook.MethodSymbol);
 
-        var safeTypeName = typeName
-            .Replace(".", "_")
-            .Replace("<", "_")
-            .Replace(">", "_")
-            .Replace(",", "_")
-            .Replace(" ", "")
-            .Replace("`", "_")
-            .Replace("+", "_");
+        // Remove the .g.cs extension since it's used as an identifier, not just a filename
+        var fileNameWithoutExtension = baseFileName.Substring(0, baseFileName.Length - ".g.cs".Length);
 
-        var safeMethodName = methodName
-            .Replace(".", "_")
-            .Replace("<", "_")
-            .Replace(">", "_")
-            .Replace(",", "_")
-            .Replace(" ", "");
-
-        var guid = System.Guid.NewGuid().ToString("N");
-        
-        return $"{safeTypeName}_{safeMethodName}_{hook.HookKind}_{hook.HookType}_{guid}";
+        // Add hook-specific information to make it unique (WITHOUT .g.cs - that's added when registering the source file)
+        return $"{fileNameWithoutExtension}_{hook.HookKind}_{hook.HookType}";
     }
 
     private static void GenerateHookRegistration(CodeWriter writer, HookMethodMetadata hook)

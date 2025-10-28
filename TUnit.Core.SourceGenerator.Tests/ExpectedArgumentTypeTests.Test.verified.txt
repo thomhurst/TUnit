@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ExpectedArgumentTypeTests_TypedArguments_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class ExpectedArgumentTypeTests_TypedArguments_TestSource_7B5B825F : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -104,12 +104,12 @@ internal sealed class ExpectedArgumentTypeTests_TypedArguments_TestSource_GUID :
         yield break;
     }
 }
-internal static class ExpectedArgumentTypeTests_TypedArguments_ModuleInitializer_GUID
+internal static class ExpectedArgumentTypeTests_TypedArguments_ModuleInitializer_7B5B825F
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests), new ExpectedArgumentTypeTests_TypedArguments_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests), new ExpectedArgumentTypeTests_TypedArguments_TestSource_7B5B825F());
     }
 }
 
@@ -121,7 +121,7 @@ internal static class ExpectedArgumentTypeTests_TypedArguments_ModuleInitializer
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ExpectedArgumentTypeTests_EnumTypes_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class ExpectedArgumentTypeTests_EnumTypes_TestSource_7E621216 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -224,11 +224,11 @@ internal sealed class ExpectedArgumentTypeTests_EnumTypes_TestSource_GUID : glob
         yield break;
     }
 }
-internal static class ExpectedArgumentTypeTests_EnumTypes_ModuleInitializer_GUID
+internal static class ExpectedArgumentTypeTests_EnumTypes_ModuleInitializer_7E621216
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests), new ExpectedArgumentTypeTests_EnumTypes_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests), new ExpectedArgumentTypeTests_EnumTypes_TestSource_7E621216());
     }
 }
