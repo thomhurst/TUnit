@@ -13,10 +13,13 @@ public class TestDiscoveryAfterHooks
     {
         await FilePolyfill.WriteAllTextAsync($"TestDiscoveryAfterTests{Guid.NewGuid():N}.txt", $"{context.AllTests.Count()} tests found");
 
-        var test = context.AllTests.First(x =>
+        var test = context.AllTests.FirstOrDefault(x =>
             x.TestDetails.TestName == nameof(TestDiscoveryAfterTests.EnsureAfterEveryTestDiscoveryHit));
 
-        test.ObjectBag.Add("AfterEveryTestDiscoveryHit", true);
+        if (test is not null)
+        {
+            test.ObjectBag.Add("AfterEveryTestDiscoveryHit", true);
+        }
     }
 }
 
