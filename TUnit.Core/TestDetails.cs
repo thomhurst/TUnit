@@ -31,7 +31,20 @@ public class TestDetails
 
     public required IReadOnlyDictionary<Type, IReadOnlyList<Attribute>> AttributesByType { get; init; }
 
-    private IReadOnlyList<Attribute>? _cachedAllAttributes;
+    private readonly Lazy<IReadOnlyList<Attribute>> _cachedAllAttributes;
+
+    public TestDetails()
+    {
+        _cachedAllAttributes = new Lazy<IReadOnlyList<Attribute>>(() =>
+        {
+            var allAttrs = new List<Attribute>();
+            foreach (var attrList in AttributesByType?.Values ?? [])
+            {
+                allAttrs.AddRange(attrList);
+            }
+            return allAttrs;
+        });
+    }
 
     /// <summary>
     /// Checks if the test has an attribute of the specified type.
@@ -56,28 +69,16 @@ public class TestDetails
     /// Cached after first access for performance.
     /// </summary>
     /// <returns>All attributes associated with this test.</returns>
-    public IReadOnlyList<Attribute> GetAllAttributes()
-    {
-        if (_cachedAllAttributes == null)
-        {
-            var allAttrs = new List<Attribute>();
-            foreach (var attrList in AttributesByType.Values)
-            {
-                allAttrs.AddRange(attrList);
-            }
-            _cachedAllAttributes = allAttrs;
-        }
-        return _cachedAllAttributes;
-    }
+    public IReadOnlyList<Attribute> GetAllAttributes() => _cachedAllAttributes.Value;
 
     public object?[] ClassMetadataArguments => TestClassArguments;
-    
+
     /// <summary>
     /// Resolved generic type arguments for the test method.
     /// Will be Type.EmptyTypes if the method is not generic.
     /// </summary>
     public Type[] MethodGenericArguments { get; set; } = Type.EmptyTypes;
-    
+
     /// <summary>
     /// Resolved generic type arguments for the test class.
     /// Will be Type.EmptyTypes if the class is not generic.

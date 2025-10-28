@@ -20,25 +20,20 @@ public static class AttributeDictionaryHelper
             return EmptyDictionary;
         }
 
-        var dictionary = new Dictionary<Type, IReadOnlyList<Attribute>>();
+        var result = new Dictionary<Type, IReadOnlyList<Attribute>>();
 
         foreach (var attr in attributes)
         {
             var type = attr.GetType();
-            if (!dictionary.TryGetValue(type, out var list))
+            if (!result.TryGetValue(type, out var list))
             {
-                list = new List<Attribute>();
-                dictionary[type] = list;
+                var newList = new List<Attribute> { attr };
+                result[type] = newList;
             }
-
-            ((List<Attribute>)list).Add(attr);
-        }
-
-        // Convert lists to read-only
-        var result = new Dictionary<Type, IReadOnlyList<Attribute>>(dictionary.Count);
-        foreach (var kvp in dictionary)
-        {
-            result[kvp.Key] = kvp.Value;
+            else
+            {
+                ((List<Attribute>)list).Add(attr);
+            }
         }
 
         return new ReadOnlyDictionary<Type, IReadOnlyList<Attribute>>(result);
