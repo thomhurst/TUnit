@@ -22,6 +22,7 @@ const sidebars: SidebarsConfig = {
         'getting-started/running-your-tests',
         'getting-started/congratulations',
         'faq',
+        'troubleshooting',
       ],
     },
     {
@@ -50,7 +51,9 @@ const sidebars: SidebarsConfig = {
         'test-authoring/depends-on',
         'test-authoring/order',
         'test-authoring/mocking',
-        'test-authoring/culture'
+        'test-authoring/culture',
+        'test-authoring/aot-compatibility',
+        'test-authoring/generic-attributes'
       ],
     },
     {
@@ -63,6 +66,8 @@ const sidebars: SidebarsConfig = {
         'assertions/scopes',
         'assertions/assertion-groups',
         'assertions/delegates',
+        'assertions/member-assertions',
+        'assertions/type-checking',
         {
           type: 'category',
           label: 'Extensibility',
@@ -145,6 +150,7 @@ const sidebars: SidebarsConfig = {
         'comparison/framework-differences',
         'comparison/attributes',
         'reference/test-configuration',
+        'reference/command-line-flags',
       ],
     },
     {
@@ -161,6 +167,8 @@ const sidebars: SidebarsConfig = {
       label: 'Migration Guides',
       items: [
         'migration/xunit',
+        'migration/nunit',
+        'migration/mstest',
       ],
     },
     {
