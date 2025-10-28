@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class Tests_TryParse_InvalidString_ReturnsFailure_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -97,12 +97,12 @@ internal sealed class Tests_TryParse_InvalidString_ReturnsFailure_TestSource_GUI
         yield break;
     }
 }
-internal static class Tests_TryParse_InvalidString_ReturnsFailure_ModuleInitializer_GUID
+internal static class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__CancellationToken_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1304.Tests), new Tests_TryParse_InvalidString_ReturnsFailure_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1304.Tests), new TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_ReturnsFailure__string__CancellationToken_TestSource());
     }
 }
 
@@ -114,7 +114,7 @@ internal static class Tests_TryParse_InvalidString_ReturnsFailure_ModuleInitiali
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class Tests_Parse_InvalidString_ThrowsException_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_ThrowsException__string__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -200,12 +200,12 @@ internal sealed class Tests_Parse_InvalidString_ThrowsException_TestSource_GUID 
         yield break;
     }
 }
-internal static class Tests_Parse_InvalidString_ThrowsException_ModuleInitializer_GUID
+internal static class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_ThrowsException__string__ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1304.Tests), new Tests_Parse_InvalidString_ThrowsException_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1304.Tests), new TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_ThrowsException__string__TestSource());
     }
 }
 
@@ -217,7 +217,7 @@ internal static class Tests_Parse_InvalidString_ThrowsException_ModuleInitialize
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class Tests_TryParse_ValidString_ReturnsAccountId_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_ReturnsAccountId__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -300,11 +300,11 @@ internal sealed class Tests_TryParse_ValidString_ReturnsAccountId_TestSource_GUI
         yield break;
     }
 }
-internal static class Tests_TryParse_ValidString_ReturnsAccountId_ModuleInitializer_GUID
+internal static class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_ReturnsAccountId__string_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1304.Tests), new Tests_TryParse_ValidString_ReturnsAccountId_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1304.Tests), new TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_ReturnsAccountId__string_TestSource());
     }
 }

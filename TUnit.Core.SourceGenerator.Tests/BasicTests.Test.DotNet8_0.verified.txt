@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class BasicTests_SynchronousTest_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_BasicTests_SynchronousTest_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -66,12 +66,12 @@ internal sealed class BasicTests_SynchronousTest_TestSource_GUID : global::TUnit
         yield break;
     }
 }
-internal static class BasicTests_SynchronousTest_ModuleInitializer_GUID
+internal static class TUnit_TestProject_BasicTests_SynchronousTest_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.BasicTests), new BasicTests_SynchronousTest_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.BasicTests), new TUnit_TestProject_BasicTests_SynchronousTest_TestSource());
     }
 }
 
@@ -83,7 +83,7 @@ internal static class BasicTests_SynchronousTest_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class BasicTests_AsynchronousTest_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_BasicTests_AsynchronousTest_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -145,12 +145,12 @@ internal sealed class BasicTests_AsynchronousTest_TestSource_GUID : global::TUni
         yield break;
     }
 }
-internal static class BasicTests_AsynchronousTest_ModuleInitializer_GUID
+internal static class TUnit_TestProject_BasicTests_AsynchronousTest_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.BasicTests), new BasicTests_AsynchronousTest_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.BasicTests), new TUnit_TestProject_BasicTests_AsynchronousTest_TestSource());
     }
 }
 
@@ -162,7 +162,7 @@ internal static class BasicTests_AsynchronousTest_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class BasicTests_ValueTaskAsynchronousTest_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_BasicTests_ValueTaskAsynchronousTest_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -224,11 +224,11 @@ internal sealed class BasicTests_ValueTaskAsynchronousTest_TestSource_GUID : glo
         yield break;
     }
 }
-internal static class BasicTests_ValueTaskAsynchronousTest_ModuleInitializer_GUID
+internal static class TUnit_TestProject_BasicTests_ValueTaskAsynchronousTest_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.BasicTests), new BasicTests_ValueTaskAsynchronousTest_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.BasicTests), new TUnit_TestProject_BasicTests_ValueTaskAsynchronousTest_TestSource());
     }
 }

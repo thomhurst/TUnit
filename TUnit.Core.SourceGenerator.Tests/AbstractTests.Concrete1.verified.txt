@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ConcreteClass1_AssertClassName_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -66,11 +66,11 @@ internal sealed class ConcreteClass1_AssertClassName_TestSource_GUID : global::T
         yield break;
     }
 }
-internal static class ConcreteClass1_AssertClassName_ModuleInitializer_GUID
+internal static class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1), new ConcreteClass1_AssertClassName_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1), new TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClassName_TestSource());
     }
 }

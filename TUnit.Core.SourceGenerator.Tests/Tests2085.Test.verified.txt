@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class Tests_Double_SpecialConsts_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__2085_Tests_Double_SpecialConsts__double_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -85,12 +85,12 @@ internal sealed class Tests_Double_SpecialConsts_TestSource_GUID : global::TUnit
         yield break;
     }
 }
-internal static class Tests_Double_SpecialConsts_ModuleInitializer_GUID
+internal static class TUnit_TestProject_Bugs__2085_Tests_Double_SpecialConsts__double_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2085.Tests), new Tests_Double_SpecialConsts_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2085.Tests), new TUnit_TestProject_Bugs__2085_Tests_Double_SpecialConsts__double_TestSource());
     }
 }
 
@@ -102,7 +102,7 @@ internal static class Tests_Double_SpecialConsts_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class Tests_Float_SpecialConsts_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__2085_Tests_Float_SpecialConsts__float_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -184,11 +184,11 @@ internal sealed class Tests_Float_SpecialConsts_TestSource_GUID : global::TUnit.
         yield break;
     }
 }
-internal static class Tests_Float_SpecialConsts_ModuleInitializer_GUID
+internal static class TUnit_TestProject_Bugs__2085_Tests_Float_SpecialConsts__float_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2085.Tests), new Tests_Float_SpecialConsts_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2085.Tests), new TUnit_TestProject_Bugs__2085_Tests_Float_SpecialConsts__float_TestSource());
     }
 }

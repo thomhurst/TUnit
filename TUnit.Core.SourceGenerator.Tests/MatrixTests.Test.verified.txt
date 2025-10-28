@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class MatrixTests_MatrixTest_One_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_One__string_int_bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -99,12 +99,12 @@ internal sealed class MatrixTests_MatrixTest_One_TestSource_GUID : global::TUnit
         yield break;
     }
 }
-internal static class MatrixTests_MatrixTest_One_ModuleInitializer_GUID
+internal static class TUnit_TestProject_MatrixTests_MatrixTest_One__string_int_bool_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new MatrixTests_MatrixTest_One_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_MatrixTest_One__string_int_bool_TestSource());
     }
 }
 
@@ -116,7 +116,7 @@ internal static class MatrixTests_MatrixTest_One_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class MatrixTests_MatrixTest_Two_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Two__int_int_int_bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -219,12 +219,12 @@ internal sealed class MatrixTests_MatrixTest_Two_TestSource_GUID : global::TUnit
         yield break;
     }
 }
-internal static class MatrixTests_MatrixTest_Two_ModuleInitializer_GUID
+internal static class TUnit_TestProject_MatrixTests_MatrixTest_Two__int_int_int_bool_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new MatrixTests_MatrixTest_Two_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_MatrixTest_Two__int_int_int_bool_TestSource());
     }
 }
 
@@ -236,7 +236,7 @@ internal static class MatrixTests_MatrixTest_Two_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class MatrixTests_MatrixTest_Enum_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnum_TestEnum__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -332,12 +332,12 @@ internal sealed class MatrixTests_MatrixTest_Enum_TestSource_GUID : global::TUni
         yield break;
     }
 }
-internal static class MatrixTests_MatrixTest_Enum_ModuleInitializer_GUID
+internal static class TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnum_TestEnum__ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new MatrixTests_MatrixTest_Enum_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_MatrixTest_Enum__int_TestEnum_TestEnum__TestSource());
     }
 }
 
@@ -349,7 +349,7 @@ internal static class MatrixTests_MatrixTest_Enum_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class MatrixTests_AutoGenerateBools_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools__string_bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -438,12 +438,12 @@ internal sealed class MatrixTests_AutoGenerateBools_TestSource_GUID : global::TU
         yield break;
     }
 }
-internal static class MatrixTests_AutoGenerateBools_ModuleInitializer_GUID
+internal static class TUnit_TestProject_MatrixTests_AutoGenerateBools__string_bool_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new MatrixTests_AutoGenerateBools_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_AutoGenerateBools__string_bool_TestSource());
     }
 }
 
@@ -455,7 +455,7 @@ internal static class MatrixTests_AutoGenerateBools_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class MatrixTests_AutoGenerateBools2_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MatrixTests_AutoGenerateBools2__string_bool__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -544,12 +544,12 @@ internal sealed class MatrixTests_AutoGenerateBools2_TestSource_GUID : global::T
         yield break;
     }
 }
-internal static class MatrixTests_AutoGenerateBools2_ModuleInitializer_GUID
+internal static class TUnit_TestProject_MatrixTests_AutoGenerateBools2__string_bool__ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new MatrixTests_AutoGenerateBools2_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_AutoGenerateBools2__string_bool__TestSource());
     }
 }
 
@@ -561,7 +561,7 @@ internal static class MatrixTests_AutoGenerateBools2_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class MatrixTests_ImplicitConversion_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_TestEnum__TestEnum2__bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -650,12 +650,12 @@ internal sealed class MatrixTests_ImplicitConversion_TestSource_GUID : global::T
         yield break;
     }
 }
-internal static class MatrixTests_ImplicitConversion_ModuleInitializer_GUID
+internal static class TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_TestEnum__TestEnum2__bool_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new MatrixTests_ImplicitConversion_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_ImplicitConversion__OneOf_TestEnum__TestEnum2__bool_TestSource());
     }
 }
 
@@ -667,7 +667,7 @@ internal static class MatrixTests_ImplicitConversion_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class MatrixTests_ExcludingAutoGeneratedMatrixValues_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MatrixTests_ExcludingAutoGeneratedMatrixValues__CountToTenEnum_bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -756,12 +756,12 @@ internal sealed class MatrixTests_ExcludingAutoGeneratedMatrixValues_TestSource_
         yield break;
     }
 }
-internal static class MatrixTests_ExcludingAutoGeneratedMatrixValues_ModuleInitializer_GUID
+internal static class TUnit_TestProject_MatrixTests_ExcludingAutoGeneratedMatrixValues__CountToTenEnum_bool_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new MatrixTests_ExcludingAutoGeneratedMatrixValues_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_ExcludingAutoGeneratedMatrixValues__CountToTenEnum_bool_TestSource());
     }
 }
 
@@ -773,7 +773,7 @@ internal static class MatrixTests_ExcludingAutoGeneratedMatrixValues_ModuleIniti
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class MatrixTests_Method1_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MatrixTests_Method1__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -855,12 +855,12 @@ internal sealed class MatrixTests_Method1_TestSource_GUID : global::TUnit.Core.I
         yield break;
     }
 }
-internal static class MatrixTests_Method1_ModuleInitializer_GUID
+internal static class TUnit_TestProject_MatrixTests_Method1__int_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new MatrixTests_Method1_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Method1__int_TestSource());
     }
 }
 
@@ -872,7 +872,7 @@ internal static class MatrixTests_Method1_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class MatrixTests_Method2_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MatrixTests_Method2__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -954,12 +954,12 @@ internal sealed class MatrixTests_Method2_TestSource_GUID : global::TUnit.Core.I
         yield break;
     }
 }
-internal static class MatrixTests_Method2_ModuleInitializer_GUID
+internal static class TUnit_TestProject_MatrixTests_Method2__int_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new MatrixTests_Method2_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Method2__int_TestSource());
     }
 }
 
@@ -971,7 +971,7 @@ internal static class MatrixTests_Method2_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class MatrixTests_Method3_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MatrixTests_Method3__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1053,12 +1053,12 @@ internal sealed class MatrixTests_Method3_TestSource_GUID : global::TUnit.Core.I
         yield break;
     }
 }
-internal static class MatrixTests_Method3_ModuleInitializer_GUID
+internal static class TUnit_TestProject_MatrixTests_Method3__int_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new MatrixTests_Method3_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Method3__int_TestSource());
     }
 }
 
@@ -1070,7 +1070,7 @@ internal static class MatrixTests_Method3_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class MatrixTests_Method4_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MatrixTests_Method4__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1152,12 +1152,12 @@ internal sealed class MatrixTests_Method4_TestSource_GUID : global::TUnit.Core.I
         yield break;
     }
 }
-internal static class MatrixTests_Method4_ModuleInitializer_GUID
+internal static class TUnit_TestProject_MatrixTests_Method4__int_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new MatrixTests_Method4_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Method4__int_TestSource());
     }
 }
 
@@ -1169,7 +1169,7 @@ internal static class MatrixTests_Method4_ModuleInitializer_GUID
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class MatrixTests_Exclusion_TestSource_GUID : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_MatrixTests_Exclusion__int_int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1261,11 +1261,11 @@ internal sealed class MatrixTests_Exclusion_TestSource_GUID : global::TUnit.Core
         yield break;
     }
 }
-internal static class MatrixTests_Exclusion_ModuleInitializer_GUID
+internal static class TUnit_TestProject_MatrixTests_Exclusion__int_int_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new MatrixTests_Exclusion_TestSource_GUID());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.MatrixTests), new TUnit_TestProject_MatrixTests_Exclusion__int_int_TestSource());
     }
 }

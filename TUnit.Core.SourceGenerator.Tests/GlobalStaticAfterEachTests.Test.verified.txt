@@ -15,8 +15,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalBase1_AfterEach1_After_Test_GUID;
-internal static class GlobalBase1_AfterEach1_After_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalBase1_AfterEach1_After_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalBase1_AfterEach1_After_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -90,8 +90,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalBase2_AfterEach2_After_Test_GUID;
-internal static class GlobalBase2_AfterEach2_After_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalBase2_AfterEach2_After_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalBase2_AfterEach2_After_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -165,8 +165,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalBase3_AfterEach3_After_Test_GUID;
-internal static class GlobalBase3_AfterEach3_After_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalBase3_AfterEach3_After_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalBase3_AfterEach3_After_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -240,8 +240,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalCleanUpTests_CleanUp_After_Test_GUID;
-internal static class GlobalCleanUpTests_CleanUp_After_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp_After_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp_After_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -315,8 +315,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalCleanUpTests_CleanUp_After_Test_GUID;
-internal static class GlobalCleanUpTests_CleanUp_After_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp__CancellationToken_After_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUp__CancellationToken_After_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -399,8 +399,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalCleanUpTests_CleanUpWithContext_After_Test_GUID;
-internal static class GlobalCleanUpTests_CleanUpWithContext_After_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_After_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_After_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -483,8 +483,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalCleanUpTests_CleanUpWithContext_After_Test_GUID;
-internal static class GlobalCleanUpTests_CleanUpWithContext_After_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_CancellationToken_After_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalCleanUpTests_CleanUpWithContext__TestContext_CancellationToken_After_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -574,8 +574,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalBase1_AfterAll1_AfterEvery_Test_GUID;
-internal static class GlobalBase1_AfterAll1_AfterEvery_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalBase1_AfterAll1__TestContext_AfterEvery_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalBase1_AfterAll1__TestContext_AfterEvery_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -657,8 +657,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalBase2_AfterAll2_AfterEvery_Test_GUID;
-internal static class GlobalBase2_AfterAll2_AfterEvery_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalBase2_AfterAll2__TestContext_AfterEvery_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalBase2_AfterAll2__TestContext_AfterEvery_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -740,8 +740,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalBase3_AfterAll3_AfterEvery_Test_GUID;
-internal static class GlobalBase3_AfterAll3_AfterEvery_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalBase3_AfterAll3__TestContext_AfterEvery_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalBase3_AfterAll3__TestContext_AfterEvery_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -823,8 +823,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalCleanUpTests_AfterAllCleanUp_AfterEvery_Test_GUID;
-internal static class GlobalCleanUpTests_AfterAllCleanUp_AfterEvery_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_AfterEvery_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_AfterEvery_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -906,8 +906,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalCleanUpTests_AfterAllCleanUp_AfterEvery_Test_GUID;
-internal static class GlobalCleanUpTests_AfterAllCleanUp_AfterEvery_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_CancellationToken_AfterEvery_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUp__TestContext_CancellationToken_AfterEvery_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -996,8 +996,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalCleanUpTests_AfterAllCleanUpWithContext_AfterEvery_Test_GUID;
-internal static class GlobalCleanUpTests_AfterAllCleanUpWithContext_AfterEvery_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_AfterEvery_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_AfterEvery_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
@@ -1079,8 +1079,8 @@ using global::TUnit.Core.Hooks;
 using global::TUnit.Core.Interfaces.SourceGenerator;
 using global::TUnit.Core.Models;
 using HookType = global::TUnit.Core.HookType;
-namespace TUnit.Generated.Hooks.GlobalCleanUpTests_AfterAllCleanUpWithContext_AfterEvery_Test_GUID;
-internal static class GlobalCleanUpTests_AfterAllCleanUpWithContext_AfterEvery_Test_GUIDInitializer
+namespace TUnit.Generated.Hooks.TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_CancellationToken_AfterEvery_Test;
+internal static class TUnit_TestProject_AfterTests_GlobalCleanUpTests_AfterAllCleanUpWithContext__TestContext_CancellationToken_AfterEvery_TestInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
