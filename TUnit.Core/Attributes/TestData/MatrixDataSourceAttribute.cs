@@ -36,18 +36,19 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
 
         foreach (var row in GetMatrixValues(parameterInformation.Select(p => GetAllArguments(dataGeneratorMetadata, p))))
         {
-            if (exclusions.Any(e => IsExcluded(e, row)))
+            var rowArray = row.ToArray();
+
+            if (exclusions.Any(e => IsExcluded(e, rowArray)))
             {
                 continue;
             }
 
-            yield return () => row.ToArray();
+            yield return () => rowArray;
         }
     }
 
-    private bool IsExcluded(object?[] exclusion, IEnumerable<object?> row)
+    private bool IsExcluded(object?[] exclusion, object?[] rowArray)
     {
-        var rowArray = row.ToArray();
         if (exclusion.Length != rowArray.Length)
         {
             return false;

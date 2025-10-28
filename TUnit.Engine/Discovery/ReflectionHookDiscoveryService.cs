@@ -94,9 +94,10 @@ internal sealed class ReflectionHookDiscoveryService
         var current = closedGenericType;
         while (current != null && current != typeof(object))
         {
-            inheritanceChain.Insert(0, current); // Insert at front to get base-to-derived order
+            inheritanceChain.Add(current); // Add to end
             current = current.BaseType;
         }
+        inheritanceChain.Reverse(); // Reverse once to get base-to-derived order (O(n) vs O(n²))
 
         // Discover hooks in each type in the inheritance chain, from base to derived
         foreach (var typeInChain in inheritanceChain)
@@ -278,9 +279,10 @@ internal sealed class ReflectionHookDiscoveryService
         Type? current = type;
         while (current != null && current != typeof(object))
         {
-            inheritanceChain.Insert(0, current); // Insert at front to get base-to-derived order
+            inheritanceChain.Add(current); // Add to end
             current = current.BaseType;
         }
+        inheritanceChain.Reverse(); // Reverse once to get base-to-derived order (O(n) vs O(n²))
 
         // Discover hooks in each type in the inheritance chain, from base to derived
         foreach (var typeInChain in inheritanceChain)
