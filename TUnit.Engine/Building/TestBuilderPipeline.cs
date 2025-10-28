@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using EnumerableAsyncProcessor.Extensions;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
 using TUnit.Engine.Building.Interfaces;
@@ -173,7 +174,7 @@ internal sealed class TestBuilderPipeline
                 TestLineNumber = metadata.LineNumber,
                 ReturnType = typeof(Task),
                 MethodMetadata = metadata.MethodMetadata,
-                Attributes = attributes,
+                AttributesByType = attributes.ToAttributeDictionary(),
                 Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
                 // Don't set RetryLimit here - let discovery event receivers set it
             };
@@ -293,7 +294,7 @@ internal sealed class TestBuilderPipeline
                         TestLineNumber = resolvedMetadata.LineNumber,
                         ReturnType = typeof(Task),
                         MethodMetadata = resolvedMetadata.MethodMetadata,
-                        Attributes = attributes,
+                        AttributesByType = attributes.ToAttributeDictionary(),
                         Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
                         // Don't set Timeout and RetryLimit here - let discovery event receivers set them
                     };
@@ -367,7 +368,7 @@ internal sealed class TestBuilderPipeline
             TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
-            Attributes = [],
+            AttributesByType = AttributeDictionaryHelper.Empty,
             Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout
         };
 
@@ -419,7 +420,7 @@ internal sealed class TestBuilderPipeline
             TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
-            Attributes = [],
+            AttributesByType = AttributeDictionaryHelper.Empty,
             Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout
         };
 

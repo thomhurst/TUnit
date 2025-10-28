@@ -876,7 +876,7 @@ internal sealed class TestBuilder : ITestBuilder
             TestLineNumber = metadata.LineNumber,
             ReturnType = metadata.MethodMetadata.ReturnType ?? typeof(void),
             MethodMetadata = metadata.MethodMetadata,
-            Attributes = attributes,
+            AttributesByType = attributes.ToAttributeDictionary(),
             MethodGenericArguments = testData.ResolvedMethodGenericArguments,
             ClassGenericArguments = testData.ResolvedClassGenericArguments,
             Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
@@ -973,7 +973,7 @@ internal sealed class TestBuilder : ITestBuilder
             TestLineNumber = metadata.LineNumber,
             ReturnType = typeof(Task),
             MethodMetadata = metadata.MethodMetadata,
-            Attributes = await InitializeAttributesAsync(metadata.AttributeFactory.Invoke()),
+            AttributesByType = (await InitializeAttributesAsync(metadata.AttributeFactory.Invoke())).ToAttributeDictionary(),
             Timeout = TimeSpan.FromMinutes(30) // Default 30-minute timeout (can be overridden by TimeoutAttribute)
         };
     }

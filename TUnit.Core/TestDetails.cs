@@ -29,15 +29,56 @@ public class TestDetails
     public Dictionary<string, List<string>> CustomProperties { get; } = new();
     public Type[]? TestClassParameterTypes { get; set; }
 
-    public required IReadOnlyList<Attribute> Attributes { get; init; }
+    public required IReadOnlyDictionary<Type, IReadOnlyList<Attribute>> AttributesByType { get; init; }
+
+    private readonly Lazy<IReadOnlyList<Attribute>> _cachedAllAttributes;
+
+    public TestDetails()
+    {
+        _cachedAllAttributes = new Lazy<IReadOnlyList<Attribute>>(() =>
+        {
+            var allAttrs = new List<Attribute>();
+            foreach (var attrList in AttributesByType?.Values ?? [])
+            {
+                allAttrs.AddRange(attrList);
+            }
+            return allAttrs;
+        });
+    }
+
+    /// <summary>
+    /// Checks if the test has an attribute of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The attribute type to check for.</typeparam>
+    /// <returns>True if the test has at least one attribute of the specified type; otherwise, false.</returns>
+    public bool HasAttribute<T>() where T : Attribute
+        => AttributesByType.ContainsKey(typeof(T));
+
+    /// <summary>
+    /// Gets all attributes of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The attribute type to retrieve.</typeparam>
+    /// <returns>An enumerable of attributes of the specified type.</returns>
+    public IEnumerable<T> GetAttributes<T>() where T : Attribute
+        => AttributesByType.TryGetValue(typeof(T), out var attrs)
+            ? attrs.OfType<T>()
+            : Enumerable.Empty<T>();
+
+    /// <summary>
+    /// Gets all attributes as a flattened collection.
+    /// Cached after first access for performance.
+    /// </summary>
+    /// <returns>All attributes associated with this test.</returns>
+    public IReadOnlyList<Attribute> GetAllAttributes() => _cachedAllAttributes.Value;
+
     public object?[] ClassMetadataArguments => TestClassArguments;
-    
+
     /// <summary>
     /// Resolved generic type arguments for the test method.
     /// Will be Type.EmptyTypes if the method is not generic.
     /// </summary>
     public Type[] MethodGenericArguments { get; set; } = Type.EmptyTypes;
-    
+
     /// <summary>
     /// Resolved generic type arguments for the test class.
     /// Will be Type.EmptyTypes if the class is not generic.
