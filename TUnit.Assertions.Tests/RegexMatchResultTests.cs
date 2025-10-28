@@ -102,4 +102,16 @@ public class RegexMatchResultTests
         // Act & Assert
         await Assert.That(() => match.Group(-1)).Throws<ArgumentOutOfRangeException>();
     }
+
+    [Test]
+    public async Task Test_RegexMatchResult_NonExistentGroupName_ThrowsArgumentException()
+    {
+        // Arrange
+        var text = "test@example.com";
+        var pattern = @"(?<user>\w+)@(?<domain>[\w.]+)";
+        var match = await Assert.That(text).Matches(pattern).GetMatchAsync();
+
+        // Act & Assert - accessing non-existent group name
+        await Assert.That(() => match.Group("nonexistent")).Throws<ArgumentException>();
+    }
 }

@@ -17,6 +17,7 @@ public class RegexMatchResult
     /// <summary>
     /// Gets the captured string for a named group.
     /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the group name is null, empty, or does not exist in the match.</exception>
     public string Group(string groupName)
     {
         if (string.IsNullOrEmpty(groupName))
@@ -24,7 +25,15 @@ public class RegexMatchResult
             throw new ArgumentException("Group name cannot be null or empty", nameof(groupName));
         }
 
-        return _match.Groups[groupName].Value;
+        var group = _match.Groups[groupName];
+        if (!group.Success)
+        {
+            throw new ArgumentException(
+                $"Group '{groupName}' does not exist in the match",
+                nameof(groupName));
+        }
+
+        return group.Value;
     }
 
     /// <summary>
