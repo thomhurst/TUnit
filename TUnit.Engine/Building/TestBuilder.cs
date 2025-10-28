@@ -1588,10 +1588,36 @@ internal sealed class TestBuilder : ITestBuilder
             null => true,
             NopFilter => true,
             TreeNodeFilter treeFilter => CouldMatchTreeNodeFilter(treeFilter, metadata),
-            TestNodeUidListFilter => true, // Can't pre-filter without test IDs - be conservative
+            TestNodeUidListFilter uidFilter => CouldMatchUidFilter(uidFilter, metadata),
             _ => true // Unknown filter type - be conservative
         };
 #pragma warning restore TPEXP
+    }
+
+    /// <summary>
+    /// Checks if a test could match a TestNodeUidListFilter by checking if any UID contains
+    /// the namespace, class name, and method name.
+    /// </summary>
+    private static bool CouldMatchUidFilter(TestNodeUidListFilter filter, TestMetadata metadata)
+    {
+        var classMetadata = metadata.MethodMetadata.Class;
+        var namespaceName = classMetadata.Namespace ?? "";
+        var className = metadata.TestClassType.Name;
+        var methodName = metadata.TestMethodName;
+
+        // Check if any UID in the filter contains all three components
+        foreach (var uid in filter.TestNodeUids)
+        {
+            var uidValue = uid.Value;
+            if (uidValue.Contains(namespaceName) &&
+                uidValue.Contains(className) &&
+                uidValue.Contains(methodName))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
