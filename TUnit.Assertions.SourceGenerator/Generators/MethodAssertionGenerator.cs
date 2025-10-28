@@ -18,53 +18,105 @@ namespace TUnit.Assertions.SourceGenerator.Generators;
 [Generator]
 public sealed class MethodAssertionGenerator : IIncrementalGenerator
 {
+    private static readonly DiagnosticDescriptor MethodMustBeStaticRule = new DiagnosticDescriptor(
+        id: "TUNITGEN001",
+        title: "Method must be static",
+        messageFormat: "Method '{0}' decorated with [GenerateAssertion] must be static",
+        category: "TUnit.Assertions.SourceGenerator",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "Methods decorated with [GenerateAssertion] must be static to be used in generated assertions.");
+
+    private static readonly DiagnosticDescriptor MethodMustHaveParametersRule = new DiagnosticDescriptor(
+        id: "TUNITGEN002",
+        title: "Method must have at least one parameter",
+        messageFormat: "Method '{0}' decorated with [GenerateAssertion] must have at least one parameter (the value to assert)",
+        category: "TUnit.Assertions.SourceGenerator",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "Methods decorated with [GenerateAssertion] must have at least one parameter representing the value being asserted.");
+
+    private static readonly DiagnosticDescriptor UnsupportedReturnTypeRule = new DiagnosticDescriptor(
+        id: "TUNITGEN003",
+        title: "Unsupported return type",
+        messageFormat: "Method '{0}' decorated with [GenerateAssertion] has unsupported return type '{1}'. Supported types are: bool, AssertionResult, Task<bool>, Task<AssertionResult>",
+        category: "TUnit.Assertions.SourceGenerator",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "Methods decorated with [GenerateAssertion] must return bool, AssertionResult, Task<bool>, or Task<AssertionResult>.");
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Find all methods decorated with [GenerateAssertion]
-        var assertionMethods = context.SyntaxProvider
+        var assertionMethodsOrDiagnostics = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Assertions.Attributes.GenerateAssertionAttribute",
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
-                transform: static (ctx, ct) => GetAssertionMethodData(ctx, ct))
-            .Where(static x => x != null)
-            .Select(static (x, _) => x!);
+                transform: (ctx, ct) => GetAssertionMethodData(ctx, ct));
+
+        // Split into methods and diagnostics
+        var methods = assertionMethodsOrDiagnostics
+            .Where(x => x.Data != null)
+            .Select((x, _) => x.Data!);
+
+        var diagnostics = assertionMethodsOrDiagnostics
+            .Where(x => x.Diagnostic != null)
+            .Select((x, _) => x.Diagnostic!);
+
+        // Report diagnostics
+        context.RegisterSourceOutput(diagnostics, static (context, diagnostic) =>
+        {
+            context.ReportDiagnostic(diagnostic);
+        });
 
         // Generate assertion classes and extension methods
-        context.RegisterSourceOutput(assertionMethods.Collect(), static (context, methods) =>
+        context.RegisterSourceOutput(methods.Collect(), static (context, methods) =>
         {
             GenerateAssertions(context, methods);
         });
     }
 
-    private static AssertionMethodData? GetAssertionMethodData(
+    private static (AssertionMethodData? Data, Diagnostic? Diagnostic) GetAssertionMethodData(
         GeneratorAttributeSyntaxContext context,
         CancellationToken cancellationToken)
     {
         if (context.TargetSymbol is not IMethodSymbol methodSymbol)
         {
-            return null;
+            return (null, null);
         }
+
+        var location = context.TargetNode.GetLocation();
 
         // Validate method is static
         if (!methodSymbol.IsStatic)
         {
-            // TODO: Report diagnostic - method must be static
-            return null;
+            var diagnostic = Diagnostic.Create(
+                MethodMustBeStaticRule,
+                location,
+                methodSymbol.Name);
+            return (null, diagnostic);
         }
 
         // Validate method has at least one parameter
         if (methodSymbol.Parameters.Length == 0)
         {
-            // TODO: Report diagnostic - method must have at least one parameter
-            return null;
+            var diagnostic = Diagnostic.Create(
+                MethodMustHaveParametersRule,
+                location,
+                methodSymbol.Name);
+            return (null, diagnostic);
         }
 
         // Get return type info
         var returnTypeInfo = AnalyzeReturnType(methodSymbol.ReturnType);
         if (returnTypeInfo == null)
         {
-            // TODO: Report diagnostic - unsupported return type
-            return null;
+            var diagnostic = Diagnostic.Create(
+                UnsupportedReturnTypeRule,
+                location,
+                methodSymbol.Name,
+                methodSymbol.ReturnType.ToDisplayString());
+            return (null, diagnostic);
         }
 
         // First parameter is the target type (what becomes IAssertionSource<T>)
@@ -90,7 +142,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             }
         }
 
-        return new AssertionMethodData(
+        var data = new AssertionMethodData(
             methodSymbol,
             targetType,
             additionalParameters,
@@ -98,6 +150,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             isExtensionMethod,
             customExpectation
         );
+
+        return (data, null);
     }
 
     private static ReturnTypeInfo? AnalyzeReturnType(ITypeSymbol returnType)

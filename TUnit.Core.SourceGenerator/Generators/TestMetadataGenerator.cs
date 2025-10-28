@@ -2708,9 +2708,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes) &&
                                           ValidateTypeConstraints(testMethod.MethodSymbol, methodTypes);
 
-                    // TODO: Fix ValidateTypeConstraints method - temporarily skip validation
-                    constraintsValid = true;
-
                     if (!constraintsValid)
                     {
                         continue;
@@ -2807,9 +2804,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     // Validate class type constraints
                     var constraintsValid = ValidateClassTypeConstraints(testMethod.TypeSymbol, inferredTypes);
-
-                    // TODO: Fix ValidateClassTypeConstraints method - temporarily skip validation
-                    constraintsValid = true;
 
                     if (!constraintsValid)
                     {
