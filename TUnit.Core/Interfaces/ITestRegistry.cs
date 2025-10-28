@@ -26,4 +26,21 @@ public interface ITestRegistry
         | DynamicallyAccessedMemberTypes.PublicFields
         | DynamicallyAccessedMemberTypes.NonPublicFields)] T>(TestContext context, DynamicTest<T> dynamicTest)
         where T : class;
+
+    /// <summary>
+    /// Creates a new test variant based on the current test's template.
+    /// The new test is queued for execution and will appear as a distinct test in the test explorer.
+    /// This is the primary mechanism for implementing property-based test shrinking and retry logic.
+    /// </summary>
+    /// <param name="currentContext">The current test context to base the variant on</param>
+    /// <param name="arguments">Method arguments for the variant (null to reuse current arguments)</param>
+    /// <param name="properties">Key-value pairs for tracking context (e.g., shrink attempt, retry count)</param>
+    /// <returns>A task that completes when the variant has been queued</returns>
+    #if NET6_0_OR_GREATER
+    [RequiresUnreferencedCode("Creating test variants requires runtime compilation and reflection which are not supported in native AOT scenarios.")]
+    #endif
+    Task CreateTestVariant(
+        TestContext currentContext,
+        object?[]? arguments,
+        Dictionary<string, object?>? properties);
 }

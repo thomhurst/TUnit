@@ -4,6 +4,7 @@ using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Engine.CommandLineProviders;
+using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 using TUnit.Engine.Models;
 using TUnit.Engine.Services;
@@ -23,6 +24,7 @@ internal sealed class TestScheduler : ITestScheduler
     private readonly IConstraintKeyScheduler _constraintKeyScheduler;
     private readonly HookExecutor _hookExecutor;
     private readonly StaticPropertyHandler _staticPropertyHandler;
+    private readonly IDynamicTestQueue _dynamicTestQueue;
     private readonly int _maxParallelism;
     private readonly SemaphoreSlim? _maxParallelismSemaphore;
 
@@ -37,7 +39,8 @@ internal sealed class TestScheduler : ITestScheduler
         CircularDependencyDetector circularDependencyDetector,
         IConstraintKeyScheduler constraintKeyScheduler,
         HookExecutor hookExecutor,
-        StaticPropertyHandler staticPropertyHandler)
+        StaticPropertyHandler staticPropertyHandler,
+        IDynamicTestQueue dynamicTestQueue)
     {
         _logger = logger;
         _groupingService = groupingService;
@@ -49,6 +52,7 @@ internal sealed class TestScheduler : ITestScheduler
         _constraintKeyScheduler = constraintKeyScheduler;
         _hookExecutor = hookExecutor;
         _staticPropertyHandler = staticPropertyHandler;
+        _dynamicTestQueue = dynamicTestQueue;
 
         _maxParallelism = GetMaxParallelism(logger, commandLineOptions);
 
@@ -155,6 +159,9 @@ internal sealed class TestScheduler : ITestScheduler
         GroupedTests groupedTests,
         CancellationToken cancellationToken)
     {
+        // Start dynamic test queue processing in background
+        var dynamicTestProcessingTask = ProcessDynamicTestQueueAsync(cancellationToken);
+
         if (groupedTests.Parallel.Length > 0)
         {
             await _logger.LogDebugAsync($"Starting {groupedTests.Parallel.Length} parallel tests").ConfigureAwait(false);
@@ -204,6 +211,59 @@ internal sealed class TestScheduler : ITestScheduler
         {
             await _logger.LogDebugAsync($"Starting {groupedTests.NotInParallel.Length} global NotInParallel tests").ConfigureAwait(false);
             await ExecuteSequentiallyAsync(groupedTests.NotInParallel, cancellationToken).ConfigureAwait(false);
+        }
+
+        // Mark the queue as complete and wait for remaining dynamic tests to finish
+        _dynamicTestQueue.Complete();
+        await dynamicTestProcessingTask.ConfigureAwait(false);
+    }
+
+    #if NET6_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
+    #endif
+    private async Task ProcessDynamicTestQueueAsync(CancellationToken cancellationToken)
+    {
+        var dynamicTests = new List<AbstractExecutableTest>();
+
+        while (!_dynamicTestQueue.IsCompleted || _dynamicTestQueue.PendingCount > 0)
+        {
+            // Dequeue all currently pending tests
+            while (_dynamicTestQueue.TryDequeue(out var test))
+            {
+                if (test != null)
+                {
+                    dynamicTests.Add(test);
+                }
+            }
+
+            // Execute the batch of dynamic tests if any were found
+            if (dynamicTests.Count > 0)
+            {
+                await _logger.LogDebugAsync($"Executing {dynamicTests.Count} dynamic test(s)").ConfigureAwait(false);
+
+                // Group and execute just like regular tests
+                var dynamicTestsArray = dynamicTests.ToArray();
+                var groupedDynamicTests = await _groupingService.GroupTestsByConstraintsAsync(dynamicTestsArray).ConfigureAwait(false);
+
+                // Execute the grouped dynamic tests (recursive call handles sub-dynamics)
+                if (groupedDynamicTests.Parallel.Length > 0)
+                {
+                    await ExecuteTestsAsync(groupedDynamicTests.Parallel, cancellationToken).ConfigureAwait(false);
+                }
+
+                if (groupedDynamicTests.NotInParallel.Length > 0)
+                {
+                    await ExecuteSequentiallyAsync(groupedDynamicTests.NotInParallel, cancellationToken).ConfigureAwait(false);
+                }
+
+                dynamicTests.Clear();
+            }
+
+            // If queue is not complete, wait a short time before checking again
+            if (!_dynamicTestQueue.IsCompleted)
+            {
+                await Task.Delay(50, cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 

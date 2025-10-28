@@ -1,11 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
 using TUnit.Engine.Interfaces;
+using Expression = System.Linq.Expressions.Expression;
 
 namespace TUnit.Engine.Services;
 
@@ -17,16 +19,19 @@ internal sealed class TestRegistry : ITestRegistry
     private readonly ConcurrentQueue<PendingDynamicTest> _pendingTests = new();
     private readonly TestBuilderPipeline? _testBuilderPipeline;
     private readonly ITestCoordinator _testCoordinator;
+    private readonly IDynamicTestQueue _dynamicTestQueue;
     private readonly CancellationToken _sessionCancellationToken;
     private readonly string? _sessionId;
 
     public TestRegistry(TestBuilderPipeline testBuilderPipeline,
         ITestCoordinator testCoordinator,
+        IDynamicTestQueue dynamicTestQueue,
         string sessionId,
         CancellationToken sessionCancellationToken)
     {
         _testBuilderPipeline = testBuilderPipeline;
         _testCoordinator = testCoordinator;
+        _dynamicTestQueue = dynamicTestQueue;
         _sessionId = sessionId;
         _sessionCancellationToken = sessionCancellationToken;
     }
@@ -96,8 +101,141 @@ internal sealed class TestRegistry : ITestRegistry
 
         foreach (var test in builtTests)
         {
-            await _testCoordinator.ExecuteTestAsync(test, _sessionCancellationToken);
+            await _dynamicTestQueue.EnqueueAsync(test);
         }
+    }
+
+    [RequiresUnreferencedCode("Creating test variants requires reflection which is not supported in native AOT scenarios.")]
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access",
+        Justification = "Dynamic test variants require reflection")]
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2067:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call",
+        Justification = "Dynamic test variants require reflection")]
+    [UnconditionalSuppressMessage("AOT",
+        "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling",
+        Justification = "Dynamic test variants require runtime compilation")]
+    public async Task CreateTestVariant(
+        TestContext currentContext,
+        object?[]? arguments,
+        Dictionary<string, object?>? properties)
+    {
+        var testDetails = currentContext.TestDetails;
+        var testClassType = testDetails.ClassType;
+        var variantMethodArguments = arguments ?? testDetails.TestMethodArguments;
+
+        var methodMetadata = testDetails.MethodMetadata;
+        var parameterTypes = methodMetadata.Parameters.Select(p => p.Type).ToArray();
+        var methodInfo = methodMetadata.Type.GetMethod(
+            methodMetadata.Name,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static,
+            null,
+            parameterTypes,
+            null);
+
+        if (methodInfo == null)
+        {
+            throw new InvalidOperationException($"Cannot create test variant: method '{methodMetadata.Name}' not found");
+        }
+
+        var relationship = TUnit.Core.Enums.TestRelationship.Dynamic;
+        if (properties != null)
+        {
+            if (properties.ContainsKey("ShrinkAttempt") || properties.ContainsKey("shrink"))
+            {
+                relationship = TUnit.Core.Enums.TestRelationship.ShrinkAttempt;
+            }
+            else if (properties.ContainsKey("RetryAttempt") || properties.ContainsKey("retry"))
+            {
+                relationship = TUnit.Core.Enums.TestRelationship.Retry;
+            }
+        }
+
+        var genericAddDynamicTestMethod = typeof(TestRegistry)
+            .GetMethod(nameof(CreateTestVariantInternal), BindingFlags.NonPublic | BindingFlags.Instance)
+            ?.MakeGenericMethod(testClassType);
+
+        if (genericAddDynamicTestMethod == null)
+        {
+            throw new InvalidOperationException("Failed to resolve CreateTestVariantInternal method");
+        }
+
+        await ((Task)genericAddDynamicTestMethod.Invoke(this,
+            [currentContext, methodInfo, variantMethodArguments, testDetails.TestClassArguments, properties, relationship])!);
+    }
+
+    [RequiresUnreferencedCode("Creating test variants requires reflection which is not supported in native AOT scenarios.")]
+    private async Task CreateTestVariantInternal<[DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
+        | DynamicallyAccessedMemberTypes.PublicProperties
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicFields
+        | DynamicallyAccessedMemberTypes.NonPublicFields)] T>(
+        TestContext currentContext,
+        MethodInfo methodInfo,
+        object?[] variantMethodArguments,
+        object?[] classArguments,
+        Dictionary<string, object?>? properties,
+        TUnit.Core.Enums.TestRelationship relationship) where T : class
+    {
+        var parameter = Expression.Parameter(typeof(T), "instance");
+        var methodParameters = methodInfo.GetParameters();
+        var argumentExpressions = new Expression[methodParameters.Length];
+
+        for (int i = 0; i < methodParameters.Length; i++)
+        {
+            var argValue = i < variantMethodArguments.Length ? variantMethodArguments[i] : null;
+            argumentExpressions[i] = Expression.Constant(argValue, methodParameters[i].ParameterType);
+        }
+
+        var methodCall = Expression.Call(parameter, methodInfo, argumentExpressions);
+
+        Expression body;
+        if (methodInfo.ReturnType == typeof(Task))
+        {
+            body = methodCall;
+        }
+        else if (methodInfo.ReturnType == typeof(void))
+        {
+            body = Expression.Block(methodCall, Expression.Constant(Task.CompletedTask));
+        }
+        else if (methodInfo.ReturnType.IsGenericType &&
+                 methodInfo.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
+        {
+            body = Expression.Convert(methodCall, typeof(Task));
+        }
+        else
+        {
+            body = Expression.Block(methodCall, Expression.Constant(Task.CompletedTask));
+        }
+
+        var lambda = Expression.Lambda<Func<T, Task>>(body, parameter);
+        var attributes = new List<Attribute>(currentContext.TestDetails.Attributes);
+
+        var discoveryResult = new DynamicDiscoveryResult
+        {
+            TestClassType = typeof(T),
+            TestClassArguments = classArguments,
+            TestMethodArguments = variantMethodArguments,
+            TestMethod = lambda,
+            Attributes = attributes,
+            CreatorFilePath = currentContext.TestDetails.TestFilePath,
+            CreatorLineNumber = currentContext.TestDetails.TestLineNumber,
+            ParentTestId = currentContext.TestDetails.TestId,
+            Relationship = relationship,
+            Properties = properties
+        };
+
+        _pendingTests.Enqueue(new PendingDynamicTest
+        {
+            DiscoveryResult = discoveryResult,
+            SourceContext = currentContext,
+            TestClassType = typeof(T)
+        });
+
+        await ProcessPendingDynamicTests();
     }
 
     [RequiresUnreferencedCode("Dynamic test metadata creation requires reflection which is not supported in native AOT scenarios.")]
@@ -236,6 +374,24 @@ internal sealed class TestRegistry : ITestRegistry
                     ClassArguments = _dynamicResult.TestClassArguments ?? context.ClassArguments,
                     Context = context.Context
                 };
+
+                if (_dynamicResult.ParentTestId != null)
+                {
+                    modifiedContext.Context.ParentTestId = _dynamicResult.ParentTestId;
+                }
+
+                if (_dynamicResult.Relationship.HasValue)
+                {
+                    modifiedContext.Context.Relationship = _dynamicResult.Relationship.Value;
+                }
+
+                if (_dynamicResult.Properties != null)
+                {
+                    foreach (var kvp in _dynamicResult.Properties)
+                    {
+                        modifiedContext.Context.ObjectBag[kvp.Key] = kvp.Value;
+                    }
+                }
 
                 var createInstance = (TestContext testContext) =>
                 {

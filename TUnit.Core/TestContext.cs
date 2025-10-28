@@ -154,6 +154,18 @@ public class TestContext : Context
     public Priority ExecutionPriority { get; set; } = Priority.Normal;
 
     /// <summary>
+    /// The test ID of the parent test, if this test is a variant or child of another test.
+    /// Used for tracking test hierarchies in property-based testing shrinking and retry scenarios.
+    /// </summary>
+    public string? ParentTestId { get; set; }
+
+    /// <summary>
+    /// Defines the relationship between this test and its parent test (if ParentTestId is set).
+    /// Used by test explorers to display hierarchical relationships.
+    /// </summary>
+    public TestRelationship Relationship { get; set; } = TestRelationship.None;
+
+    /// <summary>
     /// Will be null until initialized by TestOrchestrator
     /// </summary>
     public ClassHookContext ClassContext { get; }

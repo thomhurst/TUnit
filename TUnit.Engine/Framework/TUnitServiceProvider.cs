@@ -221,6 +221,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var staticPropertyHandler = Register(new StaticPropertyHandler(Logger, objectTracker, trackableObjectGraphProvider, disposer));
 
+        var dynamicTestQueue = Register<IDynamicTestQueue>(new DynamicTestQueue(MessageBus));
+
         var testScheduler = Register<ITestScheduler>(new TestScheduler(
             Logger,
             testGroupingService,
@@ -232,7 +234,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             circularDependencyDetector,
             constraintKeyScheduler,
             hookExecutor,
-            staticPropertyHandler));
+            staticPropertyHandler,
+            dynamicTestQueue));
 
         TestSessionCoordinator = Register(new TestSessionCoordinator(EventReceiverOrchestrator,
             Logger,
@@ -243,7 +246,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             MessageBus,
             staticPropertyInitializer));
 
-        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, TestSessionId, CancellationToken.Token));
+        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, dynamicTestQueue, TestSessionId, CancellationToken.Token));
 
         InitializeConsoleInterceptors();
     }

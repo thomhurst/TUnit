@@ -592,6 +592,9 @@ namespace
         public .<> Attributes { get; set; }
         public string? CreatorFilePath { get; set; }
         public int? CreatorLineNumber { get; set; }
+        public string? ParentTestId { get; set; }
+        public .<string, object?>? Properties { get; set; }
+        public .? Relationship { get; set; }
         public object?[]? TestClassArguments { get; set; }
         public ? TestClassType { get; set; }
         public .? TestMethod { get; set; }
@@ -1238,7 +1241,9 @@ namespace
         public .? ParallelConstraint { get; set; }
         public .<.> ParallelConstraints { get; }
         public .? ParallelLimiter { get; }
+        public string? ParentTestId { get; set; }
         public .TestPhase Phase { get; set; }
+        public . Relationship { get; set; }
         public bool ReportResult { get; set; }
         public .TestResult? Result { get; set; }
         public <.TestContext, , int, .<bool>>? RetryFunc { get; set; }
@@ -1656,6 +1661,14 @@ namespace .Enums
         High = 4,
         Critical = 5,
     }
+    public enum TestRelationship
+    {
+        None = 0,
+        Retry = 1,
+        ShrinkAttempt = 2,
+        Generated = 3,
+        Dynamic = 4,
+    }
 }
 namespace .Events
 {
@@ -1839,6 +1852,7 @@ namespace .Extensions
     {
         public static . AddDynamicTest<T>(this .TestContext context, .DynamicTest<T> dynamicTest)
             where T :  class { }
+        public static . CreateTestVariant(this .TestContext context, object?[]? arguments = null, .<string, object?>? properties = null) { }
         public static string GetClassTypeName(this .TestContext context) { }
         public static T? GetService<T>(this .TestContext context)
             where T :  class { }
@@ -2243,6 +2257,7 @@ namespace .Interfaces
     {
         . AddDynamicTest<T>(.TestContext context, .DynamicTest<T> dynamicTest)
             where T :  class;
+        . CreateTestVariant(.TestContext currentContext, object?[]? arguments, .<string, object?>? properties);
     }
     public interface ITestRetryEventReceiver : .
     {
