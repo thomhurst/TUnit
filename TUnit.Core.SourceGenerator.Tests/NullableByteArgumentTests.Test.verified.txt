@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class NullableByteArgumentTests_Test_TestSource_A6E6C204 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test__byte__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -87,12 +87,12 @@ internal sealed class NullableByteArgumentTests_Test_TestSource_A6E6C204 : globa
         yield break;
     }
 }
-internal static class NullableByteArgumentTests_Test_ModuleInitializer_A6E6C204
+internal static class TUnit_TestProject_NullableByteArgumentTests_Test__byte__ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.NullableByteArgumentTests), new NullableByteArgumentTests_Test_TestSource_A6E6C204());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.NullableByteArgumentTests), new TUnit_TestProject_NullableByteArgumentTests_Test__byte__TestSource());
     }
 }
 
@@ -104,7 +104,7 @@ internal static class NullableByteArgumentTests_Test_ModuleInitializer_A6E6C204
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class NullableByteArgumentTests_Test2_TestSource_08DA87AB : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test2__byte_byte__TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -195,11 +195,11 @@ internal sealed class NullableByteArgumentTests_Test2_TestSource_08DA87AB : glob
         yield break;
     }
 }
-internal static class NullableByteArgumentTests_Test2_ModuleInitializer_08DA87AB
+internal static class TUnit_TestProject_NullableByteArgumentTests_Test2__byte_byte__ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.NullableByteArgumentTests), new NullableByteArgumentTests_Test2_TestSource_08DA87AB());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.NullableByteArgumentTests), new TUnit_TestProject_NullableByteArgumentTests_Test2__byte_byte__TestSource());
     }
 }

@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_With_STA_TestSource_A6D386DC : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -70,12 +70,12 @@ internal sealed class STAThreadTests_With_STA_TestSource_A6D386DC : global::TUni
         yield break;
     }
 }
-internal static class STAThreadTests_With_STA_ModuleInitializer_A6D386DC
+internal static class TUnit_TestProject_STAThreadTests_With_STA_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_With_STA_TestSource_A6D386DC());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_With_STA_TestSource());
     }
 }
 
@@ -87,7 +87,7 @@ internal static class STAThreadTests_With_STA_ModuleInitializer_A6D386DC
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_Without_STA_TestSource_E8CFB143 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -153,12 +153,12 @@ internal sealed class STAThreadTests_Without_STA_TestSource_E8CFB143 : global::T
         yield break;
     }
 }
-internal static class STAThreadTests_Without_STA_ModuleInitializer_E8CFB143
+internal static class TUnit_TestProject_STAThreadTests_Without_STA_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_Without_STA_TestSource_E8CFB143());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_Without_STA_TestSource());
     }
 }
 
@@ -170,7 +170,7 @@ internal static class STAThreadTests_Without_STA_ModuleInitializer_E8CFB143
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithSimpleAwait_TestSource_64B8F052 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -237,12 +237,12 @@ internal sealed class STAThreadTests_STA_WithSimpleAwait_TestSource_64B8F052 : g
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithSimpleAwait_ModuleInitializer_64B8F052
+internal static class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithSimpleAwait_TestSource_64B8F052());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestSource());
     }
 }
 
@@ -254,7 +254,7 @@ internal static class STAThreadTests_STA_WithSimpleAwait_ModuleInitializer_64B8F
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithTaskYield_TestSource_EB5DADF6 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -321,12 +321,12 @@ internal sealed class STAThreadTests_STA_WithTaskYield_TestSource_EB5DADF6 : glo
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithTaskYield_ModuleInitializer_EB5DADF6
+internal static class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithTaskYield_TestSource_EB5DADF6());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSource());
     }
 }
 
@@ -338,7 +338,7 @@ internal static class STAThreadTests_STA_WithTaskYield_ModuleInitializer_EB5DADF
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithConfigureAwaitTrue_TestSource_B38DEE3C : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTrue_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -405,12 +405,12 @@ internal sealed class STAThreadTests_STA_WithConfigureAwaitTrue_TestSource_B38DE
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithConfigureAwaitTrue_ModuleInitializer_B38DEE3C
+internal static class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTrue_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithConfigureAwaitTrue_TestSource_B38DEE3C());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTrue_TestSource());
     }
 }
 
@@ -422,7 +422,7 @@ internal static class STAThreadTests_STA_WithConfigureAwaitTrue_ModuleInitialize
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithNestedAsyncCalls_TestSource_A0A945A4 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -489,12 +489,12 @@ internal sealed class STAThreadTests_STA_WithNestedAsyncCalls_TestSource_A0A945A
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithNestedAsyncCalls_ModuleInitializer_A0A945A4
+internal static class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithNestedAsyncCalls_TestSource_A0A945A4());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_TestSource());
     }
 }
 
@@ -506,7 +506,7 @@ internal static class STAThreadTests_STA_WithNestedAsyncCalls_ModuleInitializer_
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithTaskFromResult_TestSource_64B35E3F : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -573,12 +573,12 @@ internal sealed class STAThreadTests_STA_WithTaskFromResult_TestSource_64B35E3F 
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithTaskFromResult_ModuleInitializer_64B35E3F
+internal static class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithTaskFromResult_TestSource_64B35E3F());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_TestSource());
     }
 }
 
@@ -590,7 +590,7 @@ internal static class STAThreadTests_STA_WithTaskFromResult_ModuleInitializer_64
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithCompletedTask_TestSource_E7D05A9B : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -657,12 +657,12 @@ internal sealed class STAThreadTests_STA_WithCompletedTask_TestSource_E7D05A9B :
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithCompletedTask_ModuleInitializer_E7D05A9B
+internal static class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithCompletedTask_TestSource_E7D05A9B());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_TestSource());
     }
 }
 
@@ -674,7 +674,7 @@ internal static class STAThreadTests_STA_WithCompletedTask_ModuleInitializer_E7D
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithTaskRun_TestSource_8D2D2DEC : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -741,12 +741,12 @@ internal sealed class STAThreadTests_STA_WithTaskRun_TestSource_8D2D2DEC : globa
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithTaskRun_ModuleInitializer_8D2D2DEC
+internal static class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithTaskRun_TestSource_8D2D2DEC());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSource());
     }
 }
 
@@ -758,7 +758,7 @@ internal static class STAThreadTests_STA_WithTaskRun_ModuleInitializer_8D2D2DEC
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithMultipleAwaits_TestSource_9A713713 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -825,12 +825,12 @@ internal sealed class STAThreadTests_STA_WithMultipleAwaits_TestSource_9A713713 
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithMultipleAwaits_ModuleInitializer_9A713713
+internal static class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithMultipleAwaits_TestSource_9A713713());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_TestSource());
     }
 }
 
@@ -842,7 +842,7 @@ internal static class STAThreadTests_STA_WithMultipleAwaits_ModuleInitializer_9A
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithAsyncEnumerable_TestSource_87B79A9F : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -909,12 +909,12 @@ internal sealed class STAThreadTests_STA_WithAsyncEnumerable_TestSource_87B79A9F
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithAsyncEnumerable_ModuleInitializer_87B79A9F
+internal static class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithAsyncEnumerable_TestSource_87B79A9F());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_TestSource());
     }
 }
 
@@ -926,7 +926,7 @@ internal static class STAThreadTests_STA_WithAsyncEnumerable_ModuleInitializer_8
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithTaskWhenAll_TestSource_E8C6C0F8 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -993,12 +993,12 @@ internal sealed class STAThreadTests_STA_WithTaskWhenAll_TestSource_E8C6C0F8 : g
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithTaskWhenAll_ModuleInitializer_E8C6C0F8
+internal static class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithTaskWhenAll_TestSource_E8C6C0F8());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestSource());
     }
 }
 
@@ -1010,7 +1010,7 @@ internal static class STAThreadTests_STA_WithTaskWhenAll_ModuleInitializer_E8C6C
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithExceptionHandling_TestSource_3124E862 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1077,12 +1077,12 @@ internal sealed class STAThreadTests_STA_WithExceptionHandling_TestSource_3124E8
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithExceptionHandling_ModuleInitializer_3124E862
+internal static class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithExceptionHandling_TestSource_3124E862());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling_TestSource());
     }
 }
 
@@ -1094,7 +1094,7 @@ internal static class STAThreadTests_STA_WithExceptionHandling_ModuleInitializer
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithThrowsNothingAssertion_TestSource_55666E60 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAssertion_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1161,12 +1161,12 @@ internal sealed class STAThreadTests_STA_WithThrowsNothingAssertion_TestSource_5
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithThrowsNothingAssertion_ModuleInitializer_55666E60
+internal static class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAssertion_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithThrowsNothingAssertion_TestSource_55666E60());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAssertion_TestSource());
     }
 }
 
@@ -1178,7 +1178,7 @@ internal static class STAThreadTests_STA_WithThrowsNothingAssertion_ModuleInitia
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class STAThreadTests_STA_WithFuncAssertion_TestSource_541430F3 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -1245,11 +1245,11 @@ internal sealed class STAThreadTests_STA_WithFuncAssertion_TestSource_541430F3 :
         yield break;
     }
 }
-internal static class STAThreadTests_STA_WithFuncAssertion_ModuleInitializer_541430F3
+internal static class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new STAThreadTests_STA_WithFuncAssertion_TestSource_541430F3());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.STAThreadTests), new TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_TestSource());
     }
 }

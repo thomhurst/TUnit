@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class AotDataSourceTest_TestWithDataSource_TestSource_56C60E89 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_AotDataSourceTest_TestWithDataSource__int_int_int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -100,11 +100,11 @@ internal sealed class AotDataSourceTest_TestWithDataSource_TestSource_56C60E89 :
         yield break;
     }
 }
-internal static class AotDataSourceTest_TestWithDataSource_ModuleInitializer_56C60E89
+internal static class TUnit_TestProject_AotDataSourceTest_TestWithDataSource__int_int_int_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.AotDataSourceTest), new AotDataSourceTest_TestWithDataSource_TestSource_56C60E89());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.AotDataSourceTest), new TUnit_TestProject_AotDataSourceTest_TestWithDataSource__int_int_int_TestSource());
     }
 }

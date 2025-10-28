@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class NameOfArgumentTests_TestName_TestSource_C1DC8B92 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_NameOfArgumentTests_TestName__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -85,11 +85,11 @@ internal sealed class NameOfArgumentTests_TestName_TestSource_C1DC8B92 : global:
         yield break;
     }
 }
-internal static class NameOfArgumentTests_TestName_ModuleInitializer_C1DC8B92
+internal static class TUnit_TestProject_NameOfArgumentTests_TestName__string_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.NameOfArgumentTests), new NameOfArgumentTests_TestName_TestSource_C1DC8B92());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.NameOfArgumentTests), new TUnit_TestProject_NameOfArgumentTests_TestName__string_TestSource());
     }
 }

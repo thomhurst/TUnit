@@ -124,6 +124,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var concreteMethod = FindConcreteMethodImplementation(classInfo.TypeSymbol, method);
 
             var inheritanceDepth = CalculateInheritanceDepth(classInfo.TypeSymbol, method);
+
+            // Skip methods declared directly on this class (inheritance depth = 0)
+            // Those are already handled by the regular test method registration
+            if (inheritanceDepth == 0)
+            {
+                continue;
+            }
             var (filePath, lineNumber) = GetTestMethodSourceLocation(method, testAttribute, classInfo);
 
             // If the method is from a generic base class, use the constructed version from the inheritance hierarchy
@@ -241,12 +248,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var className = testMethod.TypeSymbol.GloballyQualified();
         var methodName = testMethod.MethodSymbol.Name;
 
-        // Use deterministic hash instead of random GUID (fixes content-based caching)
-        var fullSignature = $"{testMethod.TypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}::{testMethod.MethodSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}";
-        var deterministicHash = FileNameHelper.GetStableHash(fullSignature);
-        var combinationHash = deterministicHash.Substring(0, Math.Min(8, deterministicHash.Length));
+        // Generate unique class name using same pattern as filename (without .g.cs extension)
+        var uniqueClassName = FileNameHelper.GetDeterministicFileNameForMethod(testMethod.TypeSymbol, testMethod.MethodSymbol)
+            .Replace(".g.cs", "_TestSource");
 
-        writer.AppendLine($"internal sealed class {testMethod.TypeSymbol.Name}_{methodName}_TestSource_{deterministicHash} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
+        writer.AppendLine($"internal sealed class {uniqueClassName} : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -286,16 +292,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (hasTypedDataSource || hasGenerateGenericTest || testMethod.IsGenericMethod || hasClassArguments || hasTypedDataSourceForGenericType || hasMethodArgumentsForGenericType || hasMethodDataSourceForGenericType)
             {
-                GenerateGenericTestWithConcreteTypes(writer, testMethod, className, combinationHash);
+                GenerateGenericTestWithConcreteTypes(writer, testMethod, className, uniqueClassName);
             }
             else
             {
-                GenerateTestMetadataInstance(writer, testMethod, className, combinationHash);
+                GenerateTestMetadataInstance(writer, testMethod, className, uniqueClassName);
             }
         }
         else
         {
-            GenerateTestMetadataInstance(writer, testMethod, className, combinationHash);
+            GenerateTestMetadataInstance(writer, testMethod, className, uniqueClassName);
         }
 
         writer.AppendLine("yield break;");
@@ -305,7 +311,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("}");
 
-        GenerateModuleInitializer(writer, testMethod, deterministicHash);
+        GenerateModuleInitializer(writer, testMethod, uniqueClassName);
     }
 
     private static void GenerateSpecificGenericInstantiation(
@@ -1976,17 +1982,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
 
-    private static void GenerateModuleInitializer(CodeWriter writer, TestMethodMetadata testMethod, string guid)
+    private static void GenerateModuleInitializer(CodeWriter writer, TestMethodMetadata testMethod, string uniqueClassName)
     {
         writer.AppendLine();
-        writer.AppendLine($"internal static class {testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_ModuleInitializer_{guid}");
+        writer.AppendLine($"internal static class {uniqueClassName.Replace("_TestSource", "_ModuleInitializer")}");
         writer.AppendLine("{");
         writer.Indent();
         writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
         writer.AppendLine("public static void Initialize()");
         writer.AppendLine("{");
         writer.Indent();
-        writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register({GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)}, new {testMethod.TypeSymbol.Name}_{testMethod.MethodSymbol.Name}_TestSource_{guid}());");
+        writer.AppendLine($"global::TUnit.Core.SourceRegistrar.Register({GenerateTypeReference(testMethod.TypeSymbol, testMethod.IsGenericType)}, new {uniqueClassName}());");
         writer.Unindent();
         writer.AppendLine("}");
         writer.Unindent();

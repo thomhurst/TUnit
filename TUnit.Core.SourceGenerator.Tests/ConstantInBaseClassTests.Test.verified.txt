@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ConstantInBaseClassTests_SomeTest_TestSource_CFD5934D : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__1432_ConstantInBaseClassTests_SomeTest__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -85,11 +85,11 @@ internal sealed class ConstantInBaseClassTests_SomeTest_TestSource_CFD5934D : gl
         yield break;
     }
 }
-internal static class ConstantInBaseClassTests_SomeTest_ModuleInitializer_CFD5934D
+internal static class TUnit_TestProject_Bugs__1432_ConstantInBaseClassTests_SomeTest__string_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests), new ConstantInBaseClassTests_SomeTest_TestSource_CFD5934D());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1432.ConstantInBaseClassTests), new TUnit_TestProject_Bugs__1432_ConstantInBaseClassTests_SomeTest__string_TestSource());
     }
 }

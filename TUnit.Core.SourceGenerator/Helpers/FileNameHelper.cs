@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.CodeAnalysis;
 
@@ -11,64 +10,86 @@ internal static class FileNameHelper
 {
     /// <summary>
     /// Generates a deterministic filename for a test class.
-    /// Uses the fully qualified type name, sanitized for filesystem compatibility,
-    /// with a short stable hash to prevent collisions and path length issues.
+    /// Format: {Namespace}_{ClassName}_{GenericArgs}.g.cs
     /// </summary>
     /// <param name="typeSymbol">The type symbol for the test class</param>
-    /// <returns>A deterministic filename like "MyNamespace_MyClass_A1B2C3D4.g.cs"</returns>
+    /// <returns>A deterministic filename like "MyNamespace_MyClass_T.g.cs"</returns>
     public static string GetDeterministicFileName(INamedTypeSymbol typeSymbol)
     {
-        // Get the fully qualified name (e.g., "MyNamespace.SubNamespace.MyClass<T>")
-        var fullyQualifiedName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var sb = new StringBuilder();
 
-        // Remove the "global::" prefix if present
-        if (fullyQualifiedName.StartsWith("global::"))
+        // Add namespace
+        if (!typeSymbol.ContainingNamespace.IsGlobalNamespace)
         {
-            fullyQualifiedName = fullyQualifiedName.Substring("global::".Length);
+            sb.Append(SanitizeForFileName(typeSymbol.ContainingNamespace.ToDisplayString()));
+            sb.Append('_');
         }
 
-        // Sanitize for filename
-        var sanitized = SanitizeForFileName(fullyQualifiedName);
+        // Add class name
+        sb.Append(SanitizeForFileName(typeSymbol.Name));
 
-        // Add a short stable hash to prevent collisions and handle path length limits
-        var hash = GetStableHash(fullyQualifiedName);
+        // Add generic type arguments if any
+        if (typeSymbol.TypeArguments.Length > 0)
+        {
+            sb.Append('_');
+            for (int i = 0; i < typeSymbol.TypeArguments.Length; i++)
+            {
+                if (i > 0) sb.Append('_');
+                sb.Append(SanitizeForFileName(typeSymbol.TypeArguments[i].Name));
+            }
+        }
 
-        return $"{sanitized}_{hash}.g.cs";
+        sb.Append(".g.cs");
+        return sb.ToString();
     }
 
     /// <summary>
     /// Generates a deterministic filename for a test method.
-    /// Uses the class and method names with parameter signature to ensure uniqueness.
+    /// Format: {Namespace}_{ClassName}_{MethodName}__{ParameterTypes}.g.cs
     /// </summary>
     /// <param name="typeSymbol">The type symbol for the test class</param>
     /// <param name="methodSymbol">The method symbol for the test method</param>
-    /// <returns>A deterministic filename like "MyClass_MyMethod_ParamTypes_A1B2C3D4.g.cs"</returns>
+    /// <returns>A deterministic filename like "MyNamespace_MyClass_MyMethod__Int32_String.g.cs"</returns>
     public static string GetDeterministicFileNameForMethod(INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
     {
-        // Build a unique string combining class and method information
-        var typeFullName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        if (typeFullName.StartsWith("global::"))
+        var sb = new StringBuilder();
+
+        // Add namespace
+        if (!typeSymbol.ContainingNamespace.IsGlobalNamespace)
         {
-            typeFullName = typeFullName.Substring("global::".Length);
+            sb.Append(SanitizeForFileName(typeSymbol.ContainingNamespace.ToDisplayString()));
+            sb.Append('_');
         }
 
-        var methodFullName = methodSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        if (methodFullName.StartsWith("global::"))
+        // Add class name (with generic parameters if any)
+        sb.Append(SanitizeForFileName(typeSymbol.Name));
+        if (typeSymbol.TypeArguments.Length > 0)
         {
-            methodFullName = methodFullName.Substring("global::".Length);
+            sb.Append('_');
+            for (int i = 0; i < typeSymbol.TypeArguments.Length; i++)
+            {
+                if (i > 0) sb.Append('_');
+                sb.Append(SanitizeForFileName(typeSymbol.TypeArguments[i].Name));
+            }
+        }
+        sb.Append('_');
+
+        // Add method name
+        sb.Append(SanitizeForFileName(methodSymbol.Name));
+
+        // Add parameters with double underscore separator
+        if (methodSymbol.Parameters.Length > 0)
+        {
+            sb.Append("__");
+            for (int i = 0; i < methodSymbol.Parameters.Length; i++)
+            {
+                if (i > 0) sb.Append('_');
+                sb.Append(SanitizeForFileName(methodSymbol.Parameters[i].Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+            }
         }
 
-        // Combine for uniqueness (includes parameter types, generics, etc.)
-        var combined = $"{typeFullName}::{methodFullName}";
-
-        // Sanitize the class and method names separately for readability
-        var className = SanitizeForFileName(typeSymbol.Name);
-        var methodName = SanitizeForFileName(methodSymbol.Name);
-
-        // Generate hash from the full signature to ensure uniqueness
-        var hash = GetStableHash(combined);
-
-        return $"{className}_{methodName}_{hash}.g.cs";
+        sb.Append(".g.cs");
+        return sb.ToString();
     }
 
     /// <summary>
@@ -96,22 +117,4 @@ internal static class FileNameHelper
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Generates a stable 8-character hash from the input string.
-    /// Same input always produces the same hash (deterministic).
-    /// </summary>
-    public static string GetStableHash(string input)
-    {
-        using var sha1 = SHA1.Create();
-        var hashBytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(input));
-
-        // Take first 4 bytes and convert to hex (8 characters)
-        var sb = new StringBuilder(8);
-        for (int i = 0; i < 4 && i < hashBytes.Length; i++)
-        {
-            sb.Append(hashBytes[i].ToString("X2"));
-        }
-
-        return sb.ToString();
-    }
 }

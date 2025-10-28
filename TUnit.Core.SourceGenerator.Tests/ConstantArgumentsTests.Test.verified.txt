@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ConstantArgumentsTests_String1_TestSource_201AB93C : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ConstantArgumentsTests_String1__string_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -85,12 +85,12 @@ internal sealed class ConstantArgumentsTests_String1_TestSource_201AB93C : globa
         yield break;
     }
 }
-internal static class ConstantArgumentsTests_String1_ModuleInitializer_201AB93C
+internal static class TUnit_TestProject_ConstantArgumentsTests_String1__string_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new ConstantArgumentsTests_String1_TestSource_201AB93C());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_String1__string_TestSource());
     }
 }
 
@@ -102,7 +102,7 @@ internal static class ConstantArgumentsTests_String1_ModuleInitializer_201AB93C
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ConstantArgumentsTests_Int_TestSource_D2B48855 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ConstantArgumentsTests_Int__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -184,12 +184,12 @@ internal sealed class ConstantArgumentsTests_Int_TestSource_D2B48855 : global::T
         yield break;
     }
 }
-internal static class ConstantArgumentsTests_Int_ModuleInitializer_D2B48855
+internal static class TUnit_TestProject_ConstantArgumentsTests_Int__int_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new ConstantArgumentsTests_Int_TestSource_D2B48855());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Int__int_TestSource());
     }
 }
 
@@ -201,7 +201,7 @@ internal static class ConstantArgumentsTests_Int_ModuleInitializer_D2B48855
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ConstantArgumentsTests_Double_TestSource_1347E46B : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ConstantArgumentsTests_Double__double_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -283,12 +283,12 @@ internal sealed class ConstantArgumentsTests_Double_TestSource_1347E46B : global
         yield break;
     }
 }
-internal static class ConstantArgumentsTests_Double_ModuleInitializer_1347E46B
+internal static class TUnit_TestProject_ConstantArgumentsTests_Double__double_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new ConstantArgumentsTests_Double_TestSource_1347E46B());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Double__double_TestSource());
     }
 }
 
@@ -300,7 +300,7 @@ internal static class ConstantArgumentsTests_Double_ModuleInitializer_1347E46B
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ConstantArgumentsTests_Float_TestSource_7F0BF18E : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ConstantArgumentsTests_Float__float_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -382,12 +382,12 @@ internal sealed class ConstantArgumentsTests_Float_TestSource_7F0BF18E : global:
         yield break;
     }
 }
-internal static class ConstantArgumentsTests_Float_ModuleInitializer_7F0BF18E
+internal static class TUnit_TestProject_ConstantArgumentsTests_Float__float_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new ConstantArgumentsTests_Float_TestSource_7F0BF18E());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Float__float_TestSource());
     }
 }
 
@@ -399,7 +399,7 @@ internal static class ConstantArgumentsTests_Float_ModuleInitializer_7F0BF18E
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ConstantArgumentsTests_Long_TestSource_119C9A7D : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ConstantArgumentsTests_Long__long_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -481,12 +481,12 @@ internal sealed class ConstantArgumentsTests_Long_TestSource_119C9A7D : global::
         yield break;
     }
 }
-internal static class ConstantArgumentsTests_Long_ModuleInitializer_119C9A7D
+internal static class TUnit_TestProject_ConstantArgumentsTests_Long__long_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new ConstantArgumentsTests_Long_TestSource_119C9A7D());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_Long__long_TestSource());
     }
 }
 
@@ -498,7 +498,7 @@ internal static class ConstantArgumentsTests_Long_ModuleInitializer_119C9A7D
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ConstantArgumentsTests_UInt_TestSource_F5DB6F82 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ConstantArgumentsTests_UInt__uint_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -580,12 +580,12 @@ internal sealed class ConstantArgumentsTests_UInt_TestSource_F5DB6F82 : global::
         yield break;
     }
 }
-internal static class ConstantArgumentsTests_UInt_ModuleInitializer_F5DB6F82
+internal static class TUnit_TestProject_ConstantArgumentsTests_UInt__uint_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new ConstantArgumentsTests_UInt_TestSource_F5DB6F82());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_UInt__uint_TestSource());
     }
 }
 
@@ -597,7 +597,7 @@ internal static class ConstantArgumentsTests_UInt_ModuleInitializer_F5DB6F82
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ConstantArgumentsTests_ULong_TestSource_3FD8E723 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ConstantArgumentsTests_ULong__ulong_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -679,11 +679,11 @@ internal sealed class ConstantArgumentsTests_ULong_TestSource_3FD8E723 : global:
         yield break;
     }
 }
-internal static class ConstantArgumentsTests_ULong_ModuleInitializer_3FD8E723
+internal static class TUnit_TestProject_ConstantArgumentsTests_ULong__ulong_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new ConstantArgumentsTests_ULong_TestSource_3FD8E723());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ConstantArgumentsTests), new TUnit_TestProject_ConstantArgumentsTests_ULong__ulong_TestSource());
     }
 }

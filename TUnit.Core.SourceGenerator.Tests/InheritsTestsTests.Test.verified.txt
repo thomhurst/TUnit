@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class BaseClass_Test_TestSource_9D1457DA : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__1924_None_BaseClass_Test__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     #if NET8_0_OR_GREATER
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Data>k__BackingField")]
@@ -134,12 +134,12 @@ internal sealed class BaseClass_Test_TestSource_9D1457DA : global::TUnit.Core.In
         yield break;
     }
 }
-internal static class BaseClass_Test_ModuleInitializer_9D1457DA
+internal static class TUnit_TestProject_Bugs__1924_None_BaseClass_Test__int_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass), new BaseClass_Test_TestSource_9D1457DA());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass), new TUnit_TestProject_Bugs__1924_None_BaseClass_Test__int_TestSource());
     }
 }
 
@@ -151,7 +151,7 @@ internal static class BaseClass_Test_ModuleInitializer_9D1457DA
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class Tests_Test_TestSource_B71D1C97 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     #if NET8_0_OR_GREATER
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Data>k__BackingField")]
@@ -270,12 +270,12 @@ internal sealed class Tests_Test_TestSource_B71D1C97 : global::TUnit.Core.Interf
         yield break;
     }
 }
-internal static class Tests_Test_ModuleInitializer_B71D1C97
+internal static class TUnit_TestProject_Bugs__1924_None_Tests_Test__int_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1924.None.Tests), new Tests_Test_TestSource_B71D1C97());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1924.None.Tests), new TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSource());
     }
 }
 
@@ -287,7 +287,7 @@ internal static class Tests_Test_ModuleInitializer_B71D1C97
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class Tests2_Test_TestSource_6BD26F4F : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     #if NET8_0_OR_GREATER
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Data>k__BackingField")]
@@ -406,12 +406,12 @@ internal sealed class Tests2_Test_TestSource_6BD26F4F : global::TUnit.Core.Inter
         yield break;
     }
 }
-internal static class Tests2_Test_ModuleInitializer_6BD26F4F
+internal static class TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1924.None.Tests2), new Tests2_Test_TestSource_6BD26F4F());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1924.None.Tests2), new TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSource());
     }
 }
 
@@ -423,7 +423,7 @@ internal static class Tests2_Test_ModuleInitializer_6BD26F4F
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class Tests3_Test_TestSource_C339CAAC : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     #if NET8_0_OR_GREATER
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Data>k__BackingField")]
@@ -542,11 +542,11 @@ internal sealed class Tests3_Test_TestSource_C339CAAC : global::TUnit.Core.Inter
         yield break;
     }
 }
-internal static class Tests3_Test_ModuleInitializer_C339CAAC
+internal static class TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1924.None.Tests3), new Tests3_Test_TestSource_C339CAAC());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._1924.None.Tests3), new TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSource());
     }
 }

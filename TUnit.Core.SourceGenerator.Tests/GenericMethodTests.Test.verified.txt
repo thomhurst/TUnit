@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSource_BC79F0A1 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpectedOutput__IEnumerable_TSource__Func_TSource__TKey__Func_TKey__TAccumulate__Func_TAccumulate__TSource__TAccumulate__IEqualityComparer_TKey___IEnumerable_KeyValuePair_TKey__TAccumulate___TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -421,11 +421,11 @@ internal sealed class GenericMethodTests_AggregateBy_HasExpectedOutput_TestSourc
         yield break;
     }
 }
-internal static class GenericMethodTests_AggregateBy_HasExpectedOutput_ModuleInitializer_BC79F0A1
+internal static class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpectedOutput__IEnumerable_TSource__Func_TSource__TKey__Func_TKey__TAccumulate__Func_TAccumulate__TSource__TAccumulate__IEqualityComparer_TKey___IEnumerable_KeyValuePair_TKey__TAccumulate___ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.GenericMethodTests), new GenericMethodTests_AggregateBy_HasExpectedOutput_TestSource_BC79F0A1());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.GenericMethodTests), new TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpectedOutput__IEnumerable_TSource__Func_TSource__TKey__Func_TKey__TAccumulate__Func_TAccumulate__TSource__TAccumulate__IEqualityComparer_TKey___IEnumerable_KeyValuePair_TKey__TAccumulate___TestSource());
     }
 }

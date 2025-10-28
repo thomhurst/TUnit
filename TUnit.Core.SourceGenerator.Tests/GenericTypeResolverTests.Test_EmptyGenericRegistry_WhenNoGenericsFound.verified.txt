@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class SimpleTestClass_NonGenericTest_TestSource_E7815C18 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_SimpleTestClass_NonGenericTest_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -66,11 +66,11 @@ internal sealed class SimpleTestClass_NonGenericTest_TestSource_E7815C18 : globa
         yield break;
     }
 }
-internal static class SimpleTestClass_NonGenericTest_ModuleInitializer_E7815C18
+internal static class TUnit_TestProject_SimpleTestClass_NonGenericTest_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.SimpleTestClass), new SimpleTestClass_NonGenericTest_TestSource_E7815C18());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.SimpleTestClass), new TUnit_TestProject_SimpleTestClass_NonGenericTest_TestSource());
     }
 }

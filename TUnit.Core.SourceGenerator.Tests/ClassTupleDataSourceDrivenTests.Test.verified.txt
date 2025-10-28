@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_TestSource_ECB14A21 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_ClassTupleDataSourceDrivenTests_DataSource_TupleMethod__int_string_bool_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     #if NET8_0_OR_GREATER
     [global::System.Runtime.CompilerServices.UnsafeAccessor(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "<Property1>k__BackingField")]
@@ -375,11 +375,11 @@ internal sealed class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_Tes
         yield break;
     }
 }
-internal static class ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_ModuleInitializer_ECB14A21
+internal static class TUnit_TestProject_ClassTupleDataSourceDrivenTests_DataSource_TupleMethod__int_string_bool_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), new ClassTupleDataSourceDrivenTests_DataSource_TupleMethod_TestSource_ECB14A21());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests), new TUnit_TestProject_ClassTupleDataSourceDrivenTests_DataSource_TupleMethod__int_string_bool_TestSource());
     }
 }

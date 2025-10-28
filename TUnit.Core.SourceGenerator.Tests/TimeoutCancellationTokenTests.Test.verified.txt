@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TimeoutCancellationTokenTests_DefaultTest_TestSource_DE0D88D0 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTest__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -113,12 +113,12 @@ internal sealed class TimeoutCancellationTokenTests_DefaultTest_TestSource_DE0D8
         yield break;
     }
 }
-internal static class TimeoutCancellationTokenTests_DefaultTest_ModuleInitializer_DE0D88D0
+internal static class TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTest__CancellationToken_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TimeoutCancellationTokenTests_DefaultTest_TestSource_DE0D88D0());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_DefaultTest__CancellationToken_TestSource());
     }
 }
 
@@ -130,7 +130,7 @@ internal static class TimeoutCancellationTokenTests_DefaultTest_ModuleInitialize
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TimeoutCancellationTokenTests_BasicTest_TestSource_0E5A6D38 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -242,12 +242,12 @@ internal sealed class TimeoutCancellationTokenTests_BasicTest_TestSource_0E5A6D3
         yield break;
     }
 }
-internal static class TimeoutCancellationTokenTests_BasicTest_ModuleInitializer_0E5A6D38
+internal static class TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest__CancellationToken_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TimeoutCancellationTokenTests_BasicTest_TestSource_0E5A6D38());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_BasicTest__CancellationToken_TestSource());
     }
 }
 
@@ -259,7 +259,7 @@ internal static class TimeoutCancellationTokenTests_BasicTest_ModuleInitializer_
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TimeoutCancellationTokenTests_InheritedTimeoutAttribute_TestSource_DC637556 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedTimeoutAttribute__CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -370,12 +370,12 @@ internal sealed class TimeoutCancellationTokenTests_InheritedTimeoutAttribute_Te
         yield break;
     }
 }
-internal static class TimeoutCancellationTokenTests_InheritedTimeoutAttribute_ModuleInitializer_DC637556
+internal static class TUnit_TestProject_TimeoutCancellationTokenTests_InheritedTimeoutAttribute__CancellationToken_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TimeoutCancellationTokenTests_InheritedTimeoutAttribute_TestSource_DC637556());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_InheritedTimeoutAttribute__CancellationToken_TestSource());
     }
 }
 
@@ -387,7 +387,7 @@ internal static class TimeoutCancellationTokenTests_InheritedTimeoutAttribute_Mo
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TimeoutCancellationTokenTests_DataTest_TestSource_E67391D2 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__int_CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -516,12 +516,12 @@ internal sealed class TimeoutCancellationTokenTests_DataTest_TestSource_E67391D2
         yield break;
     }
 }
-internal static class TimeoutCancellationTokenTests_DataTest_ModuleInitializer_E67391D2
+internal static class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__int_CancellationToken_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TimeoutCancellationTokenTests_DataTest_TestSource_E67391D2());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__int_CancellationToken_TestSource());
     }
 }
 
@@ -533,7 +533,7 @@ internal static class TimeoutCancellationTokenTests_DataTest_ModuleInitializer_E
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TimeoutCancellationTokenTests_DataSourceTest_TestSource_70D5E84E : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataSourceTest__int_CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -683,12 +683,12 @@ internal sealed class TimeoutCancellationTokenTests_DataSourceTest_TestSource_70
         yield break;
     }
 }
-internal static class TimeoutCancellationTokenTests_DataSourceTest_ModuleInitializer_70D5E84E
+internal static class TUnit_TestProject_TimeoutCancellationTokenTests_DataSourceTest__int_CancellationToken_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TimeoutCancellationTokenTests_DataSourceTest_TestSource_70D5E84E());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_DataSourceTest__int_CancellationToken_TestSource());
     }
 }
 
@@ -700,7 +700,7 @@ internal static class TimeoutCancellationTokenTests_DataSourceTest_ModuleInitial
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TimeoutCancellationTokenTests_MatrixTest_TestSource_C6DEA7AD : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest__int_CancellationToken_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -830,11 +830,11 @@ internal sealed class TimeoutCancellationTokenTests_MatrixTest_TestSource_C6DEA7
         yield break;
     }
 }
-internal static class TimeoutCancellationTokenTests_MatrixTest_ModuleInitializer_C6DEA7AD
+internal static class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest__int_CancellationToken_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TimeoutCancellationTokenTests_MatrixTest_TestSource_C6DEA7AD());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.TimeoutCancellationTokenTests), new TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest__int_CancellationToken_TestSource());
     }
 }

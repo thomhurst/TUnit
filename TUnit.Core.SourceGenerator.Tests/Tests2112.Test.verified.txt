@@ -3,7 +3,7 @@
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class Tests_Test_TestSource_7BD8FEC0 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__2112_Tests_Test__int_long[]_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -112,12 +112,12 @@ internal sealed class Tests_Test_TestSource_7BD8FEC0 : global::TUnit.Core.Interf
         yield break;
     }
 }
-internal static class Tests_Test_ModuleInitializer_7BD8FEC0
+internal static class TUnit_TestProject_Bugs__2112_Tests_Test__int_long[]_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2112.Tests), new Tests_Test_TestSource_7BD8FEC0());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2112.Tests), new TUnit_TestProject_Bugs__2112_Tests_Test__int_long[]_TestSource());
     }
 }
 
@@ -129,7 +129,7 @@ internal static class Tests_Test_ModuleInitializer_7BD8FEC0
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class Tests_Test2_TestSource_19888641 : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_Bugs__2112_Tests_Test2__int_long[]_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -238,11 +238,11 @@ internal sealed class Tests_Test2_TestSource_19888641 : global::TUnit.Core.Inter
         yield break;
     }
 }
-internal static class Tests_Test2_ModuleInitializer_19888641
+internal static class TUnit_TestProject_Bugs__2112_Tests_Test2__int_long[]_ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2112.Tests), new Tests_Test2_TestSource_19888641());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.Bugs._2112.Tests), new TUnit_TestProject_Bugs__2112_Tests_Test2__int_long[]_TestSource());
     }
 }
