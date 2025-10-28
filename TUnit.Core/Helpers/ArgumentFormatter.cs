@@ -56,7 +56,16 @@ public static class ArgumentFormatter
             return FormatEnumerable(enumerable);
         }
 
-        var toString = o.ToString()!;
+        string toString;
+        try
+        {
+            toString = o.ToString()!;
+        }
+        catch
+        {
+            // If ToString() throws, fall back to type name
+            return type.Name;
+        }
 
         if (o is Enum)
         {
@@ -100,15 +109,23 @@ public static class ArgumentFormatter
         var elements = new List<string>(maxElements + 1);
         var count = 0;
 
-        foreach (var element in enumerable)
+        try
         {
-            if (count >= maxElements)
+            foreach (var element in enumerable)
             {
-                elements.Add("...");
-                break;
+                if (count >= maxElements)
+                {
+                    elements.Add("...");
+                    break;
+                }
+                elements.Add(FormatDefault(element));
+                count++;
             }
-            elements.Add(FormatDefault(element));
-            count++;
+        }
+        catch
+        {
+            // If GetEnumerator() or MoveNext() throws, fall back to type name
+            return enumerable.GetType().Name;
         }
 
         return string.Join(", ", elements);

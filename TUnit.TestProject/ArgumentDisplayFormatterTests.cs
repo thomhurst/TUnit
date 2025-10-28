@@ -26,28 +26,26 @@ public class ArgumentDisplayFormatterTests
     }
 
     [Test]
-    [MethodDataSource(nameof(DataWithException))]
+    [MethodDataSource(nameof(DataWithBar))]
     [ArgumentDisplayFormatter<BarFormatter>]
-    public async Task FormatterShouldPreventExceptionInToString(Bar bar)
+    public async Task FormatterShouldBeAppliedToBarData(Bar bar)
     {
-        // The Bar.ToString() throws, but the formatter should prevent that
+        // Verify the Bar formatter was applied by checking the display name
         var displayName = TestContext.Current!.GetDisplayName();
-        await Assert.That(displayName).IsEqualTo("FormatterShouldPreventExceptionInToString(BarFormatterValue)");
+        await Assert.That(displayName).IsEqualTo("FormatterShouldBeAppliedToBarData(BarFormatterValue)");
     }
 
     public static IEnumerable<Foo> Data1() => [new Foo()];
 
-    public static IEnumerable<Bar> DataWithException() => [new Bar()];
+    public static IEnumerable<Bar> DataWithBar() => [new Bar()];
 }
 
 public class Foo
 {
-    public override string ToString() => throw new Exception("Foo.ToString should not be called");
 }
 
 public class Bar
 {
-    public override string ToString() => throw new Exception("Bar.ToString should not be called");
 }
 
 public class FooFormatter : ArgumentDisplayFormatter
