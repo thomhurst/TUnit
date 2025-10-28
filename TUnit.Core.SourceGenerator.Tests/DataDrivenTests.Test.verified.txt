@@ -818,7 +818,7 @@ internal static class TUnit_TestProject_DataDrivenTests_Type__Type_ModuleInitial
 
 #nullable enable
 namespace TUnit.Generated;
-internal sealed class TUnit_TestProject_DataDrivenTests_IntegerArray__int[]_TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
+internal sealed class TUnit_TestProject_DataDrivenTests_IntegerArray__int___TestSource : global::TUnit.Core.Interfaces.SourceGenerator.ITestSource
 {
     public async global::System.Collections.Generic.IAsyncEnumerable<global::TUnit.Core.TestMetadata> GetTestsAsync(string testSessionId, [global::System.Runtime.CompilerServices.EnumeratorCancellation] global::System.Threading.CancellationToken cancellationToken = default)
     {
@@ -901,12 +901,12 @@ internal sealed class TUnit_TestProject_DataDrivenTests_IntegerArray__int[]_Test
         yield break;
     }
 }
-internal static class TUnit_TestProject_DataDrivenTests_IntegerArray__int[]_ModuleInitializer
+internal static class TUnit_TestProject_DataDrivenTests_IntegerArray__int___ModuleInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataDrivenTests), new TUnit_TestProject_DataDrivenTests_IntegerArray__int[]_TestSource());
+        global::TUnit.Core.SourceRegistrar.Register(typeof(global::TUnit.TestProject.DataDrivenTests), new TUnit_TestProject_DataDrivenTests_IntegerArray__int___TestSource());
     }
 }
 
