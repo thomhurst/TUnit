@@ -563,9 +563,6 @@ namespace
         public string GetDisplayName() { }
         public void SetDisplayName(string displayName) { }
         public void SetDisplayNameFormatter( formatterType) { }
-        [("Use AddParallelConstraint to support multiple constraints. This method replaces a" +
-            "ll existing constraints.")]
-        public void SetParallelConstraint(. constraint) { }
         public void SetPriority(. priority) { }
         public void SetRetryLimit(int retryLimit) { }
         public void SetRetryLimit(int retryCount, <.TestContext, , int, .<bool>> shouldRetry) { }
@@ -1283,9 +1280,6 @@ namespace
         public .CancellationTokenSource? LinkedCancellationTokens { get; set; }
         public object Lock { get; }
         public .<string, object?> ObjectBag { get; }
-        [("Use ParallelConstraints collection instead. This property is maintained for backw" +
-            "ard compatibility.")]
-        public .? ParallelConstraint { get; set; }
         public .<.> ParallelConstraints { get; }
         public .? ParallelLimiter { get; }
         public string? ParentTestId { get; set; }
@@ -1318,9 +1312,6 @@ namespace
         public .<.TestContext> GetTests(string testName,  classType) { }
         public void OverrideResult(string reason) { }
         public void OverrideResult(.TestState state, string reason) { }
-        [("This method is non-functional after the removal of ITestFinder. It will be remove" +
-            "d in a future version.")]
-        public . ReregisterTestWithArguments(object?[]? methodArguments = null, .<string, object?>? objectBag = null) { }
         public void SetParallelLimiter(. parallelLimit) { }
         public void WriteError(string message) { }
         public void WriteLine(string message) { }

@@ -121,25 +121,6 @@ public class TestContext : Context
     public IReadOnlyList<IParallelConstraint> ParallelConstraints => _parallelConstraints;
 
     /// <summary>
-    /// Gets or sets the primary parallel constraint for backward compatibility.
-    /// When setting, this replaces all existing constraints.
-    /// When getting, returns the first constraint or null if none exist.
-    /// </summary>
-    [Obsolete("Use ParallelConstraints collection instead. This property is maintained for backward compatibility.")]
-    public IParallelConstraint? ParallelConstraint
-    {
-        get => _parallelConstraints.FirstOrDefault();
-        set
-        {
-            _parallelConstraints.Clear();
-            if (value != null)
-            {
-                _parallelConstraints.Add(value);
-            }
-        }
-    }
-
-    /// <summary>
     /// Adds a parallel constraint to this test context.
     /// Multiple constraints can be combined to create complex parallelization rules.
     /// </summary>
@@ -320,33 +301,6 @@ public class TestContext : Context
         InternalExecutableTest.State = state;
     }
 
-    /// <summary>
-    /// Reregisters a test with new arguments. This method is currently non-functional as the underlying
-    /// ITestFinder interface has been removed. This functionality may be reimplemented in a future version.
-    /// </summary>
-    /// <remarks>
-    /// Previously used for dynamically modifying test arguments at runtime. Consider using data source
-    /// attributes for parameterized tests instead.
-    /// </remarks>
-    [Obsolete("This method is non-functional after the removal of ITestFinder. It will be removed in a future version.")]
-    public async Task ReregisterTestWithArguments(object?[]? methodArguments = null, Dictionary<string, object?>? objectBag = null)
-    {
-        if (methodArguments != null)
-        {
-            TestDetails.TestMethodArguments = methodArguments;
-        }
-
-        if (objectBag != null)
-        {
-            foreach (var kvp in objectBag)
-            {
-                ObjectBag[kvp.Key] = kvp.Value;
-            }
-        }
-
-        // This method is currently non-functional - see Obsolete attribute above
-        await Task.CompletedTask;
-    }
 
     public List<TestDetails> Dependencies { get; } =
     [

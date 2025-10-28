@@ -12,15 +12,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // Handle non-generic CreateAssertionAttribute (deprecated)
-        var nonGenericCreateAttributeData = context.SyntaxProvider
-            .ForAttributeWithMetadataName(
-                "TUnit.Assertions.Attributes.CreateAssertionAttribute",
-                predicate: (node, _) => true,
-                transform: (ctx, _) => GetCreateAssertionAttributeData(ctx))
-            .Where(x => x != null);
-
-        // Handle non-generic AssertionFromAttribute (new)
+        // Handle non-generic AssertionFromAttribute
         var nonGenericAssertionFromData = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Assertions.Attributes.AssertionFromAttribute",
@@ -28,15 +20,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
                 transform: (ctx, _) => GetCreateAssertionAttributeData(ctx))
             .Where(x => x != null);
 
-        // Handle generic CreateAssertionAttribute<T> (deprecated)
-        var genericCreateAttributeData = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                predicate: (node, _) => node is ClassDeclarationSyntax,
-                transform: (ctx, _) => GetGenericCreateAssertionAttributeData(ctx, "CreateAssertionAttribute"))
-            .Where(x => x != null)
-            .SelectMany((x, _) => x!.ToImmutableArray());
-
-        // Handle generic AssertionFromAttribute<T> (new)
+        // Handle generic AssertionFromAttribute<T>
         var genericAssertionFromData = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: (node, _) => node is ClassDeclarationSyntax,
@@ -45,16 +29,12 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
             .SelectMany((x, _) => x!.ToImmutableArray());
 
         // Combine all sources
-        var allAttributeData = nonGenericCreateAttributeData.Collect()
-            .Combine(nonGenericAssertionFromData.Collect())
-            .Combine(genericCreateAttributeData.Collect())
+        var allAttributeData = nonGenericAssertionFromData.Collect()
             .Combine(genericAssertionFromData.Collect())
             .Select((data, _) =>
             {
                 var result = new List<AttributeWithClassData>();
-                result.AddRange(data.Left.Left.Left.Where(x => x != null).SelectMany(x => x!));
-                result.AddRange(data.Left.Left.Right.Where(x => x != null).SelectMany(x => x!));
-                result.AddRange(data.Left.Right);
+                result.AddRange(data.Left.Where(x => x != null).SelectMany(x => x!));
                 result.AddRange(data.Right);
                 return result.AsEnumerable();
             });
