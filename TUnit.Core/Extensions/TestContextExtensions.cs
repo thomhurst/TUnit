@@ -53,7 +53,9 @@ public static class TestContextExtensions
     /// </summary>
     /// <param name="context">The current test context</param>
     /// <param name="arguments">Method arguments for the variant (null to reuse current arguments)</param>
-    /// <param name="properties">Key-value pairs for tracking context (e.g., shrink attempt, retry count)</param>
+    /// <param name="properties">Key-value pairs for user-defined metadata (e.g., attempt count, custom data)</param>
+    /// <param name="relationship">The relationship category of this variant to its parent test (defaults to Derived)</param>
+    /// <param name="displayName">Optional user-facing display name for the variant (e.g., "Shrink Attempt", "Mutant")</param>
     /// <returns>A task that completes when the variant has been queued</returns>
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Creating test variants requires runtime compilation and reflection")]
@@ -61,8 +63,10 @@ public static class TestContextExtensions
     public static async Task CreateTestVariant(
         this TestContext context,
         object?[]? arguments = null,
-        Dictionary<string, object?>? properties = null)
+        Dictionary<string, object?>? properties = null,
+        Enums.TestRelationship relationship = Enums.TestRelationship.Derived,
+        string? displayName = null)
     {
-        await context.GetService<ITestRegistry>()!.CreateTestVariant(context, arguments, properties);
+        await context.GetService<ITestRegistry>()!.CreateTestVariant(context, arguments, properties, relationship, displayName);
     }
 }

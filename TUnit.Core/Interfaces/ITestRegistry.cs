@@ -34,7 +34,9 @@ public interface ITestRegistry
     /// </summary>
     /// <param name="currentContext">The current test context to base the variant on</param>
     /// <param name="arguments">Method arguments for the variant (null to reuse current arguments)</param>
-    /// <param name="properties">Key-value pairs for tracking context (e.g., shrink attempt, retry count)</param>
+    /// <param name="properties">Key-value pairs for user-defined metadata (e.g., attempt count, custom data)</param>
+    /// <param name="relationship">The relationship category of this variant to its parent test</param>
+    /// <param name="displayName">Optional user-facing display name for the variant (e.g., "Shrink Attempt", "Mutant")</param>
     /// <returns>A task that completes when the variant has been queued</returns>
     #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Creating test variants requires runtime compilation and reflection which are not supported in native AOT scenarios.")]
@@ -42,5 +44,7 @@ public interface ITestRegistry
     Task CreateTestVariant(
         TestContext currentContext,
         object?[]? arguments,
-        Dictionary<string, object?>? properties);
+        Dictionary<string, object?>? properties,
+        Enums.TestRelationship relationship,
+        string? displayName);
 }

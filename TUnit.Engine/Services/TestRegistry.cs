@@ -118,7 +118,9 @@ internal sealed class TestRegistry : ITestRegistry
     public async Task CreateTestVariant(
         TestContext currentContext,
         object?[]? arguments,
-        Dictionary<string, object?>? properties)
+        Dictionary<string, object?>? properties,
+        TUnit.Core.Enums.TestRelationship relationship,
+        string? displayName)
     {
         var testDetails = currentContext.TestDetails;
         var testClassType = testDetails.ClassType;
@@ -138,19 +140,6 @@ internal sealed class TestRegistry : ITestRegistry
             throw new InvalidOperationException($"Cannot create test variant: method '{methodMetadata.Name}' not found");
         }
 
-        var relationship = TUnit.Core.Enums.TestRelationship.Dynamic;
-        if (properties != null)
-        {
-            if (properties.ContainsKey("ShrinkAttempt") || properties.ContainsKey("shrink"))
-            {
-                relationship = TUnit.Core.Enums.TestRelationship.ShrinkAttempt;
-            }
-            else if (properties.ContainsKey("RetryAttempt") || properties.ContainsKey("retry"))
-            {
-                relationship = TUnit.Core.Enums.TestRelationship.Retry;
-            }
-        }
-
         var genericAddDynamicTestMethod = typeof(TestRegistry)
             .GetMethod(nameof(CreateTestVariantInternal), BindingFlags.NonPublic | BindingFlags.Instance)
             ?.MakeGenericMethod(testClassType);
@@ -161,7 +150,7 @@ internal sealed class TestRegistry : ITestRegistry
         }
 
         await ((Task)genericAddDynamicTestMethod.Invoke(this,
-            [currentContext, methodInfo, variantMethodArguments, testDetails.TestClassArguments, properties, relationship])!);
+            [currentContext, methodInfo, variantMethodArguments, testDetails.TestClassArguments, properties, relationship, displayName])!);
     }
 
     [RequiresUnreferencedCode("Creating test variants requires reflection which is not supported in native AOT scenarios.")]
@@ -178,7 +167,8 @@ internal sealed class TestRegistry : ITestRegistry
         object?[] variantMethodArguments,
         object?[] classArguments,
         Dictionary<string, object?>? properties,
-        TUnit.Core.Enums.TestRelationship relationship) where T : class
+        TUnit.Core.Enums.TestRelationship relationship,
+        string? displayName) where T : class
     {
         var parameter = Expression.Parameter(typeof(T), "instance");
         var methodParameters = methodInfo.GetParameters();
@@ -225,7 +215,8 @@ internal sealed class TestRegistry : ITestRegistry
             CreatorLineNumber = currentContext.TestDetails.TestLineNumber,
             ParentTestId = currentContext.TestDetails.TestId,
             Relationship = relationship,
-            Properties = properties
+            Properties = properties,
+            DisplayName = displayName
         };
 
         _pendingTests.Enqueue(new PendingDynamicTest
@@ -369,7 +360,7 @@ internal sealed class TestRegistry : ITestRegistry
                 var modifiedContext = new ExecutableTestCreationContext
                 {
                     TestId = context.TestId,
-                    DisplayName = context.DisplayName,
+                    DisplayName = _dynamicResult.DisplayName ?? context.DisplayName,
                     Arguments = _dynamicResult.TestMethodArguments ?? context.Arguments,
                     ClassArguments = _dynamicResult.TestClassArguments ?? context.ClassArguments,
                     Context = context.Context

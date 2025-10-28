@@ -19,8 +19,10 @@ public class TestVariantTests
             arguments: new object?[] { 42 },
             properties: new Dictionary<string, object?>
             {
-                { "ShrinkAttempt", 1 }
-            }
+                { "AttemptNumber", 1 }
+            },
+            relationship: TUnit.Core.Enums.TestRelationship.Derived,
+            displayName: "Shrink Attempt"
         );
     }
 
@@ -40,14 +42,14 @@ public class TestVariantTests
             throw new InvalidOperationException($"Expected non-negative value but got {value}");
         }
 
-        if (context.ObjectBag.ContainsKey("ShrinkAttempt"))
+        if (context.ObjectBag.ContainsKey("AttemptNumber"))
         {
-            var shrinkAttempt = context.ObjectBag["ShrinkAttempt"];
-            context.WriteLine($"Shrink attempt {shrinkAttempt} with value {value}");
+            var attemptNumber = context.ObjectBag["AttemptNumber"];
+            context.WriteLine($"Shrink attempt {attemptNumber} with value {value}");
 
-            if (context.Relationship != TUnit.Core.Enums.TestRelationship.ShrinkAttempt)
+            if (context.Relationship != TUnit.Core.Enums.TestRelationship.Derived)
             {
-                throw new InvalidOperationException($"Expected ShrinkAttempt relationship but got {context.Relationship}");
+                throw new InvalidOperationException($"Expected Derived relationship but got {context.Relationship}");
             }
 
             if (context.ParentTestId == null)
