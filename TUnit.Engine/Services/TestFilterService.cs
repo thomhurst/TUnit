@@ -183,7 +183,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
     private bool IsExplicitTest(AbstractExecutableTest test)
     {
-        if (test.Context.TestDetails.Attributes.OfType<ExplicitAttribute>().Any())
+        if (test.Context.TestDetails.HasAttribute<ExplicitAttribute>())
         {
             return true;
         }

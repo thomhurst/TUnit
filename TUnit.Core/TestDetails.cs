@@ -29,7 +29,47 @@ public class TestDetails
     public Dictionary<string, List<string>> CustomProperties { get; } = new();
     public Type[]? TestClassParameterTypes { get; set; }
 
-    public required IReadOnlyList<Attribute> Attributes { get; init; }
+    public required IReadOnlyDictionary<Type, IReadOnlyList<Attribute>> AttributesByType { get; init; }
+
+    private IReadOnlyList<Attribute>? _cachedAllAttributes;
+
+    /// <summary>
+    /// Checks if the test has an attribute of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The attribute type to check for.</typeparam>
+    /// <returns>True if the test has at least one attribute of the specified type; otherwise, false.</returns>
+    public bool HasAttribute<T>() where T : Attribute
+        => AttributesByType.ContainsKey(typeof(T));
+
+    /// <summary>
+    /// Gets all attributes of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The attribute type to retrieve.</typeparam>
+    /// <returns>An enumerable of attributes of the specified type.</returns>
+    public IEnumerable<T> GetAttributes<T>() where T : Attribute
+        => AttributesByType.TryGetValue(typeof(T), out var attrs)
+            ? attrs.OfType<T>()
+            : Enumerable.Empty<T>();
+
+    /// <summary>
+    /// Gets all attributes as a flattened collection.
+    /// Cached after first access for performance.
+    /// </summary>
+    /// <returns>All attributes associated with this test.</returns>
+    public IReadOnlyList<Attribute> GetAllAttributes()
+    {
+        if (_cachedAllAttributes == null)
+        {
+            var allAttrs = new List<Attribute>();
+            foreach (var attrList in AttributesByType.Values)
+            {
+                allAttrs.AddRange(attrList);
+            }
+            _cachedAllAttributes = allAttrs;
+        }
+        return _cachedAllAttributes;
+    }
+
     public object?[] ClassMetadataArguments => TestClassArguments;
     
     /// <summary>

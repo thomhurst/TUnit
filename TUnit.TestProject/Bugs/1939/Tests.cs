@@ -55,7 +55,7 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
             if (!dataClass.Disposed)
             {
                 var classDataSourceAttribute =
-                    test.TestDetails.Attributes.OfType<ClassDataSourceAttribute<DataClass>>()
+                    test.TestDetails.GetAttributes<ClassDataSourceAttribute<DataClass>>()
                         .First();
 
                 throw new Exception($"Not Disposed: {classDataSourceAttribute.Shared}");

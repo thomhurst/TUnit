@@ -540,7 +540,7 @@ internal static class CodeGenerationHelpers
 
 
     /// <summary>
-    /// Generates all test-related attributes for the TestMetadata.Attributes field.
+    /// Generates all test-related attributes for the TestMetadata.AttributesByType field as a dictionary.
     /// </summary>
     public static string GenerateTestAttributes(IMethodSymbol methodSymbol)
     {
@@ -552,23 +552,41 @@ internal static class CodeGenerationHelpers
 
         if (allAttributes.Count == 0)
         {
-            return "System.Array.Empty<System.Attribute>()";
+            return "new System.Collections.Generic.Dictionary<System.Type, System.Collections.Generic.IReadOnlyList<System.Attribute>>().AsReadOnly()";
         }
 
-        // Generate as a single line array to avoid CS8802 parser issues
+        // Group attributes by type
+        var attributesByType = allAttributes
+            .GroupBy(attr => attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "System.Attribute")
+            .ToList();
+
         using var writer = new CodeWriter("", includeHeader: false);
 
-        // Generate inline array to avoid parser issues
-        using (writer.BeginArrayInitializer("new System.Attribute[]", terminator: ""))
+        // Generate dictionary initializer
+        writer.Append("new System.Collections.Generic.Dictionary<System.Type, System.Collections.Generic.IReadOnlyList<System.Attribute>>()");
+        writer.AppendLine();
+        writer.AppendLine("{");
+        writer.Indent();
+
+        foreach (var group in attributesByType)
         {
+            var typeString = group.Key;
+            var attrs = group.ToList();
+
+            writer.Append($"[typeof({typeString})] = new System.Attribute[] {{ ");
+
             var attributeStrings = new List<string>();
-            foreach (var attr in allAttributes)
+            foreach (var attr in attrs)
             {
-                // Use unified approach for all attributes
                 attributeStrings.Add(GenerateAttributeInstantiation(attr));
             }
+
             writer.Append(string.Join(", ", attributeStrings));
+            writer.AppendLine(" },");
         }
+
+        writer.Unindent();
+        writer.Append("}.AsReadOnly()");
 
         return writer.ToString().Trim();
     }

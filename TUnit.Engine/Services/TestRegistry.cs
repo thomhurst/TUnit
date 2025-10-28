@@ -202,7 +202,7 @@ internal sealed class TestRegistry : ITestRegistry
         }
 
         var lambda = Expression.Lambda<Func<T, Task>>(body, parameter);
-        var attributes = new List<Attribute>(currentContext.TestDetails.Attributes);
+        var attributes = new List<Attribute>(currentContext.TestDetails.GetAllAttributes());
 
         var discoveryResult = new DynamicDiscoveryResult
         {

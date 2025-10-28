@@ -10,7 +10,7 @@ internal static class TestContextExtensions
         testContext.Events,
         ..testContext.TestDetails.TestClassArguments,
         testContext.TestDetails.ClassInstance,
-        ..testContext.TestDetails.Attributes,
+        ..testContext.TestDetails.GetAllAttributes(),
         ..testContext.TestDetails.TestMethodArguments,
         ..testContext.TestDetails.TestClassInjectedPropertyArguments.Select(x => x.Value),
     ];
