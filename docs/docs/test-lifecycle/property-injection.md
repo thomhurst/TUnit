@@ -18,14 +18,14 @@ The AOT system generates strongly-typed property setters at compile time, elimin
 
 ## Async Property Initialization
 
-Properties can implement `IAsyncInitializable` for complex setup scenarios with automatic lifecycle management:
+Properties can implement `IAsyncInitializer` for complex setup scenarios with automatic lifecycle management:
 
 ```csharp
 using TUnit.Core;
 
 namespace MyTestProject;
 
-public class AsyncPropertyExample : IAsyncInitializable, IAsyncDisposable
+public class AsyncPropertyExample : IAsyncInitializer, IAsyncDisposable
 {
     public bool IsInitialized { get; private set; }
     public string? ConnectionString { get; private set; }

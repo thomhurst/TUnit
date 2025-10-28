@@ -19,7 +19,7 @@ public class MicrosoftDependencyInjectionDataSourceAttribute : DependencyInjecti
 
     public override IServiceScope CreateScope(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        return ServiceProvider.CreateAsyncScope();
+        return ServiceProvider.CreateScope();
     }
 
     public override object? Create(IServiceScope scope, Type type)

@@ -205,8 +205,8 @@ TestContext.Out.WriteLine("More output");
 // TUnit (inject TestContext)
 public async Task MyTest(TestContext context)
 {
-    await context.OutputWriter.WriteLineAsync("Test output");
-    await context.OutputWriter.WriteLineAsync("More output");
+    context.OutputWriter.WriteLine("Test output");
+    context.OutputWriter.WriteLine("More output");
 }
 ```
 

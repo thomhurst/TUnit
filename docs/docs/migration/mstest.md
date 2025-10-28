@@ -246,7 +246,7 @@ public class MyTests
     [Test]
     public async Task MyTest(TestContext context)
     {
-        await context.OutputWriter.WriteLineAsync("Test output");
+        context.OutputWriter.WriteLine("Test output");
     }
     
     [Before(HookType.Class)]

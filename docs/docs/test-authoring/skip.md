@@ -26,7 +26,7 @@ As an example, this could be used to skip tests on certain operating systems.
 ```csharp
 public class WindowsOnlyAttribute() : SkipAttribute("This test is only supported on Windows")
 {
-    public override Task<bool> ShouldSkip(BeforeTestContext context)
+    public override Task<bool> ShouldSkip(TestRegisteredContext context)
     {
         return Task.FromResult(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
     }

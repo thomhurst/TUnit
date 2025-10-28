@@ -15,7 +15,7 @@ The `ITestExecutor` interface allows you to customize how tests are executed. Th
 ```csharp
 public interface ITestExecutor
 {
-    Task ExecuteAsync(TestContext context, Func<Task> testBody);
+    ValueTask ExecuteTest(TestContext context, Func<ValueTask> action);
 }
 ```
 
@@ -24,13 +24,13 @@ public interface ITestExecutor
 ```csharp
 public class TimingTestExecutor : ITestExecutor
 {
-    public async Task ExecuteAsync(TestContext context, Func<Task> testBody)
+    public async ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
     {
         var stopwatch = Stopwatch.StartNew();
 
         try
         {
-            await testBody();
+            await action();
         }
         finally
         {
@@ -87,48 +87,97 @@ The `IHookExecutor` interface allows you to customize how setup and cleanup hook
 ```csharp
 public interface IHookExecutor
 {
-    Task ExecuteAsync(HookContext context, Func<Task> hookBody);
+    ValueTask ExecuteBeforeTestDiscoveryHook(MethodMetadata hookMethodInfo, BeforeTestDiscoveryContext context, Func<ValueTask> action);
+    ValueTask ExecuteBeforeTestSessionHook(MethodMetadata hookMethodInfo, TestSessionContext context, Func<ValueTask> action);
+    ValueTask ExecuteBeforeAssemblyHook(MethodMetadata hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action);
+    ValueTask ExecuteBeforeClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action);
+    ValueTask ExecuteBeforeTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action);
+
+    ValueTask ExecuteAfterTestDiscoveryHook(MethodMetadata hookMethodInfo, TestDiscoveryContext context, Func<ValueTask> action);
+    ValueTask ExecuteAfterTestSessionHook(MethodMetadata hookMethodInfo, TestSessionContext context, Func<ValueTask> action);
+    ValueTask ExecuteAfterAssemblyHook(MethodMetadata hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action);
+    ValueTask ExecuteAfterClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action);
+    ValueTask ExecuteAfterTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action);
 }
 ```
+
+**Note**: This interface has specific methods for each hook type (Before/After × TestDiscovery/TestSession/Assembly/Class/Test). Each method receives:
+- `MethodMetadata hookMethodInfo`: Information about the hook method being executed
+- A context object specific to the hook type
+- The `action` to execute (the actual hook logic)
 
 ### Example Implementation
 
 ```csharp
-public class ResourceManagingHookExecutor : IHookExecutor
+public class LoggingHookExecutor : IHookExecutor
 {
-    private static readonly Dictionary<string, IDisposable> Resources = new();
-
-    public async Task ExecuteAsync(HookContext context, Func<Task> hookBody)
+    public async ValueTask ExecuteBeforeTestDiscoveryHook(MethodMetadata hookMethodInfo, BeforeTestDiscoveryContext context, Func<ValueTask> action)
     {
-        if (context.HookType == HookType.Before)
-        {
-            // Allocate resources before the hook
-            var resource = AllocateResource(context.TestContext.TestName);
-            Resources[context.TestContext.TestName] = resource;
-        }
+        Console.WriteLine($"Before test discovery hook: {hookMethodInfo.MethodName}");
+        await action();
+    }
+
+    public async ValueTask ExecuteBeforeTestSessionHook(MethodMetadata hookMethodInfo, TestSessionContext context, Func<ValueTask> action)
+    {
+        Console.WriteLine($"Before test session hook: {hookMethodInfo.MethodName}");
+        await action();
+    }
+
+    public async ValueTask ExecuteBeforeAssemblyHook(MethodMetadata hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action)
+    {
+        Console.WriteLine($"Before assembly hook: {hookMethodInfo.MethodName}");
+        await action();
+    }
+
+    public async ValueTask ExecuteBeforeClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action)
+    {
+        Console.WriteLine($"Before class hook: {hookMethodInfo.MethodName} for class {context.TestClassType.Name}");
 
         try
         {
-            await hookBody();
+            await action();
         }
-        finally
+        catch (Exception ex)
         {
-            if (context.HookType == HookType.After)
-            {
-                // Clean up resources after the hook
-                if (Resources.TryGetValue(context.TestContext.TestName, out var resource))
-                {
-                    resource.Dispose();
-                    Resources.Remove(context.TestContext.TestName);
-                }
-            }
+            Console.WriteLine($"Hook failed: {ex.Message}");
+            throw;
         }
     }
 
-    private IDisposable AllocateResource(string testName)
+    public async ValueTask ExecuteBeforeTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action)
     {
-        // Allocate some resource
-        return new SomeResource(testName);
+        Console.WriteLine($"Before test hook: {hookMethodInfo.MethodName} for test {context.TestDetails.TestName}");
+        await action();
+    }
+
+    public async ValueTask ExecuteAfterTestDiscoveryHook(MethodMetadata hookMethodInfo, TestDiscoveryContext context, Func<ValueTask> action)
+    {
+        await action();
+        Console.WriteLine($"After test discovery hook: {hookMethodInfo.MethodName}");
+    }
+
+    public async ValueTask ExecuteAfterTestSessionHook(MethodMetadata hookMethodInfo, TestSessionContext context, Func<ValueTask> action)
+    {
+        await action();
+        Console.WriteLine($"After test session hook: {hookMethodInfo.MethodName}");
+    }
+
+    public async ValueTask ExecuteAfterAssemblyHook(MethodMetadata hookMethodInfo, AssemblyHookContext context, Func<ValueTask> action)
+    {
+        await action();
+        Console.WriteLine($"After assembly hook: {hookMethodInfo.MethodName}");
+    }
+
+    public async ValueTask ExecuteAfterClassHook(MethodMetadata hookMethodInfo, ClassHookContext context, Func<ValueTask> action)
+    {
+        await action();
+        Console.WriteLine($"After class hook: {hookMethodInfo.MethodName} for class {context.TestClassType.Name}");
+    }
+
+    public async ValueTask ExecuteAfterTestHook(MethodMetadata hookMethodInfo, TestContext context, Func<ValueTask> action)
+    {
+        await action();
+        Console.WriteLine($"After test hook: {hookMethodInfo.MethodName} for test {context.TestDetails.TestName}");
     }
 }
 ```
@@ -292,34 +341,59 @@ public class DatabaseTests
 
 ### IParallelConstraint
 
-Defines constraints for parallel execution.
+Defines constraints for parallel execution. This is a marker interface with no members - it's used to identify types that represent parallel execution constraints.
 
 ```csharp
 public interface IParallelConstraint
 {
-    string ConstraintKey { get; }
 }
 ```
+
+**Note**: `IParallelConstraint` is a marker interface. The actual constraint logic is handled by TUnit's built-in constraint implementations like `NotInParallelConstraint` and `ParallelGroupConstraint`.
 
 Example:
 
 ```csharp
-public class SharedResourceConstraint : IParallelConstraint
+public class FileAccessTests
 {
-    public string ConstraintKey => "SharedFile";
-}
+    [Test]
+    [NotInParallel("SharedFile")]
+    public async Task Test1()
+    {
+        // This test won't run in parallel with other tests
+        // that have the same constraint key "SharedFile"
+        await File.WriteAllTextAsync("shared.txt", "test1");
+    }
 
-[NotInParallel<SharedResourceConstraint>]
-public async Task Test1()
-{
-    // This test won't run in parallel with other tests
-    // that have the same constraint
-}
+    [Test]
+    [NotInParallel("SharedFile")]
+    public async Task Test2()
+    {
+        // This test won't run in parallel with Test1
+        // because they share the same constraint key
+        await File.WriteAllTextAsync("shared.txt", "test2");
+    }
 
-[NotInParallel<SharedResourceConstraint>]
-public async Task Test2()
+    [Test]
+    [NotInParallel("Database")]
+    public async Task Test3()
+    {
+        // This test can run in parallel with Test1 and Test2
+        // because it has a different constraint key
+        await Database.ExecuteAsync("UPDATE users SET status = 'active'");
+    }
+}
+```
+
+You can also use the `NotInParallel` attribute without arguments to ensure tests don't run in parallel with any other tests:
+
+```csharp
+[Test]
+[NotInParallel]
+public async Task GloballySerializedTest()
 {
-    // This test won't run in parallel with Test1
+    // This test won't run in parallel with any other tests
+    // marked with [NotInParallel] (no constraint key)
 }
 ```
 
@@ -397,7 +471,7 @@ Here's a complete example that wraps each test in a database transaction:
 ```csharp
 public class TransactionalTestExecutor : ITestExecutor
 {
-    public async Task ExecuteAsync(TestContext context, Func<Task> testBody)
+    public async ValueTask ExecuteTest(TestContext context, Func<ValueTask> action)
     {
         // Get the database connection from DI
         var dbContext = context.GetService<ApplicationDbContext>();
@@ -406,7 +480,7 @@ public class TransactionalTestExecutor : ITestExecutor
 
         try
         {
-            await testBody();
+            await action();
 
             // Rollback instead of commit to keep tests isolated
             await transaction.RollbackAsync();
