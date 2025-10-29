@@ -84,13 +84,13 @@ public class AsyncTests
 
     private async Task<int> ComputeAsync(int value)
     {
-        await Task.Delay(1);
+        await Task.Delay(50);
         return value * value;
     }
 
     private async Task<string> ProcessTextAsync(string text)
     {
-        await Task.Delay(1);
+        await Task.Delay(50);
         return text.ToUpper();
     }
 }

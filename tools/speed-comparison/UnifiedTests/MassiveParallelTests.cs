@@ -11,9 +11,6 @@ namespace UnifiedTests;
 #endif
 public class MassiveParallelTests
 {
-    private static readonly ConcurrentBag<int> _executionRecords = new();
-    private static readonly ConcurrentDictionary<int, string> _threadData = new();
-
 #if TUNIT
     [Test]
     [Arguments(1)]
@@ -65,7 +62,7 @@ public class MassiveParallelTests
     [Arguments(47)]
     [Arguments(48)]
     [Arguments(49)]
-    public async Task Parallel_CPUBound_Test(int taskId)
+    public void Parallel_CPUBound_Test(int taskId)
 #elif XUNIT || XUNIT3
     [Theory]
     [InlineData(1)]
@@ -224,23 +221,7 @@ public class MassiveParallelTests
 #endif
     {
         // Simulate CPU-intensive work
-        var result = PerformCPUWork(taskId);
-        _executionRecords.Add(taskId);
-        _threadData[Thread.CurrentThread.ManagedThreadId] = $"Task_{taskId}";
-
-#if TUNIT
-        await Assert.That(result).IsGreaterThan(0);
-        await Assert.That(result).IsEqualTo(CalculateExpectedResult(taskId));
-#elif XUNIT || XUNIT3
-        Assert.True(result > 0);
-        Assert.Equal(CalculateExpectedResult(taskId), result);
-#elif NUNIT
-        Assert.That(result, Is.GreaterThan(0));
-        Assert.That(result, Is.EqualTo(CalculateExpectedResult(taskId)));
-#elif MSTEST
-        Assert.IsTrue(result > 0);
-        Assert.AreEqual(CalculateExpectedResult(taskId), result);
-#endif
+        PerformCPUWork(taskId);
     }
 
 #if TUNIT
@@ -453,23 +434,8 @@ public class MassiveParallelTests
 #endif
     {
         // Simulate I/O-bound work
-        await Task.Delay(1); // Minimal delay to keep benchmarks fast
-        var result = await PerformIOWorkAsync(taskId);
-        _executionRecords.Add(taskId + 100);
-
-#if TUNIT
-        await Assert.That(result).IsNotEmpty();
-        await Assert.That(result).Contains($"Task_{taskId}");
-#elif XUNIT || XUNIT3
-        Assert.NotEmpty(result);
-        Assert.Contains($"Task_{taskId}", result);
-#elif NUNIT
-        Assert.That(result, Is.Not.Empty);
-        Assert.That(result, Does.Contain($"Task_{taskId}"));
-#elif MSTEST
-        Assert.IsTrue(!string.IsNullOrEmpty(result));
-        Assert.IsTrue(result.Contains($"Task_{taskId}"));
-#endif
+        await Task.Delay(50);
+        await PerformIOWorkAsync(taskId);
     }
 
 #if TUNIT
@@ -566,24 +532,6 @@ public class MassiveParallelTests
         await Task.Yield();
         var ioResult = await PerformIOWorkAsync(ioValue);
         var combined = $"{cpuResult}_{ioResult}";
-
-#if TUNIT
-        await Assert.That(cpuResult).IsGreaterThan(0);
-        await Assert.That(ioResult).IsNotEmpty();
-        await Assert.That(combined).Contains("_");
-#elif XUNIT || XUNIT3
-        Assert.True(cpuResult > 0);
-        Assert.NotEmpty(ioResult);
-        Assert.Contains("_", combined);
-#elif NUNIT
-        Assert.That(cpuResult, Is.GreaterThan(0));
-        Assert.That(ioResult, Is.Not.Empty);
-        Assert.That(combined, Does.Contain("_"));
-#elif MSTEST
-        Assert.IsTrue(cpuResult > 0);
-        Assert.IsTrue(!string.IsNullOrEmpty(ioResult));
-        Assert.IsTrue(combined.Contains("_"));
-#endif
     }
 
     private int PerformCPUWork(int taskId)

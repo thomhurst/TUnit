@@ -405,7 +405,7 @@ public class MatrixTests
 #endif
     {
         // Simulate async operations with different timings
-        await Task.Delay(1); // Minimal delay to keep benchmarks fast
+        await Task.Delay(50);
         var result = await ComputeAsync(computeValue);
         var adjusted = result + delayMs;
 

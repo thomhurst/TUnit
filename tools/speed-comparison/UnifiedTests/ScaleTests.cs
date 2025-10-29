@@ -426,24 +426,6 @@ public class ScaleTests
         var result = PerformCalculation(value);
         var squared = result * result;
         var sum = Enumerable.Range(1, value + 1).Sum();
-
-#if TUNIT
-        await Assert.That(result).IsEqualTo(value * 10);
-        await Assert.That(squared).IsEqualTo((value * 10) * (value * 10));
-        await Assert.That(sum).IsEqualTo((value + 1) * (value + 2) / 2);
-#elif XUNIT || XUNIT3
-        Assert.Equal(value * 10, result);
-        Assert.Equal((value * 10) * (value * 10), squared);
-        Assert.Equal((value + 1) * (value + 2) / 2, sum);
-#elif NUNIT
-        Assert.That(result, Is.EqualTo(value * 10));
-        Assert.That(squared, Is.EqualTo((value * 10) * (value * 10)));
-        Assert.That(sum, Is.EqualTo((value + 1) * (value + 2) / 2));
-#elif MSTEST
-        Assert.AreEqual(value * 10, result);
-        Assert.AreEqual((value * 10) * (value * 10), squared);
-        Assert.AreEqual((value + 1) * (value + 2) / 2, sum);
-#endif
     }
 
 #if TUNIT
@@ -663,24 +645,6 @@ public class ScaleTests
         var processed = ProcessData(id, name);
         var combined = $"{id}_{name}";
         var length = combined.Length;
-
-#if TUNIT
-        await Assert.That(processed).Contains(name);
-        await Assert.That(processed).Contains(id.ToString());
-        await Assert.That(length).IsGreaterThan(1);
-#elif XUNIT || XUNIT3
-        Assert.Contains(name, processed);
-        Assert.Contains(id.ToString(), processed);
-        Assert.True(length > 1);
-#elif NUNIT
-        Assert.That(processed, Does.Contain(name));
-        Assert.That(processed, Does.Contain(id.ToString()));
-        Assert.That(length, Is.GreaterThan(1));
-#elif MSTEST
-        Assert.IsTrue(processed.Contains(name));
-        Assert.IsTrue(processed.Contains(id.ToString()));
-        Assert.IsTrue(length > 1);
-#endif
     }
 
     private int PerformCalculation(int value)

@@ -12,7 +12,7 @@ public class BenchmarkConfig : ManualConfig
 {
     public BenchmarkConfig()
     {
-        var job = Job.LongRun
+        var job = Job.Default
             .WithRuntime(CoreRuntime.Core10_0);
 
         AddJob(job);

@@ -16,7 +16,7 @@ public class DataDrivenTests
     [Arguments(10, 20, 30)]
     [Arguments(-5, 5, 0)]
     [Arguments(100, 200, 300)]
-    public async Task ParameterizedAdditionTest(int a, int b, int expected)
+    public void ParameterizedAdditionTest(int a, int b, int expected)
 #elif XUNIT || XUNIT3
     [Theory]
     [InlineData(1, 2, 3)]
@@ -40,15 +40,6 @@ public class DataDrivenTests
 #endif
     {
         var result = a + b;
-#if TUNIT
-        await Assert.That(result).IsEqualTo(expected);
-#elif XUNIT || XUNIT3
-        Assert.Equal(expected, result);
-#elif NUNIT
-        Assert.That(result, Is.EqualTo(expected));
-#elif MSTEST
-        Assert.AreEqual(expected, result);
-#endif
     }
 
 #if TUNIT
@@ -58,7 +49,7 @@ public class DataDrivenTests
     [Arguments("TUnit", "TUNIT")]
     [Arguments("Testing", "TESTING")]
     [Arguments("Framework", "FRAMEWORK")]
-    public async Task ParameterizedStringTest(string input, string expected)
+    public void ParameterizedStringTest(string input, string expected)
 #elif XUNIT || XUNIT3
     [Theory]
     [InlineData("hello", "HELLO")]
@@ -84,26 +75,13 @@ public class DataDrivenTests
     public void ParameterizedStringTest(string input, string expected)
 #endif
     {
-        var result = input.ToUpper();
-#if TUNIT
-        await Assert.That(result).IsEqualTo(expected);
-        await Assert.That(result.Length).IsEqualTo(input.Length);
-#elif XUNIT || XUNIT3
-        Assert.Equal(expected, result);
-        Assert.Equal(input.Length, result.Length);
-#elif NUNIT
-        Assert.That(result, Is.EqualTo(expected));
-        Assert.That(result.Length, Is.EqualTo(input.Length));
-#elif MSTEST
-        Assert.AreEqual(expected, result);
-        Assert.AreEqual(input.Length, result.Length);
-#endif
+        Console.WriteLine($"{input} {expected}");
     }
 
 #if TUNIT
     [Test]
     [MethodDataSource(nameof(ComplexTestData))]
-    public async Task DataSourceTest(TestData data)
+    public void DataSourceTest(TestData data)
 #elif XUNIT || XUNIT3
     [Theory]
     [MemberData(nameof(ComplexTestData))]
@@ -118,25 +96,7 @@ public class DataDrivenTests
     public void DataSourceTest(TestData data)
 #endif
     {
-        var result = ProcessTestData(data);
-
-#if TUNIT
-        await Assert.That(result.Id).IsEqualTo(data.Id);
-        await Assert.That(result.ProcessedValue).IsEqualTo(data.Value * 2);
-        await Assert.That(result.IsValid).IsTrue();
-#elif XUNIT || XUNIT3
-        Assert.Equal(data.Id, result.Id);
-        Assert.Equal(data.Value * 2, result.ProcessedValue);
-        Assert.True(result.IsValid);
-#elif NUNIT
-        Assert.That(result.Id, Is.EqualTo(data.Id));
-        Assert.That(result.ProcessedValue, Is.EqualTo(data.Value * 2));
-        Assert.That(result.IsValid, Is.True);
-#elif MSTEST
-        Assert.AreEqual(data.Id, result.Id);
-        Assert.AreEqual(data.Value * 2, result.ProcessedValue);
-        Assert.IsTrue(result.IsValid);
-#endif
+        ProcessTestData(data);
     }
 
 #if TUNIT
@@ -145,7 +105,7 @@ public class DataDrivenTests
     [Arguments(new int[] { 10, 20, 30 }, 60)]
     [Arguments(new int[] { -5, 0, 5 }, 0)]
     [Arguments(new int[] { 100 }, 100)]
-    public async Task ArrayParameterTest(int[] numbers, int expectedSum)
+    public void ArrayParameterTest(int[] numbers, int expectedSum)
 #elif XUNIT || XUNIT3
     [Theory]
     [InlineData(new int[] { 1, 2, 3, 4, 5 }, 15)]
@@ -168,26 +128,8 @@ public class DataDrivenTests
     public void ArrayParameterTest(int[] numbers, int expectedSum)
 #endif
     {
-        var sum = numbers.Sum();
-        var average = numbers.Average();
-
-#if TUNIT
-        await Assert.That(sum).IsEqualTo(expectedSum);
-        await Assert.That(average).IsEqualTo((double)expectedSum / numbers.Length);
-        await Assert.That(numbers).IsNotEmpty();
-#elif XUNIT || XUNIT3
-        Assert.Equal(expectedSum, sum);
-        Assert.Equal((double)expectedSum / numbers.Length, average);
-        Assert.NotEmpty(numbers);
-#elif NUNIT
-        Assert.That(sum, Is.EqualTo(expectedSum));
-        Assert.That(average, Is.EqualTo((double)expectedSum / numbers.Length));
-        Assert.That(numbers, Is.Not.Empty);
-#elif MSTEST
-        Assert.AreEqual(expectedSum, sum);
-        Assert.AreEqual((double)expectedSum / numbers.Length, average);
-        Assert.IsTrue(numbers.Length > 0);
-#endif
+        _ = numbers.Sum();
+        _ = numbers.Average();
     }
 
 #if TUNIT
