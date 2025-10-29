@@ -198,9 +198,7 @@ internal sealed class TestBuilder : ITestBuilder
                     hasAnyClassData = true;
                     classDataLoopIndex++;
 
-                    // Cache the class data result to avoid calling classDataFactory() twice
-                    var classDataResult = await classDataFactory() ?? [];
-                    var classData = DataUnwrapper.Unwrap(classDataResult);
+                    var classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
 
                     var needsInstanceForMethodDataSources = metadata.DataSources.Any(ds => ds is IAccessesInstanceData);
 
@@ -285,7 +283,6 @@ internal sealed class TestBuilder : ITestBuilder
                                     DataSourceAttribute = methodDataSource
                                 };
 
-                                // Call classDataFactory() again to get fresh data for each test iteration
                                 classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
