@@ -12,14 +12,14 @@ internal sealed class EventReceiverCache
     {
         public Type ReceiverType { get; init; }
         public Type TestClassType { get; init; }
-        
+
         public bool Equals(CacheKey other) =>
-            ReceiverType == other.ReceiverType && 
+            ReceiverType == other.ReceiverType &&
             TestClassType == other.TestClassType;
-            
+
         public override bool Equals(object? obj) =>
             obj is CacheKey other && Equals(other);
-            
+
         public override int GetHashCode()
         {
 #if NETSTANDARD2_0
@@ -35,9 +35,10 @@ internal sealed class EventReceiverCache
 #endif
         }
     }
-    
-    private readonly ConcurrentDictionary<CacheKey, object[]> _cache = new();
-    
+
+    // Use object to store typed caches (avoids boxing on retrieval)
+    private readonly ConcurrentDictionary<Type, object> _typedCaches = new();
+
     /// <summary>
     /// Get cached receivers or compute and cache them
     /// </summary>
@@ -45,31 +46,13 @@ internal sealed class EventReceiverCache
         Type testClassType,
         Func<Type, T[]> factory) where T : class, IEventReceiver
     {
-        var key = new CacheKey 
-        { 
-            ReceiverType = typeof(T), 
-            TestClassType = testClassType 
-        };
-        
-        var cached = _cache.GetOrAdd(key, _ => 
-        {
-            var receivers = factory(testClassType);
-            // Pre-size array and avoid LINQ Cast + ToArray
-            var array = new object[receivers.Length];
-            for (var i = 0; i < receivers.Length; i++)
-            {
-                array[i] = receivers[i];
-            }
-            return array;
-        });
-        
-        // Cast back to specific type
-        var result = new T[cached.Length];
-        for (var i = 0; i < cached.Length; i++)
-        {
-            result[i] = (T)cached[i];
-        }
-        return result;
+        // Get or create typed cache for this receiver type
+        var typedCache = (ConcurrentDictionary<Type, T[]>)_typedCaches.GetOrAdd(
+            typeof(T),
+            static _ => new ConcurrentDictionary<Type, T[]>());
+
+        // Use typed cache - no boxing/unboxing needed
+        return typedCache.GetOrAdd(testClassType, factory);
     }
     
     /// <summary>
@@ -77,22 +60,25 @@ internal sealed class EventReceiverCache
     /// </summary>
     public void Clear()
     {
-        _cache.Clear();
+        _typedCaches.Clear();
     }
-    
+
     /// <summary>
     /// Get cache statistics
     /// </summary>
     public (int EntryCount, long EstimatedSize) GetStatistics()
     {
-        var entryCount = _cache.Count;
-        var estimatedSize = entryCount * (16 + 8); // Rough estimate: key size + reference
-        
-        foreach (var kvp in _cache)
+        var entryCount = _typedCaches.Values.Sum(cache =>
         {
-            estimatedSize += kvp.Value.Length * 8; // References
-        }
-        
+            if (cache is System.Collections.ICollection collection)
+            {
+                return collection.Count;
+            }
+            return 0;
+        });
+
+        var estimatedSize = entryCount * (16 + 8); // Rough estimate: key size + reference
+
         return (entryCount, estimatedSize);
     }
 }

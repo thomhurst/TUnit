@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_Bugs__1821_Tests_MethodDataSource__strin
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
             TestMethodName = "MethodDataSource",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -50,7 +50,7 @@ internal sealed class TUnit_TestProject_Bugs__1821_Tests_MethodDataSource__strin
                         ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetMethod("MethodDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1821.Tests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1821.Tests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -58,7 +58,7 @@ internal sealed class TUnit_TestProject_Bugs__1821_Tests_MethodDataSource__strin
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._1821",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._1821.MyData))
@@ -84,15 +84,21 @@ internal sealed class TUnit_TestProject_Bugs__1821_Tests_MethodDataSource__strin
             {
                 return new global::TUnit.TestProject.Bugs._1821.Tests(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._1821.MyData>(args[0]));
             },
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        await instance.MethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.MethodDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -128,7 +134,7 @@ internal sealed class TUnit_TestProject_Bugs__1821_Tests_MatrixDataSource__strin
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1821.Tests),
             TestMethodName = "MatrixDataSource",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -165,7 +171,7 @@ internal sealed class TUnit_TestProject_Bugs__1821_Tests_MatrixDataSource__strin
                         ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1821.Tests).GetMethod("MatrixDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1821.Tests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1821.Tests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -173,7 +179,7 @@ internal sealed class TUnit_TestProject_Bugs__1821_Tests_MatrixDataSource__strin
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1821.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._1821",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._1821.MyData))
@@ -199,15 +205,21 @@ internal sealed class TUnit_TestProject_Bugs__1821_Tests_MatrixDataSource__strin
             {
                 return new global::TUnit.TestProject.Bugs._1821.Tests(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._1821.MyData>(args[0]));
             },
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        await instance.MatrixDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.MatrixDataSource(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

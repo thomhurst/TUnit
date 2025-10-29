@@ -35,7 +35,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalBase1_BeforeEach1_Befo
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
                     ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalBase1", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalBase1", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -43,7 +43,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalBase1_BeforeEach1_Befo
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1)),
                             Name = "GlobalBase1",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -110,7 +110,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalBase2_BeforeEach2_Befo
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
                     ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalBase2", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalBase2", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -118,7 +118,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalBase2_BeforeEach2_Befo
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2)),
                             Name = "GlobalBase2",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -185,7 +185,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalBase3_BeforeEach3_Befo
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
                     ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalBase3", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalBase3", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -193,7 +193,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalBase3_BeforeEach3_Befo
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3)),
                             Name = "GlobalBase3",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -260,7 +260,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_SetUp_Befor
                     ReturnType = typeof(global::System.Threading.Tasks.Task),
                     ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                     Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -268,7 +268,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_SetUp_Befor
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)),
                             Name = "GlobalSetUpTests",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -344,7 +344,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_SetUp__Canc
                             ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("SetUp", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[0]
                         }
                     },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -352,7 +352,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_SetUp__Canc
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)),
                             Name = "GlobalSetUpTests",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -428,7 +428,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_SetUpWithCo
                             ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("SetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
                         }
                     },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -436,7 +436,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_SetUpWithCo
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)),
                             Name = "GlobalSetUpTests",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -519,7 +519,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_SetUpWithCo
                             ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("SetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
                         }
                     },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -527,7 +527,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_SetUpWithCo
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)),
                             Name = "GlobalSetUpTests",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -601,7 +601,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalBase1_BeforeAll1__Test
                             ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1).GetMethod("BeforeAll1", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
                         }
                     },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalBase1", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalBase1", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -609,7 +609,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalBase1_BeforeAll1__Test
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalBase1)),
                             Name = "GlobalBase1",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -684,7 +684,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalBase2_BeforeAll2__Test
                             ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2).GetMethod("BeforeAll2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
                         }
                     },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalBase2", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalBase2", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -692,7 +692,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalBase2_BeforeAll2__Test
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalBase2)),
                             Name = "GlobalBase2",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -767,7 +767,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalBase3_BeforeAll3__Test
                             ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3).GetMethod("BeforeAll3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
                         }
                     },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalBase3", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalBase3", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -775,7 +775,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalBase3_BeforeAll3__Test
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalBase3)),
                             Name = "GlobalBase3",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -850,7 +850,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_BeforeAllSe
                             ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("BeforeAllSetUp", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
                         }
                     },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -858,7 +858,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_BeforeAllSe
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)),
                             Name = "GlobalSetUpTests",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -940,7 +940,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_BeforeAllSe
                             ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("BeforeAllSetUp", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
                         }
                     },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -948,7 +948,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_BeforeAllSe
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)),
                             Name = "GlobalSetUpTests",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -1023,7 +1023,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_BeforeAllSe
                             ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext) }, null)!.GetParameters()[0]
                         }
                     },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -1031,7 +1031,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_BeforeAllSe
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)),
                             Name = "GlobalSetUpTests",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -1113,7 +1113,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_BeforeAllSe
                             ReflectionInfo = typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests).GetMethod("BeforeAllSetUpWithContext", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static, null, new global::System.Type[] { typeof(global::TUnit.Core.TestContext), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
                         }
                     },
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.BeforeTests.GlobalSetUpTests", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -1121,7 +1121,7 @@ internal static class TUnit_TestProject_BeforeTests_GlobalSetUpTests_BeforeAllSe
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.BeforeTests.GlobalSetUpTests)),
                             Name = "GlobalSetUpTests",
                             Namespace = "TUnit.TestProject.BeforeTests",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null

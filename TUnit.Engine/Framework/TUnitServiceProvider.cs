@@ -149,6 +149,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testStateManager = Register(new TestStateManager());
         var testContextRestorer = Register(new TestContextRestorer());
         var testMethodInvoker = Register(new TestMethodInvoker());
+        var hashSetPool = Register(new HashSetPool());
 
         // Use the mode already determined earlier
         ITestDataCollector dataCollector;
@@ -193,7 +194,8 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 testInitializer,
                 objectTracker,
                 Logger,
-                EventReceiverOrchestrator));
+                EventReceiverOrchestrator,
+                hashSetPool));
 
         // Create the HookOrchestratingTestExecutorAdapter
         // Note: We'll need to update this to handle dynamic dependencies properly

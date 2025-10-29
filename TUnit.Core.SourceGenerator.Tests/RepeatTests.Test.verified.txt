@@ -13,13 +13,14 @@ internal sealed class TUnit_TestProject_RepeatTests_One_TestSource : global::TUn
             TestClassType = typeof(global::TUnit.TestProject.RepeatTests),
             TestMethodName = "One",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.RepeatAttribute(1),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.Core.RepeatAttribute(3)
             ],
+            RepeatCount = 1,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -36,7 +37,7 @@ internal sealed class TUnit_TestProject_RepeatTests_One_TestSource : global::TUn
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.RepeatTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.RepeatTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -44,7 +45,7 @@ internal sealed class TUnit_TestProject_RepeatTests_One_TestSource : global::TUn
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.RepeatTests)),
                         Name = "RepeatTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -58,10 +59,17 @@ internal sealed class TUnit_TestProject_RepeatTests_One_TestSource : global::TUn
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.RepeatTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.One();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                try
+                {
+                    instance.One();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -96,13 +104,14 @@ internal sealed class TUnit_TestProject_RepeatTests_Two_TestSource : global::TUn
             TestClassType = typeof(global::TUnit.TestProject.RepeatTests),
             TestMethodName = "Two",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.RepeatAttribute(2),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.Core.RepeatAttribute(3)
             ],
+            RepeatCount = 2,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -119,7 +128,7 @@ internal sealed class TUnit_TestProject_RepeatTests_Two_TestSource : global::TUn
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.RepeatTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.RepeatTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -127,7 +136,7 @@ internal sealed class TUnit_TestProject_RepeatTests_Two_TestSource : global::TUn
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.RepeatTests)),
                         Name = "RepeatTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -141,10 +150,17 @@ internal sealed class TUnit_TestProject_RepeatTests_Two_TestSource : global::TUn
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.RepeatTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.Two();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                try
+                {
+                    instance.Two();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -179,12 +195,13 @@ internal sealed class TUnit_TestProject_RepeatTests_Three_TestSource : global::T
             TestClassType = typeof(global::TUnit.TestProject.RepeatTests),
             TestMethodName = "Three",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
                 new global::TUnit.Core.RepeatAttribute(3)
             ],
+            RepeatCount = 3,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -201,7 +218,7 @@ internal sealed class TUnit_TestProject_RepeatTests_Three_TestSource : global::T
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.RepeatTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.RepeatTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -209,7 +226,7 @@ internal sealed class TUnit_TestProject_RepeatTests_Three_TestSource : global::T
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.RepeatTests)),
                         Name = "RepeatTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -223,10 +240,17 @@ internal sealed class TUnit_TestProject_RepeatTests_Three_TestSource : global::T
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.RepeatTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.Three();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                try
+                {
+                    instance.Three();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

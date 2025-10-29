@@ -89,8 +89,8 @@ public class StringContainsAssertion : Assertion<string>
 
         if (_ignoringWhitespace)
         {
-            actualValue = string.Concat(actualValue.Where(c => !char.IsWhiteSpace(c)));
-            expectedValue = string.Concat(expectedValue.Where(c => !char.IsWhiteSpace(c)));
+            actualValue = RemoveWhitespace(actualValue);
+            expectedValue = RemoveWhitespace(expectedValue);
         }
 
         if (actualValue.Contains(expectedValue, _comparison))
@@ -99,6 +99,24 @@ public class StringContainsAssertion : Assertion<string>
         }
 
         return Task.FromResult(AssertionResult.Failed($"found \"{value}\""));
+    }
+
+    private static string RemoveWhitespace(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            return input;
+        }
+
+        var sb = new StringBuilder(input.Length);
+        foreach (var c in input)
+        {
+            if (!char.IsWhiteSpace(c))
+            {
+                sb.Append(c);
+            }
+        }
+        return sb.ToString();
     }
 
     protected override string GetExpectation() => $"to contain \"{_expected}\"";

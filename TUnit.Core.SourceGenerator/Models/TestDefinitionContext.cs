@@ -39,7 +39,13 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
 
         var testIndex = 0;
 
-        if (!classDataAttrs.Any() && !methodDataAttrs.Any())
+        // Convert to arrays once upfront for better performance (avoid repeated .Any() calls and enumeration)
+        var classDataArray = classDataAttrs.Count > 0 ? classDataAttrs.ToArray() : [];
+        var methodDataArray = methodDataAttrs.Count > 0 ? methodDataAttrs.ToArray() : [];
+        var hasClassData = classDataArray.Length > 0;
+        var hasMethodData = methodDataArray.Length > 0;
+
+        if (!hasClassData && !hasMethodData)
         {
             for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
             {
@@ -55,16 +61,17 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
             yield break;
         }
 
-        if (classDataAttrs.Any() && !methodDataAttrs.Any())
+        if (hasClassData && !hasMethodData)
         {
-            foreach (var classAttr in classDataAttrs)
+            // Use array indexing instead of foreach for slightly better performance
+            for (var i = 0; i < classDataArray.Length; i++)
             {
                 for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
                 {
                     yield return new TestDefinitionContext
                     {
                         GenerationContext = generationContext,
-                        ClassDataAttribute = classAttr,
+                        ClassDataAttribute = classDataArray[i],
                         MethodDataAttribute = null,
                         TestIndex = testIndex++,
                         RepeatIndex = repeatIndex
@@ -72,9 +79,10 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
                 }
             }
         }
-        else if (!classDataAttrs.Any() && methodDataAttrs.Any())
+        else if (!hasClassData && hasMethodData)
         {
-            foreach (var methodAttr in methodDataAttrs)
+            // Use array indexing instead of foreach for slightly better performance
+            for (var i = 0; i < methodDataArray.Length; i++)
             {
                 for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
                 {
@@ -82,27 +90,28 @@ public class TestDefinitionContext : IEquatable<TestDefinitionContext>
                     {
                         GenerationContext = generationContext,
                         ClassDataAttribute = null,
-                        MethodDataAttribute = methodAttr,
+                        MethodDataAttribute = methodDataArray[i],
                         TestIndex = testIndex++,
                         RepeatIndex = repeatIndex
                     };
                 }
             }
         }
-        // If we have both class and method data - create cartesian product
+        // If we have both class and method data - create cartesian product with array indexing
         else
         {
-            foreach (var classAttr in classDataAttrs)
+            // Use array indexing for cartesian product for better performance
+            for (var i = 0; i < classDataArray.Length; i++)
             {
-                foreach (var methodAttr in methodDataAttrs)
+                for (var j = 0; j < methodDataArray.Length; j++)
                 {
                     for (var repeatIndex = 0; repeatIndex < repeatCount; repeatIndex++)
                     {
                         yield return new TestDefinitionContext
                         {
                             GenerationContext = generationContext,
-                            ClassDataAttribute = classAttr,
-                            MethodDataAttribute = methodAttr,
+                            ClassDataAttribute = classDataArray[i],
+                            MethodDataAttribute = methodDataArray[j],
                             TestIndex = testIndex++,
                             RepeatIndex = repeatIndex
                         };

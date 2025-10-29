@@ -124,7 +124,7 @@ internal sealed class TestBuilder : ITestBuilder
             if (!CouldTestMatchFilter(buildingContext.Filter, metadata))
             {
                 // This test class cannot match the filter - skip all expensive work!
-                return Array.Empty<AbstractExecutableTest>();
+                return [];
             }
         }
 
@@ -145,11 +145,11 @@ internal sealed class TestBuilder : ITestBuilder
             }
 
 
+            // Use pre-extracted repeat count from metadata (avoids instantiating attributes)
+            var repeatCount = metadata.RepeatCount ?? 0;
+
             // Create and initialize attributes ONCE
             var attributes = await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
-            var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
-            var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
-            var repeatCount = repeatAttr?.Times ?? 0;
 
             if (metadata.ClassDataSources.Any(ds => ds is IAccessesInstanceData))
             {
@@ -1277,11 +1277,11 @@ internal sealed class TestBuilder : ITestBuilder
             yield break;
         }
 
-        // Extract repeat count from attributes
+        // Use pre-extracted repeat count from metadata (avoids instantiating attributes)
+        var repeatCount = metadata.RepeatCount ?? 0;
+
+        // Initialize attributes
         var attributes = await InitializeAttributesAsync(metadata.AttributeFactory.Invoke());
-        var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
-        var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
-        var repeatCount = repeatAttr?.Times ?? 0;
 
         // Create base context with ClassConstructor if present
         var baseContext = new TestBuilderContext
@@ -1517,7 +1517,7 @@ internal sealed class TestBuilder : ITestBuilder
             }
 
             // Create instance factory
-            var attributes = contextAccessor.Current.InitializedAttributes ?? Array.Empty<Attribute>();
+            var attributes = contextAccessor.Current.InitializedAttributes ?? [];
             var basicSkipReason = GetBasicSkipReason(metadata, attributes);
             Func<Task<object>> instanceFactory;
 
@@ -1664,7 +1664,7 @@ internal sealed class TestBuilder : ITestBuilder
         var constructor = typeof(TreeNodeFilter).GetConstructors(
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)[0];
 
-        return (TreeNodeFilter)constructor.Invoke(new object[] { filterString });
+        return (TreeNodeFilter)constructor.Invoke([filterString]);
     }
 #pragma warning restore TPEXP
 

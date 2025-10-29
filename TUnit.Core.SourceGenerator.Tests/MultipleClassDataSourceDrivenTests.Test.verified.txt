@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_MultipleClassDataSourceDrivenTests_Test1
             TestClassType = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
             TestMethodName = "Test1",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -40,7 +40,7 @@ internal sealed class TUnit_TestProject_MultipleClassDataSourceDrivenTests_Test1
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -48,7 +48,7 @@ internal sealed class TUnit_TestProject_MultipleClassDataSourceDrivenTests_Test1
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests)),
                         Name = "MultipleClassDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1))
@@ -102,10 +102,17 @@ internal sealed class TUnit_TestProject_MultipleClassDataSourceDrivenTests_Test1
             {
                 return new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>(args[4]));
             },
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.Test1();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                try
+                {
+                    instance.Test1();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -140,7 +147,7 @@ internal sealed class TUnit_TestProject_MultipleClassDataSourceDrivenTests_Test2
             TestClassType = typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests),
             TestMethodName = "Test2",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -167,7 +174,7 @@ internal sealed class TUnit_TestProject_MultipleClassDataSourceDrivenTests_Test2
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MultipleClassDataSourceDrivenTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -175,7 +182,7 @@ internal sealed class TUnit_TestProject_MultipleClassDataSourceDrivenTests_Test2
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests)),
                         Name = "MultipleClassDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1))
@@ -229,10 +236,17 @@ internal sealed class TUnit_TestProject_MultipleClassDataSourceDrivenTests_Test2
             {
                 return new global::TUnit.TestProject.MultipleClassDataSourceDrivenTests(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject1>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject2>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject3>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject4>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MultipleClassDataSourceDrivenTests.Inject5>(args[4]));
             },
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.Test2();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                try
+                {
+                    instance.Test2();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

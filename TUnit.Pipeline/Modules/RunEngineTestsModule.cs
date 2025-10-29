@@ -38,7 +38,6 @@ public class RunEngineTestsModule : Module<CommandResult>
             Arguments = [
                 "--hangdump", "--hangdump-filename", $"hangdump.{Environment.OSVersion.Platform}.engine-tests.dmp", "--hangdump-timeout", "30m",
                 "--timeout", "35m",
-                "--fail-fast"
             ],
             EnvironmentVariables = new Dictionary<string, string?>
             {

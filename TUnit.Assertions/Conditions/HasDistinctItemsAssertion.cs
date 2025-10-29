@@ -31,21 +31,26 @@ public class HasDistinctItemsAssertion<TCollection, TItem> : Sources.CollectionA
             return Task.FromResult(AssertionResult.Failed("collection was null"));
         }
 
-        var list = value.ToList();
-        var distinctList = list.Distinct().ToList();
+        var seen = new HashSet<TItem>();
+        var duplicates = new List<TItem>();
+        var totalCount = 0;
 
-        if (list.Count == distinctList.Count)
+        foreach (var item in value)
+        {
+            totalCount++;
+            if (!seen.Add(item) && !duplicates.Contains(item))
+            {
+                duplicates.Add(item);
+            }
+        }
+
+        if (duplicates.Count == 0)
         {
             return Task.FromResult(AssertionResult.Passed);
         }
 
-        var duplicates = list.GroupBy(x => x)
-            .Where(g => g.Count() > 1)
-            .Select(g => g.Key)
-            .ToList();
-
         return Task.FromResult(AssertionResult.Failed(
-            $"found {list.Count - distinctList.Count} duplicate(s): {string.Join(", ", duplicates)}"));
+            $"found {totalCount - seen.Count} duplicate(s): {string.Join(", ", duplicates)}"));
     }
 
     protected override string GetExpectation() => "to have distinct items";

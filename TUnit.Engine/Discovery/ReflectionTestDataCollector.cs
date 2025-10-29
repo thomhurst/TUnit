@@ -345,7 +345,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
             catch (ReflectionTypeLoadException reflectionTypeLoadException)
             {
-                return reflectionTypeLoadException.Types.Where(x => x != null).ToArray()!;
+                return reflectionTypeLoadException.Types.Where(static x => x != null).ToArray()!;
             }
             catch (Exception)
             {
@@ -358,7 +358,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return discoveredTests;
         }
 
-        var filteredTypes = types.Where(t => t.IsClass && !IsCompilerGenerated(t));
+        var filteredTypes = types.Where(static t => t.IsClass && !IsCompilerGenerated(t));
 
         foreach (var type in filteredTypes)
         {
@@ -487,7 +487,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             yield break;
         }
 
-        var filteredTypes = types.Where(t => t.IsClass && !IsCompilerGenerated(t));
+        var filteredTypes = types.Where(static t => t.IsClass && !IsCompilerGenerated(t));
 
         foreach (var type in filteredTypes)
         {
@@ -519,14 +519,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 {
                     // Get all test methods including inherited ones
                     testMethods = GetAllTestMethods(type)
-                        .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
+                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
                         .ToArray();
                 }
                 else
                 {
                     // Only get declared test methods
                     testMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
-                        .Where(m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
+                        .Where(static m => m.IsDefined(typeof(TestAttribute), inherit: false) && !m.IsAbstract)
                         .ToArray();
                 }
             }
@@ -753,7 +753,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             $"Failed to create concrete type for {genericTypeDefinition.FullName ?? genericTypeDefinition.Name}. " +
                             $"Error: {ex.Message}. " +
                             $"Generic parameter count: {genericTypeDefinition.GetGenericArguments().Length}, " +
-                            $"Type arguments: {string.Join(", ", typeArguments?.Select(t => t.Name) ?? [
+                            $"Type arguments: {string.Join(", ", typeArguments?.Select(static t => t.Name) ?? [
                             ])}", ex),
                         $"[GENERIC TYPE CREATION FAILED] {genericTypeDefinition.Name}")
                     {
@@ -896,6 +896,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(testMethod),
                 GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
                 AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(testClass, testMethod),
+                RepeatCount = testMethod.GetCustomAttribute<RepeatAttribute>()?.Times
+                    ?? testClass.GetCustomAttribute<RepeatAttribute>()?.Times,
                 PropertyInjections = PropertySourceRegistry.DiscoverInjectableProperties(testClass),
                 InheritanceDepth = inheritanceDepth
             });
@@ -971,7 +973,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return (_, _) => Activator.CreateInstance(testClass)!;
             }
 
-            var constructedTypeCtor = constructedTypeConstructors.FirstOrDefault(c => c.GetParameters().Length == 0) ?? constructedTypeConstructors.First();
+            var constructedTypeCtor = constructedTypeConstructors.FirstOrDefault(static c => c.GetParameters().Length == 0) ?? constructedTypeConstructors.First();
             var constructedTypeFactory = CreateReflectionInstanceFactory(constructedTypeCtor);
 
             // Return a factory that ignores type arguments since the type is already closed
@@ -985,7 +987,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return (_, _) => Activator.CreateInstance(testClass)!;
         }
 
-        var ctor = constructors.FirstOrDefault(c => c.GetParameters().Length == 0) ?? constructors.First();
+        var ctor = constructors.FirstOrDefault(static c => c.GetParameters().Length == 0) ?? constructors.First();
 
         var factory = CreateReflectionInstanceFactory(ctor);
         return (_, args) => factory(args);
@@ -1056,7 +1058,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             LineNumber = 0,
             MethodMetadata = CreateDummyMethodMetadata(testClass,
                 "AssemblyScanFailed"),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
             ],
             DataSources =
@@ -1839,7 +1841,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             builderMethod.Invoke(instance, [context]);
 
             // Retrieve the discovered tests
-            foreach (var discoveryResult in context.Tests.SelectMany(t => t.GetTests()))
+            foreach (var discoveryResult in context.Tests.SelectMany(static t => t.GetTests()))
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -1924,7 +1926,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             TestName = testName,
             TestClassType = result.TestClassType,
             TestMethodName = methodInfo.Name,
-            Dependencies = result.Attributes.OfType<DependsOnAttribute>().Select(a => a.ToTestDependency()).ToArray(),
+            Dependencies = result.Attributes.OfType<DependsOnAttribute>().Select(static a => a.ToTestDependency()).ToArray(),
             DataSources = [], // Dynamic tests don't use data sources in the same way
             ClassDataSources = [],
             PropertyDataSources = [],
@@ -2037,7 +2039,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             FilePath = "Unknown",
             LineNumber = 0,
             MethodMetadata = CreateDummyMethodMetadata(source.GetType(), "CollectDynamicTests"),
-            AttributeFactory = () => [],
+            AttributeFactory = static () => [],
             DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = []

@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
             TestMethodName = "TryParse_InvalidString_ReturnsFailure",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -57,7 +57,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
                         ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_InvalidString_ReturnsFailure", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1304.Tests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1304.Tests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -65,7 +65,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1304.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._1304",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -79,16 +79,22 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1304.Tests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        await instance.TryParse_InvalidString_ReturnsFailure(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    var context = global::TUnit.Core.TestContext.Current;
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.TryParse_InvalidString_ReturnsFailure(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -124,7 +130,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_Thr
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
             TestMethodName = "Parse_InvalidString_ThrowsException",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -161,7 +167,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_Thr
                         ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("Parse_InvalidString_ThrowsException", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1304.Tests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1304.Tests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -169,7 +175,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_Thr
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1304.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._1304",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -183,15 +189,21 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_Thr
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1304.Tests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        await instance.Parse_InvalidString_ThrowsException(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.Parse_InvalidString_ThrowsException(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -227,7 +239,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_Re
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
             TestMethodName = "TryParse_ValidString_ReturnsAccountId",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -261,7 +273,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_Re
                         ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._1304.Tests).GetMethod("TryParse_ValidString_ReturnsAccountId", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1304.Tests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1304.Tests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -269,7 +281,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_Re
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1304.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._1304",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -283,15 +295,21 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_Re
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1304.Tests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        await instance.TryParse_ValidString_ReturnsAccountId(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.TryParse_ValidString_ReturnsAccountId(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

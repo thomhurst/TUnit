@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "DataSource_Method",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -57,7 +57,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                         ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -65,7 +65,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests)),
                         Name = "MethodDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -79,17 +79,23 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.DataSource_Method(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.DataSource_Method(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -124,7 +130,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "DataSource_Method2",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -168,7 +174,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                         ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -176,7 +182,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests)),
                         Name = "MethodDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -190,17 +196,23 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.DataSource_Method2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.DataSource_Method2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -235,7 +247,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "DataSource_Method_WithAction",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -279,7 +291,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                         ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method_WithAction", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::System.Action) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -287,7 +299,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests)),
                         Name = "MethodDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -301,17 +313,23 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.DataSource_Method_WithAction(TUnit.Core.Helpers.CastHelper.Cast<global::System.Action>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.DataSource_Method_WithAction(TUnit.Core.Helpers.CastHelper.Cast<global::System.Action>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -346,7 +364,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "DataSource_Method3",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -405,7 +423,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                         ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -413,7 +431,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests)),
                         Name = "MethodDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -427,17 +445,23 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.DataSource_Method3(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.DataSource_Method3(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -472,7 +496,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "DataSource_Method4",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -558,7 +582,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                         ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_Method4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -566,7 +590,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests)),
                         Name = "MethodDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -580,17 +604,23 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.DataSource_Method4(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.DataSource_Method4(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -625,7 +655,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_W
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "DataSource_WithBaseReturn",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -669,7 +699,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_W
                         ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("DataSource_WithBaseReturn", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -677,7 +707,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_W
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests)),
                         Name = "MethodDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -691,17 +721,23 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_W
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.DataSource_WithBaseReturn(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.DataSource_WithBaseReturn(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.MethodDataSourceDrivenTests.BaseValue>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -736,7 +772,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_EnumerableFu
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "EnumerableFuncArrayTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -790,7 +826,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_EnumerableFu
                         ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests).GetMethod("EnumerableFuncArrayTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string[]) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -798,7 +834,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_EnumerableFu
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests)),
                         Name = "MethodDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -812,15 +848,21 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_EnumerableFu
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        await instance.EnumerableFuncArrayTest(TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.EnumerableFuncArrayTest(TUnit.Core.Helpers.CastHelper.Cast<string[]>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

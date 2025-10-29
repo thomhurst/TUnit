@@ -14,7 +14,7 @@ public class ThreadSafeDictionary<TKey,
 
     public ICollection<TKey> Keys => _innerDictionary.Keys;
 
-    public IEnumerable<TValue> Values => _innerDictionary.Values.Select(lazy => lazy.Value);
+    public IEnumerable<TValue> Values => _innerDictionary.Values.Select(static lazy => lazy.Value);
 
     public TValue GetOrAdd(TKey key, Func<TKey, TValue> func)
     {

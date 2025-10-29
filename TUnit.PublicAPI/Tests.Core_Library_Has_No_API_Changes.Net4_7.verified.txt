@@ -1395,6 +1395,7 @@ namespace
         public required .MethodMetadata MethodMetadata { get; init; }
         public required .PropertyDataSource[] PropertyDataSources { get; init; }
         public .PropertyInjectionData[] PropertyInjections { get; init; }
+        public int? RepeatCount { get; init; }
         public required  TestClassType { get; init; }
         public <object, object?[], .>? TestInvoker { get; init; }
         public required string TestMethodName { get; init; }

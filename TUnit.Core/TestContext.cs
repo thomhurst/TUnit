@@ -37,9 +37,9 @@ public class TestContext : Context
 
     internal static readonly Dictionary<string, List<string>> InternalParametersDictionary = new();
 
-    private readonly StringWriter _outputWriter = new();
+    private StringWriter? _outputWriter;
 
-    private readonly StringWriter _errorWriter = new();
+    private StringWriter? _errorWriter;
 
     public static new TestContext? Current
     {
@@ -168,17 +168,19 @@ public class TestContext : Context
 
     public void WriteLine(string message)
     {
+        _outputWriter ??= new StringWriter();
         _outputWriter.WriteLine(message);
     }
 
     public void WriteError(string message)
     {
+        _errorWriter ??= new StringWriter();
         _errorWriter.WriteLine(message);
     }
 
-    public string GetOutput() => _outputWriter.ToString();
+    public string GetOutput() => _outputWriter?.ToString() ?? string.Empty;
 
-    public new string GetErrorOutput() => _errorWriter.ToString();
+    public new string GetErrorOutput() => _errorWriter?.ToString() ?? string.Empty;
 
     public T? GetService<T>() where T : class
     {
@@ -200,6 +202,8 @@ public class TestContext : Context
 
     internal IClassConstructor? ClassConstructor => _testBuilderContext.ClassConstructor;
 
+    internal object[]? CachedEligibleEventObjects { get; set; }
+
     public string GetDisplayName()
     {
         if(!string.IsNullOrEmpty(CustomDisplayName))
@@ -218,21 +222,30 @@ public class TestContext : Context
             return TestName;
         }
 
-        var formattedArgs = new string[TestDetails.TestMethodArguments.Length];
-        for (var i = 0; i < TestDetails.TestMethodArguments.Length; i++)
+        var argsLength = TestDetails.TestMethodArguments.Length;
+        var sb = StringBuilderPool.Get();
+        try
         {
-            formattedArgs[i] = ArgumentFormatter.Format(TestDetails.TestMethodArguments[i], ArgumentDisplayFormatters);
-        }
-        var arguments = string.Join(", ", formattedArgs);
+            sb.Append(TestName);
+            sb.Append('(');
 
-        if (string.IsNullOrEmpty(arguments))
+            for (var i = 0; i < argsLength; i++)
+            {
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                }
+                sb.Append(ArgumentFormatter.Format(TestDetails.TestMethodArguments[i], ArgumentDisplayFormatters));
+            }
+
+            sb.Append(')');
+            _cachedDisplayName = sb.ToString();
+            return _cachedDisplayName;
+        }
+        finally
         {
-            _cachedDisplayName = TestName;
-            return TestName;
+            StringBuilderPool.Return(sb);
         }
-
-        _cachedDisplayName = $"{TestName}({arguments})";
-        return _cachedDisplayName;
     }
 
     /// <summary>

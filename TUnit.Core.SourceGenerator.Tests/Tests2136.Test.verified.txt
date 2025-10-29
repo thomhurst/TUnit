@@ -14,7 +14,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
             TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
             TestMethodName = "GenericArgumentsTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -51,7 +51,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                         ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -59,7 +59,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._2136",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -72,7 +72,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) =>
+            InstanceFactory = static (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.Bugs._2136.Tests();
             },
@@ -86,7 +86,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(bool)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.TestAttribute(),
                         new global::TUnit.Core.ArgumentsAttribute(true, "True"),
@@ -128,7 +128,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
                             }
                         },
-                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", static () => 
                         {
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
@@ -136,7 +136,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                                 TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                                 Name = "Tests",
                                 Namespace = "TUnit.TestProject.Bugs._2136",
-                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                                 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                                 Parent = null
@@ -149,14 +149,21 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.Bugs._2136.Tests();
                     },
-                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
-                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<bool>((bool)args[0]!, (string)args[1]!));
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<bool>((bool)args[0]!, (string)args[1]!));
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,
@@ -168,7 +175,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(int)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.TestAttribute(),
                         new global::TUnit.Core.ArgumentsAttribute(1, "1"),
@@ -210,7 +217,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
                             }
                         },
-                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", static () => 
                         {
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
@@ -218,7 +225,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                                 TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                                 Name = "Tests",
                                 Namespace = "TUnit.TestProject.Bugs._2136",
-                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                                 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                                 Parent = null
@@ -231,14 +238,21 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.Bugs._2136.Tests();
                     },
-                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
-                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<int>((int)args[0]!, (string)args[1]!));
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<int>((int)args[0]!, (string)args[1]!));
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,
@@ -250,7 +264,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(double)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.TestAttribute(),
                         new global::TUnit.Core.ArgumentsAttribute(1.1, "1.1"),
@@ -292,7 +306,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
                             }
                         },
-                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", static () => 
                         {
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
@@ -300,7 +314,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                                 TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                                 Name = "Tests",
                                 Namespace = "TUnit.TestProject.Bugs._2136",
-                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                                 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                                 Parent = null
@@ -313,14 +327,21 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.Bugs._2136.Tests();
                     },
-                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
-                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<double>((double)args[0]!, (string)args[1]!));
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<double>((double)args[0]!, (string)args[1]!));
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,
@@ -332,7 +353,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(string)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.TestAttribute(),
                         new global::TUnit.Core.ArgumentsAttribute("hello", "hello"),
@@ -374,7 +395,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
                             }
                         },
-                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", static () => 
                         {
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
@@ -382,7 +403,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                                 TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                                 Name = "Tests",
                                 Namespace = "TUnit.TestProject.Bugs._2136",
-                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                                 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                                 Parent = null
@@ -395,14 +416,21 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.Bugs._2136.Tests();
                     },
-                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
-                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<string>((string)args[0]!, (string)args[1]!));
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<string>((string)args[0]!, (string)args[1]!));
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,
@@ -414,7 +442,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._2136.MyEnum)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.TestAttribute(),
                         new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item"),
@@ -456,7 +484,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.Bugs._2136.Tests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "GenericArgumentsTest" && m.GetParameters().Length == 2)?.GetParameters()[1]!
                             }
                         },
-                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", () => 
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2136.Tests", static () => 
                         {
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
@@ -464,7 +492,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                                 TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2136.Tests)),
                                 Name = "Tests",
                                 Namespace = "TUnit.TestProject.Bugs._2136",
-                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                                 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                                 Parent = null
@@ -477,14 +505,21 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.Bugs._2136.Tests();
                     },
-                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
-                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>((global::TUnit.TestProject.Bugs._2136.MyEnum)args[0]!, (string)args[1]!));
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>((global::TUnit.TestProject.Bugs._2136.MyEnum)args[0]!, (string)args[1]!));
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,

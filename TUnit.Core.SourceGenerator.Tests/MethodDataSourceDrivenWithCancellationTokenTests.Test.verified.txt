@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenWithCancellationTo
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests),
             TestMethodName = "MyTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -165,7 +165,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenWithCancellationTo
                         ReflectionInfo = typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests).GetMethod("MyTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(global::System.Threading.CancellationToken) }, null)!.GetParameters()[1]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -173,7 +173,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenWithCancellationTo
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests)),
                         Name = "MethodDataSourceDrivenWithCancellationTokenTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -187,18 +187,24 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenWithCancellationTo
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.MyTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    var context = global::TUnit.Core.TestContext.Current;
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.MyTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test_TestSource :
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute("A super important test!"),
@@ -35,7 +35,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test_TestSource :
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -43,7 +43,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test_TestSource :
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CustomDisplayNameTests)),
                         Name = "CustomDisplayNameTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = new global::TUnit.Core.PropertyMetadata[]
                         {
@@ -70,9 +70,16 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test_TestSource :
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.Test();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Test());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -107,7 +114,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource 
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "Test2",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute("Another super important test!"),
@@ -129,7 +136,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource 
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -137,7 +144,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource 
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CustomDisplayNameTests)),
                         Name = "CustomDisplayNameTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = new global::TUnit.Core.PropertyMetadata[]
                         {
@@ -164,9 +171,16 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource 
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.Test2();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Test2());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -201,7 +215,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "Test3",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute("Test with: $value1 $value2 $value3!"),
@@ -250,7 +264,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int
                         ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string), typeof(int), typeof(bool) }, null)!.GetParameters()[2]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -258,7 +272,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CustomDisplayNameTests)),
                         Name = "CustomDisplayNameTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = new global::TUnit.Core.PropertyMetadata[]
                         {
@@ -285,15 +299,21 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 3:
-                        await instance.Test3(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 3:
+                            return new global::System.Threading.Tasks.ValueTask(instance.Test3(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -329,7 +349,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceT
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "MethodDataSourceTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute("Test using MethodDataSource"),
@@ -374,7 +394,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceT
                         ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("MethodDataSourceTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -382,7 +402,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceT
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CustomDisplayNameTests)),
                         Name = "CustomDisplayNameTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = new global::TUnit.Core.PropertyMetadata[]
                         {
@@ -409,15 +429,21 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceT
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        await instance.MethodDataSourceTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.MethodDataSourceTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -453,7 +479,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterName
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "TestParameterNamePrefixBug",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute("Test this($someValue, $someValueType)"),
@@ -496,7 +522,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterName
                         ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("TestParameterNamePrefixBug", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string) }, null)!.GetParameters()[1]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -504,7 +530,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterName
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CustomDisplayNameTests)),
                         Name = "CustomDisplayNameTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = new global::TUnit.Core.PropertyMetadata[]
                         {
@@ -531,15 +557,21 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterName
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 2:
-                        await instance.TestParameterNamePrefixBug(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 2:
+                            return new global::System.Threading.Tasks.ValueTask(instance.TestParameterNamePrefixBug(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -575,7 +607,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__str
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "PasswordTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -608,7 +640,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__str
                         ReflectionInfo = typeof(global::TUnit.TestProject.CustomDisplayNameTests).GetMethod("PasswordTest", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(string) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -616,7 +648,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__str
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CustomDisplayNameTests)),
                         Name = "CustomDisplayNameTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = new global::TUnit.Core.PropertyMetadata[]
                         {
@@ -643,15 +675,21 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__str
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        await instance.PasswordTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.PasswordTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -687,7 +725,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_SameClassConstant
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "SameClassConstantTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}"),
@@ -709,7 +747,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_SameClassConstant
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -717,7 +755,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_SameClassConstant
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CustomDisplayNameTests)),
                         Name = "CustomDisplayNameTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = new global::TUnit.Core.PropertyMetadata[]
                         {
@@ -744,9 +782,16 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_SameClassConstant
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.SameClassConstantTest();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.SameClassConstantTest());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -781,7 +826,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_DifferentClassCon
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "DifferentClassConstantTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}"),
@@ -803,7 +848,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_DifferentClassCon
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -811,7 +856,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_DifferentClassCon
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CustomDisplayNameTests)),
                         Name = "CustomDisplayNameTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = new global::TUnit.Core.PropertyMetadata[]
                         {
@@ -838,9 +883,16 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_DifferentClassCon
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.DifferentClassConstantTest();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.DifferentClassConstantTest());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -875,7 +927,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_NestedClassConsta
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "NestedClassConstantTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}"),
@@ -897,7 +949,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_NestedClassConsta
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.CustomDisplayNameTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -905,7 +957,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_NestedClassConsta
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.CustomDisplayNameTests)),
                         Name = "CustomDisplayNameTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = new global::TUnit.Core.PropertyMetadata[]
                         {
@@ -932,9 +984,16 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_NestedClassConsta
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.CustomDisplayNameTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.NestedClassConstantTest();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.NestedClassConstantTest());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

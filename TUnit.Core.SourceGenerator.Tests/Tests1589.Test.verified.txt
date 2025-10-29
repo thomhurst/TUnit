@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_Bugs__1589_MyTests_Test1_TestSource : gl
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1589.MyTests),
             TestMethodName = "Test1",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -40,7 +40,7 @@ internal sealed class TUnit_TestProject_Bugs__1589_MyTests_Test1_TestSource : gl
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1589.MyTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1589.MyTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -48,7 +48,7 @@ internal sealed class TUnit_TestProject_Bugs__1589_MyTests_Test1_TestSource : gl
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1589.MyTests)),
                         Name = "MyTests",
                         Namespace = "TUnit.TestProject.Bugs._1589",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.Bugs._1589.MyFixture))
@@ -74,9 +74,16 @@ internal sealed class TUnit_TestProject_Bugs__1589_MyTests_Test1_TestSource : gl
             {
                 return new global::TUnit.TestProject.Bugs._1589.MyTests(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._1589.MyFixture>(args[0]));
             },
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.Test1();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Test1());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

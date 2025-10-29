@@ -18,6 +18,11 @@ public abstract class AbstractExecutableTest
 
     public abstract Task InvokeTestAsync(object instance, CancellationToken cancellationToken);
 
+    // Cache fields for filtering performance
+    internal string? CachedFilterPath { get; set; }
+    // Using object to avoid type dependency on Microsoft.Testing.Platform.Extensions.Messages.PropertyBag
+    internal object? CachedPropertyBag { get; set; }
+
     public required TestContext Context
     {
         get;

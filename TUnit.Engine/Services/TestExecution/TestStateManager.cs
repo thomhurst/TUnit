@@ -18,18 +18,20 @@ internal sealed class TestStateManager
 
     public Task MarkCompletedAsync(AbstractExecutableTest test)
     {
+        var now = DateTimeOffset.UtcNow;
+
         test.Result ??= new TestResult
         {
             State = TestState.Passed,
             Start = test.StartTime,
-            End = DateTimeOffset.UtcNow,
-            Duration = DateTimeOffset.UtcNow - test.StartTime.GetValueOrDefault(),
+            End = now,
+            Duration = now - test.StartTime.GetValueOrDefault(),
             Exception = null,
             ComputerName = Environment.MachineName
         };
 
         test.State = test.Result.State;
-        test.EndTime = DateTimeOffset.UtcNow;
+        test.EndTime = now;
 
         return Task.CompletedTask;
     }
@@ -63,14 +65,15 @@ internal sealed class TestStateManager
     public Task MarkSkippedAsync(AbstractExecutableTest test, string reason)
     {
         test.State = TestState.Skipped;
+        var now = DateTimeOffset.UtcNow;
 
         // Ensure StartTime is set if it wasn't already
         if (!test.StartTime.HasValue)
         {
-            test.StartTime = DateTimeOffset.UtcNow;
+            test.StartTime = now;
         }
 
-        test.EndTime = DateTimeOffset.UtcNow;
+        test.EndTime = now;
         test.Result = new TestResult
         {
             State = TestState.Skipped,

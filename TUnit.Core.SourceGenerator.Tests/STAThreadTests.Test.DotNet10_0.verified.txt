@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "With_STA",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -22,6 +22,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -38,7 +39,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -46,7 +47,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -60,9 +61,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.With_STA();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.With_STA());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -97,7 +105,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "Without_STA",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -105,6 +113,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -121,7 +130,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -129,7 +138,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -143,9 +152,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.Without_STA();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Without_STA());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -180,7 +196,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithSimpleAwait",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -189,6 +205,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -205,7 +222,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -213,7 +230,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -227,9 +244,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithSimpleAwait();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithSimpleAwait());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -264,7 +288,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithTaskYield",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -273,6 +297,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -289,7 +314,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -297,7 +322,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -311,9 +336,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithTaskYield();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithTaskYield());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -348,7 +380,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithConfigureAwaitTrue",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -357,6 +389,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -373,7 +406,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -381,7 +414,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -395,9 +428,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithConfigureAwaitTrue();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithConfigureAwaitTrue());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -432,7 +472,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithNestedAsyncCalls",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -441,6 +481,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -457,7 +498,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -465,7 +506,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -479,9 +520,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithNestedAsyncCalls();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithNestedAsyncCalls());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -516,7 +564,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithTaskFromResult",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -525,6 +573,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -541,7 +590,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -549,7 +598,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -563,9 +612,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithTaskFromResult();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithTaskFromResult());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -600,7 +656,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithCompletedTask",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -609,6 +665,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -625,7 +682,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -633,7 +690,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -647,9 +704,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithCompletedTask();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithCompletedTask());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -684,7 +748,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithTaskRun",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -693,6 +757,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -709,7 +774,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -717,7 +782,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -731,9 +796,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithTaskRun();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithTaskRun());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -768,7 +840,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithMultipleAwaits",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -777,6 +849,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -793,7 +866,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -801,7 +874,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -815,9 +888,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithMultipleAwaits();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithMultipleAwaits());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -852,7 +932,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithAsyncEnumerable",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -861,6 +941,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -877,7 +958,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -885,7 +966,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -899,9 +980,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithAsyncEnumerable();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithAsyncEnumerable());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -936,7 +1024,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithTaskWhenAll",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -945,6 +1033,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -961,7 +1050,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -969,7 +1058,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -983,9 +1072,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithTaskWhenAll();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithTaskWhenAll());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1020,7 +1116,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithExceptionHandling",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -1029,6 +1125,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -1045,7 +1142,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -1053,7 +1150,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -1067,9 +1164,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithExceptionHandling();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithExceptionHandling());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1104,7 +1208,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithThrowsNothingAssertion",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -1113,6 +1217,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -1129,7 +1234,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -1137,7 +1242,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -1151,9 +1256,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithThrowsNothingAssertion();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithThrowsNothingAssertion());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1188,7 +1300,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithFuncAssertion",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -1197,6 +1309,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
                 new global::TUnit.Core.RepeatAttribute(100),
                 new global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessageAttribute("Interoperability", "CA1416:Validate platform compatibility")
             ],
+            RepeatCount = 100,
             DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),
             PropertyDataSources = global::System.Array.Empty<global::TUnit.Core.PropertyDataSource>(),
@@ -1213,7 +1326,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.STAThreadTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -1221,7 +1334,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.STAThreadTests)),
                         Name = "STAThreadTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -1235,9 +1348,16 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.STA_WithFuncAssertion();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithFuncAssertion());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

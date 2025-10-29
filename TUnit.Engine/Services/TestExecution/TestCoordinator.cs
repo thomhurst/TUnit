@@ -23,6 +23,7 @@ internal sealed class TestCoordinator : ITestCoordinator
     private readonly ObjectTracker _objectTracker;
     private readonly TUnitFrameworkLogger _logger;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
+    private readonly HashSetPool _hashSetPool;
 
     public TestCoordinator(
         TestExecutionGuard executionGuard,
@@ -33,7 +34,8 @@ internal sealed class TestCoordinator : ITestCoordinator
         TestInitializer testInitializer,
         ObjectTracker objectTracker,
         TUnitFrameworkLogger logger,
-        EventReceiverOrchestrator eventReceiverOrchestrator)
+        EventReceiverOrchestrator eventReceiverOrchestrator,
+        HashSetPool hashSetPool)
     {
         _executionGuard = executionGuard;
         _stateManager = stateManager;
@@ -44,6 +46,7 @@ internal sealed class TestCoordinator : ITestCoordinator
         _objectTracker = objectTracker;
         _logger = logger;
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
+        _hashSetPool = hashSetPool;
     }
 
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
@@ -68,12 +71,21 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             TestContext.Current = test.Context;
 
-            var allDependencies = new HashSet<TestDetails>();
-            CollectAllDependencies(test, allDependencies, new HashSet<AbstractExecutableTest>());
-
-            foreach (var dependency in allDependencies)
+            var allDependencies = _hashSetPool.Rent<TestDetails>();
+            var visited = _hashSetPool.Rent<AbstractExecutableTest>();
+            try
             {
-                test.Context.Dependencies.Add(dependency);
+                CollectAllDependencies(test, allDependencies, visited);
+
+                foreach (var dependency in allDependencies)
+                {
+                    test.Context.Dependencies.Add(dependency);
+                }
+            }
+            finally
+            {
+                _hashSetPool.Return(allDependencies);
+                _hashSetPool.Return(visited);
             }
 
             // Ensure TestSession hooks run before creating test instances
@@ -83,6 +95,9 @@ internal sealed class TestCoordinator : ITestCoordinator
             await RetryHelper.ExecuteWithRetry(test.Context, async () =>
             {
                 test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
+
+                // Invalidate cached eligible event objects since ClassInstance changed
+                test.Context.CachedEligibleEventObjects = null;
 
                 // Check if this test should be skipped (after creating instance)
                 if (test.Context.TestDetails.ClassInstance is SkippedTestInstance ||

@@ -17,6 +17,9 @@ internal sealed class HookCollectionService : IHookCollectionService
     private readonly ConcurrentDictionary<Assembly, IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> _beforeAssemblyHooksCache = new();
     private readonly ConcurrentDictionary<Assembly, IReadOnlyList<Func<AssemblyHookContext, CancellationToken, Task>>> _afterAssemblyHooksCache = new();
 
+    // Cache for GetGenericTypeDefinition() calls to avoid repeated reflection
+    private static readonly ConcurrentDictionary<Type, Type> _genericTypeDefinitionCache = new();
+
     // Pre-computed global hooks (computed once at initialization)
     private IReadOnlyList<Func<TestContext, CancellationToken, Task>>? _beforeEveryTestHooks;
     private IReadOnlyList<Func<TestContext, CancellationToken, Task>>? _afterEveryTestHooks;
@@ -35,6 +38,11 @@ internal sealed class HookCollectionService : IHookCollectionService
     public HookCollectionService(EventReceiverOrchestrator eventReceiverOrchestrator)
     {
         _eventReceiverOrchestrator = eventReceiverOrchestrator;
+    }
+
+    private static Type GetCachedGenericTypeDefinition(Type type)
+    {
+        return _genericTypeDefinitionCache.GetOrAdd(type, t => t.GetGenericTypeDefinition());
     }
 
     public async ValueTask InitializeAsync()
@@ -305,7 +313,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 // Also check the open generic type definition for generic types
                 if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
                 {
-                    var openGenericType = currentType.GetGenericTypeDefinition();
+                    var openGenericType = GetCachedGenericTypeDefinition(currentType);
                     if (Sources.BeforeTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
                     {
                         foreach (var hook in openTypeHooks)
@@ -372,7 +380,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 // Also check the open generic type definition for generic types
                 if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
                 {
-                    var openGenericType = currentType.GetGenericTypeDefinition();
+                    var openGenericType = GetCachedGenericTypeDefinition(currentType);
                     if (Sources.AfterTestHooks.TryGetValue(openGenericType, out var openTypeHooks))
                     {
                         foreach (var hook in openTypeHooks)
@@ -438,7 +446,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 // Also check the open generic type definition for generic types
                 if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
                 {
-                    var openGenericType = currentType.GetGenericTypeDefinition();
+                    var openGenericType = GetCachedGenericTypeDefinition(currentType);
                     if (Sources.BeforeClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
                     {
                         foreach (var hook in openTypeHooks)
@@ -495,7 +503,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 // Also check the open generic type definition for generic types
                 if (currentType is { IsGenericType: true, IsGenericTypeDefinition: false })
                 {
-                    var openGenericType = currentType.GetGenericTypeDefinition();
+                    var openGenericType = GetCachedGenericTypeDefinition(currentType);
                     if (Sources.AfterClassHooks.TryGetValue(openGenericType, out var openTypeHooks))
                     {
                         foreach (var hook in openTypeHooks)

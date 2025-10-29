@@ -394,7 +394,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             p.Type.Name == "CancellationToken" &&
             p.Type.ContainingNamespace?.ToString() == "System.Threading");
 
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -403,7 +403,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("},");
 
-        writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
+        writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        // Wrap entire lambda body in try-catch to handle synchronous exceptions
+        writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -433,7 +438,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        writer.AppendLine($"await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{typeArgsString}>({string.Join(", ", parameterCasts)}));");
+        writer.AppendLine($"return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{typeArgsString}>({string.Join(", ", parameterCasts)}));");
+
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("catch (global::System.Exception ex)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));");
+        writer.Unindent();
+        writer.AppendLine("}");
 
         writer.Unindent();
         writer.AppendLine("},");
@@ -538,7 +552,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         GenerateDependencies(writer, compilation, methodSymbol);
 
-        writer.AppendLine("AttributeFactory = () =>");
+        writer.AppendLine("AttributeFactory = static () =>");
         writer.AppendLine("[");
         writer.Indent();
 
@@ -552,6 +566,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.Unindent();
         writer.AppendLine("],");
+
+        // Extract and emit RepeatCount if present
+        var repeatCount = ExtractRepeatCount(methodSymbol, testMethod.TypeSymbol);
+        if (repeatCount.HasValue)
+        {
+            writer.AppendLine($"RepeatCount = {repeatCount.Value},");
+        }
 
         GenerateDataSources(writer, testMethod);
 
@@ -577,7 +598,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         GenerateDependencies(writer, compilation, methodSymbol);
 
-        writer.AppendLine("AttributeFactory = () =>");
+        writer.AppendLine("AttributeFactory = static () =>");
         writer.AppendLine("[");
         writer.Indent();
 
@@ -592,6 +613,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.Unindent();
         writer.AppendLine("],");
+
+        // Extract and emit RepeatCount if present
+        var repeatCount = ExtractRepeatCount(methodSymbol, testMethod.TypeSymbol);
+        if (repeatCount.HasValue)
+        {
+            writer.AppendLine($"RepeatCount = {repeatCount.Value},");
+        }
 
         // No data sources for concrete instantiations
         writer.AppendLine("DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
@@ -1824,17 +1852,23 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate InvokeTypedTest for non-generic tests
         var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
+        var returnsValueTask = ReturnsValueTask(testMethod.MethodSymbol);
         if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
-            GenerateConcreteTestInvoker(writer, testMethod, className, methodName, isAsync, hasCancellationToken, parametersFromArgs);
+            GenerateConcreteTestInvoker(writer, testMethod, className, methodName, isAsync, returnsValueTask, hasCancellationToken, parametersFromArgs);
         }
     }
 
 
-    private static void GenerateConcreteTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, bool isAsync, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
+    private static void GenerateConcreteTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, bool isAsync, bool returnsValueTask, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
     {
         // Generate InvokeTypedTest which is required by CreateExecutableTestFactory
-        writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
+        writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        // Wrap entire lambda body in try-catch to handle synchronous exceptions
+        writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -1868,11 +1902,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 : $"instance.{methodName}({tupleConstruction})";
             if (isAsync)
             {
-                writer.AppendLine($"await {methodCallReconstructed};");
+                if (returnsValueTask)
+                {
+                    writer.AppendLine($"return {methodCallReconstructed};");
+                }
+                else
+                {
+                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCallReconstructed});");
+                }
             }
             else
             {
                 writer.AppendLine($"{methodCallReconstructed};");
+                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
             }
             writer.Unindent();
             writer.AppendLine("}");
@@ -1885,11 +1927,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 : $"instance.{methodName}(TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]))";
             if (isAsync)
             {
-                writer.AppendLine($"await {methodCallDirect};");
+                if (returnsValueTask)
+                {
+                    writer.AppendLine($"return {methodCallDirect};");
+                }
+                else
+                {
+                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCallDirect});");
+                }
             }
             else
             {
                 writer.AppendLine($"{methodCallDirect};");
+                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
             }
             writer.Unindent();
             writer.AppendLine("}");
@@ -1907,12 +1957,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 : $"instance.{methodName}()";
             if (isAsync)
             {
-                writer.AppendLine($"await {typedMethodCall};");
+                if (returnsValueTask)
+                {
+                    writer.AppendLine($"return {typedMethodCall};");
+                }
+                else
+                {
+                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({typedMethodCall});");
+                }
             }
             else
             {
                 writer.AppendLine($"{typedMethodCall};");
-                writer.AppendLine("await global::System.Threading.Tasks.Task.CompletedTask;");
+                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
             }
         }
         else
@@ -1952,13 +2009,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 if (isAsync)
                 {
-                    writer.AppendLine($"await {typedMethodCall};");
+                    if (returnsValueTask)
+                    {
+                        writer.AppendLine($"return {typedMethodCall};");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({typedMethodCall});");
+                    }
                 }
                 else
                 {
                     writer.AppendLine($"{typedMethodCall};");
+                    writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
                 }
-                writer.AppendLine("break;");
                 writer.Unindent();
             }
 
@@ -1976,12 +2040,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             writer.Unindent();
             writer.AppendLine("}");
-
-            if (!isAsync)
-            {
-                writer.AppendLine("await global::System.Threading.Tasks.Task.CompletedTask;");
-            }
         }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("catch (global::System.Exception ex)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));");
+        writer.Unindent();
+        writer.AppendLine("}");
 
         writer.Unindent();
         writer.AppendLine("},");
@@ -2014,6 +2082,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                returnTypeName.StartsWith("System.Threading.Tasks.ValueTask") ||
                returnTypeName.StartsWith("Task<") ||
                returnTypeName.StartsWith("ValueTask<");
+    }
+
+    private static bool ReturnsValueTask(IMethodSymbol method)
+    {
+        var returnTypeName = method.ReturnType.ToDisplayString();
+        return returnTypeName.StartsWith("System.Threading.Tasks.ValueTask");
     }
 
     private static void GenerateDependencies(CodeWriter writer, Compilation compilation, IMethodSymbol methodSymbol)
@@ -2638,7 +2712,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateMetadataForConcreteInstantiation(writer, testMethod);
 
         // Generate instance factory that works with generic types
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -4144,7 +4218,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateConcreteMetadataWithFilteredDataSources(writer, testMethod, specificArgumentsAttribute, typeArguments);
 
         // Generate instance factory
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -4193,7 +4267,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
 
         // Generate strongly-typed test invoker
-        writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
+        writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        // Wrap entire lambda body in try-catch to handle synchronous exceptions
+        writer.AppendLine("try");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -4224,12 +4303,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (methodTypeArgs.Length > 0)
         {
             var methodTypeArgsString = string.Join(", ", methodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
-            writer.AppendLine($"await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{methodTypeArgsString}>({string.Join(", ", parameterCasts)}));");
+            writer.AppendLine($"return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{methodTypeArgsString}>({string.Join(", ", parameterCasts)}));");
         }
         else
         {
-            writer.AppendLine($"await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}({string.Join(", ", parameterCasts)}));");
+            writer.AppendLine($"return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}({string.Join(", ", parameterCasts)}));");
         }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("catch (global::System.Exception ex)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));");
+        writer.Unindent();
+        writer.AppendLine("}");
 
         writer.Unindent();
         writer.AppendLine("}");
@@ -4328,12 +4416,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         filteredAttributes.AddRange(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes());
         filteredAttributes.AddRange(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
 
-        writer.AppendLine("AttributeFactory = () =>");
+        writer.AppendLine("AttributeFactory = static () =>");
         writer.AppendLine("[");
         writer.Indent();
         AttributeWriter.WriteAttributes(writer, compilation, filteredAttributes.ToImmutableArray());
         writer.Unindent();
         writer.AppendLine("],");
+
+        // Extract and emit RepeatCount if present
+        var repeatCount = ExtractRepeatCount(methodSymbol, typeSymbol);
+        if (repeatCount.HasValue)
+        {
+            writer.AppendLine($"RepeatCount = {repeatCount.Value},");
+        }
 
         // Filter data sources based on the specific attribute
         List<AttributeData> methodDataSources;
@@ -4643,7 +4738,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateDependencies(writer, compilation, testMethod.MethodSymbol);
 
         // Generate attribute factory
-        writer.AppendLine("AttributeFactory = () =>");
+        writer.AppendLine("AttributeFactory = static () =>");
         writer.AppendLine("[");
         writer.Indent();
 
@@ -4656,6 +4751,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.Unindent();
         writer.AppendLine("],");
+
+        // Extract and emit RepeatCount if present
+        var repeatCount = ExtractRepeatCount(testMethod.MethodSymbol, testMethod.TypeSymbol);
+        if (repeatCount.HasValue)
+        {
+            writer.AppendLine($"RepeatCount = {repeatCount.Value},");
+        }
 
         if (methodDataSourceAttribute == null)
         {
@@ -4696,7 +4798,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
 
         // Generate instance factory
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -4760,6 +4862,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("};");
 
         writer.AppendLine("yield return metadata;");
+    }
+
+    private static int? ExtractRepeatCount(IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    {
+        // Check method-level RepeatAttribute first
+        var repeatAttribute = methodSymbol.GetAttributes()
+            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute");
+
+        if (repeatAttribute?.ConstructorArguments.Length > 0
+            && repeatAttribute.ConstructorArguments[0].Value is int methodCount)
+        {
+            return methodCount;
+        }
+
+        // Check class-level RepeatAttribute (can be inherited)
+        var classRepeatAttr = typeSymbol.GetAttributesIncludingBaseTypes()
+            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute");
+
+        if (classRepeatAttr?.ConstructorArguments.Length > 0
+            && classRepeatAttr.ConstructorArguments[0].Value is int classCount)
+        {
+            return classCount;
+        }
+
+        // No repeat attribute found
+        return null;
     }
 }
 

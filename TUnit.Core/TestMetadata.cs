@@ -49,6 +49,13 @@ public abstract class TestMetadata
 
     public required Func<Attribute[]> AttributeFactory { get; init; }
 
+    /// <summary>
+    /// Pre-extracted repeat count from RepeatAttribute.
+    /// Null if no repeat attribute is present (defaults to 0 at usage site).
+    /// Pre-extracting this avoids instantiating all attributes just to read the repeat count.
+    /// </summary>
+    public int? RepeatCount { get; init; }
+
     public PropertyInjectionData[] PropertyInjections { get; init; } = [];
 
     /// <summary>

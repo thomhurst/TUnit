@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using TUnit.Core.SourceGenerator.Helpers;
 
 namespace TUnit.Core.SourceGenerator.Extensions;
 
@@ -16,19 +17,28 @@ public static class AttributeDataExtensions
 
     public static bool IsDataSourceAttribute(this AttributeData? attributeData)
     {
-        return attributeData?.AttributeClass?.AllInterfaces.Any(x =>
-                   x.GloballyQualified() == WellKnownFullyQualifiedClassNames.IDataSourceAttribute.WithGlobalPrefix)
-               == true;
+        if (attributeData?.AttributeClass == null)
+        {
+            return false;
+        }
+
+        // Use InterfaceCache instead of AllInterfaces.Any() for better performance
+        return InterfaceCache.ImplementsInterface(attributeData.AttributeClass,
+            WellKnownFullyQualifiedClassNames.IDataSourceAttribute.WithGlobalPrefix);
     }
-    
+
     public static bool IsTypedDataSourceAttribute(this AttributeData? attributeData)
     {
-        return attributeData?.AttributeClass?.AllInterfaces.Any(x =>
-                   x.IsGenericType && 
-                   x.ConstructedFrom.GloballyQualified() == WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "`1")
-               == true;
+        if (attributeData?.AttributeClass == null)
+        {
+            return false;
+        }
+
+        // Use InterfaceCache instead of AllInterfaces.Any() for better performance
+        return InterfaceCache.ImplementsGenericInterface(attributeData.AttributeClass,
+            WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "`1");
     }
-    
+
     public static ITypeSymbol? GetTypedDataSourceType(this AttributeData? attributeData)
     {
         if (attributeData?.AttributeClass == null)
@@ -36,10 +46,10 @@ public static class AttributeDataExtensions
             return null;
         }
 
-        var typedInterface = attributeData.AttributeClass.AllInterfaces
-            .FirstOrDefault(x => x.IsGenericType && 
-                x.ConstructedFrom.GloballyQualified() == WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "`1");
-                
+        // Use InterfaceCache instead of AllInterfaces.FirstOrDefault() for better performance
+        var typedInterface = InterfaceCache.GetGenericInterface(attributeData.AttributeClass,
+            WellKnownFullyQualifiedClassNames.ITypedDataSourceAttribute.WithGlobalPrefix + "`1");
+
         return typedInterface?.TypeArguments.FirstOrDefault();
     }
 

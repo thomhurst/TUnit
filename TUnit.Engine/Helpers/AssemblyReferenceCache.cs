@@ -14,7 +14,7 @@ internal static class AssemblyReferenceCache
 #endif
     public static AssemblyName[] GetReferencedAssemblies(Assembly assembly)
     {
-        return _assemblyCache.GetOrAdd(assembly, a => a.GetReferencedAssemblies());
+        return _assemblyCache.GetOrAdd(assembly, static a => a.GetReferencedAssemblies());
     }
 
 #if NET6_0_OR_GREATER
@@ -22,6 +22,6 @@ internal static class AssemblyReferenceCache
 #endif
     public static Type[] GetInterfaces(Type type)
     {
-        return _interfaceCache.GetOrAdd(type, t => t.GetInterfaces());
+        return _interfaceCache.GetOrAdd(type, static t => t.GetInterfaces());
     }
 }

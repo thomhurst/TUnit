@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test__byte__Te
             TestClassType = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -47,7 +47,7 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test__byte__Te
                         ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(byte?) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NullableByteArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NullableByteArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -55,7 +55,7 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test__byte__Te
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.NullableByteArgumentTests)),
                         Name = "NullableByteArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -69,17 +69,23 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test__byte__Te
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.NullableByteArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<byte?>(args[0]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.Test(TUnit.Core.Helpers.CastHelper.Cast<byte?>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -114,7 +120,7 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test2__byte_by
             TestClassType = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
             TestMethodName = "Test2",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -155,7 +161,7 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test2__byte_by
                         ReflectionInfo = typeof(global::TUnit.TestProject.NullableByteArgumentTests).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(byte), typeof(byte?) }, null)!.GetParameters()[1]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NullableByteArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NullableByteArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -163,7 +169,7 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test2__byte_by
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.NullableByteArgumentTests)),
                         Name = "NullableByteArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -177,17 +183,23 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test2__byte_by
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.NullableByteArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 2:
-                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<byte>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<byte?>(args[1]));
-                        break;
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 2:
+                            instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<byte>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<byte?>(args[1]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                    }
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

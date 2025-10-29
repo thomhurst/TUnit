@@ -21,6 +21,8 @@ internal sealed class ReflectionHookDiscoveryService
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
     private static readonly ConcurrentDictionary<string, bool> _registeredMethods = new();
     private static readonly ConcurrentDictionary<MethodInfo, string> _methodKeyCache = new();
+    // Cache attribute lookups to avoid repeated reflection calls in hot paths
+    private static readonly ConcurrentDictionary<MethodInfo, (BeforeAttribute?, AfterAttribute?, BeforeEveryAttribute?, AfterEveryAttribute?)> _attributeCache = new();
     private static int _registrationIndex = 0;
     private static int _discoveryRunCount = 0;
 
@@ -41,6 +43,21 @@ internal sealed class ReflectionHookDiscoveryService
                 paramTypes[i] = parameters[i].ParameterType.FullName ?? "unknown";
             }
             return $"{m.DeclaringType?.FullName}.{m.Name}({string.Join(",", paramTypes)})";
+        });
+    }
+
+    /// <summary>
+    /// Get cached hook attributes for a method to avoid repeated GetCustomAttribute calls
+    /// </summary>
+    private static (BeforeAttribute?, AfterAttribute?, BeforeEveryAttribute?, AfterEveryAttribute?) GetCachedAttributes(MethodInfo method)
+    {
+        return _attributeCache.GetOrAdd(method, m =>
+        {
+            var beforeAttr = m.GetCustomAttribute<BeforeAttribute>();
+            var afterAttr = m.GetCustomAttribute<AfterAttribute>();
+            var beforeEveryAttr = m.GetCustomAttribute<BeforeEveryAttribute>();
+            var afterEveryAttr = m.GetCustomAttribute<AfterEveryAttribute>();
+            return (beforeAttr, afterAttr, beforeEveryAttr, afterEveryAttr);
         });
     }
 
@@ -94,9 +111,10 @@ internal sealed class ReflectionHookDiscoveryService
         var current = closedGenericType;
         while (current != null && current != typeof(object))
         {
-            inheritanceChain.Insert(0, current); // Insert at front to get base-to-derived order
+            inheritanceChain.Add(current); // Add to end
             current = current.BaseType;
         }
+        inheritanceChain.Reverse(); // Reverse once to get base-to-derived order (O(n) vs O(n²))
 
         // Discover hooks in each type in the inheritance chain, from base to derived
         foreach (var typeInChain in inheritanceChain)
@@ -104,11 +122,8 @@ internal sealed class ReflectionHookDiscoveryService
             var methods = typeInChain.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
                 .OrderBy(m =>
                 {
-                    // Get the minimum order from all hook attributes on this method
-                    var beforeAttr = m.GetCustomAttribute<BeforeAttribute>();
-                    var afterAttr = m.GetCustomAttribute<AfterAttribute>();
-                    var beforeEveryAttr = m.GetCustomAttribute<BeforeEveryAttribute>();
-                    var afterEveryAttr = m.GetCustomAttribute<AfterEveryAttribute>();
+                    // Get the minimum order from cached hook attributes
+                    var (beforeAttr, afterAttr, beforeEveryAttr, afterEveryAttr) = GetCachedAttributes(m);
 
                     var orders = new List<int>();
                     if (beforeAttr != null) orders.Add(beforeAttr.Order);
@@ -278,9 +293,10 @@ internal sealed class ReflectionHookDiscoveryService
         Type? current = type;
         while (current != null && current != typeof(object))
         {
-            inheritanceChain.Insert(0, current); // Insert at front to get base-to-derived order
+            inheritanceChain.Add(current); // Add to end
             current = current.BaseType;
         }
+        inheritanceChain.Reverse(); // Reverse once to get base-to-derived order (O(n) vs O(n²))
 
         // Discover hooks in each type in the inheritance chain, from base to derived
         foreach (var typeInChain in inheritanceChain)
@@ -289,11 +305,8 @@ internal sealed class ReflectionHookDiscoveryService
             var methods = typeInChain.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
                 .OrderBy(m =>
                 {
-                    // Get the minimum order from all hook attributes on this method
-                    var beforeAttr = m.GetCustomAttribute<BeforeAttribute>();
-                    var afterAttr = m.GetCustomAttribute<AfterAttribute>();
-                    var beforeEveryAttr = m.GetCustomAttribute<BeforeEveryAttribute>();
-                    var afterEveryAttr = m.GetCustomAttribute<AfterEveryAttribute>();
+                    // Get the minimum order from cached hook attributes
+                    var (beforeAttr, afterAttr, beforeEveryAttr, afterEveryAttr) = GetCachedAttributes(m);
 
                     var orders = new List<int>();
                     if (beforeAttr != null) orders.Add(beforeAttr.Order);
@@ -692,7 +705,7 @@ internal sealed class ReflectionHookDiscoveryService
             return;
         }
 
-        var bag = Sources.BeforeTestHooks.GetOrAdd(type, static _ => new ConcurrentBag<InstanceHookMethod>());
+        var bag = Sources.BeforeTestHooks.GetOrAdd(type, static _ => []);
         var hook = new InstanceHookMethod
         {
             InitClassType = type,
@@ -717,7 +730,7 @@ internal sealed class ReflectionHookDiscoveryService
             return;
         }
 
-        var bag = Sources.AfterTestHooks.GetOrAdd(type, static _ => new ConcurrentBag<InstanceHookMethod>());
+        var bag = Sources.AfterTestHooks.GetOrAdd(type, static _ => []);
         var hook = new InstanceHookMethod
         {
             InitClassType = type,
@@ -736,7 +749,7 @@ internal sealed class ReflectionHookDiscoveryService
         MethodInfo method,
         int order)
     {
-        var bag = Sources.BeforeClassHooks.GetOrAdd(type, static _ => new ConcurrentBag<BeforeClassHookMethod>());
+        var bag = Sources.BeforeClassHooks.GetOrAdd(type, static _ => []);
         var hook = new BeforeClassHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
@@ -756,7 +769,7 @@ internal sealed class ReflectionHookDiscoveryService
         MethodInfo method,
         int order)
     {
-        var bag = Sources.AfterClassHooks.GetOrAdd(type, static _ => new ConcurrentBag<AfterClassHookMethod>());
+        var bag = Sources.AfterClassHooks.GetOrAdd(type, static _ => []);
         var hook = new AfterClassHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
@@ -777,7 +790,7 @@ internal sealed class ReflectionHookDiscoveryService
         MethodInfo method,
         int order)
     {
-        var bag = Sources.BeforeAssemblyHooks.GetOrAdd(assembly, static _ => new ConcurrentBag<BeforeAssemblyHookMethod>());
+        var bag = Sources.BeforeAssemblyHooks.GetOrAdd(assembly, static _ => []);
         var hook = new BeforeAssemblyHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
@@ -798,7 +811,7 @@ internal sealed class ReflectionHookDiscoveryService
         MethodInfo method,
         int order)
     {
-        var bag = Sources.AfterAssemblyHooks.GetOrAdd(assembly, static _ => new ConcurrentBag<AfterAssemblyHookMethod>());
+        var bag = Sources.AfterAssemblyHooks.GetOrAdd(assembly, static _ => []);
         var hook = new AfterAssemblyHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),

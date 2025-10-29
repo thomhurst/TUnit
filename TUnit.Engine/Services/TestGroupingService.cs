@@ -260,7 +260,7 @@ internal sealed class TestGroupingService : ITestGroupingService
     {
         if (!constrainedGroups.TryGetValue(parallelGroup.Group, out var group))
         {
-            group = (new List<AbstractExecutableTest>(), new List<(AbstractExecutableTest, string, IReadOnlyList<string>, TestPriority)>());
+            group = ([], []);
             constrainedGroups[parallelGroup.Group] = group;
         }
 

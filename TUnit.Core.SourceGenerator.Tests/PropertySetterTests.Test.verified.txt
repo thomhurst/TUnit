@@ -27,7 +27,7 @@ internal sealed class TUnit_TestProject_PropertySetterTests_Test_TestSource : gl
             TestClassType = typeof(global::TUnit.TestProject.PropertySetterTests),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -199,7 +199,7 @@ internal sealed class TUnit_TestProject_PropertySetterTests_Test_TestSource : gl
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PropertySetterTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PropertySetterTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -207,7 +207,7 @@ internal sealed class TUnit_TestProject_PropertySetterTests_Test_TestSource : gl
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.PropertySetterTests)),
                         Name = "PropertySetterTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = new global::TUnit.Core.PropertyMetadata[]
                         {
@@ -320,9 +320,16 @@ internal sealed class TUnit_TestProject_PropertySetterTests_Test_TestSource : gl
                 Property6 = default!,
                 Property7 = default!,
             },
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.Test();
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Test());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

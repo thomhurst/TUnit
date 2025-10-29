@@ -9,6 +9,8 @@ namespace TUnit.Engine.Services;
 internal class TestFinder : ITestFinder
 {
     private readonly TestDiscoveryService _discoveryService;
+    private Dictionary<Type, List<TestContext>>? _testsByType;
+    private Dictionary<(Type ClassType, string TestName), List<TestContext>>? _testsByTypeAndName;
 
     public TestFinder(TestDiscoveryService discoveryService)
     {
@@ -16,18 +18,64 @@ internal class TestFinder : ITestFinder
     }
 
     /// <summary>
+    /// Builds index dictionaries from cached tests for O(1) lookups
+    /// </summary>
+    private void EnsureIndexesBuilt()
+    {
+        if (_testsByType != null)
+        {
+            return; // Already built
+        }
+
+        var allTests = _discoveryService.GetCachedTestContexts();
+        var testsByType = new Dictionary<Type, List<TestContext>>();
+        var testsByTypeAndName = new Dictionary<(Type, string), List<TestContext>>();
+
+        foreach (var test in allTests)
+        {
+            if (test.TestDetails?.ClassType == null)
+            {
+                continue;
+            }
+
+            var classType = test.TestDetails.ClassType;
+            var testName = test.TestName;
+
+            // Index by type
+            if (!testsByType.TryGetValue(classType, out var testsForType))
+            {
+                testsForType = [];
+                testsByType[classType] = testsForType;
+            }
+            testsForType.Add(test);
+
+            // Index by (type, name)
+            var key = (classType, testName);
+            if (!testsByTypeAndName.TryGetValue(key, out var testsForKey))
+            {
+                testsForKey = [];
+                testsByTypeAndName[key] = testsForKey;
+            }
+            testsForKey.Add(test);
+        }
+
+        _testsByType = testsByType;
+        _testsByTypeAndName = testsByTypeAndName;
+    }
+
+    /// <summary>
     /// Gets all test contexts for the specified class type
     /// </summary>
     public IEnumerable<TestContext> GetTests(Type classType)
     {
-        var allTests = _discoveryService.GetCachedTestContexts();
-        foreach (var test in allTests)
+        EnsureIndexesBuilt();
+
+        if (_testsByType!.TryGetValue(classType, out var tests))
         {
-            if (test.TestDetails?.ClassType == classType)
-            {
-                yield return test;
-            }
+            return tests;
         }
+
+        return [];
     }
 
     /// <summary>
@@ -36,34 +84,29 @@ internal class TestFinder : ITestFinder
     public TestContext[] GetTestsByNameAndParameters(string testName, IEnumerable<Type>? methodParameterTypes,
         Type classType, IEnumerable<Type>? classParameterTypes, IEnumerable<object?>? classArguments)
     {
+        EnsureIndexesBuilt();
+
         var paramTypes = methodParameterTypes as Type[] ?? methodParameterTypes?.ToArray() ?? [];
         var classParamTypes = classParameterTypes as Type[] ?? classParameterTypes?.ToArray() ?? [];
 
-        var allTests = _discoveryService.GetCachedTestContexts();
-        var results = new List<TestContext>();
-
-        // If no parameter types are specified, match by name and class type only
-        if (paramTypes.Length == 0 && classParamTypes.Length == 0)
+        // Use the (type, name) index for O(1) lookup instead of O(n) scan
+        var key = (classType, testName);
+        if (!_testsByTypeAndName!.TryGetValue(key, out var candidateTests))
         {
-            foreach (var test in allTests)
-            {
-                if (test.TestName == testName && test.TestDetails?.ClassType == classType)
-                {
-                    results.Add(test);
-                }
-            }
-            return results.ToArray();
+            return [];
         }
 
-        // Match with parameter types
-        foreach (var test in allTests)
+        // If no parameter types are specified, return all matches
+        if (paramTypes.Length == 0 && classParamTypes.Length == 0)
         {
-            if (test.TestName != testName || test.TestDetails?.ClassType != classType)
-            {
-                continue;
-            }
+            return candidateTests.ToArray();
+        }
 
-            var testParams = test.TestDetails.MethodMetadata.Parameters;
+        // Filter by parameter types
+        var results = new List<TestContext>(candidateTests.Count);
+        foreach (var test in candidateTests)
+        {
+            var testParams = test.TestDetails!.MethodMetadata.Parameters;
             var testParamTypes = new Type[testParams.Length];
             for (int i = 0; i < testParams.Length; i++)
             {

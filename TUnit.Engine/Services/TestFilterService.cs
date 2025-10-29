@@ -23,8 +23,10 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
         logger.LogTrace($"Test filter is: {testExecutionFilter.GetType().Name}");
 
-        var filteredTests = new List<AbstractExecutableTest>();
-        var filteredExplicitTests = new List<AbstractExecutableTest>();
+        // Pre-allocate capacity to avoid resizing during filtering
+        var capacity = testNodes is ICollection<AbstractExecutableTest> col ? col.Count : 16;
+        var filteredTests = new List<AbstractExecutableTest>(capacity);
+        var filteredExplicitTests = new List<AbstractExecutableTest>(capacity / 4); // Estimate ~25% explicit tests
 
         foreach (var test in testNodes)
         {
@@ -124,6 +126,12 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
     private string BuildPath(AbstractExecutableTest test)
     {
+        // Return cached path if available
+        if (test.CachedFilterPath != null)
+        {
+            return test.CachedFilterPath;
+        }
+
         var metadata = test.Metadata;
 
         var classMetadata = test.Context.TestDetails.MethodMetadata.Class;
@@ -133,6 +141,8 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
         var path = $"/{assemblyName}/{namespaceName}/{classTypeName}/{metadata.TestMethodName}";
 
+        // Cache the path for future calls
+        test.CachedFilterPath = path;
 
         return path;
     }
@@ -165,7 +175,16 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
     private PropertyBag BuildPropertyBag(AbstractExecutableTest test)
     {
-        var properties = new List<IProperty>();
+        // Return cached PropertyBag if available
+        if (test.CachedPropertyBag is PropertyBag cachedBag)
+        {
+            return cachedBag;
+        }
+
+        // Pre-calculate capacity: 2 properties per category + custom properties
+        var categoryCount = test.Context.TestDetails.Categories.Count;
+        var customPropCount = test.Context.TestDetails.CustomProperties.Sum(p => p.Value.Count);
+        var properties = new List<IProperty>(categoryCount * 2 + customPropCount);
 
         foreach (var category in test.Context.TestDetails.Categories)
         {
@@ -173,12 +192,21 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
             properties.Add(new TestMetadataProperty("Category", category));
         }
 
+        // Replace LINQ with manual loop for better performance in hot path
         foreach (var propertyEntry in test.Context.TestDetails.CustomProperties)
         {
-            properties.AddRange(propertyEntry.Value.Select(value => new TestMetadataProperty(propertyEntry.Key, value)));
+            foreach (var value in propertyEntry.Value)
+            {
+                properties.Add(new TestMetadataProperty(propertyEntry.Key, value));
+            }
         }
 
-        return new PropertyBag(properties);
+        var propertyBag = new PropertyBag(properties);
+
+        // Cache the PropertyBag for future calls
+        test.CachedPropertyBag = propertyBag;
+
+        return propertyBag;
     }
 
     private bool IsExplicitTest(AbstractExecutableTest test)
@@ -194,7 +222,9 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
     private IReadOnlyCollection<AbstractExecutableTest> FilterOutExplicitTests(IReadOnlyCollection<AbstractExecutableTest> testNodes)
     {
-        var filteredTests = new List<AbstractExecutableTest>();
+        // Pre-allocate assuming most tests are not explicit
+        var capacity = testNodes is ICollection<AbstractExecutableTest> col ? col.Count : testNodes.Count;
+        var filteredTests = new List<AbstractExecutableTest>(capacity);
 
         foreach (var test in testNodes)
         {
