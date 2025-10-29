@@ -785,37 +785,6 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that an async-mapped value satisfies custom assertions.
-    /// Maps the source value using an async selector, then runs assertions on the mapped value.
-    /// Example: await Assert.That(model).Satisfies(m => m.GetNameAsync(), assert => assert.IsEqualTo("John"));
-    /// </summary>
-    public static AsyncMappedSatisfiesAssertion<TValue, TMapped> Satisfies<TValue, TMapped>(
-        this IAssertionSource<TValue> source,
-        Func<TValue?, Task<TMapped>> selector,
-        Func<ValueAssertion<TMapped>, Assertion<TMapped>?> assertions,
-        [CallerArgumentExpression(nameof(selector))] string? selectorExpression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".Satisfies({selectorExpression}, ...)");
-        return new AsyncMappedSatisfiesAssertion<TValue, TMapped>(
-            source.Context,
-            selector,
-            assertions,
-            selectorExpression ?? "selector");
-    }
-
-    /// <summary>
-    /// Asserts that the value is in the specified collection (params array convenience method).
-    /// Example: await Assert.That(5).IsIn(1, 3, 5, 7, 9);
-    /// </summary>
-    public static IsInAssertion<TValue> IsIn<TValue>(
-        this IAssertionSource<TValue> source,
-        params TValue[] collection)
-    {
-        source.Context.ExpressionBuilder.Append($".IsIn({string.Join(", ", collection)})");
-        return new IsInAssertion<TValue>(source.Context, collection);
-    }
-
-    /// <summary>
     /// Asserts that the value is NOT in the specified collection (params array convenience method).
     /// Example: await Assert.That(4).IsNotIn(1, 3, 5, 7, 9);
     /// </summary>
