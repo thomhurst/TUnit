@@ -262,4 +262,129 @@ public class WaitsForAssertionTests
         // Should complete in a reasonable time (well under 5 seconds)
         await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromSeconds(2));
     }
+
+    [Test]
+    public async Task WaitsFor_Returns_Resolved_Value()
+    {
+        // Test that WaitsFor returns the value after assertion passes
+        var value = 42;
+
+        var result = await Assert.That(value).WaitsFor(
+            assert => assert.IsEqualTo(42),
+            timeout: TimeSpan.FromSeconds(1));
+
+        await Assert.That(result).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task WaitsFor_Returns_Final_Polled_Value()
+    {
+        var counter = 0;
+        Func<int> getValue = () => Interlocked.Increment(ref counter);
+
+        // Wait until counter reaches 5
+        var result = await Assert.That(getValue).WaitsFor(
+            assert => assert.IsGreaterThanOrEqualTo(5),
+            timeout: TimeSpan.FromSeconds(5),
+            pollingInterval: TimeSpan.FromMilliseconds(10));
+
+        // The returned value should be at least 5 (the value when assertion passed)
+        await Assert.That(result).IsGreaterThanOrEqualTo(5);
+    }
+
+    [Test]
+    public async Task WaitsFor_Can_Chain_Assertions_On_Returned_Value()
+    {
+        var value = 42;
+
+        // Capture the result and perform additional assertions
+        var result = await Assert.That(value).WaitsFor(
+            assert => assert.IsGreaterThan(40),
+            timeout: TimeSpan.FromSeconds(1));
+
+        // Can perform further assertions on the captured value
+        await Assert.That(result).IsLessThan(50);
+        await Assert.That(result).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task WaitsFor_Works_With_Complex_Object()
+    {
+        // Simulate the real-world scenario from the GitHub issue
+        var entity = new TestEntity { Id = 1, Name = "Test", IsReady = false };
+
+        // Simulate async state change
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(50);
+            entity.IsReady = true;
+        });
+
+        // Wait for entity to be ready and capture it
+        var result = await Assert.That(() => entity).WaitsFor(
+            assert => assert.Satisfies(e => e?.IsReady == true),
+            timeout: TimeSpan.FromSeconds(2),
+            pollingInterval: TimeSpan.FromMilliseconds(10));
+
+        // Verify we got the entity back
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result!.Id).IsEqualTo(1);
+        await Assert.That(result.Name).IsEqualTo("Test");
+        await Assert.That(result.IsReady).IsEqualTo(true);
+    }
+
+    [Test]
+    public async Task WaitsFor_Returns_Null_When_Value_Is_Null()
+    {
+        string? nullValue = null;
+
+        var result = await Assert.That(() => nullValue).WaitsFor(
+            assert => assert.IsNull(),
+            timeout: TimeSpan.FromSeconds(1));
+
+        await Assert.That(result).IsNull();
+    }
+
+    [Test]
+    public async Task WaitsFor_Can_Be_Used_In_Multiple_Assertion_Block()
+    {
+        var entity = new TestEntity { Id = 42, Name = "Sample", IsReady = true };
+
+        var result = await Assert.That(() => entity).WaitsFor(
+            assert => assert.IsNotNull(),
+            timeout: TimeSpan.FromSeconds(1));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).IsNotNull();
+            await Assert.That(result!.Id).IsEqualTo(42);
+            await Assert.That(result.Name).IsEqualTo("Sample");
+            await Assert.That(result.IsReady).IsEqualTo(true);
+        }
+    }
+
+    [Test]
+    public async Task WaitsFor_GitHub_Issue_Example_Scenario()
+    {
+        // This is the exact scenario from GitHub issue #3585
+        Func<TestEntity?> getEntity = () => new TestEntity { Id = 100, Name = "Entity", IsReady = true };
+
+        TestEntity? entity = await Assert.That(getEntity)
+            .WaitsFor(e => e.IsNotNull(), TimeSpan.FromSeconds(15));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(entity).IsNotNull();
+            await Assert.That(entity!.Id).IsEqualTo(100);
+            await Assert.That(entity.Name).IsEqualTo("Entity");
+        }
+    }
+
+    // Helper class for testing complex objects
+    private class TestEntity
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public bool IsReady { get; set; }
+    }
 }

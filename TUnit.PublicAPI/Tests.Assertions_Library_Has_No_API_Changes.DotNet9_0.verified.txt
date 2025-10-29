@@ -1680,6 +1680,7 @@ namespace .Conditions
     public class WaitsForAssertion<TValue> : .<TValue>
     {
         public WaitsForAssertion(.<TValue> context, <.<TValue>, .<TValue>> assertionBuilder,  timeout, ? pollingInterval = default) { }
+        public override .<TValue?> AssertAsync() { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
