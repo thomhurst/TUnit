@@ -25,7 +25,6 @@ public class RunPublicAPITestsModule : TestBaseModule
                 ["DISABLE_GITHUB_REPORTER"] = "true",
                 ["GITHUB_ACTIONS"] = "false",
             },
-            Arguments = ["--fail-fast"]
         });
     }
 }
