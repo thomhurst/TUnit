@@ -3,133 +3,54 @@ using System.Threading.Tasks;
 
 namespace UnifiedTests;
 
-#if MSTEST
 [TestClass]
-#elif NUNIT
-[TestFixture]
-#endif
 public class DataDrivenTests
 {
-#if TUNIT
-    [Test]
-    [Arguments(1, 2, 3)]
-    [Arguments(10, 20, 30)]
-    [Arguments(-5, 5, 0)]
-    [Arguments(100, 200, 300)]
+    [DataDrivenTest]
+    [TestData(1, 2, 3)]
+    [TestData(10, 20, 30)]
+    [TestData(-5, 5, 0)]
+    [TestData(100, 200, 300)]
     public void ParameterizedAdditionTest(int a, int b, int expected)
-#elif XUNIT || XUNIT3
-    [Theory]
-    [InlineData(1, 2, 3)]
-    [InlineData(10, 20, 30)]
-    [InlineData(-5, 5, 0)]
-    [InlineData(100, 200, 300)]
-    public void ParameterizedAdditionTest(int a, int b, int expected)
-#elif NUNIT
-    [TestCase(1, 2, 3)]
-    [TestCase(10, 20, 30)]
-    [TestCase(-5, 5, 0)]
-    [TestCase(100, 200, 300)]
-    public void ParameterizedAdditionTest(int a, int b, int expected)
-#elif MSTEST
-    [TestMethod]
-    [DataRow(1, 2, 3)]
-    [DataRow(10, 20, 30)]
-    [DataRow(-5, 5, 0)]
-    [DataRow(100, 200, 300)]
-    public void ParameterizedAdditionTest(int a, int b, int expected)
-#endif
     {
         var result = a + b;
+        var doubled = result * 2;
     }
 
-#if TUNIT
-    [Test]
-    [Arguments("hello", "HELLO")]
-    [Arguments("world", "WORLD")]
-    [Arguments("TUnit", "TUNIT")]
-    [Arguments("Testing", "TESTING")]
-    [Arguments("Framework", "FRAMEWORK")]
+    [DataDrivenTest]
+    [TestData("hello", "HELLO")]
+    [TestData("world", "WORLD")]
+    [TestData("TUnit", "TUNIT")]
+    [TestData("Testing", "TESTING")]
+    [TestData("Framework", "FRAMEWORK")]
     public void ParameterizedStringTest(string input, string expected)
-#elif XUNIT || XUNIT3
-    [Theory]
-    [InlineData("hello", "HELLO")]
-    [InlineData("world", "WORLD")]
-    [InlineData("xUnit", "XUNIT")]
-    [InlineData("Testing", "TESTING")]
-    [InlineData("Framework", "FRAMEWORK")]
-    public void ParameterizedStringTest(string input, string expected)
-#elif NUNIT
-    [TestCase("hello", "HELLO")]
-    [TestCase("world", "WORLD")]
-    [TestCase("NUnit", "NUNIT")]
-    [TestCase("Testing", "TESTING")]
-    [TestCase("Framework", "FRAMEWORK")]
-    public void ParameterizedStringTest(string input, string expected)
-#elif MSTEST
-    [TestMethod]
-    [DataRow("hello", "HELLO")]
-    [DataRow("world", "WORLD")]
-    [DataRow("MSTest", "MSTEST")]
-    [DataRow("Testing", "TESTING")]
-    [DataRow("Framework", "FRAMEWORK")]
-    public void ParameterizedStringTest(string input, string expected)
-#endif
     {
-        Console.WriteLine($"{input} {expected}");
+        var upper = input.ToUpper();
+        var length = input.Length + expected.Length;
     }
 
-#if TUNIT
-    [Test]
-    [MethodDataSource(nameof(ComplexTestData))]
-    public void DataSourceTest(TestData data)
-#elif XUNIT || XUNIT3
-    [Theory]
-    [MemberData(nameof(ComplexTestData))]
-    public void DataSourceTest(TestData data)
-#elif NUNIT
-    [Test]
-    [TestCaseSource(nameof(ComplexTestData))]
-    public void DataSourceTest(TestData data)
-#elif MSTEST
-    [TestMethod]
-    [DynamicData(nameof(ComplexTestData), DynamicDataSourceType.Method)]
-    public void DataSourceTest(TestData data)
+    [DataDrivenTest]
+#if MSTEST
+    [TestDataSource(nameof(ComplexTestData), DynamicDataSourceType.Method)]
+#else
+    [TestDataSource(nameof(ComplexTestData))]
 #endif
+    public void DataSourceTest(TestData data)
     {
-        ProcessTestData(data);
+        var result = ProcessTestData(data);
+        var total = result.ProcessedValue + data.Value;
     }
 
-#if TUNIT
-    [Test]
-    [Arguments(new int[] { 1, 2, 3, 4, 5 }, 15)]
-    [Arguments(new int[] { 10, 20, 30 }, 60)]
-    [Arguments(new int[] { -5, 0, 5 }, 0)]
-    [Arguments(new int[] { 100 }, 100)]
+    [DataDrivenTest]
+    [TestData(new int[] { 1, 2, 3, 4, 5 }, 15)]
+    [TestData(new int[] { 10, 20, 30 }, 60)]
+    [TestData(new int[] { -5, 0, 5 }, 0)]
+    [TestData(new int[] { 100 }, 100)]
     public void ArrayParameterTest(int[] numbers, int expectedSum)
-#elif XUNIT || XUNIT3
-    [Theory]
-    [InlineData(new int[] { 1, 2, 3, 4, 5 }, 15)]
-    [InlineData(new int[] { 10, 20, 30 }, 60)]
-    [InlineData(new int[] { -5, 0, 5 }, 0)]
-    [InlineData(new int[] { 100 }, 100)]
-    public void ArrayParameterTest(int[] numbers, int expectedSum)
-#elif NUNIT
-    [TestCase(new int[] { 1, 2, 3, 4, 5 }, 15)]
-    [TestCase(new int[] { 10, 20, 30 }, 60)]
-    [TestCase(new int[] { -5, 0, 5 }, 0)]
-    [TestCase(new int[] { 100 }, 100)]
-    public void ArrayParameterTest(int[] numbers, int expectedSum)
-#elif MSTEST
-    [TestMethod]
-    [DataRow(new int[] { 1, 2, 3, 4, 5 }, 15)]
-    [DataRow(new int[] { 10, 20, 30 }, 60)]
-    [DataRow(new int[] { -5, 0, 5 }, 0)]
-    [DataRow(new int[] { 100 }, 100)]
-    public void ArrayParameterTest(int[] numbers, int expectedSum)
-#endif
     {
-        _ = numbers.Sum();
-        _ = numbers.Average();
+        var sum = numbers.Sum();
+        var average = numbers.Length > 0 ? numbers.Average() : 0;
+        var combined = sum + expectedSum;
     }
 
 #if TUNIT

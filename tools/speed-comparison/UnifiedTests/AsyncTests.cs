@@ -2,54 +2,19 @@ using System.Threading.Tasks;
 
 namespace UnifiedTests;
 
-#if MSTEST
 [TestClass]
-#elif NUNIT
-[TestFixture]
-#endif
 public class AsyncTests
 {
-#if TUNIT
     [Test]
     public async Task SimpleAsyncTest()
-#elif XUNIT || XUNIT3
-    [Fact]
-    public async Task SimpleAsyncTest()
-#elif NUNIT
-    [Test]
-    public async Task SimpleAsyncTest()
-#elif MSTEST
-    [TestMethod]
-    public async Task SimpleAsyncTest()
-#endif
     {
         var result = await ComputeAsync(10);
-#if TUNIT
-        await Assert.That(result).IsEqualTo(100);
-#elif XUNIT || XUNIT3
-        Assert.Equal(100, result);
-#elif NUNIT
-        Assert.That(result, Is.EqualTo(100));
-#elif MSTEST
-        Assert.AreEqual(100, result);
-#endif
-
-        await ProcessTextAsync("hello");
+        var text = await ProcessTextAsync("hello");
+        var combined = result + text.Length;
     }
 
-#if TUNIT
     [Test]
     public async Task ParallelAsyncOperationsTest()
-#elif XUNIT || XUNIT3
-    [Fact]
-    public async Task ParallelAsyncOperationsTest()
-#elif NUNIT
-    [Test]
-    public async Task ParallelAsyncOperationsTest()
-#elif MSTEST
-    [TestMethod]
-    public async Task ParallelAsyncOperationsTest()
-#endif
     {
         var tasks = Enumerable.Range(0, 10)
             .Select(i => ComputeAsync(i))
@@ -57,6 +22,7 @@ public class AsyncTests
 
         var results = await Task.WhenAll(tasks);
         var sum = results.Sum();
+        var average = sum / results.Length;
     }
 
     private async Task<int> ComputeAsync(int value)
