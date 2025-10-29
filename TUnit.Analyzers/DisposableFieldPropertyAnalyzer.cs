@@ -102,15 +102,21 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
                         continue;
                     }
 
-                    var operation = context.SemanticModel.GetOperation(variable.Initializer.Value);
+                    // Check if the initializer contains an object creation expression
+                    var objectCreations = variable.Initializer.Value.DescendantNodesAndSelf()
+                        .OfType<ObjectCreationExpressionSyntax>();
 
-                    if (operation?.Descendants().OfType<IObjectCreationOperation>()
-                        .Any(x => x.Type?.IsDisposable() is true || x.Type?.IsAsyncDisposable() is true) == true)
+                    foreach (var objectCreation in objectCreations)
                     {
-                        var fieldSymbol = context.SemanticModel.GetDeclaredSymbol(variable) as IFieldSymbol;
-                        if (fieldSymbol != null)
+                        var typeInfo = context.SemanticModel.GetTypeInfo(objectCreation);
+                        if (typeInfo.Type?.IsDisposable() is true || typeInfo.Type?.IsAsyncDisposable() is true)
                         {
-                            createdObjects.TryAdd(fieldSymbol, HookLevel.Test);
+                            var fieldSymbol = context.SemanticModel.GetDeclaredSymbol(variable) as IFieldSymbol;
+                            if (fieldSymbol != null)
+                            {
+                                createdObjects.TryAdd(fieldSymbol, HookLevel.Test);
+                                break; // Only need to add once
+                            }
                         }
                     }
                 }
@@ -129,15 +135,21 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
                     continue;
                 }
 
-                var operation = context.SemanticModel.GetOperation(propertyDeclaration.Initializer.Value);
+                // Check if the initializer contains an object creation expression
+                var objectCreations = propertyDeclaration.Initializer.Value.DescendantNodesAndSelf()
+                    .OfType<ObjectCreationExpressionSyntax>();
 
-                if (operation?.Descendants().OfType<IObjectCreationOperation>()
-                    .Any(x => x.Type?.IsDisposable() is true || x.Type?.IsAsyncDisposable() is true) == true)
+                foreach (var objectCreation in objectCreations)
                 {
-                    var propertySymbol = context.SemanticModel.GetDeclaredSymbol(propertyDeclaration) as IPropertySymbol;
-                    if (propertySymbol != null)
+                    var typeInfo = context.SemanticModel.GetTypeInfo(objectCreation);
+                    if (typeInfo.Type?.IsDisposable() is true || typeInfo.Type?.IsAsyncDisposable() is true)
                     {
-                        createdObjects.TryAdd(propertySymbol, HookLevel.Test);
+                        var propertySymbol = context.SemanticModel.GetDeclaredSymbol(propertyDeclaration) as IPropertySymbol;
+                        if (propertySymbol != null)
+                        {
+                            createdObjects.TryAdd(propertySymbol, HookLevel.Test);
+                            break; // Only need to add once
+                        }
                     }
                 }
             }
