@@ -77,43 +77,67 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 
     private static void CheckFieldInitializers(SyntaxNodeAnalysisContext context, INamedTypeSymbol namedTypeSymbol, bool isStatic, ConcurrentDictionary<ISymbol, HookLevel?> createdObjects)
     {
-        var fieldsAndProperties = namedTypeSymbol.GetMembers()
-            .Where(m => (m is IFieldSymbol || m is IPropertySymbol) && m.IsStatic == isStatic)
-            .ToArray();
-
-        foreach (var member in fieldsAndProperties)
+        // Directly traverse the class syntax to find field declarations
+        if (context.Node is not ClassDeclarationSyntax classDeclaration)
         {
-            foreach (var syntaxReference in member.DeclaringSyntaxReferences)
-            {
-                var syntax = syntaxReference.GetSyntax();
+            return;
+        }
 
-                // Check for field initializers: private HttpClient _client = new HttpClient();
-                if (syntax is VariableDeclaratorSyntax variableDeclarator && variableDeclarator.Initializer != null)
+        var members = classDeclaration.Members;
+
+        foreach (var member in members)
+        {
+            // Handle field declarations: private HttpClient _client = new HttpClient();
+            if (member is FieldDeclarationSyntax fieldDeclaration)
+            {
+                if (fieldDeclaration.Modifiers.Any(SyntaxKind.StaticKeyword) != isStatic)
                 {
-                    var operation = context.SemanticModel.GetOperation(variableDeclarator.Initializer.Value);
+                    continue;
+                }
+
+                foreach (var variable in fieldDeclaration.Declaration.Variables)
+                {
+                    if (variable.Initializer == null)
+                    {
+                        continue;
+                    }
+
+                    var operation = context.SemanticModel.GetOperation(variable.Initializer.Value);
 
                     if (operation?.Descendants().OfType<IObjectCreationOperation>()
                         .Any(x => x.Type?.IsDisposable() is true || x.Type?.IsAsyncDisposable() is true) == true)
                     {
-                        if (member is IFieldSymbol fieldSymbol)
+                        var fieldSymbol = context.SemanticModel.GetDeclaredSymbol(variable) as IFieldSymbol;
+                        if (fieldSymbol != null)
                         {
                             createdObjects.TryAdd(fieldSymbol, HookLevel.Test);
                         }
                     }
                 }
+            }
 
-                // Check for property initializers: public HttpClient Client { get; set; } = new HttpClient();
-                if (syntax is PropertyDeclarationSyntax propertyDeclaration && propertyDeclaration.Initializer != null)
+            // Handle property declarations: public HttpClient Client { get; set; } = new HttpClient();
+            if (member is PropertyDeclarationSyntax propertyDeclaration)
+            {
+                if (propertyDeclaration.Modifiers.Any(SyntaxKind.StaticKeyword) != isStatic)
                 {
-                    var operation = context.SemanticModel.GetOperation(propertyDeclaration.Initializer.Value);
+                    continue;
+                }
 
-                    if (operation?.Descendants().OfType<IObjectCreationOperation>()
-                        .Any(x => x.Type?.IsDisposable() is true || x.Type?.IsAsyncDisposable() is true) == true)
+                if (propertyDeclaration.Initializer == null)
+                {
+                    continue;
+                }
+
+                var operation = context.SemanticModel.GetOperation(propertyDeclaration.Initializer.Value);
+
+                if (operation?.Descendants().OfType<IObjectCreationOperation>()
+                    .Any(x => x.Type?.IsDisposable() is true || x.Type?.IsAsyncDisposable() is true) == true)
+                {
+                    var propertySymbol = context.SemanticModel.GetDeclaredSymbol(propertyDeclaration) as IPropertySymbol;
+                    if (propertySymbol != null)
                     {
-                        if (member is IPropertySymbol propertySymbol)
-                        {
-                            createdObjects.TryAdd(propertySymbol, HookLevel.Test);
-                        }
+                        createdObjects.TryAdd(propertySymbol, HookLevel.Test);
                     }
                 }
             }
