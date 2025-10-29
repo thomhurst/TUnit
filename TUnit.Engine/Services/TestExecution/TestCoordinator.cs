@@ -24,6 +24,9 @@ internal sealed class TestCoordinator : ITestCoordinator
     private readonly TUnitFrameworkLogger _logger;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
 
+    private readonly HashSet<TestDetails> _dependenciesBuffer = new HashSet<TestDetails>();
+    private readonly HashSet<AbstractExecutableTest> _visitedBuffer = new HashSet<AbstractExecutableTest>();
+
     public TestCoordinator(
         TestExecutionGuard executionGuard,
         TestStateManager stateManager,
@@ -68,10 +71,11 @@ internal sealed class TestCoordinator : ITestCoordinator
 
             TestContext.Current = test.Context;
 
-            var allDependencies = new HashSet<TestDetails>();
-            CollectAllDependencies(test, allDependencies, new HashSet<AbstractExecutableTest>());
+            _dependenciesBuffer.Clear();
+            _visitedBuffer.Clear();
+            CollectAllDependencies(test, _dependenciesBuffer, _visitedBuffer);
 
-            foreach (var dependency in allDependencies)
+            foreach (var dependency in _dependenciesBuffer)
             {
                 test.Context.Dependencies.Add(dependency);
             }

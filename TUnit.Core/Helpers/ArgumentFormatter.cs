@@ -25,16 +25,26 @@ public static class ArgumentFormatter
 
     public static string FormatArguments(IEnumerable<object?> arguments)
     {
-        var list = arguments as IList<object?> ?? arguments.ToList();
-        if (list.Count == 0)
-            return string.Empty;
-            
-        var formatted = new string[list.Count];
-        for (int i = 0; i < list.Count; i++)
+        if (arguments is IList<object?> list)
         {
-            formatted[i] = FormatDefault(list[i]);
+            if (list.Count == 0)
+                return string.Empty;
+
+            var formatted = new string[list.Count];
+            for (int i = 0; i < list.Count; i++)
+            {
+                formatted[i] = FormatDefault(list[i]);
+            }
+            return string.Join(", ", formatted);
         }
-        return string.Join(", ", formatted);
+
+        var elements = new List<string>();
+        foreach (var arg in arguments)
+        {
+            elements.Add(FormatDefault(arg));
+        }
+
+        return elements.Count == 0 ? string.Empty : string.Join(", ", elements);
     }
 
     private static string FormatDefault(object? o)
