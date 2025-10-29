@@ -1225,7 +1225,6 @@ namespace
         public .ClassHookContext ClassContext { get; }
         public int CurrentRetryAttempt { get; }
         public .? CustomHookExecutor { get; set; }
-        public . Data { get; }
         public . Dependencies { get; }
         public ? DisplayNameFormatter { get; set; }
         public .TestContextEvents Events { get; }
@@ -1245,6 +1244,7 @@ namespace
         public <.TestContext, , int, .<bool>>? RetryFunc { get; set; }
         public  Services { get; }
         public string? SkipReason { get; set; }
+        public . StateBag { get; }
         public .TestDetails TestDetails { get; set; }
         public ? TestEnd { get; set; }
         public ? TestStart { get; set; }
@@ -2245,10 +2245,6 @@ namespace .Interfaces
         int RetryLimit { get; }
         ? Timeout { get; }
     }
-    public interface ITestData
-    {
-        .<string, object?> Bag { get; }
-    }
     public interface ITestDependencies
     {
         .<.TestDetails> DependsOn { get; }
@@ -2370,6 +2366,10 @@ namespace .Interfaces
     public interface ITestStartEventReceiver : .
     {
         . OnTestStart(.TestContext context);
+    }
+    public interface ITestStateBag
+    {
+        .<string, object?> Bag { get; }
     }
     public interface ITypedTestMetadata
     {
