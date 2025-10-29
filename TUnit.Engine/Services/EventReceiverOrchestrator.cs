@@ -422,23 +422,13 @@ internal sealed class EventReceiverOrchestrator : IDisposable
         foreach (var group in contexts.GroupBy(c => c.ClassContext.AssemblyContext.Assembly.GetName().FullName))
         {
             var counter = _assemblyTestCounts.GetOrAdd(group.Key, static _ => new Counter());
-            var groupCount = group.Count();
-
-            for (var i = 0; i < groupCount; i++)
-            {
-                counter.Increment();
-            }
+            counter.Add(group.Count());
         }
 
         foreach (var group in contexts.GroupBy(c => c.ClassContext.ClassType))
         {
             var counter = _classTestCounts.GetOrAdd(group.Key, static _ => new Counter());
-            var groupCount = group.Count();
-
-            for (var i = 0; i < groupCount; i++)
-            {
-                counter.Increment();
-            }
+            counter.Add(group.Count());
         }
     }
 
