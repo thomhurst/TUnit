@@ -459,9 +459,10 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
         if (data.IsExtensionMethod)
         {
-            // Extension method syntax: value.MethodName<T1, T2>(params)
+            // Extension method syntax: value!.MethodName<T1, T2>(params)
+            // Use null-forgiving operator since we've already checked for null above
             var paramList = string.Join(", ", data.AdditionalParameters.Select(p => $"_{p.Name}"));
-            return $"value.{methodName}{typeArguments}({paramList})";
+            return $"value!.{methodName}{typeArguments}({paramList})";
         }
         else
         {
