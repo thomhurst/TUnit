@@ -46,6 +46,16 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var methodSymbols = methods.Where(x => x.IsStatic == isStaticMethod).ToArray();
 
+        // Check field initializers first
+        if (context.Node is ClassDeclarationSyntax classDeclarationSyntax)
+        {
+            var namedTypeSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
+            if (namedTypeSymbol != null)
+            {
+                CheckFieldInitializers(context, namedTypeSymbol, isStaticMethod, createdObjects);
+            }
+        }
+
         foreach (var methodSymbol in methodSymbols)
         {
             CheckSetUps(context, methodSymbol, createdObjects);
@@ -62,6 +72,51 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 
             context.ReportDiagnostic(Diagnostic.Create(Rules.Dispose_Member_In_Cleanup,
                 createdObject.Locations.FirstOrDefault(), createdObject.Name));
+        }
+    }
+
+    private static void CheckFieldInitializers(SyntaxNodeAnalysisContext context, INamedTypeSymbol namedTypeSymbol, bool isStatic, ConcurrentDictionary<ISymbol, HookLevel?> createdObjects)
+    {
+        var fieldsAndProperties = namedTypeSymbol.GetMembers()
+            .Where(m => (m is IFieldSymbol || m is IPropertySymbol) && m.IsStatic == isStatic)
+            .ToArray();
+
+        foreach (var member in fieldsAndProperties)
+        {
+            foreach (var syntaxReference in member.DeclaringSyntaxReferences)
+            {
+                var syntax = syntaxReference.GetSyntax();
+
+                // Check for field initializers: private HttpClient _client = new HttpClient();
+                if (syntax is VariableDeclaratorSyntax variableDeclarator && variableDeclarator.Initializer != null)
+                {
+                    var operation = context.SemanticModel.GetOperation(variableDeclarator.Initializer.Value);
+
+                    if (operation?.Descendants().OfType<IObjectCreationOperation>()
+                        .Any(x => x.Type?.IsDisposable() is true || x.Type?.IsAsyncDisposable() is true) == true)
+                    {
+                        if (member is IFieldSymbol fieldSymbol)
+                        {
+                            createdObjects.TryAdd(fieldSymbol, HookLevel.Test);
+                        }
+                    }
+                }
+
+                // Check for property initializers: public HttpClient Client { get; set; } = new HttpClient();
+                if (syntax is PropertyDeclarationSyntax propertyDeclaration && propertyDeclaration.Initializer != null)
+                {
+                    var operation = context.SemanticModel.GetOperation(propertyDeclaration.Initializer.Value);
+
+                    if (operation?.Descendants().OfType<IObjectCreationOperation>()
+                        .Any(x => x.Type?.IsDisposable() is true || x.Type?.IsAsyncDisposable() is true) == true)
+                    {
+                        if (member is IPropertySymbol propertySymbol)
+                        {
+                            createdObjects.TryAdd(propertySymbol, HookLevel.Test);
+                        }
+                    }
+                }
+            }
         }
     }
 
