@@ -178,6 +178,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Migration Guides',
       items: [
+        'migration/testcontext-interface-organization',
         'migration/xunit',
         'migration/nunit',
         'migration/mstest',
