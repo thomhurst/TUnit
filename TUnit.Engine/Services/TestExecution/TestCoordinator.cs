@@ -24,8 +24,8 @@ internal sealed class TestCoordinator : ITestCoordinator
     private readonly TUnitFrameworkLogger _logger;
     private readonly EventReceiverOrchestrator _eventReceiverOrchestrator;
 
-    private readonly HashSet<TestDetails> _dependenciesBuffer = new HashSet<TestDetails>();
-    private readonly HashSet<AbstractExecutableTest> _visitedBuffer = new HashSet<AbstractExecutableTest>();
+    private readonly HashSet<TestDetails> _dependenciesBuffer = [];
+    private readonly HashSet<AbstractExecutableTest> _visitedBuffer = [];
 
     public TestCoordinator(
         TestExecutionGuard executionGuard,

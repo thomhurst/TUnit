@@ -17,15 +17,15 @@ internal sealed class PropertyInitializationPipeline
     public PropertyInitializationPipeline(DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
     {
         _dataSourceInitializer = dataSourceInitializer ?? throw new ArgumentNullException(nameof(dataSourceInitializer));
-        _strategies = new List<IPropertyInitializationStrategy>
-        {
+        _strategies =
+        [
             new SourceGeneratedPropertyStrategy(dataSourceInitializer, objectRegistrationService),
             new ReflectionPropertyStrategy(dataSourceInitializer, objectRegistrationService),
             new NestedPropertyStrategy(dataSourceInitializer, objectRegistrationService)
-        };
+        ];
 
-        _beforeSteps = new List<Func<PropertyInitializationContext, Task>>();
-        _afterSteps = new List<Func<PropertyInitializationContext, Task>>();
+        _beforeSteps = [];
+        _afterSteps = [];
     }
 
     /// <summary>

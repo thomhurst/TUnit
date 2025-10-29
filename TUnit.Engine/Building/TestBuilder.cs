@@ -124,7 +124,7 @@ internal sealed class TestBuilder : ITestBuilder
             if (!CouldTestMatchFilter(buildingContext.Filter, metadata))
             {
                 // This test class cannot match the filter - skip all expensive work!
-                return Array.Empty<AbstractExecutableTest>();
+                return [];
             }
         }
 
@@ -1520,7 +1520,7 @@ internal sealed class TestBuilder : ITestBuilder
             }
 
             // Create instance factory
-            var attributes = contextAccessor.Current.InitializedAttributes ?? Array.Empty<Attribute>();
+            var attributes = contextAccessor.Current.InitializedAttributes ?? [];
             var basicSkipReason = GetBasicSkipReason(metadata, attributes);
             Func<Task<object>> instanceFactory;
 
@@ -1667,7 +1667,7 @@ internal sealed class TestBuilder : ITestBuilder
         var constructor = typeof(TreeNodeFilter).GetConstructors(
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)[0];
 
-        return (TreeNodeFilter)constructor.Invoke(new object[] { filterString });
+        return (TreeNodeFilter)constructor.Invoke([filterString]);
     }
 #pragma warning restore TPEXP
 

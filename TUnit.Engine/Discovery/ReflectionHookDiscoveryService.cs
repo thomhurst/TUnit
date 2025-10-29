@@ -705,7 +705,7 @@ internal sealed class ReflectionHookDiscoveryService
             return;
         }
 
-        var bag = Sources.BeforeTestHooks.GetOrAdd(type, static _ => new ConcurrentBag<InstanceHookMethod>());
+        var bag = Sources.BeforeTestHooks.GetOrAdd(type, static _ => []);
         var hook = new InstanceHookMethod
         {
             InitClassType = type,
@@ -730,7 +730,7 @@ internal sealed class ReflectionHookDiscoveryService
             return;
         }
 
-        var bag = Sources.AfterTestHooks.GetOrAdd(type, static _ => new ConcurrentBag<InstanceHookMethod>());
+        var bag = Sources.AfterTestHooks.GetOrAdd(type, static _ => []);
         var hook = new InstanceHookMethod
         {
             InitClassType = type,
@@ -749,7 +749,7 @@ internal sealed class ReflectionHookDiscoveryService
         MethodInfo method,
         int order)
     {
-        var bag = Sources.BeforeClassHooks.GetOrAdd(type, static _ => new ConcurrentBag<BeforeClassHookMethod>());
+        var bag = Sources.BeforeClassHooks.GetOrAdd(type, static _ => []);
         var hook = new BeforeClassHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
@@ -769,7 +769,7 @@ internal sealed class ReflectionHookDiscoveryService
         MethodInfo method,
         int order)
     {
-        var bag = Sources.AfterClassHooks.GetOrAdd(type, static _ => new ConcurrentBag<AfterClassHookMethod>());
+        var bag = Sources.AfterClassHooks.GetOrAdd(type, static _ => []);
         var hook = new AfterClassHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
@@ -790,7 +790,7 @@ internal sealed class ReflectionHookDiscoveryService
         MethodInfo method,
         int order)
     {
-        var bag = Sources.BeforeAssemblyHooks.GetOrAdd(assembly, static _ => new ConcurrentBag<BeforeAssemblyHookMethod>());
+        var bag = Sources.BeforeAssemblyHooks.GetOrAdd(assembly, static _ => []);
         var hook = new BeforeAssemblyHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
@@ -811,7 +811,7 @@ internal sealed class ReflectionHookDiscoveryService
         MethodInfo method,
         int order)
     {
-        var bag = Sources.AfterAssemblyHooks.GetOrAdd(assembly, static _ => new ConcurrentBag<AfterAssemblyHookMethod>());
+        var bag = Sources.AfterAssemblyHooks.GetOrAdd(assembly, static _ => []);
         var hook = new AfterAssemblyHookMethod
         {
             MethodInfo = CreateMethodMetadata(type, method),
