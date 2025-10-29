@@ -76,21 +76,6 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that the string is equal to the expected value using the specified comparison.
-    /// Uses .WithComparison() since StringEqualsAssertion doesn't have a constructor for this.
-    /// </summary>
-    public static StringEqualsAssertion IsEqualTo(
-        this IAssertionSource<string> source,
-        string? expected,
-        StringComparison comparison,
-        [CallerArgumentExpression(nameof(expected))] string? expression = null)
-    {
-        source.Context.ExpressionBuilder.Append($".IsEqualTo({expression}, {comparison})");
-        var assertion = new StringEqualsAssertion(source.Context, expected);
-        return assertion.WithComparison(comparison);
-    }
-
-    /// <summary>
     /// Asserts that the numeric value is greater than zero (positive).
     /// </summary>
     public static GreaterThanAssertion<TValue> IsPositive<TValue>(

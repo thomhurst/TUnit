@@ -13,9 +13,9 @@ public class StringEqualsAssertion : Assertion<string>
 {
     private readonly string? _expected;
     private StringComparison _comparison = StringComparison.Ordinal;
-    private bool _trimming = false;
-    private bool _nullAndEmptyEquality = false;
-    private bool _ignoringWhitespace = false;
+    private bool _trimming;
+    private bool _nullAndEmptyEquality;
+    private bool _ignoringWhitespace;
 
     public StringEqualsAssertion(
         AssertionContext<string> context,
@@ -23,6 +23,16 @@ public class StringEqualsAssertion : Assertion<string>
         : base(context)
     {
         _expected = expected;
+    }
+
+    public StringEqualsAssertion(
+        AssertionContext<string> context,
+        string? expected,
+        StringComparison comparison)
+        : base(context)
+    {
+        _expected = expected;
+        _comparison = comparison;
     }
 
     /// <summary>
