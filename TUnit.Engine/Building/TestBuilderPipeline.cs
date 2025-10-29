@@ -124,13 +124,8 @@ internal sealed class TestBuilderPipeline
 
     private async Task<AbstractExecutableTest[]> GenerateDynamicTests(TestMetadata metadata)
     {
-        // Get attributes first
-        var attributes = metadata.AttributeFactory() ?? [];
-
-        // Extract repeat count from attributes
-        var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
-        var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
-        var repeatCount = repeatAttr?.Times ?? 0;
+        // Use pre-extracted repeat count from metadata (avoids instantiating attributes)
+        var repeatCount = metadata.RepeatCount ?? 0;
 
         return await Enumerable.Range(0, repeatCount + 1)
             .SelectAsync(async repeatIndex =>
@@ -247,13 +242,11 @@ internal sealed class TestBuilderPipeline
                 [
                 ];
 
-                // Get attributes first
-                var attributes = resolvedMetadata.AttributeFactory?.Invoke() ?? [];
+                // Use pre-extracted repeat count from metadata (avoids instantiating attributes)
+                var repeatCount = resolvedMetadata.RepeatCount ?? 0;
 
-                // Extract repeat count from attributes
-                var filteredAttributes = ScopedAttributeFilter.FilterScopedAttributes(attributes);
-                var repeatAttr = filteredAttributes.OfType<RepeatAttribute>().FirstOrDefault();
-                var repeatCount = repeatAttr?.Times ?? 0;
+                // Get attributes for test details
+                var attributes = resolvedMetadata.AttributeFactory?.Invoke() ?? [];
 
                 // Dynamic tests need to honor attributes like RepeatCount, RetryCount, etc.
                 // We'll create multiple test instances based on RepeatCount

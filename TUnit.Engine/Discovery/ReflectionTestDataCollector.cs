@@ -896,6 +896,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 GenericMethodInfo = ReflectionGenericTypeResolver.ExtractGenericMethodInfo(testMethod),
                 GenericMethodTypeArguments = testMethod.IsGenericMethodDefinition ? null : testMethod.GetGenericArguments(),
                 AttributeFactory = () => ReflectionAttributeExtractor.GetAllAttributes(testClass, testMethod),
+                RepeatCount = testMethod.GetCustomAttribute<RepeatAttribute>()?.Times
+                    ?? testClass.GetCustomAttribute<RepeatAttribute>()?.Times,
                 PropertyInjections = PropertySourceRegistry.DiscoverInjectableProperties(testClass),
                 InheritanceDepth = inheritanceDepth
             });

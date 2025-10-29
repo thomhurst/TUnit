@@ -567,6 +567,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("],");
 
+        // Extract and emit RepeatCount if present
+        var repeatCount = ExtractRepeatCount(methodSymbol, testMethod.TypeSymbol);
+        if (repeatCount.HasValue)
+        {
+            writer.AppendLine($"RepeatCount = {repeatCount.Value},");
+        }
+
         GenerateDataSources(writer, testMethod);
 
         GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
@@ -606,6 +613,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.Unindent();
         writer.AppendLine("],");
+
+        // Extract and emit RepeatCount if present
+        var repeatCount = ExtractRepeatCount(methodSymbol, testMethod.TypeSymbol);
+        if (repeatCount.HasValue)
+        {
+            writer.AppendLine($"RepeatCount = {repeatCount.Value},");
+        }
 
         // No data sources for concrete instantiations
         writer.AppendLine("DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
@@ -4409,6 +4423,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("],");
 
+        // Extract and emit RepeatCount if present
+        var repeatCount = ExtractRepeatCount(methodSymbol, typeSymbol);
+        if (repeatCount.HasValue)
+        {
+            writer.AppendLine($"RepeatCount = {repeatCount.Value},");
+        }
+
         // Filter data sources based on the specific attribute
         List<AttributeData> methodDataSources;
         List<AttributeData> classDataSources;
@@ -4731,6 +4752,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("],");
 
+        // Extract and emit RepeatCount if present
+        var repeatCount = ExtractRepeatCount(testMethod.MethodSymbol, testMethod.TypeSymbol);
+        if (repeatCount.HasValue)
+        {
+            writer.AppendLine($"RepeatCount = {repeatCount.Value},");
+        }
+
         if (methodDataSourceAttribute == null)
         {
             writer.AppendLine("DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
@@ -4834,6 +4862,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("};");
 
         writer.AppendLine("yield return metadata;");
+    }
+
+    private static int? ExtractRepeatCount(IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol)
+    {
+        // Check method-level RepeatAttribute first
+        var repeatAttribute = methodSymbol.GetAttributes()
+            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute");
+
+        if (repeatAttribute?.ConstructorArguments.Length > 0
+            && repeatAttribute.ConstructorArguments[0].Value is int methodCount)
+        {
+            return methodCount;
+        }
+
+        // Check class-level RepeatAttribute (can be inherited)
+        var classRepeatAttr = typeSymbol.GetAttributesIncludingBaseTypes()
+            .FirstOrDefault(a => a.AttributeClass?.Name == "RepeatAttribute");
+
+        if (classRepeatAttr?.ConstructorArguments.Length > 0
+            && classRepeatAttr.ConstructorArguments[0].Value is int classCount)
+        {
+            return classCount;
+        }
+
+        // No repeat attribute found
+        return null;
     }
 }
 
