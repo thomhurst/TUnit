@@ -255,8 +255,15 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                     },
                     InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.GenericMethodTests)instance;
-                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.AggregateBy_HasExpectedOutput<int, int, int>((global::System.Collections.Generic.IEnumerable<int>)args[0]!, (global::System.Func<int, int>)args[1]!, (global::System.Func<int, int>)args[2]!, (global::System.Func<int, int, int>)args[3]!, (global::System.Collections.Generic.IEqualityComparer<int>)args[4]!, (global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>>)args[5]!));
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.GenericMethodTests)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.AggregateBy_HasExpectedOutput<int, int, int>((global::System.Collections.Generic.IEnumerable<int>)args[0]!, (global::System.Func<int, int>)args[1]!, (global::System.Func<int, int>)args[2]!, (global::System.Func<int, int, int>)args[3]!, (global::System.Collections.Generic.IEqualityComparer<int>)args[4]!, (global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>>)args[5]!));
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,
@@ -409,8 +416,15 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                     },
                     InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.GenericMethodTests)instance;
-                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.AggregateBy_HasExpectedOutput<string, string, string>((global::System.Collections.Generic.IEnumerable<string>)args[0]!, (global::System.Func<string, string>)args[1]!, (global::System.Func<string, string>)args[2]!, (global::System.Func<string, string, string>)args[3]!, (global::System.Collections.Generic.IEqualityComparer<string>)args[4]!, (global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>>)args[5]!));
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.GenericMethodTests)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.AggregateBy_HasExpectedOutput<string, string, string>((global::System.Collections.Generic.IEnumerable<string>)args[0]!, (global::System.Func<string, string>)args[1]!, (global::System.Func<string, string>)args[2]!, (global::System.Func<string, string, string>)args[3]!, (global::System.Collections.Generic.IEqualityComparer<string>)args[4]!, (global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>>)args[5]!));
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,

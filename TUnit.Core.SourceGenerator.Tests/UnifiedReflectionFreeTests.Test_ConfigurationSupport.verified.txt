@@ -57,8 +57,15 @@ internal sealed class TUnit_TestProject_ConfigurationTest_TestWithConfiguration_
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConfigurationTest(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.TestWithConfiguration();
-                return default(global::System.Threading.Tasks.ValueTask);
+                try
+                {
+                    instance.TestWithConfiguration();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

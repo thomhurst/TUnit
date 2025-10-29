@@ -76,8 +76,15 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests2_Base_Derived
             },
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.Base_Derived1();
-                return default(global::System.Threading.Tasks.ValueTask);
+                try
+                {
+                    instance.Base_Derived1();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -175,8 +182,15 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests2_Base_Derived
             },
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.Base_Derived2();
-                return default(global::System.Threading.Tasks.ValueTask);
+                try
+                {
+                    instance.Base_Derived2();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

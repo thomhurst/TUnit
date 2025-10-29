@@ -76,7 +76,14 @@ internal sealed class TUnit_TestProject_Bugs__1589_MyTests_Test1_TestSource : gl
             },
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.Test1());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Test1());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

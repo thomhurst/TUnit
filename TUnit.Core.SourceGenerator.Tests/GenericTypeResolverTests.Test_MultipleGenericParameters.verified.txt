@@ -126,8 +126,15 @@ internal sealed class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_T
                     },
                     InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.MultiGenericTestClass<int, string>)instance;
-                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.MultiGenericTestClass<int, string>)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,
@@ -188,8 +195,15 @@ internal sealed class TUnit_TestProject_MultiGenericTestClass_T1_T2_TestMethod_T
                     },
                     InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.MultiGenericTestClass<bool, double>)instance;
-                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.MultiGenericTestClass<bool, double>)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,

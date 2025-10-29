@@ -70,12 +70,19 @@ internal sealed class TUnit_TestProject_Bugs__1603_Tests_Casted_Integer_To_Short
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1603.Tests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.Casted_Integer_To_Short_Converts(TUnit.Core.Helpers.CastHelper.Cast<short>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.Casted_Integer_To_Short_Converts(TUnit.Core.Helpers.CastHelper.Cast<short>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -168,12 +175,19 @@ internal sealed class TUnit_TestProject_Bugs__1603_Tests_Integer_To_Short_Conver
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1603.Tests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.Integer_To_Short_Converts(TUnit.Core.Helpers.CastHelper.Cast<short>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.Integer_To_Short_Converts(TUnit.Core.Helpers.CastHelper.Cast<short>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

@@ -70,12 +70,19 @@ internal sealed class TUnit_TestProject_Bugs__1432_ConstantsInInterpolatedString
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1432.ConstantsInInterpolatedStringsTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.SomeTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.SomeTest(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

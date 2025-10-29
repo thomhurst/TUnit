@@ -70,12 +70,19 @@ internal sealed class TUnit_TestProject_Bugs__2085_Tests_Double_SpecialConsts__d
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2085.Tests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.Double_SpecialConsts(TUnit.Core.Helpers.CastHelper.Cast<double>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.Double_SpecialConsts(TUnit.Core.Helpers.CastHelper.Cast<double>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -168,12 +175,19 @@ internal sealed class TUnit_TestProject_Bugs__2085_Tests_Float_SpecialConsts__fl
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2085.Tests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.Float_SpecialConsts(TUnit.Core.Helpers.CastHelper.Cast<float>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.Float_SpecialConsts(TUnit.Core.Helpers.CastHelper.Cast<float>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

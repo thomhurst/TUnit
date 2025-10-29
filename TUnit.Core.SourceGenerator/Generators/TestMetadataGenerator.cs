@@ -407,6 +407,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
+        // Wrap entire lambda body in try-catch to handle synchronous exceptions
+        writer.AppendLine("try");
+        writer.AppendLine("{");
+        writer.Indent();
+
         // Generate direct method call with specific types (no MakeGenericMethod)
         writer.AppendLine($"var typedInstance = ({className})instance;");
 
@@ -434,6 +439,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         writer.AppendLine($"return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{typeArgsString}>({string.Join(", ", parameterCasts)}));");
+
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("catch (global::System.Exception ex)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));");
+        writer.Unindent();
+        writer.AppendLine("}");
 
         writer.Unindent();
         writer.AppendLine("},");
@@ -1839,6 +1853,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
+        // Wrap entire lambda body in try-catch to handle synchronous exceptions
+        writer.AppendLine("try");
+        writer.AppendLine("{");
+        writer.Indent();
+
         // Only declare context if it's needed (when hasCancellationToken is true and there are parameters)
         if (hasCancellationToken && parametersFromArgs.Length > 0)
         {
@@ -2008,6 +2027,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
         }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("catch (global::System.Exception ex)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));");
+        writer.Unindent();
+        writer.AppendLine("}");
 
         writer.Unindent();
         writer.AppendLine("},");
@@ -4229,6 +4257,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("{");
         writer.Indent();
 
+        // Wrap entire lambda body in try-catch to handle synchronous exceptions
+        writer.AppendLine("try");
+        writer.AppendLine("{");
+        writer.Indent();
+
         testMethod.MethodSymbol.Parameters.Any(p =>
             p.Type.Name == "CancellationToken" &&
             p.Type.ContainingNamespace?.ToString() == "System.Threading");
@@ -4262,6 +4295,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             writer.AppendLine($"return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}({string.Join(", ", parameterCasts)}));");
         }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine("catch (global::System.Exception ex)");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));");
+        writer.Unindent();
+        writer.AppendLine("}");
 
         writer.Unindent();
         writer.AppendLine("}");

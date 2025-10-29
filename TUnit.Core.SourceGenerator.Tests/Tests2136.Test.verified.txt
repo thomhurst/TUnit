@@ -155,8 +155,15 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     },
                     InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
-                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<bool>((bool)args[0]!, (string)args[1]!));
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<bool>((bool)args[0]!, (string)args[1]!));
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,
@@ -237,8 +244,15 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     },
                     InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
-                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<int>((int)args[0]!, (string)args[1]!));
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<int>((int)args[0]!, (string)args[1]!));
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,
@@ -319,8 +333,15 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     },
                     InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
-                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<double>((double)args[0]!, (string)args[1]!));
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<double>((double)args[0]!, (string)args[1]!));
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,
@@ -401,8 +422,15 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     },
                     InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
-                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<string>((string)args[0]!, (string)args[1]!));
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<string>((string)args[0]!, (string)args[1]!));
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,
@@ -483,8 +511,15 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     },
                     InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
-                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>((global::TUnit.TestProject.Bugs._2136.MyEnum)args[0]!, (string)args[1]!));
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.Bugs._2136.Tests)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.GenericArgumentsTest<global::TUnit.TestProject.Bugs._2136.MyEnum>((global::TUnit.TestProject.Bugs._2136.MyEnum)args[0]!, (string)args[1]!));
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,

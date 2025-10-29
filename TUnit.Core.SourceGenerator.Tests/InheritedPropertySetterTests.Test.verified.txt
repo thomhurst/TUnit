@@ -322,7 +322,14 @@ internal sealed class TUnit_TestProject_PropertySetterTests_Test_TestSource : gl
             },
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.Test());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Test());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -566,7 +573,14 @@ internal sealed class TUnit_TestProject_InheritedPropertySetterTests_Test_TestSo
             },
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.Test());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Test());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

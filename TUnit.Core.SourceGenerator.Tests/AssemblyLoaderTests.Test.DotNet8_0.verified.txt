@@ -57,8 +57,15 @@ internal sealed class TUnit_TestProject_BasicTests_SynchronousTest_TestSource : 
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.SynchronousTest();
-                return default(global::System.Threading.Tasks.ValueTask);
+                try
+                {
+                    instance.SynchronousTest();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -137,7 +144,14 @@ internal sealed class TUnit_TestProject_BasicTests_AsynchronousTest_TestSource :
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.AsynchronousTest());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.AsynchronousTest());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -216,7 +230,14 @@ internal sealed class TUnit_TestProject_BasicTests_ValueTaskAsynchronousTest_Tes
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.BasicTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return instance.ValueTaskAsynchronousTest();
+                try
+                {
+                    return instance.ValueTaskAsynchronousTest();
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

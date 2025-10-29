@@ -89,12 +89,19 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ExpectedArgumentTypeTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 2:
-                        return new global::System.Threading.Tasks.ValueTask(instance.TypedArguments(TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 2:
+                            return new global::System.Threading.Tasks.ValueTask(instance.TypedArguments(TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -208,12 +215,19 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_EnumTypes__obj
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ExpectedArgumentTypeTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 3:
-                        return new global::System.Threading.Tasks.ValueTask(instance.EnumTypes(TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[2])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 3:
+                            return new global::System.Threading.Tasks.ValueTask(instance.EnumTypes(TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[2])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

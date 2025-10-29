@@ -69,8 +69,15 @@ internal sealed class TUnit_TestProject_AttributeTests_MyTest_TestSource : globa
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AttributeTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.MyTest();
-                return default(global::System.Threading.Tasks.ValueTask);
+                try
+                {
+                    instance.MyTest();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

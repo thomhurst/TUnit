@@ -57,7 +57,14 @@ internal sealed class TUnit_TestProject_AfterTests_CleanupTests_Test1_TestSource
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AfterTests.CleanupTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.Test1());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Test1());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -136,7 +143,14 @@ internal sealed class TUnit_TestProject_AfterTests_CleanupTests_Test2_TestSource
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AfterTests.CleanupTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.Test2());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Test2());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

@@ -81,13 +81,20 @@ internal sealed class TUnit_TestProject_StringArgumentTests_Normal__string_TestS
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.StringArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.Normal(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.Normal(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -187,13 +194,20 @@ internal sealed class TUnit_TestProject_StringArgumentTests_Nullable__string__Te
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.StringArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.Nullable(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.Nullable(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

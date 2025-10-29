@@ -70,13 +70,20 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.DataSource_Class(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.DataSource_Class(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -169,13 +176,20 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_DataSource_Cl
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.DataSource_Class_Generic(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.DataSource_Class_Generic(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Library.Models.SomeAsyncDisposableClass>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -268,12 +282,19 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_1_ClassDataSource(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_1_ClassDataSource(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -373,12 +394,19 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 2:
-                        return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_2_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 2:
+                            return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_2_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -485,12 +513,19 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 3:
-                        return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_3_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[2])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 3:
+                            return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_3_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[2])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -604,12 +639,19 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 4:
-                        return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_4_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[3])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 4 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 4:
+                            return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_4_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[3])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 4 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -730,12 +772,19 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests_IsInitialized
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ClassDataSourceDrivenTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 5:
-                        return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_5_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[4])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 5 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 5:
+                            return new global::System.Threading.Tasks.ValueTask(instance.IsInitialized_With_5_ClassDataSources(TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<InitializableClass>(args[4])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 5 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

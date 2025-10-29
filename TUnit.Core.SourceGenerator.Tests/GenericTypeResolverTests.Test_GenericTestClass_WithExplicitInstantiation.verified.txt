@@ -126,8 +126,15 @@ internal sealed class TUnit_TestProject_GenericTestClass_T_TestMethod_TestSource
                     },
                     InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.GenericTestClass<int>)instance;
-                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.GenericTestClass<int>)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,
@@ -188,8 +195,15 @@ internal sealed class TUnit_TestProject_GenericTestClass_T_TestMethod_TestSource
                     },
                     InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
-                        var typedInstance = (global::TUnit.TestProject.GenericTestClass<string>)instance;
-                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
+                        try
+                        {
+                            var typedInstance = (global::TUnit.TestProject.GenericTestClass<string>)instance;
+                            return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
+                        }
+                        catch (global::System.Exception ex)
+                        {
+                            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                        }
                     }
                 }
                 ,

@@ -78,31 +78,38 @@ internal sealed class TUnit_TestProject_Bugs__2112_Tests_Test__int_long___TestSo
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2112.Tests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 2:
-                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is long[] arr ? arr : new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) }));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 3:
-                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 4:
-                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 5:
-                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 6:
-                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 7:
-                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 2:
+                            instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is long[] arr ? arr : new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) }));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 3:
+                            instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 4:
+                            instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 5:
+                            instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 6:
+                            instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 7:
+                            instance.Test(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -203,31 +210,38 @@ internal sealed class TUnit_TestProject_Bugs__2112_Tests_Test2__int_long___TestS
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2112.Tests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 2:
-                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is long[] arr ? arr : new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) }));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 3:
-                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 4:
-                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 5:
-                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 6:
-                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 7:
-                        instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[0]);
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 2:
+                            instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is long[] arr ? arr : new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]) }));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 3:
+                            instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 4:
+                            instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 5:
+                            instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 6:
+                            instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 7:
+                            instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new long[] { TUnit.Core.Helpers.CastHelper.Cast<long>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[5]), TUnit.Core.Helpers.CastHelper.Cast<long>(args[6]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

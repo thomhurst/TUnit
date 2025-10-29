@@ -189,14 +189,21 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenWithCancellationTo
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.MethodDataSourceDrivenWithCancellationTokenTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                var context = global::TUnit.Core.TestContext.Current;
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.MyTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    var context = global::TUnit.Core.TestContext.Current;
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.MyTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None);
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

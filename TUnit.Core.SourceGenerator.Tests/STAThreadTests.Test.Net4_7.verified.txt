@@ -62,7 +62,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.With_STA());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.With_STA());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -145,7 +152,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.Without_STA());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Without_STA());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -229,7 +243,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithSimpleAwait());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithSimpleAwait());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -313,7 +334,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithTaskYield());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithTaskYield());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -397,7 +425,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithConfigureAwaitTrue());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithConfigureAwaitTrue());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -481,7 +516,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithNestedAsyncCalls());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithNestedAsyncCalls());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -565,7 +607,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithTaskFromResult());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithTaskFromResult());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -649,7 +698,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithCompletedTask());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithCompletedTask());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -733,7 +789,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithTaskRun());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithTaskRun());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -817,7 +880,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithMultipleAwaits());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithMultipleAwaits());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -901,7 +971,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithAsyncEnumerable());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithAsyncEnumerable());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -985,7 +1062,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithTaskWhenAll());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithTaskWhenAll());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1069,7 +1153,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithExceptionHandling());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithExceptionHandling());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1153,7 +1244,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithThrowsNothingAssertion());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithThrowsNothingAssertion());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1237,7 +1335,14 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.STAThreadTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.STA_WithFuncAssertion());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.STA_WithFuncAssertion());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

@@ -90,12 +90,19 @@ internal sealed class TUnit_TestProject_AutoDataTests_Test1__string_int_double_b
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AutoDataTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 4:
-                        return new global::System.Threading.Tasks.ValueTask(instance.Test1(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<double>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[3])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 4 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 4:
+                            return new global::System.Threading.Tasks.ValueTask(instance.Test1(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<double>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[3])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 4 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

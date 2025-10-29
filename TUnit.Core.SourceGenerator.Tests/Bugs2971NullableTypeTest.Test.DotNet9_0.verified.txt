@@ -58,8 +58,15 @@ internal sealed class TUnit_TestProject_Bugs__2971_Tests_SimpleTest_TestSource :
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2971.Tests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.SimpleTest();
-                return default(global::System.Threading.Tasks.ValueTask);
+                try
+                {
+                    instance.SimpleTest();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

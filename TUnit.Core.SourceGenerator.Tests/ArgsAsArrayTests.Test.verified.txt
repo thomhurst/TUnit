@@ -69,31 +69,38 @@ internal sealed class TUnit_TestProject_ArgsAsArrayTests_Params__string___TestSo
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 0:
-                        instance.Params(new string[0]);
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 1:
-                        instance.Params((args[0] is null ? null : args[0] is string[] arr ? arr : new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) }));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 2:
-                        instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 3:
-                        instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 4:
-                        instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 5:
-                        instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 6:
-                        instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]) });
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected between 0 and 1 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 0:
+                            instance.Params(new string[0]);
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 1:
+                            instance.Params((args[0] is null ? null : args[0] is string[] arr ? arr : new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]) }));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 2:
+                            instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 3:
+                            instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 4:
+                            instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 5:
+                            instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 6:
+                            instance.Params(new string[] { TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[5]) });
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected between 0 and 1 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -185,31 +192,38 @@ internal sealed class TUnit_TestProject_ArgsAsArrayTests_ParamsEnumerable__IEnum
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 0:
-                        instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 1:
-                        instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 2:
-                        instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 3:
-                        instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 4:
-                        instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 5:
-                        instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 6:
-                        instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected between 0 and 1 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 0:
+                            instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 1:
+                            instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 2:
+                            instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 3:
+                            instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 4:
+                            instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 5:
+                            instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 6:
+                            instance.ParamsEnumerable(TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected between 0 and 1 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -308,31 +322,38 @@ internal sealed class TUnit_TestProject_ArgsAsArrayTests_Following_Non_Params__i
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ArgsAsArrayTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 2:
-                        instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 3:
-                        instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 4:
-                        instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 5:
-                        instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 6:
-                        instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    case 7:
-                        instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 2:
+                            instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 3:
+                            instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 4:
+                            instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 5:
+                            instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 6:
+                            instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        case 7:
+                            instance.Following_Non_Params(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.IEnumerable<string>>(args[1]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

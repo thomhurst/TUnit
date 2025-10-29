@@ -58,7 +58,14 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AbstractTests.ConcreteClass1(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.AssertClassName());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.AssertClassName());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

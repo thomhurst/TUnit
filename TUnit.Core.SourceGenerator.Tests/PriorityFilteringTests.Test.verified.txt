@@ -58,7 +58,14 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_1_TestSource
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.High_1());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.High_1());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -138,7 +145,14 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_2_TestSource
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.High_2());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.High_2());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -218,7 +232,14 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_3_TestSource
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.High_3());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.High_3());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -298,7 +319,14 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSour
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.Medium_1());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Medium_1());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -378,7 +406,14 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSour
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.Medium_2());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Medium_2());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -458,7 +493,14 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource 
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                return new global::System.Threading.Tasks.ValueTask(instance.Low_1());
+                try
+                {
+                    return new global::System.Threading.Tasks.ValueTask(instance.Low_1());
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

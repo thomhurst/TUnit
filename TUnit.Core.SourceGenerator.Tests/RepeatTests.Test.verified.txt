@@ -60,8 +60,15 @@ internal sealed class TUnit_TestProject_RepeatTests_One_TestSource : global::TUn
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.RepeatTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.One();
-                return default(global::System.Threading.Tasks.ValueTask);
+                try
+                {
+                    instance.One();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -143,8 +150,15 @@ internal sealed class TUnit_TestProject_RepeatTests_Two_TestSource : global::TUn
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.RepeatTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.Two();
-                return default(global::System.Threading.Tasks.ValueTask);
+                try
+                {
+                    instance.Two();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -225,8 +239,15 @@ internal sealed class TUnit_TestProject_RepeatTests_Three_TestSource : global::T
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.RepeatTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.Three();
-                return default(global::System.Threading.Tasks.ValueTask);
+                try
+                {
+                    instance.Three();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

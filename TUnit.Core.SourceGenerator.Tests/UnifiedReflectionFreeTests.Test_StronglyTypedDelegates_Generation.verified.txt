@@ -57,8 +57,15 @@ internal sealed class TUnit_TestProject_TypedDelegateTest_TestWithDelegate_TestS
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.TypedDelegateTest(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.TestWithDelegate();
-                return default(global::System.Threading.Tasks.ValueTask);
+                try
+                {
+                    instance.TestWithDelegate();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

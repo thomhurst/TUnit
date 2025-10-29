@@ -84,8 +84,15 @@ internal sealed class TUnit_TestProject_ClassConstructorTest_Test_TestSource : g
             },
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                instance.Test();
-                return default(global::System.Threading.Tasks.ValueTask);
+                try
+                {
+                    instance.Test();
+                    return default(global::System.Threading.Tasks.ValueTask);
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

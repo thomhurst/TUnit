@@ -75,13 +75,20 @@ internal sealed class TUnit_TestProject_Bugs__2083_Tests_MyTest__long_TestSource
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2083.Tests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.MyTest(TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.MyTest(TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };

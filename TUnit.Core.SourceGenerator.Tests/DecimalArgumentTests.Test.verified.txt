@@ -79,12 +79,19 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_d
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 2:
-                        return new global::System.Threading.Tasks.ValueTask(instance.Transfer(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 2:
+                            return new global::System.Threading.Tasks.ValueTask(instance.Transfer(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -177,12 +184,19 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__deci
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.SimpleDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.SimpleDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -275,12 +289,19 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decim
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.SmallDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.SmallDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -373,12 +394,19 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.MaxDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.MaxDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -471,12 +499,19 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.MinDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.MinDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -569,12 +604,19 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValu
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.ExplicitDecimalValue(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.ExplicitDecimalValue(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -681,12 +723,19 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__d
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 3:
-                        return new global::System.Threading.Tasks.ValueTask(instance.MultipleDecimals(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 3:
+                            return new global::System.Threading.Tasks.ValueTask(instance.MultipleDecimals(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -781,13 +830,20 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestS
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        instance.Test(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            instance.Test(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -917,13 +973,20 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TransactionDiscount
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 6:
-                        instance.TransactionDiscountCalculations(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[5]));
-                        return default(global::System.Threading.Tasks.ValueTask);
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 6 arguments, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 6:
+                            instance.TransactionDiscountCalculations(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[5]));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 6 arguments, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -1016,12 +1079,19 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.Equality3(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.Equality3(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -1114,12 +1184,19 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.Equality4(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.Equality4(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
@@ -1212,12 +1289,19 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
             InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                switch (args.Length)
+                try
                 {
-                    case 1:
-                        return new global::System.Threading.Tasks.ValueTask(instance.TestMethod(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
-                    default:
-                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    switch (args.Length)
+                    {
+                        case 1:
+                            return new global::System.Threading.Tasks.ValueTask(instance.TestMethod(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
                 }
             },
         };
