@@ -15,7 +15,7 @@ public class Issue2504CompilationTest
     public async Task TestWithCollectionExpressionSyntax(int value)
     {
         // Test should receive 10 (5 * 2) and 20 (10 * 2)
-        await Assert.That(value).IsIn(10, 20);
+        await Assert.That(value).IsIn([10, 20]);
     }
 
     [Test]

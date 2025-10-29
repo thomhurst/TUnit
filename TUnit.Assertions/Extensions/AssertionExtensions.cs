@@ -753,16 +753,22 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that the value satisfies the specified predicate.
-    /// Example: await Assert.That(x).Satisfies(v => v > 0 && v < 100);
+    /// Asserts that a mapped Task value satisfies custom assertions on the unwrapped result.
+    /// Maps the source value using a selector that returns a Task, then runs assertions on the awaited result.
+    /// Example: await Assert.That(model).Satisfies(m => m.AsyncValue, assert => assert.IsEqualTo("Hello"));
     /// </summary>
-    public static SatisfiesAssertion<TValue> Satisfies<TValue>(
+    public static AsyncMappedSatisfiesAssertion<TValue, TMapped> Satisfies<TValue, TMapped>(
         this IAssertionSource<TValue> source,
-        Func<TValue?, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+        Func<TValue?, Task<TMapped?>> selector,
+        Func<ValueAssertion<TMapped>, Assertion<TMapped>> assertions,
+        [CallerArgumentExpression(nameof(selector))] string? selectorExpression = null)
     {
-        source.Context.ExpressionBuilder.Append($".Satisfies({expression})");
-        return new SatisfiesAssertion<TValue>(source.Context, predicate, expression ?? "predicate");
+        source.Context.ExpressionBuilder.Append($".Satisfies({selectorExpression}, ...)");
+        return new AsyncMappedSatisfiesAssertion<TValue, TMapped>(
+            source.Context,
+            selector!,
+            assertions,
+            selectorExpression ?? "selector");
     }
 
     /// <summary>
@@ -782,6 +788,19 @@ public static class AssertionExtensions
             selector,
             assertions,
             selectorExpression ?? "selector");
+    }
+
+    /// <summary>
+    /// Asserts that the value satisfies the specified predicate.
+    /// Example: await Assert.That(x).Satisfies(v => v > 0 && v < 100);
+    /// </summary>
+    public static SatisfiesAssertion<TValue> Satisfies<TValue>(
+        this IAssertionSource<TValue> source,
+        Func<TValue?, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".Satisfies({expression})");
+        return new SatisfiesAssertion<TValue>(source.Context, predicate, expression ?? "predicate");
     }
 
     /// <summary>

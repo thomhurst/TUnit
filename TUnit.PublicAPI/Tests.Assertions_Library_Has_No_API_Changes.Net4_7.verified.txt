@@ -1839,6 +1839,7 @@ namespace .Extensions
         public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TKey, TValue, TTransformed>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<TTransformed>> assertions) { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
+        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped?>> selector, <.<TMapped>, .<TMapped>> assertions, [.("selector")] string? selectorExpression = null) { }
         public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
         public static .<TException> Throws<TException>(this . source)
             where TException :  { }
@@ -2782,11 +2783,11 @@ namespace .Extensions
     }
     public static class GenericAssertions
     {
+        public static .Extensions.T_IsIn__Assertion<T> IsIn<T>(this .<T> source, params T[] collection) { }
         public static .Extensions.T_IsIn_IEnumerableT_Assertion<T> IsIn<T>(this .<T> source, .<T> collection, [.("collection")] string? collectionExpression = null) { }
-        public static .Extensions.T_IsIn__Assertion<T> IsIn<T>(this .<T> source, T[] collection, [.("collection")] string? collectionExpression = null) { }
         public static .Extensions.T_IsIn_IEnumerableT_IEqualityComparerT_Assertion<T> IsIn<T>(this .<T> source, .<T> collection, .<T> equalityComparer, [.("collection")] string? collectionExpression = null, [.("equalityComparer")] string? equalityComparerExpression = null) { }
+        public static .Extensions.T_IsNotIn__Assertion<T> IsNotIn<T>(this .<T> source, params T[] collection) { }
         public static .Extensions.T_IsNotIn_IEnumerableT_Assertion<T> IsNotIn<T>(this .<T> source, .<T> collection, [.("collection")] string? collectionExpression = null) { }
-        public static .Extensions.T_IsNotIn__Assertion<T> IsNotIn<T>(this .<T> source, T[] collection, [.("collection")] string? collectionExpression = null) { }
         public static .Extensions.T_IsNotIn_IEnumerableT_IEqualityComparerT_Assertion<T> IsNotIn<T>(this .<T> source, .<T> collection, .<T> equalityComparer, [.("collection")] string? collectionExpression = null, [.("equalityComparer")] string? equalityComparerExpression = null) { }
     }
     public static class GreaterThanAssertionExtensions
