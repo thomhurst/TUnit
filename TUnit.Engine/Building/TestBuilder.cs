@@ -285,8 +285,8 @@ internal sealed class TestBuilder : ITestBuilder
                                     DataSourceAttribute = methodDataSource
                                 };
 
-                                // Reuse cached classDataResult instead of calling classDataFactory() again
-                                classData = DataUnwrapper.Unwrap(classDataResult);
+                                // Call classDataFactory() again to get fresh data for each test iteration
+                                classData = DataUnwrapper.Unwrap(await classDataFactory() ?? []);
                                 var methodData = DataUnwrapper.UnwrapWithTypes(await methodDataFactory() ?? [], metadata.MethodMetadata.Parameters);
 
                                 // For concrete generic instantiations, check if the data is compatible with the expected types
