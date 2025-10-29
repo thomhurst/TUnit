@@ -60,7 +60,7 @@ internal sealed class TUnit_TestProject_AotDataSourceTest_TestWithDataSource__in
                         ReflectionInfo = typeof(global::TUnit.TestProject.AotDataSourceTest).GetMethod("TestWithDataSource", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(int), typeof(int) }, null)!.GetParameters()[2]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("UnifiedReflectionFreeTests:global::TUnit.TestProject.AotDataSourceTest", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("UnifiedReflectionFreeTests:global::TUnit.TestProject.AotDataSourceTest", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -68,7 +68,7 @@ internal sealed class TUnit_TestProject_AotDataSourceTest_TestWithDataSource__in
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AotDataSourceTest)),
                         Name = "AotDataSourceTest",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("UnifiedReflectionFreeTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "UnifiedReflectionFreeTests" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("UnifiedReflectionFreeTests", static () => new global::TUnit.Core.AssemblyMetadata { Name = "UnifiedReflectionFreeTests" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -82,17 +82,16 @@ internal sealed class TUnit_TestProject_AotDataSourceTest_TestWithDataSource__in
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AotDataSourceTest(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 3:
                         instance.TestWithDataSource(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]));
-                        break;
+                        return default(global::System.Threading.Tasks.ValueTask);
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

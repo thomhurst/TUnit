@@ -34,7 +34,7 @@ internal sealed class TUnit_TestProject_Bugs__2971_Tests_SimpleTest_TestSource :
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2971.Tests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._2971.Tests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -42,7 +42,7 @@ internal sealed class TUnit_TestProject_Bugs__2971_Tests_SimpleTest_TestSource :
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._2971.Tests)),
                         Name = "Tests",
                         Namespace = "TUnit.TestProject.Bugs._2971",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -56,10 +56,10 @@ internal sealed class TUnit_TestProject_Bugs__2971_Tests_SimpleTest_TestSource :
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._2971.Tests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 instance.SimpleTest();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                return default(global::System.Threading.Tasks.ValueTask);
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

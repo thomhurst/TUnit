@@ -79,7 +79,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                         ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[5]!
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericMethodTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericMethodTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -87,7 +87,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.GenericMethodTests)),
                         Name = "GenericMethodTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -228,7 +228,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[5]!
                             }
                         },
-                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericMethodTests", () => 
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericMethodTests", static () => 
                         {
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
@@ -236,7 +236,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                                 TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.GenericMethodTests)),
                                 Name = "GenericMethodTests",
                                 Namespace = "TUnit.TestProject",
-                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                                 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                                 Parent = null
@@ -253,10 +253,10 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                     {
                         return new global::TUnit.TestProject.GenericMethodTests();
                     },
-                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
                         var typedInstance = (global::TUnit.TestProject.GenericMethodTests)instance;
-                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.AggregateBy_HasExpectedOutput<int, int, int>((global::System.Collections.Generic.IEnumerable<int>)args[0]!, (global::System.Func<int, int>)args[1]!, (global::System.Func<int, int>)args[2]!, (global::System.Func<int, int, int>)args[3]!, (global::System.Collections.Generic.IEqualityComparer<int>)args[4]!, (global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>>)args[5]!));
+                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.AggregateBy_HasExpectedOutput<int, int, int>((global::System.Collections.Generic.IEnumerable<int>)args[0]!, (global::System.Func<int, int>)args[1]!, (global::System.Func<int, int>)args[2]!, (global::System.Func<int, int, int>)args[3]!, (global::System.Collections.Generic.IEqualityComparer<int>)args[4]!, (global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<int, int>>)args[5]!));
                     }
                 }
                 ,
@@ -382,7 +382,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                                 ReflectionInfo = global::System.Linq.Enumerable.FirstOrDefault(typeof(global::TUnit.TestProject.GenericMethodTests).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static), m => m.Name == "AggregateBy_HasExpectedOutput" && m.GetParameters().Length == 6)?.GetParameters()[5]!
                             }
                         },
-                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericMethodTests", () => 
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.GenericMethodTests", static () => 
                         {
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
@@ -390,7 +390,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                                 TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.GenericMethodTests)),
                                 Name = "GenericMethodTests",
                                 Namespace = "TUnit.TestProject",
-                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                                 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                                 Parent = null
@@ -407,10 +407,10 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                     {
                         return new global::TUnit.TestProject.GenericMethodTests();
                     },
-                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
                         var typedInstance = (global::TUnit.TestProject.GenericMethodTests)instance;
-                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.AggregateBy_HasExpectedOutput<string, string, string>((global::System.Collections.Generic.IEnumerable<string>)args[0]!, (global::System.Func<string, string>)args[1]!, (global::System.Func<string, string>)args[2]!, (global::System.Func<string, string, string>)args[3]!, (global::System.Collections.Generic.IEqualityComparer<string>)args[4]!, (global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>>)args[5]!));
+                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.AggregateBy_HasExpectedOutput<string, string, string>((global::System.Collections.Generic.IEnumerable<string>)args[0]!, (global::System.Func<string, string>)args[1]!, (global::System.Func<string, string>)args[2]!, (global::System.Func<string, string, string>)args[3]!, (global::System.Collections.Generic.IEqualityComparer<string>)args[4]!, (global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, string>>)args[5]!));
                     }
                 }
                 ,

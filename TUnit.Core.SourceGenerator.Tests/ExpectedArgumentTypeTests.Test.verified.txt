@@ -65,7 +65,7 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments
                         ReflectionInfo = typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests).GetMethod("TypedArguments", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object), typeof(global::System.Type) }, null)!.GetParameters()[1]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ExpectedArgumentTypeTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ExpectedArgumentTypeTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -73,7 +73,7 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests)),
                         Name = "ExpectedArgumentTypeTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -87,13 +87,12 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ExpectedArgumentTypeTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 2:
-                        await instance.TypedArguments(TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1]));
-                        break;
+                        return new global::System.Threading.Tasks.ValueTask(instance.TypedArguments(TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1])));
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                 }
@@ -185,7 +184,7 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_EnumTypes__obj
                         ReflectionInfo = typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests).GetMethod("EnumTypes", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(object), typeof(global::System.Type), typeof(global::System.Type) }, null)!.GetParameters()[2]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ExpectedArgumentTypeTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ExpectedArgumentTypeTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -193,7 +192,7 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_EnumTypes__obj
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests)),
                         Name = "ExpectedArgumentTypeTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -207,13 +206,12 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_EnumTypes__obj
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ExpectedArgumentTypeTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 3:
-                        await instance.EnumTypes(TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[2]));
-                        break;
+                        return new global::System.Threading.Tasks.ValueTask(instance.EnumTypes(TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<global::System.Type>(args[2])));
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                 }

@@ -35,7 +35,7 @@ internal static class TUnit_TestProject_DisposableFieldTests_Setup_Before_TestIn
                     ReturnType = typeof(void),
                     ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                     Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DisposableFieldTests", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DisposableFieldTests", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -43,7 +43,7 @@ internal static class TUnit_TestProject_DisposableFieldTests_Setup_Before_TestIn
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DisposableFieldTests)),
                             Name = "DisposableFieldTests",
                             Namespace = "TUnit.TestProject",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null
@@ -110,7 +110,7 @@ internal static class TUnit_TestProject_DisposableFieldTests_Blah_After_TestInit
                     ReturnType = typeof(void),
                     ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                     Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DisposableFieldTests", () => 
+                    Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DisposableFieldTests", static () => 
                     {
                         var classMetadata = new global::TUnit.Core.ClassMetadata
                         {
@@ -118,7 +118,7 @@ internal static class TUnit_TestProject_DisposableFieldTests_Blah_After_TestInit
                             TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DisposableFieldTests)),
                             Name = "DisposableFieldTests",
                             Namespace = "TUnit.TestProject",
-                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                            Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                             Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                             Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                             Parent = null

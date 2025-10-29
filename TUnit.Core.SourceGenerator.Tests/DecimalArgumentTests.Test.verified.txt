@@ -55,7 +55,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_d
                         ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Transfer", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal) }, null)!.GetParameters()[1]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -63,7 +63,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_d
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -77,13 +77,12 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_d
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 2:
-                        await instance.Transfer(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]));
-                        break;
+                        return new global::System.Threading.Tasks.ValueTask(instance.Transfer(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1])));
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
                 }
@@ -154,7 +153,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__deci
                         ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("SimpleDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -162,7 +161,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__deci
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -176,13 +175,12 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__deci
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.SimpleDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
-                        break;
+                        return new global::System.Threading.Tasks.ValueTask(instance.SimpleDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
@@ -253,7 +251,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decim
                         ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("SmallDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -261,7 +259,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decim
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -275,13 +273,12 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decim
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.SmallDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
-                        break;
+                        return new global::System.Threading.Tasks.ValueTask(instance.SmallDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
@@ -352,7 +349,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal
                         ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MaxDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -360,7 +357,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -374,13 +371,12 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.MaxDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
-                        break;
+                        return new global::System.Threading.Tasks.ValueTask(instance.MaxDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
@@ -451,7 +447,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal
                         ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MinDecimal", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -459,7 +455,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -473,13 +469,12 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.MinDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
-                        break;
+                        return new global::System.Threading.Tasks.ValueTask(instance.MinDecimal(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
@@ -550,7 +545,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValu
                         ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("ExplicitDecimalValue", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -558,7 +553,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValu
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -572,13 +567,12 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValu
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.ExplicitDecimalValue(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
-                        break;
+                        return new global::System.Threading.Tasks.ValueTask(instance.ExplicitDecimalValue(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
@@ -663,7 +657,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__d
                         ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("MultipleDecimals", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal) }, null)!.GetParameters()[2]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -671,7 +665,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__d
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -685,13 +679,12 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__d
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 3:
-                        await instance.MultipleDecimals(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2]));
-                        break;
+                        return new global::System.Threading.Tasks.ValueTask(instance.MultipleDecimals(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2])));
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                 }
@@ -764,7 +757,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestS
                         ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Test", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -772,7 +765,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestS
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -786,17 +779,16 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
                         instance.Test(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
-                        break;
+                        return default(global::System.Threading.Tasks.ValueTask);
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -901,7 +893,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TransactionDiscount
                         ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TransactionDiscountCalculations", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(decimal), typeof(bool) }, null)!.GetParameters()[5]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -909,7 +901,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TransactionDiscount
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -923,17 +915,16 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TransactionDiscount
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 6:
                         instance.TransactionDiscountCalculations(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[2]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[3]), TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[4]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[5]));
-                        break;
+                        return default(global::System.Threading.Tasks.ValueTask);
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 6 arguments, but got {args.Length}");
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -1001,7 +992,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_
                         ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Equality3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -1009,7 +1000,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -1023,13 +1014,12 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Equality3(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
-                        break;
+                        return new global::System.Threading.Tasks.ValueTask(instance.Equality3(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
@@ -1100,7 +1090,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_
                         ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("Equality4", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -1108,7 +1098,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -1122,13 +1112,12 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.Equality4(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
-                        break;
+                        return new global::System.Threading.Tasks.ValueTask(instance.Equality4(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
@@ -1199,7 +1188,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal
                         ReflectionInfo = typeof(global::TUnit.TestProject.DecimalArgumentTests).GetMethod("TestMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(decimal) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.DecimalArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -1207,7 +1196,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.DecimalArgumentTests)),
                         Name = "DecimalArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -1221,13 +1210,12 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.DecimalArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
-                        await instance.TestMethod(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]));
-                        break;
+                        return new global::System.Threading.Tasks.ValueTask(instance.TestMethod(TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0])));
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }

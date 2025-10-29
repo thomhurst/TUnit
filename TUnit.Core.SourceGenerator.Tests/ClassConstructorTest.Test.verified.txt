@@ -34,7 +34,7 @@ internal sealed class TUnit_TestProject_ClassConstructorTest_Test_TestSource : g
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassConstructorTest", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassConstructorTest", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -42,7 +42,7 @@ internal sealed class TUnit_TestProject_ClassConstructorTest_Test_TestSource : g
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassConstructorTest)),
                         Name = "ClassConstructorTest",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.DummyReferenceTypeClass))
@@ -82,10 +82,10 @@ internal sealed class TUnit_TestProject_ClassConstructorTest_Test_TestSource : g
                 // ClassConstructor attribute is present - instance creation handled at runtime
                 throw new global::System.NotSupportedException("Instance creation for classes with ClassConstructor attribute is handled at runtime");
             },
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 instance.Test();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                return default(global::System.Threading.Tasks.ValueTask);
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

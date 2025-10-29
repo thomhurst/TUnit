@@ -46,7 +46,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Int__int_TestSource 
                         ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Int", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -54,7 +54,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Int__int_TestSource 
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.NumberArgumentTests)),
                         Name = "NumberArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -68,17 +68,16 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Int__int_TestSource 
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.NumberArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
                         instance.Int(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
-                        break;
+                        return default(global::System.Threading.Tasks.ValueTask);
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -146,7 +145,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Double__double_TestS
                         ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Double", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(double) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -154,7 +153,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Double__double_TestS
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.NumberArgumentTests)),
                         Name = "NumberArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -168,17 +167,16 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Double__double_TestS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.NumberArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
                         instance.Double(TUnit.Core.Helpers.CastHelper.Cast<double>(args[0]));
-                        break;
+                        return default(global::System.Threading.Tasks.ValueTask);
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -246,7 +244,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Float__float_TestSou
                         ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Float", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(float) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -254,7 +252,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Float__float_TestSou
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.NumberArgumentTests)),
                         Name = "NumberArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -268,17 +266,16 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Float__float_TestSou
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.NumberArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
                         instance.Float(TUnit.Core.Helpers.CastHelper.Cast<float>(args[0]));
-                        break;
+                        return default(global::System.Threading.Tasks.ValueTask);
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -346,7 +343,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Long__long_TestSourc
                         ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("Long", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(long) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -354,7 +351,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Long__long_TestSourc
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.NumberArgumentTests)),
                         Name = "NumberArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -368,17 +365,16 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Long__long_TestSourc
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.NumberArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
                         instance.Long(TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]));
-                        break;
+                        return default(global::System.Threading.Tasks.ValueTask);
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -446,7 +442,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_ULong__ulong_TestSou
                         ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("ULong", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(ulong) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -454,7 +450,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_ULong__ulong_TestSou
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.NumberArgumentTests)),
                         Name = "NumberArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -468,17 +464,16 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_ULong__ulong_TestSou
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.NumberArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
                         instance.ULong(TUnit.Core.Helpers.CastHelper.Cast<ulong>(args[0]));
-                        break;
+                        return default(global::System.Threading.Tasks.ValueTask);
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -546,7 +541,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_UInt__uint_TestSourc
                         ReflectionInfo = typeof(global::TUnit.TestProject.NumberArgumentTests).GetMethod("UInt", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(uint) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NumberArgumentTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -554,7 +549,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_UInt__uint_TestSourc
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.NumberArgumentTests)),
                         Name = "NumberArgumentTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -568,17 +563,16 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_UInt__uint_TestSourc
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.NumberArgumentTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
                         instance.UInt(TUnit.Core.Helpers.CastHelper.Cast<uint>(args[0]));
-                        break;
+                        return default(global::System.Threading.Tasks.ValueTask);
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

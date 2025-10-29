@@ -126,7 +126,7 @@ internal static class MetadataGenerationHelper
     private static void WriteClassMetadataGetOrAdd(ICodeWriter writer, INamedTypeSymbol typeSymbol, string? parentExpression = null)
     {
         var qualifiedName = $"{typeSymbol.ContainingAssembly.Name}:{typeSymbol.GloballyQualified()}";
-        writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", () => ");
+        writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", static () => ");
         writer.AppendLine("{");
 
         // Manually increment indent level without calling EnsureNewLine
@@ -199,7 +199,7 @@ internal static class MetadataGenerationHelper
     {
         var qualifiedName = $"{typeSymbol.ContainingAssembly.Name}:{typeSymbol.GloballyQualified()}";
         var writer = new CodeWriter("", includeHeader: false).SetIndentLevel(currentIndentLevel);
-        writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", () => ");
+        writer.AppendLine($"global::TUnit.Core.ClassMetadata.GetOrAdd(\"{qualifiedName}\", static () => ");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -257,7 +257,7 @@ internal static class MetadataGenerationHelper
     /// </summary>
     public static string GenerateAssemblyMetadataGetOrAdd(IAssemblySymbol assembly)
     {
-        return $"global::TUnit.Core.AssemblyMetadata.GetOrAdd(\"{assembly.Name}\", () => new global::TUnit.Core.AssemblyMetadata {{ Name = \"{assembly.Name}\" }})";
+        return $"global::TUnit.Core.AssemblyMetadata.GetOrAdd(\"{assembly.Name}\", static () => new global::TUnit.Core.AssemblyMetadata {{ Name = \"{assembly.Name}\" }})";
     }
 
     /// <summary>

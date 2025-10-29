@@ -33,7 +33,7 @@ internal sealed class TUnit_TestProject_SimpleTestClass_NonGenericTest_TestSourc
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.SimpleTestClass", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.SimpleTestClass", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -41,7 +41,7 @@ internal sealed class TUnit_TestProject_SimpleTestClass_NonGenericTest_TestSourc
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.SimpleTestClass)),
                         Name = "SimpleTestClass",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", static () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -55,10 +55,10 @@ internal sealed class TUnit_TestProject_SimpleTestClass_NonGenericTest_TestSourc
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.SimpleTestClass(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 instance.NonGenericTest();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                return default(global::System.Threading.Tasks.ValueTask);
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

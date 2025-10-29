@@ -35,7 +35,7 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_SecondTest_
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass2", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -43,7 +43,7 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_SecondTest_
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2)),
                         Name = "ConcreteClass2",
                         Namespace = "TUnit.TestProject.AbstractTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -57,10 +57,10 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_SecondTest_
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AbstractTests.ConcreteClass2(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 instance.SecondTest();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                return default(global::System.Threading.Tasks.ValueTask);
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -117,7 +117,7 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClass
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass2", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass2", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -125,7 +125,7 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClass
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass2)),
                         Name = "ConcreteClass2",
                         Namespace = "TUnit.TestProject.AbstractTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -139,9 +139,9 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass2_AssertClass
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AbstractTests.ConcreteClass2(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.AssertClassName();
+                return new global::System.Threading.Tasks.ValueTask(instance.AssertClassName());
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -197,7 +197,7 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass1", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AbstractTests.ConcreteClass1", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -205,7 +205,7 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1)),
                         Name = "ConcreteClass1",
                         Namespace = "TUnit.TestProject.AbstractTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -219,9 +219,9 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AbstractTests.ConcreteClass1(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.AssertClassName();
+                return new global::System.Threading.Tasks.ValueTask(instance.AssertClassName());
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

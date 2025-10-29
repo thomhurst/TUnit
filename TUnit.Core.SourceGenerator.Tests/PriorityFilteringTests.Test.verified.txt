@@ -34,7 +34,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_1_TestSource
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -42,7 +42,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_1_TestSource
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.PriorityFilteringTests)),
                         Name = "PriorityFilteringTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -56,9 +56,9 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_1_TestSource
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.High_1();
+                return new global::System.Threading.Tasks.ValueTask(instance.High_1());
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -114,7 +114,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_2_TestSource
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -122,7 +122,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_2_TestSource
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.PriorityFilteringTests)),
                         Name = "PriorityFilteringTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -136,9 +136,9 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_2_TestSource
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.High_2();
+                return new global::System.Threading.Tasks.ValueTask(instance.High_2());
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -194,7 +194,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_3_TestSource
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -202,7 +202,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_3_TestSource
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.PriorityFilteringTests)),
                         Name = "PriorityFilteringTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -216,9 +216,9 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_High_3_TestSource
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.High_3();
+                return new global::System.Threading.Tasks.ValueTask(instance.High_3());
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -274,7 +274,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSour
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -282,7 +282,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSour
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.PriorityFilteringTests)),
                         Name = "PriorityFilteringTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -296,9 +296,9 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_1_TestSour
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.Medium_1();
+                return new global::System.Threading.Tasks.ValueTask(instance.Medium_1());
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -354,7 +354,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSour
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -362,7 +362,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSour
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.PriorityFilteringTests)),
                         Name = "PriorityFilteringTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -376,9 +376,9 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Medium_2_TestSour
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.Medium_2();
+                return new global::System.Threading.Tasks.ValueTask(instance.Medium_2());
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -434,7 +434,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource 
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.PriorityFilteringTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -442,7 +442,7 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource 
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.PriorityFilteringTests)),
                         Name = "PriorityFilteringTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -456,9 +456,9 @@ internal sealed class TUnit_TestProject_PriorityFilteringTests_Low_1_TestSource 
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.PriorityFilteringTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.Low_1();
+                return new global::System.Threading.Tasks.ValueTask(instance.Low_1());
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

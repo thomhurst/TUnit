@@ -35,7 +35,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource 
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -43,7 +43,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource 
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest)),
                         Name = "DerivedTest",
                         Namespace = "TUnit.TestProject.Bugs._1889",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -57,10 +57,10 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource 
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1889.DerivedTest(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 instance.Test1();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                return default(global::System.Threading.Tasks.ValueTask);
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -129,7 +129,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestS
                         ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test2", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -137,7 +137,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestS
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest)),
                         Name = "DerivedTest",
                         Namespace = "TUnit.TestProject.Bugs._1889",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -151,17 +151,16 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1889.DerivedTest(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
                         instance.Test2(TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]));
-                        break;
+                        return default(global::System.Threading.Tasks.ValueTask);
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -231,7 +230,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestS
                         ReflectionInfo = typeof(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass>).GetMethod("Test3", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(bool) }, null)!.GetParameters()[0]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._1889.DerivedTest", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -239,7 +238,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestS
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest)),
                         Name = "DerivedTest",
                         Namespace = "TUnit.TestProject.Bugs._1889",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -253,17 +252,16 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestS
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.Bugs._1889.DerivedTest(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 1:
                         instance.Test3(TUnit.Core.Helpers.CastHelper.Cast<bool>(args[0]));
-                        break;
+                        return default(global::System.Threading.Tasks.ValueTask);
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

@@ -40,7 +40,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests2_Base_Derived
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTests2", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -48,7 +48,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests2_Base_Derived
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2)),
                         Name = "ClassDataSourceDrivenTests2",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base))
@@ -74,10 +74,10 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests2_Base_Derived
             {
                 return new global::TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>(args[0]));
             },
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 instance.Base_Derived1();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                return default(global::System.Threading.Tasks.ValueTask);
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -139,7 +139,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests2_Base_Derived
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTests2", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassDataSourceDrivenTests2", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -147,7 +147,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests2_Base_Derived
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2)),
                         Name = "ClassDataSourceDrivenTests2",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base))
@@ -173,10 +173,10 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTests2_Base_Derived
             {
                 return new global::TUnit.TestProject.ClassDataSourceDrivenTests2(TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.ClassDataSourceDrivenTests2.Base>(args[0]));
             },
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 instance.Base_Derived2();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                return default(global::System.Threading.Tasks.ValueTask);
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

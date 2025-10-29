@@ -257,7 +257,7 @@ internal sealed class TUnit_TestProject_ClassTupleDataSourceDrivenTests_DataSour
                         ReflectionInfo = typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests).GetMethod("DataSource_TupleMethod", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, null, new global::System.Type[] { typeof(int), typeof(string), typeof(bool) }, null)!.GetParameters()[2]
                     }
                 },
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.ClassTupleDataSourceDrivenTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -265,7 +265,7 @@ internal sealed class TUnit_TestProject_ClassTupleDataSourceDrivenTests_DataSour
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ClassTupleDataSourceDrivenTests)),
                         Name = "ClassTupleDataSourceDrivenTests",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = new global::TUnit.Core.ParameterMetadata[]
                         {
                             new global::TUnit.Core.ParameterMetadata(typeof(int))
@@ -357,17 +357,16 @@ internal sealed class TUnit_TestProject_ClassTupleDataSourceDrivenTests_DataSour
                     Property4 = default(global::System.ValueTuple<int, string, bool>),
                 };
             },
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 switch (args.Length)
                 {
                     case 3:
                         instance.DataSource_TupleMethod(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), TUnit.Core.Helpers.CastHelper.Cast<string>(args[1]), TUnit.Core.Helpers.CastHelper.Cast<bool>(args[2]));
-                        break;
+                        return default(global::System.Threading.Tasks.ValueTask);
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 3 arguments, but got {args.Length}");
                 }
-                await global::System.Threading.Tasks.Task.CompletedTask;
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

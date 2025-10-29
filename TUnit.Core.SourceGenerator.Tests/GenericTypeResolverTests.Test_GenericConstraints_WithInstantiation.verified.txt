@@ -36,7 +36,7 @@ internal sealed class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.ConstrainedGenericTestClass<>", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.ConstrainedGenericTestClass<>", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -44,7 +44,7 @@ internal sealed class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
                         TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.ConstrainedGenericTestClass<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
                         Name = "ConstrainedGenericTestClass",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", static () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -99,7 +99,7 @@ internal sealed class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
                         ReturnType = typeof(void),
                         ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.ConstrainedGenericTestClass<>", () => 
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.ConstrainedGenericTestClass<>", static () => 
                         {
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
@@ -107,7 +107,7 @@ internal sealed class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
                                 TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.ConstrainedGenericTestClass<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
                                 Name = "ConstrainedGenericTestClass",
                                 Namespace = "TUnit.TestProject",
-                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
+                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", static () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
                                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                                 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                                 Parent = null
@@ -124,10 +124,10 @@ internal sealed class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
                     {
                         return new global::TUnit.TestProject.ConstrainedGenericTestClass<string>();
                     },
-                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
                         var typedInstance = (global::TUnit.TestProject.ConstrainedGenericTestClass<string>)instance;
-                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
+                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
                     }
                 }
                 ,
@@ -161,7 +161,7 @@ internal sealed class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
                         ReturnType = typeof(void),
                         ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.ConstrainedGenericTestClass<>", () => 
+                        Class = global::TUnit.Core.ClassMetadata.GetOrAdd("GenericTypeResolverTests:global::TUnit.TestProject.ConstrainedGenericTestClass<>", static () => 
                         {
                             var classMetadata = new global::TUnit.Core.ClassMetadata
                             {
@@ -169,7 +169,7 @@ internal sealed class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
                                 TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.ConstrainedGenericTestClass<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
                                 Name = "ConstrainedGenericTestClass",
                                 Namespace = "TUnit.TestProject",
-                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
+                                Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("GenericTypeResolverTests", static () => new global::TUnit.Core.AssemblyMetadata { Name = "GenericTypeResolverTests" }),
                                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                                 Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                                 Parent = null
@@ -186,10 +186,10 @@ internal sealed class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
                     {
                         return new global::TUnit.TestProject.ConstrainedGenericTestClass<object>();
                     },
-                    InvokeTypedTest = async (instance, args, cancellationToken) =>
+                    InvokeTypedTest = static (instance, args, cancellationToken) =>
                     {
                         var typedInstance = (global::TUnit.TestProject.ConstrainedGenericTestClass<object>)instance;
-                        await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
+                        return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.TestMethod());
                     }
                 }
                 ,

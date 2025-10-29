@@ -33,7 +33,7 @@ internal sealed class TUnit_TestProject_ConfigurationTest_TestWithConfiguration_
                 ReturnType = typeof(void),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(void)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("UnifiedReflectionFreeTests:global::TUnit.TestProject.ConfigurationTest", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("UnifiedReflectionFreeTests:global::TUnit.TestProject.ConfigurationTest", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -41,7 +41,7 @@ internal sealed class TUnit_TestProject_ConfigurationTest_TestWithConfiguration_
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.ConfigurationTest)),
                         Name = "ConfigurationTest",
                         Namespace = "TUnit.TestProject",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("UnifiedReflectionFreeTests", () => new global::TUnit.Core.AssemblyMetadata { Name = "UnifiedReflectionFreeTests" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("UnifiedReflectionFreeTests", static () => new global::TUnit.Core.AssemblyMetadata { Name = "UnifiedReflectionFreeTests" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -55,10 +55,10 @@ internal sealed class TUnit_TestProject_ConfigurationTest_TestWithConfiguration_
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.ConfigurationTest(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
                 instance.TestWithConfiguration();
-                await global::System.Threading.Tasks.Task.CompletedTask;
+                return default(global::System.Threading.Tasks.ValueTask);
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);

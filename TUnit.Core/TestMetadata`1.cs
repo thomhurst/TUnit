@@ -52,7 +52,7 @@ public class TestMetadata<
     /// Strongly typed test invoker with CancellationToken support.
     /// Used by source generation mode.
     /// </summary>
-    public Func<T, object?[], CancellationToken, Task>? InvokeTypedTest { get; init; }
+    public Func<T, object?[], CancellationToken, ValueTask>? InvokeTypedTest { get; init; }
 
 
 
@@ -97,7 +97,7 @@ public class TestMetadata<
                     // Convert InvokeTypedTest to the expected signature
                     Func<object, object?[], TestContext, CancellationToken, Task> invokeTest = async (instance, args, testContext, cancellationToken) =>
                     {
-                        await typedMetadata.InvokeTypedTest!((T)instance, args, cancellationToken);
+                        await typedMetadata.InvokeTypedTest!((T)instance, args, cancellationToken).ConfigureAwait(false);
                     };
 
                     return new ExecutableTest(createInstance, invokeTest)

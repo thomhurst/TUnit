@@ -403,7 +403,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Unindent();
         writer.AppendLine("},");
 
-        writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
+        writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -433,7 +433,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        writer.AppendLine($"await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{typeArgsString}>({string.Join(", ", parameterCasts)}));");
+        writer.AppendLine($"return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{typeArgsString}>({string.Join(", ", parameterCasts)}));");
 
         writer.Unindent();
         writer.AppendLine("},");
@@ -1824,17 +1824,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Generate InvokeTypedTest for non-generic tests
         var isAsync = IsAsyncMethod(testMethod.MethodSymbol);
+        var returnsValueTask = ReturnsValueTask(testMethod.MethodSymbol);
         if (testMethod is { IsGenericType: false, IsGenericMethod: false })
         {
-            GenerateConcreteTestInvoker(writer, testMethod, className, methodName, isAsync, hasCancellationToken, parametersFromArgs);
+            GenerateConcreteTestInvoker(writer, testMethod, className, methodName, isAsync, returnsValueTask, hasCancellationToken, parametersFromArgs);
         }
     }
 
 
-    private static void GenerateConcreteTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, bool isAsync, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
+    private static void GenerateConcreteTestInvoker(CodeWriter writer, TestMethodMetadata testMethod, string className, string methodName, bool isAsync, bool returnsValueTask, bool hasCancellationToken, IParameterSymbol[] parametersFromArgs)
     {
         // Generate InvokeTypedTest which is required by CreateExecutableTestFactory
-        writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
+        writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -1868,11 +1869,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 : $"instance.{methodName}({tupleConstruction})";
             if (isAsync)
             {
-                writer.AppendLine($"await {methodCallReconstructed};");
+                if (returnsValueTask)
+                {
+                    writer.AppendLine($"return {methodCallReconstructed};");
+                }
+                else
+                {
+                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCallReconstructed});");
+                }
             }
             else
             {
                 writer.AppendLine($"{methodCallReconstructed};");
+                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
             }
             writer.Unindent();
             writer.AppendLine("}");
@@ -1885,11 +1894,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 : $"instance.{methodName}(TUnit.Core.Helpers.CastHelper.Cast<{singleTupleParam.GloballyQualified()}>(args[0]))";
             if (isAsync)
             {
-                writer.AppendLine($"await {methodCallDirect};");
+                if (returnsValueTask)
+                {
+                    writer.AppendLine($"return {methodCallDirect};");
+                }
+                else
+                {
+                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({methodCallDirect});");
+                }
             }
             else
             {
                 writer.AppendLine($"{methodCallDirect};");
+                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
             }
             writer.Unindent();
             writer.AppendLine("}");
@@ -1907,12 +1924,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 : $"instance.{methodName}()";
             if (isAsync)
             {
-                writer.AppendLine($"await {typedMethodCall};");
+                if (returnsValueTask)
+                {
+                    writer.AppendLine($"return {typedMethodCall};");
+                }
+                else
+                {
+                    writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({typedMethodCall});");
+                }
             }
             else
             {
                 writer.AppendLine($"{typedMethodCall};");
-                writer.AppendLine("await global::System.Threading.Tasks.Task.CompletedTask;");
+                writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
             }
         }
         else
@@ -1952,13 +1976,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 if (isAsync)
                 {
-                    writer.AppendLine($"await {typedMethodCall};");
+                    if (returnsValueTask)
+                    {
+                        writer.AppendLine($"return {typedMethodCall};");
+                    }
+                    else
+                    {
+                        writer.AppendLine($"return new global::System.Threading.Tasks.ValueTask({typedMethodCall});");
+                    }
                 }
                 else
                 {
                     writer.AppendLine($"{typedMethodCall};");
+                    writer.AppendLine("return default(global::System.Threading.Tasks.ValueTask);");
                 }
-                writer.AppendLine("break;");
                 writer.Unindent();
             }
 
@@ -1976,11 +2007,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             writer.Unindent();
             writer.AppendLine("}");
-
-            if (!isAsync)
-            {
-                writer.AppendLine("await global::System.Threading.Tasks.Task.CompletedTask;");
-            }
         }
 
         writer.Unindent();
@@ -2014,6 +2040,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                returnTypeName.StartsWith("System.Threading.Tasks.ValueTask") ||
                returnTypeName.StartsWith("Task<") ||
                returnTypeName.StartsWith("ValueTask<");
+    }
+
+    private static bool ReturnsValueTask(IMethodSymbol method)
+    {
+        var returnTypeName = method.ReturnType.ToDisplayString();
+        return returnTypeName.StartsWith("System.Threading.Tasks.ValueTask");
     }
 
     private static void GenerateDependencies(CodeWriter writer, Compilation compilation, IMethodSymbol methodSymbol)
@@ -4193,7 +4225,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine("},");
 
         // Generate strongly-typed test invoker
-        writer.AppendLine("InvokeTypedTest = async (instance, args, cancellationToken) =>");
+        writer.AppendLine("InvokeTypedTest = static (instance, args, cancellationToken) =>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -4224,11 +4256,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (methodTypeArgs.Length > 0)
         {
             var methodTypeArgsString = string.Join(", ", methodTypeArgs.Select(t => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
-            writer.AppendLine($"await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{methodTypeArgsString}>({string.Join(", ", parameterCasts)}));");
+            writer.AppendLine($"return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}<{methodTypeArgsString}>({string.Join(", ", parameterCasts)}));");
         }
         else
         {
-            writer.AppendLine($"await global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}({string.Join(", ", parameterCasts)}));");
+            writer.AppendLine($"return global::TUnit.Core.AsyncConvert.Convert(() => typedInstance.{methodName}({string.Join(", ", parameterCasts)}));");
         }
 
         writer.Unindent();

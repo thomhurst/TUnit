@@ -33,7 +33,7 @@ internal sealed class TUnit_TestProject_AfterTests_CleanupTests_Test1_TestSource
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.CleanupTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.CleanupTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -41,7 +41,7 @@ internal sealed class TUnit_TestProject_AfterTests_CleanupTests_Test1_TestSource
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.CleanupTests)),
                         Name = "CleanupTests",
                         Namespace = "TUnit.TestProject.AfterTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -55,9 +55,9 @@ internal sealed class TUnit_TestProject_AfterTests_CleanupTests_Test1_TestSource
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AfterTests.CleanupTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.Test1();
+                return new global::System.Threading.Tasks.ValueTask(instance.Test1());
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
@@ -112,7 +112,7 @@ internal sealed class TUnit_TestProject_AfterTests_CleanupTests_Test2_TestSource
                 ReturnType = typeof(global::System.Threading.Tasks.Task),
                 ReturnTypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.Tasks.Task)),
                 Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
-                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.CleanupTests", () => 
+                Class = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.AfterTests.CleanupTests", static () => 
                 {
                     var classMetadata = new global::TUnit.Core.ClassMetadata
                     {
@@ -120,7 +120,7 @@ internal sealed class TUnit_TestProject_AfterTests_CleanupTests_Test2_TestSource
                         TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.AfterTests.CleanupTests)),
                         Name = "CleanupTests",
                         Namespace = "TUnit.TestProject.AfterTests",
-                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
+                        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", static () => new global::TUnit.Core.AssemblyMetadata { Name = "TestsBase`1" }),
                         Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
                         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
                         Parent = null
@@ -134,9 +134,9 @@ internal sealed class TUnit_TestProject_AfterTests_CleanupTests_Test2_TestSource
                 })
             },
             InstanceFactory = (typeArgs, args) => new global::TUnit.TestProject.AfterTests.CleanupTests(),
-            InvokeTypedTest = async (instance, args, cancellationToken) =>
+            InvokeTypedTest = static (instance, args, cancellationToken) =>
             {
-                await instance.Test2();
+                return new global::System.Threading.Tasks.ValueTask(instance.Test2());
             },
         };
         metadata.UseRuntimeDataGeneration(testSessionId);
