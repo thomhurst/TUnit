@@ -222,21 +222,30 @@ public class TestContext : Context
             return TestName;
         }
 
-        var formattedArgs = new string[TestDetails.TestMethodArguments.Length];
-        for (var i = 0; i < TestDetails.TestMethodArguments.Length; i++)
+        var argsLength = TestDetails.TestMethodArguments.Length;
+        var sb = StringBuilderPool.Get();
+        try
         {
-            formattedArgs[i] = ArgumentFormatter.Format(TestDetails.TestMethodArguments[i], ArgumentDisplayFormatters);
-        }
-        var arguments = string.Join(", ", formattedArgs);
+            sb.Append(TestName);
+            sb.Append('(');
 
-        if (string.IsNullOrEmpty(arguments))
+            for (var i = 0; i < argsLength; i++)
+            {
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                }
+                sb.Append(ArgumentFormatter.Format(TestDetails.TestMethodArguments[i], ArgumentDisplayFormatters));
+            }
+
+            sb.Append(')');
+            _cachedDisplayName = sb.ToString();
+            return _cachedDisplayName;
+        }
+        finally
         {
-            _cachedDisplayName = TestName;
-            return TestName;
+            StringBuilderPool.Return(sb);
         }
-
-        _cachedDisplayName = $"{TestName}({arguments})";
-        return _cachedDisplayName;
     }
 
     /// <summary>
