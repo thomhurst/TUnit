@@ -36,8 +36,8 @@ public class DependencyFilteringTests
 
         // Verify that TestContext.Dependencies is populated
         var context = TestContext.Current!;
-        await Assert.That(context.Dependencies).HasCount().EqualTo(1);
-        await Assert.That(context.Dependencies[0].TestName).IsEqualTo("DependentTest");
+        await Assert.That(context.Dependencies.TestDependencies).HasCount().EqualTo(1);
+        await Assert.That(context.Dependencies.TestDependencies.ElementAt(0).TestName).IsEqualTo("DependentTest");
     }
 
     [Test]
@@ -49,7 +49,7 @@ public class DependencyFilteringTests
 
         // Verify that TestContext.Dependencies is empty for independent tests
         var context = TestContext.Current!;
-        await Assert.That(context.Dependencies).IsEmpty();
+        await Assert.That(context.Dependencies.TestDependencies).HasCount().EqualTo(0);
     }
 
     [Test]
@@ -63,9 +63,9 @@ public class DependencyFilteringTests
 
         // Verify that TestContext.Dependencies is populated with cross-class dependency
         var context = TestContext.Current!;
-        await Assert.That(context.Dependencies).HasCount().EqualTo(1);
-        await Assert.That(context.Dependencies[0].TestName).IsEqualTo("CrossClassDependency");
-        await Assert.That(context.Dependencies[0].ClassType.Name).IsEqualTo("DependencyFilteringTests2");
+        await Assert.That(context.Dependencies.TestDependencies).HasCount().EqualTo(1);
+        await Assert.That(context.Dependencies.TestDependencies.ElementAt(0).TestName).IsEqualTo("CrossClassDependency");
+        await Assert.That(context.Dependencies.TestDependencies.ElementAt(0).ClassType.Name).IsEqualTo("DependencyFilteringTests2");
     }
 }
 

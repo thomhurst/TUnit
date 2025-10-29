@@ -66,7 +66,7 @@ public class DiscoveredTestContext
     /// </summary>
     public void AddParallelConstraint(IParallelConstraint constraint)
     {
-        TestContext.AddParallelConstraint(constraint);
+        TestContext.Parallelism.AddConstraint(constraint);
     }
 
     public void AddArgumentDisplayFormatter(ArgumentDisplayFormatter formatter)

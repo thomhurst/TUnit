@@ -48,6 +48,6 @@ public class TestRegisteredContext
     /// </summary>
     public void SetParallelLimiter(IParallelLimit parallelLimit)
     {
-        TestContext.SetParallelLimiter(parallelLimit);
+        TestContext.Parallelism.SetLimiter(parallelLimit);
     }
 }

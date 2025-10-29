@@ -14,9 +14,10 @@ namespace TUnit.Core;
 /// Simplified test context for the new architecture
 /// </summary>
 [DebuggerDisplay("{TestDetails.ClassType.Name}.{GetDisplayName(),nq}")]
-public class TestContext : Context
+public partial class TestContext : Context,
+    ITestExecution, ITestParallelization, ITestOutput, ITestMetadata, ITestDependencies
 {
-    private static readonly Dictionary<Guid, TestContext> _testContextsById = new(1000);
+    private static readonly ConcurrentDictionary<Guid, TestContext> _testContextsById = new();
     private readonly TestBuilderContext _testBuilderContext;
     private string? _cachedDisplayName;
 
@@ -32,6 +33,14 @@ public class TestContext : Context
     }
 
     public Guid Id => _testBuilderContext.Id;
+
+    // Zero-allocation interface properties for organized API access
+    public ITestExecution Execution => this;
+    public ITestParallelization Parallelism => this;
+    public ITestOutput Output => this;
+    public ITestMetadata Metadata => this;
+    public ITestDependencies Dependencies => this;
+    public IServiceProvider Services => ServiceProvider;
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
 
@@ -120,17 +129,6 @@ public class TestContext : Context
     /// </summary>
     public IReadOnlyList<IParallelConstraint> ParallelConstraints => _parallelConstraints;
 
-    /// <summary>
-    /// Adds a parallel constraint to this test context.
-    /// Multiple constraints can be combined to create complex parallelization rules.
-    /// </summary>
-    public void AddParallelConstraint(IParallelConstraint constraint)
-    {
-        if (constraint != null)
-        {
-            _parallelConstraints.Add(constraint);
-        }
-    }
 
     public Priority ExecutionPriority { get; set; } = Priority.Normal;
 
@@ -198,7 +196,8 @@ public class TestContext : Context
 
     public ConcurrentBag<Timing> Timings { get; } = [];
 
-    public IReadOnlyList<Artifact> Artifacts { get; } = new List<Artifact>();
+    private readonly ConcurrentBag<Artifact> _artifactsBag = new();
+    public IReadOnlyList<Artifact> Artifacts => _artifactsBag.ToList();
 
     internal IClassConstructor? ClassConstructor => _testBuilderContext.ClassConstructor;
 
@@ -261,12 +260,6 @@ public class TestContext : Context
 
     public bool ReportResult { get; set; } = true;
 
-
-    public void SetParallelLimiter(IParallelLimit parallelLimit)
-    {
-        ParallelLimiter = parallelLimit;
-    }
-
     public void AddLinkedCancellationToken(CancellationToken cancellationToken)
     {
         if (LinkedCancellationTokens == null)
@@ -285,11 +278,6 @@ public class TestContext : Context
     }
 
     public DateTimeOffset? TestStart { get; set; }
-
-    public void AddArtifact(Artifact artifact)
-    {
-        ((List<Artifact>)Artifacts).Add(artifact);
-    }
 
     public void OverrideResult(string reason)
     {
@@ -314,10 +302,6 @@ public class TestContext : Context
         InternalExecutableTest.State = state;
     }
 
-
-    public List<TestDetails> Dependencies { get; } =
-    [
-    ];
 
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
 

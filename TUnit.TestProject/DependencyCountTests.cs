@@ -17,7 +17,7 @@ public class DependencyCountTests
     [Test, DependsOn(nameof(Test1))]
     public async Task Test2()
     {
-        await Assert.That(TestContext.Current!.Dependencies).HasCount().EqualTo(3);
+        await Assert.That(TestContext.Current!.Dependencies.TestDependencies).HasCount().EqualTo(3);
     }
 
     [Test]
@@ -29,7 +29,7 @@ public class DependencyCountTests
     [Test, DependsOn(nameof(Test3))]
     public async Task Test4()
     {
-        await Assert.That(TestContext.Current!.Dependencies).HasCount().EqualTo(1);
+        await Assert.That(TestContext.Current!.Dependencies.TestDependencies).HasCount().EqualTo(1);
     }
 
     [Test, DependsOn(nameof(Test1))]
@@ -41,6 +41,6 @@ public class DependencyCountTests
     [Test, DependsOn(nameof(Test5))]
     public async Task Test6()
     {
-        await Assert.That(TestContext.Current!.Dependencies).HasCount().EqualTo(4);
+        await Assert.That(TestContext.Current!.Dependencies.TestDependencies).HasCount().EqualTo(4);
     }
 }
