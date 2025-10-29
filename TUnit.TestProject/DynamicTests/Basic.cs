@@ -48,49 +48,49 @@ public class Basic
         {
             TestMethod = @class => @class.SomeMethod(),
             TestMethodArguments = [],
-            Attributes = [new RepeatAttribute(5)]
+            Attributes = []
         });
 
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod_Task(),
             TestMethodArguments = [],
-            Attributes = [new RepeatAttribute(5)]
+            Attributes = []
         });
 
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod_ValueTask(),
             TestMethodArguments = [],
-            Attributes = [new RepeatAttribute(5)]
+            Attributes = []
         });
 
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod_Args(1, "test", true),
             TestMethodArguments = [2, "test", false],
-            Attributes = [new RepeatAttribute(5)]
+            Attributes = []
         });
 
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod_Task_Args(1, "test", true),
             TestMethodArguments = [2, "test", false],
-            Attributes = [new RepeatAttribute(5)]
+            Attributes = []
         });
 
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod_ValueTask_Args(1, "test", true),
             TestMethodArguments = [2, "test", false],
-            Attributes = [new RepeatAttribute(5)]
+            Attributes = []
         });
 
         context.AddTest(new DynamicTest<Basic>
         {
             TestMethod = @class => @class.SomeMethod_ValueTask_Args(1, "test", true),
             TestMethodArguments = [2, "test", false],
-            Attributes = [new RepeatAttribute(5)]
+            Attributes = []
         });
     }
 }

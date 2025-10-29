@@ -29,7 +29,7 @@ public class Runtime(int a, int b, int c)
             TestMethod = @class => @class.SomeMethod(0, 0, 0),
             TestClassArguments = [a + 10, b + 10, c + 10],
             TestMethodArguments = [d + 10, e + 10, f + 10],
-            Attributes = [new RepeatAttribute(5)]
+            Attributes = []
         });
     }
 }
