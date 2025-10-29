@@ -62,7 +62,7 @@ public class TestDetails
     public IEnumerable<T> GetAttributes<T>() where T : Attribute
         => AttributesByType.TryGetValue(typeof(T), out var attrs)
             ? attrs.OfType<T>()
-            : Enumerable.Empty<T>();
+            : [];
 
     /// <summary>
     /// Gets all attributes as a flattened collection.
