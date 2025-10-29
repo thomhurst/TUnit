@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "DataSource_Method",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -123,7 +123,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "DataSource_Method2",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -233,7 +233,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "DataSource_Method_WithAction",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -343,7 +343,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "DataSource_Method3",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -468,7 +468,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_M
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "DataSource_Method4",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -620,7 +620,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_DataSource_W
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "DataSource_WithBaseReturn",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -730,7 +730,7 @@ internal sealed class TUnit_TestProject_MethodDataSourceDrivenTests_EnumerableFu
             TestClassType = typeof(global::TUnit.TestProject.MethodDataSourceDrivenTests),
             TestMethodName = "EnumerableFuncArrayTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)

@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
             TestClassType = typeof(global::TUnit.TestProject.AbstractTests.ConcreteClass1),
             TestMethodName = "AssertClassName",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.InheritsTestsAttribute()

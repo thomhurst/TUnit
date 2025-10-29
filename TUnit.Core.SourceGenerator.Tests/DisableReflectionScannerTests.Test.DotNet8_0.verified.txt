@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_BasicTests_SynchronousTest_TestSource : 
             TestClassType = typeof(global::TUnit.TestProject.BasicTests),
             TestMethodName = "SynchronousTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute()
             ],
@@ -93,7 +93,7 @@ internal sealed class TUnit_TestProject_BasicTests_AsynchronousTest_TestSource :
             TestClassType = typeof(global::TUnit.TestProject.BasicTests),
             TestMethodName = "AsynchronousTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute()
             ],
@@ -172,7 +172,7 @@ internal sealed class TUnit_TestProject_BasicTests_ValueTaskAsynchronousTest_Tes
             TestClassType = typeof(global::TUnit.TestProject.BasicTests),
             TestMethodName = "ValueTaskAsynchronousTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute()
             ],

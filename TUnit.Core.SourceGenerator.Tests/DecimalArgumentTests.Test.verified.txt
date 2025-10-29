@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Transfer__decimal_d
             TestClassType = typeof(global::TUnit.TestProject.DecimalArgumentTests),
             TestMethodName = "Transfer",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -120,7 +120,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SimpleDecimal__deci
             TestClassType = typeof(global::TUnit.TestProject.DecimalArgumentTests),
             TestMethodName = "SimpleDecimal",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -218,7 +218,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_SmallDecimal__decim
             TestClassType = typeof(global::TUnit.TestProject.DecimalArgumentTests),
             TestMethodName = "SmallDecimal",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -316,7 +316,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MaxDecimal__decimal
             TestClassType = typeof(global::TUnit.TestProject.DecimalArgumentTests),
             TestMethodName = "MaxDecimal",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -414,7 +414,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MinDecimal__decimal
             TestClassType = typeof(global::TUnit.TestProject.DecimalArgumentTests),
             TestMethodName = "MinDecimal",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -512,7 +512,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_ExplicitDecimalValu
             TestClassType = typeof(global::TUnit.TestProject.DecimalArgumentTests),
             TestMethodName = "ExplicitDecimalValue",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -610,7 +610,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_MultipleDecimals__d
             TestClassType = typeof(global::TUnit.TestProject.DecimalArgumentTests),
             TestMethodName = "MultipleDecimals",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -722,7 +722,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Test__decimal_TestS
             TestClassType = typeof(global::TUnit.TestProject.DecimalArgumentTests),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -823,7 +823,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TransactionDiscount
             TestClassType = typeof(global::TUnit.TestProject.DecimalArgumentTests),
             TestMethodName = "TransactionDiscountCalculations",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -959,7 +959,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality3__decimal_
             TestClassType = typeof(global::TUnit.TestProject.DecimalArgumentTests),
             TestMethodName = "Equality3",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -1057,7 +1057,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_Equality4__decimal_
             TestClassType = typeof(global::TUnit.TestProject.DecimalArgumentTests),
             TestMethodName = "Equality4",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -1155,7 +1155,7 @@ internal sealed class TUnit_TestProject_DecimalArgumentTests_TestMethod__decimal
             TestClassType = typeof(global::TUnit.TestProject.DecimalArgumentTests),
             TestMethodName = "TestMethod",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)

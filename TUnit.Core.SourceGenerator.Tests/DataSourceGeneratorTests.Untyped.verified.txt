@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_AutoDataTests_Test1__string_int_double_b
             TestClassType = typeof(global::TUnit.TestProject.AutoDataTests),
             TestMethodName = "Test1",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute()
             ],

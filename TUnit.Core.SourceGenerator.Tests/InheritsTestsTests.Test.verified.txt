@@ -17,7 +17,7 @@ internal sealed class TUnit_TestProject_Bugs__1924_None_BaseClass_Test__int_Test
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1924.None.BaseClass),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.RepeatAttribute(10),
@@ -164,7 +164,7 @@ internal sealed class TUnit_TestProject_Bugs__1924_None_Tests_Test__int_TestSour
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1924.None.Tests),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.RepeatAttribute(10),
@@ -299,7 +299,7 @@ internal sealed class TUnit_TestProject_Bugs__1924_None_Tests2_Test__int_TestSou
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1924.None.Tests2),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.RepeatAttribute(10),
@@ -434,7 +434,7 @@ internal sealed class TUnit_TestProject_Bugs__1924_None_Tests3_Test__int_TestSou
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1924.None.Tests3),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.RepeatAttribute(10),

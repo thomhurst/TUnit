@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_TypedDelegateTest_TestWithDelegate_TestS
             TestClassType = typeof(global::TUnit.TestProject.TypedDelegateTest),
             TestMethodName = "TestWithDelegate",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute()
             ],

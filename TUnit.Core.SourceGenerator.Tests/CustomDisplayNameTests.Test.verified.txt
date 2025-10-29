@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test_TestSource :
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute("A super important test!"),
@@ -107,7 +107,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test2_TestSource 
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "Test2",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute("Another super important test!"),
@@ -201,7 +201,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_Test3__string_int
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "Test3",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute("Test with: $value1 $value2 $value3!"),
@@ -328,7 +328,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_MethodDataSourceT
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "MethodDataSourceTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute("Test using MethodDataSource"),
@@ -451,7 +451,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_TestParameterName
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "TestParameterNamePrefixBug",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute("Test this($someValue, $someValueType)"),
@@ -572,7 +572,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_PasswordTest__str
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "PasswordTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -683,7 +683,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_SameClassConstant
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "SameClassConstantTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}"),
@@ -777,7 +777,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_DifferentClassCon
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "DifferentClassConstantTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}"),
@@ -871,7 +871,7 @@ internal sealed class TUnit_TestProject_CustomDisplayNameTests_NestedClassConsta
             TestClassType = typeof(global::TUnit.TestProject.CustomDisplayNameTests),
             TestMethodName = "NestedClassConstantTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.DisplayNameAttribute($"My test {"My constant"}"),

@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_TypedArguments
             TestClassType = typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests),
             TestMethodName = "TypedArguments",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -130,7 +130,7 @@ internal sealed class TUnit_TestProject_ExpectedArgumentTypeTests_EnumTypes__obj
             TestClassType = typeof(global::TUnit.TestProject.ExpectedArgumentTypeTests),
             TestMethodName = "EnumTypes",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)

@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_ArgsAsArrayTests_Params__string___TestSo
             TestClassType = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
             TestMethodName = "Params",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute()
             ],
@@ -129,7 +129,7 @@ internal sealed class TUnit_TestProject_ArgsAsArrayTests_ParamsEnumerable__IEnum
             TestClassType = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
             TestMethodName = "ParamsEnumerable",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute()
             ],
@@ -245,7 +245,7 @@ internal sealed class TUnit_TestProject_ArgsAsArrayTests_Following_Non_Params__i
             TestClassType = typeof(global::TUnit.TestProject.ArgsAsArrayTests),
             TestMethodName = "Following_Non_Params",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute()
             ],

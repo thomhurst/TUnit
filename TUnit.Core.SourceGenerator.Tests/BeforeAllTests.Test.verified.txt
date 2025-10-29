@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_BeforeTests_SetupTests_Test1_TestSource 
             TestClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
             TestMethodName = "Test1",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute()
             ],
@@ -92,7 +92,7 @@ internal sealed class TUnit_TestProject_BeforeTests_SetupTests_Test2_TestSource 
             TestClassType = typeof(global::TUnit.TestProject.BeforeTests.SetupTests),
             TestMethodName = "Test2",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute()
             ],

@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test__byte__Te
             TestClassType = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -113,7 +113,7 @@ internal sealed class TUnit_TestProject_NullableByteArgumentTests_Test2__byte_by
             TestClassType = typeof(global::TUnit.TestProject.NullableByteArgumentTests),
             TestMethodName = "Test2",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)

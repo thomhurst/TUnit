@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_ClassConstructorTest_Test_TestSource : g
             TestClassType = typeof(global::TUnit.TestProject.ClassConstructorTest),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.ClassConstructorAttribute<global::TUnit.TestProject.DependencyInjectionClassConstructor>()

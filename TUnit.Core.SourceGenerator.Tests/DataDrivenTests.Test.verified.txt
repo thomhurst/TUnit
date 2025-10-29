@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_DataSource_Method__int_T
             TestClassType = typeof(global::TUnit.TestProject.DataDrivenTests),
             TestMethodName = "DataSource_Method",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -114,7 +114,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_DataSource_Method__int_s
             TestClassType = typeof(global::TUnit.TestProject.DataDrivenTests),
             TestMethodName = "DataSource_Method",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -222,7 +222,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_EnumValue__TestEnum_Test
             TestClassType = typeof(global::TUnit.TestProject.DataDrivenTests),
             TestMethodName = "EnumValue",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -323,7 +323,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_NullValue__string__TestS
             TestClassType = typeof(global::TUnit.TestProject.DataDrivenTests),
             TestMethodName = "NullValue",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -422,7 +422,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_EmptyString__string__Tes
             TestClassType = typeof(global::TUnit.TestProject.DataDrivenTests),
             TestMethodName = "EmptyString",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -521,7 +521,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_NonEmptyString__string__
             TestClassType = typeof(global::TUnit.TestProject.DataDrivenTests),
             TestMethodName = "NonEmptyString",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -620,7 +620,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_BooleanString__bool__Tes
             TestClassType = typeof(global::TUnit.TestProject.DataDrivenTests),
             TestMethodName = "BooleanString",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -721,7 +721,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_Type__Type_TestSource : 
             TestClassType = typeof(global::TUnit.TestProject.DataDrivenTests),
             TestMethodName = "Type",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -820,7 +820,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_IntegerArray__int___Test
             TestClassType = typeof(global::TUnit.TestProject.DataDrivenTests),
             TestMethodName = "IntegerArray",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -919,7 +919,7 @@ internal sealed class TUnit_TestProject_DataDrivenTests_IntMaxValue__int_TestSou
             TestClassType = typeof(global::TUnit.TestProject.DataDrivenTests),
             TestMethodName = "IntMaxValue",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)

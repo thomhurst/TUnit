@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_Bugs__2971_Tests_SimpleTest_TestSource :
             TestClassType = typeof(global::TUnit.TestProject.Bugs._2971.Tests),
             TestMethodName = "SimpleTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Bugs._2971.SomeAttribute(typeof(global::System.Nullable<>))

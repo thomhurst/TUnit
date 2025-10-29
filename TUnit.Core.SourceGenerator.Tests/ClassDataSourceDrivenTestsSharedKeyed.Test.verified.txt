@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
             TestClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
             TestMethodName = "DataSource_Class",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -113,7 +113,7 @@ internal sealed class TUnit_TestProject_ClassDataSourceDrivenTestsSharedKeyed_Da
             TestClassType = typeof(global::TUnit.TestProject.ClassDataSourceDrivenTestsSharedKeyed),
             TestMethodName = "DataSource_Class_Generic",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)

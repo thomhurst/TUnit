@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
             TestClassType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
             TestMethodName = "GeneratedData_Method",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -144,7 +144,7 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
             TestClassType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
             TestMethodName = "GeneratedData_Method2",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -289,7 +289,7 @@ internal sealed class TUnit_TestProject_DataSourceGeneratorTests_GeneratedData_M
             TestClassType = typeof(global::TUnit.TestProject.DataSourceGeneratorTests),
             TestMethodName = "GeneratedData_Method3",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),

@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_Bugs__1589_MyTests_Test1_TestSource : gl
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1589.MyTests),
             TestMethodName = "Test1",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),

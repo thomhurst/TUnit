@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_With_STA_TestSource : glo
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "With_STA",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -97,7 +97,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_Without_STA_TestSource : 
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "Without_STA",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -180,7 +180,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithSimpleAwait_TestS
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithSimpleAwait",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -264,7 +264,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskYield_TestSou
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithTaskYield",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -348,7 +348,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithConfigureAwaitTru
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithConfigureAwaitTrue",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -432,7 +432,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithNestedAsyncCalls_
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithNestedAsyncCalls",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -516,7 +516,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskFromResult_Te
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithTaskFromResult",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -600,7 +600,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithCompletedTask_Tes
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithCompletedTask",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -684,7 +684,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskRun_TestSourc
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithTaskRun",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -768,7 +768,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithMultipleAwaits_Te
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithMultipleAwaits",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -852,7 +852,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithAsyncEnumerable_T
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithAsyncEnumerable",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -936,7 +936,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithTaskWhenAll_TestS
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithTaskWhenAll",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -1020,7 +1020,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithExceptionHandling
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithExceptionHandling",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -1104,7 +1104,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithThrowsNothingAsse
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithThrowsNothingAssertion",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),
@@ -1188,7 +1188,7 @@ internal sealed class TUnit_TestProject_STAThreadTests_STA_WithFuncAssertion_Tes
             TestClassType = typeof(global::TUnit.TestProject.STAThreadTests),
             TestMethodName = "STA_WithFuncAssertion",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.Executors.STAThreadExecutorAttribute(),

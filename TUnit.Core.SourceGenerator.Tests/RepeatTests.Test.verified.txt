@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_RepeatTests_One_TestSource : global::TUn
             TestClassType = typeof(global::TUnit.TestProject.RepeatTests),
             TestMethodName = "One",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.RepeatAttribute(1),
@@ -96,7 +96,7 @@ internal sealed class TUnit_TestProject_RepeatTests_Two_TestSource : global::TUn
             TestClassType = typeof(global::TUnit.TestProject.RepeatTests),
             TestMethodName = "Two",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.RepeatAttribute(2),
@@ -179,7 +179,7 @@ internal sealed class TUnit_TestProject_RepeatTests_Three_TestSource : global::T
             TestClassType = typeof(global::TUnit.TestProject.RepeatTests),
             TestMethodName = "Three",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),

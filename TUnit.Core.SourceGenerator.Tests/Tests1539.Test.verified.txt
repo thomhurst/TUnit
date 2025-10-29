@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_Bugs__1539_Tests_Test_TestSource : globa
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1539.Tests),
             TestMethodName = "Test",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Bugs._1539.Tests.AttributeWithPositionalArgs(),

@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Int__int_TestSource 
             TestClassType = typeof(global::TUnit.TestProject.NumberArgumentTests),
             TestMethodName = "Int",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -112,7 +112,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Double__double_TestS
             TestClassType = typeof(global::TUnit.TestProject.NumberArgumentTests),
             TestMethodName = "Double",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -211,7 +211,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Float__float_TestSou
             TestClassType = typeof(global::TUnit.TestProject.NumberArgumentTests),
             TestMethodName = "Float",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -310,7 +310,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_Long__long_TestSourc
             TestClassType = typeof(global::TUnit.TestProject.NumberArgumentTests),
             TestMethodName = "Long",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -409,7 +409,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_ULong__ulong_TestSou
             TestClassType = typeof(global::TUnit.TestProject.NumberArgumentTests),
             TestMethodName = "ULong",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -508,7 +508,7 @@ internal sealed class TUnit_TestProject_NumberArgumentTests_UInt__uint_TestSourc
             TestClassType = typeof(global::TUnit.TestProject.NumberArgumentTests),
             TestMethodName = "UInt",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)

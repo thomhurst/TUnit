@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_NameOfArgumentTests_TestName__string_Tes
             TestClassType = typeof(global::TUnit.TestProject.NameOfArgumentTests),
             TestMethodName = "TestName",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)

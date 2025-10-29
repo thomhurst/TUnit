@@ -14,7 +14,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
             TestClassType = typeof(global::TUnit.TestProject.Bugs._2136.Tests),
             TestMethodName = "GenericArgumentsTest",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -72,7 +72,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) =>
+            InstanceFactory = static (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.Bugs._2136.Tests();
             },
@@ -86,7 +86,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(bool)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.TestAttribute(),
                         new global::TUnit.Core.ArgumentsAttribute(true, "True"),
@@ -149,7 +149,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.Bugs._2136.Tests();
                     },
@@ -168,7 +168,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(int)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.TestAttribute(),
                         new global::TUnit.Core.ArgumentsAttribute(1, "1"),
@@ -231,7 +231,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.Bugs._2136.Tests();
                     },
@@ -250,7 +250,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(double)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.TestAttribute(),
                         new global::TUnit.Core.ArgumentsAttribute(1.1, "1.1"),
@@ -313,7 +313,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.Bugs._2136.Tests();
                     },
@@ -332,7 +332,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(string)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.TestAttribute(),
                         new global::TUnit.Core.ArgumentsAttribute("hello", "hello"),
@@ -395,7 +395,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.Bugs._2136.Tests();
                     },
@@ -414,7 +414,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                     TestMethodName = "GenericArgumentsTest",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(global::TUnit.TestProject.Bugs._2136.MyEnum)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.TestAttribute(),
                         new global::TUnit.Core.ArgumentsAttribute(global::TUnit.TestProject.Bugs._2136.MyEnum.Item, "Item"),
@@ -477,7 +477,7 @@ internal sealed class TUnit_TestProject_Bugs__2136_Tests_GenericArgumentsTest__T
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.Bugs._2136.Tests();
                     },

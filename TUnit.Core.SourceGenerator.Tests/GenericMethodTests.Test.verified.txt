@@ -14,7 +14,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
             TestClassType = typeof(global::TUnit.TestProject.GenericMethodTests),
             TestMethodName = "AggregateBy_HasExpectedOutput",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -100,7 +100,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) =>
+            InstanceFactory = static (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.GenericMethodTests();
             },
@@ -114,7 +114,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                     TestMethodName = "AggregateBy_HasExpectedOutput",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(int), typeof(int), typeof(int)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.TestAttribute(),
                         new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData"),
@@ -249,7 +249,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.GenericMethodTests();
                     },
@@ -268,7 +268,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                     TestMethodName = "AggregateBy_HasExpectedOutput",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(string), typeof(string), typeof(string)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.TestAttribute(),
                         new global::TUnit.Core.MethodDataSourceAttribute("AggregateBy_Numeric_TestData"),
@@ -403,7 +403,7 @@ internal sealed class TUnit_TestProject_GenericMethodTests_AggregateBy_HasExpect
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.GenericMethodTests();
                     },

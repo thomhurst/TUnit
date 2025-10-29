@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
             TestMethodName = "TryParse_InvalidString_ReturnsFailure",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -123,7 +123,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_Parse_InvalidString_Thr
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
             TestMethodName = "Parse_InvalidString_ThrowsException",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
@@ -225,7 +225,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_ValidString_Re
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1304.Tests),
             TestMethodName = "TryParse_ValidString_ReturnsAccountId",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)

@@ -14,7 +14,7 @@ internal sealed class TUnit_TestProject_TestClass_GenericTestMethod_TestSource :
             TestClassType = typeof(global::TUnit.TestProject.TestClass),
             TestMethodName = "GenericTestMethod",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
                 new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string)),
@@ -57,7 +57,7 @@ internal sealed class TUnit_TestProject_TestClass_GenericTestMethod_TestSource :
                     return classMetadata;
                 })
             },
-            InstanceFactory = (typeArgs, args) =>
+            InstanceFactory = static (typeArgs, args) =>
             {
                 return new global::TUnit.TestProject.TestClass();
             },
@@ -71,7 +71,7 @@ internal sealed class TUnit_TestProject_TestClass_GenericTestMethod_TestSource :
                     TestMethodName = "GenericTestMethod",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(int)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
                         new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string)),
@@ -115,7 +115,7 @@ internal sealed class TUnit_TestProject_TestClass_GenericTestMethod_TestSource :
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.TestClass();
                     },
@@ -134,7 +134,7 @@ internal sealed class TUnit_TestProject_TestClass_GenericTestMethod_TestSource :
                     TestMethodName = "GenericTestMethod",
                     GenericMethodTypeArguments = new global::System.Type[] { typeof(string)},
                     Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-                    AttributeFactory = () =>
+                    AttributeFactory = static () =>
                     [
                         new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
                         new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string)),
@@ -178,7 +178,7 @@ internal sealed class TUnit_TestProject_TestClass_GenericTestMethod_TestSource :
                             return classMetadata;
                         })
                     },
-                    InstanceFactory = (typeArgs, args) =>
+                    InstanceFactory = static (typeArgs, args) =>
                     {
                         return new global::TUnit.TestProject.TestClass();
                     },

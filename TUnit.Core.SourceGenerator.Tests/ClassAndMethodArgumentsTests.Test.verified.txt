@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_Simple_Test
             TestClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
             TestMethodName = "Simple",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.ArgumentsAttribute("1"),
@@ -110,7 +110,7 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_WithMethodL
             TestClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
             TestMethodName = "WithMethodLevel",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.ArgumentsAttribute("1"),
@@ -226,7 +226,7 @@ internal sealed class TUnit_TestProject_ClassAndMethodArgumentsTests_IgnoreParam
             TestClassType = typeof(global::TUnit.TestProject.ClassAndMethodArgumentsTests),
             TestMethodName = "IgnoreParameters",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.ArgumentsAttribute("1"),

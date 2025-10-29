@@ -13,7 +13,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource 
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
             TestMethodName = "Test1",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -95,7 +95,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test2__bool_TestS
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
             TestMethodName = "Test2",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
@@ -195,7 +195,7 @@ internal sealed class TUnit_TestProject_Bugs__1889_DerivedTest_Test3__bool_TestS
             TestClassType = typeof(global::TUnit.TestProject.Bugs._1889.DerivedTest),
             TestMethodName = "Test3",
             Dependencies = global::System.Array.Empty<global::TUnit.Core.TestDependency>(),
-            AttributeFactory = () =>
+            AttributeFactory = static () =>
             [
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
