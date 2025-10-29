@@ -785,18 +785,6 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that the value is NOT in the specified collection (params array convenience method).
-    /// Example: await Assert.That(4).IsNotIn(1, 3, 5, 7, 9);
-    /// </summary>
-    public static IsNotInAssertion<TValue> IsNotIn<TValue>(
-        this IAssertionSource<TValue> source,
-        params TValue[] collection)
-    {
-        source.Context.ExpressionBuilder.Append($".IsNotIn({string.Join(", ", collection)})");
-        return new IsNotInAssertion<TValue>(source.Context, collection);
-    }
-
-    /// <summary>
     /// Asserts that the delegate throws the specified exception type (or subclass).
     /// Only available on delegate-based assertions for type safety.
     /// Example: await Assert.That(() => ThrowingMethod()).Throws&lt;InvalidOperationException&gt;();
