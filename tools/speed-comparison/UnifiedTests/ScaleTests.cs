@@ -111,7 +111,7 @@ public class ScaleTests
     [Arguments(97)]
     [Arguments(98)]
     [Arguments(99)]
-    public async Task Scale100_ParameterizedTest(int value)
+    public void Scale100_ParameterizedTest(int value)
 #elif XUNIT || XUNIT3
     [Theory]
     [InlineData(0)]
@@ -480,7 +480,7 @@ public class ScaleTests
     [Arguments(47, "AV")]
     [Arguments(48, "AW")]
     [Arguments(49, "AX")]
-    public async Task Scale50_MultiParamTest(int id, string name)
+    public void Scale50_MultiParamTest(int id, string name)
 #elif XUNIT || XUNIT3
     [Theory]
     [InlineData(0, "A")]
