@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core.Enums;
 
@@ -96,7 +97,7 @@ internal static class DataGeneratorMetadataCreator
             {
                 TestMetadata = null!, // Not available during discovery
                 Events = new TestContextEvents(),
-                ObjectBag = new Dictionary<string, object?>()
+                ObjectBag = new ConcurrentDictionary<string, object?>()
             }),
             MembersToGenerate = membersToGenerate,
             TestInformation = methodMetadata,
@@ -151,7 +152,7 @@ internal static class DataGeneratorMetadataCreator
                 TestMetadata = discoveryMethodMetadata,
                 DataSourceAttribute = dataSource,
                 Events = new TestContextEvents(),
-                ObjectBag = new Dictionary<string, object?>()
+                ObjectBag = new ConcurrentDictionary<string, object?>()
             }),
             MembersToGenerate = [dummyParameter],
             TestInformation = discoveryMethodMetadata,
@@ -172,7 +173,7 @@ internal static class DataGeneratorMetadataCreator
         TestContext? testContext = null,
         object? testClassInstance = null,
         TestContextEvents? events = null,
-        Dictionary<string, object?>? objectBag = null)
+        ConcurrentDictionary<string, object?>? objectBag = null)
     {
         var testBuilderContext = testContext != null
             ? TestBuilderContext.FromTestContext(testContext, dataSource)
@@ -182,7 +183,7 @@ internal static class DataGeneratorMetadataCreator
                     Events = events ?? new TestContextEvents(),
                     TestMetadata = methodMetadata,
                     DataSourceAttribute = dataSource,
-                    ObjectBag = objectBag ?? []
+                    ObjectBag = objectBag ?? new ConcurrentDictionary<string, object?>()
                 }
                 : TestSessionContext.GlobalStaticPropertyContext;
 
@@ -217,7 +218,7 @@ internal static class DataGeneratorMetadataCreator
         TestContext? testContext = null,
         object? testClassInstance = null,
         TestContextEvents? events = null,
-        Dictionary<string, object?>? objectBag = null)
+        ConcurrentDictionary<string, object?>? objectBag = null)
     {
         var propertyMetadata = new PropertyMetadata
         {

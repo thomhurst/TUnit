@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
@@ -563,7 +564,7 @@ public static class DataSourceHelpers
             TestContext.Current,
             TestContext.Current?.TestDetails.ClassInstance,
             TestContext.Current?.Events,
-            TestContext.Current?.ObjectBag ?? new Dictionary<string, object?>()
+            TestContext.Current?.ObjectBag ?? new ConcurrentDictionary<string, object?>()
         );
 
         // Generate the data source value using the attribute's GetDataRowsAsync method

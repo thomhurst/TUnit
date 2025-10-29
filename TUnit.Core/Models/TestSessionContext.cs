@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 namespace TUnit.Core;
 
 public class TestSessionContext : Context
@@ -42,7 +44,7 @@ public class TestSessionContext : Context
             }
         },
         Events = new TestContextEvents(),
-        ObjectBag = new Dictionary<string, object?>(),
+        ObjectBag = new ConcurrentDictionary<string, object?>(),
         DataSourceAttribute = null
     };
 

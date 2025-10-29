@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -15,14 +16,14 @@ public class TestRegisteredContext
     public TestRegisteredContext(TestContext testContext)
     {
         TestContext = testContext;
-        TestName = testContext.TestName;
+        TestName = testContext.TestDetails.TestName;
         CustomDisplayName = testContext.CustomDisplayName;
     }
 
     /// <summary>
     /// Gets the object bag from the underlying TestContext
     /// </summary>
-    public Dictionary<string, object?> ObjectBag => TestContext.ObjectBag;
+    public ConcurrentDictionary<string, object?> ObjectBag => TestContext.ObjectBag;
 
     /// <summary>
     /// Gets the test details from the underlying TestContext
@@ -48,6 +49,6 @@ public class TestRegisteredContext
     /// </summary>
     public void SetParallelLimiter(IParallelLimit parallelLimit)
     {
-        TestContext.SetParallelLimiter(parallelLimit);
+        TestContext.Parallelism.SetLimiter(parallelLimit);
     }
 }

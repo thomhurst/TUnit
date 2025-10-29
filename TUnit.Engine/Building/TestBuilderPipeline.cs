@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using EnumerableAsyncProcessor.Extensions;
 using TUnit.Core;
@@ -35,7 +36,7 @@ internal sealed class TestBuilderPipeline
         {
             TestMetadata = metadata.MethodMetadata,
             Events = new TestContextEvents(),
-            ObjectBag = new Dictionary<string, object?>()
+            ObjectBag = new ConcurrentDictionary<string, object?>()
         };
 
         // Check for ClassConstructor attribute and set it early if present

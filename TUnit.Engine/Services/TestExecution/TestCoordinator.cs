@@ -79,7 +79,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 
                 foreach (var dependency in allDependencies)
                 {
-                    test.Context.Dependencies.Add(dependency);
+                    test.Context._dependencies.Add(dependency);
                 }
             }
             finally

@@ -1,4 +1,6 @@
-﻿namespace TUnit.Engine.Json;
+﻿using System.Collections.Concurrent;
+
+namespace TUnit.Engine.Json;
 
 internal record TestJson
 {
@@ -28,7 +30,7 @@ internal record TestJson
     public required string TestFilePath { get; init; }
     public required int TestLineNumber { get; init; }
 
-    public required Dictionary<string, object?> ObjectBag { get; init; }
+    public required ConcurrentDictionary<string, object?> ObjectBag { get; init; }
 
     public required TestResultJson? Result { get; set; }
 }

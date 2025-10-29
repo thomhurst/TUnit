@@ -27,7 +27,7 @@ internal sealed class DataSourceInitializer
     /// </summary>
     public async Task<T> EnsureInitializedAsync<T>(
         T dataSource,
-        Dictionary<string, object?>? objectBag = null,
+        ConcurrentDictionary<string, object?>? objectBag = null,
         MethodMetadata? methodMetadata = null,
         TestContextEvents? events = null) where T : notnull
     {
@@ -61,14 +61,14 @@ internal sealed class DataSourceInitializer
     /// </summary>
     private async Task InitializeDataSourceAsync(
         object dataSource,
-        Dictionary<string, object?>? objectBag,
+        ConcurrentDictionary<string, object?>? objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents? events)
     {
         try
         {
             // Ensure we have required context
-            objectBag ??= new Dictionary<string, object?>(capacity: 8);
+            objectBag ??= new ConcurrentDictionary<string, object?>();
             events ??= new TestContextEvents();
 
             // Initialize the data source directly here

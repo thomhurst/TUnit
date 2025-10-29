@@ -18,7 +18,7 @@ public class TestDiscoveryAfterHooks
 
         if (test is not null)
         {
-            test.ObjectBag.Add("AfterEveryTestDiscoveryHit", true);
+            test.ObjectBag["AfterEveryTestDiscoveryHit"] = true;
         }
     }
 }

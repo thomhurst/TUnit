@@ -27,9 +27,9 @@ public class TestIdDebugTest
         {
             Console.WriteLine($"=== Test Execution ===");
             Console.WriteLine($"TestId: {testDetails.TestId}");
-            Console.WriteLine($"TestName: {context.TestName}");
+            Console.WriteLine($"TestName: {testDetails.TestName}");
             Console.WriteLine($"HashCode: {context.GetHashCode()}");
-            
+
             // Check all properties
             foreach (var prop in properties)
             {

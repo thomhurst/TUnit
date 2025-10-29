@@ -44,7 +44,7 @@ internal sealed class PropertyInitializationOrchestrator
     public async Task InitializePropertiesAsync(
         object instance,
         PropertyInjectionMetadata[] properties,
-        Dictionary<string, object?> objectBag,
+        ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects)
@@ -69,7 +69,7 @@ internal sealed class PropertyInitializationOrchestrator
     public async Task InitializePropertiesAsync(
         object instance,
         (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties,
-        Dictionary<string, object?> objectBag,
+        ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects)
@@ -92,7 +92,7 @@ internal sealed class PropertyInitializationOrchestrator
     public async Task InitializeObjectWithPropertiesAsync(
         object instance,
         PropertyInjectionPlan plan,
-        Dictionary<string, object?> objectBag,
+        ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects)
@@ -117,7 +117,7 @@ internal sealed class PropertyInitializationOrchestrator
     private PropertyInitializationContext CreateContext(
         object instance,
         PropertyInjectionMetadata metadata,
-        Dictionary<string, object?> objectBag,
+        ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects,
@@ -149,7 +149,7 @@ internal sealed class PropertyInitializationOrchestrator
         object instance,
         PropertyInfo property,
         IDataSourceAttribute dataSource,
-        Dictionary<string, object?> objectBag,
+        ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects,
