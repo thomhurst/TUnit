@@ -582,4 +582,76 @@ public class DisposableFieldPropertyAnalyzerTests
                   """
             );
     }
+
+    [Test]
+    public async Task New_Disposable_In_AsyncInitializer_Flags_Issue()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Net.Http;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Core.Interfaces;
+
+                public class DisposableFieldTests : IAsyncInitializer
+                {
+                    private HttpClient? {|#0:_httpClient|};
+
+                    public Task InitializeAsync()
+                    {
+                        _httpClient = new HttpClient();
+                        return Task.CompletedTask;
+                    }
+
+                    [Test]
+                    public void Test1()
+                    {
+                    }
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.Dispose_Member_In_Cleanup)
+                    .WithLocation(0)
+                    .WithArguments("_httpClient")
+            );
+    }
+
+    [Test]
+    public async Task New_Disposable_In_AsyncInitializer_No_Issue_When_Cleaned_Up()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Net.Http;
+                using System.Threading.Tasks;
+                using TUnit.Core;
+                using TUnit.Core.Interfaces;
+
+                public class DisposableFieldTests : IAsyncInitializer, IAsyncDisposable
+                {
+                    private HttpClient? _httpClient;
+
+                    public Task InitializeAsync()
+                    {
+                        _httpClient = new HttpClient();
+                        return Task.CompletedTask;
+                    }
+
+                    public ValueTask DisposeAsync()
+                    {
+                        _httpClient?.Dispose();
+                        return ValueTask.CompletedTask;
+                    }
+
+                    [Test]
+                    public void Test1()
+                    {
+                    }
+                }
+                """
+            );
+    }
 }

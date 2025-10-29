@@ -72,7 +72,20 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
 
         var isHookMethod = methodSymbol.IsHookMethod(context.Compilation, out _, out var level, out _);
 
-        if (!isHookMethod && methodSymbol.MethodKind != MethodKind.Constructor)
+        // Check for IAsyncInitializer.InitializeAsync()
+        var isInitializeAsyncMethod = false;
+        if (methodSymbol is { Name: "InitializeAsync", Parameters.IsDefaultOrEmpty: true })
+        {
+            var asyncInitializer = context.Compilation.GetTypeByMetadataName("TUnit.Core.Interfaces.IAsyncInitializer");
+            if (asyncInitializer != null && methodSymbol.ContainingType.Interfaces.Any(x =>
+                SymbolEqualityComparer.Default.Equals(x, asyncInitializer)))
+            {
+                isInitializeAsyncMethod = true;
+                level = HookLevel.Test;
+            }
+        }
+
+        if (!isHookMethod && methodSymbol.MethodKind != MethodKind.Constructor && !isInitializeAsyncMethod)
         {
             return;
         }
