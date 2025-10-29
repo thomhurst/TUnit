@@ -9,9 +9,10 @@ namespace TUnit.Core.Interfaces;
 public interface ITestDependencies
 {
     /// <summary>
-    /// Gets the collection of test dependencies for this test.
+    /// Gets the collection of tests that this test depends on.
+    /// Tests in this collection will execute before this test runs.
     /// </summary>
-    IReadOnlyList<TestDetails> TestDependencies { get; }
+    IReadOnlyList<TestDetails> DependsOn { get; }
 
     /// <summary>
     /// Gets the parent test ID if this test is part of a relationship.

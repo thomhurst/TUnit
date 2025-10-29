@@ -1217,31 +1217,33 @@ namespace
         public TestConstructorAttribute() { }
     }
     [.DebuggerDisplay("{.Name}.{GetDisplayName(),nq}")]
-    public class TestContext : .Context
+    public class TestContext : .Context, ., ., ., ., ., .
     {
         public TestContext(string testName,  serviceProvider, .ClassHookContext classContext, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
-        public .<<object?, string?>> ArgumentDisplayFormatters { get; }
         public .<.Artifact> Artifacts { get; }
         public .CancellationToken CancellationToken { get; set; }
         public .ClassHookContext ClassContext { get; }
         public int CurrentRetryAttempt { get; }
         public .? CustomHookExecutor { get; set; }
-        public .<.TestDetails> Dependencies { get; }
+        public . Data { get; }
+        public . Dependencies { get; }
         public ? DisplayNameFormatter { get; set; }
         public .TestContextEvents Events { get; }
-        public . ExecutionPriority { get; set; }
+        public . Execution { get; }
         public  Id { get; }
         public .CancellationTokenSource? LinkedCancellationTokens { get; set; }
         public object Lock { get; }
+        public . Metadata { get; }
         public .<string, object?> ObjectBag { get; }
-        public .<.> ParallelConstraints { get; }
-        public .? ParallelLimiter { get; }
+        public . Output { get; }
+        public . Parallelism { get; }
         public string? ParentTestId { get; set; }
         public .TestPhase Phase { get; set; }
         public . Relationship { get; set; }
         public bool ReportResult { get; set; }
         public .TestResult? Result { get; set; }
         public <.TestContext, , int, .<bool>>? RetryFunc { get; set; }
+        public  Services { get; }
         public string? SkipReason { get; set; }
         public .TestDetails TestDetails { get; set; }
         public ? TestEnd { get; set; }
@@ -1253,9 +1255,7 @@ namespace
         public static string? OutputDirectory { get; }
         public static .<string, .<string>> Parameters { get; }
         public static string WorkingDirectory { get; set; }
-        public void AddArtifact(.Artifact artifact) { }
         public void AddLinkedCancellationToken(.CancellationToken cancellationToken) { }
-        public void AddParallelConstraint(. constraint) { }
         public string GetDisplayName() { }
         public new string GetErrorOutput() { }
         public string GetOutput() { }
@@ -1266,7 +1266,6 @@ namespace
         public .<.TestContext> GetTests(string testName,  classType) { }
         public void OverrideResult(string reason) { }
         public void OverrideResult(.TestState state, string reason) { }
-        public void SetParallelLimiter(. parallelLimit) { }
         public void WriteError(string message) { }
         public void WriteLine(string message) { }
         public static .TestContext? GetById( id) { }
@@ -2228,6 +2227,19 @@ namespace .Interfaces
         void RegisterClassFactory(string testId, <object?[], object> factory);
         void RegisterMethodInvoker(string testId, <object, object?[], .<object?>> invoker);
     }
+    public interface ITestData
+    {
+        .<string, object?> Bag { get; }
+    }
+    public interface ITestDependencies
+    {
+        .<.TestDetails> DependsOn { get; }
+        string? ParentTestId { get; }
+        . Relationship { get; }
+        .<.TestContext> GetTests(<.TestContext, bool> predicate);
+        .<.TestContext> GetTests(string testName);
+        .<.TestContext> GetTests(string testName,  classType);
+    }
     public interface ITestDiscoveryEventReceiver : .
     {
         . OnTestDiscovered(.DiscoveredTestContext context);
@@ -2235,6 +2247,19 @@ namespace .Interfaces
     public interface ITestEndEventReceiver : .
     {
         . OnTestEnd(.TestContext context);
+    }
+    public interface ITestExecution
+    {
+        .CancellationToken CancellationToken { get; }
+        int CurrentRetryAttempt { get; }
+        .TestPhase Phase { get; }
+        .TestResult? Result { get; }
+        <.TestContext, , int, .<bool>>? RetryFunc { get; }
+        string? SkipReason { get; }
+        ? TestEnd { get; }
+        ? TestStart { get; }
+        void OverrideResult(string reason);
+        void OverrideResult(.TestState state, string reason);
     }
     public interface ITestExecutor
     {
@@ -2245,11 +2270,37 @@ namespace .Interfaces
         .<.TestContext> GetTests( classType);
         .TestContext[] GetTestsByNameAndParameters(string testName, .<> methodParameterTypes,  classType, .<> classParameterTypes, .<object?> classArguments);
     }
+    public interface ITestMetadata
+    {
+        string DisplayName { get; set; }
+         Id { get; }
+        .TestDetails TestDetails { get; }
+        string TestName { get; }
+    }
     public interface ITestNameFormatter
     {
         string BuildTestId(string template, int testIndex, int repeatIndex = 0, int classDataIndex = 0, int methodDataIndex = 0);
         string FormatArgumentValue(object? value);
         string FormatTestName(string template, object?[]? classArgs = null, object?[]? methodArgs = null, .<string, object?>? propertyValues = null);
+    }
+    public interface ITestOutput
+    {
+        .<.Artifact> Artifacts { get; }
+        .TextWriter ErrorOutput { get; }
+        .TextWriter StandardOutput { get; }
+        .<.Timing> Timings { get; }
+        void AttachArtifact(.Artifact artifact);
+        string GetErrorOutput();
+        string GetStandardOutput();
+        void RecordTiming(.Timing timing);
+    }
+    public interface ITestParallelization
+    {
+        .<.> Constraints { get; }
+        . ExecutionPriority { get; set; }
+        .? Limiter { get; }
+        void AddConstraint(. constraint);
+        void SetLimiter(. parallelLimit);
     }
     public interface ITestRegisteredEventReceiver : .
     {

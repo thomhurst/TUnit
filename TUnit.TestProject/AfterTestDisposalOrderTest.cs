@@ -37,8 +37,8 @@ public class AfterTestDisposalOrderTest : IAsyncDisposable
         await Assert.That(_testResource).IsEqualTo("TestResource");
 
         // Mark that we successfully accessed resources
-        context.ObjectBag.Add("AfterTestExecuted", true);
-        context.ObjectBag.Add("ResourceValue", _testResource);
+        context.ObjectBag["AfterTestExecuted"] = true;
+        context.ObjectBag["ResourceValue"] = _testResource;
     }
 
     [After(Class)]

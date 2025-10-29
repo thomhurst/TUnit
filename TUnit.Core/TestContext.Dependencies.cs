@@ -10,7 +10,7 @@ namespace TUnit.Core;
 public partial class TestContext
 {
     // Explicit interface implementations for ITestDependencies
-    IReadOnlyList<TestDetails> ITestDependencies.TestDependencies => TestDependencies;
+    IReadOnlyList<TestDetails> ITestDependencies.DependsOn => _dependencies;
     string? ITestDependencies.ParentTestId => ParentTestId;
     TestRelationship ITestDependencies.Relationship => Relationship;
 
@@ -18,7 +18,6 @@ public partial class TestContext
     List<TestContext> ITestDependencies.GetTests(string testName) => GetTests(testName);
     List<TestContext> ITestDependencies.GetTests(string testName, Type classType) => GetTests(testName, classType);
 
-    // Rename backing field to avoid conflict
-    public IReadOnlyList<TestDetails> TestDependencies => _dependencies;
+    // Internal backing field for dependency collection
     internal readonly List<TestDetails> _dependencies = [];
 }

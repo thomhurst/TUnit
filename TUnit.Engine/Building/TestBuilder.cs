@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
@@ -163,7 +164,7 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 TestMetadata = metadata.MethodMetadata,
                 Events = new TestContextEvents(),
-                ObjectBag = new Dictionary<string, object?>(),
+                ObjectBag = new ConcurrentDictionary<string, object?>(),
                 InitializedAttributes = attributes  // Store the initialized attributes
             };
 
@@ -279,7 +280,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 {
                                     TestMetadata = metadata.MethodMetadata,
                                     Events = new TestContextEvents(),
-                                    ObjectBag = new Dictionary<string, object?>(),
+                                    ObjectBag = new ConcurrentDictionary<string, object?>(),
                                     DataSourceAttribute = methodDataSource
                                 };
 
@@ -389,7 +390,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 {
                                     TestMetadata = metadata.MethodMetadata,
                                     Events = new TestContextEvents(),
-                                    ObjectBag = new Dictionary<string, object?>(),
+                                    ObjectBag = new ConcurrentDictionary<string, object?>(),
                                     ClassConstructor = testBuilderContext.ClassConstructor, // Copy the ClassConstructor from the template
                                     DataSourceAttribute = contextAccessor.Current.DataSourceAttribute, // Copy any data source attribute
                                     InitializedAttributes = attributes // Pass the initialized attributes
@@ -444,7 +445,7 @@ internal sealed class TestBuilder : ITestBuilder
                             {
                                 TestMetadata = metadata.MethodMetadata,
                                 Events = new TestContextEvents(),
-                                ObjectBag = new Dictionary<string, object?>(),
+                                ObjectBag = new ConcurrentDictionary<string, object?>(),
                                 ClassConstructor = testBuilderContext.ClassConstructor,
                                 DataSourceAttribute = methodDataSource,
                                 InitializedAttributes = attributes
@@ -493,7 +494,7 @@ internal sealed class TestBuilder : ITestBuilder
                     {
                         TestMetadata = metadata.MethodMetadata,
                         Events = new TestContextEvents(),
-                        ObjectBag = new Dictionary<string, object?>(),
+                        ObjectBag = new ConcurrentDictionary<string, object?>(),
                         ClassConstructor = testBuilderContext.ClassConstructor,
                         DataSourceAttribute = classDataSource,
                         InitializedAttributes = attributes
@@ -1288,7 +1289,7 @@ internal sealed class TestBuilder : ITestBuilder
         {
             TestMetadata = metadata.MethodMetadata,
             Events = new TestContextEvents(),
-            ObjectBag = new Dictionary<string, object?>(),
+            ObjectBag = new ConcurrentDictionary<string, object?>(),
             InitializedAttributes = attributes  // Store the initialized attributes
         };
 
@@ -1555,7 +1556,7 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 TestMetadata = metadata.MethodMetadata,
                 Events = new TestContextEvents(),
-                ObjectBag = new Dictionary<string, object?>(),
+                ObjectBag = new ConcurrentDictionary<string, object?>(),
                 ClassConstructor = contextAccessor.Current.ClassConstructor, // Preserve ClassConstructor if it was set
                 DataSourceAttribute = contextAccessor.Current.DataSourceAttribute, // Preserve data source attribute
                 InitializedAttributes = attributes // Pass the initialized attributes

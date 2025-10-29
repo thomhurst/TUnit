@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -22,7 +23,7 @@ public class TestRegisteredContext
     /// <summary>
     /// Gets the object bag from the underlying TestContext
     /// </summary>
-    public Dictionary<string, object?> ObjectBag => TestContext.ObjectBag;
+    public ConcurrentDictionary<string, object?> ObjectBag => TestContext.ObjectBag;
 
     /// <summary>
     /// Gets the test details from the underlying TestContext

@@ -15,7 +15,7 @@ namespace TUnit.Core;
 /// </summary>
 [DebuggerDisplay("{TestDetails.ClassType.Name}.{GetDisplayName(),nq}")]
 public partial class TestContext : Context,
-    ITestExecution, ITestParallelization, ITestOutput, ITestMetadata, ITestDependencies
+    ITestExecution, ITestParallelization, ITestOutput, ITestMetadata, ITestDependencies, ITestData
 {
     private static readonly ConcurrentDictionary<Guid, TestContext> _testContextsById = new();
     private readonly TestBuilderContext _testBuilderContext;
@@ -40,6 +40,7 @@ public partial class TestContext : Context,
     public ITestOutput Output => this;
     public ITestMetadata Metadata => this;
     public ITestDependencies Dependencies => this;
+    public ITestData Data => this;
     public IServiceProvider Services => ServiceProvider;
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
@@ -108,7 +109,7 @@ public partial class TestContext : Context,
 
     public string? SkipReason { get; set; }
 
-    public IParallelLimit? ParallelLimiter { get; private set; }
+    internal IParallelLimit? ParallelLimiter { get; private set; }
 
     public Type? DisplayNameFormatter { get; set; }
 
@@ -127,10 +128,10 @@ public partial class TestContext : Context,
     /// Gets the collection of parallel constraints applied to this test.
     /// Multiple constraints can be combined (e.g., ParallelGroup + NotInParallel).
     /// </summary>
-    public IReadOnlyList<IParallelConstraint> ParallelConstraints => _parallelConstraints;
+    internal IReadOnlyList<IParallelConstraint> ParallelConstraints => _parallelConstraints;
 
 
-    public Priority ExecutionPriority { get; set; } = Priority.Normal;
+    internal Priority ExecutionPriority { get; set; } = Priority.Normal;
 
     /// <summary>
     /// The test ID of the parent test, if this test is a variant or child of another test.
@@ -151,7 +152,7 @@ public partial class TestContext : Context,
 
     public CancellationTokenSource? LinkedCancellationTokens { get; set; }
 
-    public List<Func<object?, string?>> ArgumentDisplayFormatters { get; } =
+    internal List<Func<object?, string?>> ArgumentDisplayFormatters { get; } =
     [
     ];
 
@@ -256,25 +257,28 @@ public partial class TestContext : Context,
         _cachedDisplayName = null;
     }
 
-    public Dictionary<string, object?> ObjectBag => _testBuilderContext.ObjectBag;
+    public ConcurrentDictionary<string, object?> ObjectBag => _testBuilderContext.ObjectBag;
 
     public bool ReportResult { get; set; } = true;
 
     public void AddLinkedCancellationToken(CancellationToken cancellationToken)
     {
-        if (LinkedCancellationTokens == null)
+        lock (Lock)
         {
-            LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
-        }
-        else
-        {
-            var existingToken = LinkedCancellationTokens.Token;
-            var oldCts = LinkedCancellationTokens;
-            LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(existingToken, cancellationToken);
-            oldCts.Dispose();
-        }
+            if (LinkedCancellationTokens == null)
+            {
+                LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+            }
+            else
+            {
+                var existingToken = LinkedCancellationTokens.Token;
+                var oldCts = LinkedCancellationTokens;
+                LinkedCancellationTokens = CancellationTokenSource.CreateLinkedTokenSource(existingToken, cancellationToken);
+                oldCts.Dispose();
+            }
 
-        CancellationToken = LinkedCancellationTokens.Token;
+            CancellationToken = LinkedCancellationTokens.Token;
+        }
     }
 
     public DateTimeOffset? TestStart { get; set; }
@@ -324,7 +328,16 @@ public partial class TestContext : Context,
             ];
         }
 
-        return testFinder.GetTests(classType).Where(predicate);
+        var tests = testFinder.GetTests(classType).Where(predicate).ToList();
+
+        if (tests.Any(x => x.Result == null))
+        {
+            throw new InvalidOperationException(
+                "Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?"
+            );
+        }
+
+        return tests;
     }
 
     public List<TestContext> GetTests(string testName)
@@ -359,7 +372,7 @@ public partial class TestContext : Context,
     {
         var testFinder = ServiceProvider.GetService<ITestFinder>()!;
 
-        return testFinder.GetTestsByNameAndParameters(
+        var tests = testFinder.GetTestsByNameAndParameters(
             testName,
             [
             ],
@@ -369,5 +382,14 @@ public partial class TestContext : Context,
             [
             ]
         ).ToList();
+
+        if (tests.Any(x => x.Result == null))
+        {
+            throw new InvalidOperationException(
+                "Cannot get unfinished tests - Did you mean to add a [DependsOn] attribute?"
+            );
+        }
+
+        return tests;
     }
 }

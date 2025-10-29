@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core;
 using TUnit.Core.PropertyInjection;
@@ -30,7 +31,7 @@ internal sealed class ObjectRegistrationService
     /// <param name="events">Test context events for tracking. Must not be null and must be unique per test permutation.</param>
     public async Task RegisterObjectAsync(
         object instance,
-        Dictionary<string, object?> objectBag,
+        ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata? methodMetadata,
         TestContextEvents events)
     {
@@ -65,7 +66,7 @@ internal sealed class ObjectRegistrationService
     /// </summary>
     public async Task RegisterArgumentsAsync(
         object?[] arguments,
-        Dictionary<string, object?> objectBag,
+        ConcurrentDictionary<string, object?> objectBag,
         MethodMetadata methodMetadata,
         TestContextEvents events)
     {

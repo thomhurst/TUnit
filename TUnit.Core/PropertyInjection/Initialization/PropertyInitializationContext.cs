@@ -48,7 +48,7 @@ internal sealed class PropertyInitializationContext
     /// <summary>
     /// Shared object bag for the test context.
     /// </summary>
-    public required Dictionary<string, object?> ObjectBag { get; init; }
+    public required ConcurrentDictionary<string, object?> ObjectBag { get; init; }
 
     /// <summary>
     /// Method metadata for the test.

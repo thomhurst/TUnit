@@ -1,4 +1,5 @@
-﻿using TUnit.Core.Interfaces;
+﻿using System.Collections.Concurrent;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
@@ -19,7 +20,7 @@ public record TestBuilderContext
     }
 
     public Guid Id { get; } = Guid.NewGuid();
-    public Dictionary<string, object?> ObjectBag { get; set; } = [];
+    public ConcurrentDictionary<string, object?> ObjectBag { get; set; } = new();
     public TestContextEvents Events { get; set; } = new();
 
     public IDataSourceAttribute? DataSourceAttribute { get; set; }

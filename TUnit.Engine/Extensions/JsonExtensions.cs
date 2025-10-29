@@ -1,4 +1,5 @@
-﻿using TUnit.Core;
+using System.Collections.Concurrent;
+using TUnit.Core;
 using TUnit.Engine.Json;
 
 namespace TUnit.Engine.Extensions;

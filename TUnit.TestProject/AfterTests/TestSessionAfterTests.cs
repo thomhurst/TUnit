@@ -31,7 +31,10 @@ public class TestSessionAfterTests
     [Test]
     public async Task PepareForAfterSession()
     {
-        TestContext.Current?.ObjectBag.Add("AfterEveryTestSessionHit", true);
+        if (TestContext.Current != null)
+        {
+            TestContext.Current.ObjectBag["AfterEveryTestSessionHit"] = true;
+        }
         await Assert.That(TestContext.Current?.ObjectBag["AfterEveryTestSessionHit"]).IsEquatableOrEqualTo(true);
     }
 }
