@@ -1325,16 +1325,22 @@ namespace
         public static .TestDependency FromClassAndMethod( classType, string methodName, bool proceedOnFailure = false) { }
         public static .TestDependency FromMethodName(string methodName, bool proceedOnFailure = false) { }
     }
-    public class TestDetails
+    public class TestDetails : ., ., ., ., ., .
     {
         public TestDetails() { }
         public required .<, .<>> AttributesByType { get; init; }
         public .<string> Categories { get; }
+        public . Class { get; }
         public [] ClassGenericArguments { get; set; }
         public required object ClassInstance { get; set; }
         public object?[] ClassMetadataArguments { get; }
         public required  ClassType { get; init; }
+        public . Configuration { get; }
         public .<string, .<string>> CustomProperties { get; }
+        public . Identity { get; }
+        public . Location { get; }
+        public . Metadata { get; }
+        public . Method { get; }
         public [] MethodGenericArguments { get; set; }
         public required .MethodMetadata MethodMetadata { get; set; }
         public required string MethodName { get; init; }
@@ -2227,6 +2233,20 @@ namespace .Interfaces
         void RegisterClassFactory(string testId, <object?[], object> factory);
         void RegisterMethodInvoker(string testId, <object, object?[], .<object?>> invoker);
     }
+    public interface ITestClass
+    {
+        [] ClassGenericArguments { get; }
+        object ClassInstance { get; }
+         ClassType { get; }
+        object?[] TestClassArguments { get; }
+        .<string, object?> TestClassInjectedPropertyArguments { get; }
+        []? TestClassParameterTypes { get; }
+    }
+    public interface ITestConfiguration
+    {
+        int RetryLimit { get; }
+        ? Timeout { get; }
+    }
     public interface ITestData
     {
         .<string, object?> Bag { get; }
@@ -2239,6 +2259,17 @@ namespace .Interfaces
         .<.TestContext> GetTests(<.TestContext, bool> predicate);
         .<.TestContext> GetTests(string testName);
         .<.TestContext> GetTests(string testName,  classType);
+    }
+    public interface ITestDetailsMetadata
+    {
+        .<, .<>> AttributesByType { get; }
+        .<string> Categories { get; }
+        .<string, .<string>> CustomProperties { get; }
+        .<> GetAllAttributes();
+        .<T> GetAttributes<T>()
+            where T : ;
+        bool HasAttribute<T>()
+            where T : ;
     }
     public interface ITestDiscoveryEventReceiver : .
     {
@@ -2270,12 +2301,30 @@ namespace .Interfaces
         .<.TestContext> GetTests( classType);
         .TestContext[] GetTestsByNameAndParameters(string testName, .<> methodParameterTypes,  classType, .<> classParameterTypes, .<object?> classArguments);
     }
+    public interface ITestIdentity
+    {
+        string MethodName { get; }
+        string TestId { get; }
+        string TestName { get; }
+    }
+    public interface ITestLocation
+    {
+        string TestFilePath { get; }
+        int TestLineNumber { get; }
+    }
     public interface ITestMetadata
     {
         string DisplayName { get; set; }
          Id { get; }
         .TestDetails TestDetails { get; }
         string TestName { get; }
+    }
+    public interface ITestMethod
+    {
+        [] MethodGenericArguments { get; }
+        .MethodMetadata MethodMetadata { get; }
+         ReturnType { get; }
+        object?[] TestMethodArguments { get; }
     }
     public interface ITestNameFormatter
     {

@@ -1,12 +1,22 @@
 using System.Diagnostics.CodeAnalysis;
+using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
 /// <summary>
 /// Simplified test details for the new architecture
 /// </summary>
-public class TestDetails
+public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITestConfiguration, ITestLocation, ITestDetailsMetadata
 {
+    // Zero-allocation interface properties for organized API access
+    public ITestIdentity Identity => this;
+    public ITestClass Class => this;
+    public ITestMethod Method => this;
+    public ITestConfiguration Configuration => this;
+    public ITestLocation Location => this;
+    public ITestDetailsMetadata Metadata => this;
+
+
     public required string TestId { get; init; }
     public required string TestName { get; init; }
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
