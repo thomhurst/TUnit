@@ -16,7 +16,7 @@ public class TestRegisteredContext
     public TestRegisteredContext(TestContext testContext)
     {
         TestContext = testContext;
-        TestName = testContext.TestName;
+        TestName = testContext.TestDetails.TestName;
         CustomDisplayName = testContext.CustomDisplayName;
     }
 

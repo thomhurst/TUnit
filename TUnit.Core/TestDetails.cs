@@ -14,7 +14,7 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     public ITestMethod Method => this;
     public ITestConfiguration Configuration => this;
     public ITestLocation Location => this;
-    public ITestDetailsMetadata Metadata => this;
+    public ITestDetailsMetadata Attributes => this;
 
 
     public required string TestId { get; init; }
@@ -80,8 +80,6 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     /// </summary>
     /// <returns>All attributes associated with this test.</returns>
     public IReadOnlyList<Attribute> GetAllAttributes() => _cachedAllAttributes.Value;
-
-    public object?[] ClassMetadataArguments => TestClassArguments;
 
     /// <summary>
     /// Resolved generic type arguments for the test method.

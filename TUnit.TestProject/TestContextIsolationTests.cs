@@ -27,7 +27,7 @@ public class TestContextIsolationTests
         context.AddAsyncLocalValues();
 
         // Store mapping for later verification
-        TestIdToTestName[testId] = context.TestName;
+        TestIdToTestName[testId] = context.TestDetails.TestName;
 
         // Add to context for verification in test
         context.ObjectBag["TestLocalId"] = testId;
@@ -150,7 +150,7 @@ public class TestContextNestedAsyncIsolationTests
         var initialContext = TestContext.Current;
         await Assert.That(initialContext).IsNotNull();
 
-        var testName = initialContext!.TestName;
+        var testName = initialContext!.TestDetails.TestName;
         ObservedContexts.Add((testName, initialContext, Thread.CurrentThread.ManagedThreadId));
 
         await NestedAsyncMethod1(initialContext);
@@ -166,7 +166,7 @@ public class TestContextNestedAsyncIsolationTests
         var initialContext = TestContext.Current;
         await Assert.That(initialContext).IsNotNull();
 
-        var testName = initialContext!.TestName;
+        var testName = initialContext!.TestDetails.TestName;
         ObservedContexts.Add((testName, initialContext, Thread.CurrentThread.ManagedThreadId));
 
         await NestedAsyncMethod2(initialContext);
@@ -224,7 +224,7 @@ public class TestContextRaceConditionTests
         var myContext = TestContext.Current;
         await Assert.That(myContext).IsNotNull();
 
-        var myTestName = myContext!.TestName;
+        var myTestName = myContext!.TestDetails.TestName;
         var myTestId = Guid.NewGuid().ToString();
         myContext.ObjectBag["UniqueTestId"] = myTestId;
 

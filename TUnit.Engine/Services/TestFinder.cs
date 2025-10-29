@@ -39,7 +39,7 @@ internal class TestFinder : ITestFinder
             }
 
             var classType = test.TestDetails.ClassType;
-            var testName = test.TestName;
+            var testName = test.TestDetails.TestName;
 
             // Index by type
             if (!testsByType.TryGetValue(classType, out var testsForType))

@@ -11,7 +11,7 @@ public partial class TestContext
     // Explicit interface implementations for ITestMetadata
     Guid ITestMetadata.Id => Id;
     TestDetails ITestMetadata.TestDetails => TestDetails;
-    string ITestMetadata.TestName => TestName;
+    string ITestMetadata.TestName => TestDetails.TestName;
 
     string ITestMetadata.DisplayName
     {

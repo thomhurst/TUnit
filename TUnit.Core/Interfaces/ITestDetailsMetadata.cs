@@ -2,7 +2,7 @@ namespace TUnit.Core.Interfaces;
 
 /// <summary>
 /// Provides access to test metadata including categories, custom properties, and attributes.
-/// Accessed via <see cref="TestDetails.Metadata"/>.
+/// Accessed via <see cref="TestDetails.Attributes"/>.
 /// </summary>
 public interface ITestDetailsMetadata
 {

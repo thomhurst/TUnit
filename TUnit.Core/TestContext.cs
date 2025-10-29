@@ -24,7 +24,6 @@ public partial class TestContext : Context,
     public TestContext(string testName, IServiceProvider serviceProvider, ClassHookContext classContext, TestBuilderContext testBuilderContext, CancellationToken cancellationToken) : base(classContext)
     {
         _testBuilderContext = testBuilderContext;
-        TestName = testName;
         CancellationToken = cancellationToken;
         ServiceProvider = serviceProvider;
         ClassContext = classContext;
@@ -93,8 +92,6 @@ public partial class TestContext : Context,
         get => Environment.CurrentDirectory;
         set => Environment.CurrentDirectory = value;
     }
-
-    public string TestName { get; }
 
     internal string? CustomDisplayName { get; set; }
 
@@ -218,15 +215,15 @@ public partial class TestContext : Context,
 
         if (TestDetails.TestMethodArguments.Length == 0)
         {
-            _cachedDisplayName = TestName;
-            return TestName;
+            _cachedDisplayName = TestDetails.TestName;
+            return TestDetails.TestName;
         }
 
         var argsLength = TestDetails.TestMethodArguments.Length;
         var sb = StringBuilderPool.Get();
         try
         {
-            sb.Append(TestName);
+            sb.Append(TestDetails.TestName);
             sb.Append('(');
 
             for (var i = 0; i < argsLength; i++)
