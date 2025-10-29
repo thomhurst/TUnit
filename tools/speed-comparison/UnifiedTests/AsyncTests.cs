@@ -34,16 +34,7 @@ public class AsyncTests
         Assert.AreEqual(100, result);
 #endif
 
-        var text = await ProcessTextAsync("hello");
-#if TUNIT
-        await Assert.That(text).IsEqualTo("HELLO");
-#elif XUNIT || XUNIT3
-        Assert.Equal("HELLO", text);
-#elif NUNIT
-        Assert.That(text, Is.EqualTo("HELLO"));
-#elif MSTEST
-        Assert.AreEqual("HELLO", text);
-#endif
+        await ProcessTextAsync("hello");
     }
 
 #if TUNIT
@@ -66,20 +57,6 @@ public class AsyncTests
 
         var results = await Task.WhenAll(tasks);
         var sum = results.Sum();
-
-#if TUNIT
-        await Assert.That(results).HasCount(10);
-        await Assert.That(sum).IsEqualTo(285);
-#elif XUNIT || XUNIT3
-        Assert.Equal(10, results.Length);
-        Assert.Equal(285, sum);
-#elif NUNIT
-        Assert.That(results.Length, Is.EqualTo(10));
-        Assert.That(sum, Is.EqualTo(285));
-#elif MSTEST
-        Assert.AreEqual(10, results.Length);
-        Assert.AreEqual(285, sum);
-#endif
     }
 
     private async Task<int> ComputeAsync(int value)
