@@ -120,10 +120,39 @@ dotnet publish -c Release -p:PublishAot=true --use-current-runtime
 
 ## 📋 Quick Reference Card
 
+### ⚠️ CRITICAL: TUnit.TestProject Testing Rules
+
+**DO NOT run `TUnit.TestProject` without filters!** Many tests are intentionally designed to fail to verify error handling.
+
+```bash
+# ❌ WRONG - Will show many "failures" (expected behavior)
+cd TUnit.TestProject && dotnet run
+cd TUnit.TestProject && dotnet test
+
+# ✅ CORRECT - Always use targeted filters
+cd TUnit.TestProject && dotnet run -- --treenode-filter "/*/*/SpecificClass/*"
+cd TUnit.TestProject && dotnet run -- --treenode-filter "/*/*/*/*[Category!=Performance]"
+
+# ✅ CORRECT - Test other projects normally
+dotnet test TUnit.Engine.Tests
+dotnet test TUnit.Assertions.Tests
+dotnet test TUnit.Core.SourceGenerator.Tests
+```
+
+**Why?** TUnit.TestProject contains:
+- Tests that verify failure scenarios (expected to fail)
+- Tests for error messages and diagnostics
+- Performance tests that should be excluded by default
+- Integration tests covering edge cases
+
+**Rule**: Only run TUnit.TestProject with explicit `--treenode-filter` to target specific tests or classes.
+
+---
+
 ### Most Common Commands
 
 ```bash
-# Run all tests
+# Run all tests (excludes TUnit.TestProject integration tests)
 dotnet test
 
 # Test source generator + accept snapshots

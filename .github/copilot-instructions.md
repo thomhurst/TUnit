@@ -60,9 +60,38 @@
 
 ## Quick Reference
 
+### ⚠️ CRITICAL: TUnit.TestProject Testing Rules
+
+**DO NOT run `TUnit.TestProject` without filters!** Many tests are intentionally designed to fail to verify error handling, diagnostics, and edge cases.
+
+```bash
+# ❌ WRONG - Will show many "failures" (this is expected behavior)
+cd TUnit.TestProject && dotnet run
+cd TUnit.TestProject && dotnet test
+
+# ✅ CORRECT - Always use targeted filters when testing TUnit.TestProject
+cd TUnit.TestProject && dotnet run -- --treenode-filter "/*/*/SpecificClass/*"
+cd TUnit.TestProject && dotnet run -- --treenode-filter "/*/*/*/*[Category!=Performance]"
+
+# ✅ CORRECT - Test other test projects normally (they don't have intentional failures)
+dotnet test TUnit.Engine.Tests
+dotnet test TUnit.Assertions.Tests
+dotnet test TUnit.Core.SourceGenerator.Tests
+```
+
+**Why TUnit.TestProject is special:**
+- Contains negative test cases (tests that verify failures work correctly)
+- Tests error messages, diagnostics, and exception handling
+- Performance tests excluded by default
+- Integration tests covering all edge cases
+
+**Golden Rule**: When verifying changes, use `dotnet test` (which excludes TUnit.TestProject), OR run TUnit.TestProject with specific `--treenode-filter` patterns.
+
+---
+
 ### Most Common Commands
 ```bash
-# Run all tests
+# Run all tests (automatically excludes TUnit.TestProject integration tests)
 dotnet test
 
 # Test source generator + accept snapshots
