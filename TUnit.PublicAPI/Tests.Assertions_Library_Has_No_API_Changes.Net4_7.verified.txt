@@ -21,7 +21,7 @@ namespace
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
         public static .<TValue> That<TValue>(<.<TValue?>> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(<TValue?> func, [.("func")] string? expression = null) { }
-        public static .<TValue> That<TValue>(.<TValue?> task, [.("task")] string? expression = null) { }
+        public static .<TValue> That<TValue>(.<TValue> task, [.("task")] string? expression = null) { }
         public static .<TValue> That<TValue>(TValue? value, [.("value")] string? expression = null) { }
         public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue> value, [.("value")] string? expression = null) { }
         public static  Throws( exceptionType,  action) { }
@@ -1285,6 +1285,7 @@ namespace .Conditions
     public class StringEqualsAssertion : .<string>
     {
         public StringEqualsAssertion(.<string> context, string? expected) { }
+        public StringEqualsAssertion(.<string> context, string? expected,  comparison) { }
         protected override .<.> CheckAsync(.<string> metadata) { }
         protected override string GetExpectation() { }
         public . IgnoringCase() { }
@@ -1806,7 +1807,6 @@ namespace .Extensions
         public static .<> IsBeforeOrEqualTo(this .<> source,  expected, [.("expected")] string? expression = null) { }
         public static ..IsDefinedAssertion<TEnum> IsDefined<TEnum>(this .<TEnum> source)
             where TEnum :  struct,  { }
-        public static . IsEqualTo(this .<string> source, string? expected,  comparison, [.("expected")] string? expression = null) { }
         public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
         public static .<TValue> IsNegative<TValue>(this .<TValue> source)
             where TValue : <TValue> { }
@@ -3256,6 +3256,7 @@ namespace .Extensions
     public static class StringEqualsAssertionExtensions
     {
         public static . IsEqualTo(this .<string> source, string? expected, [.("expected")] string? expectedExpression = null) { }
+        public static . IsEqualTo(this .<string> source, string? expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
     }
     public static class StringIsEmptyAssertionExtensions
     {

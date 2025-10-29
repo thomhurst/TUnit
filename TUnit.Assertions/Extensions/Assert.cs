@@ -111,14 +111,19 @@ public static class Assert
     /// <summary>
     /// Creates an assertion for a Task that returns a value.
     /// Supports both result assertions (e.g., IsEqualTo) and task state assertions (e.g., IsCompleted).
+    /// This method accepts both nullable and non-nullable Task results seamlessly.
     /// Example: await Assert.That(GetValueAsync()).IsEqualTo(expected);
+    /// Example: await Assert.That(Task.FromResult(value)).IsEqualTo(expected);
     /// Example: await Assert.That(GetValueAsync()).IsCompleted();
     /// </summary>
     public static TaskAssertion<TValue> That<TValue>(
-        Task<TValue?> task,
+        Task<TValue> task,
         [CallerArgumentExpression(nameof(task))] string? expression = null)
     {
-        return new TaskAssertion<TValue>(task, expression);
+        // Convert Task<TValue> to Task<TValue?> to handle both nullable and non-nullable scenarios
+        // This eliminates CS8620/CS8619 warnings when using Task.FromResult with non-nullable types
+        var nullableTask = task.ContinueWith(t => (TValue?)t.Result, TaskContinuationOptions.ExecuteSynchronously);
+        return new TaskAssertion<TValue>(nullableTask, expression);
     }
 
     /// <summary>
