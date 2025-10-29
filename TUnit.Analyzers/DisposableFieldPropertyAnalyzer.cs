@@ -90,7 +90,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             // Handle field declarations: private HttpClient _client = new HttpClient();
             if (member is FieldDeclarationSyntax fieldDeclaration)
             {
-                if (fieldDeclaration.Modifiers.Any(SyntaxKind.StaticKeyword) != isStatic)
+                if (fieldDeclaration.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword)) != isStatic)
                 {
                     continue;
                 }
@@ -119,7 +119,7 @@ public class DisposableFieldPropertyAnalyzer : ConcurrentDiagnosticAnalyzer
             // Handle property declarations: public HttpClient Client { get; set; } = new HttpClient();
             if (member is PropertyDeclarationSyntax propertyDeclaration)
             {
-                if (propertyDeclaration.Modifiers.Any(SyntaxKind.StaticKeyword) != isStatic)
+                if (propertyDeclaration.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword)) != isStatic)
                 {
                     continue;
                 }
