@@ -96,6 +96,9 @@ internal sealed class TestCoordinator : ITestCoordinator
             {
                 test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
 
+                // Invalidate cached eligible event objects since ClassInstance changed
+                test.Context.CachedEligibleEventObjects = null;
+
                 // Check if this test should be skipped (after creating instance)
                 if (test.Context.TestDetails.ClassInstance is SkippedTestInstance ||
                     !string.IsNullOrEmpty(test.Context.SkipReason))
