@@ -394,7 +394,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             p.Type.Name == "CancellationToken" &&
             p.Type.ContainingNamespace?.ToString() == "System.Threading");
 
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -538,7 +538,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         GenerateDependencies(writer, compilation, methodSymbol);
 
-        writer.AppendLine("AttributeFactory = () =>");
+        writer.AppendLine("AttributeFactory = static () =>");
         writer.AppendLine("[");
         writer.Indent();
 
@@ -577,7 +577,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         GenerateDependencies(writer, compilation, methodSymbol);
 
-        writer.AppendLine("AttributeFactory = () =>");
+        writer.AppendLine("AttributeFactory = static () =>");
         writer.AppendLine("[");
         writer.Indent();
 
@@ -2670,7 +2670,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateMetadataForConcreteInstantiation(writer, testMethod);
 
         // Generate instance factory that works with generic types
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -4176,7 +4176,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateConcreteMetadataWithFilteredDataSources(writer, testMethod, specificArgumentsAttribute, typeArguments);
 
         // Generate instance factory
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
 
@@ -4360,7 +4360,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         filteredAttributes.AddRange(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes());
         filteredAttributes.AddRange(testMethod.TypeSymbol.ContainingAssembly.GetAttributes());
 
-        writer.AppendLine("AttributeFactory = () =>");
+        writer.AppendLine("AttributeFactory = static () =>");
         writer.AppendLine("[");
         writer.Indent();
         AttributeWriter.WriteAttributes(writer, compilation, filteredAttributes.ToImmutableArray());
@@ -4675,7 +4675,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GenerateDependencies(writer, compilation, testMethod.MethodSymbol);
 
         // Generate attribute factory
-        writer.AppendLine("AttributeFactory = () =>");
+        writer.AppendLine("AttributeFactory = static () =>");
         writer.AppendLine("[");
         writer.Indent();
 
@@ -4728,7 +4728,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
 
         // Generate instance factory
-        writer.AppendLine("InstanceFactory = (typeArgs, args) =>");
+        writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
         writer.AppendLine("{");
         writer.Indent();
 

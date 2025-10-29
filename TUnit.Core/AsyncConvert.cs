@@ -124,7 +124,7 @@ public static class AsyncConvert
     {
         var startAsTaskOpenGenericMethod = (_fSharpAsyncType ??= type.Assembly.GetType("Microsoft.FSharp.Control.FSharpAsync"))!
             .GetRuntimeMethods()
-            .FirstOrDefault(m => m.Name == "StartAsTask");
+            .FirstOrDefault(static m => m.Name == "StartAsTask");
 
         if (startAsTaskOpenGenericMethod is null)
         {
