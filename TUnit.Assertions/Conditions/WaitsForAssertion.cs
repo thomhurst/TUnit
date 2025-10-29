@@ -15,8 +15,6 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
     private readonly Func<IAssertionSource<TValue>, Assertion<TValue>> _assertionBuilder;
     private readonly TimeSpan _timeout;
     private readonly TimeSpan _pollingInterval;
-    private TValue? _successfulValue;
-    private bool _hasSuccessfulValue;
 
     public WaitsForAssertion(
         AssertionContext<TValue> context,
@@ -40,6 +38,24 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
         }
     }
 
+    /// <summary>
+    /// Overrides AssertAsync to return the successfully polled value.
+    /// The base ExecuteCoreAsync captures the value before calling CheckAsync,
+    /// but WaitsFor updates the value during CheckAsync via ReevaluateAsync.
+    /// This override ensures we return the updated value.
+    /// </summary>
+    public override async Task<TValue?> AssertAsync()
+    {
+        // Call base to execute the assertion logic (which calls CheckAsync internally)
+        // This may throw if the assertion fails
+        await base.AssertAsync();
+        
+        // After CheckAsync succeeds, the context contains the updated value
+        // from the successful ReevaluateAsync call
+        var (value, _) = await Context.GetAsync();
+        return value;
+    }
+
     protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -59,10 +75,8 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
                 var assertion = _assertionBuilder(assertionSource);
                 await assertion.AssertAsync();
 
-                // Store the successful value so we can return it
-                _successfulValue = currentValue;
-                _hasSuccessfulValue = true;
-                
+                // ReevaluateAsync has updated the cached value in Context.Evaluation,
+                // which will be retrieved in the overridden AssertAsync method above
                 return AssertionResult.Passed;
             }
             catch (AssertionException ex)
@@ -94,19 +108,6 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
 
         return AssertionResult.Failed(
             $"assertion did not pass within {_timeout.TotalMilliseconds:F0}ms after {attemptCount} attempts. {lastErrorMessage}");
-    }
-
-    /// <summary>
-    /// Overrides AssertAsync to return the successfully polled value instead of the initial value.
-    /// This allows users to capture the value that satisfied the assertion.
-    /// </summary>
-    public override async Task<TValue?> AssertAsync()
-    {
-        // Execute the assertion using the base implementation
-        await base.AssertAsync();
-        
-        // Return the successful value if we have one, otherwise fall back to the context value
-        return _hasSuccessfulValue ? _successfulValue : (await Context.GetAsync()).Value;
     }
 
     protected override string GetExpectation() =>
