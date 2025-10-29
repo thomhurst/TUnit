@@ -12,11 +12,8 @@ public class BenchmarkConfig : ManualConfig
 {
     public BenchmarkConfig()
     {
-        var job = Job.RyuJitX64
-            .WithRuntime(CoreRuntime.Core10_0)
-            .WithGcConcurrent(true)
-            .WithGcServer(true)
-            .DontEnforcePowerPlan();
+        var job = Job.LongRun
+            .WithRuntime(CoreRuntime.Core10_0);
 
         AddJob(job);
         AddLogger(ConsoleLogger.Default);
