@@ -753,16 +753,22 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that the value satisfies the specified predicate.
-    /// Example: await Assert.That(x).Satisfies(v => v > 0 && v < 100);
+    /// Asserts that a mapped Task value satisfies custom assertions on the unwrapped result.
+    /// Maps the source value using a selector that returns a Task, then runs assertions on the awaited result.
+    /// Example: await Assert.That(model).Satisfies(m => m.AsyncValue, assert => assert.IsEqualTo("Hello"));
     /// </summary>
-    public static SatisfiesAssertion<TValue> Satisfies<TValue>(
+    public static AsyncMappedSatisfiesAssertion<TValue, TMapped> Satisfies<TValue, TMapped>(
         this IAssertionSource<TValue> source,
-        Func<TValue?, bool> predicate,
-        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
+        Func<TValue?, Task<TMapped?>> selector,
+        Func<ValueAssertion<TMapped>, Assertion<TMapped>> assertions,
+        [CallerArgumentExpression(nameof(selector))] string? selectorExpression = null)
     {
-        source.Context.ExpressionBuilder.Append($".Satisfies({expression})");
-        return new SatisfiesAssertion<TValue>(source.Context, predicate, expression ?? "predicate");
+        source.Context.ExpressionBuilder.Append($".Satisfies({selectorExpression}, ...)");
+        return new AsyncMappedSatisfiesAssertion<TValue, TMapped>(
+            source.Context,
+            selector!,
+            assertions,
+            selectorExpression ?? "selector");
     }
 
     /// <summary>
@@ -785,46 +791,16 @@ public static class AssertionExtensions
     }
 
     /// <summary>
-    /// Asserts that an async-mapped value satisfies custom assertions.
-    /// Maps the source value using an async selector, then runs assertions on the mapped value.
-    /// Example: await Assert.That(model).Satisfies(m => m.GetNameAsync(), assert => assert.IsEqualTo("John"));
+    /// Asserts that the value satisfies the specified predicate.
+    /// Example: await Assert.That(x).Satisfies(v => v > 0 && v < 100);
     /// </summary>
-    public static AsyncMappedSatisfiesAssertion<TValue, TMapped> Satisfies<TValue, TMapped>(
+    public static SatisfiesAssertion<TValue> Satisfies<TValue>(
         this IAssertionSource<TValue> source,
-        Func<TValue?, Task<TMapped>> selector,
-        Func<ValueAssertion<TMapped>, Assertion<TMapped>?> assertions,
-        [CallerArgumentExpression(nameof(selector))] string? selectorExpression = null)
+        Func<TValue?, bool> predicate,
+        [CallerArgumentExpression(nameof(predicate))] string? expression = null)
     {
-        source.Context.ExpressionBuilder.Append($".Satisfies({selectorExpression}, ...)");
-        return new AsyncMappedSatisfiesAssertion<TValue, TMapped>(
-            source.Context,
-            selector,
-            assertions,
-            selectorExpression ?? "selector");
-    }
-
-    /// <summary>
-    /// Asserts that the value is in the specified collection (params array convenience method).
-    /// Example: await Assert.That(5).IsIn(1, 3, 5, 7, 9);
-    /// </summary>
-    public static IsInAssertion<TValue> IsIn<TValue>(
-        this IAssertionSource<TValue> source,
-        params TValue[] collection)
-    {
-        source.Context.ExpressionBuilder.Append($".IsIn({string.Join(", ", collection)})");
-        return new IsInAssertion<TValue>(source.Context, collection);
-    }
-
-    /// <summary>
-    /// Asserts that the value is NOT in the specified collection (params array convenience method).
-    /// Example: await Assert.That(4).IsNotIn(1, 3, 5, 7, 9);
-    /// </summary>
-    public static IsNotInAssertion<TValue> IsNotIn<TValue>(
-        this IAssertionSource<TValue> source,
-        params TValue[] collection)
-    {
-        source.Context.ExpressionBuilder.Append($".IsNotIn({string.Join(", ", collection)})");
-        return new IsNotInAssertion<TValue>(source.Context, collection);
+        source.Context.ExpressionBuilder.Append($".Satisfies({expression})");
+        return new SatisfiesAssertion<TValue>(source.Context, predicate, expression ?? "predicate");
     }
 
     /// <summary>

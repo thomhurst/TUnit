@@ -459,9 +459,10 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
         if (data.IsExtensionMethod)
         {
-            // Extension method syntax: value.MethodName<T1, T2>(params)
+            // Extension method syntax: value!.MethodName<T1, T2>(params)
+            // Use null-forgiving operator since we've already checked for null above
             var paramList = string.Join(", ", data.AdditionalParameters.Select(p => $"_{p.Name}"));
-            return $"value.{methodName}{typeArguments}({paramList})";
+            return $"value!.{methodName}{typeArguments}({paramList})";
         }
         else
         {
@@ -502,14 +503,18 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // Additional parameters
         foreach (var param in data.AdditionalParameters)
         {
-            sb.Append($", {param.Type.ToDisplayString()} {param.Name}");
+            var paramsModifier = param.IsParams ? "params " : "";
+            sb.Append($", {paramsModifier}{param.Type.ToDisplayString()} {param.Name}");
         }
 
-        // CallerArgumentExpression parameters
+        // CallerArgumentExpression parameters (skip for params since params must be last)
         for (int i = 0; i < data.AdditionalParameters.Length; i++)
         {
             var param = data.AdditionalParameters[i];
-            sb.Append($", [CallerArgumentExpression(nameof({param.Name}))] string? {param.Name}Expression = null");
+            if (!param.IsParams)
+            {
+                sb.Append($", [CallerArgumentExpression(nameof({param.Name}))] string? {param.Name}Expression = null");
+            }
         }
 
         sb.AppendLine(")");
@@ -528,7 +533,9 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // Build expression string
         if (data.AdditionalParameters.Length > 0)
         {
-            var exprList = string.Join(", ", data.AdditionalParameters.Select(p => $"{{{p.Name}Expression}}"));
+            // For params parameters, use parameter name directly (no Expression suffix since we didn't generate it)
+            var exprList = string.Join(", ", data.AdditionalParameters.Select(p =>
+                p.IsParams ? $"{{{p.Name}}}" : $"{{{p.Name}Expression}}"));
             sb.AppendLine($"        source.Context.ExpressionBuilder.Append($\".{methodName}({exprList})\");");
         }
         else

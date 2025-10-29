@@ -1097,14 +1097,6 @@ namespace .Conditions
         protected override string GetExpectation() { }
         public .<TCollection, TItem> Using(.<TItem> comparer) { }
     }
-    [.("IsIn")]
-    public class IsInAssertion<TValue> : .<TValue, TValue>
-    {
-        public IsInAssertion(.<TValue> context, .<TValue> collection) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-        public .<TValue> Using(.<TValue> comparer) { }
-    }
     [.("IsNotAssignableTo")]
     public class IsNotAssignableToAssertion<TTarget, TValue> : .<TValue>
     {
@@ -1135,14 +1127,6 @@ namespace .Conditions
         public IsNotDefaultReferenceAssertion(.<TValue> context) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
-    }
-    [.("IsNotIn")]
-    public class IsNotInAssertion<TValue> : .<TValue, TValue>
-    {
-        public IsNotInAssertion(.<TValue> context, .<TValue> collection) { }
-        protected override .<.> CheckAsync(.<TValue> metadata) { }
-        protected override string GetExpectation() { }
-        public .<TValue> Using(.<TValue> comparer) { }
     }
     public class IsTypeOfRuntimeAssertion<TValue> : .<TValue>
     {
@@ -1993,7 +1977,6 @@ namespace .Extensions
         public static . IsEqualTo(this .<string> source, string? expected,  comparison, [.("expected")] string? expression = null) { }
         [.("Uses reflection to compare members")]
         public static .<TValue> IsEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsIn<TValue>(this .<TValue> source, params TValue[] collection) { }
         public static .<TValue> IsNegative<TValue>(this .<TValue> source)
             where TValue : <TValue> { }
         public static .<TValue> IsNegative<TValue>(this .<TValue?> source)
@@ -2003,7 +1986,6 @@ namespace .Extensions
             where TEnum :  struct,  { }
         [.("Uses reflection to compare members")]
         public static .<TValue> IsNotEquivalentTo<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expression = null) { }
-        public static .<TValue> IsNotIn<TValue>(this .<TValue> source, params TValue[] collection) { }
         public static .<TValue> IsNotNull<TValue>(this .<TValue> source)
             where TValue :  class { }
         public static .<TValue> IsNotNull<TValue>(this .<TValue?> source)
@@ -2033,7 +2015,7 @@ namespace .Extensions
         public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TKey, TValue, TTransformed>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<TTransformed>> assertions) { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
-        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped>> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
+        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped?>> selector, <.<TMapped>, .<TMapped>> assertions, [.("selector")] string? selectorExpression = null) { }
         public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
         public static .<TException> Throws<TException>(this . source)
             where TException :  { }
@@ -3110,6 +3092,21 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<float> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class GenericAssertions
+    {
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static .Extensions.T_IsIn__Assertion<T> IsIn<T>(this .<T> source, params T[] collection) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static .Extensions.T_IsIn_IEnumerableT_Assertion<T> IsIn<T>(this .<T> source, .<T> collection, [.("collection")] string? collectionExpression = null) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static .Extensions.T_IsIn_IEnumerableT_IEqualityComparerT_Assertion<T> IsIn<T>(this .<T> source, .<T> collection, .<T> equalityComparer, [.("collection")] string? collectionExpression = null, [.("equalityComparer")] string? equalityComparerExpression = null) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static .Extensions.T_IsNotIn__Assertion<T> IsNotIn<T>(this .<T> source, params T[] collection) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static .Extensions.T_IsNotIn_IEnumerableT_Assertion<T> IsNotIn<T>(this .<T> source, .<T> collection, [.("collection")] string? collectionExpression = null) { }
+        [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+        public static .Extensions.T_IsNotIn_IEnumerableT_IEqualityComparerT_Assertion<T> IsNotIn<T>(this .<T> source, .<T> collection, .<T> equalityComparer, [.("collection")] string? collectionExpression = null, [.("equalityComparer")] string? equalityComparerExpression = null) { }
+    }
     public static class GreaterThanAssertionExtensions
     {
         public static .<TValue> IsGreaterThan<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
@@ -3328,10 +3325,6 @@ namespace .Extensions
         public static .<TCollection, TItem> IsEquivalentTo<TCollection, TItem>(this .<TCollection> source, .<TItem> expected, .<TItem> comparer, . ordering = 0, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null, [.("ordering")] string? orderingExpression = null)
             where TCollection : .<TItem> { }
     }
-    public static class IsInAssertionExtensions
-    {
-        public static .<TValue> IsIn<TValue>(this .<TValue> source, .<TValue> collection, [.("collection")] string? collectionExpression = null) { }
-    }
     public static class IsNotAssignableToAssertionExtensions
     {
         public static .<TTarget, TValue> IsNotAssignableTo<TTarget, TValue>(this .<TValue> source) { }
@@ -3350,10 +3343,6 @@ namespace .Extensions
     {
         public static .<TValue> IsNotDefault<TValue>(this .<TValue> source)
             where TValue :  class { }
-    }
-    public static class IsNotInAssertionExtensions
-    {
-        public static .<TValue> IsNotIn<TValue>(this .<TValue> source, .<TValue> collection, [.("collection")] string? collectionExpression = null) { }
     }
     public static class LazyAssertionExtensions
     {
@@ -3784,6 +3773,48 @@ namespace .Extensions
         public static . IsNotNullOrWhiteSpace(this .<string> source) { }
         public static . IsNullOrEmpty(this .<string> source) { }
         public static . IsNullOrWhiteSpace(this .<string> source) { }
+    }
+    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+    public sealed class T_IsIn_IEnumerableT_Assertion<T> : .<T>
+    {
+        public T_IsIn_IEnumerableT_Assertion(.<T> context, .<T> collection) { }
+        protected override .<.> CheckAsync(.<T> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+    public sealed class T_IsIn_IEnumerableT_IEqualityComparerT_Assertion<T> : .<T>
+    {
+        public T_IsIn_IEnumerableT_IEqualityComparerT_Assertion(.<T> context, .<T> collection, .<T> equalityComparer) { }
+        protected override .<.> CheckAsync(.<T> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+    public sealed class T_IsIn__Assertion<T> : .<T>
+    {
+        public T_IsIn__Assertion(.<T> context, T[] collection) { }
+        protected override .<.> CheckAsync(.<T> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+    public sealed class T_IsNotIn_IEnumerableT_Assertion<T> : .<T>
+    {
+        public T_IsNotIn_IEnumerableT_Assertion(.<T> context, .<T> collection) { }
+        protected override .<.> CheckAsync(.<T> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+    public sealed class T_IsNotIn_IEnumerableT_IEqualityComparerT_Assertion<T> : .<T>
+    {
+        public T_IsNotIn_IEnumerableT_IEqualityComparerT_Assertion(.<T> context, .<T> collection, .<T> equalityComparer) { }
+        protected override .<.> CheckAsync(.<T> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    [.("Trimming", "IL2091", Justification="Generic type parameter is only used for property access, not instantiation")]
+    public sealed class T_IsNotIn__Assertion<T> : .<T>
+    {
+        public T_IsNotIn__Assertion(.<T> context, T[] collection) { }
+        protected override .<.> CheckAsync(.<T> metadata) { }
+        protected override string GetExpectation() { }
     }
     public static class TaskAssertionExtensions
     {

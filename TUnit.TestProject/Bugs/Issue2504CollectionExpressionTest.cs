@@ -17,7 +17,7 @@ public class Issue2504CollectionExpressionTest
     public async Task TestWithSingleArgument(int value)
     {
         ExecutedTests.Add($"SingleParam:{value}");
-        await Assert.That(value).IsIn(10, 20);  // 5*2=10, 10*2=20
+        await Assert.That(value).IsIn([10, 20]);  // 5*2=10, 10*2=20
     }
 
     [Test]
@@ -34,7 +34,7 @@ public class Issue2504CollectionExpressionTest
     public async Task TestWithArrayArgument(int value)
     {
         ExecutedTests.Add($"ArrayParam:{value}");
-        await Assert.That(value).IsIn(4, 5);
+        await Assert.That(value).IsIn([4, 5]);
     }
 
     public static IEnumerable<int> GetDataWithSingleIntParam(int multiplier)
