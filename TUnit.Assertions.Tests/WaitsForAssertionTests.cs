@@ -262,4 +262,75 @@ public class WaitsForAssertionTests
         // Should complete in a reasonable time (well under 5 seconds)
         await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromSeconds(2));
     }
+
+    [Test]
+    public async Task WaitsFor_Returns_Successfully_Asserted_Value()
+    {
+        var counter = 0;
+        Func<int> getValue = () => Interlocked.Increment(ref counter);
+
+        // WaitsFor should return the value that satisfied the assertion
+        var result = await Assert.That(getValue).WaitsFor(
+            assert => assert.IsGreaterThan(3),
+            timeout: TimeSpan.FromSeconds(5),
+            pollingInterval: TimeSpan.FromMilliseconds(10));
+
+        // The returned value should be the one that passed the assertion (4 or greater)
+        await Assert.That(result).IsGreaterThan(3);
+        await Assert.That(result).IsEqualTo(4); // Should be exactly 4, the first value > 3
+    }
+
+    [Test]
+    public async Task WaitsFor_Returns_Eventually_Changed_Value()
+    {
+        var value = 0;
+
+        // Start a task that changes the value after 100ms
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(100);
+            Interlocked.Exchange(ref value, 42);
+        });
+
+        // WaitsFor should return the changed value
+        var result = await Assert.That(() => value).WaitsFor(
+            assert => assert.IsEqualTo(42),
+            timeout: TimeSpan.FromSeconds(5),
+            pollingInterval: TimeSpan.FromMilliseconds(10));
+
+        // The returned value should be 42
+        await Assert.That(result).IsEqualTo(42);
+    }
+
+    [Test]
+    public async Task WaitsFor_Returns_Complex_Object()
+    {
+        // Simulating the use case from the GitHub issue
+        Entity? entity = null;
+
+        // Start a task that creates the entity after 50ms
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(50);
+            entity = new Entity { Id = 123, Name = "Test Entity" };
+        });
+
+        // WaitsFor should return the entity
+        var result = await Assert.That(() => entity).WaitsFor(
+            assert => assert.IsNotNull(),
+            timeout: TimeSpan.FromSeconds(5),
+            pollingInterval: TimeSpan.FromMilliseconds(10));
+
+        // The returned value should be the entity with correct properties
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result!.Id).IsEqualTo(123);
+        await Assert.That(result.Name).IsEqualTo("Test Entity");
+    }
+
+    // Helper class for testing complex object scenarios
+    private class Entity
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
 }
