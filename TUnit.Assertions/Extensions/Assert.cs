@@ -120,10 +120,14 @@ public static class Assert
         Task<TValue> task,
         [CallerArgumentExpression(nameof(task))] string? expression = null)
     {
-        // Convert Task<TValue> to Task<TValue?> to handle both nullable and non-nullable scenarios
-        // This eliminates CS8620/CS8619 warnings when using Task.FromResult with non-nullable types
-        var nullableTask = task.ContinueWith(t => (TValue?)t.Result, TaskContinuationOptions.ExecuteSynchronously);
+        var nullableTask = ConvertToNullableTask(task);
         return new TaskAssertion<TValue>(nullableTask, expression);
+
+        static async Task<TValue?> ConvertToNullableTask(Task<TValue> sourceTask)
+        {
+            var result = await sourceTask.ConfigureAwait(false);
+            return result;
+        }
     }
 
     /// <summary>
