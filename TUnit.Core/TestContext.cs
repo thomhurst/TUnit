@@ -15,7 +15,7 @@ namespace TUnit.Core;
 /// </summary>
 [DebuggerDisplay("{TestDetails.ClassType.Name}.{GetDisplayName(),nq}")]
 public partial class TestContext : Context,
-    ITestExecution, ITestParallelization, ITestOutput, ITestMetadata, ITestDependencies, ITestStateBag
+    ITestExecution, ITestParallelization, ITestOutput, ITestMetadata, ITestDependencies, ITestStateBag, ITestEvents
 {
     private static readonly ConcurrentDictionary<Guid, TestContext> _testContextsById = new();
     private readonly TestBuilderContext _testBuilderContext;

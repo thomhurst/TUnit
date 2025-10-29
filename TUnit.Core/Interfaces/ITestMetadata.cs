@@ -27,4 +27,10 @@ public interface ITestMetadata
     /// Setting this value overrides the default generated name.
     /// </summary>
     string DisplayName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the custom display name formatter type used to format test names.
+    /// Must implement IDisplayNameFormatter interface.
+    /// </summary>
+    Type? DisplayNameFormatter { get; set; }
 }

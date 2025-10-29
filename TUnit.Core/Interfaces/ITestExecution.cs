@@ -60,4 +60,23 @@ public interface ITestExecution
     /// <param name="state">The desired test state (Passed, Failed, Skipped, etc.)</param>
     /// <param name="reason">The reason for overriding the result</param>
     void OverrideResult(TestState state, string reason);
+
+    /// <summary>
+    /// Gets or sets a custom hook executor that overrides the default execution behavior for test-level hooks.
+    /// Allows wrapping hook execution in custom logic (e.g., running on a specific thread).
+    /// </summary>
+    IHookExecutor? CustomHookExecutor { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the test result should be reported to test runners.
+    /// Defaults to true. Set to false to suppress reporting for internal or diagnostic tests.
+    /// </summary>
+    bool ReportResult { get; set; }
+
+    /// <summary>
+    /// Links an external cancellation token to this test's execution token.
+    /// Useful for coordinating cancellation across multiple operations or tests.
+    /// </summary>
+    /// <param name="cancellationToken">The external cancellation token to link</param>
+    void AddLinkedCancellationToken(CancellationToken cancellationToken);
 }

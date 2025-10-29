@@ -18,4 +18,10 @@ public partial class TestContext
         get => GetDisplayName();
         set => CustomDisplayName = value;
     }
+
+    Type? ITestMetadata.DisplayNameFormatter
+    {
+        get => DisplayNameFormatter;
+        set => DisplayNameFormatter = value;
+    }
 }

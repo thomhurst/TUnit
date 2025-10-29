@@ -1217,7 +1217,7 @@ namespace
         public TestConstructorAttribute() { }
     }
     [.DebuggerDisplay("{.Name}.{GetDisplayName(),nq}")]
-    public class TestContext : .Context, ., ., ., ., ., .
+    public class TestContext : .Context, ., ., ., ., ., ., .
     {
         public TestContext(string testName,  serviceProvider, .ClassHookContext classContext, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
         public .<.Artifact> Artifacts { get; }
@@ -2273,16 +2273,23 @@ namespace .Interfaces
     {
         . OnTestEnd(.TestContext context);
     }
+    public interface ITestEvents
+    {
+        .TestContextEvents Events { get; }
+    }
     public interface ITestExecution
     {
         .CancellationToken CancellationToken { get; }
         int CurrentRetryAttempt { get; }
+        .? CustomHookExecutor { get; set; }
         .TestPhase Phase { get; }
+        bool ReportResult { get; set; }
         .TestResult? Result { get; }
         <.TestContext, , int, .<bool>>? RetryFunc { get; }
         string? SkipReason { get; }
         ? TestEnd { get; }
         ? TestStart { get; }
+        void AddLinkedCancellationToken(.CancellationToken cancellationToken);
         void OverrideResult(string reason);
         void OverrideResult(.TestState state, string reason);
     }
@@ -2309,6 +2316,7 @@ namespace .Interfaces
     public interface ITestMetadata
     {
         string DisplayName { get; set; }
+        ? DisplayNameFormatter { get; set; }
          Id { get; }
         .TestDetails TestDetails { get; }
         string TestName { get; }

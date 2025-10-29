@@ -18,7 +18,18 @@ public partial class TestContext
     int ITestExecution.CurrentRetryAttempt => CurrentRetryAttempt;
     string? ITestExecution.SkipReason => SkipReason;
     Func<TestContext, Exception, int, Task<bool>>? ITestExecution.RetryFunc => RetryFunc;
+    IHookExecutor? ITestExecution.CustomHookExecutor
+    {
+        get => CustomHookExecutor;
+        set => CustomHookExecutor = value;
+    }
+    bool ITestExecution.ReportResult
+    {
+        get => ReportResult;
+        set => ReportResult = value;
+    }
 
     void ITestExecution.OverrideResult(string reason) => OverrideResult(reason);
     void ITestExecution.OverrideResult(TestState state, string reason) => OverrideResult(state, reason);
+    void ITestExecution.AddLinkedCancellationToken(CancellationToken cancellationToken) => AddLinkedCancellationToken(cancellationToken);
 }
