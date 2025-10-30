@@ -43,7 +43,8 @@ internal static class PropertyDataResolver
             // Initialize the resolved value if needed
             if (value != null)
             {
-                // If the resolved value is itself a data source, ensure it's initialized
+                // Ensure the value is fully initialized (property injection + IAsyncInitializer)
+                // DataSourceInitializer handles both data sources and regular objects
                 if (value is IDataSourceAttribute dataSourceValue)
                 {
                     value = await dataSourceInitializer.EnsureInitializedAsync(
@@ -52,17 +53,14 @@ internal static class PropertyDataResolver
                         context.MethodMetadata,
                         context.Events);
                 }
-                // Otherwise, register if it has injectable properties
-                else if (PropertyInjectionCache.HasInjectableProperties(value.GetType()))
+                else if (PropertyInjectionCache.HasInjectableProperties(value.GetType()) || value is IAsyncInitializer)
                 {
-                    // Use object registry for registration (property injection + tracking, NO IAsyncInitializer)
-                    await objectRegistry.RegisterObjectAsync(
+                    value = await dataSourceInitializer.EnsureInitializedAsync(
                         value,
                         context.ObjectBag,
                         context.MethodMetadata,
                         context.Events);
                 }
-                // Note: IAsyncInitializer will be called during execution phase by ObjectInitializationService
 
                 return value;
             }
