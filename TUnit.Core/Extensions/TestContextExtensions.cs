@@ -13,22 +13,22 @@ public static class TestContextExtensions
 
     public static string GetClassTypeName(this TestContext context)
     {
-        var parameters = context.TestDetails.MethodMetadata.Class.Parameters;
+        var parameters = context.Metadata.TestDetails.MethodMetadata.Class.Parameters;
 
         if (parameters.Length == 0)
         {
-            return context.TestDetails.ClassType.Name;
+            return context.Metadata.TestDetails.ClassType.Name;
         }
 
         // Optimize: Use array instead of LINQ Select to reduce allocations
-        var args = context.TestDetails.TestClassArguments;
+        var args = context.Metadata.TestDetails.TestClassArguments;
         var formattedArgs = new string[args.Length];
         for (int i = 0; i < args.Length; i++)
         {
             formattedArgs[i] = ArgumentFormatter.Format(args[i], context.ArgumentDisplayFormatters);
         }
 
-        return $"{context.TestDetails.ClassType.Name}({string.Join(", ", formattedArgs)})";
+        return $"{context.Metadata.TestDetails.ClassType.Name}({string.Join(", ", formattedArgs)})";
     }
 
     #if NET6_0_OR_GREATER

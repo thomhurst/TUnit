@@ -52,7 +52,7 @@ internal sealed class ReflectionTestMetadata : TestMetadata
 
             // Otherwise fall back to creating instance normally
             // Try to create instance with ClassConstructor attribute
-            var attributes = testContext.TestDetails.GetAllAttributes();
+            var attributes = testContext.Metadata.TestDetails.GetAllAttributes();
             var classConstructorInstance = await ClassConstructorHelper.TryCreateInstanceWithClassConstructor(
                 attributes,
                 TestClassType,

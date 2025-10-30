@@ -194,8 +194,8 @@ internal static class DataGeneratorMetadataCreator
             TestInformation = methodMetadata,
             Type = DataGeneratorType.Property,
             TestSessionId = TestSessionContext.Current?.Id ?? "property-injection",
-            TestClassInstance = testClassInstance ?? testContext?.TestDetails.ClassInstance,
-            ClassInstanceArguments = testContext?.TestDetails.TestClassArguments ?? []
+            TestClassInstance = testClassInstance ?? testContext?.Metadata.TestDetails.ClassInstance,
+            ClassInstanceArguments = testContext?.Metadata.TestDetails.TestClassArguments ?? []
         };
     }
 

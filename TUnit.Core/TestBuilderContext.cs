@@ -49,7 +49,7 @@ public record TestBuilderContext
     {
         return new TestBuilderContext
         {
-            Events = testContext.Events, TestMetadata = testContext.TestDetails.MethodMetadata, DataSourceAttribute = dataSourceAttribute, ObjectBag = testContext.ObjectBag,
+            Events = testContext.Events, TestMetadata = testContext.Metadata.TestDetails.MethodMetadata, DataSourceAttribute = dataSourceAttribute, ObjectBag = testContext.ObjectBag,
         };
     }
 }

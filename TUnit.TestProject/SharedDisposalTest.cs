@@ -102,7 +102,7 @@ public class SharedDisposalTest
         }
         
         // Print the test instances to see if they were using the same shared instance
-        var testInstances = context.Tests.Select(t => t.TestDetails.ClassInstance).OfType<SharedDisposalTest>().ToList();
+        var testInstances = context.Tests.Select(t => t.Metadata.TestDetails.ClassInstance).OfType<SharedDisposalTest>().ToList();
         Console.WriteLine($"[AfterClass] Test instances: {testInstances.Count}");
         for (var i = 0; i < testInstances.Count; i++)
         {

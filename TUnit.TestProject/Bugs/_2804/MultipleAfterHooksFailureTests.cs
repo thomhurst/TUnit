@@ -53,7 +53,7 @@ public class MultipleAfterEveryTestHooks
     [AfterEvery(Test)]
     public static async Task AfterEveryTest_Hook1_Success(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
         {
             TestHookExecutions.Add("AfterEveryTest_Hook1");
             // Hook executed("[AFTER-TEST] Hook 1 executing successfully");
@@ -64,7 +64,7 @@ public class MultipleAfterEveryTestHooks
     [AfterEvery(Test)]
     public static async Task AfterEveryTest_Hook2_Fails(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
         {
             TestHookExecutions.Add("AfterEveryTest_Hook2");
             // Hook executed("[AFTER-TEST] Hook 2 executing and will fail");
@@ -76,7 +76,7 @@ public class MultipleAfterEveryTestHooks
     [AfterEvery(Test)]
     public static async Task AfterEveryTest_Hook3_Success(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
         {
             TestHookExecutions.Add("AfterEveryTest_Hook3");
             // Hook executed("[AFTER-TEST] Hook 3 executing successfully (after Hook 2 failed)");
@@ -87,7 +87,7 @@ public class MultipleAfterEveryTestHooks
     [AfterEvery(Test)]
     public static async Task AfterEveryTest_Hook4_AlsoFails(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
         {
             TestHookExecutions.Add("AfterEveryTest_Hook4");
             // Hook executed("[AFTER-TEST] Hook 4 executing and will also fail");
@@ -99,7 +99,7 @@ public class MultipleAfterEveryTestHooks
     [AfterEvery(Test)]
     public static async Task AfterEveryTest_Hook5_StillExecutes(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(MultipleAfterHooksFailureTests))
         {
             TestHookExecutions.Add("AfterEveryTest_Hook5");
             // Hook executed("[AFTER-TEST] Hook 5 still executing (after Hooks 2 and 4 failed)");
@@ -315,7 +315,7 @@ public class AggregateExceptionVerificationTests
     [AfterEvery(Test)]
     public static async Task CaptureExceptions_Hook1_Fails(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(AggregateExceptionVerificationTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(AggregateExceptionVerificationTests))
         {
             // Hook executed("[AGGREGATE] Hook 1 failing with InvalidOperationException");
             await Task.CompletedTask;
@@ -326,7 +326,7 @@ public class AggregateExceptionVerificationTests
     [AfterEvery(Test)]
     public static async Task CaptureExceptions_Hook2_Fails(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(AggregateExceptionVerificationTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(AggregateExceptionVerificationTests))
         {
             // Hook executed("[AGGREGATE] Hook 2 failing with ArgumentException");
             await Task.CompletedTask;
@@ -337,7 +337,7 @@ public class AggregateExceptionVerificationTests
     [AfterEvery(Test)]
     public static async Task CaptureExceptions_Hook3_Fails(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(AggregateExceptionVerificationTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(AggregateExceptionVerificationTests))
         {
             // Hook executed("[AGGREGATE] Hook 3 failing with NotImplementedException");
             await Task.CompletedTask;
@@ -351,7 +351,7 @@ public class AggregateExceptionVerificationTests
         // Note: We can't easily verify the AggregateException from within the test framework,
         // but we've set up the scenario where multiple hooks fail, which should result in
         // an AggregateException being thrown by the framework
-        if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(AggregateExceptionVerificationTests)))
+        if (context.AllTests.Any(t => t.Metadata.TestDetails.ClassType == typeof(AggregateExceptionVerificationTests)))
         {
             // Hook executed("[AGGREGATE] Test scenario completed - framework should have thrown AggregateException with 3 inner exceptions");
         }
@@ -376,7 +376,7 @@ public class ComprehensiveMultiLevelHookFailureTests
     [AfterEvery(Test)]
     public static async Task TestLevel_Hook1_Success(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests))
         {
             AllHookExecutions.Add("TestLevel_Hook1");
             // Hook executed("[COMPREHENSIVE-TEST] Test-level Hook 1 success");
@@ -387,7 +387,7 @@ public class ComprehensiveMultiLevelHookFailureTests
     [AfterEvery(Test)]
     public static async Task TestLevel_Hook2_Fails(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests))
         {
             AllHookExecutions.Add("TestLevel_Hook2");
             // Hook executed("[COMPREHENSIVE-TEST] Test-level Hook 2 fails");
@@ -399,7 +399,7 @@ public class ComprehensiveMultiLevelHookFailureTests
     [AfterEvery(Test)]
     public static async Task TestLevel_Hook3_Success(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests))
         {
             AllHookExecutions.Add("TestLevel_Hook3");
             // Hook executed("[COMPREHENSIVE-TEST] Test-level Hook 3 success (after failure)");
@@ -445,7 +445,7 @@ public class ComprehensiveMultiLevelHookFailureTests
     [After(TestSession)]
     public static void VerifyAllLevelsExecuted(TestSessionContext context)
     {
-        if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests)))
+        if (context.AllTests.Any(t => t.Metadata.TestDetails.ClassType == typeof(ComprehensiveMultiLevelHookFailureTests)))
         {
             // Hook executed("\n[COMPREHENSIVE] === VERIFICATION ===");
             // Hook executed($"[COMPREHENSIVE] Total hooks executed across all levels: {AllHookExecutions.Count}");

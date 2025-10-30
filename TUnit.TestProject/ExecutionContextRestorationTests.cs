@@ -21,7 +21,7 @@ public class ExecutionContextRestorationTests
     {
         // The async local should be accessible here
         var value = TestAsyncLocal.Value;
-        context.WriteLine($"AfterTest AsyncLocal value: {value}");
+        context.Output.StandardOutput.WriteLine($"AfterTest AsyncLocal value: {value}");
         await Task.Yield();
     }
     

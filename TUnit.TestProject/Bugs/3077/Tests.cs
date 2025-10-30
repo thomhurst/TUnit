@@ -13,7 +13,7 @@ public sealed class ExampleConstructor : IClassConstructor, ITestStartEventRecei
 
     public ValueTask OnTestStart(TestContext context)
     {
-        ((Tests)context.TestDetails.ClassInstance).SomeValue = "Initialized";
+        ((Tests)context.Metadata.TestDetails.ClassInstance).SomeValue = "Initialized";
         return default;
     }
 

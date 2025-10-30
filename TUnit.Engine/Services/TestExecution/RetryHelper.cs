@@ -6,7 +6,7 @@ internal static class RetryHelper
 {
     public static async Task ExecuteWithRetry(TestContext testContext, Func<Task> action)
     {
-        var maxRetries = testContext.TestDetails.RetryLimit;
+        var maxRetries = testContext.Metadata.TestDetails.RetryLimit;
 
         for (var attempt = 0; attempt < maxRetries + 1; attempt++)
         {
@@ -40,7 +40,7 @@ internal static class RetryHelper
 
     private static async Task<bool> ShouldRetry(TestContext testContext, Exception ex, int attempt)
     {
-        if (attempt >= testContext.TestDetails.RetryLimit)
+        if (attempt >= testContext.Metadata.TestDetails.RetryLimit)
         {
             return false;
         }

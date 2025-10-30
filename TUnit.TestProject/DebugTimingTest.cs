@@ -11,12 +11,12 @@ public class DebugTimingTest
     {
         var context = TestContext.Current!;
         
-        Console.WriteLine($"TestStart at test start: {context.TestStart?.ToString("O") ?? "NULL"}");
+        Console.WriteLine($"TestStart at test start: {context.Execution.Execution.TestStart?.ToString("O") ?? "NULL"}");
         Console.WriteLine($"TestEnd at test start: {context.TestEnd?.ToString("O") ?? "NULL"}");
         
         await Task.Delay(100);
         
-        Console.WriteLine($"TestStart after delay: {context.TestStart?.ToString("O") ?? "NULL"}");
+        Console.WriteLine($"TestStart after delay: {context.Execution.Execution.TestStart?.ToString("O") ?? "NULL"}");
         Console.WriteLine($"TestEnd after delay: {context.TestEnd?.ToString("O") ?? "NULL"}");
     }
 }

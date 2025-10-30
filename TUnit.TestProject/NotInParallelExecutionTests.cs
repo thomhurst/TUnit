@@ -25,10 +25,10 @@ public class NotInParallelExecutionTests
         }
         
         // Use TestStart if available, otherwise use DateTime.Now
-        var startTime = TestContext.Current.TestStart?.DateTime ?? DateTime.Now;
+        var startTime = TestContext.Current.Execution.Execution.TestStart?.DateTime ?? DateTime.Now;
         
         ExecutionRecords.Add(new TestExecutionRecord(
-            TestContext.Current!.TestDetails.TestName,
+            TestContext.Current!.Metadata.TestDetails.TestName,
             startTime,
             null,
             CurrentlyRunning
@@ -44,7 +44,7 @@ public class NotInParallelExecutionTests
         }
 
         var record = ExecutionRecords.FirstOrDefault(r => 
-            r.TestName == TestContext.Current!.TestDetails.TestName && 
+            r.TestName == TestContext.Current!.Metadata.TestDetails.TestName && 
             r.EndTime == null);
         
         if (record != null)

@@ -79,9 +79,9 @@ public class HookOrchestratorDeadlockTests
     [BeforeEvery(Test)]
     public static async Task BeforeEveryTest_Hook(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(HookOrchestratorDeadlockTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(HookOrchestratorDeadlockTests))
         {
-            ExecutionLog.Add($"BeforeTest_{context.TestDetails.TestName}");
+            ExecutionLog.Add($"BeforeTest_{context.Metadata.TestDetails.TestName}");
             await Task.Delay(5); // Small delay to potentially trigger coordination issues
         }
     }
@@ -89,9 +89,9 @@ public class HookOrchestratorDeadlockTests
     [AfterEvery(Test)]
     public static async Task AfterEveryTest_Hook(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(HookOrchestratorDeadlockTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(HookOrchestratorDeadlockTests))
         {
-            ExecutionLog.Add($"AfterTest_{context.TestDetails.TestName}");
+            ExecutionLog.Add($"AfterTest_{context.Metadata.TestDetails.TestName}");
             await Task.Delay(5); // Small delay to potentially trigger coordination issues
         }
     }
@@ -152,9 +152,9 @@ public class SequentialCoordinationDeadlockTests
     [BeforeEvery(Test)]
     public static async Task SequentialBeforeTest(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(SequentialCoordinationDeadlockTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(SequentialCoordinationDeadlockTests))
         {
-            SequentialExecutionLog.Add($"SequentialBeforeTest_{context.TestDetails.TestName}");
+            SequentialExecutionLog.Add($"SequentialBeforeTest_{context.Metadata.TestDetails.TestName}");
             await Task.Delay(10);
         }
     }
@@ -162,9 +162,9 @@ public class SequentialCoordinationDeadlockTests
     [AfterEvery(Test)]
     public static async Task SequentialAfterTest(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(SequentialCoordinationDeadlockTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(SequentialCoordinationDeadlockTests))
         {
-            SequentialExecutionLog.Add($"SequentialAfterTest_{context.TestDetails.TestName}");
+            SequentialExecutionLog.Add($"SequentialAfterTest_{context.Metadata.TestDetails.TestName}");
             await Task.Delay(10);
         }
     }
@@ -229,10 +229,10 @@ public class DeadlockFixVerificationTests
         // In a deadlock scenario, the test run would hang and never complete
         
         var deadlockTestsRan = context.AllTests.Any(t => 
-            t.TestDetails.ClassType == typeof(HookOrchestratorDeadlockTests) ||
-            t.TestDetails.ClassType == typeof(SequentialCoordinationDeadlockTests) ||
-            t.TestDetails.ClassType == typeof(KeyedSequentialDeadlockTests_Group1) ||
-            t.TestDetails.ClassType == typeof(KeyedSequentialDeadlockTests_Group2));
+            t.Metadata.TestDetails.ClassType == typeof(HookOrchestratorDeadlockTests) ||
+            t.Metadata.TestDetails.ClassType == typeof(SequentialCoordinationDeadlockTests) ||
+            t.Metadata.TestDetails.ClassType == typeof(KeyedSequentialDeadlockTests_Group1) ||
+            t.Metadata.TestDetails.ClassType == typeof(KeyedSequentialDeadlockTests_Group2));
 
         if (deadlockTestsRan)
         {

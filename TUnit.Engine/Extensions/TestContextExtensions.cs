@@ -8,11 +8,11 @@ internal static class TestContextExtensions
     [
         testContext.ClassConstructor,
         testContext.Events,
-        ..testContext.TestDetails.TestClassArguments,
-        testContext.TestDetails.ClassInstance,
-        ..testContext.TestDetails.GetAllAttributes(),
-        ..testContext.TestDetails.TestMethodArguments,
-        ..testContext.TestDetails.TestClassInjectedPropertyArguments.Select(x => x.Value),
+        ..testContext.Metadata.TestDetails.TestClassArguments,
+        testContext.Metadata.TestDetails.ClassInstance,
+        ..testContext.Metadata.TestDetails.GetAllAttributes(),
+        ..testContext.Metadata.TestDetails.TestMethodArguments,
+        ..testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.Select(x => x.Value),
     ];
 
     public static IEnumerable<object> GetEligibleEventObjects(this TestContext testContext)

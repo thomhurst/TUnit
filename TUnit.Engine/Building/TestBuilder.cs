@@ -776,7 +776,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext);
 
-        context.TestDetails.ClassInstance = PlaceholderInstance.Instance;
+        context.Metadata.TestDetails.ClassInstance = PlaceholderInstance.Instance;
 
         // Arguments will be tracked by TestArgumentTrackingService during TestRegistered event
         // This ensures proper reference counting for shared instances
@@ -929,7 +929,7 @@ internal sealed class TestBuilder : ITestBuilder
     private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
     {
         var discoveredContext = new DiscoveredTestContext(
-            context.TestDetails.TestName,
+            context.Metadata.TestDetails.TestName,
             context);
 
         {

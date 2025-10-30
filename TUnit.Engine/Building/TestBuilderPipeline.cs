@@ -450,7 +450,7 @@ internal sealed class TestBuilderPipeline
     private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
     {
         var discoveredContext = new DiscoveredTestContext(
-            context.TestDetails.TestName,
+            context.Metadata.TestDetails.TestName,
             context);
 
         await _eventReceiverOrchestrator.InvokeTestDiscoveryEventReceiversAsync(context, discoveredContext, CancellationToken.None).ConfigureAwait(false);

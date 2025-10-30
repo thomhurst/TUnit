@@ -19,8 +19,8 @@ public class RepeatIndexVerificationTest
         await Task.Yield();
         
         var context = TestContext.Current!;
-        var testId = context.TestDetails.TestId;
-        var testStart = context.TestStart;
+        var testId = context.Metadata.TestDetails.TestId;
+        var testStart = context.Execution.Execution.TestStart;
         
         lock (Lock)
         {

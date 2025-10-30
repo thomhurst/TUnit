@@ -11,7 +11,7 @@ public class Tests
     [Property("Group", "TUnit")]
     public async Task Test()
     {
-        var properties = TestContext.Current!.TestDetails.CustomProperties;
+        var properties = TestContext.Current!.Metadata.TestDetails.CustomProperties;
 
         var array = properties["Group"].ToArray();
 

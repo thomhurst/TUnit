@@ -11,7 +11,7 @@ public class ArgumentDisplayFormatterTests
     public async Task FormatterShouldBeAppliedToMethodDataSource(Foo foo)
     {
         // Verify the formatter was applied by checking the display name
-        var displayName = TestContext.Current!.GetDisplayName();
+        var displayName = TestContext.Current!. Metadata.DisplayName;
         await Assert.That(displayName).IsEqualTo("FormatterShouldBeAppliedToMethodDataSource(FooFormatterValue)");
     }
 
@@ -21,7 +21,7 @@ public class ArgumentDisplayFormatterTests
     public async Task FormatterShouldBeAppliedToArguments(int a, int b, int c)
     {
         // Verify the formatter was applied by checking the display name
-        var displayName = TestContext.Current!.GetDisplayName();
+        var displayName = TestContext.Current!. Metadata.DisplayName;
         await Assert.That(displayName).IsEqualTo("FormatterShouldBeAppliedToArguments(INT:1, INT:2, INT:3)");
     }
 
@@ -31,7 +31,7 @@ public class ArgumentDisplayFormatterTests
     public async Task FormatterShouldBeAppliedToBarData(Bar bar)
     {
         // Verify the Bar formatter was applied by checking the display name
-        var displayName = TestContext.Current!.GetDisplayName();
+        var displayName = TestContext.Current!. Metadata.DisplayName;
         await Assert.That(displayName).IsEqualTo("FormatterShouldBeAppliedToBarData(BarFormatterValue)");
     }
 

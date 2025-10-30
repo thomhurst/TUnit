@@ -28,7 +28,7 @@ public class Tests(DataClass dataClass)
         }
 
         var dataClasses = tests
-            .SelectMany(x => x.TestDetails.TestClassArguments)
+            .SelectMany(x => x.Metadata.TestDetails.TestClassArguments)
             .OfType<DataClass>()
             .ToArray();
 

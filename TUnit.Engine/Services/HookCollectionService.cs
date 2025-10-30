@@ -640,12 +640,12 @@ internal sealed class HookCollectionService : IHookCollectionService
                 var customExecutor = context.CustomHookExecutor;
 
                 // Skip skipped test instances
-                if (context.TestDetails.ClassInstance is SkippedTestInstance)
+                if (context.Metadata.TestDetails.ClassInstance is SkippedTestInstance)
                 {
                     return;
                 }
 
-                if (context.TestDetails.ClassInstance is PlaceholderInstance)
+                if (context.Metadata.TestDetails.ClassInstance is PlaceholderInstance)
                 {
                     throw new InvalidOperationException($"Cannot execute instance hook {hook.Name} because the test instance has not been created yet. This is likely a framework bug.");
                 }
@@ -653,7 +653,7 @@ internal sealed class HookCollectionService : IHookCollectionService
                 await customExecutor.ExecuteBeforeTestHook(
                     hook.MethodInfo,
                     context,
-                    () => hook.Body!.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
+                    () => hook.Body!.Invoke(context.Metadata.TestDetails.ClassInstance, context, cancellationToken)
                 );
             }
             else

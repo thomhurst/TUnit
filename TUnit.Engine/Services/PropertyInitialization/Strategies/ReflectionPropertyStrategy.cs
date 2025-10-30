@@ -50,7 +50,7 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
         object? resolvedValue = null;
 
         // Check if property was pre-resolved during registration
-        if (context.TestContext?.TestDetails.TestClassInjectedPropertyArguments.TryGetValue(context.PropertyName, out resolvedValue) == true)
+        if (context.TestContext?.Metadata.TestDetails.TestClassInjectedPropertyArguments.TryGetValue(context.PropertyName, out resolvedValue) == true)
         {
             // Use pre-resolved value - it was already initialized during first resolution
             context.ResolvedValue = resolvedValue;
@@ -72,9 +72,9 @@ internal sealed class ReflectionPropertyStrategy : IPropertyInitializationStrate
         context.PropertySetter(context.Instance, resolvedValue);
 
         // Step 4: Add to test context tracking (if not already there)
-        if (context.TestContext != null && !context.TestContext.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(context.PropertyName))
+        if (context.TestContext != null && !context.TestContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(context.PropertyName))
         {
-            context.TestContext.TestDetails.TestClassInjectedPropertyArguments[context.PropertyName] = resolvedValue;
+            context.TestContext.Metadata.TestDetails.TestClassInjectedPropertyArguments[context.PropertyName] = resolvedValue;
         }
     }
 

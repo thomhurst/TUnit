@@ -562,7 +562,7 @@ public static class DataSourceHelpers
             testInformation,
             dataSourceAttribute,
             TestContext.Current,
-            TestContext.Current?.TestDetails.ClassInstance,
+            TestContext.Current?.Metadata.TestDetails.ClassInstance,
             TestContext.Current?.Events,
             TestContext.Current?.ObjectBag ?? new ConcurrentDictionary<string, object?>()
         );

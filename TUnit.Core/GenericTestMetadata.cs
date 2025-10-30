@@ -123,7 +123,7 @@ public sealed class GenericTestMetadata : TestMetadata
                     }
                     else
                     {
-                        typeArgs = testContext.TestDetails.TestClassArguments?.OfType<Type>().ToArray() ?? Type.EmptyTypes;
+                        typeArgs = testContext.Metadata.TestDetails.TestClassArguments?.OfType<Type>().ToArray() ?? Type.EmptyTypes;
                     }
 
                     var instance = InstanceFactory(typeArgs, context.ClassArguments ?? []);

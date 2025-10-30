@@ -22,7 +22,7 @@ public class TestSpecificAfterHooksTests
     [After(Test)]
     public async Task AfterTest_Hook1_Success(TestContext context)
     {
-        if (context.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
+        if (context.Metadata.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
         {
             ExecutedHooks.Add("AfterTest_Hook1");
             // After(Test) Hook 1 executing successfully
@@ -33,7 +33,7 @@ public class TestSpecificAfterHooksTests
     [After(Test)]
     public async Task AfterTest_Hook2_Fails(TestContext context)
     {
-        if (context.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
+        if (context.Metadata.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
         {
             ExecutedHooks.Add("AfterTest_Hook2");
             // After(Test) Hook 2 executing and will fail
@@ -47,7 +47,7 @@ public class TestSpecificAfterHooksTests
     [After(Test)]
     public async Task AfterTest_Hook3_Success(TestContext context)
     {
-        if (context.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
+        if (context.Metadata.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
         {
             ExecutedHooks.Add("AfterTest_Hook3");
             // After(Test) Hook 3 still executing after Hook 2 failed
@@ -58,7 +58,7 @@ public class TestSpecificAfterHooksTests
     [After(Test)]
     public async Task AfterTest_Hook4_AlsoFails(TestContext context)
     {
-        if (context.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
+        if (context.Metadata.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
         {
             ExecutedHooks.Add("AfterTest_Hook4");
             // After(Test) Hook 4 executing and will also fail
@@ -72,7 +72,7 @@ public class TestSpecificAfterHooksTests
     [After(Test)]
     public async Task AfterTest_Hook5_StillExecutes(TestContext context)
     {
-        if (context.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
+        if (context.Metadata.TestDetails.TestName == nameof(Test_With_Multiple_After_Hooks_Some_Failing))
         {
             ExecutedHooks.Add("AfterTest_Hook5");
             // After(Test) Hook 5 still executing after multiple failures
@@ -108,7 +108,7 @@ public class MixedBeforeAfterHooksTests
     [Before(Test)]
     public async Task BeforeTest_Hook1(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
         {
             HookSequence.Add("Before_Hook1");
             // Before(Test) Hook 1 executing
@@ -119,14 +119,14 @@ public class MixedBeforeAfterHooksTests
     [Before(Test)]
     public async Task BeforeTest_Hook2_MightFail(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
         {
             HookSequence.Add("Before_Hook2");
             // Before(Test) Hook 2 executing
             await Task.CompletedTask;
             
             // Fail on specific test
-            if (context.TestDetails.TestName == nameof(Test_With_Before_Hook_Failure))
+            if (context.Metadata.TestDetails.TestName == nameof(Test_With_Before_Hook_Failure))
             {
                 _beforeHookFailed = true;
                 // Before(Test) Hook 2 failing
@@ -156,7 +156,7 @@ public class MixedBeforeAfterHooksTests
     [After(Test)]
     public async Task AfterTest_Hook1_AlwaysRuns(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
         {
             HookSequence.Add("After_Hook1");
             // After(Test) Hook 1 executing (should run even if Before failed)
@@ -167,7 +167,7 @@ public class MixedBeforeAfterHooksTests
     [After(Test)]
     public async Task AfterTest_Hook2_Fails(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
         {
             HookSequence.Add("After_Hook2");
             // After(Test) Hook 2 executing and will fail
@@ -179,7 +179,7 @@ public class MixedBeforeAfterHooksTests
     [After(Test)]
     public async Task AfterTest_Hook3_StillRuns(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(MixedBeforeAfterHooksTests))
         {
             HookSequence.Add("After_Hook3");
             // After(Test) Hook 3 still executing
@@ -218,7 +218,7 @@ public class ExceptionDetailsPreservationTests
     [AfterEvery(Test)]
     public static async Task Hook1_ThrowsInvalidOperation(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(ExceptionDetailsPreservationTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(ExceptionDetailsPreservationTests))
         {
             var message = "InvalidOperationException from Hook 1";
             var exType = typeof(InvalidOperationException);
@@ -233,7 +233,7 @@ public class ExceptionDetailsPreservationTests
     [AfterEvery(Test)]
     public static async Task Hook2_ThrowsArgument(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(ExceptionDetailsPreservationTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(ExceptionDetailsPreservationTests))
         {
             var message = "ArgumentException from Hook 2";
             var exType = typeof(ArgumentException);
@@ -248,7 +248,7 @@ public class ExceptionDetailsPreservationTests
     [AfterEvery(Test)]
     public static async Task Hook3_ThrowsNotImplemented(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(ExceptionDetailsPreservationTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(ExceptionDetailsPreservationTests))
         {
             var message = "NotImplementedException from Hook 3";
             var exType = typeof(NotImplementedException);
@@ -263,7 +263,7 @@ public class ExceptionDetailsPreservationTests
     [AfterEvery(Test)]
     public static async Task Hook4_ThrowsCustom(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(ExceptionDetailsPreservationTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(ExceptionDetailsPreservationTests))
         {
             var message = "Custom exception from Hook 4";
             var exType = typeof(CustomTestException);
@@ -278,7 +278,7 @@ public class ExceptionDetailsPreservationTests
     [AfterEvery(Test)]
     public static async Task Hook5_VerifiesExceptions(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(ExceptionDetailsPreservationTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(ExceptionDetailsPreservationTests))
         {
             // Hook 5 executing (after 4 exceptions)
             // Exception types thrown verified
@@ -306,7 +306,7 @@ public class CatastrophicFailureRecoveryTests
     [Before(Test)]
     public void SetupResources(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
         {
             // Simulate resource allocation
             ResourcesToClean.Add(new DummyResource("Resource1"));
@@ -326,7 +326,7 @@ public class CatastrophicFailureRecoveryTests
     [After(Test)]
     public async Task Cleanup_Hook1_Partial_Success(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
         {
             // Cleanup Hook 1 - cleaning first resource
             if (ResourcesToClean.Count > 0)
@@ -341,7 +341,7 @@ public class CatastrophicFailureRecoveryTests
     [After(Test)]
     public async Task Cleanup_Hook2_Fails_Catastrophically(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
         {
             // Cleanup Hook 2 - will fail catastrophically
             await Task.CompletedTask;
@@ -352,7 +352,7 @@ public class CatastrophicFailureRecoveryTests
     [After(Test)]
     public async Task Cleanup_Hook3_Still_Cleans_Resources(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
         {
             // Cleanup Hook 3 - still cleaning remaining resources after catastrophic failure
             
@@ -374,7 +374,7 @@ public class CatastrophicFailureRecoveryTests
     [After(Test)]
     public async Task Cleanup_Hook4_Verifies_Cleanup(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(CatastrophicFailureRecoveryTests))
         {
             // Cleanup Hook 4 - verifying cleanup status
             // Cleanup operations completed

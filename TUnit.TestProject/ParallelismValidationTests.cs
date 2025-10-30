@@ -18,8 +18,8 @@ public class UnconstrainedParallelTests
         public async Task RecordExecution()
         {
             var context = TestContext.Current!;
-            _executionTimes.Add((context.TestDetails.TestName,
-                                context.TestStart!.Value,
+            _executionTimes.Add((context.Metadata.TestDetails.TestName,
+                                context.Execution.Execution.TestStart!.Value,
                                 context.Result!.End!.Value));
             await Task.CompletedTask;
         }
@@ -120,8 +120,8 @@ public class LimitedParallelTests
         public async Task RecordExecution()
         {
             var context = TestContext.Current!;
-            _executionTimes.Add((context.TestDetails.TestName,
-                                context.TestStart!.Value,
+            _executionTimes.Add((context.Metadata.TestDetails.TestName,
+                                context.Execution.Execution.TestStart!.Value,
                                 context.Result!.End!.Value));
             await Task.CompletedTask;
         }
@@ -231,8 +231,8 @@ public class StrictlySerialTests
         public async Task RecordExecution()
         {
             var context = TestContext.Current!;
-            _executionTimes.Add((context.TestDetails.TestName,
-                                context.TestStart!.Value,
+            _executionTimes.Add((context.Metadata.TestDetails.TestName,
+                                context.Execution.Execution.TestStart!.Value,
                                 context.Result!.End!.Value));
             await Task.CompletedTask;
         }
@@ -339,8 +339,8 @@ public class HighParallelismTests
         public async Task RecordExecution()
         {
             var context = TestContext.Current!;
-            _executionTimes.Add((context.TestDetails.TestName,
-                                context.TestStart!.Value,
+            _executionTimes.Add((context.Metadata.TestDetails.TestName,
+                                context.Execution.Execution.TestStart!.Value,
                                 context.Result!.End!.Value));
             await Task.CompletedTask;
         }

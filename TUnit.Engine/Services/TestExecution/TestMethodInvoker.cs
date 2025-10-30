@@ -13,12 +13,12 @@ internal sealed class TestMethodInvoker
         if (test.Context.InternalDiscoveredTest?.TestExecutor is { } testExecutor)
         {
             await testExecutor.ExecuteTest(test.Context,
-                async () => await test.InvokeTestAsync(test.Context.TestDetails.ClassInstance, cancellationToken))
+                async () => await test.InvokeTestAsync(test.Context.Metadata.TestDetails.ClassInstance, cancellationToken))
                 .ConfigureAwait(false);
         }
         else
         {
-            await test.InvokeTestAsync(test.Context.TestDetails.ClassInstance, cancellationToken)
+            await test.InvokeTestAsync(test.Context.Metadata.TestDetails.ClassInstance, cancellationToken)
                 .ConfigureAwait(false);
         }
     }

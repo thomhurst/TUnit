@@ -26,7 +26,7 @@ public class InheritedTestsFromDifferentProjectTests : Library.BaseTests
     [Test]
     public async Task VerifyInheritedCategoriesAreAvailable()
     {
-        var categories = TestContext.Current?.TestDetails.Categories;
+        var categories = TestContext.Current?.Metadata.TestDetails.Categories;
         await Assert.That(categories).Contains("BaseCategoriesOnClass");
     }
 }

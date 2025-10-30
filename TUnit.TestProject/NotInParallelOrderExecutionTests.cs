@@ -16,7 +16,7 @@ public class NotInParallelOrderExecutionTests
     [Before(Test)]
     public void RecordOrderedTestStart()
     {
-        var testName = TestContext.Current!.TestDetails.TestName;
+        var testName = TestContext.Current!.Metadata.TestDetails.TestName;
         var groupKey = GetGroupKey(testName);
         
         var groupLock = GroupLocks.GetOrAdd(groupKey, new object());
@@ -30,7 +30,7 @@ public class NotInParallelOrderExecutionTests
         }
 
         // Use TestStart if available, otherwise use DateTime.Now
-        var startTime = TestContext.Current.TestStart?.DateTime ?? DateTime.Now;
+        var startTime = TestContext.Current.Execution.Execution.TestStart?.DateTime ?? DateTime.Now;
         
         OrderedExecutionRecords.Add(new OrderedExecutionRecord(
             testName,
@@ -43,7 +43,7 @@ public class NotInParallelOrderExecutionTests
     [After(Test)]
     public async Task RecordOrderedTestEnd()
     {
-        var testName = TestContext.Current!.TestDetails.TestName;
+        var testName = TestContext.Current!.Metadata.TestDetails.TestName;
         var groupKey = GetGroupKey(testName);
         
         var groupLock = GroupLocks.GetOrAdd(groupKey, new object());

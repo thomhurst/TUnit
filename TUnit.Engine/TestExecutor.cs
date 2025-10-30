@@ -98,9 +98,9 @@ internal class TestExecutor
             executableTest.Context.RestoreExecutionContext();
 
             // Only wrap the actual test execution with timeout, not the hooks
-            var testTimeout = executableTest.Context.TestDetails.Timeout;
+            var testTimeout = executableTest.Context.Metadata.TestDetails.Timeout;
             var timeoutMessage = testTimeout.HasValue
-                ? $"Test '{executableTest.Context.TestDetails.TestName}' execution timed out after {testTimeout.Value}"
+                ? $"Test '{executableTest.Context.Metadata.TestDetails.TestName}' execution timed out after {testTimeout.Value}"
                 : null;
 
             await TimeoutHelper.ExecuteWithTimeoutAsync(
@@ -162,7 +162,7 @@ internal class TestExecutor
     private static async Task ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {
         // Skip the actual test invocation for skipped tests
-        if (executableTest.Context.TestDetails.ClassInstance is SkippedTestInstance ||
+        if (executableTest.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
             !string.IsNullOrEmpty(executableTest.Context.SkipReason))
         {
             return;
@@ -174,11 +174,11 @@ internal class TestExecutor
         if (executableTest.Context.InternalDiscoveredTest?.TestExecutor is { } testExecutor)
         {
             await testExecutor.ExecuteTest(executableTest.Context,
-                async () => await executableTest.InvokeTestAsync(executableTest.Context.TestDetails.ClassInstance, cancellationToken)).ConfigureAwait(false);
+                async () => await executableTest.InvokeTestAsync(executableTest.Context.Metadata.TestDetails.ClassInstance, cancellationToken)).ConfigureAwait(false);
         }
         else
         {
-            await executableTest.InvokeTestAsync(executableTest.Context.TestDetails.ClassInstance, cancellationToken).ConfigureAwait(false);
+            await executableTest.InvokeTestAsync(executableTest.Context.Metadata.TestDetails.ClassInstance, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -241,11 +241,11 @@ internal class TestExecutor
     internal static async Task DisposeTestInstance(AbstractExecutableTest test)
     {
         // Dispose the test instance if it's disposable
-        if (test.Context.TestDetails.ClassInstance is not SkippedTestInstance)
+        if (test.Context.Metadata.TestDetails.ClassInstance is not SkippedTestInstance)
         {
             try
             {
-                var instance = test.Context.TestDetails.ClassInstance;
+                var instance = test.Context.Metadata.TestDetails.ClassInstance;
 
                 switch (instance)
                 {

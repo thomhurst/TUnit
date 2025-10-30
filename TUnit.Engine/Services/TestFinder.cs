@@ -38,8 +38,8 @@ internal class TestFinder : ITestFinder
                 continue;
             }
 
-            var classType = test.TestDetails.ClassType;
-            var testName = test.TestDetails.TestName;
+            var classType = test.Metadata.TestDetails.ClassType;
+            var testName = test.Metadata.TestDetails.TestName;
 
             // Index by type
             if (!testsByType.TryGetValue(classType, out var testsForType))

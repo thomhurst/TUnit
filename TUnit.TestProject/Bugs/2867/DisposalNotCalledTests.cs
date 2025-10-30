@@ -215,7 +215,7 @@ public class PerClassSharedDisposalTest : IAsyncDisposable
         await Assert.That(_serviceIds.Distinct().Count()).IsEqualTo(1);
         
         // Verify all test instances themselves are disposed
-        var testInstances = context.Tests.Select(t => t.TestDetails.ClassInstance).OfType<PerClassSharedDisposalTest>().ToList();
+        var testInstances = context.Tests.Select(t => t.Metadata.TestDetails.ClassInstance).OfType<PerClassSharedDisposalTest>().ToList();
         foreach (var instance in testInstances)
         {
             await Assert.That(instance._isDisposed).IsTrue();

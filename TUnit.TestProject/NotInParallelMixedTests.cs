@@ -17,7 +17,7 @@ public class NotInParallelMixedTests
     [Before(Test)]
     public void RecordTestStart()
     {
-        var testName = TestContext.Current!.TestDetails.TestName;
+        var testName = TestContext.Current!.Metadata.TestDetails.TestName;
         var groupKey = GetGroupKeyForTest(testName);
         var startTime = DateTime.Now;
 
@@ -46,7 +46,7 @@ public class NotInParallelMixedTests
     [After(Test)]
     public async Task RecordTestEnd()
     {
-        var testName = TestContext.Current!.TestDetails.TestName;
+        var testName = TestContext.Current!.Metadata.TestDetails.TestName;
         var groupKey = GetGroupKeyForTest(testName);
         var endTime = DateTime.Now;
 

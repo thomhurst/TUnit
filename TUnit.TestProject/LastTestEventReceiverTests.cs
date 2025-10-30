@@ -40,7 +40,7 @@ public class LastTestEventReceiverTests
         // Give some time for async event receivers to complete
         await Task.Delay(100);
 
-        var displayName = context.GetDisplayName();
+        var displayName = context. Metadata.DisplayName;
 
         // After the last test (Test3), we should have the last test event recorded
         if (displayName.Contains("Test3"))
@@ -60,13 +60,13 @@ public class LastTestEventReceiverAttribute : Attribute,
 
     public ValueTask OnTestStart(TestContext context)
     {
-        LastTestEventReceiverTests.Events.Add($"TestStart: {context.GetDisplayName()}");
+        LastTestEventReceiverTests.Events.Add($"TestStart: {context. Metadata.DisplayName}");
         return default;
     }
 
     public ValueTask OnTestEnd(TestContext context)
     {
-        LastTestEventReceiverTests.Events.Add($"TestEnd: {context.GetDisplayName()}");
+        LastTestEventReceiverTests.Events.Add($"TestEnd: {context. Metadata.DisplayName}");
         return default;
     }
 
@@ -135,7 +135,7 @@ public class SkippedEventReceiverTests
         // Give some time for async event receivers to complete
         await Task.Delay(100);
 
-        if (context.GetDisplayName().Contains("SkippedTestWithCustomReason"))
+        if (context. Metadata.DisplayName.Contains("SkippedTestWithCustomReason"))
         {
             await Assert.That(Events).Contains("TestSkipped");
             await Assert.That(Events).Contains("TestEnd");
@@ -191,7 +191,7 @@ public class RuntimeSkipEventReceiverTests
         // Give some time for async event receivers to complete
         await Task.Delay(100);
 
-        if (context.GetDisplayName().Contains("RuntimeSkippedTestWithCustomReason"))
+        if (context. Metadata.DisplayName.Contains("RuntimeSkippedTestWithCustomReason"))
         {
             // Verify skip reason is preserved
             await Assert.That(CapturedSkipReason).IsEqualTo("Custom runtime skip reason");

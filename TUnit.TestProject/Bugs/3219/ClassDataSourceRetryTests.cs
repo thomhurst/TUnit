@@ -75,7 +75,7 @@ public class ClassDataSourceRetryTests
     [After(TestSession)]
     public static async Task VerifyDisposalAfterTestSession(TestSessionContext context)
     {
-        var classInstance = context.TestClasses.FirstOrDefault(x => x.ClassType  == typeof(ClassDataSourceRetryTests))?.Tests.FirstOrDefault()?.TestDetails.ClassInstance as ClassDataSourceRetryTests;
+        var classInstance = context.TestClasses.FirstOrDefault(x => x.ClassType  == typeof(ClassDataSourceRetryTests))?.Tests.FirstOrDefault()?.Metadata.TestDetails.ClassInstance as ClassDataSourceRetryTests;
 
         var dataClass = classInstance?.DataClass;
 

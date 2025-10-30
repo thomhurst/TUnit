@@ -39,7 +39,7 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
         }
 
         var dataClasses = tests
-            .SelectMany(x => x.TestDetails.TestClassArguments)
+            .SelectMany(x => x.Metadata.TestDetails.TestClassArguments)
             .OfType<DataClass>()
             .ToArray();
 
@@ -50,12 +50,12 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
 
         foreach (var test in tests.Where(x => x.Result != null))
         {
-            var dataClass = test.TestDetails.TestClassArguments.OfType<DataClass>().First();
+            var dataClass = test.Metadata.TestDetails.TestClassArguments.OfType<DataClass>().First();
 
             if (!dataClass.Disposed)
             {
                 var classDataSourceAttribute =
-                    test.TestDetails.GetAttributes<ClassDataSourceAttribute<DataClass>>()
+                    test.Metadata.TestDetails.GetAttributes<ClassDataSourceAttribute<DataClass>>()
                         .First();
 
                 throw new Exception($"Not Disposed: {classDataSourceAttribute.Shared}");

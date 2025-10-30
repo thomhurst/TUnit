@@ -5,13 +5,13 @@ public class GlobalTestHooks
     [BeforeEvery(Test)]
     public static void SetUp(TestContext testContext)
     {
-        testContext.ObjectBag.TryAdd("SetUpCustomTestNameProperty", testContext.TestDetails.TestName);
+        testContext.ObjectBag.TryAdd("SetUpCustomTestNameProperty", testContext.Metadata.TestDetails.TestName);
     }
 
     [AfterEvery(Test)]
     public static async Task CleanUp(TestContext testContext)
     {
-        testContext.ObjectBag.TryAdd("CleanUpCustomTestNameProperty", testContext.TestDetails.TestName);
+        testContext.ObjectBag.TryAdd("CleanUpCustomTestNameProperty", testContext.Metadata.TestDetails.TestName);
 
         // Result may be null for skipped tests or tests that fail during initialization
         // Only validate Result for tests that actually executed
