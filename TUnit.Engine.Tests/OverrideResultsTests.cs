@@ -15,8 +15,7 @@ public class OverrideResultsTests(TestMode testMode) : InvokableTestBase(testMod
                 result => result.ResultSummary.Counters.Total.ShouldBe(4),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(2),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1),
-                result => result.ResultSummary.Counters.Skipped.ShouldBe(1),
-                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(0)
+                result => result.ResultSummary.Counters.NotExecuted.ShouldBe(1)
             ]);
     }
 }
