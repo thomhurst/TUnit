@@ -1138,6 +1138,7 @@ namespace
         public SkipAttribute(string reason) { }
         public int Order { get; }
         public string Reason { get; }
+        protected virtual string GetSkipReason(.TestRegisteredContext context) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
         public virtual .<bool> ShouldSkip(.TestRegisteredContext context) { }
     }
@@ -1404,6 +1405,7 @@ namespace
         public string TestName { get; }
         public void SetHookExecutor(. executor) { }
         public void SetParallelLimiter(. parallelLimit) { }
+        public void SetSkipped(string reason) { }
         public void SetTestExecutor(. executor) { }
     }
     public class TestResult : <.TestResult>

@@ -54,9 +54,7 @@ public class SkipAttribute : Attribute, ITestRegisteredEventReceiver
     {
         if (await ShouldSkip(context))
         {
-            // Store skip reason directly on TestContext
-            context.TestContext.SkipReason = Reason;
-            context.TestContext.Metadata.TestDetails.ClassInstance = SkippedTestInstance.Instance;
+            context.SetSkipped(GetSkipReason(context));
         }
     }
 
@@ -75,4 +73,35 @@ public class SkipAttribute : Attribute, ITestRegisteredEventReceiver
     /// The default implementation always returns true, meaning the test will always be skipped.
     /// </remarks>
     public virtual Task<bool> ShouldSkip(TestRegisteredContext context) => Task.FromResult(true);
+
+    /// <summary>
+    /// Gets the skip reason for the test.
+    /// </summary>
+    /// <param name="context">The test context containing information about the test being registered.</param>
+    /// <returns>The reason why the test should be skipped.</returns>
+    /// <remarks>
+    /// Can be overridden in derived classes to provide dynamic skip reasons based on runtime information.
+    /// This allows including contextual information (e.g., device names, environment variables) in skip messages.
+    ///
+    /// The default implementation returns the <see cref="Reason"/> property value.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// public class SkipOnDeviceAttribute : SkipAttribute
+    /// {
+    ///     private readonly string _deviceName;
+    ///
+    ///     public SkipOnDeviceAttribute(string deviceName) : base("Device-specific skip")
+    ///     {
+    ///         _deviceName = deviceName;
+    ///     }
+    ///
+    ///     protected override string GetSkipReason(TestRegisteredContext context)
+    ///     {
+    ///         return $"Test '{context.TestName}' is not supported on device '{_deviceName}'";
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    protected virtual string GetSkipReason(TestRegisteredContext context) => Reason;
 }
