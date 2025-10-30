@@ -133,11 +133,11 @@ internal class TestExecutor
                 // Swallow any exceptions from hooks when we already have a test failure
             }
 
-            // Check if the result was overridden - if so, don't re-throw
-            if (executableTest.Context.Execution.Result is { IsOverridden: true, State: TestState.Passed })
+            // Check if the result was overridden - if so, respect the override and don't re-throw
+            if (executableTest.Context.Execution.Result?.IsOverridden == true)
             {
-                // Result was overridden to passed, don't re-throw the exception
-                executableTest.SetResult(TestState.Passed);
+                // Result was overridden, respect the override state (Passed, Failed, Skipped, etc.)
+                // Don't re-throw the exception - the override has final say
             }
             else
             {

@@ -24,6 +24,19 @@ public record TestResult
     [JsonIgnore]
     internal TestContext? TestContext { get; init; }
 
-    public string? OverrideReason { get; set; }
-    public bool IsOverridden { get; set; }
+    /// <summary>
+    /// The reason provided when this result was overridden.
+    /// </summary>
+    public string? OverrideReason { get; init; }
+
+    /// <summary>
+    /// Indicates whether this result was explicitly overridden via <see cref="TestContext.Execution.OverrideResult"/>.
+    /// </summary>
+    public bool IsOverridden { get; init; }
+
+    /// <summary>
+    /// The original exception that occurred before the result was overridden.
+    /// Useful for debugging and audit trails when a test failure is overridden to pass or skip.
+    /// </summary>
+    public Exception? OriginalException { get; init; }
 }

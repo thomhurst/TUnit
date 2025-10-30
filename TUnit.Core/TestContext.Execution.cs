@@ -74,15 +74,42 @@ public partial class TestContext
 
     internal void OverrideResult(TestState state, string reason)
     {
+        // Validation: Reason must not be empty
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            throw new ArgumentException("Override reason cannot be empty or whitespace.", nameof(reason));
+        }
+
+        // Validation: Prevent double-override
+        if (Result?.IsOverridden == true)
+        {
+            throw new InvalidOperationException(
+                $"Result has already been overridden to {Result.State} with reason: '{Result.OverrideReason}'. " +
+                "Cannot override a result multiple times.");
+        }
+
+        // Validation: Only allow final states
+        if (state is TestState.NotStarted or TestState.WaitingForDependencies or TestState.Queued or TestState.Running)
+        {
+            throw new ArgumentException(
+                $"Cannot override to intermediate state '{state}'. " +
+                "Only final states (Passed, Failed, Skipped, Timeout, Cancelled) are allowed.",
+                nameof(state));
+        }
+
+        // Preserve the original exception if one exists
+        var originalException = Result?.Exception;
+
         Result = new TestResult
         {
             State = state,
             OverrideReason = reason,
             IsOverridden = true,
+            OriginalException = originalException,
             Start = TestStart ?? DateTimeOffset.UtcNow,
             End = DateTimeOffset.UtcNow,
             Duration = DateTimeOffset.UtcNow - (TestStart ?? DateTimeOffset.UtcNow),
-            Exception = null,
+            Exception = state == TestState.Failed ? originalException : null,
             ComputerName = Environment.MachineName,
             TestContext = this
         };
