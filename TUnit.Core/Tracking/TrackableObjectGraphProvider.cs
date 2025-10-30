@@ -11,7 +11,7 @@ internal class TrackableObjectGraphProvider
     {
         var visitedObjects = testContext.TrackedObjects;
 
-        var testDetails = testContext.TestDetails;
+        var testDetails = testContext.Metadata.TestDetails;
 
         foreach (var classArgument in testDetails.TestClassArguments)
         {

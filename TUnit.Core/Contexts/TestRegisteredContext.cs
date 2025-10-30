@@ -28,7 +28,7 @@ public class TestRegisteredContext
     /// <summary>
     /// Gets the test details from the underlying TestContext
     /// </summary>
-    public TestDetails TestDetails => TestContext.TestDetails;
+    public TestDetails TestDetails => TestContext.Metadata.TestDetails;
 
     public void SetTestExecutor(ITestExecutor executor)
     {

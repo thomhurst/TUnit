@@ -11,7 +11,7 @@ public class DiscoveredTestContext
     public string TestName { get; }
     public TestContext TestContext { get; }
 
-    public TestDetails TestDetails => TestContext.TestDetails;
+    public TestDetails TestDetails => TestContext.Metadata.TestDetails;
 
     public DiscoveredTestContext(string testName, TestContext testContext)
     {

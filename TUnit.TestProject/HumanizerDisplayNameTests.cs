@@ -18,7 +18,7 @@ public class HumanizerDisplayNameTests
     {
         protected override string FormatDisplayName(DiscoveredTestContext context)
         {
-            return context.Metadata.TestDetails.TestName.Humanize();
+            return context.TestContext.Metadata.TestDetails.TestName.Humanize();
         }
     }
 }

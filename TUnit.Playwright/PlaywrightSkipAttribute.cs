@@ -32,7 +32,7 @@ public class PlaywrightSkipAttribute : SkipAttribute
 
     public override Task<bool> ShouldSkip(TestRegisteredContext context)
     {
-        var browserName = GetBrowserName(context.TestDetails);
+        var browserName = GetBrowserName(context.TestContext.Metadata.TestDetails);
 
         return Task.FromResult(_combinations.Any(combination =>
         {

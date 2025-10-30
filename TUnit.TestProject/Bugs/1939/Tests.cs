@@ -31,7 +31,7 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
             .FirstOrDefault(x => x.ClassType == typeof(Tests))
             ?.Tests;
 
-        if (tests is null || tests.Any(x => x.Result == null))
+        if (tests is null || tests.Any(x => x.Execution.Result == null))
         {
             // If the test did not run, we cannot check if the classes were disposed.
             // This can happen if the test was filtered out or not executed for some reason.
@@ -48,7 +48,7 @@ public class Tests(DataClass dataClass) : IAsyncDisposable
         await Assert.That(dataClasses).HasCount().EqualTo(6);
         await Assert.That(dataClasses.Where(x => x.Disposed)).HasCount().EqualTo(6);
 
-        foreach (var test in tests.Where(x => x.Result != null))
+        foreach (var test in tests.Where(x => x.Execution.Result != null))
         {
             var dataClass = test.Metadata.TestDetails.TestClassArguments.OfType<DataClass>().First();
 

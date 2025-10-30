@@ -269,7 +269,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 
         foreach (var dependency in test.Dependencies)
         {
-            if (collected.Add(dependency.Test.Context.TestDetails))
+            if (collected.Add(dependency.Test.Context.Metadata.TestDetails))
             {
                 CollectAllDependencies(dependency.Test, collected, visited);
             }

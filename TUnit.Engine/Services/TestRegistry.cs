@@ -122,7 +122,7 @@ internal sealed class TestRegistry : ITestRegistry
         TUnit.Core.Enums.TestRelationship relationship,
         string? displayName)
     {
-        var testDetails = currentContext.TestDetails;
+        var testDetails = currentContext.Metadata.TestDetails;
         var testClassType = testDetails.ClassType;
         var variantMethodArguments = arguments ?? testDetails.TestMethodArguments;
 

@@ -59,7 +59,7 @@ public class NotInParallelOrderExecutionTests
         if (record != null)
         {
             // Use Result.End if available, otherwise use DateTime.Now
-            record.EndTime = TestContext.Current.Result?.End?.DateTime ?? DateTime.Now;
+            record.EndTime = TestContext.Current.Execution.Result?.End?.DateTime ?? DateTime.Now;
         }
 
         await AssertOrderedExecutionWithinGroup(groupKey);

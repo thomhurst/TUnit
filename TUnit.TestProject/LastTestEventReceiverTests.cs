@@ -154,7 +154,7 @@ public class SkipEventReceiverAttribute : Attribute,
     public ValueTask OnTestSkipped(TestContext context)
     {
         SkippedEventReceiverTests.Events.Add("TestSkipped");
-        SkippedEventReceiverTests.CapturedSkipReason = context.SkipReason;
+        SkippedEventReceiverTests.CapturedSkipReason = context.Execution.SkipReason;
         return default;
     }
 
@@ -217,7 +217,7 @@ public class RuntimeSkipEventReceiverAttribute : Attribute,
     public ValueTask OnTestSkipped(TestContext context)
     {
         RuntimeSkipEventReceiverTests.Events.Add("TestSkipped");
-        RuntimeSkipEventReceiverTests.CapturedSkipReason = context.SkipReason;
+        RuntimeSkipEventReceiverTests.CapturedSkipReason = context.Execution.SkipReason;
         return default;
     }
 

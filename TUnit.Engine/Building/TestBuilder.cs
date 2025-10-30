@@ -890,7 +890,7 @@ internal sealed class TestBuilder : ITestBuilder
             testBuilderContext,
             CancellationToken.None);
 
-        context.TestDetails = testDetails;
+        context.Metadata.TestDetails = testDetails;
 
         return context;
     }
@@ -1006,7 +1006,7 @@ internal sealed class TestBuilder : ITestBuilder
             },
             CancellationToken.None);
 
-        context.TestDetails = testDetails;
+        context.Metadata.TestDetails = testDetails;
 
         return context;
     }

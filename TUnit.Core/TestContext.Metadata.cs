@@ -55,7 +55,12 @@ public partial class TestContext
     }
 
     Guid ITestMetadata.Id => Id;
-    TestDetails ITestMetadata.TestDetails => TestDetails;
+    TestDetails ITestMetadata.TestDetails
+    {
+        get => TestDetails;
+        set => TestDetails = value;
+    }
+
     string ITestMetadata.TestName => TestDetails.TestName;
 
     string ITestMetadata.DisplayName

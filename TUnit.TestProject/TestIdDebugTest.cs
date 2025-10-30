@@ -16,13 +16,13 @@ public class TestIdDebugTest
     public async Task DebugTestIdGeneration()
     {
         await Task.Yield();
-        
+
         var context = TestContext.Current!;
-        var testDetails = context.TestDetails;
-        
+        var testDetails = context.Metadata.TestDetails;
+
         // Use reflection to see if there's a RepeatIndex property we're missing
         var properties = testDetails.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-        
+
         lock (Lock)
         {
             Console.WriteLine($"=== Test Execution ===");
@@ -33,7 +33,7 @@ public class TestIdDebugTest
             // Check all properties
             foreach (var prop in properties)
             {
-                if (prop.Name.Contains("Repeat", StringComparison.OrdinalIgnoreCase) || 
+                if (prop.Name.Contains("Repeat", StringComparison.OrdinalIgnoreCase) ||
                     prop.Name.Contains("Index", StringComparison.OrdinalIgnoreCase))
                 {
                     try
@@ -47,7 +47,7 @@ public class TestIdDebugTest
                     }
                 }
             }
-            
+
             TestIds.Add(testDetails.TestId);
             Console.WriteLine($"Total unique TestIds so far: {new HashSet<string>(TestIds).Count}");
             Console.WriteLine("---");

@@ -52,7 +52,7 @@ internal static class JsonExtensions
 
     public static TestJson ToJsonModel(this TestContext context)
     {
-        var testDetails = context.TestDetails;
+        var testDetails = context.Metadata.TestDetails;
         if (testDetails == null)
         {
             throw new InvalidOperationException("TestDetails is null");

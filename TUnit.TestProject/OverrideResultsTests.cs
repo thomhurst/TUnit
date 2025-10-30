@@ -16,14 +16,14 @@ public class OverrideResultsTests
     public static async Task AfterClass(ClassHookContext classHookContext)
     {
         await Assert.That(classHookContext.Tests).HasSingleItem();
-        await Assert.That(classHookContext.Tests).ContainsOnly(t => t.Result?.State == TestState.Passed);
+        await Assert.That(classHookContext.Tests).ContainsOnly(t => t.Execution.Result?.State == TestState.Passed);
     }
 
     public class OverridePassAttribute : Attribute, ITestEndEventReceiver
     {
         public ValueTask OnTestEnd(TestContext afterTestContext)
         {
-            afterTestContext.OverrideResult(TestState.Passed, "Because I said so");
+            afterTestContext.Execution.OverrideResult(TestState.Passed, "Because I said so");
             return default(ValueTask);
         }
 

@@ -161,7 +161,7 @@ internal class TestFinder : ITestFinder
             argCount = classArguments.Count();
         }
 
-        var actualArgCount = context.TestDetails?.TestClassArguments?.Length ?? 0;
+        var actualArgCount = context.Metadata.TestDetails?.TestClassArguments?.Length ?? 0;
         return argCount == actualArgCount;
     }
 }

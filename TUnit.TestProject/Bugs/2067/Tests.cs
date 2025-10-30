@@ -22,7 +22,7 @@ public class Tests(DataClass dataClass)
             .FirstOrDefault(x => x.ClassType == typeof(Tests))
             ?.Tests;
 
-        if (tests is null || tests.Any(x => x.Result == null))
+        if (tests is null || tests.Any(x => x.Execution.Result == null))
         {
             return;
         }

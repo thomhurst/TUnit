@@ -39,8 +39,8 @@ public class DependsOnTests3
 
         await Task.Delay(TimeSpan.FromSeconds(1));
 
-        var test1 = TestContext.Current!.GetTests(nameof(Test1));
-        var test2 = TestContext.Current.GetTests(nameof(Test2));
+        var test1 = TestContext.Current!.Dependencies.GetTests(nameof(Test1));
+        var test2 = TestContext.Current.Dependencies.GetTests(nameof(Test2));
 
         await Assert.That(test1).HasCount().EqualTo(1);
         await Assert.That(test2).HasCount().EqualTo(1);

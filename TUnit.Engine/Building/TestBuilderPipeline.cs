@@ -184,7 +184,7 @@ internal sealed class TestBuilderPipeline
                 CancellationToken.None);
 
             // Set the TestDetails on the context
-            context.TestDetails = testDetails;
+            context.Metadata.TestDetails = testDetails;
 
             // Invoke discovery event receivers to properly handle all attribute behaviors
             await InvokeDiscoveryEventReceiversAsync(context).ConfigureAwait(false);
@@ -300,7 +300,7 @@ internal sealed class TestBuilderPipeline
                         CancellationToken.None);
 
                     // Set the TestDetails on the context
-                    context.TestDetails = testDetails;
+                    context.Metadata.TestDetails = testDetails;
 
                     // Invoke discovery event receivers to properly handle all attribute behaviors
                     await InvokeDiscoveryEventReceiversAsync(context).ConfigureAwait(false);
@@ -372,7 +372,7 @@ internal sealed class TestBuilderPipeline
             CreateTestBuilderContext(metadata),
             CancellationToken.None);
 
-        context.TestDetails = testDetails;
+        context.Metadata.TestDetails = testDetails;
 
 
         return new FailedExecutableTest(exception)
@@ -424,7 +424,7 @@ internal sealed class TestBuilderPipeline
             CreateTestBuilderContext(metadata),
             CancellationToken.None);
 
-        context.TestDetails = testDetails;
+        context.Metadata.TestDetails = testDetails;
 
         return new FailedExecutableTest(exception)
         {

@@ -41,7 +41,7 @@ public sealed class DisplayNameAttribute(string displayName) : DisplayNameFormat
     /// <inheritdoc />
     protected override string FormatDisplayName(DiscoveredTestContext context)
     {
-        var testDetails = context.TestDetails;
+        var testDetails = context.TestContext.Metadata.TestDetails;
 
         var mutableDisplayName = displayName;
 
