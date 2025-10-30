@@ -65,33 +65,57 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
         var processedProperties = new HashSet<string>();
 
-        var properties = typeSymbol.GetMembersIncludingBase()
+        var directProperties = typeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
-            .Where(CanSetProperty);
+            .Where(CanSetProperty)
+            .ToList();
 
-        foreach (var property in properties)
+        var inheritedProperties = typeSymbol.GetMembersIncludingBase()
+            .OfType<IPropertySymbol>()
+            .Where(CanSetProperty)
+            .Where(p => p.ContainingType != typeSymbol)
+            .ToList();
+
+        foreach (var property in directProperties)
         {
-            if (!processedProperties.Add(property.Name))
+            if (processedProperties.Add(property.Name))
             {
-                continue;
-            }
-
-            foreach (var attr in property.GetAttributes())
-            {
-                if (attr.AttributeClass != null &&
-                        attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default))
+                foreach (var attr in property.GetAttributes())
                 {
-                    propertiesWithDataSources.Add(new PropertyWithDataSourceAttribute
+                    if (attr.AttributeClass != null &&
+                            attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default))
                     {
-                        Property = property,
-                        DataSourceAttribute = attr
-                    });
-                    break; // Only one data source per property
+                        propertiesWithDataSources.Add(new PropertyWithDataSourceAttribute
+                        {
+                            Property = property,
+                            DataSourceAttribute = attr
+                        });
+                        break;
+                    }
                 }
             }
         }
 
-        // Only return if there are actually properties with data sources
+        foreach (var property in inheritedProperties)
+        {
+            if (processedProperties.Add(property.Name))
+            {
+                foreach (var attr in property.GetAttributes())
+                {
+                    if (attr.AttributeClass != null &&
+                            attr.AttributeClass.AllInterfaces.Contains(dataSourceInterface, SymbolEqualityComparer.Default))
+                    {
+                        propertiesWithDataSources.Add(new PropertyWithDataSourceAttribute
+                        {
+                            Property = property,
+                            DataSourceAttribute = attr
+                        });
+                        break;
+                    }
+                }
+            }
+        }
+
         if (propertiesWithDataSources.Count == 0)
         {
             return null;
