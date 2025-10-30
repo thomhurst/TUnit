@@ -266,45 +266,119 @@ public void TestCalculation(CalculationScenario scenario)
 
 ### Generic Test Base Classes
 
+⚠️ **Important Limitation**: C# does not allow generic type parameters to be used as attribute arguments. This is a known language limitation (see [dotnet/csharplang#124](https://github.com/dotnet/csharplang/issues/124)).
+
+The following code **WILL NOT COMPILE** due to error CS8968:
+
 ```csharp
-public abstract class EntityTestBase<TEntity, TId> 
+// ❌ This does NOT work - CS8968 error
+public abstract class EntityTestBase<TEntity, TId>
+    where TEntity : IEntity<TId>
+{
+    [Test]
+    [MethodDataSource<EntityTestBase<TEntity, TId>>(nameof(GetTestIds))]  // ❌ Error!
+    public async Task Entity_ShouldBeRetrievable(TId id) { }
+}
+```
+
+#### Workaround 1: Use InstanceMethodDataSource
+
+The recommended approach is to use `InstanceMethodDataSource` instead:
+
+```csharp
+public abstract class EntityTestBase<TEntity, TId>
     where TEntity : IEntity<TId>
     where TId : IEquatable<TId>
 {
     protected abstract TEntity CreateEntity(TId id);
     protected abstract Task<TEntity> GetEntityAsync(TId id);
-    
+
+    // ✅ This works - instance method data source
     [Test]
-    [MethodDataSource<EntityTestBase<TEntity, TId>>(nameof(GetTestIds))]
+    [InstanceMethodDataSource(nameof(GetTestIds))]
     public async Task Entity_ShouldBeRetrievable(TId id)
     {
         var entity = CreateEntity(id);
         await SaveEntityAsync(entity);
-        
+
         var retrieved = await GetEntityAsync(id);
         await Assert.That(retrieved.Id).IsEqualTo(id);
     }
-    
-    public static IEnumerable<TId> GetTestIds()
+
+    // Instance method (not static)
+    public IEnumerable<TId> GetTestIds()
     {
-        // Override in derived classes
-        yield break;
+        return GetTestIdsCore();
     }
+
+    protected abstract IEnumerable<TId> GetTestIdsCore();
 }
 
 public class UserEntityTests : EntityTestBase<User, Guid>
 {
-    protected override User CreateEntity(Guid id) => 
+    protected override User CreateEntity(Guid id) =>
         new User { Id = id, Name = "Test User" };
-        
+
     protected override Task<User> GetEntityAsync(Guid id) =>
         UserRepository.GetByIdAsync(id);
-        
-    public new static IEnumerable<Guid> GetTestIds()
+
+    protected override IEnumerable<Guid> GetTestIdsCore()
     {
         yield return Guid.NewGuid();
         yield return Guid.NewGuid();
     }
+}
+```
+
+#### Workaround 2: Create Concrete Base Classes
+
+For a limited set of types, create non-generic derived classes:
+
+```csharp
+// Base generic class (no data source attributes using generics)
+public abstract class EntityTestBase<TEntity, TId>
+    where TEntity : IEntity<TId>
+    where TId : IEquatable<TId>
+{
+    protected abstract TEntity CreateEntity(TId id);
+    protected abstract Task<TEntity> GetEntityAsync(TId id);
+
+    protected async Task Entity_ShouldBeRetrievable(TId id)
+    {
+        var entity = CreateEntity(id);
+        await SaveEntityAsync(entity);
+
+        var retrieved = await GetEntityAsync(id);
+        await Assert.That(retrieved.Id).IsEqualTo(id);
+    }
+}
+
+// Concrete base class for Guid-based entities
+public abstract class GuidEntityTestBase<TEntity> : EntityTestBase<TEntity, Guid>
+    where TEntity : IEntity<Guid>
+{
+    [Test]
+    [MethodDataSource<GuidEntityTestBase<TEntity>>(nameof(GetTestIds))]
+    public async Task TestEntity(Guid id)
+    {
+        await Entity_ShouldBeRetrievable(id);
+    }
+
+    public static IEnumerable<Guid> GetTestIds()
+    {
+        yield return Guid.NewGuid();
+        yield return Guid.NewGuid();
+    }
+}
+
+// Your test class
+public class UserEntityTests : GuidEntityTestBase<User>
+{
+    protected override User CreateEntity(Guid id) =>
+        new User { Id = id, Name = "Test User" };
+
+    protected override Task<User> GetEntityAsync(Guid id) =>
+        UserRepository.GetByIdAsync(id);
 }
 ```
 
