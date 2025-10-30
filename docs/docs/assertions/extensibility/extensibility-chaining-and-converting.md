@@ -69,6 +69,12 @@ public class IsProblemDetailsAssertion : Assertion<ProblemDetails>
 
 The `.Map<TTo>(...)` method handles the type conversion. If the conversion fails, throw an exception which will be captured and reported as an assertion failure.
 
+**Note:** The `Map` method supports both synchronous and asynchronous transformations:
+- **Synchronous**: `context.Map<TTo>(value => transformedValue)`
+- **Asynchronous**: `context.Map<TTo>(async value => await transformedValueAsync)`
+
+In both cases, the Task is automatically unwrapped, allowing you to chain assertions directly on the result type.
+
 ### 2. Create the Extension Method
 
 Create an extension method on `IAssertionSource<TFrom>` that returns your assertion class:
