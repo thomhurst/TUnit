@@ -51,4 +51,15 @@ public class TestRegisteredContext
     {
         TestContext.Parallelism.SetLimiter(parallelLimit);
     }
+
+    /// <summary>
+    /// Marks the test as skipped with the specified reason.
+    /// This can only be called during the test registration phase.
+    /// </summary>
+    /// <param name="reason">The reason why the test is being skipped</param>
+    public void SetSkipped(string reason)
+    {
+        TestContext.SkipReason = reason;
+        TestContext.Metadata.TestDetails.ClassInstance = SkippedTestInstance.Instance;
+    }
 }
