@@ -62,16 +62,10 @@ public partial class TestContext
         set => ReportResult = value;
     }
 
-    void ITestExecution.OverrideResult(string reason) => OverrideResult(reason);
     void ITestExecution.OverrideResult(TestState state, string reason) => OverrideResult(state, reason);
     void ITestExecution.AddLinkedCancellationToken(CancellationToken cancellationToken) => AddLinkedCancellationToken(cancellationToken);
 
     // Internal implementation methods
-    internal void OverrideResult(string reason)
-    {
-        OverrideResult(TestState.Passed, reason);
-    }
-
     internal void OverrideResult(TestState state, string reason)
     {
         // Validation: Reason must not be empty
@@ -100,6 +94,17 @@ public partial class TestContext
         // Preserve the original exception if one exists
         var originalException = Result?.Exception;
 
+        // When overriding to Failed without an original exception, create a synthetic one
+        Exception? exceptionForResult;
+        if (state == TestState.Failed)
+        {
+            exceptionForResult = originalException ?? new InvalidOperationException($"Test overridden to failed: {reason}");
+        }
+        else
+        {
+            exceptionForResult = null;
+        }
+
         Result = new TestResult
         {
             State = state,
@@ -109,7 +114,7 @@ public partial class TestContext
             Start = TestStart ?? DateTimeOffset.UtcNow,
             End = DateTimeOffset.UtcNow,
             Duration = DateTimeOffset.UtcNow - (TestStart ?? DateTimeOffset.UtcNow),
-            Exception = state == TestState.Failed ? originalException : null,
+            Exception = exceptionForResult,
             ComputerName = Environment.MachineName,
             TestContext = this
         };

@@ -48,36 +48,6 @@ public interface ITestExecution
     Func<TestContext, Exception, int, Task<bool>>? RetryFunc { get; }
 
     /// <summary>
-    /// Overrides the test result with a passed state and custom reason.
-    /// Useful for marking tests as passed under special conditions.
-    /// </summary>
-    /// <param name="reason">The reason for overriding the result (cannot be empty)</param>
-    /// <exception cref="ArgumentException">Thrown when reason is empty or whitespace</exception>
-    /// <exception cref="InvalidOperationException">Thrown when result has already been overridden</exception>
-    /// <remarks>
-    /// This method can only be called once per test. Subsequent calls will throw an exception.
-    /// The original exception (if any) is preserved in <see cref="TestResult.OriginalException"/>.
-    /// Best practice: Call this from <see cref="ITestEndEventReceiver.OnTestEnd"/> or After(Test) hooks.
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// public class RetryOnInfrastructureErrorAttribute : Attribute, ITestEndEventReceiver
-    /// {
-    ///     public ValueTask OnTestEnd(TestContext context)
-    ///     {
-    ///         if (context.Result?.Exception is HttpRequestException)
-    ///         {
-    ///             context.Execution.OverrideResult("Infrastructure error - not a test failure");
-    ///         }
-    ///         return default;
-    ///     }
-    ///     public int Order => 0;
-    /// }
-    /// </code>
-    /// </example>
-    void OverrideResult(string reason);
-
-    /// <summary>
     /// Overrides the test result with a specific state and custom reason.
     /// </summary>
     /// <param name="state">The desired test state (Passed, Failed, Skipped, Timeout, or Cancelled)</param>
@@ -94,6 +64,21 @@ public interface ITestExecution
     /// </remarks>
     /// <example>
     /// <code>
+    /// // Override failed test to passed
+    /// public class RetryOnInfrastructureErrorAttribute : Attribute, ITestEndEventReceiver
+    /// {
+    ///     public ValueTask OnTestEnd(TestContext context)
+    ///     {
+    ///         if (context.Result?.Exception is HttpRequestException)
+    ///         {
+    ///             context.Execution.OverrideResult(TestState.Passed, "Infrastructure error - not a test failure");
+    ///         }
+    ///         return default;
+    ///     }
+    ///     public int Order => 0;
+    /// }
+    ///
+    /// // Override failed test to skipped
     /// public class IgnoreOnWeekendAttribute : Attribute, ITestEndEventReceiver
     /// {
     ///     public ValueTask OnTestEnd(TestContext context)
