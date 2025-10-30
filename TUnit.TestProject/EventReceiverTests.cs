@@ -13,19 +13,19 @@ public class EventReceiverAttribute : Attribute, ITestStartEventReceiver, ITestE
     
     public ValueTask OnTestStart(TestContext context)
     {
-        Events.Add($"TestStart: {context.GetDisplayName()}");
+        Events.Add($"TestStart: {context. Metadata.DisplayName}");
         return default(ValueTask);
     }
     
     public ValueTask OnTestEnd(TestContext context)
     {
-        Events.Add($"TestEnd: {context.GetDisplayName()}");
+        Events.Add($"TestEnd: {context. Metadata.DisplayName}");
         return default(ValueTask);
     }
     
     public ValueTask OnTestSkipped(TestContext context)
     {
-        Events.Add($"TestSkipped: {context.GetDisplayName()}");
+        Events.Add($"TestSkipped: {context. Metadata.DisplayName}");
         return default(ValueTask);
     }
 }
@@ -58,7 +58,7 @@ public class EventReceiverTests
     {
         await Task.Delay(50); // Give time for event to be recorded
         
-        var displayName = context.GetDisplayName();
+        var displayName = context. Metadata.DisplayName;
         
         if (displayName.Contains("Skipped"))
         {

@@ -1220,53 +1220,23 @@ namespace
     public class TestContext : .Context, ., ., ., ., ., ., .
     {
         public TestContext(string testName,  serviceProvider, .ClassHookContext classContext, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
-        public .<.Artifact> Artifacts { get; }
-        public .CancellationToken CancellationToken { get; set; }
         public .ClassHookContext ClassContext { get; }
-        public int CurrentRetryAttempt { get; }
-        public .? CustomHookExecutor { get; set; }
         public . Dependencies { get; }
-        public ? DisplayNameFormatter { get; set; }
-        public .TestContextEvents Events { get; }
         public . Execution { get; }
         public  Id { get; }
-        public .CancellationTokenSource? LinkedCancellationTokens { get; set; }
         public object Lock { get; }
         public . Metadata { get; }
-        public .<string, object?> ObjectBag { get; }
         public . Output { get; }
         public . Parallelism { get; }
-        public string? ParentTestId { get; set; }
-        public .TestPhase Phase { get; set; }
-        public . Relationship { get; set; }
-        public bool ReportResult { get; set; }
-        public .TestResult? Result { get; set; }
-        public <.TestContext, , int, .<bool>>? RetryFunc { get; set; }
         public  Services { get; }
-        public string? SkipReason { get; set; }
         public . StateBag { get; }
-        public .TestDetails TestDetails { get; set; }
-        public ? TestEnd { get; set; }
-        public ? TestStart { get; set; }
-        public .<.Timing> Timings { get; }
         public static . Configuration { get; }
         public new static .TestContext? Current { get; }
         public static string? OutputDirectory { get; }
         public static .<string, .<string>> Parameters { get; }
         public static string WorkingDirectory { get; set; }
-        public void AddLinkedCancellationToken(.CancellationToken cancellationToken) { }
-        public string GetDisplayName() { }
-        public new string GetErrorOutput() { }
-        public string GetOutput() { }
         public T? GetService<T>()
             where T :  class { }
-        public .<.TestContext> GetTests(<.TestContext, bool> predicate) { }
-        public .<.TestContext> GetTests(string testName) { }
-        public .<.TestContext> GetTests(string testName,  classType) { }
-        public void OverrideResult(string reason) { }
-        public void OverrideResult(.TestState state, string reason) { }
-        public void WriteError(string message) { }
-        public void WriteLine(string message) { }
         public static .TestContext? GetById( id) { }
     }
     public class TestContextEvents
@@ -2377,7 +2347,7 @@ namespace .Interfaces
     }
     public interface ITestStateBag
     {
-        .<string, object?> Bag { get; }
+        .<string, object?> Items { get; }
     }
     public interface ITypedTestMetadata
     {

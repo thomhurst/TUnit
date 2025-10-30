@@ -12,7 +12,7 @@ public static class TestDataFormatter
     /// </summary>
     public static string FormatArguments(TestContext context)
     {
-        var arguments = context.TestDetails.TestMethodArguments;
+        var arguments = context.Metadata.TestDetails.TestMethodArguments;
         return FormatArguments(arguments, context.ArgumentDisplayFormatters);
     }
 

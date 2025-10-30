@@ -44,8 +44,8 @@ public abstract class AbstractExecutableTest
 
     public TestResult? Result
     {
-        get => Context.Result;
-        set => Context.Result = value;
+        get => Context.Execution.Result;
+        set => Context.Execution.Result = value;
     }
 
     public DateTimeOffset? StartTime
@@ -61,7 +61,7 @@ public abstract class AbstractExecutableTest
 
     public Task CompletionTask => ExecutionTask ?? Task.CompletedTask;
 
-    public DateTimeOffset? EndTime { get => Context.TestEnd; set => Context.TestEnd = value; }
+    public DateTimeOffset? EndTime { get => Context.Execution.TestEnd; set => Context.Execution.TestEnd = value; }
 
     public TimeSpan? Duration => StartTime.HasValue && EndTime.HasValue
         ? EndTime.Value - StartTime.Value
@@ -70,7 +70,7 @@ public abstract class AbstractExecutableTest
     public void SetResult(TestState state, Exception? exception = null)
     {
         State = state;
-        Context.Result ??= new TestResult
+        Context.Execution.Result ??= new TestResult
         {
             State = state,
             Exception = exception,

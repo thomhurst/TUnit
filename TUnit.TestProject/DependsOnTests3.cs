@@ -15,7 +15,7 @@ public class DependsOnTests3
     {
         await Task.Delay(TimeSpan.FromSeconds(1));
 
-        TestContext.Current!.ObjectBag["Test1"] = "1";
+        TestContext.Current!.StateBag.Items["Test1"] = "1";
 
         _test1End = DateTime.UtcNow;
     }
@@ -25,7 +25,7 @@ public class DependsOnTests3
     {
         await Task.Delay(TimeSpan.FromSeconds(1));
 
-        TestContext.Current!.ObjectBag["Test2"] = "2";
+        TestContext.Current!.StateBag.Items["Test2"] = "2";
 
         _test2End = DateTime.UtcNow;
     }
@@ -39,14 +39,14 @@ public class DependsOnTests3
 
         await Task.Delay(TimeSpan.FromSeconds(1));
 
-        var test1 = TestContext.Current!.GetTests(nameof(Test1));
-        var test2 = TestContext.Current.GetTests(nameof(Test2));
+        var test1 = TestContext.Current!.Dependencies.GetTests(nameof(Test1));
+        var test2 = TestContext.Current.Dependencies.GetTests(nameof(Test2));
 
         await Assert.That(test1).HasCount().EqualTo(1);
         await Assert.That(test2).HasCount().EqualTo(1);
 
-        await Assert.That(test1[0].ObjectBag).ContainsKey("Test1");
-        await Assert.That(test2[0].ObjectBag).ContainsKey("Test2");
+        await Assert.That(test1[0].StateBag.Items).ContainsKey("Test1");
+        await Assert.That(test2[0].StateBag.Items).ContainsKey("Test2");
     }
 
     [After(Class)]

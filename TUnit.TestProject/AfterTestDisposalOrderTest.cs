@@ -37,8 +37,8 @@ public class AfterTestDisposalOrderTest : IAsyncDisposable
         await Assert.That(_testResource).IsEqualTo("TestResource");
 
         // Mark that we successfully accessed resources
-        context.ObjectBag["AfterTestExecuted"] = true;
-        context.ObjectBag["ResourceValue"] = _testResource;
+        context.StateBag.Items["AfterTestExecuted"] = true;
+        context.StateBag.Items["ResourceValue"] = _testResource;
     }
 
     [After(Class)]
@@ -47,9 +47,9 @@ public class AfterTestDisposalOrderTest : IAsyncDisposable
         // Verify that After(Test) hooks were executed
         foreach (var test in context.Tests)
         {
-            await Assert.That(test.ObjectBag.ContainsKey("AfterTestExecuted")).IsTrue().Because("After(Test) hook should have executed");
-            await Assert.That(test.ObjectBag["AfterTestExecuted"]).IsEqualTo(true);
-            await Assert.That(test.ObjectBag["ResourceValue"]).IsEqualTo("TestResource");
+            await Assert.That(test.StateBag.Items.ContainsKey("AfterTestExecuted")).IsTrue().Because("After(Test) hook should have executed");
+            await Assert.That(test.StateBag.Items["AfterTestExecuted"]).IsEqualTo(true);
+            await Assert.That(test.StateBag.Items["ResourceValue"]).IsEqualTo("TestResource");
         }
 
         // By the time After(Class) runs, all test instances should be disposed

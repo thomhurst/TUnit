@@ -12,14 +12,14 @@ public class CustomDisplayNameTests
     [DisplayName("A super important test!")]
     public async Task Test()
     {
-        await Assert.That(TestContext.Current!.GetDisplayName()).IsEqualTo("A super important test!");
+        await Assert.That(TestContext.Current!. Metadata.DisplayName).IsEqualTo("A super important test!");
     }
 
     [Test]
     [DisplayName("Another super important test!")]
     public async Task Test2()
     {
-        await Assert.That(TestContext.Current!.GetDisplayName()).IsEqualTo("Another super important test!");
+        await Assert.That(TestContext.Current!. Metadata.DisplayName).IsEqualTo("Another super important test!");
     }
 
     [Test]
@@ -28,7 +28,7 @@ public class CustomDisplayNameTests
     [DisplayName("Test with: $value1 $value2 $value3!")]
     public async Task Test3(string value1, int value2, bool value3)
     {
-        await Assert.That(TestContext.Current!.GetDisplayName())
+        await Assert.That(TestContext.Current!. Metadata.DisplayName)
             .IsEqualTo("Test with: foo 1 True!")
             .Or
             .IsEqualTo("Test with: bar 2 False!");
@@ -39,7 +39,7 @@ public class CustomDisplayNameTests
     [DisplayName("Test using MethodDataSource")]
     public async Task MethodDataSourceTest(string foo)
     {
-        await Assert.That(TestContext.Current!.GetDisplayName()).IsEqualTo("Test using MethodDataSource");
+        await Assert.That(TestContext.Current!. Metadata.DisplayName).IsEqualTo("Test using MethodDataSource");
     }
 
     [Test]
@@ -49,7 +49,7 @@ public class CustomDisplayNameTests
     [Arguments(300, "Type1")]
     public async Task TestParameterNamePrefixBug(int someValue, string someValueType)
     {
-        var displayName = TestContext.Current!.GetDisplayName();
+        var displayName = TestContext.Current!. Metadata.DisplayName;
         // This should produce:
         // Test this(100, Type1), Test this(200, Type2), Test this(300, Type1)
         // But currently produces:
@@ -66,28 +66,28 @@ public class CustomDisplayNameTests
     [MyGenerator]
     public async Task PasswordTest(string password)
     {
-        await Assert.That(TestContext.Current!.GetDisplayName()).IsEqualTo("PasswordTest(REDACTED)");
+        await Assert.That(TestContext.Current!. Metadata.DisplayName).IsEqualTo("PasswordTest(REDACTED)");
     }
 
     [Test]
     [DisplayName($"My test {SameClassConstant}")]
     public async Task SameClassConstantTest()
     {
-        await Assert.That(TestContext.Current!.GetDisplayName()).IsEqualTo("My test My constant");
+        await Assert.That(TestContext.Current!. Metadata.DisplayName).IsEqualTo("My test My constant");
     }
 
     [Test]
     [DisplayName($"My test {DifferentClassConstants.Constant}")]
     public async Task DifferentClassConstantTest()
     {
-        await Assert.That(TestContext.Current!.GetDisplayName()).IsEqualTo("My test My constant");
+        await Assert.That(TestContext.Current!. Metadata.DisplayName).IsEqualTo("My test My constant");
     }
 
     [Test]
     [DisplayName($"My test {NestedClassConstants.Constant}")]
     public async Task NestedClassConstantTest()
     {
-        await Assert.That(TestContext.Current!.GetDisplayName()).IsEqualTo("My test My constant");
+        await Assert.That(TestContext.Current!. Metadata.DisplayName).IsEqualTo("My test My constant");
     }
 
     public class MyGenerator : DataSourceGeneratorAttribute<string>, ITestDiscoveryEventReceiver
@@ -99,7 +99,7 @@ public class CustomDisplayNameTests
 
         public ValueTask OnTestDiscovered(DiscoveredTestContext context)
         {
-            context.SetDisplayName($"{context.TestDetails.TestName}(REDACTED)");
+            context.SetDisplayName($"{context.TestContext.Metadata.TestDetails.TestName}(REDACTED)");
             return default(ValueTask);
         }
 

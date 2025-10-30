@@ -16,11 +16,11 @@ public class HookExecutorTests
         await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
 
         var test = context.AllTests.FirstOrDefault(x =>
-            x.TestDetails.TestName == nameof(VerifyBeforeTestSessionExecutorExecuted));
+            x.Metadata.TestDetails.TestName == nameof(VerifyBeforeTestSessionExecutorExecuted));
 
         if (test != null)
         {
-            test.ObjectBag["BeforeTestSessionExecutorExecuted"] = true;
+            test.StateBag.Items["BeforeTestSessionExecutorExecuted"] = true;
         }
     }
 
@@ -96,7 +96,7 @@ public class HookExecutorTests
     {
         await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
         await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
-        context.ObjectBag["BeforeTestExecutorExecuted"] = true;
+        context.StateBag.Items["BeforeTestExecutorExecuted"] = true;
     }
 
     [After(Test)]
@@ -115,9 +115,9 @@ public class HookExecutorTests
         await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
         await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
 
-        if (context.TestDetails.TestName == nameof(VerifyStaticTestHooksExecutorExecuted))
+        if (context.Metadata.TestDetails.TestName == nameof(VerifyStaticTestHooksExecutorExecuted))
         {
-            context.ObjectBag["BeforeEveryTestExecutorExecuted"] = true;
+            context.StateBag.Items["BeforeEveryTestExecutorExecuted"] = true;
         }
     }
 
@@ -133,7 +133,7 @@ public class HookExecutorTests
     [Test]
     public async Task VerifyBeforeTestSessionExecutorExecuted()
     {
-        await Assert.That(TestContext.Current?.ObjectBag["BeforeTestSessionExecutorExecuted"]).IsEquatableOrEqualTo(true);
+        await Assert.That(TestContext.Current?.StateBag.Items["BeforeTestSessionExecutorExecuted"]).IsEquatableOrEqualTo(true);
     }
 
     [Test]
@@ -151,12 +151,12 @@ public class HookExecutorTests
     [Test]
     public async Task VerifyBeforeTestExecutorExecuted()
     {
-        await Assert.That(TestContext.Current?.ObjectBag["BeforeTestExecutorExecuted"]).IsEquatableOrEqualTo(true);
+        await Assert.That(TestContext.Current?.StateBag.Items["BeforeTestExecutorExecuted"]).IsEquatableOrEqualTo(true);
     }
 
     [Test]
     public async Task VerifyStaticTestHooksExecutorExecuted()
     {
-        await Assert.That(TestContext.Current?.ObjectBag["BeforeEveryTestExecutorExecuted"]).IsEquatableOrEqualTo(true);
+        await Assert.That(TestContext.Current?.StateBag.Items["BeforeEveryTestExecutorExecuted"]).IsEquatableOrEqualTo(true);
     }
 }

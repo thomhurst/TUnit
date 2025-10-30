@@ -88,8 +88,8 @@ public sealed class VerifySettingsTask
 
         if (testContext != null)
         {
-            testClassName = testContext.TestDetails.ClassType.Name;
-            testName = testContext.TestDetails.TestName;
+            testClassName = testContext.Metadata.TestDetails.ClassType.Name;
+            testName = testContext.Metadata.TestDetails.TestName;
         }
         else
         {

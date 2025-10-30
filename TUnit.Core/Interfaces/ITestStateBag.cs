@@ -14,5 +14,5 @@ public interface ITestStateBag
     /// Use this to share state between hooks, data sources, and test methods within a single test execution.
     /// Thread-safe for concurrent access.
     /// </summary>
-    ConcurrentDictionary<string, object?> Bag { get; }
+    ConcurrentDictionary<string, object?> Items { get; }
 }

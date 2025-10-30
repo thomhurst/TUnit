@@ -23,12 +23,12 @@ public class NotInParallelExecutionTests
                 MaxConcurrentTests = CurrentlyRunning;
             }
         }
-        
+
         // Use TestStart if available, otherwise use DateTime.Now
-        var startTime = TestContext.Current.TestStart?.DateTime ?? DateTime.Now;
-        
+        var startTime = TestContext.Current.Execution.TestStart?.DateTime ?? DateTime.Now;
+
         ExecutionRecords.Add(new TestExecutionRecord(
-            TestContext.Current!.TestDetails.TestName,
+            TestContext.Current!.Metadata.TestDetails.TestName,
             startTime,
             null,
             CurrentlyRunning
@@ -43,14 +43,14 @@ public class NotInParallelExecutionTests
             CurrentlyRunning--;
         }
 
-        var record = ExecutionRecords.FirstOrDefault(r => 
-            r.TestName == TestContext.Current!.TestDetails.TestName && 
+        var record = ExecutionRecords.FirstOrDefault(r =>
+            r.TestName == TestContext.Current!.Metadata.TestDetails.TestName &&
             r.EndTime == null);
-        
+
         if (record != null)
         {
             // Use Result.End if available, otherwise use DateTime.Now
-            record.EndTime = TestContext.Current.Result?.End?.DateTime ?? DateTime.Now;
+            record.EndTime = TestContext.Current.Execution.Result?.End?.DateTime ?? DateTime.Now;
         }
 
         await AssertNoParallelExecution();
@@ -93,7 +93,7 @@ public class NotInParallelExecutionTests
             .Because($"Tests with NotInParallel should not run concurrently. Max concurrent: {MaxConcurrentTests}");
 
         var completedRecords = ExecutionRecords.Where(r => r.EndTime != null).ToList();
-        
+
         foreach (var record in completedRecords)
         {
             var overlappingTests = completedRecords

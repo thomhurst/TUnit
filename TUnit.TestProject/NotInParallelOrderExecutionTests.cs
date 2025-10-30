@@ -16,22 +16,22 @@ public class NotInParallelOrderExecutionTests
     [Before(Test)]
     public void RecordOrderedTestStart()
     {
-        var testName = TestContext.Current!.TestDetails.TestName;
+        var testName = TestContext.Current!.Metadata.TestDetails.TestName;
         var groupKey = GetGroupKey(testName);
-        
+
         var groupLock = GroupLocks.GetOrAdd(groupKey, new object());
         lock (groupLock)
         {
             var current = CurrentlyExecutingPerGroup.AddOrUpdate(groupKey, 1, (_, v) => v + 1);
             MaxConcurrentPerGroup.AddOrUpdate(groupKey, current, (_, v) => Math.Max(v, current));
-            
+
             var orderList = ExecutionOrderByGroup.GetOrAdd(groupKey, new List<string>());
             orderList.Add(testName);
         }
 
         // Use TestStart if available, otherwise use DateTime.Now
-        var startTime = TestContext.Current.TestStart?.DateTime ?? DateTime.Now;
-        
+        var startTime = TestContext.Current.Execution.TestStart?.DateTime ?? DateTime.Now;
+
         OrderedExecutionRecords.Add(new OrderedExecutionRecord(
             testName,
             groupKey,
@@ -43,9 +43,9 @@ public class NotInParallelOrderExecutionTests
     [After(Test)]
     public async Task RecordOrderedTestEnd()
     {
-        var testName = TestContext.Current!.TestDetails.TestName;
+        var testName = TestContext.Current!.Metadata.TestDetails.TestName;
         var groupKey = GetGroupKey(testName);
-        
+
         var groupLock = GroupLocks.GetOrAdd(groupKey, new object());
         lock (groupLock)
         {
@@ -59,7 +59,7 @@ public class NotInParallelOrderExecutionTests
         if (record != null)
         {
             // Use Result.End if available, otherwise use DateTime.Now
-            record.EndTime = TestContext.Current.Result?.End?.DateTime ?? DateTime.Now;
+            record.EndTime = TestContext.Current.Execution.Result?.End?.DateTime ?? DateTime.Now;
         }
 
         await AssertOrderedExecutionWithinGroup(groupKey);

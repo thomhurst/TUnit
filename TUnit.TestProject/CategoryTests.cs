@@ -41,7 +41,7 @@ public class CategoryTests
 
     private static IEnumerable<string> GetDictionary()
     {
-        return TestContext.Current?.TestDetails.Categories ?? [];
+        return TestContext.Current?.Metadata.TestDetails.Categories ?? [];
     }
 
     public class ClassCategoryAttribute() : CategoryAttribute("ClassCategory2");

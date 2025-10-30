@@ -200,7 +200,7 @@ public class AssemblyHookCleanupTests
     public static void VerifyAssemblyHooksExecuted(TestSessionContext context)
     {
         // Only check if we're in the context of these specific tests
-        if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(AssemblyHookCleanupTests)))
+        if (context.AllTests.Any(t => t.Metadata.TestDetails.ClassType == typeof(AssemblyHookCleanupTests)))
         {
             // Hook executed($"[ASSEMBLY] Verification - Assembly hooks executed: {_assemblyHookExecuted}");
             // Hook executed($"[ASSEMBLY] Total hooks recorded: {AssemblyHooks.Count}");

@@ -51,16 +51,16 @@ public class HookExceptionHandlingTests
     [BeforeEvery(Test)]
     public static void BeforeEveryTestWithPotentialFailure(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(HookExceptionHandlingTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(HookExceptionHandlingTests))
         {
-            ExecutionLog.Add($"BeforeEveryTest:{context.TestDetails.TestName}");
-            // Hook executed($"[HOOK-EXCEPTION] BeforeEveryTest for {context.TestDetails.TestName}");
+            ExecutionLog.Add($"BeforeEveryTest:{context.Metadata.TestDetails.TestName}");
+            // Hook executed($"[HOOK-EXCEPTION] BeforeEveryTest for {context.Metadata.TestDetails.TestName}");
             
             // Simulate a hook that fails for a specific test
-            if (context.TestDetails.TestName.Contains("HookFailure"))
+            if (context.Metadata.TestDetails.TestName.Contains("HookFailure"))
             {
-                // Hook executed($"[HOOK-EXCEPTION] BeforeEveryTest throwing exception for {context.TestDetails.TestName}");
-                throw new Exception($"BeforeEveryTest intentionally failed for {context.TestDetails.TestName}");
+                // Hook executed($"[HOOK-EXCEPTION] BeforeEveryTest throwing exception for {context.Metadata.TestDetails.TestName}");
+                throw new Exception($"BeforeEveryTest intentionally failed for {context.Metadata.TestDetails.TestName}");
             }
         }
     }
@@ -68,10 +68,10 @@ public class HookExceptionHandlingTests
     [AfterEvery(Test)]
     public static void AfterEveryTestMustExecute(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(HookExceptionHandlingTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(HookExceptionHandlingTests))
         {
-            ExecutionLog.Add($"AfterEveryTest:{context.TestDetails.TestName}");
-            // Hook executed($"[HOOK-EXCEPTION] AfterEveryTest executed for {context.TestDetails.TestName}");
+            ExecutionLog.Add($"AfterEveryTest:{context.Metadata.TestDetails.TestName}");
+            // Hook executed($"[HOOK-EXCEPTION] AfterEveryTest executed for {context.Metadata.TestDetails.TestName}");
         }
     }
 
@@ -106,7 +106,7 @@ public class HookExceptionHandlingTests
     public static void VerifyHookCleanupOccurred(TestSessionContext context)
     {
         // Only verify if our tests ran
-        if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(HookExceptionHandlingTests)))
+        if (context.AllTests.Any(t => t.Metadata.TestDetails.ClassType == typeof(HookExceptionHandlingTests)))
         {
             // Hook executed("\n[HOOK-EXCEPTION] === VERIFICATION ===");
             // Hook executed($"[HOOK-EXCEPTION] AfterClass executed: {_afterClassExecuted}");
@@ -196,7 +196,7 @@ public class CriticalCounterScenarioTests
     [After(TestSession)]
     public static void VerifyCriticalScenario(TestSessionContext context)
     {
-        if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(CriticalCounterScenarioTests)))
+        if (context.AllTests.Any(t => t.Metadata.TestDetails.ClassType == typeof(CriticalCounterScenarioTests)))
         {
             // Hook executed("\n[CRITICAL] === CRITICAL SCENARIO VERIFICATION ===");
             // Hook executed($"[CRITICAL] BeforeClass count: {_criticalBeforeClassCount}");

@@ -27,11 +27,11 @@ public class TestContextIsolationTests
         context.AddAsyncLocalValues();
 
         // Store mapping for later verification
-        TestIdToTestName[testId] = context.TestDetails.TestName;
+        TestIdToTestName[testId] = context.Metadata.TestDetails.TestName;
 
         // Add to context for verification in test
-        context.ObjectBag["TestLocalId"] = testId;
-        context.ObjectBag["TestStartThread"] = Thread.CurrentThread.ManagedThreadId;
+        context.StateBag.Items["TestLocalId"] = testId;
+        context.StateBag.Items["TestStartThread"] = Thread.CurrentThread.ManagedThreadId;
     }
 
     [Test]
@@ -41,7 +41,7 @@ public class TestContextIsolationTests
         var context = TestContext.Current;
         await Assert.That(context).IsNotNull();
 
-        var testId = context!.ObjectBag["TestLocalId"] as string;
+        var testId = context!.StateBag.Items["TestLocalId"] as string;
         await Assert.That(testId).IsNotNull();
 
         // Simulate some async work
@@ -49,7 +49,7 @@ public class TestContextIsolationTests
 
         // Verify context hasn't changed
         await Assert.That(TestContext.Current).IsSameReferenceAs(context);
-        await Assert.That(TestContext.Current!.ObjectBag["TestLocalId"]).IsEqualTo(testId);
+        await Assert.That(TestContext.Current!.StateBag.Items["TestLocalId"]).IsEqualTo(testId);
 
         // Verify AsyncLocal is preserved
         await Assert.That(TestLocalValue.Value).IsEqualTo(testId);
@@ -71,7 +71,7 @@ public class TestContextIsolationTests
         var context = TestContext.Current;
         await Assert.That(context).IsNotNull();
 
-        var testId = context!.ObjectBag["TestLocalId"] as string;
+        var testId = context!.StateBag.Items["TestLocalId"] as string;
         await Assert.That(testId).IsNotNull();
 
         // Different delay pattern
@@ -79,7 +79,7 @@ public class TestContextIsolationTests
 
         // Verify isolation
         await Assert.That(TestContext.Current).IsSameReferenceAs(context);
-        await Assert.That(TestContext.Current!.ObjectBag["TestLocalId"]).IsEqualTo(testId);
+        await Assert.That(TestContext.Current!.StateBag.Items["TestLocalId"]).IsEqualTo(testId);
         await Assert.That(TestLocalValue.Value).IsEqualTo(testId);
 
         CapturedContexts[testId!] = context;
@@ -95,7 +95,7 @@ public class TestContextIsolationTests
         var context = TestContext.Current;
         await Assert.That(context).IsNotNull();
 
-        var testId = context!.ObjectBag["TestLocalId"] as string;
+        var testId = context!.StateBag.Items["TestLocalId"] as string;
         await Assert.That(testId).IsNotNull();
 
         // Simulate work
@@ -103,7 +103,7 @@ public class TestContextIsolationTests
 
         // Verify context remains the same
         await Assert.That(TestContext.Current).IsSameReferenceAs(context);
-        await Assert.That(TestContext.Current!.ObjectBag["TestLocalId"]).IsEqualTo(testId);
+        await Assert.That(TestContext.Current!.StateBag.Items["TestLocalId"]).IsEqualTo(testId);
         await Assert.That(TestLocalValue.Value).IsEqualTo(testId);
 
         CapturedContexts[testId!] = context;
@@ -150,7 +150,7 @@ public class TestContextNestedAsyncIsolationTests
         var initialContext = TestContext.Current;
         await Assert.That(initialContext).IsNotNull();
 
-        var testName = initialContext!.TestDetails.TestName;
+        var testName = initialContext!.Metadata.TestDetails.TestName;
         ObservedContexts.Add((testName, initialContext, Thread.CurrentThread.ManagedThreadId));
 
         await NestedAsyncMethod1(initialContext);
@@ -166,7 +166,7 @@ public class TestContextNestedAsyncIsolationTests
         var initialContext = TestContext.Current;
         await Assert.That(initialContext).IsNotNull();
 
-        var testName = initialContext!.TestDetails.TestName;
+        var testName = initialContext!.Metadata.TestDetails.TestName;
         ObservedContexts.Add((testName, initialContext, Thread.CurrentThread.ManagedThreadId));
 
         await NestedAsyncMethod2(initialContext);
@@ -224,9 +224,9 @@ public class TestContextRaceConditionTests
         var myContext = TestContext.Current;
         await Assert.That(myContext).IsNotNull();
 
-        var myTestName = myContext!.TestDetails.TestName;
+        var myTestName = myContext!.Metadata.TestDetails.TestName;
         var myTestId = Guid.NewGuid().ToString();
-        myContext.ObjectBag["UniqueTestId"] = myTestId;
+        myContext.StateBag.Items["UniqueTestId"] = myTestId;
 
         Interlocked.Increment(ref ConcurrentTestCount);
 
@@ -244,12 +244,12 @@ public class TestContextRaceConditionTests
                     var currentContext = TestContext.Current;
                     if (currentContext != myContext)
                     {
-                        DetectedContextMismatches.Add($"Context mismatch in {myTestName}: Expected {myTestId}, Current context: {currentContext?.ObjectBag.GetValueOrDefault("UniqueTestId")}");
+                        DetectedContextMismatches.Add($"Context mismatch in {myTestName}: Expected {myTestId}, Current context: {currentContext?.StateBag.Items.GetValueOrDefault("UniqueTestId")}");
                     }
 
-                    if (currentContext?.ObjectBag.GetValueOrDefault("UniqueTestId") as string != myTestId)
+                    if (currentContext?.StateBag.Items.GetValueOrDefault("UniqueTestId") as string != myTestId)
                     {
-                        DetectedContextMismatches.Add($"TestId mismatch in {myTestName}: Expected {myTestId}, Got {currentContext?.ObjectBag.GetValueOrDefault("UniqueTestId")}");
+                        DetectedContextMismatches.Add($"TestId mismatch in {myTestName}: Expected {myTestId}, Got {currentContext?.StateBag.Items.GetValueOrDefault("UniqueTestId")}");
                     }
 
                     await Task.Delay(1);
@@ -261,7 +261,7 @@ public class TestContextRaceConditionTests
 
         // Final verification
         await Assert.That(TestContext.Current).IsSameReferenceAs(myContext);
-        await Assert.That(TestContext.Current!.ObjectBag["UniqueTestId"]).IsEqualTo(myTestId);
+        await Assert.That(TestContext.Current!.StateBag.Items["UniqueTestId"]).IsEqualTo(myTestId);
     }
 
     [Test]

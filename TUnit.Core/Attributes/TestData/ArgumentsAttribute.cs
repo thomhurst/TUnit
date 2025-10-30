@@ -62,7 +62,7 @@ public ValueTask OnTestRegistered(TestRegisteredContext context)
         if (!string.IsNullOrEmpty(Skip))
         {
             context.TestContext.SkipReason = Skip;
-            context.TestContext.TestDetails.ClassInstance = SkippedTestInstance.Instance;
+            context.TestContext.Metadata.TestDetails.ClassInstance = SkippedTestInstance.Instance;
         }
 
         return default;
@@ -90,7 +90,7 @@ public ValueTask OnTestRegistered(TestRegisteredContext context)
         if (!string.IsNullOrEmpty(Skip))
         {
             context.TestContext.SkipReason = Skip;
-            context.TestContext.TestDetails.ClassInstance = SkippedTestInstance.Instance;
+            context.TestContext.Metadata.TestDetails.ClassInstance = SkippedTestInstance.Instance;
         }
 
         return default;

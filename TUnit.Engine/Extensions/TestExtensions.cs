@@ -9,7 +9,7 @@ internal static class TestExtensions
 {
     internal static TestNode ToTestNode(this TestContext testContext)
     {
-        var testDetails = testContext.TestDetails ?? throw new ArgumentNullException(nameof(testContext.TestDetails));
+        var testDetails = testContext.Metadata.TestDetails ?? throw new ArgumentNullException(nameof(testContext.Metadata.TestDetails));
 
         var testNode = new TestNode
         {

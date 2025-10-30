@@ -56,7 +56,7 @@ public class SkipAttribute : Attribute, ITestRegisteredEventReceiver
         {
             // Store skip reason directly on TestContext
             context.TestContext.SkipReason = Reason;
-            context.TestContext.TestDetails.ClassInstance = SkippedTestInstance.Instance;
+            context.TestContext.Metadata.TestDetails.ClassInstance = SkippedTestInstance.Instance;
         }
     }
 

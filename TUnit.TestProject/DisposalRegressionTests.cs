@@ -32,7 +32,7 @@ public class DisposalRegressionTests : IAsyncDisposable
     public static async Task VerifyDisposal(ClassHookContext context)
     {
         // After the test class is done, both the test instance and injected property should be disposed
-        foreach (var testInstance in context.Tests.Select(x => x.TestDetails.ClassInstance).OfType<DisposalRegressionTests>())
+        foreach (var testInstance in context.Tests.Select(x => x.Metadata.TestDetails.ClassInstance).OfType<DisposalRegressionTests>())
         {
             await Assert.That(testInstance.IsDisposed).IsTrue();
             await Assert.That(testInstance.InjectedData.IsDisposed).IsTrue();

@@ -12,7 +12,7 @@ public class ClassDisplayNameAttributeTests
     public async Task Test()
     {
         // This test should inherit the class display name as a prefix or part of the test name
-        await Assert.That(TestContext.Current!.GetDisplayName())
+        await Assert.That(TestContext.Current!. Metadata.DisplayName)
             .DoesNotContain("ClassDisplayNameAttributeTests");
     }
 }
@@ -26,7 +26,7 @@ public class ClassDisplayNameWithParametersTests(string value)
     public async Task Test()
     {
         // This test should show the class display name with parameter substitution
-        var displayName = TestContext.Current!.GetDisplayName();
+        var displayName = TestContext.Current!. Metadata.DisplayName;
         await Assert.That(displayName)
             .Contains("TestValue");
     }

@@ -186,14 +186,14 @@ public class Tests
     [Category("Pass")]
     public async Task TestContext1()
     {
-        await Assert.That(TestContext.Current?.TestDetails.TestName).IsEqualTo(nameof(TestContext1));
+        await Assert.That(TestContext.Current?.Metadata.TestDetails.TestName).IsEqualTo(nameof(TestContext1));
     }
 
     [Test]
     [Category("Fail")]
     public async Task TestContext2()
     {
-        await Assert.That(TestContext.Current?.TestDetails.TestName).IsEqualTo(nameof(TestContext1));
+        await Assert.That(TestContext.Current?.Metadata.TestDetails.TestName).IsEqualTo(nameof(TestContext1));
     }
 
     [Test]

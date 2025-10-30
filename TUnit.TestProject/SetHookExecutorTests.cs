@@ -85,12 +85,12 @@ public class SetHookExecutorWithStaticHooksTests
     {
         // This static hook is GLOBAL and runs for ALL tests in the assembly
         // Only run assertions for tests in SetHookExecutorWithStaticHooksTests class
-        if (context.TestDetails.ClassType == typeof(SetHookExecutorWithStaticHooksTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(SetHookExecutorWithStaticHooksTests))
         {
             // This static hook should execute with the custom executor when CustomHookExecutor is set
             await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
             await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
-            context.ObjectBag["BeforeEveryExecuted"] = true;
+            context.StateBag.Items["BeforeEveryExecuted"] = true;
         }
     }
 
@@ -99,7 +99,7 @@ public class SetHookExecutorWithStaticHooksTests
     {
         // This static hook is GLOBAL and runs for ALL tests in the assembly
         // Only run assertions for tests in SetHookExecutorWithStaticHooksTests class
-        if (context.TestDetails.ClassType == typeof(SetHookExecutorWithStaticHooksTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(SetHookExecutorWithStaticHooksTests))
         {
             // This static hook should execute with the custom executor when CustomHookExecutor is set
             await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
@@ -111,7 +111,7 @@ public class SetHookExecutorWithStaticHooksTests
     public async Task Test_StaticHooksExecuteInCustomExecutor()
     {
         // Verify the BeforeEvery hook ran
-        await Assert.That(TestContext.Current?.ObjectBag["BeforeEveryExecuted"]).IsEquatableOrEqualTo(true);
+        await Assert.That(TestContext.Current?.StateBag.Items["BeforeEveryExecuted"]).IsEquatableOrEqualTo(true);
 
         // Test itself runs in custom executor
         await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");

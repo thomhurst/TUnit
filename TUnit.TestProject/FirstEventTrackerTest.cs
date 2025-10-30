@@ -13,8 +13,8 @@ public class FirstEventTracker : IFirstTestInAssemblyEventReceiver, IFirstTestIn
     public ValueTask OnFirstTestInAssembly(AssemblyHookContext context, TestContext testContext)
     {
         var assembly = context.Assembly.GetName().FullName ?? "Unknown";
-        var className = testContext.TestDetails.ClassType.FullName ?? "Unknown";
-        var testName = testContext.TestDetails.TestName;
+        var className = testContext.Metadata.TestDetails.ClassType.FullName ?? "Unknown";
+        var testName = testContext.Metadata.TestDetails.TestName;
         
         Events.Add(("FirstAssembly", assembly, className, testName, DateTime.UtcNow));
         Console.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] FirstTestInAssembly: {assembly} - {className}.{testName}");
@@ -25,7 +25,7 @@ public class FirstEventTracker : IFirstTestInAssemblyEventReceiver, IFirstTestIn
     {
         var assembly = context.AssemblyContext.Assembly.GetName().FullName ?? "Unknown";
         var className = context.ClassType.FullName ?? "Unknown";
-        var testName = testContext.TestDetails.TestName;
+        var testName = testContext.Metadata.TestDetails.TestName;
         
         Events.Add(("FirstClass", assembly, className, testName, DateTime.UtcNow));
         Console.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] FirstTestInClass: {className} - {testName}");

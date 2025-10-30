@@ -139,7 +139,7 @@ internal static class PropertyDataResolver
                 context.MethodMetadata,
                 dataSource,
                 context.TestContext,
-                context.TestContext?.TestDetails.ClassInstance,
+                context.TestContext?.Metadata.TestDetails.ClassInstance,
                 context.Events,
                 context.ObjectBag);
         }

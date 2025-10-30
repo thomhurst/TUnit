@@ -2002,7 +2002,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // Add CancellationToken if present
                 if (hasCancellationToken)
                 {
-                    argsToPass.Add("context?.CancellationToken ?? System.Threading.CancellationToken.None");
+                    argsToPass.Add("context?.Execution.CancellationToken ?? System.Threading.CancellationToken.None");
                 }
 
                 var typedMethodCall = $"instance.{methodName}({string.Join(", ", argsToPass)})";

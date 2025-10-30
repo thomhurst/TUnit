@@ -134,7 +134,7 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
         var metadata = test.Metadata;
 
-        var classMetadata = test.Context.TestDetails.MethodMetadata.Class;
+        var classMetadata = test.Context.Metadata.TestDetails.MethodMetadata.Class;
         var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
         var namespaceName = classMetadata.Namespace ?? "*";
         var classTypeName = classMetadata.Name;
@@ -182,18 +182,18 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         }
 
         // Pre-calculate capacity: 2 properties per category + custom properties
-        var categoryCount = test.Context.TestDetails.Categories.Count;
-        var customPropCount = test.Context.TestDetails.CustomProperties.Sum(p => p.Value.Count);
+        var categoryCount = test.Context.Metadata.TestDetails.Categories.Count;
+        var customPropCount = test.Context.Metadata.TestDetails.CustomProperties.Sum(p => p.Value.Count);
         var properties = new List<IProperty>(categoryCount * 2 + customPropCount);
 
-        foreach (var category in test.Context.TestDetails.Categories)
+        foreach (var category in test.Context.Metadata.TestDetails.Categories)
         {
             properties.Add(new TestMetadataProperty(category));
             properties.Add(new TestMetadataProperty("Category", category));
         }
 
         // Replace LINQ with manual loop for better performance in hot path
-        foreach (var propertyEntry in test.Context.TestDetails.CustomProperties)
+        foreach (var propertyEntry in test.Context.Metadata.TestDetails.CustomProperties)
         {
             foreach (var value in propertyEntry.Value)
             {
@@ -211,12 +211,12 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
 
     private bool IsExplicitTest(AbstractExecutableTest test)
     {
-        if (test.Context.TestDetails.HasAttribute<ExplicitAttribute>())
+        if (test.Context.Metadata.TestDetails.HasAttribute<ExplicitAttribute>())
         {
             return true;
         }
 
-        var testClassType = test.Context.TestDetails.ClassType;
+        var testClassType = test.Context.Metadata.TestDetails.ClassType;
         return testClassType.GetCustomAttributes(typeof(ExplicitAttribute), true).Length > 0;
     }
 

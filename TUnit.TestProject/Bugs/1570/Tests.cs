@@ -13,7 +13,7 @@ public class Tests(int number)
     {
         await Task.Delay(TimeSpan.FromSeconds(number));
 
-        TestContext.Current!.ObjectBag["number"] = number;
+        TestContext.Current!.StateBag.Items["number"] = number;
     }
 
     [Test]
@@ -27,6 +27,6 @@ public class Tests(int number)
         //     .GetTests(nameof(Dependency))
         //     .First();
         //
-        // await Assert.That(dependencyContext.ObjectBag["number"]).IsEqualTo(number);
+        // await Assert.That(dependencyContext.StateBag.Items["number"]).IsEqualTo(number);
     }
 }

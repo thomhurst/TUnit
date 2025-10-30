@@ -6,6 +6,6 @@ public class SimplePropertyFilterTest
     [Test]
     public void TestWithPropertyAttribute()
     {
-        Console.WriteLine($"Test executed! Properties: {string.Join(", ", TestContext.Current?.TestDetails.CustomProperties.Select(kvp => $"{kvp.Key}={string.Join(",", kvp.Value)}") ?? [])}");
+        Console.WriteLine($"Test executed! Properties: {string.Join(", ", TestContext.Current?.Metadata.TestDetails.CustomProperties.Select(kvp => $"{kvp.Key}={string.Join(",", kvp.Value)}") ?? [])}");
     }
 }

@@ -38,21 +38,21 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
     public async ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         var testContext = context.TestContext;
-        var classArguments = testContext.TestDetails.TestClassArguments;
-        var methodArguments = testContext.TestDetails.TestMethodArguments;
+        var classArguments = testContext.Metadata.TestDetails.TestClassArguments;
+        var methodArguments = testContext.Metadata.TestDetails.TestMethodArguments;
 
         // Register class arguments (registration phase - property injection + tracking, NO IAsyncInitializer)
         await _objectRegistrationService.RegisterArgumentsAsync(
             classArguments,
-            testContext.ObjectBag,
-            testContext.TestDetails.MethodMetadata,
+            testContext.StateBag.Items,
+            testContext.Metadata.TestDetails.MethodMetadata,
             testContext.Events);
 
         // Register method arguments (registration phase)
         await _objectRegistrationService.RegisterArgumentsAsync(
             methodArguments,
-            testContext.ObjectBag,
-            testContext.TestDetails.MethodMetadata,
+            testContext.StateBag.Items,
+            testContext.Metadata.TestDetails.MethodMetadata,
             testContext.Events);
 
         // Register properties that will be injected into the test class
@@ -70,7 +70,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
     {
         try
         {
-            var classType = testContext.TestDetails.ClassType;
+            var classType = testContext.Metadata.TestDetails.ClassType;
 
             // Get the property source for the class
             var propertySource = PropertySourceRegistry.GetSource(classType);
@@ -93,21 +93,21 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
                     // Create minimal DataGeneratorMetadata for property resolution during registration
                     var testBuilderContext = new TestBuilderContext
                     {
-                        TestMetadata = testContext.TestDetails.MethodMetadata,
+                        TestMetadata = testContext.Metadata.TestDetails.MethodMetadata,
                         DataSourceAttribute = dataSource,
                         Events = testContext.Events,
-                        ObjectBag = testContext.ObjectBag
+                        ObjectBag = testContext.StateBag.Items
                     };
 
                     var dataGenMetadata = new DataGeneratorMetadata
                     {
                         TestBuilderContext = new TestBuilderContextAccessor(testBuilderContext),
                         MembersToGenerate = [], // Properties don't use member generation
-                        TestInformation = testContext.TestDetails.MethodMetadata,
+                        TestInformation = testContext.Metadata.TestDetails.MethodMetadata,
                         Type = DataGeneratorType.Property,
                         TestSessionId = TestSessionContext.Current?.Id ?? "registration",
                         TestClassInstance = null, // Not available during registration
-                        ClassInstanceArguments = testContext.TestDetails.TestClassArguments
+                        ClassInstanceArguments = testContext.Metadata.TestDetails.TestClassArguments
                     };
 
                     // Get the data rows from the data source
@@ -124,14 +124,14 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
                             if (data != null)
                             {
                                 // Store for later injection
-                                testContext.TestDetails.TestClassInjectedPropertyArguments[metadata.PropertyName] = data;
+                                testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments[metadata.PropertyName] = data;
 
                                 // Register the ClassDataSource instance during registration phase
                                 // This does: property injection + tracking (NO IAsyncInitializer - deferred to execution)
                                 await _objectRegistrationService.RegisterObjectAsync(
                                     data,
-                                    testContext.ObjectBag,
-                                    testContext.TestDetails.MethodMetadata,
+                                    testContext.StateBag.Items,
+                                    testContext.Metadata.TestDetails.MethodMetadata,
                                     testContext.Events);
                             }
                         }
@@ -152,7 +152,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
         {
             // Capture any top-level exceptions (e.g., getting property source) and re-throw
             // The test building process will handle marking it as failed
-            var exceptionMessage = $"Failed to register properties for test '{testContext.TestDetails.TestName}': {ex.Message}";
+            var exceptionMessage = $"Failed to register properties for test '{testContext.Metadata.TestDetails.TestName}': {ex.Message}";
             var registrationException = new InvalidOperationException(exceptionMessage, ex);
             throw registrationException;
         }

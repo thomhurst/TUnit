@@ -24,19 +24,19 @@ public record InstanceHookMethod : HookMethod, IExecutableHook<TestContext>
     public ValueTask ExecuteAsync(TestContext context, CancellationToken cancellationToken)
     {
         // Skip instance hooks if this is a pre-skipped test
-        if (context.TestDetails.ClassInstance is SkippedTestInstance)
+        if (context.Metadata.TestDetails.ClassInstance is SkippedTestInstance)
         {
             return new ValueTask();
         }
 
         // If the instance is still a placeholder, we can't execute instance hooks
-        if (context.TestDetails.ClassInstance is PlaceholderInstance)
+        if (context.Metadata.TestDetails.ClassInstance is PlaceholderInstance)
         {
             throw new InvalidOperationException($"Cannot execute instance hook {Name} because the test instance has not been created yet. This is likely a framework bug.");
         }
 
         return HookExecutor.ExecuteBeforeTestHook(MethodInfo, context,
-            () => Body!.Invoke(context.TestDetails.ClassInstance, context, cancellationToken)
+            () => Body!.Invoke(context.Metadata.TestDetails.ClassInstance, context, cancellationToken)
         );
     }
 }

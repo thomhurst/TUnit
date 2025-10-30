@@ -23,12 +23,12 @@ internal class TestInitializer
 
     public async Task InitializeTest(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        var testClassInstance = test.Context.TestDetails.ClassInstance;
+        var testClassInstance = test.Context.Metadata.TestDetails.ClassInstance;
 
         await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
             testClassInstance,
-            test.Context.ObjectBag,
-            test.Context.TestDetails.MethodMetadata,
+            test.Context.StateBag.Items,
+            test.Context.Metadata.TestDetails.MethodMetadata,
             test.Context.Events);
 
         _eventReceiverOrchestrator.RegisterReceivers(test.Context, cancellationToken);
@@ -51,6 +51,6 @@ internal class TestInitializer
         }
 
         // Finally, ensure the test class itself is initialized
-        await ObjectInitializer.InitializeAsync(testContext.TestDetails.ClassInstance);
+        await ObjectInitializer.InitializeAsync(testContext.Metadata.TestDetails.ClassInstance);
     }
 }

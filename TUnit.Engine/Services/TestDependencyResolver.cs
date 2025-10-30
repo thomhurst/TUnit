@@ -59,7 +59,7 @@ internal sealed class TestDependencyResolver
             {
                 return true;
             }
-            
+
             return ResolveDependenciesForTest(test);
         }
     }
@@ -75,7 +75,7 @@ internal sealed class TestDependencyResolver
         {
             var resolvedDependencies = new List<ResolvedDependency>();
             var allResolved = true;
-            
+
             foreach (var dependencyMetadata in test.Metadata.Dependencies)
             {
                 var matchingTests = FindMatchingTests(dependencyMetadata, test);
@@ -97,7 +97,7 @@ internal sealed class TestDependencyResolver
                     }
                 }
             }
-            
+
             if (allResolved)
             {
                 var uniqueDependencies = new Dictionary<AbstractExecutableTest, ResolvedDependency>(capacity: 8);
@@ -107,20 +107,20 @@ internal sealed class TestDependencyResolver
                     {
                         continue;
                     }
-                    
+
                     if (!uniqueDependencies.ContainsKey(dep.Test))
                     {
                         uniqueDependencies[dep.Test] = dep;
                     }
                 }
-                
+
                 test.Dependencies = uniqueDependencies.Values.ToArray();
-                
+
                 _testsWithPendingDependencies.Remove(test);
-                
+
                 return true;
             }
-            
+
             return false;
         }
         finally
@@ -128,13 +128,13 @@ internal sealed class TestDependencyResolver
             _testsBeingResolved.Remove(test);
         }
     }
-    
+
     private List<AbstractExecutableTest> FindMatchingTests(TestDependency dependency, AbstractExecutableTest dependentTest)
     {
         var matches = new List<AbstractExecutableTest>();
-        
+
         IEnumerable<AbstractExecutableTest> searchScope;
-        
+
         if (dependency.ClassType != null && string.IsNullOrEmpty(dependency.MethodName))
         {
             if (_testsByType.TryGetValue(dependency.ClassType, out var testsInType))
@@ -161,7 +161,7 @@ internal sealed class TestDependencyResolver
         {
             searchScope = _allTests;
         }
-        
+
         foreach (var test in searchScope)
         {
             if (dependency.Matches(test.Metadata, dependentTest.Metadata))
@@ -169,14 +169,14 @@ internal sealed class TestDependencyResolver
                 matches.Add(test);
             }
         }
-        
+
         return matches;
     }
-    
+
     private void ResolvePendingDependencies()
     {
         var pendingTests = _testsWithPendingDependencies.ToList();
-        
+
         foreach (var test in pendingTests)
         {
             if (test.Dependencies.Length > 0)
@@ -184,11 +184,11 @@ internal sealed class TestDependencyResolver
                 _testsWithPendingDependencies.Remove(test);
                 continue;
             }
-            
+
             ResolveDependenciesForTest(test);
         }
     }
-    
+
     public void ResolveAllDependencies()
     {
         lock (_resolutionLock)
@@ -200,13 +200,13 @@ internal sealed class TestDependencyResolver
                     ResolveDependenciesForTest(test);
                 }
             }
-            
+
             var maxRetries = 3;
             for (var retry = 0; retry < maxRetries && _testsWithPendingDependencies.Count > 0; retry++)
             {
                 ResolvePendingDependencies();
             }
-            
+
             if (_testsWithPendingDependencies.Count > 0)
             {
                 foreach (var test in _testsWithPendingDependencies)
@@ -216,13 +216,13 @@ internal sealed class TestDependencyResolver
             }
         }
     }
-    
-    
+
+
     public IReadOnlyList<TestDetails> GetTransitiveDependencies(TestDetails testDetails)
     {
         var visited = new HashSet<TestDetails>();
         var result = new List<TestDetails>();
-        
+
         void CollectDependencies(TestDetails current)
         {
             if (!visited.Add(current))
@@ -240,13 +240,13 @@ internal sealed class TestDependencyResolver
             {
                 foreach (var dep in test.Dependencies)
                 {
-                    var depDetails = dep.Test.Context.TestDetails;
+                    var depDetails = dep.Test.Context.Metadata.TestDetails;
                     result.Add(depDetails);
                     CollectDependencies(depDetails);
                 }
             }
         }
-        
+
         CollectDependencies(testDetails);
         return result;
     }

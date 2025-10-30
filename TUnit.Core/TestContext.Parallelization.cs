@@ -3,13 +3,11 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
 
-/// <summary>
-/// Test parallelization control and configuration
-/// Implements <see cref="ITestParallelization"/> interface
-/// </summary>
 public partial class TestContext
 {
-    // Explicit interface implementations for ITestParallelization
+    internal IReadOnlyList<IParallelConstraint> ParallelConstraints => _parallelConstraints;
+    internal Priority ExecutionPriority { get; set; } = Priority.Normal;
+
     IReadOnlyList<IParallelConstraint> ITestParallelization.Constraints => ParallelConstraints;
     Priority ITestParallelization.ExecutionPriority
     {

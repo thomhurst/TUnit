@@ -65,9 +65,9 @@ internal sealed class TestCoordinator : ITestCoordinator
             _contextRestorer.RestoreContext(test);
 
             // Clear Result and timing from any previous execution (important for repeated tests)
-            test.Context.Result = null;
+            test.Context.Execution.Result = null;
             test.Context.TestStart = null;
-            test.Context.TestEnd = null;
+            test.Context.Execution.TestEnd = null;
 
             TestContext.Current = test.Context;
 
@@ -94,13 +94,13 @@ internal sealed class TestCoordinator : ITestCoordinator
             // Execute test with retry logic - each retry gets a fresh instance
             await RetryHelper.ExecuteWithRetry(test.Context, async () =>
             {
-                test.Context.TestDetails.ClassInstance = await test.CreateInstanceAsync();
+                test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync();
 
                 // Invalidate cached eligible event objects since ClassInstance changed
                 test.Context.CachedEligibleEventObjects = null;
 
                 // Check if this test should be skipped (after creating instance)
-                if (test.Context.TestDetails.ClassInstance is SkippedTestInstance ||
+                if (test.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
                     !string.IsNullOrEmpty(test.Context.SkipReason))
                 {
                     await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped");
@@ -245,7 +245,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                     break;
                 case TestState.Timeout:
                 case TestState.Failed:
-                    await _messageBus.Failed(test.Context, test.Context.Result?.Exception!, test.StartTime.GetValueOrDefault());
+                    await _messageBus.Failed(test.Context, test.Context.Execution.Result?.Exception!, test.StartTime.GetValueOrDefault());
                     break;
                 case TestState.Skipped:
                     await _messageBus.Skipped(test.Context, test.Context.SkipReason ?? "Skipped");
@@ -269,7 +269,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 
         foreach (var dependency in test.Dependencies)
         {
-            if (collected.Add(dependency.Test.Context.TestDetails))
+            if (collected.Add(dependency.Test.Context.Metadata.TestDetails))
             {
                 CollectAllDependencies(dependency.Test, collected, visited);
             }

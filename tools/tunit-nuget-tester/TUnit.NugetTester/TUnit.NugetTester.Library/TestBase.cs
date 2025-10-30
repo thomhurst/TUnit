@@ -7,12 +7,12 @@ public class TestBase
     [Before(Test)]
     public void Setup(TestContext testContext)
     {
-        Console.WriteLine($"Starting test: {testContext.GetDisplayName()}");
+        Console.WriteLine($"Starting test: {testContext.Metadata.DisplayName}");
     }
 
     [After(Test)]
     public void Teardown(TestContext testContext)
     {
-        Console.WriteLine($"Finishing test: {testContext.GetDisplayName()}");
+        Console.WriteLine($"Finishing test: {testContext.Metadata.DisplayName}");
     }
 }

@@ -15,7 +15,7 @@ public class CustomClassDisplayNameTests(Base1 base1)
     [Test]
     public async Task Test()
     {
-        await Assert.That(TestContext.Current!.GetDisplayName())
+        await Assert.That(TestContext.Current!. Metadata.DisplayName)
             .IsEqualTo("Test");
     }
 }

@@ -751,9 +751,9 @@ internal sealed class TestBuilder : ITestBuilder
         // This includes property injection and IAsyncInitializer.InitializeAsync
         var initializedDataSource = await _dataSourceInitializer.EnsureInitializedAsync(
             dataSource,
-            dataGeneratorMetadata.TestBuilderContext?.Current.ObjectBag,
+            dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
             dataGeneratorMetadata.TestInformation,
-            dataGeneratorMetadata.TestBuilderContext?.Current.Events);
+            dataGeneratorMetadata.TestBuilderContext.Current.Events);
 
         // Now get data rows from the initialized data source
         await foreach (var dataRow in initializedDataSource.GetDataRowsAsync(dataGeneratorMetadata))
@@ -776,7 +776,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         var context = await CreateTestContextAsync(testId, metadata, testData, testBuilderContext);
 
-        context.TestDetails.ClassInstance = PlaceholderInstance.Instance;
+        context.Metadata.TestDetails.ClassInstance = PlaceholderInstance.Instance;
 
         // Arguments will be tracked by TestArgumentTrackingService during TestRegistered event
         // This ensures proper reference counting for shared instances
@@ -890,7 +890,7 @@ internal sealed class TestBuilder : ITestBuilder
             testBuilderContext,
             CancellationToken.None);
 
-        context.TestDetails = testDetails;
+        context.Metadata.TestDetails = testDetails;
 
         return context;
     }
@@ -929,7 +929,7 @@ internal sealed class TestBuilder : ITestBuilder
     private async Task InvokeDiscoveryEventReceiversAsync(TestContext context)
     {
         var discoveredContext = new DiscoveredTestContext(
-            context.TestDetails.TestName,
+            context.Metadata.TestDetails.TestName,
             context);
 
         {
@@ -1006,7 +1006,7 @@ internal sealed class TestBuilder : ITestBuilder
             },
             CancellationToken.None);
 
-        context.TestDetails = testDetails;
+        context.Metadata.TestDetails = testDetails;
 
         return context;
     }

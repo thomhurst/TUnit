@@ -16,19 +16,19 @@ public class TestRegisteredContext
     public TestRegisteredContext(TestContext testContext)
     {
         TestContext = testContext;
-        TestName = testContext.TestDetails.TestName;
+        TestName = testContext.Metadata.TestDetails.TestName;
         CustomDisplayName = testContext.CustomDisplayName;
     }
 
     /// <summary>
     /// Gets the object bag from the underlying TestContext
     /// </summary>
-    public ConcurrentDictionary<string, object?> ObjectBag => TestContext.ObjectBag;
+    public ConcurrentDictionary<string, object?> ObjectBag => TestContext.StateBag.Items;
 
     /// <summary>
     /// Gets the test details from the underlying TestContext
     /// </summary>
-    public TestDetails TestDetails => TestContext.TestDetails;
+    public TestDetails TestDetails => TestContext.Metadata.TestDetails;
 
     public void SetTestExecutor(ITestExecutor executor)
     {

@@ -47,14 +47,15 @@ public class MEDITest(MEDIClass mediClass)
             ?.Tests
             .FirstOrDefault();
 
-        if (test?.Result == null)
+        if (test?.Execution.Result == null)
         {
             // If the test did not run, we cannot check if the class was disposed.
             return;
         }
 
         var mediClass = test
-            ?.TestDetails
+            .Metadata
+            .TestDetails
             .TestClassArguments
             .OfType<MEDIClass>()
             .First();

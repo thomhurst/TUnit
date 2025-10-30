@@ -527,7 +527,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataTest__
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.DataTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None));
+                            return new global::System.Threading.Tasks.ValueTask(instance.DataTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.Execution.CancellationToken ?? System.Threading.CancellationToken.None));
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -700,7 +700,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_DataSource
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.DataSourceTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None));
+                            return new global::System.Threading.Tasks.ValueTask(instance.DataSourceTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.Execution.CancellationToken ?? System.Threading.CancellationToken.None));
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
@@ -853,7 +853,7 @@ internal sealed class TUnit_TestProject_TimeoutCancellationTokenTests_MatrixTest
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.MatrixTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None));
+                            return new global::System.Threading.Tasks.ValueTask(instance.MatrixTest(TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), context?.Execution.CancellationToken ?? System.Threading.CancellationToken.None));
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }

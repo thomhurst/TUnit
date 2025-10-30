@@ -72,6 +72,6 @@ public class HookContextRestorationTests
         await Assert.That(assemblyContext).IsNotNull();
         await Assert.That(classContext).IsNotNull();
         
-        context.WriteLine($"AfterTest - Assembly: {assemblyContext?.Assembly.GetName().Name}, Class: {classContext?.ClassType.Name}");
+        context.Output.StandardOutput.WriteLine($"AfterTest - Assembly: {assemblyContext?.Assembly.GetName().Name}, Class: {classContext?.ClassType.Name}");
     }
 }

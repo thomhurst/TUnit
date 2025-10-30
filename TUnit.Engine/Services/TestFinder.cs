@@ -38,8 +38,8 @@ internal class TestFinder : ITestFinder
                 continue;
             }
 
-            var classType = test.TestDetails.ClassType;
-            var testName = test.TestDetails.TestName;
+            var classType = test.Metadata.TestDetails.ClassType;
+            var testName = test.Metadata.TestDetails.TestName;
 
             // Index by type
             if (!testsByType.TryGetValue(classType, out var testsForType))
@@ -161,7 +161,7 @@ internal class TestFinder : ITestFinder
             argCount = classArguments.Count();
         }
 
-        var actualArgCount = context.TestDetails?.TestClassArguments?.Length ?? 0;
+        var actualArgCount = context.Metadata.TestDetails?.TestClassArguments?.Length ?? 0;
         return argCount == actualArgCount;
     }
 }

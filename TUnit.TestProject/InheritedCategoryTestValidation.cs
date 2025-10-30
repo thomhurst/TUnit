@@ -12,7 +12,7 @@ public class InheritedCategoryTestValidation : Library.BaseTests
     {
         // This test verifies that the class inherits the BaseCategoriesOnClass category from the base class
         // and has its own TestCategory
-        await Assert.That(TestContext.Current!.TestDetails.Categories).Contains("BaseCategoriesOnClass");
-        await Assert.That(TestContext.Current!.TestDetails.Categories).Contains("TestCategory");
+        await Assert.That(TestContext.Current!.Metadata.TestDetails.Categories).Contains("BaseCategoriesOnClass");
+        await Assert.That(TestContext.Current!.Metadata.TestDetails.Categories).Contains("TestCategory");
     }
 }

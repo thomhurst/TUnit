@@ -166,7 +166,7 @@ public abstract class InvokableTestBase(TestMode testMode)
         catch (Exception e)
         {
             throw new Exception($"""
-                                 Error asserting results for {TestContext.Current!.TestDetails.MethodMetadata.Class.Name}: {e.Message}
+                                 Error asserting results for {TestContext.Current!.Metadata.TestDetails.MethodMetadata.Class.Name}: {e.Message}
 
                                  $@"Mode: {testMode}",
                                  @$"Command Input: {command}",

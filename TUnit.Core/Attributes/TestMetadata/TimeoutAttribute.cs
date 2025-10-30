@@ -46,7 +46,7 @@ public class TimeoutAttribute(int timeoutInMilliseconds) : TUnitAttribute, ITest
     /// <inheritdoc />
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        context.TestDetails.Timeout = Timeout;
+        context.TestContext.Metadata.TestDetails.Timeout = Timeout;
         return default(ValueTask);
     }
 

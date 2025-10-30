@@ -66,7 +66,7 @@ public class WorkerAwareTest : ITestRegisteredEventReceiver
 
     protected bool TestOk(TestContext testContext)
     {
-        return testContext.Result?.State is TestState.Passed or TestState.Skipped;
+        return testContext.Execution.Result?.State is TestState.Passed or TestState.Skipped;
     }
 
     public ValueTask OnTestRegistered(TestRegisteredContext context)

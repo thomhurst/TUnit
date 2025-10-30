@@ -58,9 +58,9 @@ public class CriticalHookChainExecutionTests
     [AfterEvery(Test)]
     public static async Task AfterEveryTest_That_Fails(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(CriticalHookChainExecutionTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(CriticalHookChainExecutionTests))
         {
-            ExecutedHooks.Add($"AfterEveryTest_{context.TestDetails.TestName}");
+            ExecutedHooks.Add($"AfterEveryTest_{context.Metadata.TestDetails.TestName}");
             // AfterEveryTest executing
             
             if (_afterTestShouldFail)
@@ -126,7 +126,7 @@ public class CriticalHookChainHelperTests
     [AfterEvery(Test)]
     public static async Task HelperAfterTest(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(CriticalHookChainHelperTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(CriticalHookChainHelperTests))
         {
             SharedExecutedHooks.Add("HelperAfterTest");
             // Helper AfterTest executed
@@ -160,7 +160,7 @@ public class CriticalAssemblyHooks
     public static void VerifyCriticalChainExecution(TestSessionContext context)
     {
         // Check if our critical test ran
-        if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(CriticalHookChainExecutionTests)))
+        if (context.AllTests.Any(t => t.Metadata.TestDetails.ClassType == typeof(CriticalHookChainExecutionTests)))
         {
             // Critical verification
             
@@ -222,7 +222,7 @@ public class CounterDecrementVerificationTests
     [BeforeEvery(Test)]
     public static async Task TrackBeforeTest(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(CounterDecrementVerificationTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(CounterDecrementVerificationTests))
         {
             Interlocked.Increment(ref _beforeTestCount);
             CounterEvents.Add($"BeforeTest_{_beforeTestCount}");
@@ -255,7 +255,7 @@ public class CounterDecrementVerificationTests
     [AfterEvery(Test)]
     public static async Task AfterTest_That_Always_Fails(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(CounterDecrementVerificationTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(CounterDecrementVerificationTests))
         {
             Interlocked.Increment(ref _afterTestCount);
             CounterEvents.Add($"AfterTest_{_afterTestCount}_Failing");
@@ -309,7 +309,7 @@ public class ExtremeFailureCascadeTests
     [After(Test)]
     public async Task AfterTest_Fails(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(ExtremeFailureCascadeTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(ExtremeFailureCascadeTests))
         {
             ExecutionTrace.Add("AfterTest_Failed");
             // After(Test) executing and failing
@@ -321,7 +321,7 @@ public class ExtremeFailureCascadeTests
     [AfterEvery(Test)]
     public static async Task AfterEveryTest_AlsoFails(TestContext context)
     {
-        if (context.TestDetails.ClassType == typeof(ExtremeFailureCascadeTests))
+        if (context.Metadata.TestDetails.ClassType == typeof(ExtremeFailureCascadeTests))
         {
             ExecutionTrace.Add("AfterEveryTest_Failed");
             // AfterEvery(Test) executing and failing
@@ -357,7 +357,7 @@ public class ExtremeFailureCascadeTests
     [After(TestSession)]
     public static void VerifyExtremeCascade(TestSessionContext context)
     {
-        if (context.AllTests.Any(t => t.TestDetails.ClassType == typeof(ExtremeFailureCascadeTests)))
+        if (context.AllTests.Any(t => t.Metadata.TestDetails.ClassType == typeof(ExtremeFailureCascadeTests)))
         {
             // Extreme cascade verification
             // Execution trace verified

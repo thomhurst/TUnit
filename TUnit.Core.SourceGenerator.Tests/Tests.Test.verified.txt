@@ -87,7 +87,7 @@ internal sealed class TUnit_TestProject_Bugs__1304_Tests_TryParse_InvalidString_
                     switch (args.Length)
                     {
                         case 1:
-                            return new global::System.Threading.Tasks.ValueTask(instance.TryParse_InvalidString_ReturnsFailure(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.CancellationToken ?? System.Threading.CancellationToken.None));
+                            return new global::System.Threading.Tasks.ValueTask(instance.TryParse_InvalidString_ReturnsFailure(TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), context?.Execution.CancellationToken ?? System.Threading.CancellationToken.None));
                         default:
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }

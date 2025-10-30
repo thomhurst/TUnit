@@ -16,8 +16,8 @@ public class DebugRepeatTest
         var context = TestContext.Current!;
         
         Console.WriteLine($"Execution #{count}:");
-        Console.WriteLine($"  TestId: {context.TestDetails.TestId}");
-        Console.WriteLine($"  TestName: {context.TestDetails.TestName}");
+        Console.WriteLine($"  TestId: {context.Metadata.TestDetails.TestId}");
+        Console.WriteLine($"  TestName: {context.Metadata.TestDetails.TestName}");
         Console.WriteLine($"  Thread: {Thread.CurrentThread.ManagedThreadId}");
         
         await Task.Delay(100);

@@ -122,7 +122,7 @@ internal sealed class TestRegistry : ITestRegistry
         TUnit.Core.Enums.TestRelationship relationship,
         string? displayName)
     {
-        var testDetails = currentContext.TestDetails;
+        var testDetails = currentContext.Metadata.TestDetails;
         var testClassType = testDetails.ClassType;
         var variantMethodArguments = arguments ?? testDetails.TestMethodArguments;
 
@@ -202,7 +202,7 @@ internal sealed class TestRegistry : ITestRegistry
         }
 
         var lambda = Expression.Lambda<Func<T, Task>>(body, parameter);
-        var attributes = new List<Attribute>(currentContext.TestDetails.GetAllAttributes());
+        var attributes = new List<Attribute>(currentContext.Metadata.TestDetails.GetAllAttributes());
 
         var discoveryResult = new DynamicDiscoveryResult
         {
@@ -211,9 +211,9 @@ internal sealed class TestRegistry : ITestRegistry
             TestMethodArguments = variantMethodArguments,
             TestMethod = lambda,
             Attributes = attributes,
-            CreatorFilePath = currentContext.TestDetails.TestFilePath,
-            CreatorLineNumber = currentContext.TestDetails.TestLineNumber,
-            ParentTestId = currentContext.TestDetails.TestId,
+            CreatorFilePath = currentContext.Metadata.TestDetails.TestFilePath,
+            CreatorLineNumber = currentContext.Metadata.TestDetails.TestLineNumber,
+            ParentTestId = currentContext.Metadata.TestDetails.TestId,
             Relationship = relationship,
             Properties = properties,
             DisplayName = displayName
@@ -380,7 +380,7 @@ internal sealed class TestRegistry : ITestRegistry
                 {
                     foreach (var kvp in _dynamicResult.Properties)
                     {
-                        modifiedContext.Context.ObjectBag[kvp.Key] = kvp.Value;
+                        modifiedContext.Context.StateBag.Items[kvp.Key] = kvp.Value;
                     }
                 }
 

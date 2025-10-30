@@ -14,7 +14,7 @@ public interface ITestMetadata
     /// <summary>
     /// Gets the detailed metadata about this test, including class type, method info, and arguments.
     /// </summary>
-    TestDetails TestDetails { get; }
+    TestDetails TestDetails { get; internal set; }
 
     /// <summary>
     /// Gets the base name of the test method.

@@ -129,7 +129,7 @@ public class TestStartLoggerAttribute : Attribute, ITestStartEventReceiver, ISco
 
     public ValueTask OnTestStart(TestContext context)
     {
-        ScopedEventReceiverTests.RecordStartEvent(context.TestDetails.MethodName, _source);
+        ScopedEventReceiverTests.RecordStartEvent(context.Metadata.TestDetails.MethodName, _source);
         return default;
     }
 
@@ -149,7 +149,7 @@ public class TestEndLoggerAttribute : Attribute, ITestEndEventReceiver, IScopedA
 
     public ValueTask OnTestEnd(TestContext context)
     {
-        ScopedEventReceiverTests.RecordEndEvent(context.TestDetails.MethodName, _source);
+        ScopedEventReceiverTests.RecordEndEvent(context.Metadata.TestDetails.MethodName, _source);
         return default;
     }
 

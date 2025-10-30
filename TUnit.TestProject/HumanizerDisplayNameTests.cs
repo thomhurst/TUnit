@@ -11,14 +11,14 @@ public class HumanizerDisplayNameTests
     public void This_test_name_is_formatted_nicely()
     {
         // Dummy method
-        Console.WriteLine(TestContext.Current!.GetDisplayName());
+        Console.WriteLine(TestContext.Current!. Metadata.DisplayName);
     }
 
     public class HumanizerDisplayNameAttribute : DisplayNameFormatterAttribute
     {
         protected override string FormatDisplayName(DiscoveredTestContext context)
         {
-            return context.TestDetails.TestName.Humanize();
+            return context.TestContext.Metadata.TestDetails.TestName.Humanize();
         }
     }
 }

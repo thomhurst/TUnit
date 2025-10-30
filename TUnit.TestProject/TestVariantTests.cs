@@ -42,17 +42,17 @@ public class TestVariantTests
             throw new InvalidOperationException($"Expected non-negative value but got {value}");
         }
 
-        if (context.ObjectBag.ContainsKey("AttemptNumber"))
+        if (context.StateBag.Items.ContainsKey("AttemptNumber"))
         {
-            var attemptNumber = context.ObjectBag["AttemptNumber"];
-            context.WriteLine($"Shrink attempt {attemptNumber} with value {value}");
+            var attemptNumber = context.StateBag.Items["AttemptNumber"];
+            context.Output.StandardOutput.WriteLine($"Shrink attempt {attemptNumber} with value {value}");
 
-            if (context.Relationship != TUnit.Core.Enums.TestRelationship.Derived)
+            if (context.Dependencies.Relationship != TUnit.Core.Enums.TestRelationship.Derived)
             {
-                throw new InvalidOperationException($"Expected Derived relationship but got {context.Relationship}");
+                throw new InvalidOperationException($"Expected Derived relationship but got {context.Dependencies.Relationship}");
             }
 
-            if (context.ParentTestId == null)
+            if (context.Dependencies.ParentTestId == null)
             {
                 throw new InvalidOperationException("Expected ParentTestId to be set for shrink attempt");
             }
