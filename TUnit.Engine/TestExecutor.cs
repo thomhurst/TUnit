@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Interfaces;
@@ -57,6 +58,9 @@ internal class TestExecutor
         var testClass = executableTest.Metadata.TestClassType;
         var testAssembly = testClass.Assembly;
 
+        Exception? capturedException = null;
+        Exception? hookException = null;
+
         try
         {
             await EnsureTestSessionHooksExecutedAsync().ConfigureAwait(false);
@@ -72,7 +76,6 @@ internal class TestExecutor
             await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(testAssembly, assembly => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, CancellationToken.None))
                 .ConfigureAwait(false);
 
-            // Event receivers for first test in assembly
             await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(
                 executableTest.Context,
                 executableTest.Context.ClassContext.AssemblyContext,
@@ -83,7 +86,6 @@ internal class TestExecutor
             await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _ => _hookExecutor.ExecuteBeforeClassHooksAsync(testClass, CancellationToken.None))
                 .ConfigureAwait(false);
 
-            // Event receivers for first test in class
             await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(
                 executableTest.Context,
                 executableTest.Context.ClassContext,
@@ -97,7 +99,6 @@ internal class TestExecutor
 
             executableTest.Context.RestoreExecutionContext();
 
-            // Only wrap the actual test execution with timeout, not the hooks
             var testTimeout = executableTest.Context.Metadata.TestDetails.Timeout;
             var timeoutMessage = testTimeout.HasValue
                 ? $"Test '{executableTest.Context.Metadata.TestDetails.TestName}' execution timed out after {testTimeout.Value}"
@@ -111,51 +112,47 @@ internal class TestExecutor
 
             executableTest.SetResult(TestState.Passed);
         }
-        catch (SkipTestException)
+        catch (SkipTestException ex)
         {
             executableTest.SetResult(TestState.Skipped);
-            throw;
+            capturedException = ex;
         }
         catch (Exception ex)
         {
             executableTest.SetResult(TestState.Failed, ex);
-
-            // Run per-retry cleanup hooks before re-throwing
-            try
-            {
-                // Run After(Test) hooks
-                await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
-
-                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
-            }
-            catch
-            {
-                // Swallow any exceptions from hooks when we already have a test failure
-            }
-
-            // Check if the result was overridden - if so, respect the override and don't re-throw
-            if (executableTest.Context.Execution.Result?.IsOverridden == true)
-            {
-                // Result was overridden, respect the override state (Passed, Failed, Skipped, etc.)
-                // Don't re-throw the exception - the override has final say
-            }
-            else
-            {
-                throw;
-            }
+            capturedException = ex;
         }
         finally
         {
-            // Per-retry cleanup - runs for success path only
-            if (executableTest.State != TestState.Failed)
+            try
             {
-                // Run After(Test) hooks
                 await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
-
                 await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
             }
-            // Note: Test instance disposal and After(Class/Assembly/Session) hooks
-            // are now handled in TestCoordinator after the retry loop completes
+            catch (Exception ex)
+            {
+                hookException = ex;
+            }
+        }
+
+        // If test passed but hooks failed, throw hook exception to fail the test
+        if (capturedException == null && hookException != null)
+        {
+            ExceptionDispatchInfo.Capture(hookException).Throw();
+        }
+
+        // If test failed or was skipped, handle the test exception
+        if (capturedException != null)
+        {
+            if (capturedException is SkipTestException)
+            {
+                ExceptionDispatchInfo.Capture(capturedException).Throw();
+            }
+
+            if (executableTest.Context.Execution.Result?.IsOverridden != true)
+            {
+                ExceptionDispatchInfo.Capture(capturedException).Throw();
+            }
         }
     }
 
