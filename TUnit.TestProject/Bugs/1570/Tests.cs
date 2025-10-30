@@ -27,6 +27,6 @@ public class Tests(int number)
         //     .GetTests(nameof(Dependency))
         //     .First();
         //
-        // await Assert.That(dependencyContext.StateBag.Bag["number"]).IsEqualTo(number);
+        // await Assert.That(dependencyContext.StateBag.Items["number"]).IsEqualTo(number);
     }
 }
