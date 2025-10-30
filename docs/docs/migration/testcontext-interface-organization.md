@@ -271,37 +271,6 @@ The interface properties return `this` cast to the appropriate interface type, e
 ITestExecution execution = testContext.Execution;  // Zero allocations
 ```
 
-## Backwards Compatibility
-
-### Direct Access Still Works
-
-All properties remain accessible directly on `TestContext` for backwards compatibility:
-
-```csharp
-// ✅ Both work - Choose based on your needs
-var result1 = TestContext.Current.Result;              // Direct access
-var result2 = TestContext.Current.Execution.Result;    // Through interface
-
-// ✅ Both work
-TestContext.Current.ReportResult = false;              // Direct access (backwards compatible)
-TestContext.Current.Execution.ReportResult = false;    // Through interface (recommended)
-```
-
-However, **new code should prefer the interface-based approach** for better organization and discoverability.
-
-### When to Update
-
-You should update your code when:
-- ✅ You're writing new test infrastructure code
-- ✅ You're refactoring existing test helpers
-- ✅ You want better IDE autocomplete/IntelliSense
-- ✅ You're implementing custom test executors or hooks
-
-You can defer updates when:
-- ⏳ Code is stable and working well
-- ⏳ In legacy codebases with extensive TestContext usage
-- ⏳ Migration effort outweighs immediate benefits
-
 ## Complete Interface Reference
 
 ### ITestExecution
