@@ -1462,9 +1462,10 @@ namespace
         public required ? Duration { get; init; }
         public required ? End { get; init; }
         public required ? Exception { get; init; }
-        public bool IsOverridden { get; set; }
+        public bool IsOverridden { get; init; }
+        public ? OriginalException { get; init; }
         public string? Output { get; }
-        public string? OverrideReason { get; set; }
+        public string? OverrideReason { get; init; }
         public required ? Start { get; init; }
         public required .TestState State { get; init; }
     }
@@ -2331,7 +2332,6 @@ namespace .Interfaces
         ? TestEnd { get; }
         ? TestStart { get; }
         void AddLinkedCancellationToken(.CancellationToken cancellationToken);
-        void OverrideResult(string reason);
         void OverrideResult(.TestState state, string reason);
     }
     public interface ITestExecutor

@@ -62,32 +62,62 @@ public partial class TestContext
         set => ReportResult = value;
     }
 
-    void ITestExecution.OverrideResult(string reason) => OverrideResult(reason);
     void ITestExecution.OverrideResult(TestState state, string reason) => OverrideResult(state, reason);
     void ITestExecution.AddLinkedCancellationToken(CancellationToken cancellationToken) => AddLinkedCancellationToken(cancellationToken);
 
     // Internal implementation methods
-    internal void OverrideResult(string reason)
-    {
-        OverrideResult(TestState.Passed, reason);
-    }
-
     internal void OverrideResult(TestState state, string reason)
     {
-        Result = new TestResult
+        lock (Lock)
         {
-            State = state,
-            OverrideReason = reason,
-            IsOverridden = true,
-            Start = TestStart ?? DateTimeOffset.UtcNow,
-            End = DateTimeOffset.UtcNow,
-            Duration = DateTimeOffset.UtcNow - (TestStart ?? DateTimeOffset.UtcNow),
-            Exception = null,
-            ComputerName = Environment.MachineName,
-            TestContext = this
-        };
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                throw new ArgumentException("Override reason cannot be empty or whitespace.", nameof(reason));
+            }
 
-        InternalExecutableTest.State = state;
+            if (Result?.IsOverridden == true)
+            {
+                throw new InvalidOperationException(
+                    $"Result has already been overridden to {Result.State} with reason: '{Result.OverrideReason}'. " +
+                    "Cannot override a result multiple times. Check Result.IsOverridden before calling OverrideResult().");
+            }
+
+            if (state is TestState.NotStarted or TestState.WaitingForDependencies or TestState.Queued or TestState.Running)
+            {
+                throw new ArgumentException(
+                    $"Cannot override to intermediate state '{state}'. " +
+                    "Only final states (Passed, Failed, Skipped, Timeout, Cancelled) are allowed.",
+                    nameof(state));
+            }
+
+            var originalException = Result?.Exception;
+
+            Exception? exceptionForResult;
+            if (state == TestState.Failed)
+            {
+                exceptionForResult = originalException ?? new InvalidOperationException($"Test overridden to failed: {reason}");
+            }
+            else
+            {
+                exceptionForResult = null;
+            }
+
+            Result = new TestResult
+            {
+                State = state,
+                OverrideReason = reason,
+                IsOverridden = true,
+                OriginalException = originalException,
+                Start = TestStart ?? DateTimeOffset.UtcNow,
+                End = DateTimeOffset.UtcNow,
+                Duration = DateTimeOffset.UtcNow - (TestStart ?? DateTimeOffset.UtcNow),
+                Exception = exceptionForResult,
+                ComputerName = Environment.MachineName,
+                TestContext = this
+            };
+
+            InternalExecutableTest.State = state;
+        }
     }
 
     internal void AddLinkedCancellationToken(CancellationToken cancellationToken)

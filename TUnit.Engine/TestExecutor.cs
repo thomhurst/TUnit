@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Interfaces;
@@ -57,11 +58,13 @@ internal class TestExecutor
         var testClass = executableTest.Metadata.TestClassType;
         var testAssembly = testClass.Assembly;
 
+        Exception? capturedException = null;
+        Exception? hookException = null;
+
         try
         {
             await EnsureTestSessionHooksExecutedAsync().ConfigureAwait(false);
 
-            // Event receivers have their own internal coordination to run once
             await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(
                 executableTest.Context,
                 executableTest.Context.ClassContext.AssemblyContext.TestSessionContext,
@@ -72,7 +75,6 @@ internal class TestExecutor
             await _beforeHookTaskCache.GetOrCreateBeforeAssemblyTask(testAssembly, assembly => _hookExecutor.ExecuteBeforeAssemblyHooksAsync(assembly, CancellationToken.None))
                 .ConfigureAwait(false);
 
-            // Event receivers for first test in assembly
             await _eventReceiverOrchestrator.InvokeFirstTestInAssemblyEventReceiversAsync(
                 executableTest.Context,
                 executableTest.Context.ClassContext.AssemblyContext,
@@ -83,7 +85,6 @@ internal class TestExecutor
             await _beforeHookTaskCache.GetOrCreateBeforeClassTask(testClass, _ => _hookExecutor.ExecuteBeforeClassHooksAsync(testClass, CancellationToken.None))
                 .ConfigureAwait(false);
 
-            // Event receivers for first test in class
             await _eventReceiverOrchestrator.InvokeFirstTestInClassEventReceiversAsync(
                 executableTest.Context,
                 executableTest.Context.ClassContext,
@@ -97,7 +98,6 @@ internal class TestExecutor
 
             executableTest.Context.RestoreExecutionContext();
 
-            // Only wrap the actual test execution with timeout, not the hooks
             var testTimeout = executableTest.Context.Metadata.TestDetails.Timeout;
             var timeoutMessage = testTimeout.HasValue
                 ? $"Test '{executableTest.Context.Metadata.TestDetails.TestName}' execution timed out after {testTimeout.Value}"
@@ -111,51 +111,40 @@ internal class TestExecutor
 
             executableTest.SetResult(TestState.Passed);
         }
-        catch (SkipTestException)
+        catch (SkipTestException ex)
         {
             executableTest.SetResult(TestState.Skipped);
-            throw;
+            capturedException = ex;
         }
         catch (Exception ex)
         {
             executableTest.SetResult(TestState.Failed, ex);
-
-            // Run per-retry cleanup hooks before re-throwing
-            try
-            {
-                // Run After(Test) hooks
-                await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
-
-                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
-            }
-            catch
-            {
-                // Swallow any exceptions from hooks when we already have a test failure
-            }
-
-            // Check if the result was overridden - if so, don't re-throw
-            if (executableTest.Context.Execution.Result is { IsOverridden: true, State: TestState.Passed })
-            {
-                // Result was overridden to passed, don't re-throw the exception
-                executableTest.SetResult(TestState.Passed);
-            }
-            else
-            {
-                throw;
-            }
+            capturedException = ex;
         }
         finally
         {
-            // Per-retry cleanup - runs for success path only
-            if (executableTest.State != TestState.Failed)
+            try
             {
-                // Run After(Test) hooks
                 await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
-
                 await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
             }
-            // Note: Test instance disposal and After(Class/Assembly/Session) hooks
-            // are now handled in TestCoordinator after the retry loop completes
+            catch (Exception ex)
+            {
+                hookException = ex;
+            }
+        }
+
+        if (capturedException == null && hookException != null)
+        {
+            ExceptionDispatchInfo.Capture(hookException).Throw();
+        }
+        else if (capturedException is SkipTestException)
+        {
+            ExceptionDispatchInfo.Capture(capturedException).Throw();
+        }
+        else if (capturedException != null && executableTest.Context.Execution.Result?.IsOverridden != true)
+        {
+            ExceptionDispatchInfo.Capture(capturedException).Throw();
         }
     }
 
