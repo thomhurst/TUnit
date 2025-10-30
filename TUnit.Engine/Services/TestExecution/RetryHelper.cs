@@ -27,9 +27,9 @@ internal static class RetryHelper
                 if (await ShouldRetry(testContext, ex, attempt))
                 {
                     // Clear the previous result before retrying
-                    testContext.Result = null;
+                    testContext.Execution.Result = null;
                     testContext.TestStart = null;
-                    testContext.TestEnd = null;
+                    testContext.Execution.TestEnd = null;
                     continue;
                 }
 

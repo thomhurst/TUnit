@@ -24,11 +24,31 @@ public partial class TestContext
 
     // Explicit interface implementations for ITestExecution
     TestPhase ITestExecution.Phase => Phase;
-    TestResult? ITestExecution.Result => Result;
+    TestResult? ITestExecution.Result
+    {
+        get => Result;
+        set => Result = value;
+    }
+
     CancellationToken ITestExecution.CancellationToken => CancellationToken;
-    DateTimeOffset? ITestExecution.TestStart => TestStart;
-    DateTimeOffset? ITestExecution.TestEnd => TestEnd;
-    int ITestExecution.CurrentRetryAttempt => CurrentRetryAttempt;
+    DateTimeOffset? ITestExecution.TestStart
+    {
+        get => TestStart;
+        set => TestStart = value;
+    }
+
+    DateTimeOffset? ITestExecution.TestEnd
+    {
+        get => TestEnd;
+        set => TestEnd = value;
+    }
+
+    int ITestExecution.CurrentRetryAttempt
+    {
+        get => CurrentRetryAttempt;
+        set => CurrentRetryAttempt = value;
+    }
+
     string? ITestExecution.SkipReason => SkipReason;
     Func<TestContext, Exception, int, Task<bool>>? ITestExecution.RetryFunc => RetryFunc;
     IHookExecutor? ITestExecution.CustomHookExecutor

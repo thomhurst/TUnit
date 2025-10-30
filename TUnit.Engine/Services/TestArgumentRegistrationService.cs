@@ -44,14 +44,14 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
         // Register class arguments (registration phase - property injection + tracking, NO IAsyncInitializer)
         await _objectRegistrationService.RegisterArgumentsAsync(
             classArguments,
-            testContext.ObjectBag,
+            testContext.StateBag.Items,
             testContext.Metadata.TestDetails.MethodMetadata,
             testContext.Events);
 
         // Register method arguments (registration phase)
         await _objectRegistrationService.RegisterArgumentsAsync(
             methodArguments,
-            testContext.ObjectBag,
+            testContext.StateBag.Items,
             testContext.Metadata.TestDetails.MethodMetadata,
             testContext.Events);
 
@@ -96,7 +96,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
                         TestMetadata = testContext.Metadata.TestDetails.MethodMetadata,
                         DataSourceAttribute = dataSource,
                         Events = testContext.Events,
-                        ObjectBag = testContext.ObjectBag
+                        ObjectBag = testContext.StateBag.Items
                     };
 
                     var dataGenMetadata = new DataGeneratorMetadata
@@ -130,7 +130,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
                                 // This does: property injection + tracking (NO IAsyncInitializer - deferred to execution)
                                 await _objectRegistrationService.RegisterObjectAsync(
                                     data,
-                                    testContext.ObjectBag,
+                                    testContext.StateBag.Items,
                                     testContext.Metadata.TestDetails.MethodMetadata,
                                     testContext.Events);
                             }

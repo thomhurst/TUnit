@@ -18,20 +18,20 @@ public class NotInParallelOrderExecutionTests
     {
         var testName = TestContext.Current!.Metadata.TestDetails.TestName;
         var groupKey = GetGroupKey(testName);
-        
+
         var groupLock = GroupLocks.GetOrAdd(groupKey, new object());
         lock (groupLock)
         {
             var current = CurrentlyExecutingPerGroup.AddOrUpdate(groupKey, 1, (_, v) => v + 1);
             MaxConcurrentPerGroup.AddOrUpdate(groupKey, current, (_, v) => Math.Max(v, current));
-            
+
             var orderList = ExecutionOrderByGroup.GetOrAdd(groupKey, new List<string>());
             orderList.Add(testName);
         }
 
         // Use TestStart if available, otherwise use DateTime.Now
-        var startTime = TestContext.Current.Execution.Execution.TestStart?.DateTime ?? DateTime.Now;
-        
+        var startTime = TestContext.Current.Execution.TestStart?.DateTime ?? DateTime.Now;
+
         OrderedExecutionRecords.Add(new OrderedExecutionRecord(
             testName,
             groupKey,
@@ -45,7 +45,7 @@ public class NotInParallelOrderExecutionTests
     {
         var testName = TestContext.Current!.Metadata.TestDetails.TestName;
         var groupKey = GetGroupKey(testName);
-        
+
         var groupLock = GroupLocks.GetOrAdd(groupKey, new object());
         lock (groupLock)
         {

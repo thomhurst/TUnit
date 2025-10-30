@@ -751,9 +751,9 @@ internal sealed class TestBuilder : ITestBuilder
         // This includes property injection and IAsyncInitializer.InitializeAsync
         var initializedDataSource = await _dataSourceInitializer.EnsureInitializedAsync(
             dataSource,
-            dataGeneratorMetadata.TestBuilderContext?.Current.ObjectBag,
+            dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
             dataGeneratorMetadata.TestInformation,
-            dataGeneratorMetadata.TestBuilderContext?.Current.Events);
+            dataGeneratorMetadata.TestBuilderContext.Current.Events);
 
         // Now get data rows from the initialized data source
         await foreach (var dataRow in initializedDataSource.GetDataRowsAsync(dataGeneratorMetadata))

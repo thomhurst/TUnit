@@ -99,7 +99,7 @@ public class CustomDisplayNameTests
 
         public ValueTask OnTestDiscovered(DiscoveredTestContext context)
         {
-            context.SetDisplayName($"{context.Metadata.TestDetails.TestName}(REDACTED)");
+            context.SetDisplayName($"{context.TestContext.Metadata.TestDetails.TestName}(REDACTED)");
             return default(ValueTask);
         }
 

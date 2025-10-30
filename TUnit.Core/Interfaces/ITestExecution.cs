@@ -14,7 +14,7 @@ public interface ITestExecution
     /// <summary>
     /// Gets the test result after execution completes, or null if the test is still running.
     /// </summary>
-    TestResult? Result { get; }
+    TestResult? Result { get; internal set; }
 
     /// <summary>
     /// Gets the cancellation token for this test execution.
@@ -25,17 +25,17 @@ public interface ITestExecution
     /// <summary>
     /// Gets the timestamp when test execution started, or null if not yet started.
     /// </summary>
-    DateTimeOffset? TestStart { get; }
+    DateTimeOffset? TestStart { get; internal set; }
 
     /// <summary>
     /// Gets the timestamp when test execution ended, or null if not yet completed.
     /// </summary>
-    DateTimeOffset? TestEnd { get; }
+    DateTimeOffset? TestEnd { get; internal set; }
 
     /// <summary>
     /// Gets the current retry attempt number (0 for first attempt, 1+ for retries).
     /// </summary>
-    int CurrentRetryAttempt { get; }
+    int CurrentRetryAttempt { get; internal set; }
 
     /// <summary>
     /// Gets the reason why this test was skipped, or null if not skipped.

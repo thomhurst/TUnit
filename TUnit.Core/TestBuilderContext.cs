@@ -31,7 +31,7 @@ public record TestBuilderContext
     public required MethodMetadata TestMetadata { get; init; }
 
     internal IClassConstructor? ClassConstructor { get; set; }
-    
+
     /// <summary>
     /// Cached and initialized attributes for the test
     /// </summary>
@@ -49,7 +49,7 @@ public record TestBuilderContext
     {
         return new TestBuilderContext
         {
-            Events = testContext.Events, TestMetadata = testContext.Metadata.TestDetails.MethodMetadata, DataSourceAttribute = dataSourceAttribute, ObjectBag = testContext.ObjectBag,
+            Events = testContext.Events, TestMetadata = testContext.Metadata.TestDetails.MethodMetadata, DataSourceAttribute = dataSourceAttribute, ObjectBag = testContext.StateBag.Items,
         };
     }
 }

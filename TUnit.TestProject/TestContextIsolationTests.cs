@@ -244,12 +244,12 @@ public class TestContextRaceConditionTests
                     var currentContext = TestContext.Current;
                     if (currentContext != myContext)
                     {
-                        DetectedContextMismatches.Add($"Context mismatch in {myTestName}: Expected {myTestId}, Current context: {currentContext?.ObjectBag.GetValueOrDefault("UniqueTestId")}");
+                        DetectedContextMismatches.Add($"Context mismatch in {myTestName}: Expected {myTestId}, Current context: {currentContext?.StateBag.Items.GetValueOrDefault("UniqueTestId")}");
                     }
 
-                    if (currentContext?.ObjectBag.GetValueOrDefault("UniqueTestId") as string != myTestId)
+                    if (currentContext?.StateBag.Items.GetValueOrDefault("UniqueTestId") as string != myTestId)
                     {
-                        DetectedContextMismatches.Add($"TestId mismatch in {myTestName}: Expected {myTestId}, Got {currentContext?.ObjectBag.GetValueOrDefault("UniqueTestId")}");
+                        DetectedContextMismatches.Add($"TestId mismatch in {myTestName}: Expected {myTestId}, Got {currentContext?.StateBag.Items.GetValueOrDefault("UniqueTestId")}");
                     }
 
                     await Task.Delay(1);

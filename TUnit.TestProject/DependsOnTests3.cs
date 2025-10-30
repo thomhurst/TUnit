@@ -45,8 +45,8 @@ public class DependsOnTests3
         await Assert.That(test1).HasCount().EqualTo(1);
         await Assert.That(test2).HasCount().EqualTo(1);
 
-        await Assert.That(test1[0].ObjectBag).ContainsKey("Test1");
-        await Assert.That(test2[0].ObjectBag).ContainsKey("Test2");
+        await Assert.That(test1[0].StateBag.Items).ContainsKey("Test1");
+        await Assert.That(test2[0].StateBag.Items).ContainsKey("Test2");
     }
 
     [After(Class)]

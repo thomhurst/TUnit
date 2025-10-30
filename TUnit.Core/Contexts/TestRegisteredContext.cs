@@ -23,7 +23,7 @@ public class TestRegisteredContext
     /// <summary>
     /// Gets the object bag from the underlying TestContext
     /// </summary>
-    public ConcurrentDictionary<string, object?> ObjectBag => TestContext.ObjectBag;
+    public ConcurrentDictionary<string, object?> ObjectBag => TestContext.StateBag.Items;
 
     /// <summary>
     /// Gets the test details from the underlying TestContext

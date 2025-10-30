@@ -7,7 +7,7 @@ public class ClassDisplayNameAttribute : Attribute, ITestDiscoveryEventReceiver
 {
     public ValueTask OnTestDiscovered(DiscoveredTestContext context)
     {
-        context.SetDisplayName($"{context.Metadata.TestDetails.MethodMetadata.Class.Name}.{context. Metadata.DisplayName}");
+        context.SetDisplayName($"{context.TestContext.Metadata.TestDetails.MethodMetadata.Class.Name}.{context.TestContext.Metadata.DisplayName}");
         return default(ValueTask);
     }
 

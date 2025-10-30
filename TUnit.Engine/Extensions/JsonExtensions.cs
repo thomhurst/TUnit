@@ -84,13 +84,13 @@ internal static class JsonExtensions
         {
             Categories = testDetails.Categories,
             ClassType = testDetails.MethodMetadata.Class.Type.FullName ?? testDetails.ClassType.FullName ?? "Unknown",
-            Result = context.Result?.ToJsonModel(),
+            Result = context.Execution.Result?.ToJsonModel(),
             Timeout = testDetails.Timeout,
             CustomProperties = testDetails.CustomProperties.ToDictionary(
                 kvp => kvp.Key,
                 kvp => (IReadOnlyList<string>) kvp.Value.AsReadOnly()),
             DisplayName = context.GetDisplayName(),
-            ObjectBag = context.ObjectBag,
+            ObjectBag = context.StateBag.Items,
             RetryLimit = testDetails.RetryLimit,
             ReturnType = testDetails.ReturnType?.FullName ?? "void",
             TestId = testDetails.TestId,

@@ -564,7 +564,7 @@ public static class DataSourceHelpers
             TestContext.Current,
             TestContext.Current?.Metadata.TestDetails.ClassInstance,
             TestContext.Current?.Events,
-            TestContext.Current?.ObjectBag ?? new ConcurrentDictionary<string, object?>()
+            TestContext.Current?.StateBag.Items ?? new ConcurrentDictionary<string, object?>()
         );
 
         // Generate the data source value using the attribute's GetDataRowsAsync method

@@ -39,10 +39,10 @@ internal sealed class TestStateManager
     public Task MarkFailedAsync(AbstractExecutableTest test, Exception exception)
     {
         // Check if result has been overridden - if so, respect the override
-        if (test.Context.Result?.IsOverridden == true)
+        if (test.Context.Execution.Result?.IsOverridden == true)
         {
-            test.State = test.Context.Result.State;
-            test.EndTime = test.Context.Result.End ?? DateTimeOffset.UtcNow;
+            test.State = test.Context.Execution.Result.State;
+            test.EndTime = test.Context.Execution.Result.End ?? DateTimeOffset.UtcNow;
         }
         else
         {

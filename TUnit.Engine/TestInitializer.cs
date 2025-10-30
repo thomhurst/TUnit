@@ -27,7 +27,7 @@ internal class TestInitializer
 
         await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
             testClassInstance,
-            test.Context.ObjectBag,
+            test.Context.StateBag.Items,
             test.Context.Metadata.TestDetails.MethodMetadata,
             test.Context.Events);
 

@@ -65,9 +65,9 @@ internal sealed class TestCoordinator : ITestCoordinator
             _contextRestorer.RestoreContext(test);
 
             // Clear Result and timing from any previous execution (important for repeated tests)
-            test.Context.Result = null;
+            test.Context.Execution.Result = null;
             test.Context.TestStart = null;
-            test.Context.TestEnd = null;
+            test.Context.Execution.TestEnd = null;
 
             TestContext.Current = test.Context;
 
@@ -245,7 +245,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                     break;
                 case TestState.Timeout:
                 case TestState.Failed:
-                    await _messageBus.Failed(test.Context, test.Context.Result?.Exception!, test.StartTime.GetValueOrDefault());
+                    await _messageBus.Failed(test.Context, test.Context.Execution.Result?.Exception!, test.StartTime.GetValueOrDefault());
                     break;
                 case TestState.Skipped:
                     await _messageBus.Skipped(test.Context, test.Context.SkipReason ?? "Skipped");

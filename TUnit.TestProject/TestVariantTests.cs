@@ -42,7 +42,7 @@ public class TestVariantTests
             throw new InvalidOperationException($"Expected non-negative value but got {value}");
         }
 
-        if (context.ObjectBag.ContainsKey("AttemptNumber"))
+        if (context.StateBag.Items.ContainsKey("AttemptNumber"))
         {
             var attemptNumber = context.StateBag.Items["AttemptNumber"];
             context.Output.StandardOutput.WriteLine($"Shrink attempt {attemptNumber} with value {value}");

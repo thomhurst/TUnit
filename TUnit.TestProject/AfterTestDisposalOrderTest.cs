@@ -47,7 +47,7 @@ public class AfterTestDisposalOrderTest : IAsyncDisposable
         // Verify that After(Test) hooks were executed
         foreach (var test in context.Tests)
         {
-            await Assert.That(test.ObjectBag.ContainsKey("AfterTestExecuted")).IsTrue().Because("After(Test) hook should have executed");
+            await Assert.That(test.StateBag.Items.ContainsKey("AfterTestExecuted")).IsTrue().Because("After(Test) hook should have executed");
             await Assert.That(test.StateBag.Items["AfterTestExecuted"]).IsEqualTo(true);
             await Assert.That(test.StateBag.Items["ResourceValue"]).IsEqualTo("TestResource");
         }

@@ -12,7 +12,7 @@ public class ParallelTests
     [After(Test)]
     public async Task TestOverlaps()
     {
-        TestDateTimeRanges.Add(new DateTimeRange(TestContext.Current!.Execution.Execution.TestStart!.Value.DateTime, TestContext.Current.Result!.End!.Value.DateTime));
+        TestDateTimeRanges.Add(new DateTimeRange(TestContext.Current!.Execution.TestStart!.Value.DateTime, TestContext.Current.Result!.End!.Value.DateTime));
 
         await AssertOverlaps();
     }
