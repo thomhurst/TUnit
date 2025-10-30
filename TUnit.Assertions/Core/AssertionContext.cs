@@ -80,12 +80,13 @@ public sealed class AssertionContext<TValue>
     }
 
     /// <summary>
-    /// Convenience overload for simple value-to-value transformations.
-    /// Wraps a simple mapper function in an evaluation context transformation.
+    /// Convenience overload for async value-to-value transformations.
+    /// Wraps an async mapper function in an evaluation context transformation.
+    /// The Task is unwrapped, allowing assertions to chain on the result type directly.
     /// </summary>
-    public AssertionContext<Task<TNew?>> MapAsync<TNew>(Func<TValue?, Task<TNew?>> mapper)
+    public AssertionContext<TNew> Map<TNew>(Func<TValue?, Task<TNew?>> asyncMapper)
     {
-        return Map(evalContext => evalContext.Map(mapper));
+        return Map(evalContext => evalContext.Map(asyncMapper));
     }
 
     public AssertionContext<TException> MapException<TException>() where TException : Exception

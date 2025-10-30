@@ -101,6 +101,33 @@ public sealed class EvaluationContext<TValue>
         });
     }
 
+    /// <summary>
+    /// Creates a derived context by mapping the value to a different type using an async mapper.
+    /// Used for type transformations that require async operations (e.g., HTTP response to JSON).
+    /// The mapping function is only called if evaluation succeeds (no exception).
+    /// </summary>
+    public EvaluationContext<TNew> Map<TNew>(Func<TValue?, Task<TNew?>> asyncMapper)
+    {
+        return new EvaluationContext<TNew>(async () =>
+        {
+            var (value, exception) = await GetAsync();
+            if (exception != null)
+            {
+                return (default(TNew), exception);
+            }
+
+            try
+            {
+                var mappedValue = await asyncMapper(value);
+                return (mappedValue, null);
+            }
+            catch (Exception ex)
+            {
+                return (default(TNew), ex);
+            }
+        });
+    }
+
     public EvaluationContext<TException> MapException<TException>() where TException : Exception
     {
         return new EvaluationContext<TException>(async () =>
