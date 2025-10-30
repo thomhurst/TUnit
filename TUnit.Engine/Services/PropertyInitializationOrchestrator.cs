@@ -14,34 +14,20 @@ namespace TUnit.Engine.Services;
 /// </summary>
 internal sealed class PropertyInitializationOrchestrator
 {
-    private PropertyInitializationPipeline _pipeline;
-    internal DataSourceInitializer DataSourceInitializer { get; }
-    internal ObjectRegistrationService ObjectRegistrationService { get; private set; }
+    internal readonly DataSourceInitializer _dataSourceInitializer;
+    private readonly IObjectRegistry _objectRegistry;
 
-    public PropertyInitializationOrchestrator(DataSourceInitializer dataSourceInitializer, ObjectRegistrationService? objectRegistrationService)
+    public PropertyInitializationOrchestrator(DataSourceInitializer dataSourceInitializer, IObjectRegistry? objectRegistry)
     {
-        DataSourceInitializer = dataSourceInitializer ?? throw new ArgumentNullException(nameof(dataSourceInitializer));
-        ObjectRegistrationService = objectRegistrationService!; // Will be set via Initialize()
-        if (objectRegistrationService != null)
-        {
-            _pipeline = PropertyInitializationPipeline.CreateDefault(dataSourceInitializer, objectRegistrationService);
-        }
-        else
-        {
-            _pipeline = null!; // Will be set via Initialize()
-        }
-    }
-
-    public void Initialize(ObjectRegistrationService objectRegistrationService)
-    {
-        ObjectRegistrationService = objectRegistrationService ?? throw new ArgumentNullException(nameof(objectRegistrationService));
-        _pipeline = PropertyInitializationPipeline.CreateDefault(DataSourceInitializer, objectRegistrationService);
+        _dataSourceInitializer = dataSourceInitializer ?? throw new ArgumentNullException(nameof(dataSourceInitializer));
+        _objectRegistry = objectRegistry!;
     }
 
     /// <summary>
     /// Initializes all properties for an instance using source-generated metadata.
+    /// Properties are initialized in parallel for better performance.
     /// </summary>
-    public async Task InitializePropertiesAsync(
+    private async Task InitializeSourceGeneratedPropertiesAsync(
         object instance,
         PropertyInjectionMetadata[] properties,
         ConcurrentDictionary<string, object?> objectBag,
@@ -54,19 +40,20 @@ internal sealed class PropertyInitializationOrchestrator
             return;
         }
 
-        var contexts = properties.Select(metadata => CreateContext(
-            instance, metadata, objectBag, methodMetadata, events, visitedObjects, TestContext.Current));
+        var tasks = properties.Select(metadata =>
+            InitializeSourceGeneratedPropertyAsync(instance, metadata, objectBag, methodMetadata, events, visitedObjects));
 
-        await _pipeline.ExecuteParallelAsync(contexts);
+        await Task.WhenAll(tasks);
     }
 
     /// <summary>
     /// Initializes all properties for an instance using reflection.
+    /// Properties are initialized in parallel for better performance.
     /// </summary>
 #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Reflection-based property initialization uses PropertyInfo")]
 #endif
-    public async Task InitializePropertiesAsync(
+    private async Task InitializeReflectionPropertiesAsync(
         object instance,
         (PropertyInfo Property, IDataSourceAttribute DataSource)[] properties,
         ConcurrentDictionary<string, object?> objectBag,
@@ -79,10 +66,116 @@ internal sealed class PropertyInitializationOrchestrator
             return;
         }
 
-        var contexts = properties.Select(pair => CreateContext(
-            instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, visitedObjects, TestContext.Current));
+        var tasks = properties.Select(pair =>
+            InitializeReflectionPropertyAsync(instance, pair.Property, pair.DataSource, objectBag, methodMetadata, events, visitedObjects));
 
-        await _pipeline.ExecuteParallelAsync(contexts);
+        await Task.WhenAll(tasks);
+    }
+
+    /// <summary>
+    /// Initializes a single property using source-generated metadata.
+    /// </summary>
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Property data resolver is called for source-generated properties which are AOT-safe")]
+    #endif
+    private async Task InitializeSourceGeneratedPropertyAsync(
+        object instance,
+        PropertyInjectionMetadata metadata,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        ConcurrentDictionary<object, byte> visitedObjects)
+    {
+        object? resolvedValue = null;
+        var testContext = TestContext.Current;
+
+        // Check if property was pre-resolved during registration
+        if (testContext?.Metadata.TestDetails.TestClassInjectedPropertyArguments.TryGetValue(metadata.PropertyName, out resolvedValue) == true)
+        {
+            // Use pre-resolved value - it was already initialized during first resolution
+        }
+        else
+        {
+            // Resolve the property value from the data source
+            resolvedValue = await PropertyDataResolver.ResolvePropertyDataAsync(
+                new PropertyInitializationContext
+                {
+                    Instance = instance,
+                    SourceGeneratedMetadata = metadata,
+                    PropertyName = metadata.PropertyName,
+                    PropertyType = metadata.PropertyType,
+                    PropertySetter = metadata.SetProperty,
+                    ObjectBag = objectBag,
+                    MethodMetadata = methodMetadata,
+                    Events = events,
+                    VisitedObjects = visitedObjects,
+                    TestContext = testContext,
+                    IsNestedProperty = false
+                },
+                _dataSourceInitializer,
+                _objectRegistry);
+
+            if (resolvedValue == null)
+            {
+                return;
+            }
+        }
+
+        // Set the property value
+        metadata.SetProperty(instance, resolvedValue);
+
+        // Store for potential reuse
+        if (testContext != null && !testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(metadata.PropertyName))
+        {
+            testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments[metadata.PropertyName] = resolvedValue;
+        }
+    }
+
+    /// <summary>
+    /// Initializes a single property using reflection.
+    /// </summary>
+    #if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection-based property initialization is only used in reflection mode, not in AOT")]
+    #endif
+    private async Task InitializeReflectionPropertyAsync(
+        object instance,
+        PropertyInfo property,
+        IDataSourceAttribute dataSource,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        ConcurrentDictionary<object, byte> visitedObjects)
+    {
+        var testContext = TestContext.Current;
+        var propertySetter = PropertySetterFactory.CreateSetter(property);
+
+        // Resolve the property value from the data source
+        var resolvedValue = await PropertyDataResolver.ResolvePropertyDataAsync(
+            new PropertyInitializationContext
+            {
+                Instance = instance,
+                PropertyInfo = property,
+                DataSource = dataSource,
+                PropertyName = property.Name,
+                PropertyType = property.PropertyType,
+                PropertySetter = propertySetter,
+                ObjectBag = objectBag,
+                MethodMetadata = methodMetadata,
+                Events = events,
+                VisitedObjects = visitedObjects,
+                TestContext = testContext,
+                IsNestedProperty = false
+            },
+            _dataSourceInitializer,
+            _objectRegistry);
+
+        if (resolvedValue == null)
+        {
+            return;
+        }
+
+        // Set the property value
+        propertySetter(instance, resolvedValue);
     }
 
     /// <summary>
@@ -97,82 +190,22 @@ internal sealed class PropertyInitializationOrchestrator
         TestContextEvents events,
         ConcurrentDictionary<object, byte> visitedObjects)
     {
-        // Initialize properties based on the mode
-        // Properties will be fully initialized (including nested initialization) by the strategies
+        if (plan.HasProperties == false)
+        {
+            return;
+        }
+
+        // Initialize properties based on the mode (source-generated or reflection)
         if (SourceRegistrar.IsEnabled)
         {
-            await InitializePropertiesAsync(
+            await InitializeSourceGeneratedPropertiesAsync(
                 instance, plan.SourceGeneratedProperties, objectBag, methodMetadata, events, visitedObjects);
         }
         else
         {
-            await InitializePropertiesAsync(
+            await InitializeReflectionPropertiesAsync(
                 instance, plan.ReflectionProperties, objectBag, methodMetadata, events, visitedObjects);
         }
     }
 
-    /// <summary>
-    /// Creates initialization context for source-generated properties.
-    /// </summary>
-    private PropertyInitializationContext CreateContext(
-        object instance,
-        PropertyInjectionMetadata metadata,
-        ConcurrentDictionary<string, object?> objectBag,
-        MethodMetadata? methodMetadata,
-        TestContextEvents events,
-        ConcurrentDictionary<object, byte> visitedObjects,
-        TestContext? testContext)
-    {
-        return new PropertyInitializationContext
-        {
-            Instance = instance,
-            SourceGeneratedMetadata = metadata,
-            PropertyName = metadata.PropertyName,
-            PropertyType = metadata.PropertyType,
-            PropertySetter = metadata.SetProperty,
-            ObjectBag = objectBag,
-            MethodMetadata = methodMetadata,
-            Events = events,
-            VisitedObjects = visitedObjects,
-            TestContext = testContext,
-            IsNestedProperty = false
-        };
-    }
-
-    /// <summary>
-    /// Creates initialization context for reflection-based properties.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection-based property setter creation is only used in reflection mode, not in AOT")]
-    #endif
-    private PropertyInitializationContext CreateContext(
-        object instance,
-        PropertyInfo property,
-        IDataSourceAttribute dataSource,
-        ConcurrentDictionary<string, object?> objectBag,
-        MethodMetadata? methodMetadata,
-        TestContextEvents events,
-        ConcurrentDictionary<object, byte> visitedObjects,
-        TestContext? testContext)
-    {
-        return new PropertyInitializationContext
-        {
-            Instance = instance,
-            PropertyInfo = property,
-            DataSource = dataSource,
-            PropertyName = property.Name,
-            PropertyType = property.PropertyType,
-            PropertySetter = PropertySetterFactory.CreateSetter(property),
-            ObjectBag = objectBag,
-            MethodMetadata = methodMetadata,
-            Events = events,
-            VisitedObjects = visitedObjects,
-            TestContext = testContext,
-            IsNestedProperty = false
-        };
-    }
-
-    /// <summary>
-    /// Gets the singleton instance of the orchestrator.
-    /// </summary>
 }

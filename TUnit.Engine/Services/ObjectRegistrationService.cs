@@ -11,7 +11,7 @@ namespace TUnit.Engine.Services;
 /// Responsibilities: Create instances, inject properties, track for disposal (ONCE per object).
 /// Does NOT call IAsyncInitializer - that's deferred to ObjectInitializationService during execution.
 /// </summary>
-internal sealed class ObjectRegistrationService
+internal sealed class ObjectRegistrationService : IObjectRegistry
 {
     private readonly PropertyInjectionService _propertyInjectionService;
 
@@ -67,7 +67,7 @@ internal sealed class ObjectRegistrationService
     public async Task RegisterArgumentsAsync(
         object?[] arguments,
         ConcurrentDictionary<string, object?> objectBag,
-        MethodMetadata methodMetadata,
+        MethodMetadata? methodMetadata,
         TestContextEvents events)
     {
         if (arguments == null || arguments.Length == 0)
