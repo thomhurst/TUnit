@@ -20,7 +20,7 @@ internal static class PropertyDataResolver
 #if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("Property data resolution uses reflection on property types")]
 #endif
-    public static async Task<object?> ResolvePropertyDataAsync(PropertyInitializationContext context, DataSourceInitializer dataSourceInitializer, ObjectRegistrationService objectRegistrationService)
+    public static async Task<object?> ResolvePropertyDataAsync(PropertyInitializationContext context, DataSourceInitializer dataSourceInitializer, IObjectRegistry objectRegistry)
     {
         var dataSource = await GetInitializedDataSourceAsync(context, dataSourceInitializer);
         if (dataSource == null)
@@ -55,8 +55,8 @@ internal static class PropertyDataResolver
                 // Otherwise, register if it has injectable properties
                 else if (PropertyInjectionCache.HasInjectableProperties(value.GetType()))
                 {
-                    // Use ObjectRegistrationService for registration (property injection + tracking, NO IAsyncInitializer)
-                    await objectRegistrationService.RegisterObjectAsync(
+                    // Use object registry for registration (property injection + tracking, NO IAsyncInitializer)
+                    await objectRegistry.RegisterObjectAsync(
                         value,
                         context.ObjectBag,
                         context.MethodMetadata,

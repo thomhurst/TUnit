@@ -10,17 +10,22 @@ namespace TUnit.Engine.Services;
 /// </summary>
 internal sealed class PropertyInjectionService
 {
-    private readonly PropertyInitializationOrchestrator _orchestrator;
+    private readonly DataSourceInitializer _dataSourceInitializer;
+    private PropertyInitializationOrchestrator _orchestrator;
 
     public PropertyInjectionService(DataSourceInitializer dataSourceInitializer)
     {
-        // We'll set ObjectRegistrationService later to break the circular dependency
+        _dataSourceInitializer = dataSourceInitializer ?? throw new ArgumentNullException(nameof(dataSourceInitializer));
         _orchestrator = new PropertyInitializationOrchestrator(dataSourceInitializer, null!);
     }
 
-    public void Initialize(ObjectRegistrationService objectRegistrationService)
+    /// <summary>
+    /// Completes initialization by providing the ObjectRegistrationService as IObjectRegistry.
+    /// This two-phase initialization breaks the circular dependency while maintaining type safety.
+    /// </summary>
+    public void Initialize(IObjectRegistry objectRegistry)
     {
-        _orchestrator.Initialize(objectRegistrationService);
+        _orchestrator = new PropertyInitializationOrchestrator(_dataSourceInitializer, objectRegistry);
     }
 
     /// <summary>
@@ -105,51 +110,6 @@ internal sealed class PropertyInjectionService
             if (alreadyProcessed && existingTask != null)
             {
                 await existingTask;
-
-                var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
-                if (plan.HasProperties)
-                {
-                    if (SourceRegistrar.IsEnabled)
-                    {
-                        foreach (var metadata in plan.SourceGeneratedProperties)
-                        {
-                            var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
-
-                            if (property == null || !property.CanRead)
-                            {
-                                continue;
-                            }
-
-                            var propertyValue = property.GetValue(instance);
-
-                            if (propertyValue == null)
-                            {
-                                continue;
-                            }
-
-                            if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
-                            {
-                                await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        foreach (var (property, _) in plan.ReflectionProperties)
-                        {
-                            var propertyValue = property.GetValue(instance);
-                            if (propertyValue == null)
-                            {
-                                continue;
-                            }
-
-                            if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
-                            {
-                                await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
-                            }
-                        }
-                    }
-                }
             }
             else
             {
@@ -157,55 +117,14 @@ internal sealed class PropertyInjectionService
                 {
                     var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
 
-                    // Use the new orchestrator for property initialization
+                    // Use the orchestrator for property initialization
                     await _orchestrator.InitializeObjectWithPropertiesAsync(
                         instance, plan, objectBag, methodMetadata, events, visitedObjects);
                 });
-
-                // After orchestrator completes, recursively inject nested properties
-                var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
-                if (plan.HasProperties)
-                {
-                    if (SourceRegistrar.IsEnabled)
-                    {
-                        foreach (var metadata in plan.SourceGeneratedProperties)
-                        {
-                            var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
-                            if (property == null || !property.CanRead)
-                            {
-                                continue;
-                            }
-
-                            var propertyValue = property.GetValue(instance);
-                            if (propertyValue == null)
-                            {
-                                continue;
-                            }
-
-                            if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
-                            {
-                                await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        foreach (var (property, _) in plan.ReflectionProperties)
-                        {
-                            var propertyValue = property.GetValue(instance);
-                            if (propertyValue == null)
-                            {
-                                continue;
-                            }
-
-                            if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
-                            {
-                                await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
-                            }
-                        }
-                    }
-                }
             }
+
+            // After properties are initialized, recursively inject nested properties
+            await RecurseIntoNestedPropertiesAsync(instance, objectBag, methodMetadata, events, visitedObjects);
         }
         catch (Exception ex)
         {
@@ -217,6 +136,63 @@ internal sealed class PropertyInjectionService
             }
 
             throw new InvalidOperationException(detailedMessage, ex);
+        }
+    }
+
+    /// <summary>
+    /// Recursively injects properties into nested objects that have injectable properties.
+    /// This is called after the direct properties of an object have been initialized.
+    /// </summary>
+    private async Task RecurseIntoNestedPropertiesAsync(
+        object instance,
+        ConcurrentDictionary<string, object?> objectBag,
+        MethodMetadata? methodMetadata,
+        TestContextEvents events,
+        ConcurrentDictionary<object, byte> visitedObjects)
+    {
+        var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
+        if (!plan.HasProperties)
+        {
+            return;
+        }
+
+        if (SourceRegistrar.IsEnabled)
+        {
+            foreach (var metadata in plan.SourceGeneratedProperties)
+            {
+                var property = metadata.ContainingType.GetProperty(metadata.PropertyName);
+                if (property == null || !property.CanRead)
+                {
+                    continue;
+                }
+
+                var propertyValue = property.GetValue(instance);
+                if (propertyValue == null)
+                {
+                    continue;
+                }
+
+                if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
+                {
+                    await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
+                }
+            }
+        }
+        else
+        {
+            foreach (var (property, _) in plan.ReflectionProperties)
+            {
+                var propertyValue = property.GetValue(instance);
+                if (propertyValue == null)
+                {
+                    continue;
+                }
+
+                if (PropertyInjectionCache.HasInjectableProperties(propertyValue.GetType()))
+                {
+                    await InjectPropertiesIntoObjectAsyncCore(propertyValue, objectBag, methodMetadata, events, visitedObjects);
+                }
+            }
         }
     }
 

@@ -101,14 +101,14 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             loggerFactory.CreateLogger<TUnitFrameworkLogger>(),
             logLevelProvider));
 
-        // Create initialization services early as they're needed by other services
+        // Create initialization services
+        // Note: Circular dependency managed through two-phase initialization
+        // Phase 1: Create services with partial dependencies
         DataSourceInitializer = Register(new DataSourceInitializer());
         PropertyInjectionService = Register(new PropertyInjectionService(DataSourceInitializer));
-
-        // NEW: Separate registration and execution services (replaces TestObjectInitializer)
         ObjectRegistrationService = Register(new ObjectRegistrationService(PropertyInjectionService));
 
-        // Initialize the circular dependencies
+        // Phase 2: Complete dependencies (Initialize methods accept IObjectRegistry to break circular dependency)
         PropertyInjectionService.Initialize(ObjectRegistrationService);
         DataSourceInitializer.Initialize(PropertyInjectionService);
 

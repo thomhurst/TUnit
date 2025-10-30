@@ -16,9 +16,13 @@ internal sealed class DataSourceInitializer
     private readonly object _lock = new();
     private PropertyInjectionService? _propertyInjectionService;
 
+    /// <summary>
+    /// Completes initialization by providing the PropertyInjectionService.
+    /// This two-phase initialization breaks the circular dependency.
+    /// </summary>
     public void Initialize(PropertyInjectionService propertyInjectionService)
     {
-        _propertyInjectionService = propertyInjectionService;
+        _propertyInjectionService = propertyInjectionService ?? throw new ArgumentNullException(nameof(propertyInjectionService));
     }
 
     /// <summary>
@@ -72,7 +76,7 @@ internal sealed class DataSourceInitializer
             events ??= new TestContextEvents();
 
             // Initialize the data source directly here
-            // Step 1: Property injection - use PropertyInjectionService if available
+            // Step 1: Property injection (if PropertyInjectionService has been initialized)
             if (_propertyInjectionService != null && PropertyInjectionCache.HasInjectableProperties(dataSource.GetType()))
             {
                 await _propertyInjectionService.InjectPropertiesIntoObjectAsync(
