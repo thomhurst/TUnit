@@ -65,7 +65,6 @@ internal class TestExecutor
         {
             await EnsureTestSessionHooksExecutedAsync().ConfigureAwait(false);
 
-            // Event receivers have their own internal coordination to run once
             await _eventReceiverOrchestrator.InvokeFirstTestInSessionEventReceiversAsync(
                 executableTest.Context,
                 executableTest.Context.ClassContext.AssemblyContext.TestSessionContext,
@@ -135,24 +134,17 @@ internal class TestExecutor
             }
         }
 
-        // If test passed but hooks failed, throw hook exception to fail the test
         if (capturedException == null && hookException != null)
         {
             ExceptionDispatchInfo.Capture(hookException).Throw();
         }
-
-        // If test failed or was skipped, handle the test exception
-        if (capturedException != null)
+        else if (capturedException is SkipTestException)
         {
-            if (capturedException is SkipTestException)
-            {
-                ExceptionDispatchInfo.Capture(capturedException).Throw();
-            }
-
-            if (executableTest.Context.Execution.Result?.IsOverridden != true)
-            {
-                ExceptionDispatchInfo.Capture(capturedException).Throw();
-            }
+            ExceptionDispatchInfo.Capture(capturedException).Throw();
+        }
+        else if (capturedException != null && executableTest.Context.Execution.Result?.IsOverridden != true)
+        {
+            ExceptionDispatchInfo.Capture(capturedException).Throw();
         }
     }
 
