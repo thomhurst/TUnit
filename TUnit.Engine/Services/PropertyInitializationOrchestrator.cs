@@ -20,7 +20,7 @@ internal sealed class PropertyInitializationOrchestrator
     public PropertyInitializationOrchestrator(DataSourceInitializer dataSourceInitializer, IObjectRegistry? objectRegistry)
     {
         _dataSourceInitializer = dataSourceInitializer ?? throw new ArgumentNullException(nameof(dataSourceInitializer));
-        _objectRegistry = objectRegistry!; // Will be set properly via re-creation in Initialize if null
+        _objectRegistry = objectRegistry!;
     }
 
     /// <summary>
