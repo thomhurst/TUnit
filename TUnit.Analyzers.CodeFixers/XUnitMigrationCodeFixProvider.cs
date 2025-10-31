@@ -16,12 +16,6 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
     protected override string DiagnosticId => Rules.XunitMigration.Id;
     protected override string CodeFixTitle => Rules.XunitMigration.Title.ToString();
 
-    // TODO: XUnit assertion conversion is implemented but tests don't cover it yet.
-    // The existing tests only test attribute migration without assertions.
-    // Setting this to false to keep existing tests passing.
-    // In real usage, if XUnit code has assertions, they WILL be converted by XUnitAssertionRewriter,
-    // but the usings won't be added automatically. Users would need to add them manually or
-    // we need to make this conditional based on whether assertions are actually present.
     protected override bool ShouldAddTUnitUsings() => false;
 
     protected override AttributeRewriter CreateAttributeRewriter(Compilation compilation)
@@ -519,7 +513,8 @@ public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 
         protected override bool IsFrameworkAssertionNamespace(string namespaceName)
         {
-            return namespaceName == "Xunit" || namespaceName.StartsWith("Xunit.");
+            return namespaceName.Equals("Xunit", StringComparison.OrdinalIgnoreCase) ||
+                   namespaceName.StartsWith("Xunit.", StringComparison.OrdinalIgnoreCase);
         }
 
         protected override ExpressionSyntax? ConvertAssertionIfNeeded(InvocationExpressionSyntax invocation)
