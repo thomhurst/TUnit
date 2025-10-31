@@ -73,9 +73,31 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
 
         updatedRoot = RemoveUsingDirectives(updatedRoot);
-        UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
 
-        // Apply all changes in one step
+        // Clean up trailing blank lines at end of file
+        if (updatedRoot is CompilationUnitSyntax compilationUnit)
+        {
+            // Get the last member (class, namespace, etc.)
+            var lastMember = compilationUnit.Members.LastOrDefault();
+            if (lastMember != null)
+            {
+                var trailingTrivia = lastMember.GetTrailingTrivia();
+                int newlineCount = trailingTrivia.Count(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
+
+                // Remove ALL trailing newlines at EOF - files should end immediately after closing brace
+                if (newlineCount > 0)
+                {
+                    var newTrivia = trailingTrivia
+                        .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
+                        .ToList();
+
+                    var newLastMember = lastMember.WithTrailingTrivia(newTrivia);
+                    updatedRoot = compilationUnit.ReplaceNode(lastMember, newLastMember);
+                }
+            }
+        }
+
+        // Apply all changes in one step, preserving original formatting
         return document.WithSyntaxRoot(updatedRoot);
     }
 
@@ -115,20 +137,46 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             currentRoot = currentRoot.RemoveNode(parameterSyntax, SyntaxRemoveOptions.KeepNoTrivia)!;
         }
 
-        while (currentRoot.DescendantNodes()
-                     .OfType<PropertyDeclarationSyntax>()
-                     .FirstOrDefault(x => x.Type.TryGetInferredMemberName() == "ITestOutputHelper")
-                     is { } propertyDeclarationSyntax)
-        {
-            currentRoot = currentRoot.RemoveNode(propertyDeclarationSyntax, SyntaxRemoveOptions.KeepNoTrivia)!;
-        }
+        // Collect all ITestOutputHelper members to remove
+        var membersToRemove = currentRoot.DescendantNodes()
+            .Where(n => (n is PropertyDeclarationSyntax prop && prop.Type.TryGetInferredMemberName() == "ITestOutputHelper") ||
+                        (n is FieldDeclarationSyntax field && field.Declaration.Type.TryGetInferredMemberName() == "ITestOutputHelper"))
+            .ToList();
 
-        while (currentRoot.DescendantNodes()
-                     .OfType<FieldDeclarationSyntax>()
-                     .FirstOrDefault(x => x.Declaration.Type.TryGetInferredMemberName() == "ITestOutputHelper")
-                     is { } fieldDeclarationSyntax)
+        // Remove them all at once with KeepNoTrivia
+        if (membersToRemove.Count > 0)
         {
-            currentRoot = currentRoot.RemoveNode(fieldDeclarationSyntax, SyntaxRemoveOptions.KeepNoTrivia)!;
+            currentRoot = currentRoot.RemoveNodes(membersToRemove, SyntaxRemoveOptions.KeepNoTrivia)!;
+
+            // After removal, find classes and fix excessive blank lines at the start
+            var classesToFix = currentRoot.DescendantNodes().OfType<ClassDeclarationSyntax>()
+                .Where(c => c.Members.Any())
+                .ToList();
+
+            foreach (var classDecl in classesToFix)
+            {
+                var firstMember = classDecl.Members.First();
+
+                // Check the first member's leading trivia
+                var leadingTrivia = firstMember.GetLeadingTrivia();
+
+                // Count newlines - we want exactly 0 blank lines (just indentation)
+                int newlineCount = leadingTrivia.Count(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
+
+                if (newlineCount > 0)
+                {
+                    // Keep only indentation (whitespace), remove all newlines
+                    var triviaToKeep = leadingTrivia
+                        .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
+                        .Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia) ||
+                                    (!t.IsKind(SyntaxKind.WhitespaceTrivia) && !t.IsKind(SyntaxKind.EndOfLineTrivia)))
+                        .ToList();
+
+                    var newFirstMember = firstMember.WithLeadingTrivia(triviaToKeep);
+                    var updatedClass = classDecl.ReplaceNode(firstMember, newFirstMember);
+                    currentRoot = currentRoot.ReplaceNode(classDecl, updatedClass);
+                }
+            }
         }
 
         return currentRoot;
@@ -177,25 +225,57 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 continue;
             }
 
-            var collectionItems = objectCreationExpressionSyntax.Initializer!
-                .ChildNodes()
-                .Select(x => x.DescendantNodesAndSelf().OfType<ExpressionSyntax>().First());
+            // Preserve the original initializer's trivia (including brace placement)
+            var originalInitializer = objectCreationExpressionSyntax.Initializer!;
 
-            var arrayCreationExpressionSyntax = SyntaxFactory.ArrayCreationExpression(
-                SyntaxFactory.ArrayType(genericNameSyntax.TypeArgumentList.Arguments[0],
-                    SyntaxFactory.SingletonList(
-                        SyntaxFactory.ArrayRankSpecifier(
-                            SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
-                                SyntaxFactory.OmittedArraySizeExpression()
-                            )
+            // Extract the collection items - these are the expressions inside the initializer
+            var collectionExpressions = originalInitializer.Expressions;
+
+            // Get the original array type (TimeSpan in this case)
+            var elementType = genericNameSyntax.TypeArgumentList.Arguments[0];
+
+            // Create the array type: TimeSpan[]
+            // Ensure no trailing trivia on the array type so the brace's leading trivia is respected
+            var arrayType = SyntaxFactory.ArrayType(elementType,
+                SyntaxFactory.SingletonList(
+                    SyntaxFactory.ArrayRankSpecifier(
+                        SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
+                            SyntaxFactory.OmittedArraySizeExpression()
                         )
                     )
-                ),
-                SyntaxFactory.InitializerExpression(
+                ))
+                .WithoutTrailingTrivia();
+
+            // Get the 'new' keyword token
+            var newKeyword = SyntaxFactory.Token(SyntaxKind.NewKeyword)
+                .WithLeadingTrivia(objectCreationExpressionSyntax.GetLeadingTrivia())
+                .WithTrailingTrivia(SyntaxFactory.Space);
+
+            // Ensure the opening brace has the newline + indentation in its leading trivia
+            // The original opening brace should already have this
+            var openBrace = originalInitializer.OpenBraceToken;
+            if (!openBrace.LeadingTrivia.Any(t => t.IsKind(SyntaxKind.EndOfLineTrivia)))
+            {
+                // If there's no newline, add one with proper indentation
+                openBrace = openBrace.WithLeadingTrivia(
+                    SyntaxFactory.CarriageReturnLineFeed,
+                    SyntaxFactory.Whitespace("    "));
+            }
+
+            // Preserve the original initializer structure with potentially updated opening brace
+            var newInitializer = SyntaxFactory.InitializerExpression(
                     SyntaxKind.ArrayInitializerExpression,
-                    SyntaxFactory.SeparatedList(collectionItems)
-                )
-            ).NormalizeWhitespace();
+                    openBrace,
+                    collectionExpressions,
+                    originalInitializer.CloseBraceToken);
+
+            // Create the array creation expression
+            var arrayCreationExpressionSyntax = SyntaxFactory.ArrayCreationExpression(
+                newKeyword,
+                arrayType,
+                newInitializer
+            )
+            .WithTrailingTrivia(objectCreationExpressionSyntax.GetTrailingTrivia());
 
             currentRoot = currentRoot.ReplaceNode(objectCreationExpressionSyntax, arrayCreationExpressionSyntax);
         }
@@ -204,12 +284,14 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         {
             var enumerableTypeSyntax = SyntaxFactory.GenericName(
                 SyntaxFactory.Identifier("IEnumerable"),
-                SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(genericTheoryDataTypeSyntax.TypeArgumentList.Arguments)));
+                SyntaxFactory.TypeArgumentList(SyntaxFactory.SeparatedList(genericTheoryDataTypeSyntax.TypeArgumentList.Arguments)))
+                .WithLeadingTrivia(genericTheoryDataTypeSyntax.GetLeadingTrivia())
+                .WithTrailingTrivia(genericTheoryDataTypeSyntax.GetTrailingTrivia());
 
             currentRoot = currentRoot.ReplaceNode(genericTheoryDataTypeSyntax, enumerableTypeSyntax);
         }
 
-        return currentRoot.NormalizeWhitespace();
+        return currentRoot;
     }
 
     private static SyntaxNode UpdateInitializeDispose(Compilation compilation, SyntaxNode root)
@@ -247,7 +329,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
             }
         }
 
-        return currentRoot.NormalizeWhitespace();
+        return currentRoot;
     }
 
     private static SyntaxNode RemoveInterfacesAndBaseClasses(Compilation compilation, SyntaxNode root)
@@ -304,7 +386,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 compilationUnit.Usings
                     .Where(x => x.Name?.ToString().StartsWith("Xunit") is false)
             )
-        ).NormalizeWhitespace();
+        );
     }
 
     private static SyntaxNode UpdateClassAttributes(Compilation compilation, SyntaxNode root)
@@ -324,6 +406,27 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         }
 
         return name.ToString();
+    }
+
+    private static AttributeArgumentListSyntax CreateArgumentListWithAddedArgument(
+        AttributeArgumentListSyntax existingList,
+        AttributeArgumentSyntax newArgument)
+    {
+        if (existingList.Arguments.Count == 0)
+        {
+            return existingList.AddArguments(newArgument);
+        }
+
+        // Preserve separator trivia by creating a new list with proper separators
+        var newArguments = new List<AttributeArgumentSyntax>(existingList.Arguments);
+        newArguments.Add(newArgument);
+
+        var separators = new List<SyntaxToken>(existingList.Arguments.GetSeparators());
+        // Add a comma with trailing space for the new argument
+        separators.Add(SyntaxFactory.Token(SyntaxKind.CommaToken).WithTrailingTrivia(SyntaxFactory.Space));
+
+        return SyntaxFactory.AttributeArgumentList(
+            SyntaxFactory.SeparatedList(newArguments, separators));
     }
 
     private static IEnumerable<AttributeSyntax> ConvertTestAttribute(AttributeSyntax attributeSyntax)
@@ -468,9 +571,14 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         public override SyntaxNode VisitAttributeList(AttributeListSyntax node)
         {
             var newAttributes = new List<AttributeSyntax>();
+            var separators = new List<SyntaxToken>();
 
-            foreach (var attr in node.Attributes)
+            // Preserve the original separators (commas with their trivia/spacing)
+            var originalSeparators = node.Attributes.GetSeparators().ToList();
+
+            for (int i = 0; i < node.Attributes.Count; i++)
             {
+                var attr = node.Attributes[i];
                 var name = GetSimpleName(attr);
 
                 var converted = name switch
@@ -483,7 +591,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                     [
                         SyntaxFactory.Attribute(
                             SyntaxFactory.IdentifierName("MethodDataSource"),
-                            (attr.ArgumentList ?? SyntaxFactory.AttributeArgumentList()).AddArguments(
+                            CreateArgumentListWithAddedArgument(attr.ArgumentList ?? SyntaxFactory.AttributeArgumentList(),
                                 SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
                                     SyntaxFactory.Literal("GetEnumerator")))))
                     ],
@@ -494,7 +602,26 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                     _ => [attr]
                 };
 
+                int attributesBeforeConversion = newAttributes.Count;
                 newAttributes.AddRange(converted);
+                int attributesAfterConversion = newAttributes.Count;
+
+                // Add separators for the newly added attributes
+                // If we added more than one attribute, add separators between them
+                for (int j = attributesBeforeConversion; j < attributesAfterConversion - 1; j++)
+                {
+                    // Use the original separator if available, otherwise create one with space
+                    var separator = i < originalSeparators.Count
+                        ? originalSeparators[i]
+                        : SyntaxFactory.Token(SyntaxKind.CommaToken).WithTrailingTrivia(SyntaxFactory.Space);
+                    separators.Add(separator);
+                }
+
+                // Add the original separator after this group of attributes if it exists
+                if (i < originalSeparators.Count && attributesAfterConversion > attributesBeforeConversion)
+                {
+                    separators.Add(originalSeparators[i]);
+                }
             }
 
             if (node.Attributes.SequenceEqual(newAttributes))
@@ -502,8 +629,9 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 return node;
             }
 
-            // Preserve original trivia instead of forcing elastic trivia
-            return SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(newAttributes))
+            // Create separated list with preserved separators
+            return SyntaxFactory.AttributeList(
+                    SyntaxFactory.SeparatedList(newAttributes, separators))
                 .WithLeadingTrivia(node.GetLeadingTrivia())
                 .WithTrailingTrivia(node.GetTrailingTrivia());
         }
@@ -548,9 +676,24 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
 
             if (newBaseList.Count == 0)
             {
-                // Preserve original trivia instead of forcing elastic trivia
-                return node.WithBaseList(null)
-                    .WithOpenBraceToken(node.OpenBraceToken.WithLeadingTrivia(node.BaseList!.GetTrailingTrivia()));
+                // When removing the entire base list, preserve the trailing trivia
+                // The base list's trailing trivia typically contains the newline before the opening brace
+                var baseListTrailingTrivia = node.BaseList.GetTrailingTrivia();
+
+                // Apply the trivia to the element before the base list (parameter list or identifier)
+                // REPLACE the trailing trivia rather than adding to it to avoid extra spaces
+                if (node.ParameterList != null)
+                {
+                    node = node.WithParameterList(
+                        node.ParameterList.WithTrailingTrivia(baseListTrailingTrivia));
+                }
+                else
+                {
+                    node = node.WithIdentifier(
+                        node.Identifier.WithTrailingTrivia(baseListTrailingTrivia));
+                }
+
+                return node.WithBaseList(null);
             }
 
             var baseListSyntax = node.BaseList!.WithTypes(SyntaxFactory.SeparatedList<BaseTypeSyntax>(newBaseList));
@@ -591,80 +734,199 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
 
             if (isTestClass)
             {
+                // Collect all replacements first, then apply them together
+                var replacements = new Dictionary<SyntaxNode, SyntaxNode>();
+
                 if (hasAsyncLifetime && GetInitializeMethod(node) is { } initializeMethod)
                 {
-                    node = node
-                        .AddMembers(
-                            SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("Task"), "InitializeAsync")
-                                .WithModifiers(initializeMethod.Modifiers)
-                                .WithBody(initializeMethod.Body)
-                                .WithAttributeLists(
-                                    SyntaxFactory.SingletonList(
-                                        SyntaxFactory.AttributeList(
-                                            SyntaxFactory.SingletonSeparatedList(
-                                                SyntaxFactory.Attribute(SyntaxFactory.ParseName("Before"), SyntaxFactory.ParseAttributeArgumentList("(Test)")))
-                                        )
-                                    )
-                                )
-                                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
-                        );
+                    var attributeList = SyntaxFactory.AttributeList(
+                        SyntaxFactory.SingletonSeparatedList(
+                            SyntaxFactory.Attribute(SyntaxFactory.ParseName("Before"), SyntaxFactory.ParseAttributeArgumentList("(Test)"))));
 
-                    node = node.RemoveNode(GetInitializeMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
+                    var newMethod = initializeMethod
+                        .WithReturnType(SyntaxFactory.ParseTypeName("Task").WithTrailingTrivia(SyntaxFactory.Space))
+                        .WithAttributeLists(SyntaxFactory.SingletonList(attributeList));
 
-                    node = node.WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
-                            node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IAsyncLifetime") is null or false))))
-                        .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
-
+                    replacements[initializeMethod] = newMethod;
                 }
 
                 if ((hasAsyncLifetime || hasAsyncDisposable) && GetDisposeAsyncMethod(node) is { } disposeAsyncMethod)
                 {
-                    node = node
-                        .AddMembers(
-                            SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("Task"), "DisposeAsync")
-                                .WithModifiers(disposeAsyncMethod.Modifiers)
-                                .WithBody(disposeAsyncMethod.Body)
-                                .WithAttributeLists(
-                                    SyntaxFactory.SingletonList(
-                                        SyntaxFactory.AttributeList(
-                                            SyntaxFactory.SingletonSeparatedList(
-                                                SyntaxFactory.Attribute(SyntaxFactory.ParseName("After"), SyntaxFactory.ParseAttributeArgumentList("(Test)")))
-                                        )
-                                    )
-                                )
-                                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
-                        );
+                    var attributeList = SyntaxFactory.AttributeList(
+                        SyntaxFactory.SingletonSeparatedList(
+                            SyntaxFactory.Attribute(SyntaxFactory.ParseName("After"), SyntaxFactory.ParseAttributeArgumentList("(Test)"))));
 
-                    node = node.RemoveNode(GetDisposeAsyncMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
+                    var newMethod = disposeAsyncMethod
+                        .WithReturnType(SyntaxFactory.ParseTypeName("Task").WithTrailingTrivia(SyntaxFactory.Space))
+                        .WithAttributeLists(SyntaxFactory.SingletonList(attributeList));
 
-                    node = node.WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
-                            node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IAsyncDisposable") is null or false))))
-                        .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
+                    replacements[disposeAsyncMethod] = newMethod;
                 }
 
                 if (hasDisposable && GetDisposeMethod(node) is { } disposeMethod)
                 {
-                    node = node
-                        .AddMembers(
-                            SyntaxFactory.MethodDeclaration(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)), "Dispose")
-                                .WithModifiers(disposeMethod.Modifiers)
-                                .WithBody(disposeMethod.Body)
-                                .WithAttributeLists(
-                                    SyntaxFactory.SingletonList(
-                                        SyntaxFactory.AttributeList(
-                                            SyntaxFactory.SingletonSeparatedList(
-                                                SyntaxFactory.Attribute(SyntaxFactory.ParseName("After"), SyntaxFactory.ParseAttributeArgumentList("(Test)")))
-                                        )
-                                    )
-                                )
-                                .WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed)
-                        );
+                    var attributeList = SyntaxFactory.AttributeList(
+                        SyntaxFactory.SingletonSeparatedList(
+                            SyntaxFactory.Attribute(SyntaxFactory.ParseName("After"), SyntaxFactory.ParseAttributeArgumentList("(Test)"))));
 
-                    node = node.RemoveNode(GetDisposeMethod(node)!, SyntaxRemoveOptions.AddElasticMarker)!.NormalizeWhitespace();
+                    var newMethod = disposeMethod
+                        .WithAttributeLists(SyntaxFactory.SingletonList(attributeList));
 
-                    node = node.WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
-                            node.BaseList!.Types.Where(x => x.Type.TryGetInferredMemberName()?.EndsWith("IDisposable") is null or false))))
-                        .WithTrailingTrivia(node.BaseList.GetTrailingTrivia());
+                    replacements[disposeMethod] = newMethod;
+                }
+
+                // Apply all replacements at once
+                if (replacements.Count > 0)
+                {
+                    node = node.ReplaceNodes(replacements.Keys, (oldNode, _) => replacements[oldNode]);
+                }
+
+                // Reorder methods: Test methods should come first, then Before/After methods
+                var testMethods = node.Members
+                    .OfType<MethodDeclarationSyntax>()
+                    .Where(m => m.AttributeLists.Any(al => al.Attributes.Any(a =>
+                        a.Name.ToString() is "Test" or "Fact" or "Theory")))
+                    .ToList();
+
+                var beforeAfterMethods = node.Members
+                    .OfType<MethodDeclarationSyntax>()
+                    .Where(m => m.AttributeLists.Any(al => al.Attributes.Any(a =>
+                        a.Name.ToString() is "Before" or "After")))
+                    .ToList();
+
+                var otherMembers = node.Members
+                    .Except(testMethods.Cast<MemberDeclarationSyntax>())
+                    .Except(beforeAfterMethods.Cast<MemberDeclarationSyntax>())
+                    .ToList();
+
+                // If we have both test methods and before/after methods, reorder
+                if (testMethods.Count > 0 && beforeAfterMethods.Count > 0)
+                {
+                    // Normalize trivia: all members should have blank line before them (except first)
+                    var allMethodsToReorder = new List<MethodDeclarationSyntax>();
+                    allMethodsToReorder.AddRange(testMethods);
+                    allMethodsToReorder.AddRange(beforeAfterMethods);
+
+                    var normalizedMethods = allMethodsToReorder.Select((m, i) =>
+                    {
+                        // Strip existing leading and trailing trivia, then set normalized trivia
+                        var strippedMethod = m.WithLeadingTrivia().WithTrailingTrivia();
+
+                        // Check if method has attributes
+                        var hasAttributes = strippedMethod.AttributeLists.Count > 0;
+
+                        if (hasAttributes)
+                        {
+                            // For methods with attributes, we need to:
+                            // 1. Set trivia on the attribute's first token
+                            // 2. Strip the attribute list's trailing trivia
+                            // 3. Set trivia on the first modifier token
+
+                            var firstToken = strippedMethod.GetFirstToken(); // This is the '[' token
+
+                            if (i == 0)
+                            {
+                                // First method: just indentation on attribute
+                                strippedMethod = strippedMethod.ReplaceToken(
+                                    firstToken,
+                                    firstToken.WithLeadingTrivia(SyntaxFactory.Whitespace("    ")));
+                            }
+                            else
+                            {
+                                // Subsequent methods: blank line + indentation on attribute
+                                strippedMethod = strippedMethod.ReplaceToken(
+                                    firstToken,
+                                    firstToken.WithLeadingTrivia(
+                                        SyntaxFactory.CarriageReturnLineFeed,
+                                        SyntaxFactory.Whitespace("    ")));
+                            }
+
+                            // Strip trailing trivia from all attribute lists to prevent extra newlines
+                            var attributeListsWithoutTrailing = strippedMethod.AttributeLists
+                                .Select(al => al.WithTrailingTrivia())
+                                .ToList();
+                            strippedMethod = strippedMethod.WithAttributeLists(
+                                SyntaxFactory.List(attributeListsWithoutTrailing));
+
+                            // Now get the first modifier AFTER the replacements
+                            var firstModifier = strippedMethod.Modifiers.FirstOrDefault();
+
+                            // Add newline + indentation before the modifier (public, etc.)
+                            if (firstModifier != default)
+                            {
+                                strippedMethod = strippedMethod.ReplaceToken(
+                                    firstModifier,
+                                    firstModifier.WithLeadingTrivia(
+                                        SyntaxFactory.CarriageReturnLineFeed,
+                                        SyntaxFactory.Whitespace("    ")));
+                            }
+
+                            return strippedMethod.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                        }
+                        else
+                        {
+                            // No attributes: set trivia on first token (modifier or return type)
+                            if (i == 0)
+                            {
+                                // First method: just indentation
+                                return strippedMethod
+                                    .WithLeadingTrivia(SyntaxFactory.Whitespace("    "))
+                                    .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                            }
+                            else
+                            {
+                                // Subsequent methods: blank line + indentation
+                                return strippedMethod.WithLeadingTrivia(
+                                    SyntaxFactory.CarriageReturnLineFeed,
+                                    SyntaxFactory.Whitespace("    ")
+                                ).WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+                            }
+                        }
+                    }).ToList();
+
+                    // New order: other members, then all normalized methods
+                    var reorderedMembers = new List<MemberDeclarationSyntax>();
+                    reorderedMembers.AddRange(otherMembers);
+                    reorderedMembers.AddRange(normalizedMethods);
+
+                    node = node.WithMembers(SyntaxFactory.List(reorderedMembers));
+                }
+
+                // Update base list to remove interfaces
+                var interfacesToRemove = new[] { "IAsyncLifetime", "IAsyncDisposable", "IDisposable" };
+                var newBaseTypes = node.BaseList!.Types
+                    .Where(x => !interfacesToRemove.Any(i => x.Type.TryGetInferredMemberName()?.EndsWith(i) == true))
+                    .ToList();
+
+                if (newBaseTypes.Count != node.BaseList.Types.Count)
+                {
+                    if (newBaseTypes.Count == 0)
+                    {
+                        // When removing the entire base list, preserve the trailing trivia
+                        // The base list's trailing trivia typically contains the newline before the opening brace
+                        var baseListTrailingTrivia = node.BaseList.GetTrailingTrivia();
+
+                        // Apply the trivia to the element before the base list (parameter list or identifier)
+                        // REPLACE the trailing trivia rather than adding to it to avoid extra spaces
+                        if (node.ParameterList != null)
+                        {
+                            node = node.WithParameterList(
+                                node.ParameterList.WithTrailingTrivia(baseListTrailingTrivia));
+                        }
+                        else
+                        {
+                            node = node.WithIdentifier(
+                                node.Identifier.WithTrailingTrivia(baseListTrailingTrivia));
+                        }
+
+                        node = node.WithBaseList(null);
+                    }
+                    else
+                    {
+                        node = node.WithBaseList(
+                            SyntaxFactory.BaseList(SyntaxFactory.SeparatedList<BaseTypeSyntax>(newBaseTypes))
+                                .WithTrailingTrivia(node.BaseList.GetTrailingTrivia()));
+                    }
                 }
             }
             else
@@ -672,8 +934,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 if (hasAsyncLifetime && GetInitializeMethod(node) is { } initializeMethod)
                 {
                     node = node
-                        .ReplaceNode(initializeMethod, initializeMethod.WithReturnType(SyntaxFactory.ParseTypeName("Task")))
-                        .NormalizeWhitespace();
+                        .ReplaceNode(initializeMethod, initializeMethod.WithReturnType(SyntaxFactory.ParseTypeName("Task").WithTrailingTrivia(SyntaxFactory.Space)));
 
                     node = node.WithBaseList(SyntaxFactory.BaseList(SyntaxFactory.SeparatedList(
                         [
@@ -690,14 +951,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                 }
             }
 
-            if (node.BaseList is not null && node.BaseList.Types.Count == 0)
-            {
-                node = node.WithBaseList(null)
-                    .WithOpenBraceToken(node.OpenBraceToken.WithLeadingTrivia(node.BaseList.GetTrailingTrivia()))
-                    .NormalizeWhitespace();
-            }
-
-            return node.NormalizeWhitespace();
+            return node;
 
             MethodDeclarationSyntax? GetInitializeMethod(ClassDeclarationSyntax classDeclaration)
             {

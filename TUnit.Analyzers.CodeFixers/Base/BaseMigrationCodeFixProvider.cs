@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Formatting;
 using TUnit.Analyzers.Migrators.Base;
 
 namespace TUnit.Analyzers.CodeFixers.Base;
@@ -72,16 +71,8 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             compilationUnit = MigrationHelpers.RemoveFrameworkUsings(compilationUnit, FrameworkName);
             compilationUnit = MigrationHelpers.AddTUnitUsings(compilationUnit);
 
-            // Format the document first
-            var documentWithNewRoot = document.WithSyntaxRoot(compilationUnit);
-            var formattedDocument = await Formatter.FormatAsync(documentWithNewRoot, options: null, cancellationToken).ConfigureAwait(false);
-
-            // Normalize all line endings to CRLF for cross-platform consistency
-            var text = await formattedDocument.GetTextAsync(cancellationToken).ConfigureAwait(false);
-            var normalizedContent = text.ToString().Replace("\r\n", "\n").Replace("\n", "\r\n");
-            var normalizedText = Microsoft.CodeAnalysis.Text.SourceText.From(normalizedContent, text.Encoding);
-
-            return formattedDocument.WithText(normalizedText);
+            // Return the document with updated syntax root, preserving original formatting
+            return document.WithSyntaxRoot(compilationUnit);
         }
         catch
         {
