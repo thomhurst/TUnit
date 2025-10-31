@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Interfaces;
 
@@ -32,10 +33,8 @@ public partial class TestDetails : ITestIdentity, ITestClass, ITestMethod, ITest
     public string TestFilePath { get; set; } = "";
     public int TestLineNumber { get; set; }
     public required Type ReturnType { get; set; }
-    public IDictionary<string, object?> TestClassInjectedPropertyArguments { get; init; } = new Dictionary<string, object?>();
-    public List<string> Categories { get; } =
-    [
-    ];
+    public IDictionary<string, object?> TestClassInjectedPropertyArguments { get; init; } = new ConcurrentDictionary<string, object?>();
+    public List<string> Categories { get; } = [];
     public Dictionary<string, List<string>> CustomProperties { get; } = new();
     public Type[]? TestClassParameterTypes { get; set; }
 
