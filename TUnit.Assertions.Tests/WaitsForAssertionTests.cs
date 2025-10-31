@@ -380,6 +380,35 @@ public class WaitsForAssertionTests
         }
     }
 
+    [Test]
+    public async Task WaitsFor_WithIsNotNull_ReturnsResolvedValue_Issue3623()
+    {
+        // Regression test for GitHub issue #3623
+        // WaitsFor was returning null instead of the resolved value when using IsNotNull()
+        TestEntity? currentValue = null;
+        var callCount = 0;
+
+        Func<TestEntity?> getEntity = () =>
+        {
+            callCount++;
+            if (callCount >= 3)
+            {
+                currentValue = new TestEntity { Id = 42, Name = "Resolved", IsReady = true };
+            }
+            return currentValue;
+        };
+
+        // This should wait until the entity is not null, then return the non-null entity
+        TestEntity? entity = await Assert.That(getEntity)
+            .WaitsFor(e => e.IsNotNull(), TimeSpan.FromSeconds(5));
+
+        // The bug was that entity would be null here, even though WaitsFor succeeded
+        await Assert.That(entity).IsNotNull();
+        await Assert.That(entity!.Id).IsEqualTo(42);
+        await Assert.That(entity.Name).IsEqualTo("Resolved");
+        await Assert.That(entity.IsReady).IsEqualTo(true);
+    }
+
     // Helper class for testing complex objects
     private class TestEntity
     {
