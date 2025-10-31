@@ -124,10 +124,11 @@ internal sealed class PropertyInitializationOrchestrator
         // Set the property value
         metadata.SetProperty(instance, resolvedValue);
 
-        // Store for potential reuse
-        if (testContext != null && !testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments.ContainsKey(metadata.PropertyName))
+        // Store for potential reuse (using TryAdd for thread-safe concurrent access)
+        if (testContext != null)
         {
-            testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments[metadata.PropertyName] = resolvedValue;
+            ((ConcurrentDictionary<string, object?>)testContext.Metadata.TestDetails.TestClassInjectedPropertyArguments)
+                .TryAdd(metadata.PropertyName, resolvedValue);
         }
     }
 
