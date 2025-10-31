@@ -15,27 +15,27 @@ public class MSTestMigrationCodeFixProvider : BaseMigrationCodeFixProvider
     protected override string DiagnosticId => Rules.MSTestMigration.Id;
     protected override string CodeFixTitle => "Convert MSTest code to TUnit";
     
-    protected override AttributeRewriter CreateAttributeRewriter()
+    protected override AttributeRewriter CreateAttributeRewriter(Compilation compilation)
     {
         return new MSTestAttributeRewriter();
     }
-    
-    protected override CSharpSyntaxRewriter CreateAssertionRewriter(SemanticModel semanticModel)
+
+    protected override CSharpSyntaxRewriter CreateAssertionRewriter(SemanticModel semanticModel, Compilation compilation)
     {
         return new MSTestAssertionRewriter(semanticModel);
     }
-    
-    protected override CSharpSyntaxRewriter CreateBaseTypeRewriter(SemanticModel semanticModel)
+
+    protected override CSharpSyntaxRewriter CreateBaseTypeRewriter(SemanticModel semanticModel, Compilation compilation)
     {
         return new MSTestBaseTypeRewriter();
     }
-    
-    protected override CSharpSyntaxRewriter CreateLifecycleRewriter()
+
+    protected override CSharpSyntaxRewriter CreateLifecycleRewriter(Compilation compilation)
     {
         return new MSTestLifecycleRewriter();
     }
-    
-    protected override CompilationUnitSyntax ApplyFrameworkSpecificConversions(CompilationUnitSyntax compilationUnit, SemanticModel semanticModel)
+
+    protected override CompilationUnitSyntax ApplyFrameworkSpecificConversions(CompilationUnitSyntax compilationUnit, SemanticModel semanticModel, Compilation compilation)
     {
         // MSTest-specific conversions if needed
         return compilationUnit;

@@ -5,59 +5,55 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Analyzers.CodeFixers.Base;
 
 namespace TUnit.Analyzers.CodeFixers;
 
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(XUnitMigrationCodeFixProvider)), Shared]
-public class XUnitMigrationCodeFixProvider : CodeFixProvider
+public class XUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
 {
-    public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
-        ImmutableArray.Create(Rules.XunitMigration.Id);
+    protected override string FrameworkName => "XUnit";
+    protected override string DiagnosticId => Rules.XunitMigration.Id;
+    protected override string CodeFixTitle => Rules.XunitMigration.Title.ToString();
 
-    public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
+    // XUnit doesn't add assertion usings - it only removes Xunit usings
+    protected override bool ShouldAddTUnitUsings() => false;
 
-    public sealed override Task RegisterCodeFixesAsync(CodeFixContext context)
+    protected override AttributeRewriter CreateAttributeRewriter(Compilation compilation)
     {
-        foreach (var diagnostic in context.Diagnostics)
-        {
-            context.RegisterCodeFix(
-                CodeAction.Create(
-                    title: Rules.XunitMigration.Title.ToString(),
-                    createChangedDocument: c => ConvertCodeAsync(context.Document, c),
-                    equivalenceKey: Rules.XunitMigration.Title.ToString()),
-                diagnostic);
-        }
-
-        return Task.CompletedTask;
+        return new XUnitAttributeRewriter();
     }
 
-    private static async Task<Document> ConvertCodeAsync(Document document, CancellationToken cancellationToken)
+    protected override CSharpSyntaxRewriter CreateAssertionRewriter(SemanticModel semanticModel, Compilation compilation)
     {
-        var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+        // XUnit doesn't need assertion conversion - return pass-through rewriter
+        return new PassThroughRewriter();
+    }
 
-        if (root is null)
-        {
-            return document;
-        }
+    protected override CSharpSyntaxRewriter CreateBaseTypeRewriter(SemanticModel semanticModel, Compilation compilation)
+    {
+        // XUnit base type conversion is complex and handled in ApplyFrameworkSpecificConversions
+        return new PassThroughRewriter();
+    }
 
-        var compilation = await document.Project.GetCompilationAsync(cancellationToken);
+    protected override CSharpSyntaxRewriter CreateLifecycleRewriter(Compilation compilation)
+    {
+        // XUnit lifecycle conversion is complex and handled in ApplyFrameworkSpecificConversions
+        return new PassThroughRewriter();
+    }
 
-        if (compilation is null)
-        {
-            return document;
-        }
+    // Simple pass-through rewriter that doesn't modify anything
+    private class PassThroughRewriter : CSharpSyntaxRewriter
+    {
+    }
 
-        var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
+    protected override CompilationUnitSyntax ApplyFrameworkSpecificConversions(CompilationUnitSyntax compilationUnit, SemanticModel semanticModel, Compilation compilation)
+    {
+        var syntaxTree = compilationUnit.SyntaxTree;
+        SyntaxNode updatedRoot = compilationUnit;
 
-        if (semanticModel is null)
-        {
-            return document;
-        }
-
-        var syntaxTree = root.SyntaxTree;
-
-        // Always use the latest updatedRoot as input for the next transformation
-        var updatedRoot = UpdateInitializeDispose(compilation, root);
+        // XUnit needs iterative compilation updates for complex transformations
+        updatedRoot = UpdateInitializeDispose(compilation, updatedRoot);
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
 
         updatedRoot = UpdateClassAttributes(compilation, updatedRoot);
@@ -72,33 +68,8 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         updatedRoot = ConvertTestOutputHelpers(ref compilation, ref syntaxTree, updatedRoot);
         UpdateSyntaxTrees(ref compilation, ref syntaxTree, ref updatedRoot);
 
-        updatedRoot = RemoveUsingDirectives(updatedRoot);
-
-        // Clean up trailing blank lines at end of file
-        if (updatedRoot is CompilationUnitSyntax compilationUnit)
-        {
-            // Get the last member (class, namespace, etc.)
-            var lastMember = compilationUnit.Members.LastOrDefault();
-            if (lastMember != null)
-            {
-                var trailingTrivia = lastMember.GetTrailingTrivia();
-                int newlineCount = trailingTrivia.Count(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
-
-                // Remove ALL trailing newlines at EOF - files should end immediately after closing brace
-                if (newlineCount > 0)
-                {
-                    var newTrivia = trailingTrivia
-                        .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
-                        .ToList();
-
-                    var newLastMember = lastMember.WithTrailingTrivia(newTrivia);
-                    updatedRoot = compilationUnit.ReplaceNode(lastMember, newLastMember);
-                }
-            }
-        }
-
-        // Apply all changes in one step, preserving original formatting
-        return document.WithSyntaxRoot(updatedRoot);
+        // Don't remove usings here - let the base class handle it
+        return (CompilationUnitSyntax)updatedRoot;
     }
 
     private static SyntaxNode ConvertTestOutputHelpers(ref Compilation compilation, ref SyntaxTree syntaxTree, SyntaxNode root)
@@ -147,36 +118,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         if (membersToRemove.Count > 0)
         {
             currentRoot = currentRoot.RemoveNodes(membersToRemove, SyntaxRemoveOptions.KeepNoTrivia)!;
-
-            // After removal, find classes and fix excessive blank lines at the start
-            var classesToFix = currentRoot.DescendantNodes().OfType<ClassDeclarationSyntax>()
-                .Where(c => c.Members.Any())
-                .ToList();
-
-            foreach (var classDecl in classesToFix)
-            {
-                var firstMember = classDecl.Members.First();
-
-                // Check the first member's leading trivia
-                var leadingTrivia = firstMember.GetLeadingTrivia();
-
-                // Count newlines - we want exactly 0 blank lines (just indentation)
-                int newlineCount = leadingTrivia.Count(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
-
-                if (newlineCount > 0)
-                {
-                    // Keep only indentation (whitespace), remove all newlines
-                    var triviaToKeep = leadingTrivia
-                        .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
-                        .Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia) ||
-                                    (!t.IsKind(SyntaxKind.WhitespaceTrivia) && !t.IsKind(SyntaxKind.EndOfLineTrivia)))
-                        .ToList();
-
-                    var newFirstMember = firstMember.WithLeadingTrivia(triviaToKeep);
-                    var updatedClass = classDecl.ReplaceNode(firstMember, newFirstMember);
-                    currentRoot = currentRoot.ReplaceNode(classDecl, updatedClass);
-                }
-            }
+            // Trivia cleanup will be handled by CleanupClassMemberLeadingTrivia in base class
         }
 
         return currentRoot;
@@ -392,7 +334,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
     private static SyntaxNode UpdateClassAttributes(Compilation compilation, SyntaxNode root)
     {
         // Always operate on the latest root
-        var rewriter = new AttributeRewriter(compilation);
+        var rewriter = new XUnitAttributeRewriterInternal(compilation);
         return rewriter.Visit(root);
     }
 
@@ -566,8 +508,36 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
         return null;
     }
 
-    private class AttributeRewriter(Compilation compilation) : CSharpSyntaxRewriter
+    // This is the AttributeRewriter for the base class pattern
+    private class XUnitAttributeRewriter : AttributeRewriter
     {
+        protected override string FrameworkName => "XUnit";
+
+        protected override bool IsFrameworkAttribute(string attributeName)
+        {
+            return attributeName is "Fact" or "FactAttribute" or "Theory" or "TheoryAttribute"
+                or "Trait" or "TraitAttribute" or "InlineData" or "InlineDataAttribute"
+                or "MemberData" or "MemberDataAttribute" or "ClassData" or "ClassDataAttribute"
+                or "Collection" or "CollectionAttribute" or "CollectionDefinition" or "CollectionDefinitionAttribute";
+        }
+
+        protected override AttributeArgumentListSyntax? ConvertAttributeArguments(AttributeArgumentListSyntax argumentList, string attributeName)
+        {
+            // XUnit attributes don't need special argument conversion - handled by XUnitAttributeRewriterInternal
+            return argumentList;
+        }
+    }
+
+    // Internal rewriter used by ApplyFrameworkSpecificConversions with compilation access
+    private class XUnitAttributeRewriterInternal : CSharpSyntaxRewriter
+    {
+        private readonly Compilation _compilation;
+
+        public XUnitAttributeRewriterInternal(Compilation compilation)
+        {
+            _compilation = compilation;
+        }
+
         public override SyntaxNode VisitAttributeList(AttributeListSyntax node)
         {
             var newAttributes = new List<AttributeSyntax>();
@@ -595,7 +565,7 @@ public class XUnitMigrationCodeFixProvider : CodeFixProvider
                                 SyntaxFactory.AttributeArgument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression,
                                     SyntaxFactory.Literal("GetEnumerator")))))
                     ],
-                    "Collection" or "CollectionAttribute" => ConvertCollection(compilation, attr),
+                    "Collection" or "CollectionAttribute" => ConvertCollection(_compilation, attr),
                     "CollectionDefinition" or "CollectionDefinitionAttribute" => [SyntaxFactory.Attribute(
                         SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),
                             SyntaxFactory.IdentifierName("Obsolete")))],

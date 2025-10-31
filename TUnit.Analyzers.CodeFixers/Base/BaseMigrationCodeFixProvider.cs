@@ -46,30 +46,40 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             return document;
         }
 
+        var compilation = semanticModel.Compilation;
+
         try
         {
             // Convert assertions FIRST (while semantic model still matches the syntax tree)
-            var assertionRewriter = CreateAssertionRewriter(semanticModel);
+            var assertionRewriter = CreateAssertionRewriter(semanticModel, compilation);
             compilationUnit = (CompilationUnitSyntax)assertionRewriter.Visit(compilationUnit);
 
             // Framework-specific conversions (also use semantic model while it still matches)
-            compilationUnit = ApplyFrameworkSpecificConversions(compilationUnit, semanticModel);
+            compilationUnit = ApplyFrameworkSpecificConversions(compilationUnit, semanticModel, compilation);
 
             // Remove unnecessary base classes and interfaces
-            var baseTypeRewriter = CreateBaseTypeRewriter(semanticModel);
+            var baseTypeRewriter = CreateBaseTypeRewriter(semanticModel, compilation);
             compilationUnit = (CompilationUnitSyntax)baseTypeRewriter.Visit(compilationUnit);
 
             // Update lifecycle methods
-            var lifecycleRewriter = CreateLifecycleRewriter();
+            var lifecycleRewriter = CreateLifecycleRewriter(compilation);
             compilationUnit = (CompilationUnitSyntax)lifecycleRewriter.Visit(compilationUnit);
 
             // Convert attributes
-            var attributeRewriter = CreateAttributeRewriter();
+            var attributeRewriter = CreateAttributeRewriter(compilation);
             compilationUnit = (CompilationUnitSyntax)attributeRewriter.Visit(compilationUnit);
 
             // Remove framework usings and add TUnit usings (do this LAST)
             compilationUnit = MigrationHelpers.RemoveFrameworkUsings(compilationUnit, FrameworkName);
-            compilationUnit = MigrationHelpers.AddTUnitUsings(compilationUnit);
+
+            if (ShouldAddTUnitUsings())
+            {
+                compilationUnit = MigrationHelpers.AddTUnitUsings(compilationUnit);
+            }
+
+            // Clean up trivia issues that can occur after transformations
+            compilationUnit = CleanupClassMemberLeadingTrivia(compilationUnit);
+            compilationUnit = CleanupEndOfFileTrivia(compilationUnit);
 
             // Return the document with updated syntax root, preserving original formatting
             return document.WithSyntaxRoot(compilationUnit);
@@ -80,12 +90,79 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             return document;
         }
     }
-    
-    protected abstract AttributeRewriter CreateAttributeRewriter();
-    protected abstract CSharpSyntaxRewriter CreateAssertionRewriter(SemanticModel semanticModel);
-    protected abstract CSharpSyntaxRewriter CreateBaseTypeRewriter(SemanticModel semanticModel);
-    protected abstract CSharpSyntaxRewriter CreateLifecycleRewriter();
-    protected abstract CompilationUnitSyntax ApplyFrameworkSpecificConversions(CompilationUnitSyntax compilationUnit, SemanticModel semanticModel);
+
+    protected abstract AttributeRewriter CreateAttributeRewriter(Compilation compilation);
+    protected abstract CSharpSyntaxRewriter CreateAssertionRewriter(SemanticModel semanticModel, Compilation compilation);
+    protected abstract CSharpSyntaxRewriter CreateBaseTypeRewriter(SemanticModel semanticModel, Compilation compilation);
+    protected abstract CSharpSyntaxRewriter CreateLifecycleRewriter(Compilation compilation);
+    protected abstract CompilationUnitSyntax ApplyFrameworkSpecificConversions(CompilationUnitSyntax compilationUnit, SemanticModel semanticModel, Compilation compilation);
+
+    /// <summary>
+    /// Determines whether to add TUnit usings (including assertion usings).
+    /// Override to return false for frameworks that don't need assertion usings (e.g., XUnit).
+    /// </summary>
+    protected virtual bool ShouldAddTUnitUsings() => true;
+
+    /// <summary>
+    /// Removes excessive blank lines at the start of class members (after opening brace).
+    /// This can occur after removing members like ITestOutputHelper fields/properties.
+    /// </summary>
+    protected static CompilationUnitSyntax CleanupClassMemberLeadingTrivia(CompilationUnitSyntax root)
+    {
+        var classesToFix = root.DescendantNodes().OfType<ClassDeclarationSyntax>()
+            .Where(c => c.Members.Any())
+            .ToList();
+
+        var currentRoot = root;
+        foreach (var classDecl in classesToFix)
+        {
+            var firstMember = classDecl.Members.First();
+            var leadingTrivia = firstMember.GetLeadingTrivia();
+            int newlineCount = leadingTrivia.Count(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
+
+            if (newlineCount > 0)
+            {
+                // Keep only indentation (whitespace), remove all newlines
+                var triviaToKeep = leadingTrivia
+                    .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
+                    .Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia) ||
+                                (!t.IsKind(SyntaxKind.WhitespaceTrivia) && !t.IsKind(SyntaxKind.EndOfLineTrivia)))
+                    .ToList();
+
+                var newFirstMember = firstMember.WithLeadingTrivia(triviaToKeep);
+                var updatedClass = classDecl.ReplaceNode(firstMember, newFirstMember);
+                currentRoot = currentRoot.ReplaceNode(classDecl, updatedClass);
+            }
+        }
+
+        return (CompilationUnitSyntax)currentRoot;
+    }
+
+    /// <summary>
+    /// Removes trailing blank lines at end of file.
+    /// Files should end immediately after the closing brace with no trailing newlines.
+    /// </summary>
+    protected static CompilationUnitSyntax CleanupEndOfFileTrivia(CompilationUnitSyntax compilationUnit)
+    {
+        var lastMember = compilationUnit.Members.LastOrDefault();
+        if (lastMember != null)
+        {
+            var trailingTrivia = lastMember.GetTrailingTrivia();
+            int newlineCount = trailingTrivia.Count(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
+
+            if (newlineCount > 0)
+            {
+                var newTrivia = trailingTrivia
+                    .Where(t => !t.IsKind(SyntaxKind.EndOfLineTrivia))
+                    .ToList();
+
+                var newLastMember = lastMember.WithTrailingTrivia(newTrivia);
+                return compilationUnit.ReplaceNode(lastMember, newLastMember);
+            }
+        }
+
+        return compilationUnit;
+    }
 }
 
 public abstract class AttributeRewriter : CSharpSyntaxRewriter
