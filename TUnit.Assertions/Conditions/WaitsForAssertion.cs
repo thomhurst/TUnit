@@ -57,8 +57,6 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
                 var assertion = _assertionBuilder(assertionSource);
                 await assertion.AssertAsync();
 
-                // Store the successfully resolved value so it can be returned
-                _resolvedValue = currentValue;
                 return AssertionResult.Passed;
             }
             catch (AssertionException ex)
@@ -93,12 +91,6 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
     }
 
     /// <summary>
-    /// The resolved value after the assertion passes.
-    /// This allows users to capture and use the value in downstream assertions.
-    /// </summary>
-    private TValue? _resolvedValue;
-
-    /// <summary>
     /// Executes the assertion and returns the resolved value upon success.
     /// This enables the pattern: Entity entity = await Assert.That(getEntity).WaitsFor(...);
     /// </summary>
@@ -107,8 +99,10 @@ public class WaitsForAssertion<TValue> : Assertion<TValue>
         // Execute the base assertion logic (which calls CheckAsync and handles the result)
         await base.AssertAsync();
 
-        // Return the resolved value that was stored when the assertion passed
-        return _resolvedValue;
+        // After CheckAsync succeeds, the context contains the updated value
+        // from the successful ReevaluateAsync call
+        var (value, _) = await Context.GetAsync();
+        return value;
     }
 
     protected override string GetExpectation() =>
