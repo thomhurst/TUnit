@@ -34,7 +34,7 @@ public sealed class HttpStatusCode_IsSuccess_Assertion : Assertion<HttpStatusCod
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsSuccess();
+        var result = value!.IsSuccess();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -71,7 +71,7 @@ public sealed class HttpStatusCode_IsNotSuccess_Assertion : Assertion<HttpStatus
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsNotSuccess();
+        var result = value!.IsNotSuccess();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -108,7 +108,7 @@ public sealed class HttpStatusCode_IsClientError_Assertion : Assertion<HttpStatu
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsClientError();
+        var result = value!.IsClientError();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -145,7 +145,7 @@ public sealed class HttpStatusCode_IsServerError_Assertion : Assertion<HttpStatu
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsServerError();
+        var result = value!.IsServerError();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -182,7 +182,7 @@ public sealed class HttpStatusCode_IsRedirection_Assertion : Assertion<HttpStatu
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsRedirection();
+        var result = value!.IsRedirection();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -219,7 +219,7 @@ public sealed class HttpStatusCode_IsInformational_Assertion : Assertion<HttpSta
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsInformational();
+        var result = value!.IsInformational();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -256,7 +256,7 @@ public sealed class HttpStatusCode_IsError_Assertion : Assertion<HttpStatusCode>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsError();
+        var result = value!.IsError();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));

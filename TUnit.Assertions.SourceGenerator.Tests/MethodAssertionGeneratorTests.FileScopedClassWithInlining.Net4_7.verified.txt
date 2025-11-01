@@ -5,7 +5,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TUnit.Assertions.Core;
-using TUnit.Assertions.Conditions;
+using TUnit.Assertions.Tests.TestData;
 
 namespace TUnit.Assertions.Extensions;
 
@@ -29,7 +29,7 @@ public sealed class Bool_IsTrue_Assertion : Assertion<bool>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value!.IsTrue();
+        var result = value == true;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -61,7 +61,7 @@ public sealed class Bool_IsFalse_Assertion : Assertion<bool>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value!.IsFalse();
+        var result = value == false;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -73,81 +73,7 @@ public sealed class Bool_IsFalse_Assertion : Assertion<bool>
     }
 }
 
-/// <summary>
-/// Generated assertion for IsTrue
-/// </summary>
-public sealed class NullableBool_IsTrue_Assertion : Assertion<bool?>
-{
-    public NullableBool_IsTrue_Assertion(AssertionContext<bool?> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<bool?> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value!.IsTrue();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be true";
-    }
-}
-
-/// <summary>
-/// Generated assertion for IsFalse
-/// </summary>
-public sealed class NullableBool_IsFalse_Assertion : Assertion<bool?>
-{
-    public NullableBool_IsFalse_Assertion(AssertionContext<bool?> context)
-        : base(context)
-    {
-    }
-
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<bool?> metadata)
-    {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        if (exception != null)
-        {
-            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
-        }
-
-        if (value is null)
-        {
-            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
-        }
-
-        var result = value!.IsFalse();
-        return Task.FromResult(result
-            ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}"));
-    }
-
-    protected override string GetExpectation()
-    {
-        return "to be false";
-    }
-}
-
-public static partial class BooleanAssertionExtensions
+public static partial class FileScopedBoolAssertions
 {
     /// <summary>
     /// Generated extension method for IsTrue
@@ -167,22 +93,104 @@ public static partial class BooleanAssertionExtensions
         return new Bool_IsFalse_Assertion(source.Context);
     }
 
-    /// <summary>
-    /// Generated extension method for IsTrue
-    /// </summary>
-    public static NullableBool_IsTrue_Assertion IsTrue(this IAssertionSource<bool?> source)
+}
+
+  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for IsPositive
+/// </summary>
+public sealed class Int_IsPositive_Assertion : Assertion<int>
+{
+    public Int_IsPositive_Assertion(AssertionContext<int> context)
+        : base(context)
     {
-        source.Context.ExpressionBuilder.Append(".IsTrue()");
-        return new NullableBool_IsTrue_Assertion(source.Context);
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value > 0;
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return "to be positive";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsGreaterThan
+/// </summary>
+public sealed class Int_IsGreaterThan_Int_Assertion : Assertion<int>
+{
+    private readonly int _threshold;
+
+    public Int_IsGreaterThan_Int_Assertion(AssertionContext<int> context, int threshold)
+        : base(context)
+    {
+        _threshold = threshold;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value > _threshold;
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"to be greater than {_threshold}";
+    }
+}
+
+public static partial class FileScopedIntAssertions
+{
+    /// <summary>
+    /// Generated extension method for IsPositive
+    /// </summary>
+    public static Int_IsPositive_Assertion IsPositive(this IAssertionSource<int> source)
+    {
+        source.Context.ExpressionBuilder.Append(".IsPositive()");
+        return new Int_IsPositive_Assertion(source.Context);
     }
 
     /// <summary>
-    /// Generated extension method for IsFalse
+    /// Generated extension method for IsGreaterThan
     /// </summary>
-    public static NullableBool_IsFalse_Assertion IsFalse(this IAssertionSource<bool?> source)
+    public static Int_IsGreaterThan_Int_Assertion IsGreaterThan(this IAssertionSource<int> source, int threshold, [CallerArgumentExpression(nameof(threshold))] string? thresholdExpression = null)
     {
-        source.Context.ExpressionBuilder.Append(".IsFalse()");
-        return new NullableBool_IsFalse_Assertion(source.Context);
+        source.Context.ExpressionBuilder.Append($".IsGreaterThan({thresholdExpression})");
+        return new Int_IsGreaterThan_Int_Assertion(source.Context, threshold);
     }
 
 }

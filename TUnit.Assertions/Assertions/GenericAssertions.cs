@@ -5,38 +5,20 @@ namespace TUnit.Assertions.Assertions;
 internal static class GenericAssertions
 {
     [GenerateAssertion]
-    public static bool IsIn<T>(this T value, IEnumerable<T> collection)
-    {
-        return collection.Contains(value);
-    }
+    public static bool IsIn<T>(this T value, IEnumerable<T> collection) => collection.Contains(value);
 
     [GenerateAssertion]
-    public static bool IsIn<T>(this T value, IEnumerable<T> collection, IEqualityComparer<T> equalityComparer)
-    {
-        return collection.Contains(value, equalityComparer);
-    }
+    public static bool IsIn<T>(this T value, IEnumerable<T> collection, IEqualityComparer<T> equalityComparer) => collection.Contains(value, equalityComparer);
 
     [GenerateAssertion]
-    public static bool IsIn<T>(this T value, params T[] collection)
-    {
-        return collection.Contains(value);
-    }
+    public static bool IsIn<T>(this T value, params T[] collection) => collection.Contains(value);
 
     [GenerateAssertion]
-    public static bool IsNotIn<T>(this T value, IEnumerable<T> collection)
-    {
-        return !collection.Contains(value);
-    }
+    public static bool IsNotIn<T>(this T value, IEnumerable<T> collection) => !collection.Contains(value);
 
     [GenerateAssertion]
-    public static bool IsNotIn<T>(this T value, IEnumerable<T> collection, IEqualityComparer<T> equalityComparer)
-    {
-        return !collection.Contains(value, equalityComparer);
-    }
+    public static bool IsNotIn<T>(this T value, IEnumerable<T> collection, IEqualityComparer<T> equalityComparer) => !collection.Contains(value, equalityComparer);
 
     [GenerateAssertion]
-    public static bool IsNotIn<T>(this T value, params T[] collection)
-    {
-        return !collection.Contains(value);
-    }
+    public static bool IsNotIn<T>(this T value, params T[] collection) => !collection.Contains(value);
 }

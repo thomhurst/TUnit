@@ -27,21 +27,9 @@ public static partial class ArrayAssertionExtensions
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to be a single-element collection")]
-    public static bool IsSingleElement<T>(this IEnumerable<T> value)
-    {
-        if (value == null) return false;
-        using var enumerator = value.GetEnumerator();
-        if (!enumerator.MoveNext()) return false; // Empty
-        return !enumerator.MoveNext(); // True if no second element
-    }
+    public static bool IsSingleElement<T>(this IEnumerable<T> value) => value != null && value.Skip(1).Take(1).Any() == false && value.Any();
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     [GenerateAssertion(ExpectationMessage = "to not be a single-element collection")]
-    public static bool IsNotSingleElement<T>(this IEnumerable<T> value)
-    {
-        if (value == null) return true;
-        using var enumerator = value.GetEnumerator();
-        if (!enumerator.MoveNext()) return true; // Empty - not single element
-        return enumerator.MoveNext(); // True if there's a second element
-    }
+    public static bool IsNotSingleElement<T>(this IEnumerable<T> value) => value == null || value.Skip(1).Take(1).Any() || !value.Any();
 }

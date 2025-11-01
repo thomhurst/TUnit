@@ -29,10 +29,10 @@ public sealed class Int_IsPositiveAsync_Assertion : Assertion<int>
             return AssertionResult.Failed($"threw {exception.GetType().FullName}");
         }
 
-        var result = await value.IsPositiveAsync();
+        var result = await value!.IsPositiveAsync();
         return result
             ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}");
+            : AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()
@@ -64,10 +64,10 @@ public sealed class Int_IsGreaterThanAsync_Int_Assertion : Assertion<int>
             return AssertionResult.Failed($"threw {exception.GetType().FullName}");
         }
 
-        var result = await value.IsGreaterThanAsync(_threshold);
+        var result = await value!.IsGreaterThanAsync(_threshold);
         return result
             ? AssertionResult.Passed
-            : AssertionResult.Failed($"found {value}");
+            : AssertionResult.Failed($"found {value}"));
     }
 
     protected override string GetExpectation()

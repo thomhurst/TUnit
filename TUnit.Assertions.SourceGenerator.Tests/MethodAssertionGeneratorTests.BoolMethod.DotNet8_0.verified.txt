@@ -29,7 +29,7 @@ public sealed class Int_IsPositive_Assertion : Assertion<int>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsPositive();
+        var result = value!.IsPositive();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -64,7 +64,7 @@ public sealed class Int_IsGreaterThan_Int_Assertion : Assertion<int>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsGreaterThan(_threshold);
+        var result = value!.IsGreaterThan(_threshold);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));

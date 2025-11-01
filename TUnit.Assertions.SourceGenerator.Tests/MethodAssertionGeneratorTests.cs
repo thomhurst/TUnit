@@ -36,7 +36,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).IsNotNull();
             await Assert.That(mainFile!).Contains("Int_IsEven_Assertion");
             await Assert.That(mainFile!).Contains("Int_IsBetween_Int_Int_Assertion");
-            await Assert.That(mainFile!).Contains("return Task.FromResult(value.IsEven())"); // AssertionResult wrapped in Task
+            await Assert.That(mainFile!).Contains("return Task.FromResult(value!.IsEven())"); // AssertionResult wrapped in Task
         });
 
     [Test]
@@ -84,7 +84,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsErrorOfType"));
             await Assert.That(mainFile).IsNotNull();
             // Verify the method call includes type arguments
-            await Assert.That(mainFile!).Contains("value.IsErrorOfType<TValue, TError>()");
+            await Assert.That(mainFile!).Contains("value!.IsErrorOfType<TValue, TError>()");
             // Verify the assertion class is generic
             await Assert.That(mainFile!).Contains("ResultTValue_IsErrorOfType_Assertion<TValue, TError>");
             // Verify the constraint is preserved
@@ -110,7 +110,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).Contains("IsGreaterThan<T>(this IAssertionSource<int> source");
 
             // Verify IsBetween generates with constraint
-            await Assert.That(mainFile).Contains("Int_IsBetween_T_Assertion<T>");
+            await Assert.That(mainFile).Contains("Int_IsBetween_T_T_Assertion<T>");
             await Assert.That(mainFile).Contains("IsBetween<T>(this IAssertionSource<int> source");
         });
 

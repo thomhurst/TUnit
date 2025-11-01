@@ -34,7 +34,7 @@ public sealed class Int_IsDefault_T_Assertion<T> : Assertion<int>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsDefault<T>(_obj);
+        var result = value!.IsDefault<T>(_obj);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
