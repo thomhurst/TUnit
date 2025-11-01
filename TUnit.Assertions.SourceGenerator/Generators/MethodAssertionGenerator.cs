@@ -487,9 +487,6 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             // For non-file-scoped types, we use partial classes to combine with the source definition
             var isFileScopedType = methodGroup.Any(m => m.IsFileScoped);
 
-            // TEMPORARY DEBUG: Always treat as file-scoped to test
-            isFileScopedType = true;
-
             var extensionClassName = isFileScopedType
                 ? $"{containingType.Name}Extensions"  // Standalone class for file-scoped types
                 : containingType.Name;                 // Partial class for public types
