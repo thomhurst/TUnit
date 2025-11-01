@@ -116,13 +116,6 @@ internal sealed class TestDependencyResolver
 
                 test.Dependencies = uniqueDependencies.Values.ToArray();
 
-                // Populate TestContext._dependencies with the TestDetails from resolved dependencies
-                test.Context._dependencies.Clear();
-                foreach (var dep in test.Dependencies)
-                {
-                    test.Context._dependencies.Add(dep.Test.Context.Metadata.TestDetails);
-                }
-
                 _testsWithPendingDependencies.Remove(test);
 
                 return true;
