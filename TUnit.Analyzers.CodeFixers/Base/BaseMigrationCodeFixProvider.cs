@@ -81,6 +81,9 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
             compilationUnit = CleanupClassMemberLeadingTrivia(compilationUnit);
             compilationUnit = CleanupEndOfFileTrivia(compilationUnit);
 
+            // Normalize line endings to match original document (fixes cross-platform issues)
+            compilationUnit = NormalizeLineEndings(compilationUnit, root);
+
             // Return the document with updated syntax root, preserving original formatting
             return document.WithSyntaxRoot(compilationUnit);
         }
@@ -162,6 +165,37 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
         }
 
         return compilationUnit;
+    }
+
+    /// <summary>
+    /// Normalizes all line endings in the compilation unit to match the original document.
+    /// This prevents mixed line endings that cause cross-platform test failures.
+    /// </summary>
+    private static CompilationUnitSyntax NormalizeLineEndings(CompilationUnitSyntax compilationUnit, SyntaxNode originalRoot)
+    {
+        // Detect the line ending used in the original document
+        var originalText = originalRoot.GetText().ToString();
+        var targetEol = originalText.Contains("\r\n") ? "\r\n" : "\n";
+
+        // Create a rewriter that replaces all EndOfLine trivia with the target line ending
+        var rewriter = new LineEndingNormalizer(targetEol);
+        return (CompilationUnitSyntax)rewriter.Visit(compilationUnit);
+    }
+
+    /// <summary>
+    /// Rewrites all EndOfLine trivia to use a consistent line ending style.
+    /// </summary>
+    private class LineEndingNormalizer(string lineEnding) : CSharpSyntaxRewriter(visitIntoStructuredTrivia: true)
+    {
+        public override SyntaxTrivia VisitTrivia(SyntaxTrivia trivia)
+        {
+            if (trivia.IsKind(SyntaxKind.EndOfLineTrivia))
+            {
+                return SyntaxFactory.EndOfLine(lineEnding);
+            }
+
+            return base.VisitTrivia(trivia);
+        }
     }
 }
 
