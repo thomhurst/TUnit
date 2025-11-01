@@ -78,7 +78,7 @@ public abstract class AbstractExecutableTest
             Duration = Duration,
             End = EndTime ??= DateTimeOffset.UtcNow,
             Start = StartTime ??= DateTimeOffset.UtcNow,
-            Output = Context.GetOutput() + Environment.NewLine + Environment.NewLine + Context.GetErrorOutput()
+            Output = string.Concat(Context.GetOutput(), Environment.NewLine, Environment.NewLine, Context.GetErrorOutput())
         };
     }
 }

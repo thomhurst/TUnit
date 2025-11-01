@@ -108,8 +108,10 @@ public class StringContainsAssertion : Assertion<string>
             return input;
         }
 
+#if NETSTANDARD2_0
+        // Use StringBuilder for netstandard2.0 compatibility
         var sb = new StringBuilder(input.Length);
-        foreach (var c in input)
+        foreach (char c in input)
         {
             if (!char.IsWhiteSpace(c))
             {
@@ -117,6 +119,23 @@ public class StringContainsAssertion : Assertion<string>
             }
         }
         return sb.ToString();
+#else
+        // Use Span<char> for better performance on modern .NET
+        Span<char> buffer = input.Length <= 256
+            ? stackalloc char[input.Length]
+            : new char[input.Length];
+
+        int writeIndex = 0;
+        foreach (char c in input)
+        {
+            if (!char.IsWhiteSpace(c))
+            {
+                buffer[writeIndex++] = c;
+            }
+        }
+
+        return new string(buffer.Slice(0, writeIndex));
+#endif
     }
 
     protected override string GetExpectation() => $"to contain \"{_expected}\"";

@@ -1,4 +1,5 @@
 using System.Runtime.ExceptionServices;
+using System.Text;
 using TUnit.Assertions.Exceptions;
 
 namespace TUnit.Assertions;
@@ -44,7 +45,17 @@ internal class AssertionScope : IDisposable
             ExceptionDispatchInfo.Capture(_exceptions[0]).Throw();
         }
 
-        var message = string.Join(Environment.NewLine + Environment.NewLine, _exceptions.Select(e => e.Message));
+        // Use StringBuilder for message concatenation instead of LINQ
+        var sb = new StringBuilder();
+        for (int i = 0; i < _exceptions.Count; i++)
+        {
+            if (i > 0)
+            {
+                sb.Append(Environment.NewLine).Append(Environment.NewLine);
+            }
+            sb.Append(_exceptions[i].Message);
+        }
+        var message = sb.ToString();
         throw new AssertionException(message, new AggregateException(_exceptions));
     }
 

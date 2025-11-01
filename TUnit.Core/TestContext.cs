@@ -103,7 +103,7 @@ public partial class TestContext : Context,
     internal Type? DisplayNameFormatter { get; set; }
 
     // New: Support multiple parallel constraints
-    private readonly List<IParallelConstraint> _parallelConstraints = [];
+    private List<IParallelConstraint>? _parallelConstraints;
 
 
     /// <summary>
@@ -111,9 +111,9 @@ public partial class TestContext : Context,
     /// </summary>
     public ClassHookContext ClassContext { get; }
 
-    internal List<Func<object?, string?>> ArgumentDisplayFormatters { get; } =
-    [
-    ];
+    private List<Func<object?, string?>>? _argumentDisplayFormatters;
+    internal List<Func<object?, string?>> ArgumentDisplayFormatters =>
+        _argumentDisplayFormatters ??= [];
 
 
     internal DiscoveredTest? InternalDiscoveredTest { get; set; }
@@ -149,7 +149,9 @@ public partial class TestContext : Context,
 
     internal AbstractExecutableTest InternalExecutableTest { get; set; } = null!;
 
-    internal ConcurrentDictionary<int, HashSet<object>> TrackedObjects { get; } = [];
+    private ConcurrentDictionary<int, HashSet<object>>? _trackedObjects;
+    internal ConcurrentDictionary<int, HashSet<object>> TrackedObjects =>
+        _trackedObjects ??= new();
 
 
 }

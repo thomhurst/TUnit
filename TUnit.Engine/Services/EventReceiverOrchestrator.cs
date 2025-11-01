@@ -93,10 +93,28 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestStartEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
-            context.GetEligibleEventObjects()
-                .OfType<ITestStartEventReceiver>()
-                .OrderBy(static r => r.Order));
+        // Manual filtering and sorting instead of LINQ to avoid allocations
+        var eligibleObjects = context.GetEligibleEventObjects();
+        List<ITestStartEventReceiver>? receivers = null;
+
+        foreach (var obj in eligibleObjects)
+        {
+            if (obj is ITestStartEventReceiver receiver)
+            {
+                receivers ??= [];
+                receivers.Add(receiver);
+            }
+        }
+
+        if (receivers == null)
+        {
+            return;
+        }
+
+        // Manual sort instead of OrderBy
+        receivers.Sort((a, b) => a.Order.CompareTo(b.Order));
+
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
 
         foreach (var receiver in filteredReceivers)
         {
@@ -117,11 +135,28 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
-            context.GetEligibleEventObjects()
-                .OfType<ITestEndEventReceiver>()
-                .OrderBy(static r => r.Order));
+        // Manual filtering and sorting instead of LINQ to avoid allocations
+        var eligibleObjects = context.GetEligibleEventObjects();
+        List<ITestEndEventReceiver>? receivers = null;
+
+        foreach (var obj in eligibleObjects)
+        {
+            if (obj is ITestEndEventReceiver receiver)
+            {
+                receivers ??= [];
+                receivers.Add(receiver);
+            }
+        }
+
+        if (receivers == null)
+        {
+            return;
+        }
+
+        // Manual sort instead of OrderBy
+        receivers.Sort((a, b) => a.Order.CompareTo(b.Order));
+
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
 
         foreach (var receiver in filteredReceivers)
         {
@@ -149,11 +184,28 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
     private async ValueTask InvokeTestSkippedEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
-        // Filter scoped attributes - FilterScopedAttributes will materialize the collection
-        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(
-            context.GetEligibleEventObjects()
-                .OfType<ITestSkippedEventReceiver>()
-                .OrderBy(static r => r.Order));
+        // Manual filtering and sorting instead of LINQ to avoid allocations
+        var eligibleObjects = context.GetEligibleEventObjects();
+        List<ITestSkippedEventReceiver>? receivers = null;
+
+        foreach (var obj in eligibleObjects)
+        {
+            if (obj is ITestSkippedEventReceiver receiver)
+            {
+                receivers ??= [];
+                receivers.Add(receiver);
+            }
+        }
+
+        if (receivers == null)
+        {
+            return;
+        }
+
+        // Manual sort instead of OrderBy
+        receivers.Sort((a, b) => a.Order.CompareTo(b.Order));
+
+        var filteredReceivers = ScopedAttributeFilter.FilterScopedAttributes(receivers);
 
         foreach (var receiver in filteredReceivers)
         {
