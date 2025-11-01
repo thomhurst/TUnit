@@ -5,7 +5,7 @@ namespace TUnit.Core;
 
 public partial class TestContext
 {
-    internal IReadOnlyList<IParallelConstraint> ParallelConstraints => _parallelConstraints;
+    internal IReadOnlyList<IParallelConstraint> ParallelConstraints => _parallelConstraints ?? [];
     internal Priority ExecutionPriority { get; set; } = Priority.Normal;
 
     IReadOnlyList<IParallelConstraint> ITestParallelization.Constraints => ParallelConstraints;
@@ -20,6 +20,7 @@ public partial class TestContext
     {
         if (constraint != null)
         {
+            _parallelConstraints ??= [];
             _parallelConstraints.Add(constraint);
         }
     }

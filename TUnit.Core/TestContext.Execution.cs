@@ -1,4 +1,5 @@
 using TUnit.Core.Enums;
+using TUnit.Core.Helpers;
 using TUnit.Core.Interfaces;
 
 namespace TUnit.Core;
@@ -112,7 +113,7 @@ public partial class TestContext
                 End = DateTimeOffset.UtcNow,
                 Duration = DateTimeOffset.UtcNow - (TestStart ?? DateTimeOffset.UtcNow),
                 Exception = exceptionForResult,
-                ComputerName = Environment.MachineName,
+                ComputerName = EnvironmentHelper.MachineName,
                 TestContext = this
             };
 

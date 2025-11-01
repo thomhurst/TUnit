@@ -9,13 +9,13 @@ namespace TUnit.Core;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The <see cref="CombinedDataSourceAttribute"/> allows you to apply different data source attributes
+/// The <see cref="CombinedDataSourcesAttribute"/> allows you to apply different data source attributes
 /// (such as <see cref="ArgumentsAttribute"/>, <see cref="MethodDataSourceAttribute"/>, <see cref="ClassDataSourceAttribute{T}"/>)
 /// to individual parameters, creating test cases from all combinations via Cartesian product.
 /// </para>
 /// <para>
 /// This is different from <see cref="MatrixDataSourceAttribute"/> which uses Matrix-specific attributes.
-/// CombinedDataSource works with ANY <see cref="IDataSourceAttribute"/>, providing maximum flexibility
+/// CombinedDataSources works with ANY <see cref="IDataSourceAttribute"/>, providing maximum flexibility
 /// for complex data-driven testing scenarios.
 /// </para>
 /// <para>
@@ -36,7 +36,7 @@ namespace TUnit.Core;
 /// <para><strong>Basic Usage with Arguments:</strong></para>
 /// <code>
 /// [Test]
-/// [CombinedDataSource]
+/// [CombinedDataSources]
 /// public void BasicTest(
 ///     [Arguments(1, 2, 3)] int x,
 ///     [Arguments("a", "b")] string y)
@@ -55,7 +55,7 @@ namespace TUnit.Core;
 /// }
 ///
 /// [Test]
-/// [CombinedDataSource]
+/// [CombinedDataSources]
 /// public void MixedTest(
 ///     [Arguments(1, 2)] int x,
 ///     [MethodDataSource(nameof(GetStrings))] string y,
@@ -69,7 +69,7 @@ namespace TUnit.Core;
 /// <para><strong>Multiple Data Sources on Same Parameter:</strong></para>
 /// <code>
 /// [Test]
-/// [CombinedDataSource]
+/// [CombinedDataSources]
 /// public void MultipleSourcesTest(
 ///     [Arguments(1, 2)]
 ///     [Arguments(3, 4)] int x,
@@ -81,7 +81,7 @@ namespace TUnit.Core;
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class CombinedDataSourceAttribute : AsyncUntypedDataSourceGeneratorAttribute, IAccessesInstanceData
+public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGeneratorAttribute, IAccessesInstanceData
 {
     protected override async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
@@ -93,12 +93,12 @@ public sealed class CombinedDataSourceAttribute : AsyncUntypedDataSourceGenerato
         if (parameterInformation.Length != dataGeneratorMetadata.MembersToGenerate.Length
             || parameterInformation.Length is 0)
         {
-            throw new Exception("[CombinedDataSource] only supports parameterised tests");
+            throw new Exception("[CombinedDataSources] only supports parameterised tests");
         }
 
         if (dataGeneratorMetadata.TestInformation == null)
         {
-            throw new InvalidOperationException("CombinedDataSource requires test information but none is available. This may occur during static property initialization.");
+            throw new InvalidOperationException("CombinedDataSources requires test information but none is available. This may occur during static property initialization.");
         }
 
         // For each parameter, collect all possible values (individual values, not arrays)
@@ -144,7 +144,7 @@ public sealed class CombinedDataSourceAttribute : AsyncUntypedDataSourceGenerato
 
         if (dataSourceAttributes.Length == 0)
         {
-            throw new InvalidOperationException($"Parameter '{parameterMetadata.Name}' has no data source attributes. All parameters must have at least one IDataSourceAttribute when using [CombinedDataSource].");
+            throw new InvalidOperationException($"Parameter '{parameterMetadata.Name}' has no data source attributes. All parameters must have at least one IDataSourceAttribute when using [CombinedDataSources].");
         }
 
         var allValues = new List<object?>();
@@ -191,8 +191,8 @@ public sealed class CombinedDataSourceAttribute : AsyncUntypedDataSourceGenerato
     {
         var values = new List<object?>();
 
-        // Special handling for ArgumentsAttribute when used on parameters with CombinedDataSource
-        // ArgumentsAttribute yields ONE row containing ALL values, but for CombinedDataSource we need
+        // Special handling for ArgumentsAttribute when used on parameters with CombinedDataSources
+        // ArgumentsAttribute yields ONE row containing ALL values, but for CombinedDataSources we need
         // each value to be treated as a separate option for this parameter
         if (dataSourceAttr is ArgumentsAttribute argsAttr)
         {

@@ -463,28 +463,28 @@
         <value>Data source may produce no tests</value>
     </data>
     <data name="TUnit0070Description" xml:space="preserve">
-        <value>When parameters have data source attributes, the method or class must be marked with [CombinedDataSource] to combine the parameter data sources.</value>
+        <value>When parameters have data source attributes, the method or class must be marked with [CombinedDataSources] to combine the parameter data sources.</value>
     </data>
     <data name="TUnit0070MessageFormat" xml:space="preserve">
-        <value>[CombinedDataSource] is required when parameters have data source attributes.</value>
+        <value>[CombinedDataSources] is required when parameters have data source attributes.</value>
     </data>
     <data name="TUnit0070Title" xml:space="preserve">
-        <value>[CombinedDataSource] attribute required</value>
+        <value>[CombinedDataSources] attribute required</value>
     </data>
     <data name="TUnit0071Description" xml:space="preserve">
-        <value>When [CombinedDataSource] is used, all parameters (except CancellationToken) must have data source attributes to provide test data.</value>
+        <value>When [CombinedDataSources] is used, all parameters (except CancellationToken) must have data source attributes to provide test data.</value>
     </data>
     <data name="TUnit0071MessageFormat" xml:space="preserve">
-        <value>Parameter '{0}' is missing a data source attribute. All parameters must have data sources when using [CombinedDataSource].</value>
+        <value>Parameter '{0}' is missing a data source attribute. All parameters must have data sources when using [CombinedDataSources].</value>
     </data>
     <data name="TUnit0071Title" xml:space="preserve">
         <value>Parameter missing data source attribute</value>
     </data>
     <data name="TUnit0072Description" xml:space="preserve">
-        <value>Using [CombinedDataSource] together with [MatrixDataSource] is not recommended as they serve different purposes and may cause confusion.</value>
+        <value>Using [CombinedDataSources] together with [MatrixDataSource] is not recommended as they serve different purposes and may cause confusion.</value>
     </data>
     <data name="TUnit0072MessageFormat" xml:space="preserve">
-        <value>[CombinedDataSource] should not be used with [MatrixDataSource]. Use one or the other.</value>
+        <value>[CombinedDataSources] should not be used with [MatrixDataSource]. Use one or the other.</value>
     </data>
     <data name="TUnit0072Title" xml:space="preserve">
         <value>Conflicting data source attributes</value>

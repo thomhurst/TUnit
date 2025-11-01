@@ -1,5 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Services.TestExecution;
 
@@ -27,7 +28,7 @@ internal sealed class TestStateManager
             End = now,
             Duration = now - test.StartTime.GetValueOrDefault(),
             Exception = null,
-            ComputerName = Environment.MachineName
+            ComputerName = EnvironmentHelper.MachineName
         };
 
         test.State = test.Result.State;
@@ -55,7 +56,7 @@ internal sealed class TestStateManager
                 Start = test.StartTime,
                 End = test.EndTime,
                 Duration = test.EndTime - test.StartTime.GetValueOrDefault(),
-                ComputerName = Environment.MachineName
+                ComputerName = EnvironmentHelper.MachineName
             };
         }
 
@@ -81,7 +82,7 @@ internal sealed class TestStateManager
             Start = test.StartTime.Value,
             End = test.EndTime,
             Duration = test.EndTime - test.StartTime.GetValueOrDefault(),
-            ComputerName = Environment.MachineName
+            ComputerName = EnvironmentHelper.MachineName
         };
 
         return Task.CompletedTask;
@@ -98,7 +99,7 @@ internal sealed class TestStateManager
             Start = now,
             End = now,
             Duration = TimeSpan.Zero,
-            ComputerName = Environment.MachineName
+            ComputerName = EnvironmentHelper.MachineName
         };
 
         return Task.CompletedTask;
@@ -117,7 +118,7 @@ internal sealed class TestStateManager
             Start = now,
             End = now,
             Duration = TimeSpan.Zero,
-            ComputerName = Environment.MachineName
+            ComputerName = EnvironmentHelper.MachineName
         };
 
         return Task.CompletedTask;

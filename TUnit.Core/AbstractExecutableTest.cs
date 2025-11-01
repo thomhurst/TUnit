@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using TUnit.Core.Helpers;
 using TUnit.Core.Models;
 
 namespace TUnit.Core;
@@ -8,7 +9,7 @@ public abstract class AbstractExecutableTest
 {
     public required string TestId { get; init; }
 
-    public virtual TestMetadata Metadata { get; init; } = null!;
+    public TestMetadata Metadata { get; init; } = null!;
 
     public required object?[] Arguments { get; init; }
 
@@ -70,15 +71,26 @@ public abstract class AbstractExecutableTest
     public void SetResult(TestState state, Exception? exception = null)
     {
         State = state;
+
+        // Lazy output building - avoid string allocation when there's no output
+        var output = Context.GetOutput();
+        var errorOutput = Context.GetErrorOutput();
+        var combinedOutput = string.Empty;
+
+        if (output.Length > 0 || errorOutput.Length > 0)
+        {
+            combinedOutput = string.Concat(output, Environment.NewLine, Environment.NewLine, errorOutput);
+        }
+
         Context.Execution.Result ??= new TestResult
         {
             State = state,
             Exception = exception,
-            ComputerName = Environment.MachineName,
+            ComputerName = EnvironmentHelper.MachineName,
             Duration = Duration,
             End = EndTime ??= DateTimeOffset.UtcNow,
             Start = StartTime ??= DateTimeOffset.UtcNow,
-            Output = Context.GetOutput() + Environment.NewLine + Environment.NewLine + Context.GetErrorOutput()
+            Output = combinedOutput
         };
     }
 }

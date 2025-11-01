@@ -410,7 +410,7 @@ internal sealed class TestBuilderPipeline
                 End = DateTimeOffset.UtcNow,
                 Duration = TimeSpan.Zero,
                 Exception = exception,
-                ComputerName = Environment.MachineName,
+                ComputerName = EnvironmentHelper.MachineName,
                 TestContext = context
             }
         };
@@ -461,7 +461,7 @@ internal sealed class TestBuilderPipeline
                 End = DateTimeOffset.UtcNow,
                 Duration = TimeSpan.Zero,
                 Exception = exception,
-                ComputerName = Environment.MachineName,
+                ComputerName = EnvironmentHelper.MachineName,
                 TestContext = context
             }
         };

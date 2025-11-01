@@ -3,7 +3,7 @@ using TUnit.TestProject.Attributes;
 namespace TUnit.TestProject;
 
 /// <summary>
-/// Tests for error scenarios with CombinedDataSource
+/// Tests for error scenarios with CombinedDataSources
 /// These tests are expected to fail during test initialization
 /// </summary>
 public class CombinedDataSourceErrorTests
@@ -12,7 +12,7 @@ public class CombinedDataSourceErrorTests
     // They should fail during test discovery/initialization, not during execution
 
     // [Test]
-    // [CombinedDataSource]
+    // [CombinedDataSources]
     // public async Task ParameterWithoutDataSource_ShouldFail(
     //     [Arguments(1, 2)] int x,
     //     int y) // Missing data source attribute - should fail
@@ -21,7 +21,7 @@ public class CombinedDataSourceErrorTests
     // }
 
     // [Test]
-    // [CombinedDataSource]
+    // [CombinedDataSources]
     // public async Task NoParametersWithDataSources_ShouldFail()
     // {
     //     // Should fail because there are no parameters with data sources
@@ -44,7 +44,7 @@ public class CombinedDataSourceEdgeCaseTests
     // Note: SkipIfEmpty is not a property of MethodDataSource
     // This test is commented out for now
     // [Test]
-    // [CombinedDataSource]
+    // [CombinedDataSources]
     // public async Task EmptyDataSource_ShouldHandleGracefully(
     //     [Arguments(1)] int x,
     //     [MethodDataSource(nameof(GetEmptyStrings))] string y)
@@ -54,7 +54,7 @@ public class CombinedDataSourceEdgeCaseTests
     // }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task ParameterWithNullValues(
         [Arguments(null, 1, 2)] int? x,
         [Arguments(null, "a")] string? y)

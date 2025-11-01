@@ -6,7 +6,7 @@ using TUnit.Analyzers.Extensions;
 namespace TUnit.Analyzers;
 
 /// <summary>
-/// Analyzer for CombinedDataSource validation
+/// Analyzer for CombinedDataSources validation
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class CombinedDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
@@ -66,7 +66,7 @@ public class CombinedDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
             .Where(p => p.HasDataSourceAttribute(context.Compilation))
             .ToList();
 
-        // Rule 1: If parameters have data source attributes, CombinedDataSource must be present
+        // Rule 1: If parameters have data source attributes, CombinedDataSources must be present
         if (parametersWithDataSources.Any() && !hasCombinedDataSource)
         {
             context.ReportDiagnostic(
@@ -75,7 +75,7 @@ public class CombinedDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
             );
         }
 
-        // Rule 2: If CombinedDataSource is present, all parameters must have data sources
+        // Rule 2: If CombinedDataSources is present, all parameters must have data sources
         if (hasCombinedDataSource)
         {
             // Filter out CancellationToken parameters as they're handled by the engine
@@ -96,7 +96,7 @@ public class CombinedDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
                 }
             }
 
-            // Rule 3: Warn if mixing CombinedDataSource with MatrixDataSource
+            // Rule 3: Warn if mixing CombinedDataSources with MatrixDataSource
             var hasMatrixDataSource = attributes.Any(x => x.IsMatrixDataSourceAttribute(context.Compilation));
             if (hasMatrixDataSource)
             {

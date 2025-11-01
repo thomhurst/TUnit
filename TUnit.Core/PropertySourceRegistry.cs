@@ -222,7 +222,15 @@ public static class PropertySourceRegistry
             return field;
         }
 
+#if NET8_0_OR_GREATER
+        Span<char> buffer = stackalloc char[property.Name.Length + 1];
+        buffer[0] = '_';
+        buffer[1] = char.ToLowerInvariant(property.Name[0]);
+        property.Name.AsSpan(1).CopyTo(buffer.Slice(2));
+        var underscoreName = new string(buffer);
+#else
         var underscoreName = "_" + char.ToLowerInvariant(property.Name[0]) + property.Name.Substring(1);
+#endif
         field = GetFieldSafe(declaringType, underscoreName, backingFieldFlags);
 
         if (field != null && field.FieldType == property.PropertyType)
