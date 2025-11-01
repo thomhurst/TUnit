@@ -148,15 +148,20 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             }
         }
 
-        // Extract attributes that should be copied to generated code (suppression and diagnostic attributes)
-        var suppressionAttributes = new List<string>();
+        // Extract attributes that should be copied to generated code
+        // Split into two categories:
+        // 1. Suppression attributes (for CheckAsync method - to suppress warnings in generated code)
+        // 2. Diagnostic attributes (for extension method - to warn users)
+        var suppressionAttributesForCheckAsync = new List<string>();
+        var diagnosticAttributesForExtensionMethod = new List<string>();
+
         foreach (var attr in methodSymbol.GetAttributes())
         {
             var attributeClass = attr.AttributeClass;
             if (attributeClass == null || attributeClass.ContainingNamespace?.ToDisplayString() != "System.Diagnostics.CodeAnalysis")
                 continue;
 
-            // Handle UnconditionalSuppressMessage
+            // Handle UnconditionalSuppressMessage - goes to CheckAsync
             if (attributeClass.Name == "UnconditionalSuppressMessageAttribute" && attr.ConstructorArguments.Length >= 2)
             {
                 var category = attr.ConstructorArguments[0].Value?.ToString();
@@ -174,10 +179,10 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
                 if (!string.IsNullOrEmpty(category) && !string.IsNullOrEmpty(checkId))
                 {
-                    suppressionAttributes.Add($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"{category}\", \"{checkId}\"{justification})]");
+                    suppressionAttributesForCheckAsync.Add($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"{category}\", \"{checkId}\"{justification})]");
                 }
             }
-            // Handle RequiresUnreferencedCode
+            // Handle RequiresUnreferencedCode - goes to extension method AND add suppression to CheckAsync
             else if (attributeClass.Name == "RequiresUnreferencedCodeAttribute" && attr.ConstructorArguments.Length >= 1)
             {
                 var message = attr.ConstructorArguments[0].Value?.ToString();
@@ -194,10 +199,13 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
                 if (!string.IsNullOrEmpty(message))
                 {
-                    suppressionAttributes.Add($"[System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{message}\"{urlPart})]");
+                    // Add to extension method so users see the warning
+                    diagnosticAttributesForExtensionMethod.Add($"[System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{message}\"{urlPart})]");
+                    // Add suppression to CheckAsync to avoid IL2046 (can't override without matching attributes)
+                    suppressionAttributesForCheckAsync.Add($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"IL2026\", Justification = \"Caller is already warned via RequiresUnreferencedCode on extension method\")]");
                 }
             }
-            // Handle RequiresDynamicCode
+            // Handle RequiresDynamicCode - goes to extension method AND add suppression to CheckAsync
             else if (attributeClass.Name == "RequiresDynamicCodeAttribute" && attr.ConstructorArguments.Length >= 1)
             {
                 var message = attr.ConstructorArguments[0].Value?.ToString();
@@ -214,7 +222,10 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
                 if (!string.IsNullOrEmpty(message))
                 {
-                    suppressionAttributes.Add($"[System.Diagnostics.CodeAnalysis.RequiresDynamicCode(\"{message}\"{urlPart})]");
+                    // Add to extension method so users see the warning
+                    diagnosticAttributesForExtensionMethod.Add($"[System.Diagnostics.CodeAnalysis.RequiresDynamicCode(\"{message}\"{urlPart})]");
+                    // Add suppression to CheckAsync
+                    suppressionAttributesForCheckAsync.Add($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"AOT\", \"IL3050\", Justification = \"Caller is already warned via RequiresDynamicCode on extension method\")]");
                 }
             }
         }
@@ -257,7 +268,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             customExpectation,
             isFileScoped,
             methodBody,
-            suppressionAttributes.ToImmutableArray()
+            suppressionAttributesForCheckAsync.ToImmutableArray(),
+            diagnosticAttributesForExtensionMethod.ToImmutableArray()
         );
 
         return (data, null);
@@ -557,9 +569,9 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var asyncKeyword = needsAsync ? "async " : "";
 
         // Add suppression attributes to CheckAsync method when method body is inlined
-        if (!string.IsNullOrEmpty(data.MethodBody) && data.SuppressionAttributes.Length > 0)
+        if (!string.IsNullOrEmpty(data.MethodBody) && data.SuppressionAttributesForCheckAsync.Length > 0)
         {
-            foreach (var suppressionAttr in data.SuppressionAttributes)
+            foreach (var suppressionAttr in data.SuppressionAttributesForCheckAsync)
             {
                 sb.AppendLine($"    {suppressionAttr}");
             }
@@ -785,6 +797,15 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             sb.AppendLine($"    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"IL2091\", Justification = \"Generic type parameter is only used for property access, not instantiation\")]");
         }
 
+        // Add diagnostic attributes (RequiresUnreferencedCode, RequiresDynamicCode) to extension method
+        if (data.DiagnosticAttributesForExtensionMethod.Length > 0)
+        {
+            foreach (var diagnosticAttr in data.DiagnosticAttributesForExtensionMethod)
+            {
+                sb.AppendLine($"    {diagnosticAttr}");
+            }
+        }
+
         // Method signature
         sb.Append($"    public static {className}{genericDeclaration} {methodName}{genericDeclaration}(");
         sb.Append($"this IAssertionSource<{targetTypeName}> source");
@@ -980,6 +1001,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         string? CustomExpectation,
         bool IsFileScoped,
         string? MethodBody,
-        ImmutableArray<string> SuppressionAttributes
+        ImmutableArray<string> SuppressionAttributesForCheckAsync,
+        ImmutableArray<string> DiagnosticAttributesForExtensionMethod
     );
 }
