@@ -42,4 +42,9 @@ public static class ParameterExtensions
     {
         return parameterSymbol.GetAttributes().Any(x => x.IsMatrixAttribute(compilation));
     }
+
+    public static bool HasDataSourceAttribute(this IParameterSymbol parameterSymbol, Compilation compilation)
+    {
+        return parameterSymbol.GetAttributes().Any(x => x.IsDataSourceAttribute(compilation));
+    }
 }

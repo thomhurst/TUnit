@@ -5,13 +5,13 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
 public class MethodDataSourceAttribute<
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)]
 T>(string methodNameProvidingDataSource)
     : MethodDataSourceAttribute(typeof(T), methodNameProvidingDataSource);
 
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
 public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 {
     private const BindingFlags BindingFlags = System.Reflection.BindingFlags.Public

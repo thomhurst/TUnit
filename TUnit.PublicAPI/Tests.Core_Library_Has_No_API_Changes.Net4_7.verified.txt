@@ -65,7 +65,7 @@ namespace
         public ArgumentDisplayFormatterAttribute() { }
         public override .ArgumentDisplayFormatter Formatter { get; }
     }
-    [(.Class | .Method | .Property, AllowMultiple=true)]
+    [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
     public sealed class ArgumentsAttribute : , .IDataSourceAttribute, ., .
     {
         public ArgumentsAttribute(params object?[]? values) { }
@@ -77,7 +77,7 @@ namespace
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
-    [(.Class | .Method | .Property, AllowMultiple=true)]
+    [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
     public sealed class ArgumentsAttribute<T> : .TypedDataSourceAttribute<T>, ., .
     {
         public ArgumentsAttribute(T value) { }
@@ -236,7 +236,7 @@ namespace
         public required .TestBuilderContext TestBuilderContext { get; init; }
         public required string TestSessionId { get; init; }
     }
-    [(.Class | .Method | .Property, AllowMultiple=true)]
+    [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
     public sealed class ClassDataSourceAttribute : .UntypedDataSourceGeneratorAttribute
     {
         public ClassDataSourceAttribute( type) { }
@@ -251,7 +251,7 @@ namespace
         public .<string> GetKeys() { }
         public .<.SharedType> GetSharedTypes() { }
     }
-    [(.Class | .Method | .Property, AllowMultiple=true)]
+    [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
     public sealed class ClassDataSourceAttribute<T> : .DataSourceGeneratorAttribute<T>
     {
         public ClassDataSourceAttribute() { }
@@ -350,6 +350,13 @@ namespace
         public override int GetHashCode() { }
         public static .ClassMetadata GetOrAdd(string name, <.ClassMetadata> factory) { }
     }
+    [(.Class | .Method)]
+    public sealed class CombinedDataSourceAttribute : .AsyncUntypedDataSourceGeneratorAttribute, .IAccessesInstanceData
+    {
+        public CombinedDataSourceAttribute() { }
+        [.(typeof(.CombinedDataSourceAttribute.<GenerateDataSourcesAsync>d__0))]
+        protected override .<<.<object?[]?>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
+    }
     public sealed class ConcreteType : .TypeInfo, <.ConcreteType>
     {
         public ConcreteType( Type) { }
@@ -432,7 +439,7 @@ namespace
         public DataSourceException(string dataSourceName, string message) { }
         public string DataSourceName { get; }
     }
-    [(.Class | .Method | .Property, AllowMultiple=true)]
+    [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
     public abstract class DataSourceGeneratorAttribute<T> : .AsyncDataSourceGeneratorAttribute<T>
     {
         protected DataSourceGeneratorAttribute() { }
@@ -440,7 +447,7 @@ namespace
         [.(typeof(.DataSourceGeneratorAttribute<T>.<GenerateDataSourcesAsync>d__1))]
         protected override .<<.<T>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
-    [(.Class | .Method, AllowMultiple=true)]
+    [(.Class | .Method | .Parameter, AllowMultiple=true)]
     public abstract class DataSourceGeneratorAttribute<T1, T2> : .AsyncDataSourceGeneratorAttribute<T1, T2>
     {
         protected DataSourceGeneratorAttribute() { }
@@ -448,7 +455,7 @@ namespace
         [.(typeof(.DataSourceGeneratorAttribute<T1, T2>.<GenerateDataSourcesAsync>d__1))]
         protected override .<<.<<T1, T2>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
-    [(.Class | .Method, AllowMultiple=true)]
+    [(.Class | .Method | .Parameter, AllowMultiple=true)]
     public abstract class DataSourceGeneratorAttribute<T1, T2, T3> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3>
     {
         protected DataSourceGeneratorAttribute() { }
@@ -456,7 +463,7 @@ namespace
         [.(typeof(.DataSourceGeneratorAttribute<T1, T2, T3>.<GenerateDataSourcesAsync>d__1))]
         protected override sealed .<<.<<T1, T2, T3>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
-    [(.Class | .Method, AllowMultiple=true)]
+    [(.Class | .Method | .Parameter, AllowMultiple=true)]
     public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4>
     {
         protected DataSourceGeneratorAttribute() { }
@@ -464,7 +471,7 @@ namespace
         [.(typeof(.DataSourceGeneratorAttribute<T1, T2, T3, T4>.<GenerateDataSourcesAsync>d__1))]
         protected override .<<.<<T1, T2, T3, T4>>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
-    [(.Class | .Method, AllowMultiple=true)]
+    [(.Class | .Method | .Parameter, AllowMultiple=true)]
     public abstract class DataSourceGeneratorAttribute<T1, T2, T3, T4, T5> : .AsyncDataSourceGeneratorAttribute<T1, T2, T3, T4, T5>
     {
         protected DataSourceGeneratorAttribute() { }
@@ -904,7 +911,7 @@ namespace
         public override int GetHashCode() { }
         protected virtual bool PrintMembers(.StringBuilder stringBuilder) { }
     }
-    [(.Class | .Method | .Property, AllowMultiple=true)]
+    [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
     public class MethodDataSourceAttribute : , .IDataSourceAttribute
     {
         public MethodDataSourceAttribute(string methodNameProvidingDataSource) { }
@@ -917,7 +924,7 @@ namespace
         [.(typeof(.MethodDataSourceAttribute.<GetDataRowsAsync>d__21))]
         public .<<.<object?[]?>>> GetDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
-    [(.Class | .Method | .Property, AllowMultiple=true)]
+    [(.Class | .Method | .Property | .Parameter, AllowMultiple=true)]
     public class MethodDataSourceAttribute<T> : .MethodDataSourceAttribute
     {
         public MethodDataSourceAttribute(string methodNameProvidingDataSource) { }
@@ -992,9 +999,10 @@ namespace
     public class ParameterMetadata : <.ParameterMetadata>, .IMemberMetadata
     {
         public ParameterMetadata( Type) { }
-        public object? CachedDefaultValue { get; init; }
-        public bool? CachedIsOptional { get; init; }
-        public bool? CachedIsParams { get; init; }
+        public .IDataSourceAttribute[]? CachedDataSourceAttributes { get; }
+        public object? CachedDefaultValue { get; }
+        public bool? CachedIsOptional { get; }
+        public bool? CachedIsParams { get; }
         public object? DefaultValue { get; }
         public bool IsNullable { get; init; }
         public bool IsOptional { get; }

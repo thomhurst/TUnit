@@ -91,14 +91,29 @@ public sealed class MatrixDataSourceAttribute : UntypedDataSourceGeneratorAttrib
     private IReadOnlyList<object?> GetAllArguments(DataGeneratorMetadata dataGeneratorMetadata,
         ParameterMetadata sourceGeneratedParameterInformation)
     {
-        if (sourceGeneratedParameterInformation.ReflectionInfo == null)
-        {
-            throw new InvalidOperationException($"Parameter reflection information is not available for parameter '{sourceGeneratedParameterInformation.Name}'. This typically occurs when using instance method data sources which are not supported at compile time.");
-        }
+        // Get MatrixAttribute on this parameter
+        // Prefer cached attributes from source generator for AOT compatibility
+        MatrixAttribute? matrixAttribute;
 
-        var matrixAttribute = sourceGeneratedParameterInformation.ReflectionInfo.GetCustomAttributesSafe()
-            .OfType<MatrixAttribute>()
-            .FirstOrDefault();
+        if (sourceGeneratedParameterInformation.CachedDataSourceAttributes != null)
+        {
+            // Source-generated mode: use cached attributes (no reflection!)
+            matrixAttribute = sourceGeneratedParameterInformation.CachedDataSourceAttributes
+                .OfType<MatrixAttribute>()
+                .FirstOrDefault();
+        }
+        else
+        {
+            // Reflection mode: fall back to runtime attribute discovery
+            if (sourceGeneratedParameterInformation.ReflectionInfo == null)
+            {
+                throw new InvalidOperationException($"Parameter reflection information is not available for parameter '{sourceGeneratedParameterInformation.Name}'. This typically occurs when using instance method data sources which are not supported at compile time.");
+            }
+
+            matrixAttribute = sourceGeneratedParameterInformation.ReflectionInfo.GetCustomAttributesSafe()
+                .OfType<MatrixAttribute>()
+                .FirstOrDefault();
+        }
 
         // Check if this is an instance data attribute and we don't have an instance
         if (matrixAttribute is IAccessesInstanceData && dataGeneratorMetadata.TestClassInstance == null)

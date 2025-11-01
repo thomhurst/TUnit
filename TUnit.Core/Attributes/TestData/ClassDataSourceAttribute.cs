@@ -3,7 +3,7 @@ using TUnit.Core.Helpers;
 
 namespace TUnit.Core;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
 public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] T>
     : DataSourceGeneratorAttribute<T>
 {
@@ -24,7 +24,7 @@ public sealed class ClassDataSourceAttribute<[DynamicallyAccessedMembers(Dynamic
     public IEnumerable<string> GetKeys() => string.IsNullOrEmpty(Key) ? [] : [Key];
 }
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
 public sealed class ClassDataSourceAttribute : UntypedDataSourceGeneratorAttribute
 {
     private readonly Type[] _types;

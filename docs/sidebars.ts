@@ -38,6 +38,7 @@ const sidebars: SidebarsConfig = {
             'test-authoring/method-data-source',
             'test-authoring/class-data-source',
             'test-authoring/matrix-tests',
+            'test-authoring/combined-data-source',
             {
               type: 'link',
               label: 'Data Source Generators',

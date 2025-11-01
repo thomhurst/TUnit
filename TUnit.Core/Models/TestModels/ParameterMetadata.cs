@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -36,17 +37,28 @@ public record ParameterMetadata([DynamicallyAccessedMembers(DynamicallyAccessedM
     /// <summary>
     /// Cached IsParams value to avoid reflection call.
     /// </summary>
-    public bool? CachedIsParams { get; init; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool? CachedIsParams { get; internal init; }
 
     /// <summary>
     /// Cached IsOptional value to avoid reflection call.
     /// </summary>
-    public bool? CachedIsOptional { get; init; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public bool? CachedIsOptional { get; internal init; }
 
     /// <summary>
     /// Cached default value to avoid reflection call.
     /// </summary>
-    public object? CachedDefaultValue { get; init; }
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public object? CachedDefaultValue { get; internal init; }
+
+    /// <summary>
+    /// Cached data source attributes to avoid reflection call.
+    /// Set by source generator for AOT compatibility.
+    /// When null, falls back to using ReflectionInfo.GetCustomAttributes().
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public IDataSourceAttribute[]? CachedDataSourceAttributes { get; internal init; }
 
     /// <summary>
     /// Position of this parameter in the method/constructor signature.

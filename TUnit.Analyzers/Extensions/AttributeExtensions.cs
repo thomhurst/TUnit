@@ -99,6 +99,13 @@ public static class AttributeExtensions
                 .WithoutGlobalPrefix));
     }
 
+    public static bool IsCombinedDataSourceAttribute(this AttributeData attributeData, Compilation compilation)
+    {
+        return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
+            compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.CombinedDataSourceAttribute
+                .WithoutGlobalPrefix));
+    }
+
     public static bool IsDataSourceAttribute(this AttributeData? attributeData, Compilation compilation)
     {
         if (attributeData?.AttributeClass is null)
