@@ -9,10 +9,27 @@ public class DisableReflectionScannerGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var provider = context.CompilationProvider
-            .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer());
+        var enabledProvider = context.AnalyzerConfigOptionsProvider
+            .Select((options, _) =>
+            {
+                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
+                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
+            });
 
-        context.RegisterSourceOutput(provider, (sourceProductionContext, _) => GenerateCode(sourceProductionContext));
+        var provider = context.CompilationProvider
+            .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer())
+            .Combine(enabledProvider);
+
+        context.RegisterSourceOutput(provider, (sourceProductionContext, data) =>
+        {
+            var (_, isEnabled) = data;
+            if (!isEnabled)
+            {
+                return;
+            }
+
+            GenerateCode(sourceProductionContext);
+        });
     }
 
     private void GenerateCode(SourceProductionContext context)

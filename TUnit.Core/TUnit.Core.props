@@ -38,8 +38,14 @@
         <EnableTUnitPolyfills Condition="'$(EnableTUnitPolyfills)' == '' and ('$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'netstandard2.1' or '$(TargetFrameworkIdentifier)' == '.NETFramework')">true</EnableTUnitPolyfills>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <!-- Enable TUnit source generation (defaults to true). Set to false when using reflection mode to skip source generation and improve build performance. -->
+        <EnableTUnitSourceGeneration Condition="'$(EnableTUnitSourceGeneration)' == ''">true</EnableTUnitSourceGeneration>
+    </PropertyGroup>
+
     <ItemGroup>
         <CompilerVisibleProperty Include="EnableTUnitPolyfills" />
+        <CompilerVisibleProperty Include="EnableTUnitSourceGeneration" />
     </ItemGroup>
 
 </Project>

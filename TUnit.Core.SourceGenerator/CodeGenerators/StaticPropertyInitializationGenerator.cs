@@ -15,15 +15,31 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        var enabledProvider = context.AnalyzerConfigOptionsProvider
+            .Select((options, _) =>
+            {
+                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
+                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
+            });
+
         var testClasses = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: static (s, _) => s is ClassDeclarationSyntax,
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Where(static t => t is not null)
-            .Collect();
+            .Collect()
+            .Combine(enabledProvider);
 
-        context.RegisterSourceOutput(testClasses, (sourceProductionContext, testClasses) => 
-            GenerateStaticPropertyInitialization(sourceProductionContext, testClasses.Where(t => t != null).ToImmutableArray()!));
+        context.RegisterSourceOutput(testClasses, (sourceProductionContext, data) =>
+        {
+            var (classes, isEnabled) = data;
+            if (!isEnabled)
+            {
+                return;
+            }
+
+            GenerateStaticPropertyInitialization(sourceProductionContext, classes.Where(t => t != null).ToImmutableArray()!);
+        });
     }
 
     private static INamedTypeSymbol? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
