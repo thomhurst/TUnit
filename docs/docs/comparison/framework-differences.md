@@ -2,9 +2,60 @@
 
 TUnit is inspired by NUnit and xUnit, and first and foremost I want to say that these are amazing frameworks and no hate to them.
 
-**Why use TUnit?**  
-TUnit aims to address some pain points and limitations found in other frameworks, especially around parallelism, lifecycle hooks, test isolation, and extensibility.  
+**Why use TUnit?**
+TUnit aims to address some pain points and limitations found in other frameworks, especially around parallelism, lifecycle hooks, test isolation, and extensibility.
 Below are some scenarios where TUnit offers a different or improved approach.
+
+## Quick Comparison: Basic Test Structure
+
+| Framework | Class Attribute | Method Attribute | Example |
+|-----------|----------------|------------------|---------|
+| **TUnit** | ❌ None needed | `[Test]` | `public class MyTests { [Test] public async Task MyTest() { } }` |
+| **MSTest** | `[TestClass]` | `[TestMethod]` | `[TestClass] public class MyTests { [TestMethod] public void MyTest() { } }` |
+| **NUnit** | `[TestFixture]` (optional) | `[Test]` | `[TestFixture] public class MyTests { [Test] public void MyTest() { } }` |
+| **xUnit** | ❌ None needed | `[Fact]` or `[Theory]` | `public class MyTests { [Fact] public void MyTest() { } }` |
+
+**Key Point**: TUnit does **NOT** require `[TestClass]` or `[TestFixture]` attributes. You only need `[Test]` on your test methods.
+
+### Complete TUnit Test Example
+
+**With explicit using statements:**
+
+```csharp
+using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
+using TUnit.Core;
+
+namespace MyTests;
+
+public class ValidatorTests  // No [TestClass] needed!
+{
+    [Test]  // Only this attribute is required
+    public async Task IsPositive_WithNegativeNumber_ReturnsFalse()
+    {
+        var result = Validator.IsPositive(-1);
+        await Assert.That(result).IsFalse();
+    }
+}
+```
+
+**Without explicit using statements (TUnit automatically provides global usings):**
+
+```csharp
+namespace MyTests;
+
+public class ValidatorTests
+{
+    [Test]
+    public async Task IsPositive_WithNegativeNumber_ReturnsFalse()
+    {
+        var result = Validator.IsPositive(-1);
+        await Assert.That(result).IsFalse();
+    }
+}
+```
+
+The TUnit package automatically configures global usings for common TUnit namespaces, so you don't need to include using statements in your test files.
 
 So you'll be asking why use TUnit instead of them, right?
 Here are some things I've stumbled across in the past that I've found limiting when writing a test suite.
