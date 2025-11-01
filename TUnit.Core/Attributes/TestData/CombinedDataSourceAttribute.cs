@@ -81,9 +81,9 @@ namespace TUnit.Core;
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class CombinedDataSourceAttribute : UntypedDataSourceGeneratorAttribute, IAccessesInstanceData
+public sealed class CombinedDataSourceAttribute : AsyncUntypedDataSourceGeneratorAttribute, IAccessesInstanceData
 {
-    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    protected override async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var parameterInformation = dataGeneratorMetadata
             .MembersToGenerate
@@ -106,14 +106,14 @@ public sealed class CombinedDataSourceAttribute : UntypedDataSourceGeneratorAttr
 
         foreach (var param in parameterInformation)
         {
-            var parameterValues = GetParameterValues(param, dataGeneratorMetadata);
+            var parameterValues = await GetParameterValues(param, dataGeneratorMetadata);
             parameterValueSets.Add(parameterValues);
         }
 
         // Compute Cartesian product of all parameter value sets
         foreach (var combination in GetCartesianProduct(parameterValueSets))
         {
-            yield return () => combination.ToArray();
+            yield return () => Task.FromResult(combination.ToArray())!;
         }
     }
 
@@ -121,7 +121,7 @@ public sealed class CombinedDataSourceAttribute : UntypedDataSourceGeneratorAttr
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Reflection usage is documented. AOT-safe path available via typed data sources")]
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection usage is documented. AOT-safe path available via typed data sources")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Dynamic code usage is documented. AOT-safe path available via typed data sources")]
-    private IReadOnlyList<object?> GetParameterValues(ParameterMetadata parameterMetadata, DataGeneratorMetadata dataGeneratorMetadata)
+    private async Task<IReadOnlyList<object?>> GetParameterValues(ParameterMetadata parameterMetadata, DataGeneratorMetadata dataGeneratorMetadata)
     {
         if (parameterMetadata.ReflectionInfo == null)
         {
@@ -166,8 +166,7 @@ public sealed class CombinedDataSourceAttribute : UntypedDataSourceGeneratorAttr
             };
 
             // Get data rows from this data source (need to await async enumerable)
-            var dataRowsTask = ProcessDataSourceAsync(dataSourceAttr, singleParamMetadata);
-            var dataRows = dataRowsTask.GetAwaiter().GetResult();
+            var dataRows = await ProcessDataSourceAsync(dataSourceAttr, singleParamMetadata);
 
             allValues.AddRange(dataRows);
         }
