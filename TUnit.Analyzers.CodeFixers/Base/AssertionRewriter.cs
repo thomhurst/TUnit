@@ -19,9 +19,12 @@ public abstract class AssertionRewriter : CSharpSyntaxRewriter
         var convertedAssertion = ConvertAssertionIfNeeded(node);
         if (convertedAssertion != null)
         {
-            return convertedAssertion;
+            // Preserve the original trivia (whitespace, comments, etc.)
+            return convertedAssertion
+                .WithLeadingTrivia(node.GetLeadingTrivia())
+                .WithTrailingTrivia(node.GetTrailingTrivia());
         }
-        
+
         return base.VisitInvocationExpression(node);
     }
     

@@ -621,11 +621,17 @@ public class MSTestMigrationAnalyzerTests
                         var value = 42;
                         var list = new[] { 1, 2, 3 };
                         var text = "hello";
+
+                        // Standard assertions
                         await Assert.That(value).IsEqualTo(42);
                         await Assert.That(value).IsNotNull();
                         await Assert.That(value > 0).IsTrue();
+
+                        // Collection assertions
                         await Assert.That(list).Contains(2);
                         await Assert.That(new[] { 4, 5, 6 }).IsNotEquivalentTo(list);
+
+                        // String assertions
                         await Assert.That(text).Contains("ell");
                         await Assert.That(text).StartsWith("hel");
                     }
@@ -671,6 +677,7 @@ public class MSTestMigrationAnalyzerTests
                         var obj1 = new object();
                         var obj2 = obj1;
                         var obj3 = new object();
+
                         await Assert.That(obj2).IsSameReference(obj1);
                         await Assert.That(obj3).IsNotSameReference(obj1);
                     }

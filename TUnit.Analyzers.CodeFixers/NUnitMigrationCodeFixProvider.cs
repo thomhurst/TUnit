@@ -15,27 +15,27 @@ public class NUnitMigrationCodeFixProvider : BaseMigrationCodeFixProvider
     protected override string DiagnosticId => Rules.NUnitMigration.Id;
     protected override string CodeFixTitle => "Convert NUnit code to TUnit";
     
-    protected override AttributeRewriter CreateAttributeRewriter()
+    protected override AttributeRewriter CreateAttributeRewriter(Compilation compilation)
     {
         return new NUnitAttributeRewriter();
     }
-    
-    protected override CSharpSyntaxRewriter CreateAssertionRewriter(SemanticModel semanticModel)
+
+    protected override CSharpSyntaxRewriter CreateAssertionRewriter(SemanticModel semanticModel, Compilation compilation)
     {
         return new NUnitAssertionRewriter(semanticModel);
     }
-    
-    protected override CSharpSyntaxRewriter CreateBaseTypeRewriter(SemanticModel semanticModel)
+
+    protected override CSharpSyntaxRewriter CreateBaseTypeRewriter(SemanticModel semanticModel, Compilation compilation)
     {
         return new NUnitBaseTypeRewriter();
     }
-    
-    protected override CSharpSyntaxRewriter CreateLifecycleRewriter()
+
+    protected override CSharpSyntaxRewriter CreateLifecycleRewriter(Compilation compilation)
     {
         return new NUnitLifecycleRewriter();
     }
-    
-    protected override CompilationUnitSyntax ApplyFrameworkSpecificConversions(CompilationUnitSyntax compilationUnit, SemanticModel semanticModel)
+
+    protected override CompilationUnitSyntax ApplyFrameworkSpecificConversions(CompilationUnitSyntax compilationUnit, SemanticModel semanticModel, Compilation compilation)
     {
         // NUnit-specific conversions if needed
         return compilationUnit;
