@@ -4,6 +4,12 @@ In TUnit you can create an assertion scope by calling `Assert.Multiple()`. This 
 
 This is useful for asserting multiple properties and showing all errors at once, instead of having to fix > rerun > fix > rerun.
 
+## Behavior Differences
+
+**Outside `Assert.Multiple()`**: Assertions throw immediately when they fail, stopping test execution.
+
+**Inside `Assert.Multiple()`**: Assertions accumulate failures and only throw when the scope exits, allowing all assertions within the scope to execute.
+
 Implicit Scope:
 
 ```csharp
