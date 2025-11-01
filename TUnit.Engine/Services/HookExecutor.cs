@@ -234,8 +234,9 @@ internal sealed class HookExecutor
         }
     }
 
-    public async ValueTask ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public async ValueTask<List<Exception>> ExecuteAfterTestHooksAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
+        var exceptions = new List<Exception>();
         var testClassType = test.Metadata.TestClassType;
 
         // Execute After(Test) hooks first (specific hooks run before global hooks for cleanup)
@@ -252,7 +253,7 @@ internal sealed class HookExecutor
                 }
                 catch (Exception ex)
                 {
-                    throw new AfterTestException("AfterTest hook failed", ex);
+                    exceptions.Add(new AfterTestException($"After(Test) hook failed: {ex.Message}", ex));
                 }
             }
         }
@@ -271,10 +272,12 @@ internal sealed class HookExecutor
                 }
                 catch (Exception ex)
                 {
-                    throw new AfterTestException("AfterEveryTest hook failed", ex);
+                    exceptions.Add(new AfterTestException($"AfterEvery(Test) hook failed: {ex.Message}", ex));
                 }
             }
         }
+
+        return exceptions;
     }
 
     public async ValueTask ExecuteBeforeTestDiscoveryHooksAsync(CancellationToken cancellationToken)

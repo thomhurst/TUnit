@@ -123,18 +123,20 @@ internal sealed class EventReceiverOrchestrator : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public async ValueTask InvokeTestEndEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
+    public async ValueTask<List<Exception>> InvokeTestEndEventReceiversAsync(TestContext context, CancellationToken cancellationToken)
     {
         if (!_registry.HasTestEndReceivers())
         {
-            return;
+            return [];
         }
 
-        await InvokeTestEndEventReceiversCore(context, cancellationToken);
+        return await InvokeTestEndEventReceiversCore(context, cancellationToken);
     }
 
-    private async ValueTask InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken)
+    private async ValueTask<List<Exception>> InvokeTestEndEventReceiversCore(TestContext context, CancellationToken cancellationToken)
     {
+        var exceptions = new List<Exception>();
+
         // Manual filtering and sorting instead of LINQ to avoid allocations
         var eligibleObjects = context.GetEligibleEventObjects();
         List<ITestEndEventReceiver>? receivers = null;
@@ -150,7 +152,7 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         if (receivers == null)
         {
-            return;
+            return exceptions;
         }
 
         // Manual sort instead of OrderBy
@@ -167,8 +169,11 @@ internal sealed class EventReceiverOrchestrator : IDisposable
             catch (Exception ex)
             {
                 await _logger.LogErrorAsync($"Error in test end event receiver: {ex.Message}");
+                exceptions.Add(ex);
             }
         }
+
+        return exceptions;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

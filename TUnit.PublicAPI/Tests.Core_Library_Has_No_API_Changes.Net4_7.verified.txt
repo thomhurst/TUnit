@@ -1752,6 +1752,13 @@ namespace .Exceptions
         public string DependencyName { get; }
         public bool ProceedOnFailure { get; }
     }
+    public class TestExecutionException : .
+    {
+        public TestExecutionException(? testException, .<> hookExceptions, .<> eventReceiverExceptions) { }
+        public .<> EventReceiverExceptions { get; }
+        public .<> HookExceptions { get; }
+        public ? TestException { get; }
+    }
     public class TestFailedInitializationException : 
     {
         public TestFailedInitializationException(string? message, ? innerException) { }
