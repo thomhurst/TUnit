@@ -148,6 +148,77 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             }
         }
 
+        // Extract attributes that should be copied to generated code (suppression and diagnostic attributes)
+        var suppressionAttributes = new List<string>();
+        foreach (var attr in methodSymbol.GetAttributes())
+        {
+            var attributeClass = attr.AttributeClass;
+            if (attributeClass == null || attributeClass.ContainingNamespace?.ToDisplayString() != "System.Diagnostics.CodeAnalysis")
+                continue;
+
+            // Handle UnconditionalSuppressMessage
+            if (attributeClass.Name == "UnconditionalSuppressMessageAttribute" && attr.ConstructorArguments.Length >= 2)
+            {
+                var category = attr.ConstructorArguments[0].Value?.ToString();
+                var checkId = attr.ConstructorArguments[1].Value?.ToString();
+
+                var justification = "";
+                foreach (var namedArg in attr.NamedArguments)
+                {
+                    if (namedArg.Key == "Justification" && namedArg.Value.Value is string j)
+                    {
+                        justification = $", Justification = \"{j}\"";
+                        break;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(category) && !string.IsNullOrEmpty(checkId))
+                {
+                    suppressionAttributes.Add($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"{category}\", \"{checkId}\"{justification})]");
+                }
+            }
+            // Handle RequiresUnreferencedCode
+            else if (attributeClass.Name == "RequiresUnreferencedCodeAttribute" && attr.ConstructorArguments.Length >= 1)
+            {
+                var message = attr.ConstructorArguments[0].Value?.ToString();
+
+                var urlPart = "";
+                foreach (var namedArg in attr.NamedArguments)
+                {
+                    if (namedArg.Key == "Url" && namedArg.Value.Value is string url)
+                    {
+                        urlPart = $", Url = \"{url}\"";
+                        break;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(message))
+                {
+                    suppressionAttributes.Add($"[System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{message}\"{urlPart})]");
+                }
+            }
+            // Handle RequiresDynamicCode
+            else if (attributeClass.Name == "RequiresDynamicCodeAttribute" && attr.ConstructorArguments.Length >= 1)
+            {
+                var message = attr.ConstructorArguments[0].Value?.ToString();
+
+                var urlPart = "";
+                foreach (var namedArg in attr.NamedArguments)
+                {
+                    if (namedArg.Key == "Url" && namedArg.Value.Value is string url)
+                    {
+                        urlPart = $", Url = \"{url}\"";
+                        break;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(message))
+                {
+                    suppressionAttributes.Add($"[System.Diagnostics.CodeAnalysis.RequiresDynamicCode(\"{message}\"{urlPart})]");
+                }
+            }
+        }
+
         // Check if the containing type is file-scoped and extract method body if inlining is requested
         var isFileScoped = IsFileScopedClass(methodSymbol.ContainingType);
         string? methodBody = null;
@@ -185,7 +256,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             isExtensionMethod,
             customExpectation,
             isFileScoped,
-            methodBody
+            methodBody,
+            suppressionAttributes.ToImmutableArray()
         );
 
         return (data, null);
@@ -483,6 +555,15 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var needsAsync = data.ReturnTypeInfo.Kind == ReturnTypeKind.TaskBool ||
                         data.ReturnTypeInfo.Kind == ReturnTypeKind.TaskAssertionResult;
         var asyncKeyword = needsAsync ? "async " : "";
+
+        // Add suppression attributes to CheckAsync method when method body is inlined
+        if (!string.IsNullOrEmpty(data.MethodBody) && data.SuppressionAttributes.Length > 0)
+        {
+            foreach (var suppressionAttr in data.SuppressionAttributes)
+            {
+                sb.AppendLine($"    {suppressionAttr}");
+            }
+        }
 
         sb.AppendLine($"    protected override {asyncKeyword}Task<AssertionResult> CheckAsync(EvaluationMetadata<{targetTypeName}> metadata)");
         sb.AppendLine("    {");
@@ -898,6 +979,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         bool IsExtensionMethod,
         string? CustomExpectation,
         bool IsFileScoped,
-        string? MethodBody
+        string? MethodBody,
+        ImmutableArray<string> SuppressionAttributes
     );
 }
