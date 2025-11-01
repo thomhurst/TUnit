@@ -316,7 +316,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             sourceBuilder.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{escapedMessage}\")]");
         }
 
-        // Add OverloadResolutionPriority attribute only if priority > 0
+        // Add OverloadResolutionPriority attribute if specified
         if (data.OverloadResolutionPriority > 0)
         {
             sourceBuilder.AppendLine($"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({data.OverloadResolutionPriority})]");
@@ -327,9 +327,8 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             ? $"{assertionType.Name}{genericParamsString}"
             : assertionType.Name;
 
-        // The extension method always extends IAssertionSource<T> where T is the type argument
-        // from the Assertion<T> base class. This ensures the source.Context type matches what
-        // the assertion constructor expects.
+        // The extension method extends IAssertionSource<T> where T is the type argument
+        // from the Assertion<T> base class.
         string sourceType;
         if (typeParam is ITypeParameterSymbol baseTypeParam)
         {
