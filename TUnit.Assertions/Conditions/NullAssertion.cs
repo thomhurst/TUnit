@@ -65,8 +65,7 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
 
     private async Task<TValue> GetNonNullValueAsync()
     {
-        var (value, _) = await Context.GetAsync();
-
+        var value = await AssertAsync();
         return value!;
     }
 }
