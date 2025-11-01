@@ -123,28 +123,37 @@ internal class TestExecutor
         }
         finally
         {
-            try
+            var hookExceptions = await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
+            var eventReceiverExceptions = await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
+
+            if (hookExceptions.Count > 0 || eventReceiverExceptions.Count > 0)
             {
-                await _hookExecutor.ExecuteAfterTestHooksAsync(executableTest, cancellationToken).ConfigureAwait(false);
-                await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(executableTest.Context, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                hookException = ex;
+                hookException = new TestExecutionException(null, hookExceptions, eventReceiverExceptions);
             }
         }
 
-        if (capturedException == null && hookException != null)
+        if (capturedException is SkipTestException)
+        {
+            ExceptionDispatchInfo.Capture(capturedException).Throw();
+        }
+        else if (executableTest.Context.Execution.Result?.IsOverridden == true)
+        {
+            return;
+        }
+        else if (capturedException != null && hookException != null)
+        {
+            var combinedException = new TestExecutionException(capturedException,
+                (hookException as TestExecutionException)?.HookExceptions ?? [],
+                (hookException as TestExecutionException)?.EventReceiverExceptions ?? []);
+            ExceptionDispatchInfo.Capture(combinedException).Throw();
+        }
+        else if (capturedException != null)
+        {
+            ExceptionDispatchInfo.Capture(capturedException).Throw();
+        }
+        else if (hookException != null)
         {
             ExceptionDispatchInfo.Capture(hookException).Throw();
-        }
-        else if (capturedException is SkipTestException)
-        {
-            ExceptionDispatchInfo.Capture(capturedException).Throw();
-        }
-        else if (capturedException != null && executableTest.Context.Execution.Result?.IsOverridden != true)
-        {
-            ExceptionDispatchInfo.Capture(capturedException).Throw();
         }
     }
 
