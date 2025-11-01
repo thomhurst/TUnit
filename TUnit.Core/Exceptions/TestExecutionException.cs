@@ -1,11 +1,44 @@
 namespace TUnit.Core.Exceptions;
 
+/// <summary>
+/// Exception thrown when one or more failures occur during test execution, including the test itself,
+/// hooks (before/after test methods), or event receivers.
+/// This exception aggregates multiple failure types to provide comprehensive error reporting.
+/// </summary>
+/// <remarks>
+/// This exception is thrown in the following scenarios:
+/// <list type="bullet">
+/// <item><description>The test itself fails and one or more hooks or event receivers also fail</description></item>
+/// <item><description>The test passes but one or more hooks or event receivers fail during cleanup</description></item>
+/// <item><description>Multiple hooks fail during test execution</description></item>
+/// <item><description>Multiple event receivers fail during test execution</description></item>
+/// </list>
+/// The <see cref="InnerException"/> property contains either a single exception or an <see cref="AggregateException"/>
+/// when multiple failures occur.
+/// </remarks>
 public class TestExecutionException : TUnitException
 {
+    /// <summary>
+    /// Gets the exception thrown by the test itself, or null if the test passed.
+    /// </summary>
     public Exception? TestException { get; }
+
+    /// <summary>
+    /// Gets the collection of exceptions thrown by hooks during test execution.
+    /// </summary>
     public IReadOnlyList<Exception> HookExceptions { get; }
+
+    /// <summary>
+    /// Gets the collection of exceptions thrown by event receivers during test execution.
+    /// </summary>
     public IReadOnlyList<Exception> EventReceiverExceptions { get; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestExecutionException"/> class.
+    /// </summary>
+    /// <param name="testException">The exception thrown by the test, or null if the test passed.</param>
+    /// <param name="hookExceptions">The collection of exceptions thrown by hooks.</param>
+    /// <param name="eventReceiverExceptions">The collection of exceptions thrown by event receivers.</param>
     public TestExecutionException(
         Exception? testException,
         IReadOnlyList<Exception> hookExceptions,
@@ -38,8 +71,17 @@ public class TestExecutionException : TUnitException
             }
             else
             {
-                var messages = string.Join("; ", hookExceptions.Select(e => e.Message));
-                parts.Add($"Multiple after hooks failed: {messages}");
+                var messageBuilder = new System.Text.StringBuilder();
+                messageBuilder.Append("Multiple hooks failed: ");
+                for (var i = 0; i < hookExceptions.Count; i++)
+                {
+                    if (i > 0)
+                    {
+                        messageBuilder.Append("; ");
+                    }
+                    messageBuilder.Append(hookExceptions[i].Message);
+                }
+                parts.Add(messageBuilder.ToString());
             }
         }
 
@@ -51,8 +93,17 @@ public class TestExecutionException : TUnitException
             }
             else
             {
-                var messages = string.Join("; ", eventReceiverExceptions.Select(e => e.Message));
-                parts.Add($"{eventReceiverExceptions.Count} test end event receivers failed: {messages}");
+                var messageBuilder = new System.Text.StringBuilder();
+                messageBuilder.Append($"{eventReceiverExceptions.Count} test end event receivers failed: ");
+                for (var i = 0; i < eventReceiverExceptions.Count; i++)
+                {
+                    if (i > 0)
+                    {
+                        messageBuilder.Append("; ");
+                    }
+                    messageBuilder.Append(eventReceiverExceptions[i].Message);
+                }
+                parts.Add(messageBuilder.ToString());
             }
         }
 

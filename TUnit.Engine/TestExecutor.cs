@@ -128,7 +128,7 @@ internal class TestExecutor
 
             if (hookExceptions.Count > 0 || eventReceiverExceptions.Count > 0)
             {
-                hookException = new TestExecutionException(null, hookExceptions, eventReceiverExceptions);
+                hookException = new TestExecutionException(capturedException, hookExceptions, eventReceiverExceptions);
             }
         }
 
