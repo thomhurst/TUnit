@@ -351,10 +351,11 @@ namespace
         public static .ClassMetadata GetOrAdd(string name, <.ClassMetadata> factory) { }
     }
     [(.Class | .Method)]
-    public sealed class CombinedDataSourceAttribute : .UntypedDataSourceGeneratorAttribute, .IAccessesInstanceData
+    public sealed class CombinedDataSourceAttribute : .AsyncUntypedDataSourceGeneratorAttribute, .IAccessesInstanceData
     {
         public CombinedDataSourceAttribute() { }
-        protected override .<<object?[]?>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        [.(typeof(.CombinedDataSourceAttribute.<GenerateDataSourcesAsync>d__0))]
+        protected override .<<.<object?[]?>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     public sealed class ConcreteType : .TypeInfo, <.ConcreteType>
     {
@@ -998,9 +999,10 @@ namespace
     public class ParameterMetadata : <.ParameterMetadata>, .IMemberMetadata
     {
         public ParameterMetadata( Type) { }
-        public object? CachedDefaultValue { get; init; }
-        public bool? CachedIsOptional { get; init; }
-        public bool? CachedIsParams { get; init; }
+        public .IDataSourceAttribute[]? CachedDataSourceAttributes { get; }
+        public object? CachedDefaultValue { get; }
+        public bool? CachedIsOptional { get; }
+        public bool? CachedIsParams { get; }
         public object? DefaultValue { get; }
         public bool IsNullable { get; init; }
         public bool IsOptional { get; }

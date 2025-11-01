@@ -41,11 +41,31 @@ internal static class CodeGenerationHelpers
                     var paramTypesArray = GenerateParameterTypesArray(method);
                     if (paramTypesArray == "null")
                     {
-                        writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == \"{method.Name}\" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}]");
+                        writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethods(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static).FirstOrDefault(m => m.Name == \"{method.Name}\" && m.GetParameters().Length == {method.Parameters.Length})?.GetParameters()[{parameterIndex}],");
                     }
                     else
                     {
-                        writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static, null, {paramTypesArray}, null)!.GetParameters()[{parameterIndex}]");
+                        writer.AppendLine($"ReflectionInfo = typeof({method.ContainingType.GloballyQualified()}).GetMethod(\"{method.Name}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance | global::System.Reflection.BindingFlags.Static, null, {paramTypesArray}, null)!.GetParameters()[{parameterIndex}],");
+                    }
+
+                    // Generate cached data source attributes for AOT compatibility
+                    var dataSourceAttributes = param.GetAttributes()
+                        .Where(attr => attr.AttributeClass != null &&
+                               attr.AttributeClass.AllInterfaces.Any(i => i.Name == "IDataSourceAttribute"))
+                        .ToArray();
+
+                    if (dataSourceAttributes.Length > 0)
+                    {
+                        writer.AppendLine($"CachedDataSourceAttributes = new global::TUnit.Core.IDataSourceAttribute[]");
+                        writer.AppendLine("{");
+                        writer.SetIndentLevel(3);
+                        foreach (var attr in dataSourceAttributes)
+                        {
+                            var attrCode = GenerateAttributeInstantiation(attr, method.Parameters);
+                            writer.AppendLine($"{attrCode},");
+                        }
+                        writer.SetIndentLevel(2);
+                        writer.Append("}");
                     }
                 }
             }

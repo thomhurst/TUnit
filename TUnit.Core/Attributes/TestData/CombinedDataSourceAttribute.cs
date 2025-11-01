@@ -117,22 +117,30 @@ public sealed class CombinedDataSourceAttribute : AsyncUntypedDataSourceGenerato
         }
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection usage is documented. AOT-safe path available via typed data sources")]
-    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Reflection usage is documented. AOT-safe path available via typed data sources")]
-    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Reflection usage is documented. AOT-safe path available via typed data sources")]
-    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Dynamic code usage is documented. AOT-safe path available via typed data sources")]
     private async Task<IReadOnlyList<object?>> GetParameterValues(ParameterMetadata parameterMetadata, DataGeneratorMetadata dataGeneratorMetadata)
     {
-        if (parameterMetadata.ReflectionInfo == null)
-        {
-            throw new InvalidOperationException($"Parameter reflection information is not available for parameter '{parameterMetadata.Name}'. This typically occurs when using instance method data sources which are not supported at compile time.");
-        }
-
         // Get all IDataSourceAttribute attributes on this parameter
-        var dataSourceAttributes = parameterMetadata.ReflectionInfo
-            .GetCustomAttributesSafe()
-            .OfType<IDataSourceAttribute>()
-            .ToArray();
+        // Prefer cached attributes from source generator for AOT compatibility
+        IDataSourceAttribute[] dataSourceAttributes;
+
+        if (parameterMetadata.CachedDataSourceAttributes != null)
+        {
+            // Source-generated mode: use cached attributes (no reflection!)
+            dataSourceAttributes = parameterMetadata.CachedDataSourceAttributes;
+        }
+        else
+        {
+            // Reflection mode: fall back to runtime attribute discovery
+            if (parameterMetadata.ReflectionInfo == null)
+            {
+                throw new InvalidOperationException($"Parameter reflection information is not available for parameter '{parameterMetadata.Name}'. This typically occurs when using instance method data sources which are not supported at compile time.");
+            }
+
+            dataSourceAttributes = parameterMetadata.ReflectionInfo
+                .GetCustomAttributesSafe()
+                .OfType<IDataSourceAttribute>()
+                .ToArray();
+        }
 
         if (dataSourceAttributes.Length == 0)
         {
