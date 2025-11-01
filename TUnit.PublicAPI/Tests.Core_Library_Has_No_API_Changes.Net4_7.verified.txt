@@ -26,7 +26,7 @@ namespace
         public ? EndTime { get; set; }
         public .? ExecutionContext { get; set; }
         public .? ExecutionTask { get; }
-        public virtual .TestMetadata Metadata { get; init; }
+        public .TestMetadata Metadata { get; init; }
         public .TestResult? Result { get; set; }
         public ? StartTime { get; set; }
         public .TestState State { get; set; }
@@ -351,10 +351,10 @@ namespace
         public static .ClassMetadata GetOrAdd(string name, <.ClassMetadata> factory) { }
     }
     [(.Class | .Method)]
-    public sealed class CombinedDataSourceAttribute : .AsyncUntypedDataSourceGeneratorAttribute, .IAccessesInstanceData
+    public sealed class CombinedDataSourcesAttribute : .AsyncUntypedDataSourceGeneratorAttribute, .IAccessesInstanceData
     {
-        public CombinedDataSourceAttribute() { }
-        [.(typeof(.CombinedDataSourceAttribute.<GenerateDataSourcesAsync>d__0))]
+        public CombinedDataSourcesAttribute() { }
+        [.(typeof(.CombinedDataSourcesAttribute.<GenerateDataSourcesAsync>d__0))]
         protected override .<<.<object?[]?>>> GenerateDataSourcesAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
     }
     public sealed class ConcreteType : .TypeInfo, <.ConcreteType>
