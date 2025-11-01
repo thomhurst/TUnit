@@ -1,4 +1,5 @@
 using TUnit.Core;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Services;
 
@@ -263,7 +264,7 @@ internal sealed class TestDependencyResolver
             Duration = TimeSpan.Zero,
             Exception = new InvalidOperationException(
                 $"Could not resolve all dependencies for test {test.Metadata.TestClassType.Name}.{test.Metadata.TestMethodName}"),
-            ComputerName = Environment.MachineName
+            ComputerName = EnvironmentHelper.MachineName
         };
     }
 }
