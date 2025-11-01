@@ -27,6 +27,29 @@ dotnet add package TUnit --prerelease
 
 And then remove any automatically generated `Program.cs` or main method, as this'll be taken care of by the TUnit package.
 
+### Global Usings
+
+The TUnit package automatically configures global usings for common TUnit namespaces, so your test files don't need to include using statements for:
+
+- `TUnit.Core` (for `[Test]` attribute)
+- `TUnit.Assertions` (for `Assert.That()`)
+- `TUnit.Assertions.Extensions` (for assertion methods)
+
+This means your test files can be as simple as:
+
+```csharp
+namespace MyTests;
+
+public class MyTests  // No [TestClass] needed!
+{
+    [Test]  // Available without explicit using statement
+    public async Task MyTest()
+    {
+        await Assert.That(true).IsTrue();  // Assert is available automatically
+    }
+}
+```
+
 That's it. We're ready to write our first test.
 
 Your `.csproj` should be as simple as something like:

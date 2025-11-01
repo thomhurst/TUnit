@@ -3,6 +3,37 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace TUnit.Core.Data;
 
+/// <summary>
+/// Provides a thread-safe dictionary with lazy value initialization.
+/// </summary>
+/// <typeparam name="TKey">The type of keys in the dictionary. Must be non-null.</typeparam>
+/// <typeparam name="TValue">The type of values in the dictionary. Must have a public parameterless constructor.</typeparam>
+/// <remarks>
+/// <para>
+/// This class provides a concurrent dictionary where values are lazily initialized on first access.
+/// Each value is created exactly once per key, even when accessed concurrently from multiple threads.
+/// </para>
+/// <para>
+/// The lazy initialization is thread-safe and uses <see cref="LazyThreadSafetyMode.ExecutionAndPublication"/>
+/// to ensure that the factory function is executed only once per key, even under concurrent access.
+/// </para>
+/// <para>
+/// This class is marked as hidden in the editor browsable state in non-debug builds as it's primarily
+/// intended for internal use within the TUnit framework.
+/// </para>
+/// </remarks>
+/// <example>
+/// <code>
+/// var cache = new ThreadSafeDictionary&lt;string, ExpensiveResource&gt;();
+///
+/// // Values are created lazily on first access
+/// var resource1 = cache.GetOrAdd("key1", k => new ExpensiveResource(k));
+///
+/// // Same key returns the same instance (thread-safe)
+/// var resource2 = cache.GetOrAdd("key1", k => new ExpensiveResource(k));
+/// // resource1 == resource2
+/// </code>
+/// </example>
 #if !DEBUG
 [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 #endif
@@ -12,10 +43,38 @@ public class ThreadSafeDictionary<TKey,
 {
     private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _innerDictionary = new();
 
+    /// <summary>
+    /// Gets a collection containing the keys in the dictionary.
+    /// </summary>
+    /// <value>A collection of keys present in the dictionary.</value>
     public ICollection<TKey> Keys => _innerDictionary.Keys;
 
+    /// <summary>
+    /// Gets an enumerable collection of values in the dictionary.
+    /// </summary>
+    /// <value>An enumerable of initialized values.</value>
+    /// <remarks>
+    /// Accessing this property will force initialization of all lazy values in the dictionary.
+    /// </remarks>
     public IEnumerable<TValue> Values => _innerDictionary.Values.Select(static lazy => lazy.Value);
 
+    /// <summary>
+    /// Gets the value associated with the specified key, or creates it if it doesn't exist.
+    /// </summary>
+    /// <param name="key">The key of the value to get or create.</param>
+    /// <param name="func">The factory function to create the value if the key doesn't exist.</param>
+    /// <returns>
+    /// The value for the key. This will be either the existing value or a newly created value from the factory function.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// This method is thread-safe. If multiple threads call this method simultaneously with the same key,
+    /// the factory function will be executed only once, and all threads will receive the same instance.
+    /// </para>
+    /// <para>
+    /// The value is created lazily using <see cref="Lazy{T}"/> with <see cref="LazyThreadSafetyMode.ExecutionAndPublication"/>.
+    /// </para>
+    /// </remarks>
     public TValue GetOrAdd(TKey key, Func<TKey, TValue> func)
     {
         var lazy = _innerDictionary.GetOrAdd(key,
@@ -24,6 +83,18 @@ public class ThreadSafeDictionary<TKey,
         return lazy.Value;
     }
 
+    /// <summary>
+    /// Tries to get the value associated with the specified key.
+    /// </summary>
+    /// <param name="key">The key of the value to get.</param>
+    /// <param name="value">
+    /// When this method returns, contains the value associated with the specified key if found;
+    /// otherwise, the default value for the type.
+    /// </param>
+    /// <returns><see langword="true"/> if the dictionary contains an element with the specified key; otherwise, <see langword="false"/>.</returns>
+    /// <remarks>
+    /// If the key exists, accessing the value will trigger lazy initialization if it hasn't occurred yet.
+    /// </remarks>
     public bool TryGetValue(TKey key, [NotNullWhen(true)] out TValue? value)
     {
         if (_innerDictionary.TryGetValue(key, out var lazy))
@@ -36,6 +107,17 @@ public class ThreadSafeDictionary<TKey,
         return false;
     }
 
+    /// <summary>
+    /// Removes the value with the specified key from the dictionary.
+    /// </summary>
+    /// <param name="key">The key of the value to remove.</param>
+    /// <returns>
+    /// The value that was removed, or the default value for the type if the key was not found.
+    /// </returns>
+    /// <remarks>
+    /// If the key exists and the value has been lazily initialized, that instance is returned.
+    /// Otherwise, the default value for <typeparamref name="TValue"/> is returned.
+    /// </remarks>
     public TValue? Remove(TKey key)
     {
         if (_innerDictionary.TryRemove(key, out var lazy))
@@ -46,6 +128,15 @@ public class ThreadSafeDictionary<TKey,
         return default(TValue?);
     }
 
+    /// <summary>
+    /// Gets the value associated with the specified key.
+    /// </summary>
+    /// <param name="key">The key of the value to get.</param>
+    /// <returns>The value associated with the specified key.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown when the specified key is not found in the dictionary.</exception>
+    /// <remarks>
+    /// Accessing this indexer will trigger lazy initialization of the value if it hasn't occurred yet.
+    /// </remarks>
     public TValue this[TKey key] => _innerDictionary.TryGetValue(key, out var lazy)
         ? lazy.Value
         : throw new KeyNotFoundException($"Key '{key}' not found in dictionary");
