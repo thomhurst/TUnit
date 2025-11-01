@@ -3,7 +3,7 @@ using TUnit.TestProject.Attributes;
 namespace TUnit.TestProject;
 
 /// <summary>
-/// Tests for error scenarios with CombinedDataSource
+/// Tests for error scenarios with CombinedDataSources
 /// These tests are expected to fail during test initialization
 /// </summary>
 public class CombinedDataSourceErrorTests

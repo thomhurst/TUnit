@@ -15,7 +15,7 @@ namespace TUnit.Core;
 /// </para>
 /// <para>
 /// This is different from <see cref="MatrixDataSourceAttribute"/> which uses Matrix-specific attributes.
-/// CombinedDataSource works with ANY <see cref="IDataSourceAttribute"/>, providing maximum flexibility
+/// CombinedDataSources works with ANY <see cref="IDataSourceAttribute"/>, providing maximum flexibility
 /// for complex data-driven testing scenarios.
 /// </para>
 /// <para>
@@ -98,7 +98,7 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
 
         if (dataGeneratorMetadata.TestInformation == null)
         {
-            throw new InvalidOperationException("CombinedDataSource requires test information but none is available. This may occur during static property initialization.");
+            throw new InvalidOperationException("CombinedDataSources requires test information but none is available. This may occur during static property initialization.");
         }
 
         // For each parameter, collect all possible values (individual values, not arrays)
@@ -191,8 +191,8 @@ public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGenerat
     {
         var values = new List<object?>();
 
-        // Special handling for ArgumentsAttribute when used on parameters with CombinedDataSource
-        // ArgumentsAttribute yields ONE row containing ALL values, but for CombinedDataSource we need
+        // Special handling for ArgumentsAttribute when used on parameters with CombinedDataSources
+        // ArgumentsAttribute yields ONE row containing ALL values, but for CombinedDataSources we need
         // each value to be treated as a separate option for this parameter
         if (dataSourceAttr is ArgumentsAttribute argsAttr)
         {

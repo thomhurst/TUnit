@@ -1,4 +1,4 @@
-# CombinedDataSource
+# CombinedDataSources
 
 ## Overview
 
@@ -14,7 +14,7 @@ The `[CombinedDataSources]` attribute enables you to apply different data source
 
 ## Comparison with MatrixDataSource
 
-| Feature | MatrixDataSource | CombinedDataSource |
+| Feature | MatrixDataSource | CombinedDataSources |
 |---------|-----------------|---------------------------|
 | Parameter-level attributes | `[Matrix]` only | ANY `IDataSourceAttribute` |
 | Combination strategy | Cartesian product | Cartesian product |

@@ -632,7 +632,7 @@ public class CombinedDataSourceTests
         [ClassDataSource<InitializablePersonWithPropertyInjection>] InitializablePersonWithPropertyInjection personWithBoth)
     {
         // Should create 2 × 2 × 1 × 1 × 1 = 4 test cases
-        // This tests that CombinedDataSource handles:
+        // This tests that CombinedDataSources handles:
         // - Primitive arguments
         // - Method data sources
         // - IAsyncInitializer objects

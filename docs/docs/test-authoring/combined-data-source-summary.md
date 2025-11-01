@@ -1,4 +1,4 @@
-# CombinedDataSource - Quick Reference
+# CombinedDataSources - Quick Reference
 
 ## What is it?
 
@@ -93,7 +93,7 @@ public void Test(
 
 ## When to Use
 
-✅ **Use CombinedDataSource when:**
+✅ **Use CombinedDataSources when:**
 - Different parameters need different data sources
 - You want maximum flexibility in data generation
 - You need to test all combinations of inputs
