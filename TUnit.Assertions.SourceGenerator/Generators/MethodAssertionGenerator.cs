@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -127,8 +129,9 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var isExtensionMethod = methodSymbol.IsExtensionMethod ||
                                (methodSymbol.Parameters.Length > 0 && methodSymbol.Parameters[0].IsThis);
 
-        // Extract custom expectation message if provided
+        // Extract custom expectation message and inlining preference if provided
         string? customExpectation = null;
+        bool inlineMethodBody = false;
         var attribute = context.Attributes.FirstOrDefault();
         if (attribute != null)
         {
@@ -137,8 +140,40 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 if (namedArg.Key == "ExpectationMessage" && namedArg.Value.Value is string expectation)
                 {
                     customExpectation = expectation;
-                    break;
                 }
+                else if (namedArg.Key == "InlineMethodBody" && namedArg.Value.Value is bool inline)
+                {
+                    inlineMethodBody = inline;
+                }
+            }
+        }
+
+        // Check if the containing type is file-scoped and extract method body if inlining is requested
+        var isFileScoped = IsFileScopedClass(methodSymbol.ContainingType);
+        string? methodBody = null;
+        SyntaxNode? expressionNode = null;
+
+        if (inlineMethodBody && context.TargetNode is MethodDeclarationSyntax methodSyntax)
+        {
+            if (methodSyntax.ExpressionBody != null)
+            {
+                expressionNode = methodSyntax.ExpressionBody.Expression;
+                methodBody = expressionNode.ToFullString().Trim();
+            }
+            else if (methodSyntax.Body != null)
+            {
+                var statements = methodSyntax.Body.Statements;
+                if (statements.Count == 1 && statements[0] is ReturnStatementSyntax returnStatement && returnStatement.Expression != null)
+                {
+                    expressionNode = returnStatement.Expression;
+                    methodBody = expressionNode.ToFullString().Trim();
+                }
+            }
+
+            // Fully qualify the expression if we have it
+            if (expressionNode != null && methodBody != null)
+            {
+                methodBody = FullyQualifyExpression(methodBody, context.SemanticModel, expressionNode) ?? methodBody;
             }
         }
 
@@ -148,10 +183,120 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             additionalParameters,
             returnTypeInfo.Value,
             isExtensionMethod,
-            customExpectation
+            customExpectation,
+            isFileScoped,
+            methodBody
         );
 
         return (data, null);
+    }
+
+    /// <summary>
+    /// Checks if a type is file-scoped (has 'file' accessibility)
+    /// File-scoped types have specific metadata that we can check.
+    /// </summary>
+    private static bool IsFileScopedClass(INamedTypeSymbol typeSymbol)
+    {
+        // In Roslyn, file-scoped types are marked with a special compiler-generated attribute
+        // We can check for this by looking at the type's attributes
+        // The safest approach: check if the type is internal and has no public/protected members
+        // except the methods marked with [GenerateAssertion]
+
+        // For now, we use a heuristic: if the class is not public and not a known extension class pattern,
+        // we treat it as file-scoped for inlining purposes
+        if (typeSymbol.DeclaredAccessibility == Accessibility.Public)
+        {
+            return false;
+        }
+
+        // Check if there are file-local modifiers (Roslyn 4.4+)
+        // File-scoped types have IsFileLocal property set to true
+        // We'll use reflection to check if this property exists and is true
+        var isFileLocalProperty = typeSymbol.GetType().GetProperty("IsFileLocal");
+        if (isFileLocalProperty != null)
+        {
+            var isFileLocal = isFileLocalProperty.GetValue(typeSymbol);
+            if (isFileLocal is bool fileLocal && fileLocal)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Fully qualifies type names in an expression to make it safe for inlining across namespaces.
+    /// Uses the semantic model to resolve all type references.
+    /// </summary>
+    private static string? FullyQualifyExpression(string expression, SemanticModel semanticModel, SyntaxNode expressionNode)
+    {
+        try
+        {
+            var rewriter = new TypeQualifyingRewriter(semanticModel);
+            var rewrittenNode = rewriter.Visit(expressionNode);
+            return rewrittenNode?.ToFullString().Trim();
+        }
+        catch
+        {
+            // If rewriting fails, return the original expression
+            return expression;
+        }
+    }
+
+    /// <summary>
+    /// Syntax rewriter that fully qualifies all type references in an expression.
+    /// </summary>
+    private class TypeQualifyingRewriter : CSharpSyntaxRewriter
+    {
+        private readonly SemanticModel _semanticModel;
+
+        public TypeQualifyingRewriter(SemanticModel semanticModel)
+        {
+            _semanticModel = semanticModel;
+        }
+
+        public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
+        {
+            var symbolInfo = _semanticModel.GetSymbolInfo(node);
+            var symbol = symbolInfo.Symbol;
+
+            // Fully qualify type references, static members, etc.
+            if (symbol is INamedTypeSymbol typeSymbol)
+            {
+                var fullName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                return SyntaxFactory.ParseExpression(fullName).WithTriviaFrom(node);
+            }
+            else if (symbol is IFieldSymbol fieldSymbol && fieldSymbol.IsStatic)
+            {
+                var typeName = fieldSymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                return SyntaxFactory.ParseExpression($"{typeName}.{fieldSymbol.Name}").WithTriviaFrom(node);
+            }
+            else if (symbol is IPropertySymbol propertySymbol && propertySymbol.IsStatic)
+            {
+                var typeName = propertySymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                return SyntaxFactory.ParseExpression($"{typeName}.{propertySymbol.Name}").WithTriviaFrom(node);
+            }
+
+            return base.VisitIdentifierName(node);
+        }
+
+        public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+        {
+            // Check if the left side is a type reference that needs qualification
+            var symbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
+            var symbol = symbolInfo.Symbol;
+
+            if (symbol is INamedTypeSymbol typeSymbol)
+            {
+                // Fully qualify the type on the left side
+                var fullName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var newExpression = SyntaxFactory.ParseExpression(fullName);
+                return node.WithExpression(newExpression);
+            }
+
+            return base.VisitMemberAccessExpression(node);
+        }
     }
 
     private static ReturnTypeInfo? AnalyzeReturnType(ITypeSymbol returnType)
@@ -416,7 +561,12 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
     private static void GenerateMethodCall(StringBuilder sb, AssertionMethodData data)
     {
-        var methodCall = BuildMethodCallExpression(data);
+        // If we have a method body available (with fully qualified types), inline it
+        // Otherwise, fall back to calling the method (backward compatibility)
+        var shouldInline = !string.IsNullOrEmpty(data.MethodBody);
+        var methodCall = shouldInline
+            ? BuildInlinedExpression(data)
+            : BuildMethodCallExpression(data);
 
         switch (data.ReturnTypeInfo.Kind)
         {
@@ -435,13 +585,71 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 sb.AppendLine($"        var result = await {methodCall};");
                 sb.AppendLine("        return result");
                 sb.AppendLine("            ? AssertionResult.Passed");
-                sb.AppendLine("            : AssertionResult.Failed($\"found {value}\");");
+                sb.AppendLine("            : AssertionResult.Failed($\"found {value}\"));");
                 break;
 
             case ReturnTypeKind.TaskAssertionResult:
                 sb.AppendLine($"        return await {methodCall};");
                 break;
         }
+    }
+
+    /// <summary>
+    /// Builds an inlined expression by replacing parameter references in the method body.
+    /// For example: "value == true" or "collection.Contains(value)"
+    /// </summary>
+    private static string BuildInlinedExpression(AssertionMethodData data)
+    {
+        if (string.IsNullOrEmpty(data.MethodBody))
+        {
+            // Fallback to method call if body is not available
+            return BuildMethodCallExpression(data);
+        }
+
+        var inlinedBody = data.MethodBody;
+
+        // Replace first parameter name with "value" (already named value in our context)
+        var firstParamName = data.Method.Parameters[0].Name;
+        if (firstParamName != "value")
+        {
+            // Use word boundary replacement to avoid partial matches
+            inlinedBody = Regex.Replace(
+                inlinedBody,
+                $@"\b{Regex.Escape(firstParamName)}\b",
+                "value");
+        }
+
+        // Replace additional parameter names with their field references (_paramName)
+        foreach (var param in data.AdditionalParameters)
+        {
+            var paramName = param.Name;
+            inlinedBody = Regex.Replace(
+                inlinedBody,
+                $@"\b{Regex.Escape(paramName)}\b",
+                $"_{paramName}");
+        }
+
+        // Add null-forgiving operator for reference types if not already present
+        // This is safe because we've already checked for null above
+        var isNullable = data.TargetType.IsReferenceType || data.TargetType.NullableAnnotation == NullableAnnotation.Annotated;
+        if (isNullable && !string.IsNullOrEmpty(inlinedBody) && !inlinedBody.StartsWith("value!"))
+        {
+            inlinedBody = inlinedBody.Replace("value.", "value!.");
+            inlinedBody = inlinedBody.Replace("value[", "value![");
+            // Handle cases like "value == something" - we need to be careful here
+            if (!inlinedBody.Contains("value!"))
+            {
+                // If value is used directly without member access, add ! when first used
+                inlinedBody = Regex.Replace(
+                    inlinedBody,
+                    @"\bvalue\b(?![!\.])",
+                    "value!",
+                    RegexOptions.None,
+                    TimeSpan.FromSeconds(1));
+            }
+        }
+
+        return inlinedBody ?? string.Empty;
     }
 
     private static string BuildMethodCallExpression(AssertionMethodData data)
@@ -688,6 +896,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         ImmutableArray<IParameterSymbol> AdditionalParameters,
         ReturnTypeInfo ReturnTypeInfo,
         bool IsExtensionMethod,
-        string? CustomExpectation
+        string? CustomExpectation,
+        bool IsFileScoped,
+        string? MethodBody
     );
 }

@@ -189,4 +189,16 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).Contains("where T : notnull");
             await Assert.That(mainFile).Contains("HasValue<T>(this IAssertionSource<string> source");
         });
+
+    [Test]
+    public Task FileScopedClassWithInlining() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "FileScopedClassAssertion.cs"),
+        async generatedFiles =>
+        {
+            // Snapshot test - the actual verification is done by snapshot comparison
+            await Assert.That(generatedFiles.Count).IsGreaterThanOrEqualTo(1);
+        });
 }

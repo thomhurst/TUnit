@@ -98,4 +98,30 @@ public sealed class GenerateAssertionAttribute : Attribute
     /// </code>
     /// </example>
     public string? ExpectationMessage { get; set; }
+
+    /// <summary>
+    /// When true, the method body will be inlined into the generated assertion instead of calling the method.
+    /// This removes the need for the method to be visible and eliminates the need for [EditorBrowsable] attributes.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Inlining is recommended when defining assertion helpers in file-scoped classes,
+    /// as it allows the helper methods to remain private while still generating public assertions.
+    /// </para>
+    /// <para>
+    /// The source generator will fully qualify all type references to ensure the inlined code
+    /// works correctly regardless of namespace context.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// file static class BoolAssertions
+    /// {
+    ///     [GenerateAssertion(InlineMethodBody = true)]
+    ///     public static bool IsTrue(this bool value) => value == true;
+    /// }
+    /// // No need for [EditorBrowsable], class can be file-scoped
+    /// </code>
+    /// </example>
+    public bool InlineMethodBody { get; set; }
 }
