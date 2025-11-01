@@ -462,6 +462,33 @@
     <data name="TUnit0060Title" xml:space="preserve">
         <value>Data source may produce no tests</value>
     </data>
+    <data name="TUnit0070Description" xml:space="preserve">
+        <value>When parameters have data source attributes, the method or class must be marked with [MixedParametersDataSource] to combine the parameter data sources.</value>
+    </data>
+    <data name="TUnit0070MessageFormat" xml:space="preserve">
+        <value>[MixedParametersDataSource] is required when parameters have data source attributes.</value>
+    </data>
+    <data name="TUnit0070Title" xml:space="preserve">
+        <value>[MixedParametersDataSource] attribute required</value>
+    </data>
+    <data name="TUnit0071Description" xml:space="preserve">
+        <value>When [MixedParametersDataSource] is used, all parameters (except CancellationToken) must have data source attributes to provide test data.</value>
+    </data>
+    <data name="TUnit0071MessageFormat" xml:space="preserve">
+        <value>Parameter '{0}' is missing a data source attribute. All parameters must have data sources when using [MixedParametersDataSource].</value>
+    </data>
+    <data name="TUnit0071Title" xml:space="preserve">
+        <value>Parameter missing data source attribute</value>
+    </data>
+    <data name="TUnit0072Description" xml:space="preserve">
+        <value>Using [MixedParametersDataSource] together with [MatrixDataSource] is not recommended as they serve different purposes and may cause confusion.</value>
+    </data>
+    <data name="TUnit0072MessageFormat" xml:space="preserve">
+        <value>[MixedParametersDataSource] should not be used with [MatrixDataSource]. Use one or the other.</value>
+    </data>
+    <data name="TUnit0072Title" xml:space="preserve">
+        <value>Conflicting data source attributes</value>
+    </data>
     <data name="TUnit0300Description" xml:space="preserve">
         <value>Generic types and methods may not be AOT-compatible when using dynamic type creation. Consider using concrete types or ensure all generic combinations are known at compile time.</value>
     </data>
