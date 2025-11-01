@@ -69,18 +69,38 @@ internal sealed class TestBuilderPipeline
     }
 
     /// <summary>
+    /// Collects all test metadata without building tests.
+    /// This is a lightweight operation used for dependency analysis.
+    /// </summary>
+    public async Task<IEnumerable<TestMetadata>> CollectTestMetadataAsync(string testSessionId)
+    {
+        return await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Streaming version that yields tests as they're built without buffering
     /// </summary>
+    /// <param name="testSessionId">The test session identifier</param>
+    /// <param name="buildingContext">Context for test building</param>
+    /// <param name="metadataFilter">Optional predicate to filter which metadata should be built (null means build all)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
     public async Task<IEnumerable<AbstractExecutableTest>> BuildTestsStreamingAsync(
         string testSessionId,
         TestBuildingContext buildingContext,
+        Func<TestMetadata, bool>? metadataFilter = null,
         CancellationToken cancellationToken = default)
     {
         // Get metadata streaming if supported
         // Fall back to non-streaming collection
         var collectedMetadata = await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
+
+        // Apply metadata filter if provided (for dependency-aware filtering optimization)
+        if (metadataFilter != null)
+        {
+            collectedMetadata = collectedMetadata.Where(metadataFilter);
+        }
 
         return await collectedMetadata
             .SelectManyAsync(metadata => BuildTestsFromSingleMetadataAsync(metadata, buildingContext), cancellationToken: cancellationToken)

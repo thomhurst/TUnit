@@ -5,6 +5,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Engine.Building;
+using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
@@ -27,9 +28,8 @@ internal sealed class TestDiscoveryService : IDataProducer
     private readonly TestExecutor _testExecutor;
     private readonly TestBuilderPipeline _testBuilderPipeline;
     private readonly TestFilterService _testFilterService;
-    private readonly ConcurrentBag<AbstractExecutableTest> _cachedTests =
-    [
-    ];
+    private readonly MetadataDependencyExpander _dependencyExpander;
+    private readonly ConcurrentBag<AbstractExecutableTest> _cachedTests = [];
     private readonly TestDependencyResolver _dependencyResolver = new();
 
     public string Uid => "TUnit";
@@ -40,11 +40,16 @@ internal sealed class TestDiscoveryService : IDataProducer
 
     public Task<bool> IsEnabledAsync() => Task.FromResult(true);
 
-    public TestDiscoveryService(TestExecutor testExecutor, TestBuilderPipeline testBuilderPipeline, TestFilterService testFilterService)
+    public TestDiscoveryService(
+        TestExecutor testExecutor,
+        TestBuilderPipeline testBuilderPipeline,
+        TestFilterService testFilterService,
+        MetadataDependencyExpander dependencyExpander)
     {
         _testExecutor = testExecutor;
         _testBuilderPipeline = testBuilderPipeline ?? throw new ArgumentNullException(nameof(testBuilderPipeline));
         _testFilterService = testFilterService;
+        _dependencyExpander = dependencyExpander ?? throw new ArgumentNullException(nameof(dependencyExpander));
     }
 
     public async Task<TestDiscoveryResult> DiscoverTests(string testSessionId, ITestExecutionFilter? filter, CancellationToken cancellationToken, bool isForExecution)
@@ -52,49 +57,58 @@ internal sealed class TestDiscoveryService : IDataProducer
         await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
         var contextProvider = _testExecutor.GetContextProvider();
-
         contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
 
-        // Create building context for optimization
-        var buildingContext = new Building.TestBuildingContext(isForExecution, filter);
-
-        // Stage 1: Stream independent tests immediately while buffering dependent tests
-        var independentTests = new List<AbstractExecutableTest>();
-        var dependentTests = new List<AbstractExecutableTest>();
         var allTests = new List<AbstractExecutableTest>();
 
-        await foreach (var test in DiscoverTestsStreamAsync(testSessionId, buildingContext, cancellationToken).ConfigureAwait(false))
+#pragma warning disable TPEXP
+        var isNopFilter = filter is NopFilter;
+#pragma warning restore TPEXP
+        if (filter == null || !isForExecution || isNopFilter)
         {
-            allTests.Add(test);
-
-            if (test.Metadata.Dependencies.Length > 0)
+            var buildingContext = new Building.TestBuildingContext(isForExecution, Filter: null);
+            await foreach (var test in DiscoverTestsStreamAsync(testSessionId, buildingContext, cancellationToken).ConfigureAwait(false))
             {
-                // Buffer tests with dependencies for later resolution
-                dependentTests.Add(test);
-            }
-            else
-            {
-                // Independent test - can be used immediately
-                independentTests.Add(test);
+                allTests.Add(test);
             }
         }
+        else
+        {
+            var allMetadata = await _testBuilderPipeline.CollectTestMetadataAsync(testSessionId).ConfigureAwait(false);
+            var allMetadataList = allMetadata.ToList();
 
-        // Now resolve dependencies for dependent tests
-        foreach (var test in dependentTests)
+            var metadataToInclude = _dependencyExpander.ExpandToIncludeDependencies(allMetadataList, filter);
+
+            var buildingContext = new Building.TestBuildingContext(isForExecution, Filter: null);
+            var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(
+                testSessionId,
+                buildingContext,
+                metadataFilter: m => metadataToInclude.Contains(m),
+                cancellationToken).ConfigureAwait(false);
+
+            var testsList = tests.ToList();
+
+            // Cache tests so ITestFinder can locate them
+            foreach (var test in testsList)
+            {
+                _cachedTests.Add(test);
+            }
+
+            allTests.AddRange(testsList);
+        }
+
+        foreach (var test in allTests)
+        {
+            _dependencyResolver.RegisterTest(test);
+        }
+
+        foreach (var test in allTests.Where(t => t.Metadata.Dependencies.Length > 0))
         {
             _dependencyResolver.TryResolveDependencies(test);
         }
 
-        // Combine independent and dependent tests
-        var tests = new List<AbstractExecutableTest>(independentTests.Count + dependentTests.Count);
-        tests.AddRange(independentTests);
-        tests.AddRange(dependentTests);
+        var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, allTests) : allTests;
 
-        // For discovery requests (IDE test explorers), return all tests including explicit ones
-        // For execution requests, apply filtering to exclude explicit tests unless explicitly targeted
-        var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, tests) : tests;
-
-        // If we applied filtering, find all dependencies of filtered tests and add them
         if (isForExecution)
         {
             var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
@@ -119,44 +133,32 @@ internal sealed class TestDiscoveryService : IDataProducer
         contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
 
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
-
         contextProvider.TestDiscoveryContext.RestoreExecutionContext();
 
-        // Register the filtered tests to invoke ITestRegisteredEventReceiver
         await _testFilterService.RegisterTestsAsync(filteredTests).ConfigureAwait(false);
 
-        // Capture the final execution context after discovery
         var finalContext = ExecutionContext.Capture();
         return new TestDiscoveryResult(filteredTests, finalContext);
     }
 
-    /// Streams test discovery for parallel discovery and execution
     private async IAsyncEnumerable<AbstractExecutableTest> DiscoverTestsStreamAsync(
         string testSessionId,
         Building.TestBuildingContext buildingContext,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
-        // Set a reasonable timeout for test discovery (5 minutes)
         cts.CancelAfter(TimeSpan.FromMinutes(5));
 
-        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, buildingContext, cancellationToken).ConfigureAwait(false);
+        var tests = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, buildingContext, metadataFilter: null, cancellationToken).ConfigureAwait(false);
 
         foreach (var test in tests)
         {
             _dependencyResolver.RegisterTest(test);
-
-            // Cache for backward compatibility
             _cachedTests.Add(test);
-
             yield return test;
         }
     }
 
-    /// <summary>
-    /// Simplified streaming test discovery without channels - matches source generation approach
-    /// </summary>
     #if NET6_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Generic test instantiation requires MakeGenericType")]
     #endif
@@ -167,23 +169,19 @@ internal sealed class TestDiscoveryService : IDataProducer
     {
         await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
-        // Create building context - this is for discovery/streaming, not execution filtering
         var buildingContext = new Building.TestBuildingContext(IsForExecution: false, Filter: null);
 
-        // Collect all tests first (like source generation mode does)
         var allTests = new List<AbstractExecutableTest>();
         await foreach (var test in DiscoverTestsStreamAsync(testSessionId, buildingContext, cancellationToken).ConfigureAwait(false))
         {
             allTests.Add(test);
         }
 
-        // Resolve dependencies for all tests
         foreach (var test in allTests)
         {
             _dependencyResolver.TryResolveDependencies(test);
         }
 
-        // Separate into independent and dependent tests
         var independentTests = new List<AbstractExecutableTest>();
         var dependentTests = new List<AbstractExecutableTest>();
 
@@ -199,7 +197,6 @@ internal sealed class TestDiscoveryService : IDataProducer
             }
         }
 
-        // Yield independent tests first
         foreach (var test in independentTests)
         {
             if (_testFilterService.MatchesTest(filter, test))
@@ -208,7 +205,6 @@ internal sealed class TestDiscoveryService : IDataProducer
             }
         }
 
-        // Process dependent tests in dependency order
         var yieldedTests = new HashSet<string>(independentTests.Select(static t => t.TestId));
         var remainingTests = new List<AbstractExecutableTest>(dependentTests);
 
@@ -226,10 +222,8 @@ internal sealed class TestDiscoveryService : IDataProducer
                 }
             }
 
-            // If no tests are ready, we have a circular dependency
             if (readyTests.Count == 0 && remainingTests.Count > 0)
             {
-                // Yield remaining tests anyway to avoid hanging
                 foreach (var test in remainingTests)
                 {
                     if (_testFilterService.MatchesTest(filter, test))
@@ -240,7 +234,6 @@ internal sealed class TestDiscoveryService : IDataProducer
                 break;
             }
 
-            // Yield ready tests and remove from remaining
             foreach (var test in readyTests)
             {
                 if (_testFilterService.MatchesTest(filter, test))
