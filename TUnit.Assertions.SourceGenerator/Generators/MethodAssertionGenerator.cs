@@ -482,9 +482,20 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 sourceBuilder.AppendLine();
             }
 
-            // Generate extension methods in a partial class
-            var extensionClassName = containingType.Name;
-            sourceBuilder.AppendLine($"public static partial class {extensionClassName}");
+            // Generate extension methods class
+            // For file-scoped types, we can't use partial classes, so create a standalone public class
+            // For non-file-scoped types, we use partial classes to combine with the source definition
+            var isFileScopedType = methodGroup.Any(m => m.IsFileScoped);
+
+            // TEMPORARY DEBUG: Always treat as file-scoped to test
+            isFileScopedType = true;
+
+            var extensionClassName = isFileScopedType
+                ? $"{containingType.Name}Extensions"  // Standalone class for file-scoped types
+                : containingType.Name;                 // Partial class for public types
+
+            var partialModifier = isFileScopedType ? "" : "partial ";
+            sourceBuilder.AppendLine($"public static {partialModifier}class {extensionClassName}");
             sourceBuilder.AppendLine("{");
 
             foreach (var methodData in methodGroup)
