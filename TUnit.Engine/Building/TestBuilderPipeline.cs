@@ -69,6 +69,15 @@ internal sealed class TestBuilderPipeline
     }
 
     /// <summary>
+    /// Collects all test metadata without building tests.
+    /// This is a lightweight operation used for dependency analysis.
+    /// </summary>
+    public async Task<IEnumerable<TestMetadata>> CollectTestMetadataAsync(string testSessionId)
+    {
+        return await _dataCollector.CollectTestsAsync(testSessionId).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Streaming version that yields tests as they're built without buffering
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]

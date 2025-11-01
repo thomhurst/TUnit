@@ -5,6 +5,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
 using TUnit.Engine.Building;
+using TUnit.Engine.Building.Interfaces;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
@@ -52,50 +53,40 @@ internal sealed class TestDiscoveryService : IDataProducer
         await _testExecutor.ExecuteBeforeTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
 
         var contextProvider = _testExecutor.GetContextProvider();
-
         contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
 
-        // Create building context without filter to ensure all tests (including dependencies) are discovered
-        // Filtering will be applied later after dependency resolution
+        // DEPENDENCY FIX: Disable early filtering optimization to ensure dependencies are discovered
+        // When a test depends on another test, we must discover ALL tests so that dependencies
+        // can be resolved. The early filtering optimization in TestBuilder would skip building
+        // dependency tests that don't match the filter, breaking dependency resolution.
+        // Trade-off: This means all tests are built even when filtering, which has performance cost.
+        // TODO: Optimize by implementing metadata-level dependency analysis to determine
+        // which tests to build before construction (requires pipeline architecture changes).
         var buildingContext = new Building.TestBuildingContext(isForExecution, Filter: null);
 
-        // Stage 1: Stream independent tests immediately while buffering dependent tests
-        var independentTests = new List<AbstractExecutableTest>();
-        var dependentTests = new List<AbstractExecutableTest>();
         var allTests = new List<AbstractExecutableTest>();
 
         await foreach (var test in DiscoverTestsStreamAsync(testSessionId, buildingContext, cancellationToken).ConfigureAwait(false))
         {
             allTests.Add(test);
-
-            if (test.Metadata.Dependencies.Length > 0)
-            {
-                // Buffer tests with dependencies for later resolution
-                dependentTests.Add(test);
-            }
-            else
-            {
-                // Independent test - can be used immediately
-                independentTests.Add(test);
-            }
         }
 
-        // Now resolve dependencies for dependent tests
-        foreach (var test in dependentTests)
+        // Resolve dependencies for all tests
+        foreach (var test in allTests)
+        {
+            _dependencyResolver.RegisterTest(test);
+        }
+
+        foreach (var test in allTests.Where(t => t.Metadata.Dependencies.Length > 0))
         {
             _dependencyResolver.TryResolveDependencies(test);
         }
 
-        // Combine independent and dependent tests
-        var tests = new List<AbstractExecutableTest>(independentTests.Count + dependentTests.Count);
-        tests.AddRange(independentTests);
-        tests.AddRange(dependentTests);
-
-        // For discovery requests (IDE test explorers), return all tests including explicit ones
+        // For discovery requests (IDE test explorers), return all tests
         // For execution requests, apply filtering to exclude explicit tests unless explicitly targeted
-        var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, tests) : tests;
+        var filteredTests = isForExecution ? _testFilterService.FilterTests(filter, allTests) : allTests;
 
-        // If we applied filtering, find all dependencies of filtered tests and add them
+        // Add back any dependencies that were filtered out
         if (isForExecution)
         {
             var testsToInclude = new HashSet<AbstractExecutableTest>(filteredTests);
@@ -120,7 +111,6 @@ internal sealed class TestDiscoveryService : IDataProducer
         contextProvider.TestDiscoveryContext.AddTests(allTests.Select(static t => t.Context));
 
         await _testExecutor.ExecuteAfterTestDiscoveryHooksAsync(cancellationToken).ConfigureAwait(false);
-
         contextProvider.TestDiscoveryContext.RestoreExecutionContext();
 
         // Register the filtered tests to invoke ITestRegisteredEventReceiver
@@ -129,6 +119,136 @@ internal sealed class TestDiscoveryService : IDataProducer
         // Capture the final execution context after discovery
         var finalContext = ExecutionContext.Capture();
         return new TestDiscoveryResult(filteredTests, finalContext);
+    }
+
+    /// <summary>
+    /// Filters test metadata to find tests that could match the filter.
+    /// This is a lightweight operation that doesn't require building tests.
+    /// Uses the same logic as TestBuilder.CouldTestMatchFilter but inlined to avoid dependencies.
+    /// </summary>
+    private List<TestMetadata> FilterMetadata(IEnumerable<TestMetadata> allMetadata, ITestExecutionFilter filter)
+    {
+        var result = new List<TestMetadata>();
+
+        foreach (var metadata in allMetadata)
+        {
+            if (CouldMetadataMatchFilter(filter, metadata))
+            {
+                result.Add(metadata);
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Determines if metadata could potentially match the filter without building the test.
+    /// Conservative check - returns true unless we can definitively rule out the test.
+    /// </summary>
+#pragma warning disable TPEXP
+    private bool CouldMetadataMatchFilter(ITestExecutionFilter filter, TestMetadata metadata)
+    {
+        return filter switch
+        {
+            null => true,
+            NopFilter => true,
+            TreeNodeFilter treeFilter => CouldMatchTreeNodeFilter(treeFilter, metadata),
+            TestNodeUidListFilter uidFilter => CouldMatchUidFilter(uidFilter, metadata),
+            _ => true // Unknown filter type - be conservative
+        };
+    }
+
+    private bool CouldMatchUidFilter(TestNodeUidListFilter filter, TestMetadata metadata)
+    {
+        var classMetadata = metadata.MethodMetadata.Class;
+        var namespaceName = classMetadata.Namespace ?? "";
+        var className = metadata.TestClassType.Name;
+        var methodName = metadata.TestMethodName;
+
+        foreach (var uid in filter.TestNodeUids)
+        {
+            var uidValue = uid.Value;
+            if (uidValue.Contains(namespaceName) &&
+                uidValue.Contains(className) &&
+                uidValue.Contains(methodName))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool CouldMatchTreeNodeFilter(TreeNodeFilter filter, TestMetadata metadata)
+    {
+        var filterString = filter.Filter;
+
+        if (string.IsNullOrEmpty(filterString))
+        {
+            return true;
+        }
+
+        // Strip property conditions for path-only matching
+        TreeNodeFilter pathOnlyFilter;
+        if (filterString.Contains('['))
+        {
+            var strippedFilterString = System.Text.RegularExpressions.Regex.Replace(
+                filterString, @"\[([^\]]*)\]", "");
+            pathOnlyFilter = CreateTreeNodeFilterViaReflection(strippedFilterString);
+        }
+        else
+        {
+            pathOnlyFilter = filter;
+        }
+
+        var path = BuildPathFromMetadata(metadata);
+        var emptyPropertyBag = new PropertyBag();
+        return pathOnlyFilter.MatchesFilter(path, emptyPropertyBag);
+    }
+
+    private static TreeNodeFilter CreateTreeNodeFilterViaReflection(string filterString)
+    {
+        var constructor = typeof(TreeNodeFilter).GetConstructors(
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)[0];
+        return (TreeNodeFilter)constructor.Invoke([filterString]);
+    }
+
+    private static string BuildPathFromMetadata(TestMetadata metadata)
+    {
+        var classMetadata = metadata.MethodMetadata.Class;
+        var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
+        var namespaceName = classMetadata.Namespace ?? "*";
+        var className = classMetadata.Name;
+        var methodName = metadata.TestMethodName;
+
+        return $"/{assemblyName}/{namespaceName}/{className}/{methodName}";
+    }
+#pragma warning restore TPEXP
+
+    /// <summary>
+    /// Builds tests from a specific subset of metadata.
+    /// This allows us to build only the tests we need (filtered + dependencies).
+    /// </summary>
+    private async IAsyncEnumerable<AbstractExecutableTest> BuildTestsFromMetadataSubset(
+        HashSet<TestMetadata> metadataSubset,
+        Building.TestBuildingContext buildingContext,
+        string testSessionId,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        // Use the pipeline's existing streaming build functionality
+        // but only for the metadata subset we care about
+        var testsStream = await _testBuilderPipeline.BuildTestsStreamingAsync(testSessionId, buildingContext, cancellationToken).ConfigureAwait(false);
+
+        foreach (var test in testsStream)
+        {
+            // Only yield tests whose metadata is in our subset
+            if (metadataSubset.Contains(test.Metadata))
+            {
+                _dependencyResolver.RegisterTest(test);
+                _cachedTests.Add(test);
+                yield return test;
+            }
+        }
     }
 
     /// Streams test discovery for parallel discovery and execution

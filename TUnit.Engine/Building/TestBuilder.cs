@@ -1581,7 +1581,7 @@ internal sealed class TestBuilder : ITestBuilder
     /// Determines if a test could potentially match the filter without building the full test object.
     /// This is a conservative check - returns true unless we can definitively rule out the test.
     /// </summary>
-    private bool CouldTestMatchFilter(ITestExecutionFilter filter, TestMetadata metadata)
+    internal bool CouldTestMatchFilter(ITestExecutionFilter filter, TestMetadata metadata)
     {
 #pragma warning disable TPEXP
         return filter switch
