@@ -118,7 +118,7 @@ public void Test(
 
 ## Full Documentation
 
-See [CombinedDataSource.md](CombinedDataSource.md) for complete documentation including:
+See [CombinedDataSource](combined-data-source.md) for complete documentation including:
 - Advanced scenarios
 - Error handling
 - AOT compilation details
