@@ -28,7 +28,7 @@ public class CombinedDataSourceTests
     #region Basic Tests - Arguments Only
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task TwoParameters_Arguments(
         [Arguments(1, 2, 3)] int x,
         [Arguments("a", "b")] string y)
@@ -39,7 +39,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task ThreeParameters_Arguments(
         [Arguments(1, 2)] int x,
         [Arguments("a", "b", "c")] string y,
@@ -52,7 +52,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task FourParameters_Arguments(
         [Arguments(1, 2)] int w,
         [Arguments("a", "b")] string x,
@@ -71,7 +71,7 @@ public class CombinedDataSourceTests
     #region Mixing Arguments with MethodDataSource
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task ArgumentsWithMethodDataSource(
         [Arguments(1, 2)] int x,
         [MethodDataSource(nameof(GetStrings))] string y)
@@ -82,7 +82,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task MultipleMethodDataSources(
         [MethodDataSource(nameof(GetNumbers))] int x,
         [MethodDataSource(nameof(GetStrings))] string y)
@@ -93,7 +93,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task ThreeWayMix_ArgumentsAndMethodDataSources(
         [Arguments(1, 2)] int x,
         [MethodDataSource(nameof(GetStrings))] string y,
@@ -110,7 +110,7 @@ public class CombinedDataSourceTests
     #region Multiple Attributes on Same Parameter
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task MultipleArgumentsAttributesOnSameParameter(
         [Arguments(1, 2)]
         [Arguments(3, 4)] int x,
@@ -122,7 +122,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task MixingMultipleDataSourcesPerParameter(
         [Arguments(1)]
         [MethodDataSource(nameof(GetNumbers))] int x,
@@ -138,7 +138,7 @@ public class CombinedDataSourceTests
     #region Type Variety Tests
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task DifferentPrimitiveTypes(
         [Arguments(1, 2)] int intVal,
         [Arguments("a", "b")] string stringVal,
@@ -155,7 +155,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task NullableTypes(
         [Arguments(1, 2, null)] int? nullableInt,
         [Arguments("a", null)] string? nullableString)
@@ -173,7 +173,7 @@ public class CombinedDataSourceTests
     #region Edge Cases
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task SingleParameterWithSingleValue(
         [Arguments(42)] int x)
     {
@@ -182,7 +182,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task SingleParameterWithMultipleValues(
         [Arguments(1, 2, 3, 4, 5)] int x)
     {
@@ -191,7 +191,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task ManyParametersSmallSets(
         [Arguments(1)] int a,
         [Arguments(2)] int b,
@@ -218,7 +218,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task WithClassDataSource(
         [Arguments(1, 2)] int x,
         [ClassDataSource<SimpleClass>] SimpleClass obj)
@@ -241,7 +241,7 @@ public class CombinedDataSourceTests
     // Note: MethodDataSource with generic parameters and arguments needs special syntax
     // This test is simplified for now
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task WithTypedMethodDataSource(
         [Arguments(1, 2)] int x,
         [MethodDataSource<CombinedDataSourceTests>(nameof(GetNumbers))] int y)
@@ -259,7 +259,7 @@ public class CombinedDataSourceTests
     private static readonly object _lock = new();
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task VerifyCartesianProduct_TwoParameters(
         [Arguments("A", "B")] string x,
         [Arguments(1, 2, 3)] int y)
@@ -283,7 +283,7 @@ public class CombinedDataSourceTests
     #region Performance Test - Many Combinations
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task LargeCartesianProduct(
         [Arguments(1, 2, 3, 4, 5)] int a,
         [Arguments(1, 2, 3, 4)] int b,
@@ -325,7 +325,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task CombinedDataSource_WithPropertyInjection_SingleLevel(
         [Arguments(1, 2)] int x,
         [ClassDataSource<PersonWithPropertyInjection>] PersonWithPropertyInjection person)
@@ -379,7 +379,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task CombinedDataSource_WithNestedPropertyInjection(
         [Arguments("A", "B")] string x,
         [ClassDataSource<PersonWithNestedPropertyInjection>] PersonWithNestedPropertyInjection person)
@@ -399,7 +399,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task CombinedDataSource_MultipleParametersWithPropertyInjection(
         [Arguments(1, 2)] int x,
         [ClassDataSource<PersonWithPropertyInjection>] PersonWithPropertyInjection person1,
@@ -441,7 +441,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task CombinedDataSource_WithIAsyncInitializer(
         [Arguments(1, 2, 3)] int x,
         [ClassDataSource<InitializableClass>] InitializableClass obj)
@@ -470,7 +470,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task CombinedDataSource_MultipleParametersWithIAsyncInitializer(
         [Arguments("Query1", "Query2")] string query,
         [ClassDataSource<DatabaseConnection>] DatabaseConnection db)
@@ -522,7 +522,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task CombinedDataSource_WithPropertyInjectionAndIAsyncInitializer(
         [Arguments(10, 20)] int x,
         [ClassDataSource<InitializablePersonWithPropertyInjection>] InitializablePersonWithPropertyInjection person)
@@ -594,7 +594,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task CombinedDataSource_WithNestedPropertyInjectionAndMultipleIAsyncInitializers(
         [Arguments(true, false)] bool flag,
         [ClassDataSource<InitializableAddressWithNestedInjection>] InitializableAddressWithNestedInjection address)
@@ -623,7 +623,7 @@ public class CombinedDataSourceTests
     }
 
     [Test]
-    [CombinedDataSource]
+    [CombinedDataSources]
     public async Task CombinedDataSource_ComplexScenario_MultipleParametersWithMixedFeatures(
         [Arguments(1, 2)] int x,
         [MethodDataSource(nameof(GetStrings))] string y,

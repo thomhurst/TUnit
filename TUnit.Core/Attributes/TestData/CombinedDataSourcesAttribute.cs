@@ -9,7 +9,7 @@ namespace TUnit.Core;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The <see cref="CombinedDataSourceAttribute"/> allows you to apply different data source attributes
+/// The <see cref="CombinedDataSourcesAttribute"/> allows you to apply different data source attributes
 /// (such as <see cref="ArgumentsAttribute"/>, <see cref="MethodDataSourceAttribute"/>, <see cref="ClassDataSourceAttribute{T}"/>)
 /// to individual parameters, creating test cases from all combinations via Cartesian product.
 /// </para>
@@ -36,7 +36,7 @@ namespace TUnit.Core;
 /// <para><strong>Basic Usage with Arguments:</strong></para>
 /// <code>
 /// [Test]
-/// [CombinedDataSource]
+/// [CombinedDataSources]
 /// public void BasicTest(
 ///     [Arguments(1, 2, 3)] int x,
 ///     [Arguments("a", "b")] string y)
@@ -55,7 +55,7 @@ namespace TUnit.Core;
 /// }
 ///
 /// [Test]
-/// [CombinedDataSource]
+/// [CombinedDataSources]
 /// public void MixedTest(
 ///     [Arguments(1, 2)] int x,
 ///     [MethodDataSource(nameof(GetStrings))] string y,
@@ -69,7 +69,7 @@ namespace TUnit.Core;
 /// <para><strong>Multiple Data Sources on Same Parameter:</strong></para>
 /// <code>
 /// [Test]
-/// [CombinedDataSource]
+/// [CombinedDataSources]
 /// public void MultipleSourcesTest(
 ///     [Arguments(1, 2)]
 ///     [Arguments(3, 4)] int x,
@@ -81,7 +81,7 @@ namespace TUnit.Core;
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class CombinedDataSourceAttribute : AsyncUntypedDataSourceGeneratorAttribute, IAccessesInstanceData
+public sealed class CombinedDataSourcesAttribute : AsyncUntypedDataSourceGeneratorAttribute, IAccessesInstanceData
 {
     protected override async IAsyncEnumerable<Func<Task<object?[]?>>> GenerateDataSourcesAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
@@ -93,7 +93,7 @@ public sealed class CombinedDataSourceAttribute : AsyncUntypedDataSourceGenerato
         if (parameterInformation.Length != dataGeneratorMetadata.MembersToGenerate.Length
             || parameterInformation.Length is 0)
         {
-            throw new Exception("[CombinedDataSource] only supports parameterised tests");
+            throw new Exception("[CombinedDataSources] only supports parameterised tests");
         }
 
         if (dataGeneratorMetadata.TestInformation == null)
@@ -144,7 +144,7 @@ public sealed class CombinedDataSourceAttribute : AsyncUntypedDataSourceGenerato
 
         if (dataSourceAttributes.Length == 0)
         {
-            throw new InvalidOperationException($"Parameter '{parameterMetadata.Name}' has no data source attributes. All parameters must have at least one IDataSourceAttribute when using [CombinedDataSource].");
+            throw new InvalidOperationException($"Parameter '{parameterMetadata.Name}' has no data source attributes. All parameters must have at least one IDataSourceAttribute when using [CombinedDataSources].");
         }
 
         var allValues = new List<object?>();

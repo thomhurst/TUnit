@@ -14,7 +14,7 @@ public class CombinedDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [CombinedDataSource]
+                    [CombinedDataSources]
                     [Test]
                     public void MyTest(
                         [Arguments(1, 2, 3)] int value,
@@ -61,7 +61,7 @@ public class CombinedDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [CombinedDataSource]
+                    [CombinedDataSources]
                     [Test]
                     public void MyTest(
                         [Arguments(1, 2, 3)] int value,
@@ -87,7 +87,7 @@ public class CombinedDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [CombinedDataSource]
+                    [CombinedDataSources]
                     [MatrixDataSource]
                     [Test]
                     public void {|#0:MyTest|}(
@@ -111,7 +111,7 @@ public class CombinedDataSourceAnalyzerTests
                 """
                 using TUnit.Core;
 
-                [CombinedDataSource]
+                [CombinedDataSources]
                 public class MyClass
                 {
                     public MyClass(
@@ -169,7 +169,7 @@ public class CombinedDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [CombinedDataSource]
+                    [CombinedDataSources]
                     [Test]
                     public void MyTest(
                         [Arguments(1, 2, 3)] int value,
@@ -195,7 +195,7 @@ public class CombinedDataSourceAnalyzerTests
                 {
                     public static IEnumerable<int> GetNumbers() => [1, 2, 3];
 
-                    [CombinedDataSource]
+                    [CombinedDataSources]
                     [Test]
                     public void MyTest(
                         [MethodDataSource(nameof(GetNumbers))] int number,
@@ -229,7 +229,7 @@ public class CombinedDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [CombinedDataSource]
+                    [CombinedDataSources]
                     [Test]
                     public void MyTest(
                         [ClassDataSource<TestData>] int number,
@@ -252,7 +252,7 @@ public class CombinedDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [CombinedDataSource]
+                    [CombinedDataSources]
                     [Test]
                     public void MyTest(
                         [Arguments(1, 2, 3)] int value,
@@ -300,7 +300,7 @@ public class CombinedDataSourceAnalyzerTests
                 """
                 using TUnit.Core;
 
-                [CombinedDataSource]
+                [CombinedDataSources]
                 public class MyClass
                 {
                     public MyClass(
