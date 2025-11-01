@@ -9,7 +9,7 @@ namespace TUnit.Assertions.Conditions;
 /// Demonstrates multiple custom methods WITHOUT wrappers!
 /// </summary>
 [AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
-public class StringEqualsAssertion : Assertion<string>
+public class StringEqualsAssertion : Assertion<string?>
 {
     private readonly string? _expected;
     private StringComparison _comparison = StringComparison.Ordinal;
@@ -18,7 +18,7 @@ public class StringEqualsAssertion : Assertion<string>
     private bool _ignoringWhitespace;
 
     public StringEqualsAssertion(
-        AssertionContext<string> context,
+        AssertionContext<string?> context,
         string? expected)
         : base(context)
     {
@@ -26,7 +26,7 @@ public class StringEqualsAssertion : Assertion<string>
     }
 
     public StringEqualsAssertion(
-        AssertionContext<string> context,
+        AssertionContext<string?> context,
         string? expected,
         StringComparison comparison)
         : base(context)
@@ -85,7 +85,7 @@ public class StringEqualsAssertion : Assertion<string>
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string?> metadata)
     {
         var value = metadata.Value;
         var exception = metadata.Exception;
