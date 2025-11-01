@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Conditions;
@@ -18,21 +17,14 @@ namespace TUnit.Assertions.Conditions;
 
 [AssertionFrom<Stream>(nameof(Stream.CanTimeout), ExpectationMessage = "support timeout")]
 [AssertionFrom<Stream>(nameof(Stream.CanTimeout), CustomName = "CannotTimeout", NegateLogic = true, ExpectationMessage = "support timeout")]
-public static partial class StreamAssertionExtensions
+file static partial class StreamAssertionExtensions
 {
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to be at the start")]
+    [GenerateAssertion(ExpectationMessage = "to be at the start", InlineMethodBody = true)]
     public static bool IsAtStart(this Stream value) => value?.Position == 0;
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to be at the end")]
+    [GenerateAssertion(ExpectationMessage = "to be at the end", InlineMethodBody = true)]
     public static bool IsAtEnd(this Stream value) => value != null && value.Position == value.Length;
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to be empty")]
+    [GenerateAssertion(ExpectationMessage = "to be empty", InlineMethodBody = true)]
     public static bool IsEmpty(this Stream value) => value?.Length == 0;
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to not be empty")]
+    [GenerateAssertion(ExpectationMessage = "to not be empty", InlineMethodBody = true)]
     public static bool IsNotEmpty(this Stream value) => value?.Length > 0;
 }

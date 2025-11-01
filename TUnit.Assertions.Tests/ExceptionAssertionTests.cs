@@ -79,28 +79,30 @@ public class ExceptionAssertionTests
         await Assert.That(exception).HasNoSource();
     }
 
-    [Test]
-    public async Task Test_Exception_HasTargetSite()
-    {
-        Exception? exception = null;
-        try
-        {
-            ThrowException();
-        }
-        catch (Exception ex)
-        {
-            exception = ex;
-        }
-
-        await Assert.That(exception!).HasTargetSite();
-    }
-
-    [Test]
-    public async Task Test_Exception_HasNoTargetSite()
-    {
-        var exception = new Exception("No target site");
-        await Assert.That(exception).HasNoTargetSite();
-    }
+    // TODO: HasTargetSite and HasNoTargetSite assertions have been temporarily disabled
+    // due to IL2026 trimming issues with Exception.TargetSite property
+//    [Test]
+//    public async Task Test_Exception_HasTargetSite()
+//    {
+//        Exception? exception = null;
+//        try
+//        {
+//            ThrowException();
+//        }
+//        catch (Exception ex)
+//        {
+//            exception = ex;
+//        }
+//
+//        await Assert.That(exception!).HasTargetSite();
+//    }
+//
+//    [Test]
+//    public async Task Test_Exception_HasNoTargetSite()
+//    {
+//        var exception = new Exception("No target site");
+//        await Assert.That(exception).HasNoTargetSite();
+//    }
 
     private static void ThrowException()
     {

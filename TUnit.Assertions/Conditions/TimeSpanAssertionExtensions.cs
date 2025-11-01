@@ -1,34 +1,22 @@
-using System.ComponentModel;
 using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Conditions;
 
 /// <summary>
-/// Source-generated assertions for TimeSpan type using [GenerateAssertion] attributes.
+/// Source-generated assertions for TimeSpan type using [GenerateAssertion(InlineMethodBody = true)] attributes.
 /// </summary>
-public static partial class TimeSpanAssertionExtensions
+file static partial class TimeSpanAssertionExtensions
 {
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to be zero")]
+    [GenerateAssertion(ExpectationMessage = "to be zero", InlineMethodBody = true)]
     public static bool IsZero(this TimeSpan value) => value == TimeSpan.Zero;
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to not be zero")]
+    [GenerateAssertion(ExpectationMessage = "to not be zero", InlineMethodBody = true)]
     public static bool IsNotZero(this TimeSpan value) => value != TimeSpan.Zero;
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to be positive")]
+    [GenerateAssertion(ExpectationMessage = "to be positive", InlineMethodBody = true)]
     public static bool IsPositive(this TimeSpan value) => value > TimeSpan.Zero;
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to be negative")]
+    [GenerateAssertion(ExpectationMessage = "to be negative", InlineMethodBody = true)]
     public static bool IsNegative(this TimeSpan value) => value < TimeSpan.Zero;
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to be non-negative")]
+    [GenerateAssertion(ExpectationMessage = "to be non-negative", InlineMethodBody = true)]
     public static bool IsNonNegative(this TimeSpan value) => value >= TimeSpan.Zero;
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to be non-positive")]
+    [GenerateAssertion(ExpectationMessage = "to be non-positive", InlineMethodBody = true)]
     public static bool IsNonPositive(this TimeSpan value) => value <= TimeSpan.Zero;
 }
