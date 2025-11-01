@@ -1,0 +1,114 @@
+﻿[  
+#nullable enable
+
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Tests.TestData;
+
+namespace TUnit.Assertions.Extensions;
+
+/// <summary>
+/// Generated assertion for IsGreaterThan
+/// </summary>
+[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+public sealed class Int_IsGreaterThan_T_Assertion<T> : Assertion<int>
+    where T : System.IComparable<T>
+{
+    private readonly T _other;
+
+    public Int_IsGreaterThan_T_Assertion(AssertionContext<int> context, T other)
+        : base(context)
+    {
+        _other = other;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value!.IsGreaterThan<T>(_other);
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"be greater than {0}";
+    }
+}
+
+/// <summary>
+/// Generated assertion for IsBetween
+/// </summary>
+[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+public sealed class Int_IsBetween_T_T_Assertion<T> : Assertion<int>
+    where T : System.IComparable<T>
+{
+    private readonly T _min;
+    private readonly T _max;
+
+    public Int_IsBetween_T_T_Assertion(AssertionContext<int> context, T min, T max)
+        : base(context)
+    {
+        _min = min;
+        _max = max;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<int> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        var result = value!.IsBetween<T>(_min, _max);
+        return Task.FromResult(result
+            ? AssertionResult.Passed
+            : AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"be between {0} and {1}";
+    }
+}
+
+public static partial class ComparableConstraintExtensions
+{
+    /// <summary>
+    /// Generated extension method for IsGreaterThan
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+    public static Int_IsGreaterThan_T_Assertion<T> IsGreaterThan<T>(this IAssertionSource<int> source, T other, [CallerArgumentExpression(nameof(other))] string? otherExpression = null)
+    where T : System.IComparable<T>
+    {
+        source.Context.ExpressionBuilder.Append($".IsGreaterThan({otherExpression})");
+        return new Int_IsGreaterThan_T_Assertion<T>(source.Context, other);
+    }
+
+    /// <summary>
+    /// Generated extension method for IsBetween
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
+    public static Int_IsBetween_T_T_Assertion<T> IsBetween<T>(this IAssertionSource<int> source, T min, T max, [CallerArgumentExpression(nameof(min))] string? minExpression = null, [CallerArgumentExpression(nameof(max))] string? maxExpression = null)
+    where T : System.IComparable<T>
+    {
+        source.Context.ExpressionBuilder.Append($".IsBetween({minExpression}, {maxExpression})");
+        return new Int_IsBetween_T_T_Assertion<T>(source.Context, min, max);
+    }
+
+}
+
+]

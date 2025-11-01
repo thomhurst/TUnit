@@ -727,15 +727,26 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var isNullable = data.TargetType.IsReferenceType || data.TargetType.NullableAnnotation == NullableAnnotation.Annotated;
         if (isNullable && !string.IsNullOrEmpty(inlinedBody) && !inlinedBody.StartsWith("value!"))
         {
-            inlinedBody = inlinedBody.Replace("value.", "value!.");
-            inlinedBody = inlinedBody.Replace("value[", "value![");
+            // Replace null-conditional operators with null-forgiving + regular operators
+            // value?.Member becomes value!.Member (safe because we already null-checked)
+            inlinedBody = inlinedBody.Replace("value?.", "value!.");
+            inlinedBody = inlinedBody.Replace("value?[", "value![");
+
+            // Replace regular member access with null-forgiving operator
+            // But only if we haven't already added it via the null-conditional replacement
+            if (!inlinedBody.Contains("value!"))
+            {
+                inlinedBody = inlinedBody.Replace("value.", "value!.");
+                inlinedBody = inlinedBody.Replace("value[", "value![");
+            }
+
             // Handle cases like "value == something" - we need to be careful here
             if (!inlinedBody.Contains("value!"))
             {
                 // If value is used directly without member access, add ! when first used
                 inlinedBody = Regex.Replace(
                     inlinedBody,
-                    @"\bvalue\b(?![!\.])",
+                    @"\bvalue\b(?![!\.\?])",
                     "value!",
                     RegexOptions.None,
                     TimeSpan.FromSeconds(1));

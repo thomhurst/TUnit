@@ -36,7 +36,7 @@ public sealed class ResultTValue_IsErrorOfType_Assertion<TValue, TError> : Asser
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsErrorOfType<TValue, TError>();
+        var result = value!.IsErrorOfType<TValue, TError>();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));

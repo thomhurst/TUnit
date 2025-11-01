@@ -34,7 +34,7 @@ public sealed class Version_IsMajorVersion_Assertion : Assertion<System.Version>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value!.IsMajorVersion();
+        var result = value != null && value!.Minor == 0 && (value!.Build <= 0 || value!.Build == -1) && (value!.Revision <= 0 || value!.Revision == -1);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -71,7 +71,7 @@ public sealed class Version_IsNotMajorVersion_Assertion : Assertion<System.Versi
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value!.IsNotMajorVersion();
+        var result = value != null && (value!.Minor != 0 || (value!.Build > 0 && value!.Build != -1) || (value!.Revision > 0 && value!.Revision != -1));
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -108,7 +108,7 @@ public sealed class Version_HasBuildNumber_Assertion : Assertion<System.Version>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value!.HasBuildNumber();
+        var result = value!.Build >= 0;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -145,7 +145,7 @@ public sealed class Version_HasNoBuildNumber_Assertion : Assertion<System.Versio
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value!.HasNoBuildNumber();
+        var result = value!.Build == -1;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -182,7 +182,7 @@ public sealed class Version_HasRevisionNumber_Assertion : Assertion<System.Versi
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value!.HasRevisionNumber();
+        var result = value!.Revision >= 0;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -219,7 +219,7 @@ public sealed class Version_HasNoRevisionNumber_Assertion : Assertion<System.Ver
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value!.HasNoRevisionNumber();
+        var result = value!.Revision == -1;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));

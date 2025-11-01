@@ -29,7 +29,7 @@ public sealed class Int_IsEven_Assertion : Assertion<int>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        return Task.FromResult(value.IsEven());
+        return Task.FromResult(value!.IsEven());
     }
 
     protected override string GetExpectation()
@@ -63,7 +63,7 @@ public sealed class Int_IsBetween_Int_Int_Assertion : Assertion<int>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        return Task.FromResult(value.IsBetween(_min, _max));
+        return Task.FromResult(value!.IsBetween(_min, _max));
     }
 
     protected override string GetExpectation()

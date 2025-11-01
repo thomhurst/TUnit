@@ -29,7 +29,7 @@ public sealed class Guid_IsEmptyGuid_Assertion : Assertion<System.Guid>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value!.IsEmptyGuid();
+        var result = value == global::System.Guid.Empty;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -61,7 +61,7 @@ public sealed class Guid_IsNotEmptyGuid_Assertion : Assertion<System.Guid>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value!.IsNotEmptyGuid();
+        var result = value != global::System.Guid.Empty;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
