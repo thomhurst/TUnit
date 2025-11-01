@@ -55,8 +55,9 @@ internal sealed class TestDiscoveryService : IDataProducer
 
         contextProvider.BeforeTestDiscoveryContext.RestoreExecutionContext();
 
-        // Create building context for optimization
-        var buildingContext = new Building.TestBuildingContext(isForExecution, filter);
+        // Create building context without filter to ensure all tests (including dependencies) are discovered
+        // Filtering will be applied later after dependency resolution
+        var buildingContext = new Building.TestBuildingContext(isForExecution, Filter: null);
 
         // Stage 1: Stream independent tests immediately while buffering dependent tests
         var independentTests = new List<AbstractExecutableTest>();
