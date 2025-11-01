@@ -46,18 +46,87 @@ namespace
         public static .<TException> ThrowsExactlyAsync<TException>(string parameterName, <.> action)
             where TException :  { }
     }
+    public static class ByteAssertions
+    {
+        [.]
+        public static bool IsEven(this byte value) { }
+        [.(ExpectationMessage="to not be zero")]
+        public static bool IsNotZero(this byte value) { }
+        [.]
+        public static bool IsOdd(this byte value) { }
+        [.(ExpectationMessage="to be zero")]
+        public static bool IsZero(this byte value) { }
+    }
+    public static class DecimalAssertions
+    {
+        [.(ExpectationMessage="to not be zero")]
+        public static bool IsNotZero(this decimal value) { }
+        [.(ExpectationMessage="to be zero")]
+        public static bool IsZero(this decimal value) { }
+    }
+    public static class DoubleAssertions
+    {
+        [.(ExpectationMessage="to not be zero")]
+        public static bool IsNotZero(this double value) { }
+        [.(ExpectationMessage="to be zero")]
+        public static bool IsZero(this double value) { }
+    }
     public static class Fail
     {
         public static void Test(string reason) { }
         public static void Unless([.(false)] bool condition, string reason) { }
         public static void When([.(true)] bool condition, string reason) { }
     }
+    public static class FloatAssertions
+    {
+        [.(ExpectationMessage="to not be zero")]
+        public static bool IsNotZero(this float value) { }
+        [.(ExpectationMessage="to be zero")]
+        public static bool IsZero(this float value) { }
+    }
     public static class IntAssertions
     {
         [.]
         public static bool IsEven(this int value) { }
+        [.(ExpectationMessage="to not be zero")]
+        public static bool IsNotZero(this int value) { }
         [.]
         public static bool IsOdd(this int value) { }
+        [.(ExpectationMessage="to be zero")]
+        public static bool IsZero(this int value) { }
+    }
+    public static class LongAssertions
+    {
+        [.]
+        public static bool IsEven(this long value) { }
+        [.(ExpectationMessage="to not be zero")]
+        public static bool IsNotZero(this long value) { }
+        [.]
+        public static bool IsOdd(this long value) { }
+        [.(ExpectationMessage="to be zero")]
+        public static bool IsZero(this long value) { }
+    }
+    public static class SbyteAssertions
+    {
+        [.]
+        public static bool IsEven(this sbyte value) { }
+        [.(ExpectationMessage="to not be zero")]
+        public static bool IsNotZero(this sbyte value) { }
+        [.]
+        public static bool IsOdd(this sbyte value) { }
+        [.(ExpectationMessage="to be zero")]
+        public static bool IsZero(this sbyte value) { }
+    }
+    public static class ShortAssertions
+    {
+        [.]
+        public static bool IsEven(this short value) { }
+        [.(ExpectationMessage="to not be zero")]
+        public static bool IsNotZero(this short value) { }
+        [.]
+        public static bool IsOdd(this short value) { }
+        [.(ExpectationMessage="to be zero")]
+        public static bool IsZero(this short value) { }
     }
     public class StringMatcher
     {
@@ -66,6 +135,39 @@ namespace
         public override string ToString() { }
         public static .StringMatcher AsRegex(string pattern) { }
         public static .StringMatcher AsWildcard(string pattern) { }
+    }
+    public static class UintAssertions
+    {
+        [.]
+        public static bool IsEven(this uint value) { }
+        [.(ExpectationMessage="to not be zero")]
+        public static bool IsNotZero(this uint value) { }
+        [.]
+        public static bool IsOdd(this uint value) { }
+        [.(ExpectationMessage="to be zero")]
+        public static bool IsZero(this uint value) { }
+    }
+    public static class UlongAssertions
+    {
+        [.]
+        public static bool IsEven(this ulong value) { }
+        [.(ExpectationMessage="to not be zero")]
+        public static bool IsNotZero(this ulong value) { }
+        [.]
+        public static bool IsOdd(this ulong value) { }
+        [.(ExpectationMessage="to be zero")]
+        public static bool IsZero(this ulong value) { }
+    }
+    public static class UshortAssertions
+    {
+        [.]
+        public static bool IsEven(this ushort value) { }
+        [.(ExpectationMessage="to not be zero")]
+        public static bool IsNotZero(this ushort value) { }
+        [.]
+        public static bool IsOdd(this ushort value) { }
+        [.(ExpectationMessage="to be zero")]
+        public static bool IsZero(this ushort value) { }
     }
 }
 namespace .
@@ -2117,6 +2219,37 @@ namespace .Extensions
         public static ._IsTrue_Assertion IsTrue(this .<bool> source) { }
         public static ._IsTrue_Assertion IsTrue(this .<bool?> source) { }
     }
+    public static class ByteAssertions
+    {
+        public static ._IsEven_Assertion IsEven(this .<byte> source) { }
+        public static ._IsNotZero_Assertion IsNotZero(this .<byte> source) { }
+        public static ._IsOdd_Assertion IsOdd(this .<byte> source) { }
+        public static ._IsZero_Assertion IsZero(this .<byte> source) { }
+    }
+    public sealed class Byte_IsEven_Assertion : .<byte>
+    {
+        public Byte_IsEven_Assertion(.<byte> context) { }
+        protected override .<.> CheckAsync(.<byte> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Byte_IsNotZero_Assertion : .<byte>
+    {
+        public Byte_IsNotZero_Assertion(.<byte> context) { }
+        protected override .<.> CheckAsync(.<byte> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Byte_IsOdd_Assertion : .<byte>
+    {
+        public Byte_IsOdd_Assertion(.<byte> context) { }
+        protected override .<.> CheckAsync(.<byte> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Byte_IsZero_Assertion : .<byte>
+    {
+        public Byte_IsZero_Assertion(.<byte> context) { }
+        protected override .<.> CheckAsync(.<byte> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public static class CancellationTokenAssertionExtensions
     {
         public static . CanBeCanceled(this .<.CancellationToken> source) { }
@@ -2694,9 +2827,26 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
+    public static class DecimalAssertions
+    {
+        public static ._IsNotZero_Assertion IsNotZero(this .<decimal> source) { }
+        public static ._IsZero_Assertion IsZero(this .<decimal> source) { }
+    }
     public static class DecimalEqualsAssertionExtensions
     {
         public static . IsEqualTo(this .<decimal> source, decimal expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public sealed class Decimal_IsNotZero_Assertion : .<decimal>
+    {
+        public Decimal_IsNotZero_Assertion(.<decimal> context) { }
+        protected override .<.> CheckAsync(.<decimal> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Decimal_IsZero_Assertion : .<decimal>
+    {
+        public Decimal_IsZero_Assertion(.<decimal> context) { }
+        protected override .<.> CheckAsync(.<decimal> metadata) { }
+        protected override string GetExpectation() { }
     }
     public static class DirectoryHasFilesAssertionExtensions
     {
@@ -2783,6 +2933,11 @@ namespace .Extensions
         public static . IsPositiveInfinity(this .<double> source) { }
         public static . IsSubnormal(this .<double> source) { }
     }
+    public static class DoubleAssertions
+    {
+        public static ._IsNotZero_Assertion IsNotZero(this .<double> source) { }
+        public static ._IsZero_Assertion IsZero(this .<double> source) { }
+    }
     public static class DoubleEqualsAssertionExtensions
     {
         public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expectedExpression = null) { }
@@ -2826,6 +2981,18 @@ namespace .Extensions
     public class DoubleIsSubnormalWithDoubleAssertion : .<double>
     {
         public DoubleIsSubnormalWithDoubleAssertion(.<double> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Double_IsNotZero_Assertion : .<double>
+    {
+        public Double_IsNotZero_Assertion(.<double> context) { }
+        protected override .<.> CheckAsync(.<double> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Double_IsZero_Assertion : .<double>
+    {
+        public Double_IsZero_Assertion(.<double> context) { }
         protected override .<.> CheckAsync(.<double> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -3048,6 +3215,11 @@ namespace .Extensions
     {
         public static . IsNotSystem(this .<.FileInfo> source) { }
     }
+    public static class FloatAssertions
+    {
+        public static ._IsNotZero_Assertion IsNotZero(this .<float> source) { }
+        public static ._IsZero_Assertion IsZero(this .<float> source) { }
+    }
     public static class FloatEqualsAssertionExtensions
     {
         public static . IsEqualTo(this .<float> source, float expected, [.("expected")] string? expectedExpression = null) { }
@@ -3091,6 +3263,18 @@ namespace .Extensions
     public class FloatIsSubnormalWithFloatAssertion : .<float>
     {
         public FloatIsSubnormalWithFloatAssertion(.<float> context, bool negated = false) { }
+        protected override .<.> CheckAsync(.<float> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Float_IsNotZero_Assertion : .<float>
+    {
+        public Float_IsNotZero_Assertion(.<float> context) { }
+        protected override .<.> CheckAsync(.<float> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Float_IsZero_Assertion : .<float>
+    {
+        public Float_IsZero_Assertion(.<float> context) { }
         protected override .<.> CheckAsync(.<float> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -3272,10 +3456,36 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
+    public sealed class Int16_IsEven_Assertion : .<short>
+    {
+        public Int16_IsEven_Assertion(.<short> context) { }
+        protected override .<.> CheckAsync(.<short> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Int16_IsNotZero_Assertion : .<short>
+    {
+        public Int16_IsNotZero_Assertion(.<short> context) { }
+        protected override .<.> CheckAsync(.<short> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Int16_IsOdd_Assertion : .<short>
+    {
+        public Int16_IsOdd_Assertion(.<short> context) { }
+        protected override .<.> CheckAsync(.<short> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Int16_IsZero_Assertion : .<short>
+    {
+        public Int16_IsZero_Assertion(.<short> context) { }
+        protected override .<.> CheckAsync(.<short> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public static class IntAssertions
     {
         public static ._IsEven_Assertion IsEven(this .<int> source) { }
+        public static ._IsNotZero_Assertion IsNotZero(this .<int> source) { }
         public static ._IsOdd_Assertion IsOdd(this .<int> source) { }
+        public static ._IsZero_Assertion IsZero(this .<int> source) { }
     }
     public static class IntEqualsAssertionExtensions
     {
@@ -3287,9 +3497,21 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<int> metadata) { }
         protected override string GetExpectation() { }
     }
+    public sealed class Int_IsNotZero_Assertion : .<int>
+    {
+        public Int_IsNotZero_Assertion(.<int> context) { }
+        protected override .<.> CheckAsync(.<int> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public sealed class Int_IsOdd_Assertion : .<int>
     {
         public Int_IsOdd_Assertion(.<int> context) { }
+        protected override .<.> CheckAsync(.<int> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Int_IsZero_Assertion : .<int>
+    {
+        public Int_IsZero_Assertion(.<int> context) { }
         protected override .<.> CheckAsync(.<int> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -3377,9 +3599,40 @@ namespace .Extensions
         public static .<TValue> IsLessThanOrEqualTo<TValue>(this .<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
             where TValue : <TValue> { }
     }
+    public static class LongAssertions
+    {
+        public static ._IsEven_Assertion IsEven(this .<long> source) { }
+        public static ._IsNotZero_Assertion IsNotZero(this .<long> source) { }
+        public static ._IsOdd_Assertion IsOdd(this .<long> source) { }
+        public static ._IsZero_Assertion IsZero(this .<long> source) { }
+    }
     public static class LongEqualsAssertionExtensions
     {
         public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public sealed class Long_IsEven_Assertion : .<long>
+    {
+        public Long_IsEven_Assertion(.<long> context) { }
+        protected override .<.> CheckAsync(.<long> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Long_IsNotZero_Assertion : .<long>
+    {
+        public Long_IsNotZero_Assertion(.<long> context) { }
+        protected override .<.> CheckAsync(.<long> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Long_IsOdd_Assertion : .<long>
+    {
+        public Long_IsOdd_Assertion(.<long> context) { }
+        protected override .<.> CheckAsync(.<long> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class Long_IsZero_Assertion : .<long>
+    {
+        public Long_IsZero_Assertion(.<long> context) { }
+        protected override .<.> CheckAsync(.<long> metadata) { }
+        protected override string GetExpectation() { }
     }
     public static class NotEqualsAssertionExtensions
     {
@@ -3611,9 +3864,47 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.Rune> metadata) { }
         protected override string GetExpectation() { }
     }
+    public sealed class SByte_IsEven_Assertion : .<sbyte>
+    {
+        public SByte_IsEven_Assertion(.<sbyte> context) { }
+        protected override .<.> CheckAsync(.<sbyte> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class SByte_IsNotZero_Assertion : .<sbyte>
+    {
+        public SByte_IsNotZero_Assertion(.<sbyte> context) { }
+        protected override .<.> CheckAsync(.<sbyte> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class SByte_IsOdd_Assertion : .<sbyte>
+    {
+        public SByte_IsOdd_Assertion(.<sbyte> context) { }
+        protected override .<.> CheckAsync(.<sbyte> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class SByte_IsZero_Assertion : .<sbyte>
+    {
+        public SByte_IsZero_Assertion(.<sbyte> context) { }
+        protected override .<.> CheckAsync(.<sbyte> metadata) { }
+        protected override string GetExpectation() { }
+    }
     public static class SameReferenceAssertionExtensions
     {
         public static .<TValue> IsSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
+    }
+    public static class SbyteAssertions
+    {
+        public static ._IsEven_Assertion IsEven(this .<sbyte> source) { }
+        public static ._IsNotZero_Assertion IsNotZero(this .<sbyte> source) { }
+        public static ._IsOdd_Assertion IsOdd(this .<sbyte> source) { }
+        public static ._IsZero_Assertion IsZero(this .<sbyte> source) { }
+    }
+    public static class ShortAssertions
+    {
+        public static .16_IsEven_Assertion IsEven(this .<short> source) { }
+        public static .16_IsNotZero_Assertion IsNotZero(this .<short> source) { }
+        public static .16_IsOdd_Assertion IsOdd(this .<short> source) { }
+        public static .16_IsZero_Assertion IsZero(this .<short> source) { }
     }
     public static class SingleAssertionExtensions
     {
@@ -4204,6 +4495,92 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
+    public sealed class UInt16_IsEven_Assertion : .<ushort>
+    {
+        public UInt16_IsEven_Assertion(.<ushort> context) { }
+        protected override .<.> CheckAsync(.<ushort> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class UInt16_IsNotZero_Assertion : .<ushort>
+    {
+        public UInt16_IsNotZero_Assertion(.<ushort> context) { }
+        protected override .<.> CheckAsync(.<ushort> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class UInt16_IsOdd_Assertion : .<ushort>
+    {
+        public UInt16_IsOdd_Assertion(.<ushort> context) { }
+        protected override .<.> CheckAsync(.<ushort> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class UInt16_IsZero_Assertion : .<ushort>
+    {
+        public UInt16_IsZero_Assertion(.<ushort> context) { }
+        protected override .<.> CheckAsync(.<ushort> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class UInt32_IsEven_Assertion : .<uint>
+    {
+        public UInt32_IsEven_Assertion(.<uint> context) { }
+        protected override .<.> CheckAsync(.<uint> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class UInt32_IsNotZero_Assertion : .<uint>
+    {
+        public UInt32_IsNotZero_Assertion(.<uint> context) { }
+        protected override .<.> CheckAsync(.<uint> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class UInt32_IsOdd_Assertion : .<uint>
+    {
+        public UInt32_IsOdd_Assertion(.<uint> context) { }
+        protected override .<.> CheckAsync(.<uint> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class UInt32_IsZero_Assertion : .<uint>
+    {
+        public UInt32_IsZero_Assertion(.<uint> context) { }
+        protected override .<.> CheckAsync(.<uint> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class UInt64_IsEven_Assertion : .<ulong>
+    {
+        public UInt64_IsEven_Assertion(.<ulong> context) { }
+        protected override .<.> CheckAsync(.<ulong> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class UInt64_IsNotZero_Assertion : .<ulong>
+    {
+        public UInt64_IsNotZero_Assertion(.<ulong> context) { }
+        protected override .<.> CheckAsync(.<ulong> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class UInt64_IsOdd_Assertion : .<ulong>
+    {
+        public UInt64_IsOdd_Assertion(.<ulong> context) { }
+        protected override .<.> CheckAsync(.<ulong> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class UInt64_IsZero_Assertion : .<ulong>
+    {
+        public UInt64_IsZero_Assertion(.<ulong> context) { }
+        protected override .<.> CheckAsync(.<ulong> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public static class UintAssertions
+    {
+        public static .32_IsEven_Assertion IsEven(this .<uint> source) { }
+        public static .32_IsNotZero_Assertion IsNotZero(this .<uint> source) { }
+        public static .32_IsOdd_Assertion IsOdd(this .<uint> source) { }
+        public static .32_IsZero_Assertion IsZero(this .<uint> source) { }
+    }
+    public static class UlongAssertions
+    {
+        public static .64_IsEven_Assertion IsEven(this .<ulong> source) { }
+        public static .64_IsNotZero_Assertion IsNotZero(this .<ulong> source) { }
+        public static .64_IsOdd_Assertion IsOdd(this .<ulong> source) { }
+        public static .64_IsZero_Assertion IsZero(this .<ulong> source) { }
+    }
     public static class UriAssertionExtensions
     {
         public static . IsAbsoluteUri(this .<> source) { }
@@ -4254,6 +4631,13 @@ namespace .Extensions
         public UriUserEscapedAssertion(.<> context, bool negated = false) { }
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
+    }
+    public static class UshortAssertions
+    {
+        public static .16_IsEven_Assertion IsEven(this .<ushort> source) { }
+        public static .16_IsNotZero_Assertion IsNotZero(this .<ushort> source) { }
+        public static .16_IsOdd_Assertion IsOdd(this .<ushort> source) { }
+        public static .16_IsZero_Assertion IsZero(this .<ushort> source) { }
     }
     public static class ValueTaskAssertionExtensions
     {
