@@ -191,13 +191,24 @@ public sealed class CombinedDataSourceAttribute : AsyncUntypedDataSourceGenerato
     {
         var values = new List<object?>();
 
-        await foreach (var dataRowFunc in dataSourceAttr.GetDataRowsAsync(metadata))
+        // Special handling for ArgumentsAttribute when used on parameters with CombinedDataSource
+        // ArgumentsAttribute yields ONE row containing ALL values, but for CombinedDataSource we need
+        // each value to be treated as a separate option for this parameter
+        if (dataSourceAttr is ArgumentsAttribute argsAttr)
         {
-            var dataRow = await dataRowFunc();
-            if (dataRow != null && dataRow.Length > 0)
+            // Each value in Arguments should be a separate option for this parameter
+            values.AddRange(argsAttr.Values);
+        }
+        else
+        {
+            await foreach (var dataRowFunc in dataSourceAttr.GetDataRowsAsync(metadata))
             {
-                // Each data row should have exactly one element for this parameter
-                values.Add(dataRow[0]);
+                var dataRow = await dataRowFunc();
+                if (dataRow != null && dataRow.Length > 0)
+                {
+                    // Each data row should have exactly one element for this parameter
+                    values.Add(dataRow[0]);
+                }
             }
         }
 
