@@ -1,24 +1,18 @@
-using System.ComponentModel;
 using System.Text;
 using TUnit.Assertions.Attributes;
 
 namespace TUnit.Assertions.Conditions;
 
 /// <summary>
-/// Source-generated assertions for StringBuilder type using [GenerateAssertion] attributes.
+/// Source-generated assertions for StringBuilder type using [GenerateAssertion(InlineMethodBody = true)] attributes.
 /// These wrap StringBuilder property checks as extension methods.
 /// </summary>
-public static partial class StringBuilderAssertionExtensions
+file static partial class StringBuilderAssertionExtensions
 {
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to be empty")]
+    [GenerateAssertion(ExpectationMessage = "to be empty", InlineMethodBody = true)]
     public static bool IsEmpty(this StringBuilder value) => value?.Length == 0;
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to not be empty")]
+    [GenerateAssertion(ExpectationMessage = "to not be empty", InlineMethodBody = true)]
     public static bool IsNotEmpty(this StringBuilder value) => value?.Length > 0;
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [GenerateAssertion(ExpectationMessage = "to have excess capacity")]
+    [GenerateAssertion(ExpectationMessage = "to have excess capacity", InlineMethodBody = true)]
     public static bool HasExcessCapacity(this StringBuilder value) => value != null && value.Capacity > value.Length;
 }

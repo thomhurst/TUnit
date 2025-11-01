@@ -39,7 +39,7 @@ public sealed class String_IsNullOrDefault_T_Assertion<T> : Assertion<string>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsNullOrDefault<T>(_obj);
+        var result = value!.IsNullOrDefault<T>(_obj);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));

@@ -303,6 +303,91 @@ await Assert.That("invalid-email").IsValidEmail();     // ❌ Fails: "Expected t
 
 ---
 
+## Method Body Inlining (Advanced)
+
+For cleaner code and better IntelliSense, you can use method body inlining with file-scoped classes. This eliminates the need for `[EditorBrowsable]` attributes entirely.
+
+### Using `InlineMethodBody`
+
+Set `InlineMethodBody = true` to have the generator inline your method body instead of calling it:
+
+```csharp
+using TUnit.Assertions.Attributes;
+
+// File-scoped class - only visible in this file
+file static class BoolAssertions
+{
+    [GenerateAssertion(ExpectationMessage = "to be true", InlineMethodBody = true)]
+    public static bool IsTrue(this bool value) => value == true;
+
+    [GenerateAssertion(ExpectationMessage = "to be false", InlineMethodBody = true)]
+    public static bool IsFalse(this bool value) => value == false;
+}
+
+// Usage in tests:
+await Assert.That(myBool).IsTrue();   // ✅ Clean API, no IntelliSense pollution
+```
+
+### What Gets Generated with Inlining
+
+Instead of calling your method, the generator inlines the expression directly:
+
+```csharp
+// WITHOUT InlineMethodBody (calls the method):
+protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<bool> metadata)
+{
+    var value = metadata.Value;
+    var result = value!.IsTrue();  // Method call
+    return Task.FromResult(result ? AssertionResult.Passed : AssertionResult.Failed($"found {value}"));
+}
+
+// WITH InlineMethodBody (inlines the expression):
+protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<bool> metadata)
+{
+    var value = metadata.Value;
+    var result = value == true;  // Inlined!
+    return Task.FromResult(result ? AssertionResult.Passed : AssertionResult.Failed($"found {value}"));
+}
+```
+
+### Benefits of Inlining
+
+✅ **No `[EditorBrowsable]` needed** - The helper methods are in a file-scoped class
+✅ **Cleaner IntelliSense** - Helper methods don't appear anywhere in IntelliSense
+✅ **Type-safe** - The generator fully qualifies all type references automatically
+✅ **Works with parameters** - Parameters are automatically substituted
+
+### Example with Parameters
+
+```csharp
+file static class IntAssertions
+{
+    [GenerateAssertion(ExpectationMessage = "to be positive", InlineMethodBody = true)]
+    public static bool IsPositive(this int value) => value > 0;
+
+    [GenerateAssertion(ExpectationMessage = "to be greater than {threshold}", InlineMethodBody = true)]
+    public static bool IsGreaterThan(this int value, int threshold) => value > threshold;
+}
+
+// Generated code inlines with proper parameter substitution:
+// var result = value > 0;
+// var result = value > _threshold;  // Parameter renamed to field
+```
+
+### When to Use Inlining
+
+Use `InlineMethodBody = true` when:
+- You want cleaner code without `[EditorBrowsable]` attributes
+- You're using file-scoped classes (C# 11+)
+- Your assertion logic is simple (expression-bodied or single return statement)
+- You want the cleanest possible API surface
+
+**Note:** Inlining only works with:
+- Expression-bodied methods: `=> expression`
+- Simple block methods with a single return statement: `{ return expression; }`
+
+---
+
 ## Requirements and Best Practices
 
 ### Method Requirements

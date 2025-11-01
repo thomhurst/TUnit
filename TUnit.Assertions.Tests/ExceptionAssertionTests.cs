@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.Assertions.Extensions;
 
 namespace TUnit.Assertions.Tests;
@@ -80,6 +81,7 @@ public class ExceptionAssertionTests
     }
 
     [Test]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Testing TargetSite assertion functionality")]
     public async Task Test_Exception_HasTargetSite()
     {
         Exception? exception = null;
@@ -96,6 +98,7 @@ public class ExceptionAssertionTests
     }
 
     [Test]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Testing TargetSite assertion functionality")]
     public async Task Test_Exception_HasNoTargetSite()
     {
         var exception = new Exception("No target site");

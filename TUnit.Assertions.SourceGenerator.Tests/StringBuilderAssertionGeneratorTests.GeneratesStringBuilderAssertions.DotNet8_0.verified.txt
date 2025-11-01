@@ -34,7 +34,7 @@ public sealed class StringBuilder_IsEmpty_Assertion : Assertion<System.Text.Stri
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsEmpty();
+        var result = value!.Length == 0;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -71,7 +71,7 @@ public sealed class StringBuilder_IsNotEmpty_Assertion : Assertion<System.Text.S
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsNotEmpty();
+        var result = value!.Length > 0;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -108,7 +108,7 @@ public sealed class StringBuilder_HasExcessCapacity_Assertion : Assertion<System
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.HasExcessCapacity();
+        var result = value != null && value!.Capacity > value!.Length;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));

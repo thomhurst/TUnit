@@ -29,7 +29,7 @@ public sealed class Bool_IsTrue_Assertion : Assertion<bool>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsTrue();
+        var result = value == true;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -61,7 +61,7 @@ public sealed class Bool_IsFalse_Assertion : Assertion<bool>
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsFalse();
+        var result = value == false;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -98,7 +98,7 @@ public sealed class NullableBool_IsTrue_Assertion : Assertion<bool?>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsTrue();
+        var result = value! == true;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -135,7 +135,7 @@ public sealed class NullableBool_IsFalse_Assertion : Assertion<bool?>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsFalse();
+        var result = value! == false;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));

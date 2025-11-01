@@ -29,7 +29,7 @@ public sealed class HttpStatusCode_IsSuccess_Assertion : Assertion<System.Net.Ht
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsSuccess();
+        var result = (int)value is >= 200 and < 300;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -61,7 +61,7 @@ public sealed class HttpStatusCode_IsNotSuccess_Assertion : Assertion<System.Net
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsNotSuccess();
+        var result = (int)value is < 200 or >= 300;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -93,7 +93,7 @@ public sealed class HttpStatusCode_IsClientError_Assertion : Assertion<System.Ne
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsClientError();
+        var result = (int)value is >= 400 and < 500;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -125,7 +125,7 @@ public sealed class HttpStatusCode_IsServerError_Assertion : Assertion<System.Ne
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsServerError();
+        var result = (int)value is >= 500 and < 600;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -157,7 +157,7 @@ public sealed class HttpStatusCode_IsRedirection_Assertion : Assertion<System.Ne
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsRedirection();
+        var result = (int)value is >= 300 and < 400;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -189,7 +189,7 @@ public sealed class HttpStatusCode_IsInformational_Assertion : Assertion<System.
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsInformational();
+        var result = (int)value is >= 100 and < 200;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -221,7 +221,7 @@ public sealed class HttpStatusCode_IsError_Assertion : Assertion<System.Net.Http
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsError();
+        var result = (int)value is >= 400 and < 600;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));

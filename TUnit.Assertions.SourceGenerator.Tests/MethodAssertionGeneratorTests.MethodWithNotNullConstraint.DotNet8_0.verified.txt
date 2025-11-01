@@ -39,7 +39,7 @@ public sealed class String_HasValue_T_Assertion<T> : Assertion<string>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.HasValue<T>(_value);
+        var result = value!.HasValue<T>(_value);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));

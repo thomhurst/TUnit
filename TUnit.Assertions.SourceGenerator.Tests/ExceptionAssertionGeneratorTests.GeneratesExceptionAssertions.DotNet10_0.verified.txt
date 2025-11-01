@@ -34,7 +34,7 @@ public sealed class Exception_HasInnerException_Assertion : Assertion<System.Exc
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.HasInnerException();
+        var result = value!.InnerException != null;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -71,7 +71,7 @@ public sealed class Exception_HasNoInnerException_Assertion : Assertion<System.E
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.HasNoInnerException();
+        var result = value!.InnerException == null;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -108,7 +108,7 @@ public sealed class Exception_HasStackTrace_Assertion : Assertion<System.Excepti
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.HasStackTrace();
+        var result = !string.IsNullOrWhiteSpace(value!.StackTrace);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -145,7 +145,7 @@ public sealed class Exception_HasNoData_Assertion : Assertion<System.Exception>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.HasNoData();
+        var result = value!.Data.Count == 0;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -182,7 +182,7 @@ public sealed class Exception_HasHelpLink_Assertion : Assertion<System.Exception
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.HasHelpLink();
+        var result = !string.IsNullOrWhiteSpace(value!.HelpLink);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -219,7 +219,7 @@ public sealed class Exception_HasNoHelpLink_Assertion : Assertion<System.Excepti
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.HasNoHelpLink();
+        var result = string.IsNullOrWhiteSpace(value!.HelpLink);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -256,7 +256,7 @@ public sealed class Exception_HasSource_Assertion : Assertion<System.Exception>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.HasSource();
+        var result = !string.IsNullOrWhiteSpace(value!.Source);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -293,7 +293,7 @@ public sealed class Exception_HasNoSource_Assertion : Assertion<System.Exception
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.HasNoSource();
+        var result = string.IsNullOrWhiteSpace(value!.Source);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -315,6 +315,7 @@ public sealed class Exception_HasTargetSite_Assertion : Assertion<System.Excepti
     {
     }
 
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Caller is already warned via RequiresUnreferencedCode on extension method")]
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Exception> metadata)
     {
         var value = metadata.Value;
@@ -330,7 +331,7 @@ public sealed class Exception_HasTargetSite_Assertion : Assertion<System.Excepti
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.HasTargetSite();
+        var result = value!.TargetSite != null;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -352,6 +353,7 @@ public sealed class Exception_HasNoTargetSite_Assertion : Assertion<System.Excep
     {
     }
 
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Caller is already warned via RequiresUnreferencedCode on extension method")]
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<System.Exception> metadata)
     {
         var value = metadata.Value;
@@ -367,7 +369,7 @@ public sealed class Exception_HasNoTargetSite_Assertion : Assertion<System.Excep
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.HasNoTargetSite();
+        var result = value!.TargetSite == null;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -456,6 +458,7 @@ public static partial class ExceptionAssertionExtensions
     /// <summary>
     /// Generated extension method for HasTargetSite
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Exception.TargetSite uses reflection which may be trimmed in AOT scenarios")]
     public static Exception_HasTargetSite_Assertion HasTargetSite(this IAssertionSource<System.Exception> source)
     {
         source.Context.ExpressionBuilder.Append(".HasTargetSite()");
@@ -465,6 +468,7 @@ public static partial class ExceptionAssertionExtensions
     /// <summary>
     /// Generated extension method for HasNoTargetSite
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Exception.TargetSite uses reflection which may be trimmed in AOT scenarios")]
     public static Exception_HasNoTargetSite_Assertion HasNoTargetSite(this IAssertionSource<System.Exception> source)
     {
         source.Context.ExpressionBuilder.Append(".HasNoTargetSite()");

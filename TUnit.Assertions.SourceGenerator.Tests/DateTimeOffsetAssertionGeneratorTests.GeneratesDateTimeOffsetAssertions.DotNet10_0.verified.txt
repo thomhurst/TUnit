@@ -29,7 +29,7 @@ public sealed class DateTimeOffset_IsToday_Assertion : Assertion<System.DateTime
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsToday();
+        var result = value.Date == global::System.DateTimeOffset.Now.Date;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -61,7 +61,7 @@ public sealed class DateTimeOffset_IsNotToday_Assertion : Assertion<System.DateT
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsNotToday();
+        var result = value.Date != global::System.DateTimeOffset.Now.Date;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -93,7 +93,7 @@ public sealed class DateTimeOffset_IsUtc_Assertion : Assertion<System.DateTimeOf
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsUtc();
+        var result = value.Offset == global::System.TimeSpan.Zero;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -125,7 +125,7 @@ public sealed class DateTimeOffset_IsNotUtc_Assertion : Assertion<System.DateTim
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsNotUtc();
+        var result = value.Offset != global::System.TimeSpan.Zero;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -157,7 +157,7 @@ public sealed class DateTimeOffset_IsLeapYear_Assertion : Assertion<System.DateT
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsLeapYear();
+        var result = global::System.DateTime.IsLeapYear(value.Year);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -189,7 +189,7 @@ public sealed class DateTimeOffset_IsNotLeapYear_Assertion : Assertion<System.Da
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsNotLeapYear();
+        var result = !global::System.DateTime.IsLeapYear(value.Year);
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -221,7 +221,7 @@ public sealed class DateTimeOffset_IsInFuture_Assertion : Assertion<System.DateT
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsInFuture();
+        var result = value > global::System.DateTimeOffset.Now;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -253,7 +253,7 @@ public sealed class DateTimeOffset_IsInPast_Assertion : Assertion<System.DateTim
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsInPast();
+        var result = value < global::System.DateTimeOffset.Now;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -285,7 +285,7 @@ public sealed class DateTimeOffset_IsInFutureUtc_Assertion : Assertion<System.Da
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsInFutureUtc();
+        var result = value > global::System.DateTimeOffset.UtcNow;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -317,7 +317,7 @@ public sealed class DateTimeOffset_IsInPastUtc_Assertion : Assertion<System.Date
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsInPastUtc();
+        var result = value < global::System.DateTimeOffset.UtcNow;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -349,7 +349,7 @@ public sealed class DateTimeOffset_IsOnWeekend_Assertion : Assertion<System.Date
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsOnWeekend();
+        var result = value.DayOfWeek == global::System.DayOfWeek.Saturday || value.DayOfWeek == global::System.DayOfWeek.Sunday;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -381,7 +381,7 @@ public sealed class DateTimeOffset_IsOnWeekday_Assertion : Assertion<System.Date
             return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
         }
 
-        var result = value.IsOnWeekday();
+        var result = value.DayOfWeek != global::System.DayOfWeek.Saturday && value.DayOfWeek != global::System.DayOfWeek.Sunday;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));

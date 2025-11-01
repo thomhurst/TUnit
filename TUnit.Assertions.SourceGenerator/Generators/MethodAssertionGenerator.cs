@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -127,8 +129,9 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var isExtensionMethod = methodSymbol.IsExtensionMethod ||
                                (methodSymbol.Parameters.Length > 0 && methodSymbol.Parameters[0].IsThis);
 
-        // Extract custom expectation message if provided
+        // Extract custom expectation message and inlining preference if provided
         string? customExpectation = null;
+        bool inlineMethodBody = false;
         var attribute = context.Attributes.FirstOrDefault();
         if (attribute != null)
         {
@@ -137,8 +140,122 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 if (namedArg.Key == "ExpectationMessage" && namedArg.Value.Value is string expectation)
                 {
                     customExpectation = expectation;
-                    break;
                 }
+                else if (namedArg.Key == "InlineMethodBody" && namedArg.Value.Value is bool inline)
+                {
+                    inlineMethodBody = inline;
+                }
+            }
+        }
+
+        // Extract attributes that should be copied to generated code
+        // Split into two categories:
+        // 1. Suppression attributes (for CheckAsync method - to suppress warnings in generated code)
+        // 2. Diagnostic attributes (for extension method - to warn users)
+        var suppressionAttributesForCheckAsync = new List<string>();
+        var diagnosticAttributesForExtensionMethod = new List<string>();
+
+        foreach (var attr in methodSymbol.GetAttributes())
+        {
+            var attributeClass = attr.AttributeClass;
+            if (attributeClass == null || attributeClass.ContainingNamespace?.ToDisplayString() != "System.Diagnostics.CodeAnalysis")
+                continue;
+
+            // Handle UnconditionalSuppressMessage - goes to CheckAsync
+            if (attributeClass.Name == "UnconditionalSuppressMessageAttribute" && attr.ConstructorArguments.Length >= 2)
+            {
+                var category = attr.ConstructorArguments[0].Value?.ToString();
+                var checkId = attr.ConstructorArguments[1].Value?.ToString();
+
+                var justification = "";
+                foreach (var namedArg in attr.NamedArguments)
+                {
+                    if (namedArg.Key == "Justification" && namedArg.Value.Value is string j)
+                    {
+                        justification = $", Justification = \"{j}\"";
+                        break;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(category) && !string.IsNullOrEmpty(checkId))
+                {
+                    suppressionAttributesForCheckAsync.Add($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"{category}\", \"{checkId}\"{justification})]");
+                }
+            }
+            // Handle RequiresUnreferencedCode - goes to extension method AND add suppression to CheckAsync
+            else if (attributeClass.Name == "RequiresUnreferencedCodeAttribute" && attr.ConstructorArguments.Length >= 1)
+            {
+                var message = attr.ConstructorArguments[0].Value?.ToString();
+
+                var urlPart = "";
+                foreach (var namedArg in attr.NamedArguments)
+                {
+                    if (namedArg.Key == "Url" && namedArg.Value.Value is string url)
+                    {
+                        urlPart = $", Url = \"{url}\"";
+                        break;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(message))
+                {
+                    // Add to extension method so users see the warning
+                    diagnosticAttributesForExtensionMethod.Add($"[System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{message}\"{urlPart})]");
+                    // Add suppression to CheckAsync to avoid IL2046 (can't override without matching attributes)
+                    suppressionAttributesForCheckAsync.Add($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"IL2026\", Justification = \"Caller is already warned via RequiresUnreferencedCode on extension method\")]");
+                }
+            }
+            // Handle RequiresDynamicCode - goes to extension method AND add suppression to CheckAsync
+            else if (attributeClass.Name == "RequiresDynamicCodeAttribute" && attr.ConstructorArguments.Length >= 1)
+            {
+                var message = attr.ConstructorArguments[0].Value?.ToString();
+
+                var urlPart = "";
+                foreach (var namedArg in attr.NamedArguments)
+                {
+                    if (namedArg.Key == "Url" && namedArg.Value.Value is string url)
+                    {
+                        urlPart = $", Url = \"{url}\"";
+                        break;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(message))
+                {
+                    // Add to extension method so users see the warning
+                    diagnosticAttributesForExtensionMethod.Add($"[System.Diagnostics.CodeAnalysis.RequiresDynamicCode(\"{message}\"{urlPart})]");
+                    // Add suppression to CheckAsync
+                    suppressionAttributesForCheckAsync.Add($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"AOT\", \"IL3050\", Justification = \"Caller is already warned via RequiresDynamicCode on extension method\")]");
+                }
+            }
+        }
+
+        // Check if the containing type is file-scoped and extract method body if inlining is requested
+        var isFileScoped = IsFileScopedClass(methodSymbol.ContainingType);
+        string? methodBody = null;
+        SyntaxNode? expressionNode = null;
+
+        if (inlineMethodBody && context.TargetNode is MethodDeclarationSyntax methodSyntax)
+        {
+            if (methodSyntax.ExpressionBody != null)
+            {
+                expressionNode = methodSyntax.ExpressionBody.Expression;
+                methodBody = expressionNode.ToFullString().Trim();
+            }
+            else if (methodSyntax.Body != null)
+            {
+                var statements = methodSyntax.Body.Statements;
+                if (statements.Count == 1 && statements[0] is ReturnStatementSyntax returnStatement && returnStatement.Expression != null)
+                {
+                    expressionNode = returnStatement.Expression;
+                    methodBody = expressionNode.ToFullString().Trim();
+                }
+            }
+
+            // Fully qualify the expression if we have it
+            if (expressionNode != null && methodBody != null)
+            {
+                methodBody = FullyQualifyExpression(methodBody, context.SemanticModel, expressionNode) ?? methodBody;
             }
         }
 
@@ -148,10 +265,122 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             additionalParameters,
             returnTypeInfo.Value,
             isExtensionMethod,
-            customExpectation
+            customExpectation,
+            isFileScoped,
+            methodBody,
+            suppressionAttributesForCheckAsync.ToImmutableArray(),
+            diagnosticAttributesForExtensionMethod.ToImmutableArray()
         );
 
         return (data, null);
+    }
+
+    /// <summary>
+    /// Checks if a type is file-scoped (has 'file' accessibility)
+    /// File-scoped types have specific metadata that we can check.
+    /// </summary>
+    private static bool IsFileScopedClass(INamedTypeSymbol typeSymbol)
+    {
+        // In Roslyn, file-scoped types are marked with a special compiler-generated attribute
+        // We can check for this by looking at the type's attributes
+        // The safest approach: check if the type is internal and has no public/protected members
+        // except the methods marked with [GenerateAssertion]
+
+        // For now, we use a heuristic: if the class is not public and not a known extension class pattern,
+        // we treat it as file-scoped for inlining purposes
+        if (typeSymbol.DeclaredAccessibility == Accessibility.Public)
+        {
+            return false;
+        }
+
+        // Check if there are file-local modifiers (Roslyn 4.4+)
+        // File-scoped types have IsFileLocal property set to true
+        // We'll use reflection to check if this property exists and is true
+        var isFileLocalProperty = typeSymbol.GetType().GetProperty("IsFileLocal");
+        if (isFileLocalProperty != null)
+        {
+            var isFileLocal = isFileLocalProperty.GetValue(typeSymbol);
+            if (isFileLocal is bool fileLocal && fileLocal)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Fully qualifies type names in an expression to make it safe for inlining across namespaces.
+    /// Uses the semantic model to resolve all type references.
+    /// </summary>
+    private static string? FullyQualifyExpression(string expression, SemanticModel semanticModel, SyntaxNode expressionNode)
+    {
+        try
+        {
+            var rewriter = new TypeQualifyingRewriter(semanticModel);
+            var rewrittenNode = rewriter.Visit(expressionNode);
+            return rewrittenNode?.ToFullString().Trim();
+        }
+        catch
+        {
+            // If rewriting fails, return the original expression
+            return expression;
+        }
+    }
+
+    /// <summary>
+    /// Syntax rewriter that fully qualifies all type references in an expression.
+    /// </summary>
+    private class TypeQualifyingRewriter : CSharpSyntaxRewriter
+    {
+        private readonly SemanticModel _semanticModel;
+
+        public TypeQualifyingRewriter(SemanticModel semanticModel)
+        {
+            _semanticModel = semanticModel;
+        }
+
+        public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
+        {
+            var symbolInfo = _semanticModel.GetSymbolInfo(node);
+            var symbol = symbolInfo.Symbol;
+
+            // Fully qualify type references, static members, etc.
+            if (symbol is INamedTypeSymbol typeSymbol)
+            {
+                var fullName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                return SyntaxFactory.ParseExpression(fullName).WithTriviaFrom(node);
+            }
+            else if (symbol is IFieldSymbol fieldSymbol && fieldSymbol.IsStatic)
+            {
+                var typeName = fieldSymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                return SyntaxFactory.ParseExpression($"{typeName}.{fieldSymbol.Name}").WithTriviaFrom(node);
+            }
+            else if (symbol is IPropertySymbol propertySymbol && propertySymbol.IsStatic)
+            {
+                var typeName = propertySymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                return SyntaxFactory.ParseExpression($"{typeName}.{propertySymbol.Name}").WithTriviaFrom(node);
+            }
+
+            return base.VisitIdentifierName(node);
+        }
+
+        public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+        {
+            // Check if the left side is a type reference that needs qualification
+            var symbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
+            var symbol = symbolInfo.Symbol;
+
+            if (symbol is INamedTypeSymbol typeSymbol)
+            {
+                // Fully qualify the type on the left side
+                var fullName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                var newExpression = SyntaxFactory.ParseExpression(fullName);
+                return node.WithExpression(newExpression);
+            }
+
+            return base.VisitMemberAccessExpression(node);
+        }
     }
 
     private static ReturnTypeInfo? AnalyzeReturnType(ITypeSymbol returnType)
@@ -253,9 +482,17 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 sourceBuilder.AppendLine();
             }
 
-            // Generate extension methods in a partial class
-            var extensionClassName = containingType.Name;
-            sourceBuilder.AppendLine($"public static partial class {extensionClassName}");
+            // Generate extension methods class
+            // For file-scoped types, we can't use partial classes, so create a standalone public class
+            // For non-file-scoped types, we use partial classes to combine with the source definition
+            var isFileScopedType = methodGroup.Any(m => m.IsFileScoped);
+
+            var extensionClassName = isFileScopedType
+                ? $"{containingType.Name}Extensions"  // Standalone class for file-scoped types
+                : containingType.Name;                 // Partial class for public types
+
+            var partialModifier = isFileScopedType ? "" : "partial ";
+            sourceBuilder.AppendLine($"public static {partialModifier}class {extensionClassName}");
             sourceBuilder.AppendLine("{");
 
             foreach (var methodData in methodGroup)
@@ -339,6 +576,15 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                         data.ReturnTypeInfo.Kind == ReturnTypeKind.TaskAssertionResult;
         var asyncKeyword = needsAsync ? "async " : "";
 
+        // Add suppression attributes to CheckAsync method when method body is inlined
+        if (!string.IsNullOrEmpty(data.MethodBody) && data.SuppressionAttributesForCheckAsync.Length > 0)
+        {
+            foreach (var suppressionAttr in data.SuppressionAttributesForCheckAsync)
+            {
+                sb.AppendLine($"    {suppressionAttr}");
+            }
+        }
+
         sb.AppendLine($"    protected override {asyncKeyword}Task<AssertionResult> CheckAsync(EvaluationMetadata<{targetTypeName}> metadata)");
         sb.AppendLine("    {");
         sb.AppendLine("        var value = metadata.Value;");
@@ -416,7 +662,12 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
 
     private static void GenerateMethodCall(StringBuilder sb, AssertionMethodData data)
     {
-        var methodCall = BuildMethodCallExpression(data);
+        // If we have a method body available (with fully qualified types), inline it
+        // Otherwise, fall back to calling the method (backward compatibility)
+        var shouldInline = !string.IsNullOrEmpty(data.MethodBody);
+        var methodCall = shouldInline
+            ? BuildInlinedExpression(data)
+            : BuildMethodCallExpression(data);
 
         switch (data.ReturnTypeInfo.Kind)
         {
@@ -435,13 +686,82 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 sb.AppendLine($"        var result = await {methodCall};");
                 sb.AppendLine("        return result");
                 sb.AppendLine("            ? AssertionResult.Passed");
-                sb.AppendLine("            : AssertionResult.Failed($\"found {value}\");");
+                sb.AppendLine("            : AssertionResult.Failed($\"found {value}\"));");
                 break;
 
             case ReturnTypeKind.TaskAssertionResult:
                 sb.AppendLine($"        return await {methodCall};");
                 break;
         }
+    }
+
+    /// <summary>
+    /// Builds an inlined expression by replacing parameter references in the method body.
+    /// For example: "value == true" or "collection.Contains(value)"
+    /// </summary>
+    private static string BuildInlinedExpression(AssertionMethodData data)
+    {
+        if (string.IsNullOrEmpty(data.MethodBody))
+        {
+            // Fallback to method call if body is not available
+            return BuildMethodCallExpression(data);
+        }
+
+        var inlinedBody = data.MethodBody;
+
+        // Replace first parameter name with "value" (already named value in our context)
+        var firstParamName = data.Method.Parameters[0].Name;
+        if (firstParamName != "value")
+        {
+            // Use word boundary replacement to avoid partial matches
+            inlinedBody = Regex.Replace(
+                inlinedBody,
+                $@"\b{Regex.Escape(firstParamName)}\b",
+                "value");
+        }
+
+        // Replace additional parameter names with their field references (_paramName)
+        foreach (var param in data.AdditionalParameters)
+        {
+            var paramName = param.Name;
+            inlinedBody = Regex.Replace(
+                inlinedBody,
+                $@"\b{Regex.Escape(paramName)}\b",
+                $"_{paramName}");
+        }
+
+        // Add null-forgiving operator for reference types if not already present
+        // This is safe because we've already checked for null above
+        var isNullable = data.TargetType.IsReferenceType || data.TargetType.NullableAnnotation == NullableAnnotation.Annotated;
+        if (isNullable && !string.IsNullOrEmpty(inlinedBody) && !inlinedBody.StartsWith("value!"))
+        {
+            // Replace null-conditional operators with null-forgiving + regular operators
+            // value?.Member becomes value!.Member (safe because we already null-checked)
+            inlinedBody = inlinedBody.Replace("value?.", "value!.");
+            inlinedBody = inlinedBody.Replace("value?[", "value![");
+
+            // Replace regular member access with null-forgiving operator
+            // But only if we haven't already added it via the null-conditional replacement
+            if (!inlinedBody.Contains("value!"))
+            {
+                inlinedBody = inlinedBody.Replace("value.", "value!.");
+                inlinedBody = inlinedBody.Replace("value[", "value![");
+            }
+
+            // Handle cases like "value == something" - we need to be careful here
+            if (!inlinedBody.Contains("value!"))
+            {
+                // If value is used directly without member access, add ! when first used
+                inlinedBody = Regex.Replace(
+                    inlinedBody,
+                    @"\bvalue\b(?![!\.\?])",
+                    "value!",
+                    RegexOptions.None,
+                    TimeSpan.FromSeconds(1));
+            }
+        }
+
+        return inlinedBody ?? string.Empty;
     }
 
     private static string BuildMethodCallExpression(AssertionMethodData data)
@@ -494,6 +814,15 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         if (genericParams.Length > 0)
         {
             sb.AppendLine($"    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"IL2091\", Justification = \"Generic type parameter is only used for property access, not instantiation\")]");
+        }
+
+        // Add diagnostic attributes (RequiresUnreferencedCode, RequiresDynamicCode) to extension method
+        if (data.DiagnosticAttributesForExtensionMethod.Length > 0)
+        {
+            foreach (var diagnosticAttr in data.DiagnosticAttributesForExtensionMethod)
+            {
+                sb.AppendLine($"    {diagnosticAttr}");
+            }
         }
 
         // Method signature
@@ -688,6 +1017,10 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         ImmutableArray<IParameterSymbol> AdditionalParameters,
         ReturnTypeInfo ReturnTypeInfo,
         bool IsExtensionMethod,
-        string? CustomExpectation
+        string? CustomExpectation,
+        bool IsFileScoped,
+        string? MethodBody,
+        ImmutableArray<string> SuppressionAttributesForCheckAsync,
+        ImmutableArray<string> DiagnosticAttributesForExtensionMethod
     );
 }

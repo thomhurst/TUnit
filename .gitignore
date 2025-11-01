@@ -426,3 +426,4 @@ nul
 
 # Claude Code settings
 .claude/settings.local.json
+.claude/agents

@@ -36,7 +36,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).IsNotNull();
             await Assert.That(mainFile!).Contains("Int_IsEven_Assertion");
             await Assert.That(mainFile!).Contains("Int_IsBetween_Int_Int_Assertion");
-            await Assert.That(mainFile!).Contains("return Task.FromResult(value.IsEven())"); // AssertionResult wrapped in Task
+            await Assert.That(mainFile!).Contains("return Task.FromResult(value!.IsEven())"); // AssertionResult wrapped in Task
         });
 
     [Test]
@@ -84,7 +84,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             var mainFile = generatedFiles.FirstOrDefault(f => f.Contains("IsErrorOfType"));
             await Assert.That(mainFile).IsNotNull();
             // Verify the method call includes type arguments
-            await Assert.That(mainFile!).Contains("value.IsErrorOfType<TValue, TError>()");
+            await Assert.That(mainFile!).Contains("value!.IsErrorOfType<TValue, TError>()");
             // Verify the assertion class is generic
             await Assert.That(mainFile!).Contains("ResultTValue_IsErrorOfType_Assertion<TValue, TError>");
             // Verify the constraint is preserved
@@ -110,7 +110,7 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).Contains("IsGreaterThan<T>(this IAssertionSource<int> source");
 
             // Verify IsBetween generates with constraint
-            await Assert.That(mainFile).Contains("Int_IsBetween_T_Assertion<T>");
+            await Assert.That(mainFile).Contains("Int_IsBetween_T_T_Assertion<T>");
             await Assert.That(mainFile).Contains("IsBetween<T>(this IAssertionSource<int> source");
         });
 
@@ -188,5 +188,17 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).Contains("String_HasValue_T_Assertion<T>");
             await Assert.That(mainFile).Contains("where T : notnull");
             await Assert.That(mainFile).Contains("HasValue<T>(this IAssertionSource<string> source");
+        });
+
+    [Test]
+    public Task FileScopedClassWithInlining() => RunTest(
+        Path.Combine(Sourcy.Git.RootDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "FileScopedClassAssertion.cs"),
+        async generatedFiles =>
+        {
+            // Snapshot test - the actual verification is done by snapshot comparison
+            await Assert.That(generatedFiles.Count).IsGreaterThanOrEqualTo(1);
         });
 }

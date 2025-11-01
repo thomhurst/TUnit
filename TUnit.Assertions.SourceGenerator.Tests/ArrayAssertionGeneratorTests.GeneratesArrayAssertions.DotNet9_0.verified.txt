@@ -35,7 +35,7 @@ public sealed class _IsEmpty_Assertion<T> : Assertion<T[]>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsEmpty<T>();
+        var result = value!.Length == 0;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -73,7 +73,7 @@ public sealed class _IsNotEmpty_Assertion<T> : Assertion<T[]>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsNotEmpty<T>();
+        var result = value != null && value!.Length > 0;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -111,7 +111,7 @@ public sealed class _IsSingleElement_Assertion<T> : Assertion<T[]>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsSingleElement<T>();
+        var result = value!.Length == 1;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -149,7 +149,7 @@ public sealed class _IsNotSingleElement_Assertion<T> : Assertion<T[]>
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsNotSingleElement<T>();
+        var result = value!.Length != 1;
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -187,7 +187,7 @@ public sealed class IEnumerableT_IsSingleElement_Assertion<T> : Assertion<System
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsSingleElement<T>();
+        var result = value != null && value!.Skip(1).Take(1).Any() == false && value!.Any();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
@@ -225,7 +225,7 @@ public sealed class IEnumerableT_IsNotSingleElement_Assertion<T> : Assertion<Sys
             return Task.FromResult(AssertionResult.Failed("Actual value is null"));
         }
 
-        var result = value.IsNotSingleElement<T>();
+        var result = value == null || value!.Skip(1).Take(1).Any() || !value!.Any();
         return Task.FromResult(result
             ? AssertionResult.Passed
             : AssertionResult.Failed($"found {value}"));
