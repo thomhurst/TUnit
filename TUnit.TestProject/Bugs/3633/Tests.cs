@@ -21,19 +21,19 @@ public class Tests
     {
         var valueReached = false;
 
-        await Assert.That(() =>
+        await Assert.That(async () =>
         {
             using (Assert.Multiple())
             {
                 string? nullValue = null;
 
                 // This should NOT throw immediately - should accumulate
-                Assert.That(nullValue).IsNotNull().GetAwaiter().GetResult();
+                await Assert.That(nullValue).IsNotNull();
 
                 // This line SHOULD be reached even though assertion above failed
                 valueReached = true;
 
-                Assert.That(1).IsEqualTo(2).GetAwaiter().GetResult();
+                await Assert.That(1).IsEqualTo(2);
             }
         }).ThrowsException();
 

@@ -53,16 +53,16 @@ public class Issue3633Tests
     {
         var secondAssertionReached = false;
 
-        await Assert.That(() =>
+        await Assert.That(async () =>
         {
             using (Assert.Multiple())
             {
                 string? nullValue = null;
-                Assert.That(nullValue).IsNotNull().GetAwaiter().GetResult();
+                await Assert.That(nullValue).IsNotNull();
 
                 secondAssertionReached = true;
 
-                Assert.That(1).IsEqualTo(2).GetAwaiter().GetResult();
+                await Assert.That(1).IsEqualTo(2);
             }
         }).ThrowsException();
 
