@@ -170,13 +170,30 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
                 continue;
             }
 
-            // Generate positive assertion method
-            GenerateExtensionMethod(sourceBuilder, data, constructor, negated: false);
+            // Check if the type parameter is a nullable reference type (e.g., string?)
+            var typeParam = data.AssertionBaseType.TypeArguments[0];
+            var isNullableReferenceType = typeParam.NullableAnnotation == NullableAnnotation.Annotated &&
+                                         typeParam.IsReferenceType;
+
+            // Generate positive assertion method for nullable source
+            GenerateExtensionMethod(sourceBuilder, data, constructor, negated: false, isNullableOverload: false);
+
+            // If nullable reference type, also generate overload for non-nullable source
+            // This uses a generic constraint to create a distinct signature
+            if (isNullableReferenceType)
+            {
+                GenerateExtensionMethod(sourceBuilder, data, constructor, negated: false, isNullableOverload: true);
+            }
 
             // Generate negated assertion method if requested
             if (!string.IsNullOrEmpty(data.NegatedMethodName))
             {
-                GenerateExtensionMethod(sourceBuilder, data, constructor, negated: true);
+                GenerateExtensionMethod(sourceBuilder, data, constructor, negated: true, isNullableOverload: false);
+
+                if (isNullableReferenceType)
+                {
+                    GenerateExtensionMethod(sourceBuilder, data, constructor, negated: true, isNullableOverload: true);
+                }
             }
         }
 
@@ -211,7 +228,8 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         StringBuilder sourceBuilder,
         AssertionExtensionData data,
         IMethodSymbol constructor,
-        bool negated)
+        bool negated,
+        bool isNullableOverload)
     {
         var methodName = negated ? data.NegatedMethodName : data.MethodName;
         var assertionType = data.ClassSymbol;
@@ -317,9 +335,17 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         }
 
         // Add OverloadResolutionPriority attribute if specified
-        if (data.OverloadResolutionPriority > 0)
+        // For nullable overloads (generic with class constraint), increase priority by 1
+        // so they're preferred over the base nullable overload when source is non-nullable
+        var effectivePriority = data.OverloadResolutionPriority;
+        if (isNullableOverload)
         {
-            sourceBuilder.AppendLine($"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({data.OverloadResolutionPriority})]");
+            effectivePriority += 1;
+        }
+
+        if (effectivePriority > 0)
+        {
+            sourceBuilder.AppendLine($"    [global::System.Runtime.CompilerServices.OverloadResolutionPriority({effectivePriority})]");
         }
 
         // Method declaration
@@ -330,7 +356,19 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         // The extension method extends IAssertionSource<T> where T is the type argument
         // from the Assertion<T> base class.
         string sourceType;
-        if (typeParam is ITypeParameterSymbol baseTypeParam)
+        string genericTypeParam = null;
+        string genericConstraint = null;
+
+        if (isNullableOverload)
+        {
+            // For nullable overload, use a generic type parameter with class constraint
+            // e.g., IsEqualTo<TNonNullable>(this IAssertionSource<TNonNullable> source, string? expected) where TNonNullable : class
+            // We can't constrain to 'string' directly since it's a sealed type, but 'class' ensures it's a reference type
+            genericTypeParam = "TNonNullable";
+            sourceType = $"IAssertionSource<{genericTypeParam}>";
+            genericConstraint = $"where {genericTypeParam} : class";
+        }
+        else if (typeParam is ITypeParameterSymbol baseTypeParam)
         {
             sourceType = $"IAssertionSource<{baseTypeParam.Name}>";
         }
@@ -339,7 +377,13 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             sourceType = $"IAssertionSource<{typeParam.ToDisplayString()}>";
         }
 
-        sourceBuilder.Append($"    public static {returnType} {methodName}{genericParamsString}(");
+        sourceBuilder.Append($"    public static {returnType} {methodName}");
+        if (genericTypeParam != null)
+        {
+            sourceBuilder.Append($"<{genericTypeParam}>");
+        }
+        sourceBuilder.Append(genericParamsString);
+        sourceBuilder.Append("(");
         sourceBuilder.Append($"this {sourceType} source");
 
         // Add additional parameters
@@ -365,10 +409,16 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         sourceBuilder.Append(")");
 
         // Add type constraints on new line if any
-        if (typeConstraints.Count > 0)
+        var allConstraints = new List<string>(typeConstraints);
+        if (genericConstraint != null)
+        {
+            allConstraints.Add(genericConstraint);
+        }
+
+        if (allConstraints.Count > 0)
         {
             sourceBuilder.AppendLine();
-            sourceBuilder.Append($"        {string.Join(" ", typeConstraints)}");
+            sourceBuilder.Append($"        {string.Join(" ", allConstraints)}");
         }
 
         sourceBuilder.AppendLine();
@@ -393,7 +443,20 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         {
             sourceBuilder.Append($"<{string.Join(", ", genericParams)}>");
         }
-        sourceBuilder.Append("(source.Context");
+        sourceBuilder.Append("(");
+
+        // For non-nullable source with nullable assertion, use AsNullable() to convert the context
+        if (isNullableOverload)
+        {
+            // AsNullable() safely converts AssertionContext<TNonNullable> to AssertionContext<TNonNullable?>
+            // We then cast to the target nullable type through object
+            var nullableTypeName = typeParam.ToDisplayString();
+            sourceBuilder.Append($"(AssertionContext<{nullableTypeName}>)(object)source.Context.AsNullable()");
+        }
+        else
+        {
+            sourceBuilder.Append("source.Context");
+        }
 
         foreach (var param in additionalParams)
         {

@@ -3568,6 +3568,12 @@ namespace .Extensions
         public static . IsEqualTo(this .<string?> source, string? expected, [.("expected")] string? expectedExpression = null) { }
         [.(2)]
         public static . IsEqualTo(this .<string?> source, string? expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
+        [.(3)]
+        public static . IsEqualTo<TNonNullable>(this .<TNonNullable> source, string? expected, [.("expected")] string? expectedExpression = null)
+            where TNonNullable :  class { }
+        [.(3)]
+        public static . IsEqualTo<TNonNullable>(this .<TNonNullable> source, string? expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null)
+            where TNonNullable :  class { }
     }
     public static class StringIsEmptyAssertionExtensions
     {
