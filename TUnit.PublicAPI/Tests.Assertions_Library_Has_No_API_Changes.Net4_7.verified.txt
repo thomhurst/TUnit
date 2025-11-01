@@ -1400,7 +1400,7 @@ namespace .Exceptions
 }
 namespace .Extensions
 {
-    public static class ArrayAssertionExtensionsExtensions
+    public static class ArrayAssertionExtensions
     {
         public static .Extensions._IsEmpty_Assertion<T> IsEmpty<T>(this .<T[]> source) { }
         public static .Extensions._IsNotEmpty_Assertion<T> IsNotEmpty<T>(this .<T[]> source) { }
@@ -1415,9 +1415,6 @@ namespace .Extensions
         public static . IsFullyTrusted(this .<.Assembly> source) { }
         public static . IsNotDynamic(this .<.Assembly> source) { }
         public static . IsNotFullyTrusted(this .<.Assembly> source) { }
-    }
-    public static class AssemblyAssertionExtensionsExtensions
-    {
         public static ._IsNotSigned_Assertion IsNotSigned(this .<.Assembly> source) { }
         public static ._IsSigned_Assertion IsSigned(this .<.Assembly> source) { }
     }
@@ -1593,14 +1590,14 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<bool> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class BooleanAssertionExtensionsExtensions
+    public static class BooleanAssertionExtensions
     {
         public static ._IsFalse_Assertion IsFalse(this .<bool> source) { }
         public static ._IsFalse_Assertion IsFalse(this .<bool?> source) { }
         public static ._IsTrue_Assertion IsTrue(this .<bool> source) { }
         public static ._IsTrue_Assertion IsTrue(this .<bool?> source) { }
     }
-    public static class ByteAssertionsExtensions
+    public static class ByteAssertions
     {
         public static ._IsEven_Assertion IsEven(this .<byte> source) { }
         public static ._IsNotZero_Assertion IsNotZero(this .<byte> source) { }
@@ -1636,11 +1633,8 @@ namespace .Extensions
         public static . CanBeCanceled(this .<.CancellationToken> source) { }
         public static . CannotBeCanceled(this .<.CancellationToken> source) { }
         public static . IsCancellationRequested(this .<.CancellationToken> source) { }
-        public static . IsNotCancellationRequested(this .<.CancellationToken> source) { }
-    }
-    public static class CancellationTokenAssertionExtensionsExtensions
-    {
         public static ._IsNone_Assertion IsNone(this .<.CancellationToken> source) { }
+        public static . IsNotCancellationRequested(this .<.CancellationToken> source) { }
         public static ._IsNotNone_Assertion IsNotNone(this .<.CancellationToken> source) { }
     }
     public class CancellationTokenCanBeCanceledAssertion : .<.CancellationToken>
@@ -1851,17 +1845,14 @@ namespace .Extensions
     }
     public static class CultureInfoAssertionExtensions
     {
-        public static . IsNeutralCulture(this .<.CultureInfo> source) { }
-        public static . IsNotNeutralCulture(this .<.CultureInfo> source) { }
-        public static . IsReadOnly(this .<.CultureInfo> source) { }
-    }
-    public static class CultureInfoAssertionExtensionsExtensions
-    {
         public static ._IsEnglish_Assertion IsEnglish(this .<.CultureInfo> source) { }
         public static ._IsInvariant_Assertion IsInvariant(this .<.CultureInfo> source) { }
         public static ._IsLeftToRight_Assertion IsLeftToRight(this .<.CultureInfo> source) { }
+        public static . IsNeutralCulture(this .<.CultureInfo> source) { }
         public static ._IsNotEnglish_Assertion IsNotEnglish(this .<.CultureInfo> source) { }
         public static ._IsNotInvariant_Assertion IsNotInvariant(this .<.CultureInfo> source) { }
+        public static . IsNotNeutralCulture(this .<.CultureInfo> source) { }
+        public static . IsReadOnly(this .<.CultureInfo> source) { }
         public static ._IsRightToLeft_Assertion IsRightToLeft(this .<.CultureInfo> source) { }
     }
     public class CultureInfoIsNeutralCultureAssertion : .<.CultureInfo>
@@ -1915,15 +1906,12 @@ namespace .Extensions
     public static class DateTimeAssertionExtensions
     {
         public static . IsDaylightSavingTime(this .<> source) { }
-        public static . IsNotDaylightSavingTime(this .<> source) { }
-    }
-    public static class DateTimeAssertionExtensionsExtensions
-    {
         public static ._IsInFuture_Assertion IsInFuture(this .<> source) { }
         public static ._IsInFutureUtc_Assertion IsInFutureUtc(this .<> source) { }
         public static ._IsInPast_Assertion IsInPast(this .<> source) { }
         public static ._IsInPastUtc_Assertion IsInPastUtc(this .<> source) { }
         public static ._IsLeapYear_Assertion IsLeapYear(this .<> source) { }
+        public static . IsNotDaylightSavingTime(this .<> source) { }
         public static ._IsNotLeapYear_Assertion IsNotLeapYear(this .<> source) { }
         public static ._IsNotToday_Assertion IsNotToday(this .<> source) { }
         public static ._IsNotUtc_Assertion IsNotUtc(this .<> source) { }
@@ -1946,7 +1934,7 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class DateTimeOffsetAssertionExtensionsExtensions
+    public static class DateTimeOffsetAssertionExtensions
     {
         public static ._IsInFuture_Assertion IsInFuture(this .<> source) { }
         public static ._IsInFutureUtc_Assertion IsInFutureUtc(this .<> source) { }
@@ -2109,7 +2097,7 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class DayOfWeekAssertionExtensionsExtensions
+    public static class DayOfWeekAssertionExtensions
     {
         public static ._IsFriday_Assertion IsFriday(this .<> source) { }
         public static ._IsMonday_Assertion IsMonday(this .<> source) { }
@@ -2140,7 +2128,7 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class DecimalAssertionsExtensions
+    public static class DecimalAssertions
     {
         public static ._IsNotZero_Assertion IsNotZero(this .<decimal> source) { }
         public static ._IsZero_Assertion IsZero(this .<decimal> source) { }
@@ -2173,9 +2161,6 @@ namespace .Extensions
     {
         public static . DoesNotExist(this .<.DirectoryInfo> source) { }
         public static . Exists(this .<.DirectoryInfo> source) { }
-    }
-    public static class DirectoryInfoAssertionExtensionsExtensions
-    {
         public static ._IsEmpty_Assertion IsEmpty(this .<.DirectoryInfo> source) { }
         public static ._IsHidden_Assertion IsHidden(this .<.DirectoryInfo> source) { }
         public static ._IsNotEmpty_Assertion IsNotEmpty(this .<.DirectoryInfo> source) { }
@@ -2243,7 +2228,7 @@ namespace .Extensions
         public static . IsNotPositiveInfinity(this .<double> source) { }
         public static . IsPositiveInfinity(this .<double> source) { }
     }
-    public static class DoubleAssertionsExtensions
+    public static class DoubleAssertions
     {
         public static ._IsNotZero_Assertion IsNotZero(this .<double> source) { }
         public static ._IsZero_Assertion IsZero(this .<double> source) { }
@@ -2290,14 +2275,11 @@ namespace .Extensions
     }
     public static class EncodingAssertionExtensions
     {
-        public static . IsNotSingleByte(this .<.Encoding> source) { }
-        public static . IsSingleByte(this .<.Encoding> source) { }
-    }
-    public static class EncodingAssertionExtensionsExtensions
-    {
         public static ._IsASCII_Assertion IsASCII(this .<.Encoding> source) { }
         public static ._IsBigEndianUnicode_Assertion IsBigEndianUnicode(this .<.Encoding> source) { }
+        public static . IsNotSingleByte(this .<.Encoding> source) { }
         public static ._IsNotUTF8_Assertion IsNotUTF8(this .<.Encoding> source) { }
+        public static . IsSingleByte(this .<.Encoding> source) { }
         public static ._IsUTF32_Assertion IsUTF32(this .<.Encoding> source) { }
         public static ._IsUTF8_Assertion IsUTF8(this .<.Encoding> source) { }
         public static ._IsUnicode_Assertion IsUnicode(this .<.Encoding> source) { }
@@ -2354,7 +2336,7 @@ namespace .Extensions
         public static .<TActual, TExpected> IsEquatableTo<TActual, TExpected>(this .<TActual> source, TExpected expected, [.("expected")] string? expectedExpression = null)
             where TActual : <TExpected> { }
     }
-    public static class ExceptionAssertionExtensionsExtensions
+    public static class ExceptionAssertionExtensions
     {
         public static ._HasHelpLink_Assertion HasHelpLink(this .<> source) { }
         public static ._HasInnerException_Assertion HasInnerException(this .<> source) { }
@@ -2431,11 +2413,6 @@ namespace .Extensions
     {
         public static . DoesNotExist(this .<.FileInfo> source) { }
         public static . Exists(this .<.FileInfo> source) { }
-        public static . IsNotReadOnly(this .<.FileInfo> source) { }
-        public static . IsReadOnly(this .<.FileInfo> source) { }
-    }
-    public static class FileInfoAssertionExtensionsExtensions
-    {
         public static ._HasExtension_Assertion HasExtension(this .<.FileInfo> source) { }
         public static ._HasNoExtension_Assertion HasNoExtension(this .<.FileInfo> source) { }
         public static ._IsArchived_Assertion IsArchived(this .<.FileInfo> source) { }
@@ -2443,6 +2420,8 @@ namespace .Extensions
         public static ._IsHidden_Assertion IsHidden(this .<.FileInfo> source) { }
         public static ._IsNotEmpty_Assertion IsNotEmpty(this .<.FileInfo> source) { }
         public static ._IsNotHidden_Assertion IsNotHidden(this .<.FileInfo> source) { }
+        public static . IsNotReadOnly(this .<.FileInfo> source) { }
+        public static . IsReadOnly(this .<.FileInfo> source) { }
         public static ._IsSystemFile_Assertion IsSystemFile(this .<.FileInfo> source) { }
     }
     public class FileInfoExistsAssertion : .<.FileInfo>
@@ -2513,7 +2492,7 @@ namespace .Extensions
     {
         public static . IsNotSystem(this .<.FileInfo> source) { }
     }
-    public static class FloatAssertionsExtensions
+    public static class FloatAssertions
     {
         public static ._IsNotZero_Assertion IsNotZero(this .<float> source) { }
         public static ._IsZero_Assertion IsZero(this .<float> source) { }
@@ -2558,7 +2537,7 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<float> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class GenericAssertionsExtensions
+    public static class GenericAssertions
     {
         public static .Extensions.T_IsIn__Assertion<T> IsIn<T>(this .<T> source, params T[] collection) { }
         public static .Extensions.T_IsIn_IEnumerableT_Assertion<T> IsIn<T>(this .<T> source, .<T> collection, [.("collection")] string? collectionExpression = null) { }
@@ -2575,7 +2554,7 @@ namespace .Extensions
         public static .<TValue> IsGreaterThanOrEqualTo<TValue>(this .<TValue> source, TValue minimum, [.("minimum")] string? minimumExpression = null)
             where TValue : <TValue> { }
     }
-    public static class GuidAssertionExtensionsExtensions
+    public static class GuidAssertionExtensions
     {
         public static ._IsEmptyGuid_Assertion IsEmptyGuid(this .<> source) { }
         public static ._IsNotEmptyGuid_Assertion IsNotEmptyGuid(this .<> source) { }
@@ -2608,7 +2587,7 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class HttpStatusCodeAssertionExtensionsExtensions
+    public static class HttpStatusCodeAssertionExtensions
     {
         public static ._IsClientError_Assertion IsClientError(this .<.HttpStatusCode> source) { }
         public static ._IsError_Assertion IsError(this .<.HttpStatusCode> source) { }
@@ -2739,7 +2718,7 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<short> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class IntAssertionsExtensions
+    public static class IntAssertions
     {
         public static ._IsEven_Assertion IsEven(this .<int> source) { }
         public static ._IsNotZero_Assertion IsNotZero(this .<int> source) { }
@@ -2823,7 +2802,7 @@ namespace .Extensions
         public static .<TValue> IsNotDefault<TValue>(this .<TValue> source)
             where TValue :  class { }
     }
-    public static class LazyAssertionExtensionsExtensions
+    public static class LazyAssertionExtensions
     {
         public static ._IsValueCreated_Assertion<T> IsValueCreated<T>(this .<<T>> source) { }
         public static ._IsValueNotCreated_Assertion<T> IsValueNotCreated<T>(this .<<T>> source) { }
@@ -2850,7 +2829,7 @@ namespace .Extensions
         public static .<TValue> IsLessThanOrEqualTo<TValue>(this .<TValue> source, TValue maximum, [.("maximum")] string? maximumExpression = null)
             where TValue : <TValue> { }
     }
-    public static class LongAssertionsExtensions
+    public static class LongAssertions
     {
         public static ._IsEven_Assertion IsEven(this .<long> source) { }
         public static ._IsNotZero_Assertion IsNotZero(this .<long> source) { }
@@ -3003,14 +2982,14 @@ namespace .Extensions
     {
         public static .<TValue> IsSameReferenceAs<TValue>(this .<TValue> source, object? expected, [.("expected")] string? expectedExpression = null) { }
     }
-    public static class SbyteAssertionsExtensions
+    public static class SbyteAssertions
     {
         public static ._IsEven_Assertion IsEven(this .<sbyte> source) { }
         public static ._IsNotZero_Assertion IsNotZero(this .<sbyte> source) { }
         public static ._IsOdd_Assertion IsOdd(this .<sbyte> source) { }
         public static ._IsZero_Assertion IsZero(this .<sbyte> source) { }
     }
-    public static class ShortAssertionsExtensions
+    public static class ShortAssertions
     {
         public static .16_IsEven_Assertion IsEven(this .<short> source) { }
         public static .16_IsNotZero_Assertion IsNotZero(this .<short> source) { }
@@ -3038,9 +3017,6 @@ namespace .Extensions
         public static . CannotSeek(this .<.Stream> source) { }
         public static . CannotTimeout(this .<.Stream> source) { }
         public static . CannotWrite(this .<.Stream> source) { }
-    }
-    public static class StreamAssertionExtensionsExtensions
-    {
         public static ._IsAtEnd_Assertion IsAtEnd(this .<.Stream> source) { }
         public static ._IsAtStart_Assertion IsAtStart(this .<.Stream> source) { }
         public static ._IsEmpty_Assertion IsEmpty(this .<.Stream> source) { }
@@ -3094,7 +3070,7 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.Stream> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class StringBuilderAssertionExtensionsExtensions
+    public static class StringBuilderAssertionExtensions
     {
         public static ._HasExcessCapacity_Assertion HasExcessCapacity(this .<.StringBuilder> source) { }
         public static ._IsEmpty_Assertion IsEmpty(this .<.StringBuilder> source) { }
@@ -3262,7 +3238,7 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.Thread> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class TimeSpanAssertionExtensionsExtensions
+    public static class TimeSpanAssertionExtensions
     {
         public static ._IsNegative_Assertion IsNegative(this .<> source) { }
         public static ._IsNonNegative_Assertion IsNonNegative(this .<> source) { }
@@ -3581,14 +3557,14 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<ulong> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class UintAssertionsExtensions
+    public static class UintAssertions
     {
         public static .32_IsEven_Assertion IsEven(this .<uint> source) { }
         public static .32_IsNotZero_Assertion IsNotZero(this .<uint> source) { }
         public static .32_IsOdd_Assertion IsOdd(this .<uint> source) { }
         public static .32_IsZero_Assertion IsZero(this .<uint> source) { }
     }
-    public static class UlongAssertionsExtensions
+    public static class UlongAssertions
     {
         public static .64_IsEven_Assertion IsEven(this .<ulong> source) { }
         public static .64_IsNotZero_Assertion IsNotZero(this .<ulong> source) { }
@@ -3646,7 +3622,7 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class UshortAssertionsExtensions
+    public static class UshortAssertions
     {
         public static .16_IsEven_Assertion IsEven(this .<ushort> source) { }
         public static .16_IsNotZero_Assertion IsNotZero(this .<ushort> source) { }
@@ -3688,7 +3664,7 @@ namespace .Extensions
         protected override .<.> CheckAsync(.<.> metadata) { }
         protected override string GetExpectation() { }
     }
-    public static class VersionAssertionExtensionsExtensions
+    public static class VersionAssertionExtensions
     {
         public static ._HasBuildNumber_Assertion HasBuildNumber(this .<> source) { }
         public static ._HasNoBuildNumber_Assertion HasNoBuildNumber(this .<> source) { }
