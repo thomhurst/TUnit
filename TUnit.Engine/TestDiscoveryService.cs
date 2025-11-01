@@ -86,7 +86,15 @@ internal sealed class TestDiscoveryService : IDataProducer
                 metadataFilter: m => metadataToInclude.Contains(m),
                 cancellationToken).ConfigureAwait(false);
 
-            allTests.AddRange(tests.ToList());
+            var testsList = tests.ToList();
+
+            // Cache tests so ITestFinder can locate them
+            foreach (var test in testsList)
+            {
+                _cachedTests.Add(test);
+            }
+
+            allTests.AddRange(testsList);
         }
 
         foreach (var test in allTests)
