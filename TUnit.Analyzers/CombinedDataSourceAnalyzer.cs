@@ -6,16 +6,16 @@ using TUnit.Analyzers.Extensions;
 namespace TUnit.Analyzers;
 
 /// <summary>
-/// Analyzer for MixedParametersDataSource validation
+/// Analyzer for CombinedDataSource validation
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class MixedParametersDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
+public class CombinedDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(
-            Rules.MixedParametersDataSourceAttributeRequired,
-            Rules.MixedParametersDataSourceMissingParameterDataSource,
-            Rules.MixedParametersDataSourceConflictWithMatrix
+            Rules.CombinedDataSourceAttributeRequired,
+            Rules.CombinedDataSourceMissingParameterDataSource,
+            Rules.CombinedDataSourceConflictWithMatrix
         );
 
     protected override void InitializeInternal(AnalysisContext context)
@@ -36,7 +36,7 @@ public class MixedParametersDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        CheckMixedParametersDataSourceErrors(context, namedTypeSymbol.GetAttributes(),
+        CheckCombinedDataSourceErrors(context, namedTypeSymbol.GetAttributes(),
             namedTypeSymbol.InstanceConstructors.FirstOrDefault()?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty);
     }
 
@@ -52,31 +52,31 @@ public class MixedParametersDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
             return;
         }
 
-        CheckMixedParametersDataSourceErrors(context, methodSymbol.GetAttributes(), methodSymbol.Parameters);
+        CheckCombinedDataSourceErrors(context, methodSymbol.GetAttributes(), methodSymbol.Parameters);
     }
 
-    private void CheckMixedParametersDataSourceErrors(SymbolAnalysisContext context,
+    private void CheckCombinedDataSourceErrors(SymbolAnalysisContext context,
         ImmutableArray<AttributeData> attributes,
         ImmutableArray<IParameterSymbol> parameters)
     {
-        var hasMixedParametersDataSource = attributes.Any(x =>
-            x.IsMixedParametersDataSourceAttribute(context.Compilation));
+        var hasCombinedDataSource = attributes.Any(x =>
+            x.IsCombinedDataSourceAttribute(context.Compilation));
 
         var parametersWithDataSources = parameters
             .Where(p => p.HasDataSourceAttribute(context.Compilation))
             .ToList();
 
-        // Rule 1: If parameters have data source attributes, MixedParametersDataSource must be present
-        if (parametersWithDataSources.Any() && !hasMixedParametersDataSource)
+        // Rule 1: If parameters have data source attributes, CombinedDataSource must be present
+        if (parametersWithDataSources.Any() && !hasCombinedDataSource)
         {
             context.ReportDiagnostic(
-                Diagnostic.Create(Rules.MixedParametersDataSourceAttributeRequired,
+                Diagnostic.Create(Rules.CombinedDataSourceAttributeRequired,
                     context.Symbol.Locations.FirstOrDefault())
             );
         }
 
-        // Rule 2: If MixedParametersDataSource is present, all parameters must have data sources
-        if (hasMixedParametersDataSource)
+        // Rule 2: If CombinedDataSource is present, all parameters must have data sources
+        if (hasCombinedDataSource)
         {
             // Filter out CancellationToken parameters as they're handled by the engine
             var nonCancellationTokenParams = parameters
@@ -89,19 +89,19 @@ public class MixedParametersDataSourceAnalyzer : ConcurrentDiagnosticAnalyzer
                 if (!parameter.HasDataSourceAttribute(context.Compilation))
                 {
                     context.ReportDiagnostic(
-                        Diagnostic.Create(Rules.MixedParametersDataSourceMissingParameterDataSource,
+                        Diagnostic.Create(Rules.CombinedDataSourceMissingParameterDataSource,
                             parameter.Locations.FirstOrDefault() ?? context.Symbol.Locations.FirstOrDefault(),
                             parameter.Name)
                     );
                 }
             }
 
-            // Rule 3: Warn if mixing MixedParametersDataSource with MatrixDataSource
+            // Rule 3: Warn if mixing CombinedDataSource with MatrixDataSource
             var hasMatrixDataSource = attributes.Any(x => x.IsMatrixDataSourceAttribute(context.Compilation));
             if (hasMatrixDataSource)
             {
                 context.ReportDiagnostic(
-                    Diagnostic.Create(Rules.MixedParametersDataSourceConflictWithMatrix,
+                    Diagnostic.Create(Rules.CombinedDataSourceConflictWithMatrix,
                         context.Symbol.Locations.FirstOrDefault())
                 );
             }

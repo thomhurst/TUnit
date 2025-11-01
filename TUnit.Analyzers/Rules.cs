@@ -138,13 +138,13 @@ public static class Rules
     public static readonly DiagnosticDescriptor OverwriteConsole =
         CreateDescriptor("TUnit0055", UsageCategory, DiagnosticSeverity.Warning);
 
-    public static readonly DiagnosticDescriptor MixedParametersDataSourceAttributeRequired =
+    public static readonly DiagnosticDescriptor CombinedDataSourceAttributeRequired =
         CreateDescriptor("TUnit0070", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor MixedParametersDataSourceMissingParameterDataSource =
+    public static readonly DiagnosticDescriptor CombinedDataSourceMissingParameterDataSource =
         CreateDescriptor("TUnit0071", UsageCategory, DiagnosticSeverity.Error);
 
-    public static readonly DiagnosticDescriptor MixedParametersDataSourceConflictWithMatrix =
+    public static readonly DiagnosticDescriptor CombinedDataSourceConflictWithMatrix =
         CreateDescriptor("TUnit0072", UsageCategory, DiagnosticSeverity.Warning);
 
     public static readonly DiagnosticDescriptor InstanceMethodSource =

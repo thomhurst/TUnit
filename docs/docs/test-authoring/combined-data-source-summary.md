@@ -1,14 +1,14 @@
-# MixedParametersDataSource - Quick Reference
+# CombinedDataSource - Quick Reference
 
 ## What is it?
 
-`[MixedParametersDataSource]` allows you to apply different data source attributes to individual test method parameters, automatically generating all possible combinations (Cartesian product).
+`[CombinedDataSource]` allows you to apply different data source attributes to individual test method parameters, automatically generating all possible combinations (Cartesian product).
 
 ## Quick Start
 
 ```csharp
 [Test]
-[MixedParametersDataSource]
+[CombinedDataSource]
 public async Task MyTest(
     [Arguments(1, 2, 3)] int x,
     [MethodDataSource(nameof(GetStrings))] string y)
@@ -56,7 +56,7 @@ With 3 parameters:
 ### Pattern 1: All Arguments
 ```csharp
 [Test]
-[MixedParametersDataSource]
+[CombinedDataSource]
 public void Test(
     [Arguments(1, 2)] int a,
     [Arguments("x", "y")] string b)
@@ -68,7 +68,7 @@ public void Test(
 ### Pattern 2: Mixed Sources
 ```csharp
 [Test]
-[MixedParametersDataSource]
+[CombinedDataSource]
 public void Test(
     [Arguments(1, 2)] int a,
     [MethodDataSource(nameof(GetData))] string b,
@@ -81,7 +81,7 @@ public void Test(
 ### Pattern 3: Multiple Per Parameter
 ```csharp
 [Test]
-[MixedParametersDataSource]
+[CombinedDataSource]
 public void Test(
     [Arguments(1, 2)]
     [Arguments(3, 4)] int a,  // Combines to 4 values
@@ -93,7 +93,7 @@ public void Test(
 
 ## When to Use
 
-✅ **Use MixedParametersDataSource when:**
+✅ **Use CombinedDataSource when:**
 - Different parameters need different data sources
 - You want maximum flexibility in data generation
 - You need to test all combinations of inputs
@@ -118,7 +118,7 @@ public void Test(
 
 ## Full Documentation
 
-See [MixedParametersDataSource.md](MixedParametersDataSource.md) for complete documentation including:
+See [CombinedDataSource.md](CombinedDataSource.md) for complete documentation including:
 - Advanced scenarios
 - Error handling
 - AOT compilation details

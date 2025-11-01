@@ -1,11 +1,11 @@
-using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.MixedParametersDataSourceAnalyzer>;
+using Verifier = TUnit.Analyzers.Tests.Verifiers.CSharpAnalyzerVerifier<TUnit.Analyzers.CombinedDataSourceAnalyzer>;
 
 namespace TUnit.Analyzers.Tests;
 
-public class MixedParametersDataSourceAnalyzerTests
+public class CombinedDataSourceAnalyzerTests
 {
     [Test]
-    public async Task Method_With_MixedParametersDataSource_And_ParameterDataSources_No_Error()
+    public async Task Method_With_CombinedDataSource_And_ParameterDataSources_No_Error()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -14,7 +14,7 @@ public class MixedParametersDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [MixedParametersDataSource]
+                    [CombinedDataSource]
                     [Test]
                     public void MyTest(
                         [Arguments(1, 2, 3)] int value,
@@ -28,7 +28,7 @@ public class MixedParametersDataSourceAnalyzerTests
     }
 
     [Test]
-    public async Task Method_With_ParameterDataSources_Missing_MixedParametersDataSource_Error()
+    public async Task Method_With_ParameterDataSources_Missing_CombinedDataSource_Error()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -46,13 +46,13 @@ public class MixedParametersDataSourceAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.MixedParametersDataSourceAttributeRequired)
+                Verifier.Diagnostic(Rules.CombinedDataSourceAttributeRequired)
                     .WithLocation(0)
             );
     }
 
     [Test]
-    public async Task Method_With_MixedParametersDataSource_Missing_ParameterDataSource_Error()
+    public async Task Method_With_CombinedDataSource_Missing_ParameterDataSource_Error()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -61,7 +61,7 @@ public class MixedParametersDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [MixedParametersDataSource]
+                    [CombinedDataSource]
                     [Test]
                     public void MyTest(
                         [Arguments(1, 2, 3)] int value,
@@ -71,14 +71,14 @@ public class MixedParametersDataSourceAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.MixedParametersDataSourceMissingParameterDataSource)
+                Verifier.Diagnostic(Rules.CombinedDataSourceMissingParameterDataSource)
                     .WithLocation(0)
                     .WithArguments("text")
             );
     }
 
     [Test]
-    public async Task Method_With_MixedParametersDataSource_And_MatrixDataSource_Warning()
+    public async Task Method_With_CombinedDataSource_And_MatrixDataSource_Warning()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -87,7 +87,7 @@ public class MixedParametersDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [MixedParametersDataSource]
+                    [CombinedDataSource]
                     [MatrixDataSource]
                     [Test]
                     public void {|#0:MyTest|}(
@@ -98,20 +98,20 @@ public class MixedParametersDataSourceAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.MixedParametersDataSourceConflictWithMatrix)
+                Verifier.Diagnostic(Rules.CombinedDataSourceConflictWithMatrix)
                     .WithLocation(0)
             );
     }
 
     [Test]
-    public async Task Class_With_MixedParametersDataSource_And_ParameterDataSources_No_Error()
+    public async Task Class_With_CombinedDataSource_And_ParameterDataSources_No_Error()
     {
         await Verifier
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
 
-                [MixedParametersDataSource]
+                [CombinedDataSource]
                 public class MyClass
                 {
                     public MyClass(
@@ -131,7 +131,7 @@ public class MixedParametersDataSourceAnalyzerTests
     }
 
     [Test]
-    public async Task Class_With_ParameterDataSources_Missing_MixedParametersDataSource_Error()
+    public async Task Class_With_ParameterDataSources_Missing_CombinedDataSource_Error()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -153,7 +153,7 @@ public class MixedParametersDataSourceAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.MixedParametersDataSourceAttributeRequired)
+                Verifier.Diagnostic(Rules.CombinedDataSourceAttributeRequired)
                     .WithLocation(0)
             );
     }
@@ -169,7 +169,7 @@ public class MixedParametersDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [MixedParametersDataSource]
+                    [CombinedDataSource]
                     [Test]
                     public void MyTest(
                         [Arguments(1, 2, 3)] int value,
@@ -195,7 +195,7 @@ public class MixedParametersDataSourceAnalyzerTests
                 {
                     public static IEnumerable<int> GetNumbers() => [1, 2, 3];
 
-                    [MixedParametersDataSource]
+                    [CombinedDataSource]
                     [Test]
                     public void MyTest(
                         [MethodDataSource(nameof(GetNumbers))] int number,
@@ -229,7 +229,7 @@ public class MixedParametersDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [MixedParametersDataSource]
+                    [CombinedDataSource]
                     [Test]
                     public void MyTest(
                         [ClassDataSource<TestData>] int number,
@@ -252,7 +252,7 @@ public class MixedParametersDataSourceAnalyzerTests
 
                 public class MyClass
                 {
-                    [MixedParametersDataSource]
+                    [CombinedDataSource]
                     [Test]
                     public void MyTest(
                         [Arguments(1, 2, 3)] int value,
@@ -263,17 +263,17 @@ public class MixedParametersDataSourceAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.MixedParametersDataSourceMissingParameterDataSource)
+                Verifier.Diagnostic(Rules.CombinedDataSourceMissingParameterDataSource)
                     .WithLocation(0)
                     .WithArguments("text"),
-                Verifier.Diagnostic(Rules.MixedParametersDataSourceMissingParameterDataSource)
+                Verifier.Diagnostic(Rules.CombinedDataSourceMissingParameterDataSource)
                     .WithLocation(1)
                     .WithArguments("flag")
             );
     }
 
     [Test]
-    public async Task Method_Without_MixedParametersDataSource_No_ParameterDataSources_No_Error()
+    public async Task Method_Without_CombinedDataSource_No_ParameterDataSources_No_Error()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -293,14 +293,14 @@ public class MixedParametersDataSourceAnalyzerTests
     }
 
     [Test]
-    public async Task Class_With_MixedParametersDataSource_Missing_ParameterDataSource_Error()
+    public async Task Class_With_CombinedDataSource_Missing_ParameterDataSource_Error()
     {
         await Verifier
             .VerifyAnalyzerAsync(
                 """
                 using TUnit.Core;
 
-                [MixedParametersDataSource]
+                [CombinedDataSource]
                 public class MyClass
                 {
                     public MyClass(
@@ -316,7 +316,7 @@ public class MixedParametersDataSourceAnalyzerTests
                     }
                 }
                 """,
-                Verifier.Diagnostic(Rules.MixedParametersDataSourceMissingParameterDataSource)
+                Verifier.Diagnostic(Rules.CombinedDataSourceMissingParameterDataSource)
                     .WithLocation(0)
                     .WithArguments("text")
             );

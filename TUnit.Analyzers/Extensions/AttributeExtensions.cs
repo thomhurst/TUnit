@@ -99,10 +99,10 @@ public static class AttributeExtensions
                 .WithoutGlobalPrefix));
     }
 
-    public static bool IsMixedParametersDataSourceAttribute(this AttributeData attributeData, Compilation compilation)
+    public static bool IsCombinedDataSourceAttribute(this AttributeData attributeData, Compilation compilation)
     {
         return SymbolEqualityComparer.Default.Equals(attributeData.AttributeClass,
-            compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.MixedParametersDataSourceAttribute
+            compilation.GetTypeByMetadataName(WellKnown.AttributeFullyQualifiedClasses.CombinedDataSourceAttribute
                 .WithoutGlobalPrefix));
     }
 
