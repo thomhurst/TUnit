@@ -166,8 +166,11 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             staticPropertyInitializer = new ReflectionStaticPropertyInitializer(Logger);
         }
 
+        var filterMatcher = Register<IMetadataFilterMatcher>(new MetadataFilterMatcher());
+        var dependencyExpander = Register(new MetadataDependencyExpander(filterMatcher));
+
         var testBuilder = Register<ITestBuilder>(
-            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, PropertyInjectionService, DataSourceInitializer, hookDiscoveryService, testArgumentRegistrationService));
+            new TestBuilder(TestSessionId, EventReceiverOrchestrator, ContextProvider, PropertyInjectionService, DataSourceInitializer, hookDiscoveryService, testArgumentRegistrationService, filterMatcher));
 
         TestBuilderPipeline = Register(
             new TestBuilderPipeline(
@@ -176,7 +179,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
                 ContextProvider,
                 EventReceiverOrchestrator));
 
-        DiscoveryService = Register(new TestDiscoveryService(TestExecutor, TestBuilderPipeline, TestFilterService));
+        DiscoveryService = Register(new TestDiscoveryService(TestExecutor, TestBuilderPipeline, TestFilterService, dependencyExpander));
 
         // Create test finder service after discovery service so it can use its cache
         TestFinder = Register<ITestFinder>(new TestFinder(DiscoveryService));

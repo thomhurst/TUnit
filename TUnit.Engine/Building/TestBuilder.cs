@@ -25,6 +25,7 @@ internal sealed class TestBuilder : ITestBuilder
     private readonly DataSourceInitializer _dataSourceInitializer;
     private readonly Discovery.IHookDiscoveryService _hookDiscoveryService;
     private readonly TestArgumentRegistrationService _testArgumentRegistrationService;
+    private readonly IMetadataFilterMatcher _filterMatcher;
 
     public TestBuilder(
         string sessionId,
@@ -33,7 +34,8 @@ internal sealed class TestBuilder : ITestBuilder
         PropertyInjectionService propertyInjectionService,
         DataSourceInitializer dataSourceInitializer,
         Discovery.IHookDiscoveryService hookDiscoveryService,
-        TestArgumentRegistrationService testArgumentRegistrationService)
+        TestArgumentRegistrationService testArgumentRegistrationService,
+        IMetadataFilterMatcher filterMatcher)
     {
         _sessionId = sessionId;
         _hookDiscoveryService = hookDiscoveryService;
@@ -42,6 +44,7 @@ internal sealed class TestBuilder : ITestBuilder
         _propertyInjectionService = propertyInjectionService;
         _dataSourceInitializer = dataSourceInitializer;
         _testArgumentRegistrationService = testArgumentRegistrationService;
+        _filterMatcher = filterMatcher ?? throw new ArgumentNullException(nameof(filterMatcher));
     }
 
     /// <summary>
@@ -1580,107 +1583,10 @@ internal sealed class TestBuilder : ITestBuilder
     /// <summary>
     /// Determines if a test could potentially match the filter without building the full test object.
     /// This is a conservative check - returns true unless we can definitively rule out the test.
+    /// Delegates to IMetadataFilterMatcher service.
     /// </summary>
     internal bool CouldTestMatchFilter(ITestExecutionFilter filter, TestMetadata metadata)
     {
-#pragma warning disable TPEXP
-        return filter switch
-        {
-            null => true,
-            NopFilter => true,
-            TreeNodeFilter treeFilter => CouldMatchTreeNodeFilter(treeFilter, metadata),
-            TestNodeUidListFilter uidFilter => CouldMatchUidFilter(uidFilter, metadata),
-            _ => true // Unknown filter type - be conservative
-        };
-#pragma warning restore TPEXP
-    }
-
-    /// <summary>
-    /// Checks if a test could match a TestNodeUidListFilter by checking if any UID contains
-    /// the namespace, class name, and method name.
-    /// </summary>
-    private static bool CouldMatchUidFilter(TestNodeUidListFilter filter, TestMetadata metadata)
-    {
-        var classMetadata = metadata.MethodMetadata.Class;
-        var namespaceName = classMetadata.Namespace ?? "";
-        var className = metadata.TestClassType.Name;
-        var methodName = metadata.TestMethodName;
-
-        // Check if any UID in the filter contains all three components
-        foreach (var uid in filter.TestNodeUids)
-        {
-            var uidValue = uid.Value;
-            if (uidValue.Contains(namespaceName) &&
-                uidValue.Contains(className) &&
-                uidValue.Contains(methodName))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Checks if a test could match a TreeNodeFilter by building the test path and checking the filter.
-    /// </summary>
-#pragma warning disable TPEXP
-    private bool CouldMatchTreeNodeFilter(TreeNodeFilter filter, TestMetadata metadata)
-    {
-        var filterString = filter.Filter;
-
-        // No filter means match all
-        if (string.IsNullOrEmpty(filterString))
-        {
-            return true;
-        }
-
-        // If the filter contains property conditions, strip them for path-only matching
-        // Property conditions will be evaluated in the second pass after tests are fully built
-        TreeNodeFilter pathOnlyFilter;
-        if (filterString.Contains('['))
-        {
-            // Strip all property conditions: [key=value]
-            // Use regex to remove all [...] blocks
-            var strippedFilterString = System.Text.RegularExpressions.Regex.Replace(filterString, @"\[([^\]]*)\]", "");
-
-            // Create a new TreeNodeFilter with the stripped filter string using reflection
-            pathOnlyFilter = CreateTreeNodeFilterViaReflection(strippedFilterString);
-        }
-        else
-        {
-            pathOnlyFilter = filter;
-        }
-
-        var path = BuildPathFromMetadata(metadata);
-        var emptyPropertyBag = new PropertyBag();
-        return pathOnlyFilter.MatchesFilter(path, emptyPropertyBag);
-    }
-
-    /// <summary>
-    /// Creates a TreeNodeFilter instance via reflection since it doesn't have a public constructor.
-    /// </summary>
-    private static TreeNodeFilter CreateTreeNodeFilterViaReflection(string filterString)
-    {
-        var constructor = typeof(TreeNodeFilter).GetConstructors(
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)[0];
-
-        return (TreeNodeFilter)constructor.Invoke([filterString]);
-    }
-#pragma warning restore TPEXP
-
-    /// <summary>
-    /// Builds the test path from metadata, matching the format used by TestFilterService.
-    /// Path format: /AssemblyName/Namespace/ClassName/MethodName
-    /// </summary>
-    private static string BuildPathFromMetadata(TestMetadata metadata)
-    {
-        var classMetadata = metadata.MethodMetadata.Class;
-        var assemblyName = classMetadata.Assembly.Name ?? metadata.TestClassType.Assembly.GetName().Name ?? "*";
-        var namespaceName = classMetadata.Namespace ?? "*";
-        var className = classMetadata.Name;
-        var methodName = metadata.TestMethodName;
-
-        return $"/{assemblyName}/{namespaceName}/{className}/{methodName}";
+        return _filterMatcher.CouldMatchFilter(metadata, filter);
     }
 }

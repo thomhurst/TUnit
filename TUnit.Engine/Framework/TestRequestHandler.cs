@@ -32,8 +32,6 @@ internal sealed class TestRequestHandler : IRequestHandler
         ExecuteRequestContext context,
         ITestExecutionFilter? testExecutionFilter)
     {
-        // For discovery, we want to show ALL tests including explicit ones
-        // Pass isForExecution: false to discover all tests - filtering is only for execution
         var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, testExecutionFilter, context.CancellationToken, isForExecution: false);
 
 #if NET
@@ -56,7 +54,6 @@ internal sealed class TestRequestHandler : IRequestHandler
         RunTestExecutionRequest request,
         ExecuteRequestContext context, ITestExecutionFilter? testExecutionFilter)
     {
-        // For execution, apply filtering to exclude explicit tests unless explicitly targeted
         var discoveryResult = await serviceProvider.DiscoveryService.DiscoverTests(context.Request.Session.SessionUid.Value, testExecutionFilter, context.CancellationToken, isForExecution: true);
 
 #if NET
@@ -68,14 +65,12 @@ internal sealed class TestRequestHandler : IRequestHandler
 
         var allTests = discoveryResult.Tests.ToArray();
 
-        // Report only the tests that will actually run
         foreach (var test in allTests)
         {
             context.CancellationToken.ThrowIfCancellationRequested();
             await serviceProvider.MessageBus.Discovered(test.Context);
         }
 
-        // Execute tests
         await serviceProvider.TestSessionCoordinator.ExecuteTests(
             allTests,
             request.Filter,
