@@ -168,14 +168,15 @@ public abstract class BaseMigrationCodeFixProvider : CodeFixProvider
     }
 
     /// <summary>
-    /// Normalizes all line endings in the compilation unit to match the original document.
-    /// This prevents mixed line endings that cause cross-platform test failures.
+    /// Normalizes all line endings in the compilation unit to LF (Unix format) for cross-platform consistency.
+    /// This ensures code fixes produce consistent output regardless of the platform or original document's line endings,
+    /// preventing test failures between Windows (CRLF) and Unix (LF) systems.
     /// </summary>
     private static CompilationUnitSyntax NormalizeLineEndings(CompilationUnitSyntax compilationUnit, SyntaxNode originalRoot)
     {
-        // Detect the line ending used in the original document
-        var originalText = originalRoot.GetText().ToString();
-        var targetEol = originalText.Contains("\r\n") ? "\r\n" : "\n";
+        // Always normalize to LF for cross-platform consistency
+        // This matches our test infrastructure which also normalizes to LF
+        const string targetEol = "\n";
 
         // Create a rewriter that replaces all EndOfLine trivia with the target line ending
         var rewriter = new LineEndingNormalizer(targetEol);

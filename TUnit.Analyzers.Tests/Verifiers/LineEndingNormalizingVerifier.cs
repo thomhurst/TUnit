@@ -4,9 +4,9 @@ using Microsoft.CodeAnalysis.Testing;
 namespace TUnit.Analyzers.Tests.Verifiers;
 
 /// <summary>
-/// A custom verifier that normalizes line endings before comparison to support cross-platform testing.
-/// This prevents tests from failing on Unix systems (Linux/macOS) which use LF line endings
-/// while Windows uses CRLF line endings.
+/// A custom verifier that normalizes line endings to LF before comparison to support cross-platform testing.
+/// This prevents tests from failing due to differences between Windows (CRLF) and Unix (LF) line endings.
+/// By normalizing to LF (the universal standard), tests pass consistently on all platforms.
 /// </summary>
 public class LineEndingNormalizingVerifier : IVerifier
 {
@@ -71,8 +71,9 @@ public class LineEndingNormalizingVerifier : IVerifier
 
     private static string NormalizeLineEndings(string value)
     {
-        // Normalize all line endings to CRLF for consistent comparison
-        return value.Replace("\r\n", "\n").Replace("\n", "\r\n");
+        // Normalize all line endings to LF (Unix) for cross-platform consistent comparison
+        // LF is the universal standard and prevents Windows/Linux test mismatches
+        return value.Replace("\r\n", "\n");
     }
 
     /// <summary>
