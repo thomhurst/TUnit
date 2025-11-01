@@ -11,14 +11,31 @@ public class DynamicTestsGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        var enabledProvider = context.AnalyzerConfigOptionsProvider
+            .Select((options, _) =>
+            {
+                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
+                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
+            });
+
         var standardTests = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.DynamicTestBuilderAttribute",
                 predicate: static (_, _) => true,
                 transform: static (ctx, _) => GetSemanticTargetForTestMethodGeneration(ctx))
-            .Where(static m => m is not null);
+            .Where(static m => m is not null)
+            .Combine(enabledProvider);
 
-        context.RegisterSourceOutput(standardTests, (sourceContext, data) => GenerateTests(sourceContext, data!));
+        context.RegisterSourceOutput(standardTests, (sourceContext, data) =>
+        {
+            var (testData, isEnabled) = data;
+            if (!isEnabled)
+            {
+                return;
+            }
+
+            GenerateTests(sourceContext, testData!);
+        });
     }
 
     static DynamicTestSourceDataModel? GetSemanticTargetForTestMethodGeneration(GeneratorAttributeSyntaxContext context)

@@ -17,10 +17,27 @@ public class AssemblyLoaderGenerator : IIncrementalGenerator
     ];
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var provider = context.CompilationProvider
-            .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer());
+        var enabledProvider = context.AnalyzerConfigOptionsProvider
+            .Select((options, _) =>
+            {
+                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
+                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
+            });
 
-        context.RegisterSourceOutput(provider, (sourceProductionContext, source) => GenerateCode(sourceProductionContext, source));
+        var provider = context.CompilationProvider
+            .WithComparer(new PreventCompilationTriggerOnEveryKeystrokeComparer())
+            .Combine(enabledProvider);
+
+        context.RegisterSourceOutput(provider, (sourceProductionContext, data) =>
+        {
+            var (compilation, isEnabled) = data;
+            if (!isEnabled)
+            {
+                return;
+            }
+
+            GenerateCode(sourceProductionContext, compilation);
+        });
     }
 
     private void GenerateCode(SourceProductionContext context, Compilation compilation)

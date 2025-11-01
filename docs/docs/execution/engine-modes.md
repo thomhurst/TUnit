@@ -91,6 +91,59 @@ Alternatively, you can configure this in a `.runsettings` file:
 </RunSettings>
 ```
 
+### Optimizing Build Performance in Reflection Mode
+
+When using reflection mode exclusively (via `[assembly: ReflectionMode]`), you can improve build performance by disabling source generation entirely. Since the generated code won't be used at runtime in reflection mode, skipping source generation reduces compile times.
+
+Add this MSBuild property to your test project file (`.csproj`):
+
+```xml
+<PropertyGroup>
+    <EnableTUnitSourceGeneration>false</EnableTUnitSourceGeneration>
+</PropertyGroup>
+```
+
+**Example: bUnit Test Project with Optimized Build**
+```xml
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <!-- Disable source generation since we're using reflection mode -->
+    <EnableTUnitSourceGeneration>false</EnableTUnitSourceGeneration>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="bunit" Version="1.x.x" />
+    <PackageReference Include="TUnit" Version="1.x.x" />
+  </ItemGroup>
+</Project>
+```
+
+Then in your code:
+```csharp
+// Enable reflection mode for Razor component testing
+[assembly: ReflectionMode]
+
+namespace MyApp.Tests;
+
+public class CounterComponentTests : TestContext
+{
+    [Test]
+    public void CounterStartsAtZero()
+    {
+        var cut = RenderComponent<Counter>();
+        cut.Find("p").TextContent.ShouldBe("Current count: 0");
+    }
+}
+```
+
+**Benefits:**
+- **Faster Builds**: Eliminates source generator execution at compile time
+- **Reduced Compiler Overhead**: Less work for the compiler to do
+- **Clear Intent**: Explicitly indicates the project uses reflection mode
+
+**Note:** This optimization is only beneficial when you're exclusively using reflection mode. If you're using source generation mode (the default), keep `EnableTUnitSourceGeneration` set to `true` (or omit it entirely, as `true` is the default).
+
 ## Native AOT Support
 
 When publishing with Native AOT, TUnit's source generation mode provides additional benefits:

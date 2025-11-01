@@ -8,6 +8,13 @@ public class LanguageVersionCheckGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        var enabledProvider = context.AnalyzerConfigOptionsProvider
+            .Select((options, _) =>
+            {
+                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
+                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
+            });
+
         var settings = context.CompilationProvider
             .Select((c, _) =>
             {
@@ -16,10 +23,18 @@ public class LanguageVersionCheckGenerator : IIncrementalGenerator
                     : null;
 
                 return csharpVersion;
-            });
+            })
+            .Combine(enabledProvider);
 
-        context.RegisterSourceOutput(settings, static (sourceProductionContext, languageVersion) =>
+        context.RegisterSourceOutput(settings, static (sourceProductionContext, data) =>
         {
+            var (languageVersion, isEnabled) = data;
+
+            if (!isEnabled)
+            {
+                return;
+            }
+
             if (languageVersion is null)
             {
                 return;
