@@ -57,7 +57,17 @@ internal sealed class DataSourceInitializer
             }
         }
 
-        await existingTask.WaitAsync(cancellationToken);
+        // Wait for initialization with cancellation support
+        if (cancellationToken.CanBeCanceled)
+        {
+            await existingTask.ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+        else
+        {
+            await existingTask.ConfigureAwait(false);
+        }
+
         return dataSource;
     }
 
