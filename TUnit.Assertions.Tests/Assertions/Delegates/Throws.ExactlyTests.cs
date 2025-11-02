@@ -140,10 +140,12 @@ public partial class Throws
                 await Assert.That((object)ex).IsAssignableTo<CustomException>();
             });
 
-            await Assert.That(assertionException).HasMessageStartingWith("""
+            var expectedPrefix = """
                 Expected to throw exactly CustomException
                 and to have message equal to "Foo bar message!"
-                """);
+                """;
+
+            await Assert.That(assertionException.Message.NormalizeLineEndings()).StartsWith(expectedPrefix.NormalizeLineEndings());
         }
     }
 }

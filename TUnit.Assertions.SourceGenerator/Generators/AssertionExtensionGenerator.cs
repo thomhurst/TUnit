@@ -175,25 +175,13 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             var isNullableReferenceType = typeParam.NullableAnnotation == NullableAnnotation.Annotated &&
                                          typeParam.IsReferenceType;
 
-            // Generate positive assertion method for nullable source
+            // Generate positive assertion method
             GenerateExtensionMethod(sourceBuilder, data, constructor, negated: false, isNullableOverload: false);
-
-            // If nullable reference type, also generate overload for non-nullable source
-            // This uses a generic constraint to create a distinct signature
-            if (isNullableReferenceType)
-            {
-                GenerateExtensionMethod(sourceBuilder, data, constructor, negated: false, isNullableOverload: true);
-            }
 
             // Generate negated assertion method if requested
             if (!string.IsNullOrEmpty(data.NegatedMethodName))
             {
                 GenerateExtensionMethod(sourceBuilder, data, constructor, negated: true, isNullableOverload: false);
-
-                if (isNullableReferenceType)
-                {
-                    GenerateExtensionMethod(sourceBuilder, data, constructor, negated: true, isNullableOverload: true);
-                }
             }
         }
 
@@ -361,12 +349,12 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 
         if (isNullableOverload)
         {
-            // For nullable overload, use a generic type parameter with class constraint
-            // e.g., IsEqualTo<TNonNullable>(this IAssertionSource<TNonNullable> source, string? expected) where TNonNullable : class
-            // We can't constrain to 'string' directly since it's a sealed type, but 'class' ensures it's a reference type
-            genericTypeParam = "TNonNullable";
-            sourceType = $"IAssertionSource<{genericTypeParam}>";
-            genericConstraint = $"where {genericTypeParam} : class";
+            // For nullable reference types, we can't use two separate overloads for T and T?
+            // because NRT annotations are erased at runtime - they're the same type to the CLR.
+            // Instead, just use the nullable version and accept both nullable and non-nullable sources.
+            sourceType = $"IAssertionSource<{typeParam.ToDisplayString()}>";
+            genericTypeParam = null;
+            genericConstraint = null;
         }
         else if (typeParam is ITypeParameterSymbol baseTypeParam)
         {
@@ -445,13 +433,9 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         }
         sourceBuilder.Append("(");
 
-        // For non-nullable source with nullable assertion, use AsNullable() to convert the context
         if (isNullableOverload)
         {
-            // AsNullable() safely converts AssertionContext<TNonNullable> to AssertionContext<TNonNullable?>
-            // We then cast to the target nullable type through object
-            var nullableTypeName = typeParam.ToDisplayString();
-            sourceBuilder.Append($"(AssertionContext<{nullableTypeName}>)(object)source.Context.AsNullable()");
+            sourceBuilder.Append("source.Context.AsNullable()");
         }
         else
         {

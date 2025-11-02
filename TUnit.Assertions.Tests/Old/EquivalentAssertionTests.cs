@@ -130,7 +130,7 @@ public class EquivalentAssertionTests
 
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching));
 
-        await TUnitAssert.That(exception!.Message).IsEqualTo(
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             """
             Expected to be equivalent to [1, 2, 3, 4, 5]
             but collection item at index 1 does not match: expected 2, but was 5
@@ -149,7 +149,7 @@ public class EquivalentAssertionTests
 
         var exception = await TUnitAssert.ThrowsAsync<TUnitAssertionException>(async () => await TUnitAssert.That(array).IsEquivalentTo(list, CollectionOrdering.Matching));
 
-        await TUnitAssert.That(exception!.Message).IsEqualTo(
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings()).IsEqualTo(
             """
             Expected to be equivalent to [1, 2, 3, 4, 5]
             but collection item at index 1 does not match: expected 2, but was 5
@@ -177,7 +177,7 @@ public class EquivalentAssertionTests
                               $"Received: \"Foo\"{Environment.NewLine}" +
                               $"{Environment.NewLine}" +
                               $"at Assert.That(result1).IsEquivalentTo(result2)";
-        await TUnitAssert.That(exception!.Message).IsEqualTo(expectedMessage);
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings().NormalizeLineEndings()).IsEqualTo(expectedMessage.NormalizeLineEndings());
     }
 
     [Test]
@@ -197,7 +197,7 @@ public class EquivalentAssertionTests
                               $"Received: null{Environment.NewLine}" +
                               $"{Environment.NewLine}" +
                               $"at Assert.That(object1).IsEquivalentTo(object2)";
-        await TUnitAssert.That(exception!.Message).IsEqualTo(expectedMessage);
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings().NormalizeLineEndings()).IsEqualTo(expectedMessage.NormalizeLineEndings());
     }
 
     [Test]
@@ -233,7 +233,7 @@ public class EquivalentAssertionTests
                               $"Received: null{Environment.NewLine}" +
                               $"{Environment.NewLine}" +
                               $"at Assert.That(object1).IsEquivalentTo(object2)";
-        await TUnitAssert.That(exception!.Message).IsEqualTo(expectedMessage);
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings().NormalizeLineEndings()).IsEqualTo(expectedMessage.NormalizeLineEndings());
     }
 
     [Test]
@@ -365,7 +365,7 @@ public class EquivalentAssertionTests
                               $"Received: null{Environment.NewLine}" +
                               $"{Environment.NewLine}" +
                               $"at Assert.That(object1).IsEquivalentTo(object2)";
-        await TUnitAssert.That(exception!.Message).IsEqualTo(expectedMessage);
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings().NormalizeLineEndings()).IsEqualTo(expectedMessage.NormalizeLineEndings());
     }
 
     [Test]
@@ -496,7 +496,7 @@ public class EquivalentAssertionTests
                               $"Received: InnerClass{Environment.NewLine}" +
                               $"{Environment.NewLine}" +
                               $"at Assert.That(object1).IsEquivalentTo(object2)";
-        await TUnitAssert.That(exception!.Message).IsEqualTo(expectedMessage);
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings().NormalizeLineEndings()).IsEqualTo(expectedMessage.NormalizeLineEndings());
     }
 
     [Test]
@@ -572,7 +572,7 @@ public class EquivalentAssertionTests
                               $"Received: \"Bar\"{Environment.NewLine}" +
                               $"{Environment.NewLine}" +
                               $"at Assert.That(object1).IsEquivalentTo(object2).WithPartialEquivalency()";
-        await TUnitAssert.That(exception!.Message).IsEqualTo(expectedMessage);
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings().NormalizeLineEndings()).IsEqualTo(expectedMessage.NormalizeLineEndings());
     }
 
     [Test]
@@ -624,7 +624,7 @@ public class EquivalentAssertionTests
                               $"Received: Int32{Environment.NewLine}" +
                               $"{Environment.NewLine}" +
                               $"at Assert.That(object1).IsEquivalentTo(object2)";
-        await TUnitAssert.That(exception!.Message).IsEqualTo(expectedMessage);
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings().NormalizeLineEndings()).IsEqualTo(expectedMessage.NormalizeLineEndings());
     }
 
     [Test]

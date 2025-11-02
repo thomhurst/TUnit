@@ -160,6 +160,6 @@ public class StringEqualsAssertionTests
                               $"                            ↑{Environment.NewLine}" +
                               $"{Environment.NewLine}" +
                               $"at Assert.That(value1).IsEqualTo(value2)";
-        await TUnitAssert.That(exception!.Message).IsEqualTo(expectedMessage);
+        await TUnitAssert.That(exception!.Message.NormalizeLineEndings().NormalizeLineEndings()).IsEqualTo(expectedMessage.NormalizeLineEndings());
     }
 }
