@@ -270,9 +270,10 @@ namespace .Conditions
         public .<T> Context { get; }
         public .<T, TExpected> IsTypeOf<TExpected>() { }
     }
-    public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
+    public class AsyncMappedSatisfiesAssertion<TValue, TMapped, TAssertion> : .<TValue>
+        where TAssertion : .<TMapped>
     {
-        public AsyncMappedSatisfiesAssertion(.<TValue> context, <TValue?, .<TMapped>> selector, <.<TMapped>, .<TMapped>?> assertions, string selectorDescription) { }
+        public AsyncMappedSatisfiesAssertion(.<TValue> context, <TValue?, .<TMapped>> selector, <.<TMapped>, TAssertion> assertions, string selectorDescription) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -997,18 +998,18 @@ namespace .Conditions
         public . IgnoringCase() { }
         public . WithComparison( comparison) { }
     }
-    [.("IsEqualTo", OverloadResolutionPriority=2)]
-    public class StringEqualsAssertion : .<string>
+    [.("IsEqualTo")]
+    public class StringEqualsAssertion<TActual> : .<TActual>
     {
-        public StringEqualsAssertion(.<string> context, string? expected) { }
-        public StringEqualsAssertion(.<string> context, string? expected,  comparison) { }
-        protected override .<.> CheckAsync(.<string> metadata) { }
+        public StringEqualsAssertion(.<TActual> context, string? expected) { }
+        public StringEqualsAssertion(.<TActual> context, string? expected,  comparison) { }
+        protected override .<.> CheckAsync(.<TActual> metadata) { }
         protected override string GetExpectation() { }
-        public . IgnoringCase() { }
-        public . IgnoringWhitespace() { }
-        public . WithComparison( comparison) { }
-        public . WithNullAndEmptyEquality() { }
-        public . WithTrimming() { }
+        public .<TActual> IgnoringCase() { }
+        public .<TActual> IgnoringWhitespace() { }
+        public .<TActual> WithComparison( comparison) { }
+        public .<TActual> WithNullAndEmptyEquality() { }
+        public .<TActual> WithTrimming() { }
     }
     [.("IsEmpty")]
     public class StringIsEmptyAssertion : .<string>
@@ -1513,8 +1514,9 @@ namespace .Extensions
         public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TKey, TValue, TTransformed>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<TTransformed>> assertions) { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
-        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped?>> selector, <.<TMapped>, .<TMapped>> assertions, [.("selector")] string? selectorExpression = null) { }
         public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
+        public static .<TValue, TMapped, TAssertion> Satisfies<TValue, TMapped, TAssertion>(this .<TValue> source, <TValue?, .<TMapped?>> selector, <.<TMapped>, TAssertion> assertions, [.("selector")] string? selectorExpression = null)
+            where TAssertion : .<TMapped> { }
         public static .<TException> Throws<TException>(this . source)
             where TException :  { }
         public static .<TException> Throws<TException>(this . source)
@@ -3116,8 +3118,8 @@ namespace .Extensions
     }
     public static class StringEqualsAssertionExtensions
     {
-        public static . IsEqualTo(this .<string> source, string? expected, [.("expected")] string? expectedExpression = null) { }
-        public static . IsEqualTo(this .<string> source, string? expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
+        public static .<TActual> IsEqualTo<TActual>(this .<TActual> source, string? expected, [.("expected")] string? expectedExpression = null) { }
+        public static .<TActual> IsEqualTo<TActual>(this .<TActual> source, string? expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
     }
     public static class StringIsEmptyAssertionExtensions
     {

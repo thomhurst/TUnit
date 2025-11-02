@@ -153,4 +153,20 @@ public sealed class AssertionContext<TValue>
         PendingLinkType = null;
         return result;
     }
+
+    /// <summary>
+    /// Converts a non-nullable reference type context to its nullable equivalent.
+    /// This is safe because reference types and their nullable counterparts have identical runtime representations.
+    /// Used primarily by the assertion source generator to handle non-nullable to nullable conversions.
+    /// IMPORTANT: This should only be called when TValue is a reference type (class).
+    /// </summary>
+    /// <returns>The same context instance viewed as nullable</returns>
+    internal AssertionContext<TValue?> AsNullable()
+    {
+        // This cast is safe because for reference types, TValue and TValue?
+        // have the same runtime representation. We are only changing the
+        // compiler's static analysis view of the type.
+        // The generator ensures this is only called for reference types.
+        return (AssertionContext<TValue?>)(object)this;
+    }
 }

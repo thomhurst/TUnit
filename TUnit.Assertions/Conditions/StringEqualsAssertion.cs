@@ -6,10 +6,10 @@ namespace TUnit.Assertions.Conditions;
 
 /// <summary>
 /// Asserts that a string is equal to an expected value.
-/// Demonstrates multiple custom methods WITHOUT wrappers!
+/// Generic to support both nullable and non-nullable string sources.
 /// </summary>
-[AssertionExtension("IsEqualTo", OverloadResolutionPriority = 2)]
-public class StringEqualsAssertion : Assertion<string>
+[AssertionExtension("IsEqualTo")]
+public class StringEqualsAssertion<TActual> : Assertion<TActual>
 {
     private readonly string? _expected;
     private StringComparison _comparison = StringComparison.Ordinal;
@@ -18,7 +18,7 @@ public class StringEqualsAssertion : Assertion<string>
     private bool _ignoringWhitespace;
 
     public StringEqualsAssertion(
-        AssertionContext<string> context,
+        AssertionContext<TActual> context,
         string? expected)
         : base(context)
     {
@@ -26,7 +26,7 @@ public class StringEqualsAssertion : Assertion<string>
     }
 
     public StringEqualsAssertion(
-        AssertionContext<string> context,
+        AssertionContext<TActual> context,
         string? expected,
         StringComparison comparison)
         : base(context)
@@ -38,7 +38,7 @@ public class StringEqualsAssertion : Assertion<string>
     /// <summary>
     /// Makes the comparison case-insensitive.
     /// </summary>
-    public StringEqualsAssertion IgnoringCase()
+    public StringEqualsAssertion<TActual> IgnoringCase()
     {
         _comparison = StringComparison.OrdinalIgnoreCase;
         Context.ExpressionBuilder.Append(".IgnoringCase()");
@@ -48,7 +48,7 @@ public class StringEqualsAssertion : Assertion<string>
     /// <summary>
     /// Specifies a custom string comparison type.
     /// </summary>
-    public StringEqualsAssertion WithComparison(StringComparison comparison)
+    public StringEqualsAssertion<TActual> WithComparison(StringComparison comparison)
     {
         _comparison = comparison;
         Context.ExpressionBuilder.Append($".WithComparison({comparison})");
@@ -58,7 +58,7 @@ public class StringEqualsAssertion : Assertion<string>
     /// <summary>
     /// Trims both strings before comparing.
     /// </summary>
-    public StringEqualsAssertion WithTrimming()
+    public StringEqualsAssertion<TActual> WithTrimming()
     {
         _trimming = true;
         Context.ExpressionBuilder.Append(".WithTrimming()");
@@ -68,7 +68,7 @@ public class StringEqualsAssertion : Assertion<string>
     /// <summary>
     /// Treats null and empty string as equal.
     /// </summary>
-    public StringEqualsAssertion WithNullAndEmptyEquality()
+    public StringEqualsAssertion<TActual> WithNullAndEmptyEquality()
     {
         _nullAndEmptyEquality = true;
         Context.ExpressionBuilder.Append(".WithNullAndEmptyEquality()");
@@ -78,16 +78,16 @@ public class StringEqualsAssertion : Assertion<string>
     /// <summary>
     /// Removes all whitespace from both strings before comparing.
     /// </summary>
-    public StringEqualsAssertion IgnoringWhitespace()
+    public StringEqualsAssertion<TActual> IgnoringWhitespace()
     {
         _ignoringWhitespace = true;
         Context.ExpressionBuilder.Append(".IgnoringWhitespace()");
         return this;
     }
 
-    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TActual> metadata)
     {
-        var value = metadata.Value;
+        var value = metadata.Value as string;
         var exception = metadata.Exception;
 
         var actualValue = value;

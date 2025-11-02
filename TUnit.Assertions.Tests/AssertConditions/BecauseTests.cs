@@ -91,7 +91,7 @@ public class BecauseTests
         };
 
         var exception = await Assert.ThrowsAsync<AssertionException>(action);
-        await Assert.That(exception.Message).IsEqualTo(expectedMessage);
+        await Assert.That(exception.Message.NormalizeLineEndings()).IsEqualTo(expectedMessage);
     }
 
     [Test]
