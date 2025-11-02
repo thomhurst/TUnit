@@ -270,9 +270,10 @@ namespace .Conditions
         public .<T> Context { get; }
         public .<T, TExpected> IsTypeOf<TExpected>() { }
     }
-    public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : .<TValue>
+    public class AsyncMappedSatisfiesAssertion<TValue, TMapped, TAssertion> : .<TValue>
+        where TAssertion : .<TMapped>
     {
-        public AsyncMappedSatisfiesAssertion(.<TValue> context, <TValue?, .<TMapped>> selector, <.<TMapped>, .<TMapped>?> assertions, string selectorDescription) { }
+        public AsyncMappedSatisfiesAssertion(.<TValue> context, <TValue?, .<TMapped>> selector, <.<TMapped>, TAssertion> assertions, string selectorDescription) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -1630,8 +1631,9 @@ namespace .Extensions
         public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, TMember>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
         public static .<TObject> Member<TObject, TKey, TValue, TTransformed>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<TTransformed>> assertions) { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
-        public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, .<TMapped?>> selector, <.<TMapped>, .<TMapped>> assertions, [.("selector")] string? selectorExpression = null) { }
         public static .<TValue, TMapped> Satisfies<TValue, TMapped>(this .<TValue> source, <TValue?, TMapped> selector, <.<TMapped>, .<TMapped>?> assertions, [.("selector")] string? selectorExpression = null) { }
+        public static .<TValue, TMapped, TAssertion> Satisfies<TValue, TMapped, TAssertion>(this .<TValue> source, <TValue?, .<TMapped?>> selector, <.<TMapped>, TAssertion> assertions, [.("selector")] string? selectorExpression = null)
+            where TAssertion : .<TMapped> { }
         public static .<TException> Throws<TException>(this . source)
             where TException :  { }
         public static .<TException> Throws<TException>(this . source)

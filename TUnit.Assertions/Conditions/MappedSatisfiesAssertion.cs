@@ -75,16 +75,17 @@ public class MappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
 /// Maps the source value using an async selector, then runs assertions on the mapped value.
 /// Example: await Assert.That(model).Satisfies(m => m.GetNameAsync(), assert => assert.IsEqualTo("John"));
 /// </summary>
-public class AsyncMappedSatisfiesAssertion<TValue, TMapped> : Assertion<TValue>
+public class AsyncMappedSatisfiesAssertion<TValue, TMapped, TAssertion> : Assertion<TValue>
+    where TAssertion : Assertion<TMapped>
 {
     private readonly Func<TValue?, Task<TMapped>> _selector;
-    private readonly Func<ValueAssertion<TMapped>, Assertion<TMapped>?> _assertions;
+    private readonly Func<ValueAssertion<TMapped>, TAssertion> _assertions;
     private readonly string _selectorDescription;
 
     public AsyncMappedSatisfiesAssertion(
         AssertionContext<TValue> context,
         Func<TValue?, Task<TMapped>> selector,
-        Func<ValueAssertion<TMapped>, Assertion<TMapped>?> assertions,
+        Func<ValueAssertion<TMapped>, TAssertion> assertions,
         string selectorDescription)
         : base(context)
     {

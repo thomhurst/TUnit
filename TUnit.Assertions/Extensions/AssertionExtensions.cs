@@ -742,14 +742,15 @@ public static class AssertionExtensions
     /// Maps the source value using a selector that returns a Task, then runs assertions on the awaited result.
     /// Example: await Assert.That(model).Satisfies(m => m.AsyncValue, assert => assert.IsEqualTo("Hello"));
     /// </summary>
-    public static AsyncMappedSatisfiesAssertion<TValue, TMapped> Satisfies<TValue, TMapped>(
+    public static AsyncMappedSatisfiesAssertion<TValue, TMapped, TAssertion> Satisfies<TValue, TMapped, TAssertion>(
         this IAssertionSource<TValue> source,
         Func<TValue?, Task<TMapped?>> selector,
-        Func<ValueAssertion<TMapped>, Assertion<TMapped>> assertions,
+        Func<ValueAssertion<TMapped>, TAssertion> assertions,
         [CallerArgumentExpression(nameof(selector))] string? selectorExpression = null)
+        where TAssertion : Assertion<TMapped>
     {
         source.Context.ExpressionBuilder.Append($".Satisfies({selectorExpression}, ...)");
-        return new AsyncMappedSatisfiesAssertion<TValue, TMapped>(
+        return new AsyncMappedSatisfiesAssertion<TValue, TMapped, TAssertion>(
             source.Context,
             selector!,
             assertions,
