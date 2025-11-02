@@ -61,8 +61,17 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
         try
         {
             var previousContext = SynchronizationContext.Current;
-            var taskScheduler = new DedicatedThreadTaskScheduler(Thread.CurrentThread);
-            var dedicatedContext = new DedicatedThreadSynchronizationContext(taskScheduler);
+            ManualResetEventSlim? workAvailableEvent = null;
+#if NET5_0_OR_GREATER
+            if (!OperatingSystem.IsBrowser())
+            {
+                workAvailableEvent = new ManualResetEventSlim(false);
+            }
+#else
+            workAvailableEvent = new ManualResetEventSlim(false);
+#endif
+            var taskScheduler = new DedicatedThreadTaskScheduler(Thread.CurrentThread, workAvailableEvent);
+            var dedicatedContext = new DedicatedThreadSynchronizationContext(taskScheduler, workAvailableEvent);
 
             SynchronizationContext.SetSynchronizationContext(dedicatedContext);
 
@@ -82,11 +91,11 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                     return;
                 }
 
-                // Pump messages until the task completes with optimized waiting
+                // Pump messages until the task completes with event-driven signaling
                 var deadline = DateTime.UtcNow.AddMinutes(5);
                 var spinWait = new SpinWait();
-                var lastTimeCheck = DateTime.UtcNow;
-                const int TimeCheckIntervalMs = 100;
+                const int MaxSpinCount = 50;
+                const int WaitTimeoutMs = 100;
 
                 while (!task.IsCompleted)
                 {
@@ -95,20 +104,46 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
 
                     if (!hadWork)
                     {
-                        // No work available, use efficient waiting
-                        if (spinWait.Count < 10)
+                        // Fast path: spin briefly for immediate continuations
+                        if (spinWait.Count < MaxSpinCount)
                         {
                             spinWait.SpinOnce();
                         }
                         else
                         {
-                            // After initial spins, yield to other threads
-                            Thread.Yield();
-                            if (spinWait.Count > 100)
+#if NET5_0_OR_GREATER
+                            if (workAvailableEvent != null && !OperatingSystem.IsBrowser())
                             {
-                                // After many iterations, do a brief sleep
-                                Thread.Sleep(0);
+                                // No work after spinning - use event-driven wait (eliminates Thread.Sleep)
+                                // Thread blocks efficiently in kernel, wakes instantly when work queued
+                                workAvailableEvent.Wait(WaitTimeoutMs);
+                                workAvailableEvent.Reset();
                                 spinWait.Reset();
+                            }
+                            else
+                            {
+                                // Fallback for browser or null event
+                                Thread.Yield();
+                                spinWait.Reset();
+                            }
+#else
+                            if (workAvailableEvent != null)
+                            {
+                                workAvailableEvent.Wait(WaitTimeoutMs);
+                                workAvailableEvent.Reset();
+                                spinWait.Reset();
+                            }
+                            else
+                            {
+                                Thread.Yield();
+                                spinWait.Reset();
+                            }
+#endif
+                            // Check timeout after waiting
+                            if (DateTime.UtcNow >= deadline)
+                            {
+                                tcs.SetException(new TimeoutException("Async operation timed out after 5 minutes"));
+                                return;
                             }
                         }
                     }
@@ -117,24 +152,13 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
                         // Had work, reset spin counter
                         spinWait.Reset();
                     }
-
-                    // Check timeout periodically instead of every iteration
-                    var now = DateTime.UtcNow;
-                    if ((now - lastTimeCheck).TotalMilliseconds >= TimeCheckIntervalMs)
-                    {
-                        if (now >= deadline)
-                        {
-                            tcs.SetException(new TimeoutException("Async operation timed out after 5 minutes"));
-                            return;
-                        }
-                        lastTimeCheck = now;
-                    }
                 }
 
                 HandleTaskCompletion(task, tcs);
             }
             finally
             {
+                workAvailableEvent?.Dispose();
                 SynchronizationContext.SetSynchronizationContext(previousContext);
             }
         }
@@ -177,14 +201,16 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
     internal sealed class DedicatedThreadTaskScheduler : TaskScheduler
     {
         private readonly Thread _dedicatedThread;
+        private readonly ManualResetEventSlim? _workAvailableEvent;
         private readonly List<Task> _taskQueue =
         [
         ];
         private readonly Lock _queueLock = new();
 
-        public DedicatedThreadTaskScheduler(Thread dedicatedThread)
+        public DedicatedThreadTaskScheduler(Thread dedicatedThread, ManualResetEventSlim? workAvailableEvent)
         {
             _dedicatedThread = dedicatedThread;
+            _workAvailableEvent = workAvailableEvent;
         }
 
         protected override void QueueTask(Task task)
@@ -193,6 +219,8 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
             {
                 _taskQueue.Add(task);
             }
+            // Signal that work is available (wake message pump immediately)
+            _workAvailableEvent?.Set();
         }
 
         protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
@@ -267,13 +295,15 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
     {
         private readonly Thread _dedicatedThread;
         private readonly DedicatedThreadTaskScheduler _taskScheduler;
+        private readonly ManualResetEventSlim? _workAvailableEvent;
         private readonly Queue<(SendOrPostCallback callback, object? state)> _workQueue = new();
         private readonly Lock _queueLock = new();
 
-        public DedicatedThreadSynchronizationContext(DedicatedThreadTaskScheduler taskScheduler)
+        public DedicatedThreadSynchronizationContext(DedicatedThreadTaskScheduler taskScheduler, ManualResetEventSlim? workAvailableEvent)
         {
             _dedicatedThread = Thread.CurrentThread;
             _taskScheduler = taskScheduler;
+            _workAvailableEvent = workAvailableEvent;
         }
 
         public override void Post(SendOrPostCallback d, object? state)
@@ -283,6 +313,8 @@ public class DedicatedThreadExecutor : GenericAbstractExecutor, ITestRegisteredE
             {
                 _workQueue.Enqueue((d, state));
             }
+            // Signal that work is available (wake message pump immediately)
+            _workAvailableEvent?.Set();
         }
 
         public override void Send(SendOrPostCallback d, object? state)

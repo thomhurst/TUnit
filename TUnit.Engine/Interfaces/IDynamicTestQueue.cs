@@ -37,4 +37,11 @@ internal interface IDynamicTestQueue
     /// Marks the queue as complete, indicating no more tests will be added.
     /// </summary>
     void Complete();
+
+    /// <summary>
+    /// Asynchronously waits for tests to become available in the queue.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if tests are available or queue is completed, false on cancellation</returns>
+    ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken = default);
 }
