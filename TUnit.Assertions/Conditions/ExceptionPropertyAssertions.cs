@@ -316,6 +316,9 @@ public class ExceptionParameterNameAssertion<TException> : Assertion<TException>
             $"WithParameterName can only be used with ArgumentException, but exception is {exception.GetType().Name}"));
     }
 
-    protected override string GetExpectation() =>
-        $"{(_requireExactType ? "exactly " : "")}{typeof(TException).Name} to have parameter name \"{_expectedParameterName}\"";
+    protected override string GetExpectation()
+    {
+        var typeDescription = _requireExactType ? $"exactly {typeof(TException).Name}" : typeof(TException).Name;
+        return $"{typeDescription} to have parameter name \"{_expectedParameterName}\"";
+    }
 }
