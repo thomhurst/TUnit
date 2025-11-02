@@ -98,16 +98,8 @@ internal class TestExecutor
 
             executableTest.Context.RestoreExecutionContext();
 
-            var testTimeout = executableTest.Context.Metadata.TestDetails.Timeout;
-            var timeoutMessage = testTimeout.HasValue
-                ? $"Test '{executableTest.Context.Metadata.TestDetails.TestName}' execution timed out after {testTimeout.Value}"
-                : null;
-
-            await TimeoutHelper.ExecuteWithTimeoutAsync(
-                ct => ExecuteTestAsync(executableTest, ct),
-                testTimeout,
-                cancellationToken,
-                timeoutMessage).ConfigureAwait(false);
+            // Timeout is now enforced at the TestCoordinator level to include initialization
+            await ExecuteTestAsync(executableTest, cancellationToken).ConfigureAwait(false);
 
             executableTest.SetResult(TestState.Passed);
         }

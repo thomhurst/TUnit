@@ -112,11 +112,24 @@ internal sealed class TestCoordinator : ITestCoordinator
                     return;
                 }
 
+                // Apply timeout to the entire test execution including initialization, hooks, and test method
+                var testTimeout = test.Context.Metadata.TestDetails.Timeout;
+                var timeoutMessage = testTimeout.HasValue
+                    ? $"Test '{test.Context.Metadata.TestDetails.TestName}' execution timed out after {testTimeout.Value}"
+                    : null;
+
                 try
                 {
-                    await _testInitializer.InitializeTest(test, cancellationToken);
-                    test.Context.RestoreExecutionContext();
-                    await _testExecutor.ExecuteAsync(test, cancellationToken);
+                    await TUnit.Engine.Helpers.TimeoutHelper.ExecuteWithTimeoutAsync(
+                        async ct =>
+                        {
+                            await _testInitializer.InitializeTest(test, ct);
+                            test.Context.RestoreExecutionContext();
+                            await _testExecutor.ExecuteAsync(test, ct);
+                        },
+                        testTimeout,
+                        cancellationToken,
+                        timeoutMessage).ConfigureAwait(false);
                 }
                 finally
                 {
