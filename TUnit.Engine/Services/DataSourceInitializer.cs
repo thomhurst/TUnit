@@ -33,7 +33,8 @@ internal sealed class DataSourceInitializer
         T dataSource,
         ConcurrentDictionary<string, object?>? objectBag = null,
         MethodMetadata? methodMetadata = null,
-        TestContextEvents? events = null) where T : notnull
+        TestContextEvents? events = null,
+        CancellationToken cancellationToken = default) where T : notnull
     {
         if (dataSource == null)
         {
@@ -51,12 +52,22 @@ internal sealed class DataSourceInitializer
             else
             {
                 // Start initialization
-                existingTask = InitializeDataSourceAsync(dataSource, objectBag, methodMetadata, events);
+                existingTask = InitializeDataSourceAsync(dataSource, objectBag, methodMetadata, events, cancellationToken);
                 _initializationTasks[dataSource] = existingTask;
             }
         }
 
-        await existingTask;
+        // Wait for initialization with cancellation support
+        if (cancellationToken.CanBeCanceled)
+        {
+            await existingTask.ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+        else
+        {
+            await existingTask.ConfigureAwait(false);
+        }
+
         return dataSource;
     }
 
@@ -67,7 +78,8 @@ internal sealed class DataSourceInitializer
         object dataSource,
         ConcurrentDictionary<string, object?>? objectBag,
         MethodMetadata? methodMetadata,
-        TestContextEvents? events)
+        TestContextEvents? events,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -85,12 +97,12 @@ internal sealed class DataSourceInitializer
 
             // Step 2: Initialize nested property-injected objects (deepest first)
             // This ensures that when the parent's IAsyncInitializer runs, all nested objects are already initialized
-            await InitializeNestedObjectsAsync(dataSource);
+            await InitializeNestedObjectsAsync(dataSource, cancellationToken);
 
             // Step 3: IAsyncInitializer on the data source itself
             if (dataSource is IAsyncInitializer asyncInitializer)
             {
-                await ObjectInitializer.InitializeAsync(asyncInitializer);
+                await ObjectInitializer.InitializeAsync(asyncInitializer, cancellationToken);
             }
         }
         catch (Exception ex)
@@ -104,7 +116,7 @@ internal sealed class DataSourceInitializer
     /// Initializes all nested property-injected objects in depth-first order.
     /// This ensures that when the parent's IAsyncInitializer runs, all nested dependencies are already initialized.
     /// </summary>
-    private async Task InitializeNestedObjectsAsync(object rootObject)
+    private async Task InitializeNestedObjectsAsync(object rootObject, CancellationToken cancellationToken)
     {
         var objectsByDepth = new Dictionary<int, HashSet<object>>(capacity: 4);
         var visitedObjects = new HashSet<object>();
@@ -120,7 +132,7 @@ internal sealed class DataSourceInitializer
             var objectsAtDepth = objectsByDepth[depth];
 
             // Initialize all objects at this depth in parallel
-            await Task.WhenAll(objectsAtDepth.Select(obj => ObjectInitializer.InitializeAsync(obj).AsTask()));
+            await Task.WhenAll(objectsAtDepth.Select(obj => ObjectInitializer.InitializeAsync(obj, cancellationToken).AsTask()));
         }
     }
 
