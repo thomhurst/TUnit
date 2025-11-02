@@ -1067,18 +1067,18 @@ namespace .Conditions
         public . IgnoringCase() { }
         public . WithComparison( comparison) { }
     }
-    [.("IsEqualTo", OverloadResolutionPriority=2)]
-    public class StringEqualsAssertion : .<string?>
+    [.("IsEqualTo")]
+    public class StringEqualsAssertion<TActual> : .<TActual>
     {
-        public StringEqualsAssertion(.<string?> context, string? expected) { }
-        public StringEqualsAssertion(.<string?> context, string? expected,  comparison) { }
-        protected override .<.> CheckAsync(.<string?> metadata) { }
+        public StringEqualsAssertion(.<TActual> context, string? expected) { }
+        public StringEqualsAssertion(.<TActual> context, string? expected,  comparison) { }
+        protected override .<.> CheckAsync(.<TActual> metadata) { }
         protected override string GetExpectation() { }
-        public . IgnoringCase() { }
-        public . IgnoringWhitespace() { }
-        public . WithComparison( comparison) { }
-        public . WithNullAndEmptyEquality() { }
-        public . WithTrimming() { }
+        public .<TActual> IgnoringCase() { }
+        public .<TActual> IgnoringWhitespace() { }
+        public .<TActual> WithComparison( comparison) { }
+        public .<TActual> WithNullAndEmptyEquality() { }
+        public .<TActual> WithTrimming() { }
     }
     [.("IsEmpty")]
     public class StringIsEmptyAssertion : .<string>
@@ -3546,8 +3546,8 @@ namespace .Extensions
     }
     public static class StringEqualsAssertionExtensions
     {
-        public static . IsEqualTo(this .<string?> source, string? expected, [.("expected")] string? expectedExpression = null) { }
-        public static . IsEqualTo(this .<string?> source, string? expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
+        public static .<TActual> IsEqualTo<TActual>(this .<TActual> source, string? expected, [.("expected")] string? expectedExpression = null) { }
+        public static .<TActual> IsEqualTo<TActual>(this .<TActual> source, string? expected,  comparison, [.("expected")] string? expectedExpression = null, [.("comparison")] string? comparisonExpression = null) { }
     }
     public static class StringIsEmptyAssertionExtensions
     {
