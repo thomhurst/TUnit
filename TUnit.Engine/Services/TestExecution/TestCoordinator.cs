@@ -3,6 +3,7 @@ using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Core.Tracking;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 
@@ -120,7 +121,7 @@ internal sealed class TestCoordinator : ITestCoordinator
 
                 try
                 {
-                    await TUnit.Engine.Helpers.TimeoutHelper.ExecuteWithTimeoutAsync(
+                    await TimeoutHelper.ExecuteWithTimeoutAsync(
                         async ct =>
                         {
                             await _testInitializer.InitializeTest(test, ct);

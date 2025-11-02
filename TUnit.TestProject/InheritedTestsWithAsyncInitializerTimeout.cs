@@ -67,4 +67,3 @@ public sealed class DerivedTestWithAsyncInitializerB(AsyncInitializableDataSourc
     : BaseTestWithAsyncInitializer(dataSource)
 {
 }
-
