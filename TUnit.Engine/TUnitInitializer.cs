@@ -14,6 +14,7 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookDis
     {
         ConfigureGlobalExceptionHandlers(context);
         SetUpExceptionListeners();
+        ConfigureThreadPool();
         ParseParameters();
 
         // Discover hooks using the mode-specific service
@@ -52,6 +53,18 @@ internal class TUnitInitializer(ICommandLineOptions commandLineOptions, IHookDis
             }
             list.Add(value);
         }
+    }
+
+    private void ConfigureThreadPool()
+    {
+        // Optimize ThreadPool for parallel test execution
+        // This eliminates the default ~500ms thread injection delay when running many tests in parallel
+        // Users can call ThreadPool.SetMinThreads() in their test setup to override if needed
+        var processorCount = Environment.ProcessorCount;
+        var minWorkerThreads = Math.Max(processorCount * 4, 32);
+        var minIocpThreads = Math.Max(processorCount * 4, 32);
+
+        ThreadPool.SetMinThreads(minWorkerThreads, minIocpThreads);
     }
 
     private static void ConfigureGlobalExceptionHandlers(ExecuteRequestContext context)
