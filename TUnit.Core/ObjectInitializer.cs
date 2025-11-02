@@ -25,24 +25,28 @@ public static class ObjectInitializer
     {
         if (obj is IAsyncInitializer asyncInitializer)
         {
-            await GetInitializationTask(obj, asyncInitializer);
+            await GetInitializationTask(obj, asyncInitializer, cancellationToken);
         }
     }
 
-    private static Task GetInitializationTask(object obj, IAsyncInitializer asyncInitializer)
+    private static async Task GetInitializationTask(object obj, IAsyncInitializer asyncInitializer, CancellationToken cancellationToken)
     {
+        Task initializationTask;
+
         lock (_lock)
         {
-            if (_initializationTasks.TryGetValue(obj, out var task))
+            if (_initializationTasks.TryGetValue(obj, out var existingTask))
             {
-                return task;
+                initializationTask = existingTask;
             }
-
-            var initializationTask = asyncInitializer.InitializeAsync();
-
-            _initializationTasks.Add(obj, initializationTask);
-
-            return initializationTask;
+            else
+            {
+                initializationTask = asyncInitializer.InitializeAsync();
+                _initializationTasks.Add(obj, initializationTask);
+            }
         }
+
+        // Wait for initialization with cancellation support
+        await initializationTask.WaitAsync(cancellationToken);
     }
 }

@@ -36,10 +36,10 @@ internal class TestInitializer
         // Shouldn't retrack already tracked objects, but will track any new ones created during retries / initialization
         _objectTracker.TrackObjects(test.Context);
 
-        await InitializeTrackedObjects(test.Context);
+        await InitializeTrackedObjects(test.Context, cancellationToken);
     }
 
-    private async Task InitializeTrackedObjects(TestContext testContext)
+    private async Task InitializeTrackedObjects(TestContext testContext, CancellationToken cancellationToken)
     {
         // Initialize by level (deepest first), with objects at the same level in parallel
         var levels = testContext.TrackedObjects.Keys.OrderByDescending(level => level);
@@ -47,10 +47,10 @@ internal class TestInitializer
         foreach (var level in levels)
         {
             var objectsAtLevel = testContext.TrackedObjects[level];
-            await Task.WhenAll(objectsAtLevel.Select(obj => ObjectInitializer.InitializeAsync(obj).AsTask()));
+            await Task.WhenAll(objectsAtLevel.Select(obj => ObjectInitializer.InitializeAsync(obj, cancellationToken).AsTask()));
         }
 
         // Finally, ensure the test class itself is initialized
-        await ObjectInitializer.InitializeAsync(testContext.Metadata.TestDetails.ClassInstance);
+        await ObjectInitializer.InitializeAsync(testContext.Metadata.TestDetails.ClassInstance, cancellationToken);
     }
 }

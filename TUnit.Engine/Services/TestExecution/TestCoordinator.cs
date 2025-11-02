@@ -3,6 +3,7 @@ using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Logging;
 using TUnit.Core.Tracking;
+using TUnit.Engine.Helpers;
 using TUnit.Engine.Interfaces;
 using TUnit.Engine.Logging;
 
@@ -92,60 +93,75 @@ internal sealed class TestCoordinator : ITestCoordinator
             await _testExecutor.EnsureTestSessionHooksExecutedAsync();
 
             // Execute test with retry logic - each retry gets a fresh instance
+            // Timeout is applied per retry attempt, not across all retries
             await RetryHelper.ExecuteWithRetry(test.Context, async () =>
             {
-                test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync();
+                // Get timeout configuration for this attempt
+                var testTimeout = test.Context.Metadata.TestDetails.Timeout;
+                var timeoutMessage = testTimeout.HasValue
+                    ? $"Test '{test.Context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}"
+                    : null;
 
-                // Invalidate cached eligible event objects since ClassInstance changed
-                test.Context.CachedEligibleEventObjects = null;
-
-                // Check if this test should be skipped (after creating instance)
-                if (test.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
-                    !string.IsNullOrEmpty(test.Context.SkipReason))
-                {
-                    await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped");
-
-                    await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
-
-                    await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, cancellationToken);
-
-                    return;
-                }
-
-                try
-                {
-                    await _testInitializer.InitializeTest(test, cancellationToken);
-                    test.Context.RestoreExecutionContext();
-                    await _testExecutor.ExecuteAsync(test, cancellationToken);
-                }
-                finally
-                {
-                    // Dispose test instance and fire OnDispose after each attempt
-                    // This ensures each retry gets a fresh instance
-                    if (test.Context.Events.OnDispose?.InvocationList != null)
+                // Wrap entire lifecycle (instance creation, initialization, execution) with timeout
+                await TimeoutHelper.ExecuteWithTimeoutAsync(
+                    async ct =>
                     {
-                        foreach (var invocation in test.Context.Events.OnDispose.InvocationList)
+                        test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync();
+
+                        // Invalidate cached eligible event objects since ClassInstance changed
+                        test.Context.CachedEligibleEventObjects = null;
+
+                        // Check if this test should be skipped (after creating instance)
+                        if (test.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
+                            !string.IsNullOrEmpty(test.Context.SkipReason))
                         {
+                            await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped");
+
+                            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, ct);
+
+                            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, ct);
+
+                            return;
+                        }
+
+                        try
+                        {
+                            await _testInitializer.InitializeTest(test, ct);
+                            test.Context.RestoreExecutionContext();
+                            await _testExecutor.ExecuteAsync(test, ct);
+                        }
+                        finally
+                        {
+                            // Dispose test instance and fire OnDispose after each attempt
+                            // This ensures each retry gets a fresh instance
+                            if (test.Context.Events.OnDispose?.InvocationList != null)
+                            {
+                                foreach (var invocation in test.Context.Events.OnDispose.InvocationList)
+                                {
+                                    try
+                                    {
+                                        await invocation.InvokeAsync(test.Context, test.Context);
+                                    }
+                                    catch (Exception disposeEx)
+                                    {
+                                        await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}");
+                                    }
+                                }
+                            }
+
                             try
                             {
-                                await invocation.InvokeAsync(test.Context, test.Context);
+                                await TestExecutor.DisposeTestInstance(test);
                             }
                             catch (Exception disposeEx)
                             {
-                                await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}");
+                                await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}");
                             }
                         }
-                    }
-
-                    try
-                    {
-                        await TestExecutor.DisposeTestInstance(test);
-                    }
-                    catch (Exception disposeEx)
-                    {
-                        await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}");
-                    }
-                }
+                    },
+                    testTimeout,
+                    cancellationToken,
+                    timeoutMessage);
             });
 
             await _stateManager.MarkCompletedAsync(test);

@@ -5,7 +5,6 @@ using TUnit.Core;
 using TUnit.Core.Exceptions;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Services;
-using TUnit.Engine.Helpers;
 using TUnit.Engine.Services;
 
 namespace TUnit.Engine;
@@ -98,16 +97,8 @@ internal class TestExecutor
 
             executableTest.Context.RestoreExecutionContext();
 
-            var testTimeout = executableTest.Context.Metadata.TestDetails.Timeout;
-            var timeoutMessage = testTimeout.HasValue
-                ? $"Test '{executableTest.Context.Metadata.TestDetails.TestName}' execution timed out after {testTimeout.Value}"
-                : null;
-
-            await TimeoutHelper.ExecuteWithTimeoutAsync(
-                ct => ExecuteTestAsync(executableTest, ct),
-                testTimeout,
-                cancellationToken,
-                timeoutMessage).ConfigureAwait(false);
+            // Timeout is now enforced at TestCoordinator level (wrapping entire lifecycle)
+            await ExecuteTestAsync(executableTest, cancellationToken).ConfigureAwait(false);
 
             executableTest.SetResult(TestState.Passed);
         }
