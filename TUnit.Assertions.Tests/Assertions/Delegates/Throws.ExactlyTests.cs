@@ -120,7 +120,7 @@ public partial class Throws
             await Assert.That(assertionException).HasMessageStartingWith("""
                                                                          Expected to throw exactly Exception
                                                                          but wrong exception type: CustomException instead of exactly Exception
-                                                                         """);
+                                                                         """.NormalizeLineEndings());
         }
 
         [Test]

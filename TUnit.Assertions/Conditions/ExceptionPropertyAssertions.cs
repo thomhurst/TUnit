@@ -89,7 +89,11 @@ public class ExceptionMessageEqualsAssertion<TException> : Assertion<TException>
             return Task.FromResult(AssertionResult.Failed("no exception was thrown"));
         }
 
-        if (string.Equals(exception.Message, _expectedMessage, _comparison))
+        // Normalize line endings for consistent cross-platform comparison
+        var actualMessage = exception.Message.Replace("\r\n", "\n").Replace("\r", "\n");
+        var expectedMessage = _expectedMessage.Replace("\r\n", "\n").Replace("\r", "\n");
+
+        if (string.Equals(actualMessage, expectedMessage, _comparison))
         {
             return Task.FromResult(AssertionResult.Passed);
         }
