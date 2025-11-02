@@ -61,5 +61,11 @@ internal sealed class DynamicTestQueue : IDynamicTestQueue
     public void Complete()
     {
         _isCompleted = true;
+        _channel.Writer.Complete();
+    }
+
+    public ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken = default)
+    {
+        return _channel.Reader.WaitToReadAsync(cancellationToken);
     }
 }

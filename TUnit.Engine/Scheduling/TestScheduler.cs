@@ -225,9 +225,10 @@ internal sealed class TestScheduler : ITestScheduler
     {
         var dynamicTests = new List<AbstractExecutableTest>();
 
-        while (!_dynamicTestQueue.IsCompleted || _dynamicTestQueue.PendingCount > 0)
+        // Use async signaling instead of polling to eliminate IOCP overhead
+        while (await _dynamicTestQueue.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
         {
-            // Dequeue all currently pending tests
+            // Dequeue all currently available tests (batch processing)
             while (_dynamicTestQueue.TryDequeue(out var test))
             {
                 if (test != null)
@@ -258,11 +259,32 @@ internal sealed class TestScheduler : ITestScheduler
 
                 dynamicTests.Clear();
             }
+        }
 
-            // If queue is not complete, wait a short time before checking again
-            if (!_dynamicTestQueue.IsCompleted)
+        // Process any remaining tests after queue completion
+        while (_dynamicTestQueue.TryDequeue(out var test))
+        {
+            if (test != null)
             {
-                await Task.Delay(50, cancellationToken).ConfigureAwait(false);
+                dynamicTests.Add(test);
+            }
+        }
+
+        if (dynamicTests.Count > 0)
+        {
+            await _logger.LogDebugAsync($"Executing {dynamicTests.Count} remaining dynamic test(s)").ConfigureAwait(false);
+
+            var dynamicTestsArray = dynamicTests.ToArray();
+            var groupedDynamicTests = await _groupingService.GroupTestsByConstraintsAsync(dynamicTestsArray).ConfigureAwait(false);
+
+            if (groupedDynamicTests.Parallel.Length > 0)
+            {
+                await ExecuteTestsAsync(groupedDynamicTests.Parallel, cancellationToken).ConfigureAwait(false);
+            }
+
+            if (groupedDynamicTests.NotInParallel.Length > 0)
+            {
+                await ExecuteSequentiallyAsync(groupedDynamicTests.NotInParallel, cancellationToken).ConfigureAwait(false);
             }
         }
     }
@@ -280,21 +302,28 @@ internal sealed class TestScheduler : ITestScheduler
         }
         else
         {
-            var tasks = ArrayPool<Task>.Shared.Rent(tests.Length);
-            try
-            {
-                for (var i = 0; i < tests.Length; i++)
+#if NET6_0_OR_GREATER
+            // Use Parallel.ForEachAsync for bounded concurrency (eliminates unbounded Task.Run queue depth)
+            // This dramatically reduces ThreadPool contention and GetQueuedCompletionStatus waits
+            await Parallel.ForEachAsync(
+                tests,
+                new ParallelOptions { CancellationToken = cancellationToken },
+                async (test, ct) =>
                 {
-                    var test = tests[i];
-                    tasks[i] = test.ExecutionTask ??= Task.Run(() => ExecuteSingleTestAsync(test, cancellationToken), CancellationToken.None);
+                    test.ExecutionTask ??= ExecuteSingleTestAsync(test, ct);
+                    await test.ExecutionTask.ConfigureAwait(false);
                 }
-
-                await WaitForTasksWithFailFastHandling(new ArraySegment<Task>(tasks, 0, tests.Length), cancellationToken).ConfigureAwait(false);
-            }
-            finally
+            ).ConfigureAwait(false);
+#else
+            // Fallback for netstandard2.0: use Task.WhenAll (still better than unbounded Task.Run)
+            var tasks = new Task[tests.Length];
+            for (var i = 0; i < tests.Length; i++)
             {
-                ArrayPool<Task>.Shared.Return(tasks);
+                var test = tests[i];
+                tasks[i] = test.ExecutionTask ??= ExecuteSingleTestAsync(test, cancellationToken);
             }
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+#endif
         }
     }
 
@@ -345,16 +374,51 @@ internal sealed class TestScheduler : ITestScheduler
         AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)
     {
-        var tasks = ArrayPool<Task>.Shared.Rent(tests.Length);
-        try
-        {
-            for (var i = 0; i < tests.Length; i++)
+#if NET6_0_OR_GREATER
+        // Use Parallel.ForEachAsync with explicit MaxDegreeOfParallelism
+        // This eliminates unbounded Task.Run calls and leverages work-stealing for efficiency
+        await Parallel.ForEachAsync(
+            tests,
+            new ParallelOptions
             {
-                var test = tests[i];
-                tasks[i] = Task.Run(async () =>
-                {
-                    SemaphoreSlim? parallelLimiterSemaphore = null;
+                MaxDegreeOfParallelism = _maxParallelism,
+                CancellationToken = cancellationToken
+            },
+            async (test, ct) =>
+            {
+                SemaphoreSlim? parallelLimiterSemaphore = null;
 
+                // Acquire parallel limiter semaphore if needed
+                if (test.Context.ParallelLimiter != null)
+                {
+                    parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
+                    await parallelLimiterSemaphore.WaitAsync(ct).ConfigureAwait(false);
+                }
+
+                try
+                {
+                    test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct);
+                    await test.ExecutionTask.ConfigureAwait(false);
+                }
+                finally
+                {
+                    parallelLimiterSemaphore?.Release();
+                }
+            }
+        ).ConfigureAwait(false);
+#else
+        // Fallback for netstandard2.0: Manual bounded concurrency using existing semaphore
+        var tasks = new Task[tests.Length];
+        for (var i = 0; i < tests.Length; i++)
+        {
+            var test = tests[i];
+            tasks[i] = Task.Run(async () =>
+            {
+                SemaphoreSlim? parallelLimiterSemaphore = null;
+
+                await _maxParallelismSemaphore!.WaitAsync(cancellationToken).ConfigureAwait(false);
+                try
+                {
                     if (test.Context.ParallelLimiter != null)
                     {
                         parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
@@ -363,30 +427,22 @@ internal sealed class TestScheduler : ITestScheduler
 
                     try
                     {
-                        await _maxParallelismSemaphore!.WaitAsync(cancellationToken).ConfigureAwait(false);
-                        try
-                        {
-                            test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken);
-                            await test.ExecutionTask.ConfigureAwait(false);
-                        }
-                        finally
-                        {
-                            _maxParallelismSemaphore.Release();
-                        }
+                        test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken);
+                        await test.ExecutionTask.ConfigureAwait(false);
                     }
                     finally
                     {
                         parallelLimiterSemaphore?.Release();
                     }
-                }, CancellationToken.None);
-            }
-
-            await WaitForTasksWithFailFastHandling(new ArraySegment<Task>(tasks, 0, tests.Length), cancellationToken).ConfigureAwait(false);
+                }
+                finally
+                {
+                    _maxParallelismSemaphore.Release();
+                }
+            }, CancellationToken.None);
         }
-        finally
-        {
-            ArrayPool<Task>.Shared.Return(tasks);
-        }
+        await Task.WhenAll(tasks).ConfigureAwait(false);
+#endif
     }
 
     private async Task WaitForTasksWithFailFastHandling(IEnumerable<Task> tasks, CancellationToken cancellationToken)
