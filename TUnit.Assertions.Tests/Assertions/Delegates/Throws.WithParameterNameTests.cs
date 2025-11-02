@@ -11,7 +11,7 @@ public partial class Throws
             var paramName1 = "foo";
             var paramName2 = "bar";
             var expectedMessage = """
-                                  Expected ArgumentException to have parameter name "bar"
+                                  Expected exactly ArgumentException to have parameter name "bar"
                                   but ArgumentException parameter name was "foo"
 
                                   at Assert.That(action).ThrowsExactly<ArgumentException>().WithParameterName("bar")
@@ -44,6 +44,51 @@ public partial class Throws
         {
             var matchingParamName = "foo";
             ArgumentException exception = new(string.Empty, matchingParamName);
+            Action action = () => throw exception;
+
+            var sut = async ()
+                => await Assert.That(action).Throws<ArgumentException>().WithParameterName(matchingParamName);
+
+            await Assert.That(sut).ThrowsNothing();
+        }
+
+        [Test]
+        public async Task ThrowsExactly_Fails_For_Subclass_Exception_With_WithParameterName()
+        {
+            var expectedMessage = """
+                                  Expected exactly ArgumentException to have parameter name "quantity"
+                                  but wrong exception type: ArgumentOutOfRangeException instead of exactly ArgumentException
+
+                                  at Assert.That(action).ThrowsExactly<ArgumentException>().WithParameterName("quantity")
+                                  """;
+            var exception = new ArgumentOutOfRangeException(paramName: "quantity", message: "must be less than 20");
+            Action action = () => throw exception;
+
+            var sut = async ()
+                => await Assert.That(action).ThrowsExactly<ArgumentException>().WithParameterName("quantity");
+
+            await Assert.That(sut).ThrowsException()
+                .WithMessage(expectedMessage);
+        }
+
+        [Test]
+        public async Task ThrowsExactly_Succeeds_For_Exact_Type_With_WithParameterName()
+        {
+            var matchingParamName = "foo";
+            ArgumentException exception = new(string.Empty, matchingParamName);
+            Action action = () => throw exception;
+
+            var sut = async ()
+                => await Assert.That(action).ThrowsExactly<ArgumentException>().WithParameterName(matchingParamName);
+
+            await Assert.That(sut).ThrowsNothing();
+        }
+
+        [Test]
+        public async Task Throws_Succeeds_For_Subclass_Exception_With_WithParameterName()
+        {
+            var matchingParamName = "quantity";
+            var exception = new ArgumentOutOfRangeException(paramName: matchingParamName, message: "must be less than 20");
             Action action = () => throw exception;
 
             var sut = async ()

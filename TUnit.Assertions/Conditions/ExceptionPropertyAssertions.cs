@@ -267,13 +267,16 @@ public class ExceptionParameterNameAssertion<TException> : Assertion<TException>
     where TException : Exception
 {
     private readonly string _expectedParameterName;
+    private readonly bool _requireExactType;
 
     public ExceptionParameterNameAssertion(
         AssertionContext<TException> context,
-        string expectedParameterName)
+        string expectedParameterName,
+        bool requireExactType = false)
         : base(context)
     {
         _expectedParameterName = expectedParameterName;
+        _requireExactType = requireExactType;
     }
 
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TException> metadata)
@@ -289,6 +292,13 @@ public class ExceptionParameterNameAssertion<TException> : Assertion<TException>
         if (exception == null)
         {
             return Task.FromResult(AssertionResult.Failed("no exception was thrown"));
+        }
+
+        // If requireExactType is true (from ThrowsExactly), check for exact type match
+        if (_requireExactType && exception.GetType() != typeof(TException))
+        {
+            return Task.FromResult(AssertionResult.Failed(
+                $"wrong exception type: {exception.GetType().Name} instead of exactly {typeof(TException).Name}"));
         }
 
         if (exception is ArgumentException argumentException)
@@ -307,5 +317,5 @@ public class ExceptionParameterNameAssertion<TException> : Assertion<TException>
     }
 
     protected override string GetExpectation() =>
-        $"ArgumentException to have parameter name \"{_expectedParameterName}\"";
+        $"{(_requireExactType ? "exactly " : "")}{typeof(TException).Name} to have parameter name \"{_expectedParameterName}\"";
 }

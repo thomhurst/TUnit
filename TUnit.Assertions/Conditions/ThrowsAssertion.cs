@@ -339,7 +339,7 @@ public class ThrowsExactlyAssertion<TException> : BaseThrowsAssertion<TException
     public ExceptionParameterNameAssertion<TException> WithParameterName(string expectedParameterName)
     {
         Context.ExpressionBuilder.Append($".WithParameterName(\"{expectedParameterName}\")");
-        return new ExceptionParameterNameAssertion<TException>(Context, expectedParameterName);
+        return new ExceptionParameterNameAssertion<TException>(Context, expectedParameterName, requireExactType: true);
     }
 }
 
