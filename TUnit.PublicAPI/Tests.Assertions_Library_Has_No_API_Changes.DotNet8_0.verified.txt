@@ -666,7 +666,7 @@ namespace .Conditions
     public class ExceptionParameterNameAssertion<TException> : .<TException>
         where TException : 
     {
-        public ExceptionParameterNameAssertion(.<TException> context, string expectedParameterName) { }
+        public ExceptionParameterNameAssertion(.<TException> context, string expectedParameterName, bool requireExactType = false) { }
         protected override .<.> CheckAsync(.<TException> metadata) { }
         protected override string GetExpectation() { }
     }
