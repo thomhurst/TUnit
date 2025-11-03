@@ -14,7 +14,14 @@
       "commands": [
         "dotnet-verify"
       ],
-      "rollForward": false
+      "rollForward": true
+    },
+    "dotnet-trace": {
+      "version": "9.0.652701",
+      "commands": [
+        "dotnet-trace"
+      ],
+      "rollForward": true
     }
   }
 }
