@@ -11,7 +11,7 @@ public partial class Throws
             var paramName1 = "foo";
             var paramName2 = "bar";
             var expectedMessage = """
-                                  Expected ArgumentException to have parameter name "bar"
+                                  Expected ArgumentException to have parameter name "bar" (exact type)
                                   but ArgumentException parameter name was "foo"
 
                                   at Assert.That(action).ThrowsExactly<ArgumentException>().WithParameterName("bar")
