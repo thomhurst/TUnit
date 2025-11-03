@@ -505,10 +505,10 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
-        // Default: 4x CPU cores (balances CPU-bound and I/O-bound tests)
-        // This prevents resource exhaustion (DB connections, memory, etc.) while allowing I/O overlap
-        var defaultLimit = Environment.ProcessorCount * 4;
-        logger.LogDebug($"Maximum parallel tests limit defaulting to {defaultLimit} ({Environment.ProcessorCount} processors * 4)");
+        // Default: 8x CPU cores (optimized for I/O-bound and async tests)
+        // Allows higher concurrency for tests with async/await patterns while preventing resource exhaustion
+        var defaultLimit = Environment.ProcessorCount * 8;
+        logger.LogDebug($"Maximum parallel tests limit defaulting to {defaultLimit} ({Environment.ProcessorCount} processors * 8)");
         return defaultLimit;
     }
 }

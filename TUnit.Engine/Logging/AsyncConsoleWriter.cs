@@ -174,6 +174,7 @@ internal sealed class AsyncConsoleWriter : TextWriter
 
     /// <summary>
     /// Background task that processes all writes in order
+    /// Optimized to drain the channel in batches to reduce async overhead
     /// </summary>
     private async Task ProcessWritesAsync()
     {
@@ -183,29 +184,38 @@ internal sealed class AsyncConsoleWriter : TextWriter
 
         try
         {
-            await foreach (var command in _writeChannel.Reader.ReadAllAsync(_shutdownCts.Token))
+            // Drain-loop pattern: reduces async state machine overhead by processing all available items in one go
+            while (await _writeChannel.Reader.WaitToReadAsync(_shutdownCts.Token).ConfigureAwait(false))
             {
-                switch (command.Type)
+                // Drain all immediately available items from the channel
+                while (_writeChannel.Reader.TryRead(out var command))
                 {
-                    case CommandType.Write:
-                        buffer.Append(command.Text);
-                        break;
-                        
-                    case CommandType.WriteLine:
-                        buffer.AppendLine(command.Text);
-                        break;
-                        
-                    case CommandType.Flush:
+                    switch (command.Type)
+                    {
+                        case CommandType.Write:
+                            buffer.Append(command.Text);
+                            break;
+
+                        case CommandType.WriteLine:
+                            buffer.AppendLine(command.Text);
+                            break;
+
+                        case CommandType.Flush:
+                            FlushBuffer(buffer);
+                            lastFlush = DateTime.UtcNow;
+                            continue;
+                    }
+
+                    // Check if we should flush mid-drain (for large buffers)
+                    if (buffer.Length > 4096)
+                    {
                         FlushBuffer(buffer);
                         lastFlush = DateTime.UtcNow;
-                        continue;
+                    }
                 }
 
-                // Batch writes for efficiency
-                var shouldFlush = buffer.Length > 4096 || // Buffer is large
-                                  (DateTime.UtcNow - lastFlush).TotalMilliseconds > flushIntervalMs; // Time based
-
-                if (shouldFlush)
+                // Flush after draining batch if time-based threshold met
+                if (buffer.Length > 0 && (DateTime.UtcNow - lastFlush).TotalMilliseconds > flushIntervalMs)
                 {
                     FlushBuffer(buffer);
                     lastFlush = DateTime.UtcNow;
