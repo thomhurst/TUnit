@@ -10,24 +10,32 @@ internal sealed class TestExecutionGuard
 {
     private readonly ConcurrentDictionary<string, TaskCompletionSource<bool>> _executingTests = new();
 
-    public async Task<bool> TryStartExecutionAsync(string testId, Func<Task> executionFunc)
+    public ValueTask<bool> TryStartExecutionAsync(string testId, Func<ValueTask> executionFunc)
     {
         var tcs = new TaskCompletionSource<bool>();
         var existingTcs = _executingTests.GetOrAdd(testId, tcs);
-        
+
         if (existingTcs != tcs)
         {
-            // Another thread is already executing this test, wait for it
-            await existingTcs.Task.ConfigureAwait(false);
-            return false; // Test was executed by another thread
+            return new ValueTask<bool>(WaitForExistingExecutionAsync(existingTcs));
         }
 
+        return ExecuteAndCompleteAsync(testId, tcs, executionFunc);
+    }
+
+    private static async Task<bool> WaitForExistingExecutionAsync(TaskCompletionSource<bool> tcs)
+    {
+        await tcs.Task.ConfigureAwait(false);
+        return false;
+    }
+
+    private async ValueTask<bool> ExecuteAndCompleteAsync(string testId, TaskCompletionSource<bool> tcs, Func<ValueTask> executionFunc)
+    {
         try
         {
-            // We got the lock, execute the test
             await executionFunc().ConfigureAwait(false);
             tcs.SetResult(true);
-            return true; // We executed the test
+            return true;
         }
         catch (Exception ex)
         {

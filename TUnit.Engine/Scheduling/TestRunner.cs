@@ -36,14 +36,34 @@ public sealed class TestRunner
         _testStateManager = testStateManager;
     }
 
-    private readonly ThreadSafeDictionary<string, Task> _executingTests = new();
+    private readonly ThreadSafeDictionary<string, TaskCompletionSource<bool>> _executingTests = new();
     private Exception? _firstFailFastException;
 
-    public async ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
-        // Prevent double execution with a simple lock
-        var executionTask = _executingTests.GetOrAdd(test.TestId, _ => ExecuteTestInternalAsync(test, cancellationToken).AsTask());
-        await executionTask.ConfigureAwait(false);
+        var tcs = new TaskCompletionSource<bool>();
+        var existingTcs = _executingTests.GetOrAdd(test.TestId, _ => tcs);
+
+        if (existingTcs != tcs)
+        {
+            return new ValueTask(existingTcs.Task);
+        }
+
+        return ExecuteTestWithCompletionAsync(test, cancellationToken, tcs);
+    }
+
+    private async ValueTask ExecuteTestWithCompletionAsync(AbstractExecutableTest test, CancellationToken cancellationToken, TaskCompletionSource<bool> tcs)
+    {
+        try
+        {
+            await ExecuteTestInternalAsync(test, cancellationToken).ConfigureAwait(false);
+            tcs.SetResult(true);
+        }
+        catch (Exception ex)
+        {
+            tcs.SetException(ex);
+            throw;
+        }
     }
 
     private async ValueTask ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
