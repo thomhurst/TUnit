@@ -40,7 +40,6 @@ internal sealed class PropertyInjectionService
             return;
         }
 
-        // Fast path: check if any arguments need injection
         var injectableArgs = arguments
             .Where(argument => argument != null && PropertyInjectionCache.HasInjectableProperties(argument.GetType()))
             .ToArray();
@@ -50,7 +49,6 @@ internal sealed class PropertyInjectionService
             return;
         }
 
-        // Process arguments in parallel
         var argumentTasks = injectableArgs
             .Select(argument => InjectPropertiesIntoObjectAsync(argument!, objectBag, methodMetadata, events))
             .ToArray();
@@ -80,7 +78,6 @@ internal sealed class PropertyInjectionService
             throw new ArgumentNullException(nameof(events), "TestContextEvents must not be null. Each test permutation must have a unique TestContextEvents instance for proper disposal tracking.");
         }
 
-        // Start with an empty visited set for cycle detection
 #if NETSTANDARD2_0
         var visitedObjects = new ConcurrentDictionary<object, byte>();
 #else
@@ -96,8 +93,7 @@ internal sealed class PropertyInjectionService
             return;
         }
 
-        // Prevent cycles - if we're already processing this object, skip it
-        // TryAdd returns false if the key already exists (thread-safe)
+        // Prevent cycles
         if (!visitedObjects.TryAdd(instance, 0))
         {
             return;
@@ -117,13 +113,11 @@ internal sealed class PropertyInjectionService
                 {
                     var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
 
-                    // Use the orchestrator for property initialization
                     await _orchestrator.InitializeObjectWithPropertiesAsync(
                         instance, plan, objectBag, methodMetadata, events, visitedObjects);
                 });
             }
 
-            // After properties are initialized, recursively inject nested properties
             await RecurseIntoNestedPropertiesAsync(instance, objectBag, methodMetadata, events, visitedObjects);
         }
         catch (Exception ex)
