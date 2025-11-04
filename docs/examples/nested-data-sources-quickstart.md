@@ -56,22 +56,11 @@ public class TestApp : IAsyncInitializer, IAsyncDisposable
     }
 }
 
-// Step 3: Create a data source attribute
-[SharedType(SharedType.PerClass)] // Share the expensive resources per test class
-public class TestAppAttribute : DataSourceGeneratorAttribute<TestApp>
-{
-    public override IEnumerable<TestApp> GenerateDataSources(DataGeneratorMetadata metadata)
-    {
-        yield return new TestApp();
-    }
-}
-
-// Step 4: Use in tests
-[TestClass]
+// Step 3: Use in tests
 public class ApiIntegrationTests
 {
     [Test]
-    [TestApp]
+    [ClassDataSource<TestApp>(Shared = SharedType.PerClass)] // Share the expensive resources per test class
     public async Task Get_Users_Returns_Cached_Data(TestApp app)
     {
         // Both Redis and WebApp are initialized and ready to use

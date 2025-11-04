@@ -178,27 +178,13 @@ public class TestApplication : IAsyncInitializer, IAsyncDisposable
 }
 ```
 
-### 3. Create a Data Source Attribute
+### 3. Write Integration Tests
 
 ```csharp
-// This attribute will provide a fully initialized TestApplication to tests
-public class TestApplicationAttribute : DataSourceGeneratorAttribute<TestApplication>
-{
-    public override IEnumerable<TestApplication> GenerateDataSources(DataGeneratorMetadata metadata)
-    {
-        // Return a single instance that will be initialized by TUnit
-        yield return new TestApplication();
-    }
-}
-
-### 4. Write Integration Tests
-
-```csharp
-[TestClass]
 public class UserApiIntegrationTests
 {
     [Test]
-    [TestApplication]
+    [ClassDataSource<TestApplication>(Shared = SharedType.PerClass)]
     public async Task CreateUser_Should_Store_In_Database(TestApplication app)
     {
         // Arrange
@@ -224,7 +210,7 @@ public class UserApiIntegrationTests
     }
     
     [Test]
-    [TestApplication]
+    [ClassDataSource<TestApplication>(Shared = SharedType.PerClass)]
     public async Task CreateUser_Should_Cache_In_Redis(TestApplication app)
     {
         // Arrange
@@ -247,135 +233,101 @@ public class UserApiIntegrationTests
     }
 }
 
-### 5. Advanced Scenario: Custom Test Data with Initialized Context
+### 4. Advanced Scenario: Parameterized Tests with Seeded Data
+
+For parameterized tests that need pre-seeded data, combine `ClassDataSource` with `MethodDataSource`:
 
 ```csharp
-// Data source that provides test scenarios with pre-populated data
-public class OrderTestScenarioAttribute : AsyncDataSourceGeneratorAttribute<OrderTestScenario>
+public class OrderProcessingTests
 {
-    [ClassDataSource<TestApplication>]
-    public required TestApplication App { get; init; }
-    
-    public override async IAsyncEnumerable<OrderTestScenario> GenerateDataSourcesAsync(DataGeneratorMetadata metadata)
+    // Helper method to seed test data
+    private static async Task<(Guid CustomerId, Guid[] ProductIds)> SeedTestData(TestApplication app)
     {
-        // App is already initialized here with Redis and SQL Server running
-        
-        // Seed test data
-        var customerId = await CreateTestCustomer();
-        var productIds = await CreateTestProducts();
-        
-        yield return new OrderTestScenario
-        {
-            Name = "Valid order with single item",
-            App = App,
-            CustomerId = customerId,
-            OrderItems = new[]
-            {
-                new OrderItem { ProductId = productIds[0], Quantity = 1 }
-            },
-            ExpectedTotal = 29.99m
-        };
-        
-        yield return new OrderTestScenario
-        {
-            Name = "Valid order with multiple items",
-            App = App,
-            CustomerId = customerId,
-            OrderItems = new[]
-            {
-                new OrderItem { ProductId = productIds[0], Quantity = 2 },
-                new OrderItem { ProductId = productIds[1], Quantity = 1 }
-            },
-            ExpectedTotal = 89.97m
-        };
-        
-        yield return new OrderTestScenario
-        {
-            Name = "Order exceeding stock",
-            App = App,
-            CustomerId = customerId,
-            OrderItems = new[]
-            {
-                new OrderItem { ProductId = productIds[0], Quantity = 1000 }
-            },
-            ExpectedException = typeof(InsufficientStockException)
-        };
-    }
-    
-    private async Task<Guid> CreateTestCustomer()
-    {
-        using var scope = App.Services.CreateScope();
+        using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        
+
+        // Create test customer
         var customer = new Customer
         {
             Id = Guid.NewGuid(),
             Name = "Test Customer",
             Email = "customer@test.com"
         };
-        
         dbContext.Customers.Add(customer);
-        await dbContext.SaveChangesAsync();
-        
-        return customer.Id;
-    }
-    
-    private async Task<Guid[]> CreateTestProducts()
-    {
-        using var scope = App.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        
+
+        // Create test products
         var products = new[]
         {
             new Product { Id = Guid.NewGuid(), Name = "Widget", Price = 29.99m, Stock = 100 },
             new Product { Id = Guid.NewGuid(), Name = "Gadget", Price = 59.99m, Stock = 50 }
         };
-        
         dbContext.Products.AddRange(products);
+
         await dbContext.SaveChangesAsync();
-        
-        return products.Select(p => p.Id).ToArray();
+
+        return (customer.Id, products.Select(p => p.Id).ToArray());
     }
-}
 
-public class OrderTestScenario
-{
-    public required string Name { get; init; }
-    public required TestApplication App { get; init; }
-    public required Guid CustomerId { get; init; }
-    public required OrderItem[] OrderItems { get; init; }
-    public decimal? ExpectedTotal { get; init; }
-    public Type? ExpectedException { get; init; }
-}
-
-// Use the test scenarios
-[TestClass]
-public class OrderProcessingTests
-{
-    [Test]
-    [OrderTestScenario]
-    public async Task ProcessOrder_Scenarios(OrderTestScenario scenario)
+    // Provide test scenarios
+    private static IEnumerable<(string Name, Func<Guid, Guid[], OrderItem[]> Items, decimal? ExpectedTotal, bool ShouldFail)> OrderScenarios()
     {
-        // Arrange
+        yield return (
+            "Valid order with single item",
+            (customerId, productIds) => new[] { new OrderItem { ProductId = productIds[0], Quantity = 1 } },
+            29.99m,
+            false
+        );
+
+        yield return (
+            "Valid order with multiple items",
+            (customerId, productIds) => new[]
+            {
+                new OrderItem { ProductId = productIds[0], Quantity = 2 },
+                new OrderItem { ProductId = productIds[1], Quantity = 1 }
+            },
+            89.97m,
+            false
+        );
+
+        yield return (
+            "Order exceeding stock",
+            (customerId, productIds) => new[] { new OrderItem { ProductId = productIds[0], Quantity = 1000 } },
+            null,
+            true
+        );
+    }
+
+    [Test]
+    [ClassDataSource<TestApplication>(Shared = SharedType.PerClass)]
+    [MethodDataSource(nameof(OrderScenarios))]
+    public async Task ProcessOrder_Scenarios(
+        TestApplication app,
+        string scenarioName,
+        Func<Guid, Guid[], OrderItem[]> itemsFactory,
+        decimal? expectedTotal,
+        bool shouldFail)
+    {
+        // Arrange - Seed data first
+        var (customerId, productIds) = await SeedTestData(app);
         var orderRequest = new CreateOrderRequest
         {
-            CustomerId = scenario.CustomerId,
-            Items = scenario.OrderItems
+            CustomerId = customerId,
+            Items = itemsFactory(customerId, productIds)
         };
-        
+
         // Act
-        var response = await scenario.App.Client.PostAsJsonAsync("/api/orders", orderRequest);
-        
+        var response = await app.Client.PostAsJsonAsync("/api/orders", orderRequest);
+
         // Assert
-        if (scenario.ExpectedException != null)
+        if (shouldFail)
         {
-            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
         }
         else
         {
-            response.StatusCode.Should().Be(HttpStatusCode.Created);
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Created);
             var order = await response.Content.ReadFromJsonAsync<OrderResponse>();
-            order!.Total.Should().Be(scenario.ExpectedTotal);
+            await Assert.That(order!.Total).IsEqualTo(expectedTotal);
         }
     }
 }

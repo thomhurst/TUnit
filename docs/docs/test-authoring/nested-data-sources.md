@@ -90,20 +90,11 @@ public class TestApplication : IAsyncInitializer, IAsyncDisposable
     }
 }
 
-// 3. Create a data source attribute
-public class TestApplicationAttribute : DataSourceGeneratorAttribute<TestApplication>
-{
-    public override IEnumerable<TestApplication> GenerateDataSources(DataGeneratorMetadata metadata)
-    {
-        yield return new TestApplication();
-    }
-}
-
-// 4. Use in tests
+// 3. Use in tests - TUnit automatically handles nested initialization
 public class UserApiTests
 {
     [Test]
-    [TestApplication]
+    [ClassDataSource<TestApplication>(Shared = SharedType.PerClass)]
     public async Task CreateUser_Should_Cache_In_Redis(TestApplication app)
     {
         // Arrange
@@ -173,75 +164,83 @@ public class CompleteTestEnvironment : IAsyncInitializer, IAsyncDisposable
 
 ## Sharing Resources
 
-Expensive resources like test containers should be shared across tests:
+Expensive resources like test containers should be shared across tests using the `Shared` parameter:
 
 ```csharp
-// Share the same instance across all tests in a class
-[SharedType(SharedType.PerClass)]
-public class SharedTestApplicationAttribute : TestApplicationAttribute
-{
-}
-
-// Or share with a specific key for fine-grained control
-[SharedType(SharedType.Keyed, "integration-tests")]
-public class KeyedTestApplicationAttribute : TestApplicationAttribute
-{
-}
-
-// Usage
-[TestClass]
 public class OrderApiTests
 {
     [Test]
-    [SharedTestApplication] // Reuses the same instance for all tests in this class
-    public async Task Test1(TestApplication app) { /* ... */ }
-    
-    [Test]
-    [SharedTestApplication] // Same instance as Test1
-    public async Task Test2(TestApplication app) { /* ... */ }
-}
-```
-
-## Async Data Generation with Dependencies
-
-You can also use async data source generators that depend on initialized resources:
-
-```csharp
-public class UserTestDataAttribute : AsyncDataSourceGeneratorAttribute<UserTestData>
-{
-    // This will be initialized first
-    [ClassDataSource<TestApplication>]
-    public required TestApplication App { get; init; }
-    
-    public override async IAsyncEnumerable<UserTestData> GenerateDataSourcesAsync(
-        DataGeneratorMetadata metadata)
+    [ClassDataSource<TestApplication>(Shared = SharedType.PerClass)]
+    public async Task Test1(TestApplication app)
     {
-        // App is fully initialized here, including database
-        var dbContext = App.Services.GetRequiredService<AppDbContext>();
-        
-        // Create test users
-        var adminUser = new User { Email = "admin@test.com", Role = "Admin" };
-        var regularUser = new User { Email = "user@test.com", Role = "User" };
-        
-        dbContext.Users.AddRange(adminUser, regularUser);
-        await dbContext.SaveChangesAsync();
-        
-        yield return new UserTestData 
-        { 
-            User = adminUser, 
-            App = App,
-            ExpectedPermissions = new[] { "read", "write", "delete" }
-        };
-        
-        yield return new UserTestData 
-        { 
-            User = regularUser, 
-            App = App,
-            ExpectedPermissions = new[] { "read" }
-        };
+        // First test - creates new instance
+    }
+
+    [Test]
+    [ClassDataSource<TestApplication>(Shared = SharedType.PerClass)]
+    public async Task Test2(TestApplication app)
+    {
+        // Reuses the same instance as Test1
+    }
+}
+
+// Or share with a specific key for fine-grained control across multiple test classes
+public class UserApiTests
+{
+    [Test]
+    [ClassDataSource<TestApplication>(Shared = SharedType.Keyed, Key = "integration-tests")]
+    public async Task CreateUser(TestApplication app) { /* ... */ }
+}
+
+public class ProductApiTests
+{
+    [Test]
+    [ClassDataSource<TestApplication>(Shared = SharedType.Keyed, Key = "integration-tests")]
+    public async Task CreateProduct(TestApplication app)
+    {
+        // Shares the same TestApplication instance with UserApiTests.CreateUser
     }
 }
 ```
+
+## Combining with Method Data Sources
+
+You can combine nested data sources with parameterized tests using method data sources:
+
+```csharp
+public class UserPermissionTests
+{
+    [Test]
+    [ClassDataSource<TestApplication>(Shared = SharedType.PerClass)]
+    [MethodDataSource(nameof(UserScenarios))]
+    public async Task User_Should_Have_Correct_Permissions(
+        TestApplication app,
+        string userEmail,
+        string role,
+        string[] expectedPermissions)
+    {
+        // Create user through API
+        var createResponse = await app.Client.PostAsJsonAsync("/api/users",
+            new { Email = userEmail, Role = role });
+        createResponse.EnsureSuccessStatusCode();
+
+        // Verify permissions
+        var permissionsResponse = await app.Client.GetAsync($"/api/users/{userEmail}/permissions");
+        var permissions = await permissionsResponse.Content.ReadFromJsonAsync<string[]>();
+
+        await Assert.That(permissions).IsEquivalentTo(expectedPermissions);
+    }
+
+    private static IEnumerable<(string Email, string Role, string[] Permissions)> UserScenarios()
+    {
+        yield return ("admin@test.com", "Admin", new[] { "read", "write", "delete" });
+        yield return ("user@test.com", "User", new[] { "read" });
+        yield return ("guest@test.com", "Guest", Array.Empty<string>());
+    }
+}
+```
+
+For more complex scenarios where you need to query the initialized application during data generation, you can access it through the test context metadata.
 
 ## How It Works
 
