@@ -12,8 +12,7 @@ namespace TUnit.Engine.Services;
 /// </summary>
 internal sealed class DataSourceInitializer
 {
-    private readonly Dictionary<object, Task> _initializationTasks = new();
-    private readonly object _lock = new();
+    private readonly ConcurrentDictionary<object, Lazy<Task>> _initializationTasks = new();
     private PropertyInjectionService? _propertyInjectionService;
 
     /// <summary>
@@ -42,30 +41,22 @@ internal sealed class DataSourceInitializer
         }
 
         // Check if already initialized or being initialized
-        Task? existingTask;
-        lock (_lock)
-        {
-            if (_initializationTasks.TryGetValue(dataSource, out existingTask))
-            {
-                // Already initialized or being initialized
-            }
-            else
-            {
-                // Start initialization
-                existingTask = InitializeDataSourceAsync(dataSource, objectBag, methodMetadata, events, cancellationToken);
-                _initializationTasks[dataSource] = existingTask;
-            }
-        }
+        // Use Lazy<Task> to ensure only one initialization task is created per data source (thread-safe)
+        var lazyTask = _initializationTasks.GetOrAdd(
+            dataSource,
+            _ => new Lazy<Task>(() => InitializeDataSourceAsync(dataSource, objectBag, methodMetadata, events, cancellationToken)));
+
+        var task = lazyTask.Value;
 
         // Wait for initialization with cancellation support
         if (cancellationToken.CanBeCanceled)
         {
-            await existingTask.ConfigureAwait(false);
+            await task.ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
         }
         else
         {
-            await existingTask.ConfigureAwait(false);
+            await task.ConfigureAwait(false);
         }
 
         return dataSource;
@@ -221,9 +212,6 @@ internal sealed class DataSourceInitializer
     /// </summary>
     public void ClearCache()
     {
-        lock (_lock)
-        {
-            _initializationTasks.Clear();
-        }
+        _initializationTasks.Clear();
     }
 }

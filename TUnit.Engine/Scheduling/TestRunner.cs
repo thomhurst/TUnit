@@ -39,14 +39,14 @@ public sealed class TestRunner
     private readonly ThreadSafeDictionary<string, Task> _executingTests = new();
     private Exception? _firstFailFastException;
 
-    public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public async ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         // Prevent double execution with a simple lock
-        var executionTask = _executingTests.GetOrAdd(test.TestId, _ => ExecuteTestInternalAsync(test, cancellationToken));
+        var executionTask = _executingTests.GetOrAdd(test.TestId, _ => ExecuteTestInternalAsync(test, cancellationToken).AsTask());
         await executionTask.ConfigureAwait(false);
     }
 
-    private async Task ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    private async ValueTask ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         try
         {
