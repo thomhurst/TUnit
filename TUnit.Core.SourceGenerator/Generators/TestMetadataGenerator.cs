@@ -21,25 +21,50 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        var enabledProvider = context.AnalyzerConfigOptionsProvider
+            .Select((options, _) =>
+            {
+                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
+                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
+            });
+
         var testMethodsProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.TestAttribute",
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
                 transform: static (ctx, _) => GetTestMethodMetadata(ctx))
-            .Where(static m => m is not null);
+            .Where(static m => m is not null)
+            .Combine(enabledProvider);
 
         var inheritsTestsClassesProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.InheritsTestsAttribute",
                 predicate: static (node, _) => node is ClassDeclarationSyntax,
                 transform: static (ctx, _) => GetInheritsTestsClassMetadata(ctx))
-            .Where(static m => m is not null);
+            .Where(static m => m is not null)
+            .Combine(enabledProvider);
 
         context.RegisterSourceOutput(testMethodsProvider,
-            static (context, testMethod) => GenerateTestMethodSource(context, testMethod));
+            static (context, data) =>
+            {
+                var (testMethod, isEnabled) = data;
+                if (!isEnabled)
+                {
+                    return;
+                }
+                GenerateTestMethodSource(context, testMethod);
+            });
 
         context.RegisterSourceOutput(inheritsTestsClassesProvider,
-            static (context, classInfo) => GenerateInheritedTestSources(context, classInfo));
+            static (context, data) =>
+            {
+                var (classInfo, isEnabled) = data;
+                if (!isEnabled)
+                {
+                    return;
+                }
+                GenerateInheritedTestSources(context, classInfo);
+            });
     }
 
     private static InheritsTestsClassMetadata? GetInheritsTestsClassMetadata(GeneratorAttributeSyntaxContext context)

@@ -11,6 +11,13 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        var enabledProvider = context.AnalyzerConfigOptionsProvider
+            .Select((options, _) =>
+            {
+                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
+                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
+            });
+
         var classesWithPropertyInjection = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: (node, _) => IsClassWithDataSourceProperties(node),
@@ -18,10 +25,19 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
             .Where(x => x != null)
             .Select((x, _) => x!)
             .Collect()
-            .SelectMany((classes, _) => classes.DistinctBy(c => c.ClassSymbol, SymbolEqualityComparer.Default));
+            .SelectMany((classes, _) => classes.DistinctBy(c => c.ClassSymbol, SymbolEqualityComparer.Default))
+            .Combine(enabledProvider);
 
         // Generate individual files for each unique class
-        context.RegisterSourceOutput(classesWithPropertyInjection, GenerateIndividualPropertyInjectionSource);
+        context.RegisterSourceOutput(classesWithPropertyInjection, (context, data) =>
+        {
+            var (classData, isEnabled) = data;
+            if (!isEnabled)
+            {
+                return;
+            }
+            GenerateIndividualPropertyInjectionSource(context, classData);
+        });
     }
 
     private static bool IsClassWithDataSourceProperties(SyntaxNode node)
