@@ -60,8 +60,8 @@ internal sealed class TestCoordinator : ITestCoordinator
     {
         try
         {
-            await _stateManager.MarkRunningAsync(test);
-            await _messageBus.InProgress(test.Context);
+            await _stateManager.MarkRunningAsync(test).ConfigureAwait(false);
+            await _messageBus.InProgress(test.Context).ConfigureAwait(false);
 
             _contextRestorer.RestoreContext(test);
 
@@ -90,7 +90,7 @@ internal sealed class TestCoordinator : ITestCoordinator
             }
 
             // Ensure TestSession hooks run before creating test instances
-            await _testExecutor.EnsureTestSessionHooksExecutedAsync();
+            await _testExecutor.EnsureTestSessionHooksExecutedAsync().ConfigureAwait(false);
 
             // Execute test with retry logic - each retry gets a fresh instance
             // Timeout is applied per retry attempt, not across all retries
@@ -106,7 +106,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                 await TimeoutHelper.ExecuteWithTimeoutAsync(
                     async ct =>
                     {
-                        test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync();
+                        test.Context.Metadata.TestDetails.ClassInstance = await test.CreateInstanceAsync().ConfigureAwait(false);
 
                         // Invalidate cached eligible event objects since ClassInstance changed
                         test.Context.CachedEligibleEventObjects = null;
@@ -115,20 +115,20 @@ internal sealed class TestCoordinator : ITestCoordinator
                         if (test.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||
                             !string.IsNullOrEmpty(test.Context.SkipReason))
                         {
-                            await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped");
+                            await _stateManager.MarkSkippedAsync(test, test.Context.SkipReason ?? "Test was skipped").ConfigureAwait(false);
 
-                            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, ct);
+                            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, ct).ConfigureAwait(false);
 
-                            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, ct);
+                            await _eventReceiverOrchestrator.InvokeTestEndEventReceiversAsync(test.Context, ct).ConfigureAwait(false);
 
                             return;
                         }
 
                         try
                         {
-                            await _testInitializer.InitializeTest(test, ct);
+                            await _testInitializer.InitializeTest(test, ct).ConfigureAwait(false);
                             test.Context.RestoreExecutionContext();
-                            await _testExecutor.ExecuteAsync(test, ct);
+                            await _testExecutor.ExecuteAsync(test, ct).ConfigureAwait(false);
                         }
                         finally
                         {
@@ -140,59 +140,59 @@ internal sealed class TestCoordinator : ITestCoordinator
                                 {
                                     try
                                     {
-                                        await invocation.InvokeAsync(test.Context, test.Context);
+                                        await invocation.InvokeAsync(test.Context, test.Context).ConfigureAwait(false);
                                     }
                                     catch (Exception disposeEx)
                                     {
-                                        await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}");
+                                        await _logger.LogErrorAsync($"Error during OnDispose for {test.TestId}: {disposeEx}").ConfigureAwait(false);
                                     }
                                 }
                             }
 
                             try
                             {
-                                await TestExecutor.DisposeTestInstance(test);
+                                await TestExecutor.DisposeTestInstance(test).ConfigureAwait(false);
                             }
                             catch (Exception disposeEx)
                             {
-                                await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}");
+                                await _logger.LogErrorAsync($"Error disposing test instance for {test.TestId}: {disposeEx}").ConfigureAwait(false);
                             }
                         }
                     },
                     testTimeout,
                     cancellationToken,
-                    timeoutMessage);
-            });
+                    timeoutMessage).ConfigureAwait(false);
+            }).ConfigureAwait(false);
 
-            await _stateManager.MarkCompletedAsync(test);
+            await _stateManager.MarkCompletedAsync(test).ConfigureAwait(false);
 
         }
         catch (SkipTestException ex)
         {
             test.Context.SkipReason = ex.Message;
-            await _stateManager.MarkSkippedAsync(test, ex.Message);
+            await _stateManager.MarkSkippedAsync(test, ex.Message).ConfigureAwait(false);
 
-            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken);
+            await _eventReceiverOrchestrator.InvokeTestSkippedEventReceiversAsync(test.Context, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            await _stateManager.MarkFailedAsync(test, ex);
+            await _stateManager.MarkFailedAsync(test, ex).ConfigureAwait(false);
         }
         finally
         {
             var cleanupExceptions = new List<Exception>();
 
-            await _objectTracker.UntrackObjects(test.Context, cleanupExceptions);
+            await _objectTracker.UntrackObjects(test.Context, cleanupExceptions).ConfigureAwait(false);
 
             var testClass = test.Metadata.TestClassType;
             var testAssembly = testClass.Assembly;
-            var hookExceptions = await _testExecutor.ExecuteAfterClassAssemblyHooks(test, testClass, testAssembly, CancellationToken.None);
+            var hookExceptions = await _testExecutor.ExecuteAfterClassAssemblyHooks(test, testClass, testAssembly, CancellationToken.None).ConfigureAwait(false);
 
             if (hookExceptions.Count > 0)
             {
                 foreach (var ex in hookExceptions)
                 {
-                    await _logger.LogErrorAsync($"Error executing After hooks for {test.TestId}: {ex}");
+                    await _logger.LogErrorAsync($"Error executing After hooks for {test.TestId}: {ex}").ConfigureAwait(false);
                 }
                 cleanupExceptions.AddRange(hookExceptions);
             }
@@ -203,11 +203,11 @@ internal sealed class TestCoordinator : ITestCoordinator
                 await _eventReceiverOrchestrator.InvokeLastTestInClassEventReceiversAsync(
                     test.Context,
                     test.Context.ClassContext,
-                    CancellationToken.None);
+                    CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync($"Error in last test in class event receiver for {test.TestId}: {ex}");
+                await _logger.LogErrorAsync($"Error in last test in class event receiver for {test.TestId}: {ex}").ConfigureAwait(false);
                 cleanupExceptions.Add(ex);
             }
 
@@ -216,11 +216,11 @@ internal sealed class TestCoordinator : ITestCoordinator
                 await _eventReceiverOrchestrator.InvokeLastTestInAssemblyEventReceiversAsync(
                     test.Context,
                     test.Context.ClassContext.AssemblyContext,
-                    CancellationToken.None);
+                    CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync($"Error in last test in assembly event receiver for {test.TestId}: {ex}");
+                await _logger.LogErrorAsync($"Error in last test in assembly event receiver for {test.TestId}: {ex}").ConfigureAwait(false);
                 cleanupExceptions.Add(ex);
             }
 
@@ -229,11 +229,11 @@ internal sealed class TestCoordinator : ITestCoordinator
                 await _eventReceiverOrchestrator.InvokeLastTestInSessionEventReceiversAsync(
                     test.Context,
                     test.Context.ClassContext.AssemblyContext.TestSessionContext,
-                    CancellationToken.None);
+                    CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _logger.LogErrorAsync($"Error in last test in session event receiver for {test.TestId}: {ex}");
+                await _logger.LogErrorAsync($"Error in last test in session event receiver for {test.TestId}: {ex}").ConfigureAwait(false);
                 cleanupExceptions.Add(ex);
             }
 
@@ -244,7 +244,7 @@ internal sealed class TestCoordinator : ITestCoordinator
                     ? cleanupExceptions[0]
                     : new AggregateException("One or more errors occurred during test cleanup", cleanupExceptions);
 
-                await _stateManager.MarkFailedAsync(test, aggregatedException);
+                await _stateManager.MarkFailedAsync(test, aggregatedException).ConfigureAwait(false);
             }
 
             switch (test.State)
@@ -254,20 +254,20 @@ internal sealed class TestCoordinator : ITestCoordinator
                 case TestState.Queued:
                 case TestState.Running:
                     // This shouldn't happen
-                    await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault());
+                    await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
                     break;
                 case TestState.Passed:
-                    await _messageBus.Passed(test.Context, test.StartTime.GetValueOrDefault());
+                    await _messageBus.Passed(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
                     break;
                 case TestState.Timeout:
                 case TestState.Failed:
-                    await _messageBus.Failed(test.Context, test.Context.Execution.Result?.Exception!, test.StartTime.GetValueOrDefault());
+                    await _messageBus.Failed(test.Context, test.Context.Execution.Result?.Exception!, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
                     break;
                 case TestState.Skipped:
-                    await _messageBus.Skipped(test.Context, test.Context.SkipReason ?? "Skipped");
+                    await _messageBus.Skipped(test.Context, test.Context.SkipReason ?? "Skipped").ConfigureAwait(false);
                     break;
                 case TestState.Cancelled:
-                    await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault());
+                    await _messageBus.Cancelled(test.Context, test.StartTime.GetValueOrDefault()).ConfigureAwait(false);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
