@@ -51,7 +51,7 @@ internal class TestExecutor
     /// Creates a test executor delegate that wraps the provided executor with hook orchestration.
     /// Uses focused services that follow SRP to manage lifecycle and execution.
     /// </summary>
-    public async Task ExecuteAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
+    public async ValueTask ExecuteAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {
 
         var testClass = executableTest.Metadata.TestClassType;
@@ -148,7 +148,7 @@ internal class TestExecutor
         }
     }
 
-    private static async Task ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
+    private static async ValueTask ExecuteTestAsync(AbstractExecutableTest executableTest, CancellationToken cancellationToken)
     {
         // Skip the actual test invocation for skipped tests
         if (executableTest.Context.Metadata.TestDetails.ClassInstance is SkippedTestInstance ||

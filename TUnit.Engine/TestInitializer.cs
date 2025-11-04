@@ -21,7 +21,7 @@ internal class TestInitializer
         _objectTracker = objectTracker;
     }
 
-    public async Task InitializeTest(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public async ValueTask InitializeTest(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         var testClassInstance = test.Context.Metadata.TestDetails.ClassInstance;
 

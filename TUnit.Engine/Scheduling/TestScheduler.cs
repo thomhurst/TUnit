@@ -420,7 +420,7 @@ internal sealed class TestScheduler : ITestScheduler
 
                     try
                     {
-                        test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken);
+                        test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, cancellationToken).AsTask();
                         await test.ExecutionTask.ConfigureAwait(false);
                     }
                     finally
@@ -458,9 +458,7 @@ internal sealed class TestScheduler : ITestScheduler
 
                 try
                 {
-#pragma warning disable IL2026 // ExecuteTestAsync uses reflection, but caller (ExecuteWithGlobalLimitAsync) is already marked with RequiresUnreferencedCode
-                    test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct);
-#pragma warning restore IL2026
+                    test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct).AsTask();
                     await test.ExecutionTask.ConfigureAwait(false);
                 }
                 finally
@@ -485,9 +483,7 @@ internal sealed class TestScheduler : ITestScheduler
             },
             async (test, ct) =>
             {
-#pragma warning disable IL2026 // ExecuteTestAsync uses reflection, but caller (ExecuteWithGlobalLimitAsync) is already marked with RequiresUnreferencedCode
-                test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct);
-#pragma warning restore IL2026
+                test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct).AsTask();
                 await test.ExecutionTask.ConfigureAwait(false);
             }
         ).ConfigureAwait(false);

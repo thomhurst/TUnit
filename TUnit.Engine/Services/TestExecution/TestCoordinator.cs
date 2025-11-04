@@ -50,13 +50,13 @@ internal sealed class TestCoordinator : ITestCoordinator
         _hashSetPool = hashSetPool;
     }
 
-    public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    public async ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         await _executionGuard.TryStartExecutionAsync(test.TestId,
-            () => ExecuteTestInternalAsync(test, cancellationToken));
+            () => ExecuteTestInternalAsync(test, cancellationToken).AsTask());
     }
 
-    private async Task ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
+    private async ValueTask ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         try
         {
