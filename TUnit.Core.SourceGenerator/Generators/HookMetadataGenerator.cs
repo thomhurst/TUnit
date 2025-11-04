@@ -13,61 +13,92 @@ public class HookMetadataGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        var enabledProvider = context.AnalyzerConfigOptionsProvider
+            .Select((options, _) =>
+            {
+                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
+                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
+            });
+
         var beforeHooks = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.BeforeAttribute",
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
                 transform: static (ctx, _) => GetHookMethodMetadata(ctx, "Before"))
-            .Where(static m => m is not null);
+            .Where(static m => m is not null)
+            .Combine(enabledProvider);
 
         var afterHooks = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.AfterAttribute",
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
                 transform: static (ctx, _) => GetHookMethodMetadata(ctx, "After"))
-            .Where(static m => m is not null);
+            .Where(static m => m is not null)
+            .Combine(enabledProvider);
 
         var beforeEveryHooks = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.BeforeEveryAttribute",
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
                 transform: static (ctx, _) => GetHookMethodMetadata(ctx, "BeforeEvery"))
-            .Where(static m => m is not null);
+            .Where(static m => m is not null)
+            .Combine(enabledProvider);
 
         var afterEveryHooks = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "TUnit.Core.AfterEveryAttribute",
                 predicate: static (node, _) => node is MethodDeclarationSyntax,
                 transform: static (ctx, _) => GetHookMethodMetadata(ctx, "AfterEvery"))
-            .Where(static m => m is not null);
+            .Where(static m => m is not null)
+            .Combine(enabledProvider);
 
         // Generate individual files for each hook instead of collecting them
-        context.RegisterSourceOutput(beforeHooks, (sourceProductionContext, hook) =>
+        context.RegisterSourceOutput(beforeHooks, (sourceProductionContext, data) =>
         {
+            var (hook, isEnabled) = data;
+            if (!isEnabled)
+            {
+                return;
+            }
             if (hook != null)
             {
                 GenerateIndividualHookFile(sourceProductionContext, hook);
             }
         });
 
-        context.RegisterSourceOutput(afterHooks, (sourceProductionContext, hook) =>
+        context.RegisterSourceOutput(afterHooks, (sourceProductionContext, data) =>
         {
+            var (hook, isEnabled) = data;
+            if (!isEnabled)
+            {
+                return;
+            }
             if (hook != null)
             {
                 GenerateIndividualHookFile(sourceProductionContext, hook);
             }
         });
 
-        context.RegisterSourceOutput(beforeEveryHooks, (sourceProductionContext, hook) =>
+        context.RegisterSourceOutput(beforeEveryHooks, (sourceProductionContext, data) =>
         {
+            var (hook, isEnabled) = data;
+            if (!isEnabled)
+            {
+                return;
+            }
             if (hook != null)
             {
                 GenerateIndividualHookFile(sourceProductionContext, hook);
             }
         });
 
-        context.RegisterSourceOutput(afterEveryHooks, (sourceProductionContext, hook) =>
+        context.RegisterSourceOutput(afterEveryHooks, (sourceProductionContext, data) =>
         {
+            var (hook, isEnabled) = data;
+            if (!isEnabled)
+            {
+                return;
+            }
             if (hook != null)
             {
                 GenerateIndividualHookFile(sourceProductionContext, hook);

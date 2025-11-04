@@ -12,6 +12,13 @@ public class AotConverterGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        var enabledProvider = context.AnalyzerConfigOptionsProvider
+            .Select((options, _) =>
+            {
+                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
+                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
+            });
+
         var allTypes = context.CompilationProvider
             .Select((compilation, ct) =>
             {
@@ -26,10 +33,16 @@ public class AotConverterGenerator : IIncrementalGenerator
                     var stackTrace = ex.StackTrace ?? "No stack trace";
                     throw new InvalidOperationException($"NullReferenceException in ScanTestParameters: {ex.Message}\nStack: {stackTrace}", ex);
                 }
-            });
+            })
+            .Combine(enabledProvider);
 
-        context.RegisterSourceOutput(allTypes, (spc, source) =>
+        context.RegisterSourceOutput(allTypes, (spc, data) =>
         {
+            var (source, isEnabled) = data;
+            if (!isEnabled)
+            {
+                return;
+            }
             try
             {
                 GenerateConverters(spc, source);
