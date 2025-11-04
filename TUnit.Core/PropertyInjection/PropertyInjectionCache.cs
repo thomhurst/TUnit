@@ -18,7 +18,7 @@ internal static class PropertyInjectionCache
 {
     private static readonly ThreadSafeDictionary<Type, PropertyInjectionPlan> _injectionPlans = new();
     private static readonly ThreadSafeDictionary<Type, bool> _shouldInjectCache = new();
-    private static readonly ThreadSafeDictionary<object, Task> _injectionTasks = new();
+    private static readonly ThreadSafeDictionary<object, TaskCompletionSource<bool>> _injectionTasks = new();
 
     /// <summary>
     /// Gets or creates an injection plan for the specified type.
@@ -43,18 +43,40 @@ internal static class PropertyInjectionCache
     }
 
     /// <summary>
-    /// Gets or adds an injection task for the specified instance.
+    /// Ensures properties are injected into the specified instance.
+    /// Fast-path optimized for already-injected instances (zero allocation).
     /// </summary>
-    public static async Task GetOrAddInjectionTask(object instance, Func<object, Task> taskFactory)
+    public static async ValueTask EnsureInjectedAsync(object instance, Func<object, ValueTask> injectionFactory)
     {
-        await _injectionTasks.GetOrAdd(instance, taskFactory);
-    }
+        if (_injectionTasks.TryGetValue(instance, out var existingTcs) && existingTcs.Task.IsCompleted)
+        {
+            if (existingTcs.Task.IsFaulted)
+            {
+                await existingTcs.Task.ConfigureAwait(false);
+            }
 
-    /// <summary>
-    /// Checks if an injection task already exists for the instance.
-    /// </summary>
-    public static bool TryGetInjectionTask(object instance, out Task? existingTask)
-    {
-        return _injectionTasks.TryGetValue(instance, out existingTask);
+            return;
+        }
+
+        var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        existingTcs = _injectionTasks.GetOrAdd(instance, _ => tcs);
+
+        if (existingTcs == tcs)
+        {
+            try
+            {
+                await injectionFactory(instance).ConfigureAwait(false);
+                tcs.SetResult(true);
+            }
+            catch (Exception ex)
+            {
+                tcs.SetException(ex);
+                throw;
+            }
+        }
+        else
+        {
+            await existingTcs.Task.ConfigureAwait(false);
+        }
     }
 }

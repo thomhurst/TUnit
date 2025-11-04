@@ -20,15 +20,23 @@ public static class TestContextExtensions
             return context.Metadata.TestDetails.ClassType.Name;
         }
 
-        // Optimize: Use array instead of LINQ Select to reduce allocations
+        // Optimize: Use StringBuilder to avoid string concatenation allocations
         var args = context.Metadata.TestDetails.TestClassArguments;
-        var formattedArgs = new string[args.Length];
+        var sb = new System.Text.StringBuilder();
+        sb.Append(context.Metadata.TestDetails.ClassType.Name);
+        sb.Append('(');
+
         for (int i = 0; i < args.Length; i++)
         {
-            formattedArgs[i] = ArgumentFormatter.Format(args[i], context.ArgumentDisplayFormatters);
+            if (i > 0)
+            {
+                sb.Append(", ");
+            }
+            sb.Append(ArgumentFormatter.Format(args[i], context.ArgumentDisplayFormatters));
         }
 
-        return $"{context.Metadata.TestDetails.ClassType.Name}({string.Join(", ", formattedArgs)})";
+        sb.Append(')');
+        return sb.ToString();
     }
 
     #if NET6_0_OR_GREATER

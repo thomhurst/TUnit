@@ -53,7 +53,7 @@ internal sealed class TestCoordinator : ITestCoordinator
     public async ValueTask ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         await _executionGuard.TryStartExecutionAsync(test.TestId,
-            () => ExecuteTestInternalAsync(test, cancellationToken).AsTask());
+            () => ExecuteTestInternalAsync(test, cancellationToken));
     }
 
     private async ValueTask ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)

@@ -46,25 +46,33 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         foreach (var obj in context.GetEligibleEventObjects())
         {
-            if (_initializedObjects.Add(obj)) // Add returns false if already present
+            if (_initializedObjects.Contains(obj))
             {
-                // For First event receivers, only register one instance per type
+                continue;
+            }
+
+            if (_initializedObjects.Add(obj))
+            {
                 bool isFirstEventReceiver = obj is IFirstTestInTestSessionEventReceiver ||
                                            obj is IFirstTestInAssemblyEventReceiver ||
                                            obj is IFirstTestInClassEventReceiver;
 
                 if (isFirstEventReceiver)
                 {
-                    if (_registeredFirstEventReceiverTypes.Add(obj.GetType()))
+                    var objType = obj.GetType();
+
+                    if (_registeredFirstEventReceiverTypes.Contains(objType))
                     {
-                        // First instance of this type, register it
+                        continue;
+                    }
+
+                    if (_registeredFirstEventReceiverTypes.Add(objType))
+                    {
                         objectsToRegister.Add(obj);
                     }
-                    // else: Skip registration, we already have an instance of this type
                 }
                 else
                 {
-                    // Not a First event receiver, register normally
                     objectsToRegister.Add(obj);
                 }
             }
@@ -72,7 +80,6 @@ internal sealed class EventReceiverOrchestrator : IDisposable
 
         if (objectsToRegister.Count > 0)
         {
-            // Register only the objects that should be registered
             _registry.RegisterReceivers(objectsToRegister);
         }
     }

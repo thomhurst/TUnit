@@ -12,7 +12,7 @@ namespace TUnit.Engine.Services;
 /// </summary>
 internal sealed class DataSourceInitializer
 {
-    private readonly ConcurrentDictionary<object, Lazy<Task>> _initializationTasks = new();
+    private readonly ConcurrentDictionary<object, TaskCompletionSource<bool>> _initializationTasks = new();
     private PropertyInjectionService? _propertyInjectionService;
 
     /// <summary>
@@ -27,8 +27,9 @@ internal sealed class DataSourceInitializer
     /// <summary>
     /// Ensures a data source instance is fully initialized before use.
     /// This includes property injection and calling IAsyncInitializer if implemented.
+    /// Optimized with fast-path for already-initialized data sources.
     /// </summary>
-    public async Task<T> EnsureInitializedAsync<T>(
+    public async ValueTask<T> EnsureInitializedAsync<T>(
         T dataSource,
         ConcurrentDictionary<string, object?>? objectBag = null,
         MethodMetadata? methodMetadata = null,
@@ -40,23 +41,46 @@ internal sealed class DataSourceInitializer
             throw new ArgumentNullException(nameof(dataSource));
         }
 
-        // Check if already initialized or being initialized
-        // Use Lazy<Task> to ensure only one initialization task is created per data source (thread-safe)
-        var lazyTask = _initializationTasks.GetOrAdd(
-            dataSource,
-            _ => new Lazy<Task>(() => InitializeDataSourceAsync(dataSource, objectBag, methodMetadata, events, cancellationToken)));
-
-        var task = lazyTask.Value;
-
-        // Wait for initialization with cancellation support
-        if (cancellationToken.CanBeCanceled)
+        // Fast path: Check if already initialized (avoids Task allocation)
+        if (_initializationTasks.TryGetValue(dataSource, out var existingTcs) && existingTcs.Task.IsCompleted)
         {
-            await task.ConfigureAwait(false);
-            cancellationToken.ThrowIfCancellationRequested();
+            // Already initialized - return synchronously without allocating a Task
+            if (existingTcs.Task.IsFaulted)
+            {
+                // Re-throw the original exception
+                await existingTcs.Task.ConfigureAwait(false);
+            }
+
+            return dataSource;
+        }
+
+        // Slow path: Need to initialize or wait for initialization
+        var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        existingTcs = _initializationTasks.GetOrAdd(dataSource, tcs);
+
+        if (existingTcs == tcs)
+        {
+            try
+            {
+                await InitializeDataSourceAsync(dataSource, objectBag, methodMetadata, events, cancellationToken).ConfigureAwait(false);
+                tcs.SetResult(true);
+            }
+            catch (Exception ex)
+            {
+                tcs.SetException(ex);
+                throw;
+            }
         }
         else
         {
-            await task.ConfigureAwait(false);
+            // Another thread is initializing or already initialized - wait for it
+            await existingTcs.Task.ConfigureAwait(false);
+
+            // Check cancellation after waiting
+            if (cancellationToken.CanBeCanceled)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
         }
 
         return dataSource;
