@@ -145,41 +145,69 @@ internal static class TestIdentifierService
 
     private static string GetTypeNameWithGenerics(Type type)
     {
-        if (!type.IsGenericType)
-        {
-            return type.Name;
-        }
-
         var sb = new StringBuilder();
-        var name = type.Name;
 
-        var backtickIndex = name.IndexOf('`');
-        if (backtickIndex > 0)
+        // Build the full type hierarchy including all containing types
+        var typeHierarchy = new List<string>();
+        var currentType = type;
+
+        while (currentType != null)
         {
+            if (currentType.IsGenericType)
+            {
+                var typeSb = new StringBuilder();
+                var name = currentType.Name;
+
+                var backtickIndex = name.IndexOf('`');
+                if (backtickIndex > 0)
+                {
 #if NET6_0_OR_GREATER
-            sb.Append(name.AsSpan(0, backtickIndex));
+                    typeSb.Append(name.AsSpan(0, backtickIndex));
 #else
-            sb.Append(name.Substring(0, backtickIndex));
+                    typeSb.Append(name.Substring(0, backtickIndex));
 #endif
-        }
-        else
-        {
-            sb.Append(name);
+                }
+                else
+                {
+                    typeSb.Append(name);
+                }
+
+                // Add the generic type arguments
+                var genericArgs = currentType.GetGenericArguments();
+                typeSb.Append('<');
+                for (var i = 0; i < genericArgs.Length; i++)
+                {
+                    if (i > 0)
+                    {
+                        typeSb.Append(", ");
+                    }
+                    // Use the full name for generic arguments to ensure uniqueness
+                    typeSb.Append(genericArgs[i].FullName ?? genericArgs[i].Name);
+                }
+                typeSb.Append('>');
+
+                typeHierarchy.Add(typeSb.ToString());
+            }
+            else
+            {
+                typeHierarchy.Add(currentType.Name);
+            }
+
+            currentType = currentType.DeclaringType;
         }
 
-        // Add the generic type arguments
-        var genericArgs = type.GetGenericArguments();
-        sb.Append('<');
-        for (var i = 0; i < genericArgs.Length; i++)
+        // Reverse to get outer-to-inner order
+        typeHierarchy.Reverse();
+
+        // Append all types with dot separator
+        for (var i = 0; i < typeHierarchy.Count; i++)
         {
             if (i > 0)
             {
-                sb.Append(", ");
+                sb.Append('.');
             }
-            // Use the full name for generic arguments to ensure uniqueness
-            sb.Append(genericArgs[i].FullName ?? genericArgs[i].Name);
+            sb.Append(typeHierarchy[i]);
         }
-        sb.Append('>');
 
         return sb.ToString();
     }
