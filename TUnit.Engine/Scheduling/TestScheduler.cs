@@ -473,8 +473,7 @@ internal sealed class TestScheduler : ITestScheduler
         List<AbstractExecutableTest> tests,
         CancellationToken cancellationToken)
     {
-        // Execute tests without limiters - still apply global parallelism limit to prevent thread pool saturation
-        // "Unlimited" means no per-test constraints (ParallelLimiter), not unlimited concurrency
+        // Execute tests without per-test limiters, but still apply global parallelism limit
         await Parallel.ForEachAsync(
             tests,
             new ParallelOptions
@@ -551,11 +550,10 @@ internal sealed class TestScheduler : ITestScheduler
             }
         }
 
-        // Default: 4x CPU cores (balanced for mixed CPU/I/O workloads)
-        // Higher values can cause thread pool saturation with many async tests
+        // Default: 8x CPU cores (empirically optimized for async/IO-bound workloads)
         // Users can override via --maximum-parallel-tests or TUNIT_MAX_PARALLEL_TESTS
-        var defaultLimit = Environment.ProcessorCount * 4;
-        logger.LogDebug($"Maximum parallel tests limit defaulting to {defaultLimit} ({Environment.ProcessorCount} processors * 4)");
+        var defaultLimit = Environment.ProcessorCount * 8;
+        logger.LogDebug($"Maximum parallel tests limit defaulting to {defaultLimit} ({Environment.ProcessorCount} processors * 8)");
         return defaultLimit;
     }
 }
