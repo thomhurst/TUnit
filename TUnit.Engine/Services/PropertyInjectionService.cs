@@ -13,6 +13,9 @@ internal sealed class PropertyInjectionService
     private readonly DataSourceInitializer _dataSourceInitializer;
     private PropertyInitializationOrchestrator _orchestrator;
 
+    // Simple object pool for visited objects dictionaries to reduce allocations
+    private static readonly ConcurrentBag<ConcurrentDictionary<object, byte>> _visitedObjectsPool = new();
+
     public PropertyInjectionService(DataSourceInitializer dataSourceInitializer)
     {
         _dataSourceInitializer = dataSourceInitializer ?? throw new ArgumentNullException(nameof(dataSourceInitializer));
@@ -66,7 +69,7 @@ internal sealed class PropertyInjectionService
     /// <param name="objectBag">Shared object bag for the test context. Must not be null.</param>
     /// <param name="methodMetadata">Method metadata for the test. Can be null.</param>
     /// <param name="events">Test context events for tracking. Must not be null and must be unique per test permutation.</param>
-    public Task InjectPropertiesIntoObjectAsync(object instance, ConcurrentDictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
+    public async Task InjectPropertiesIntoObjectAsync(object instance, ConcurrentDictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events)
     {
         if (objectBag == null)
         {
@@ -78,12 +81,29 @@ internal sealed class PropertyInjectionService
             throw new ArgumentNullException(nameof(events), "TestContextEvents must not be null. Each test permutation must have a unique TestContextEvents instance for proper disposal tracking.");
         }
 
+        // Rent dictionary from pool to avoid allocations
+        if (!_visitedObjectsPool.TryTake(out var visitedObjects))
+        {
 #if NETSTANDARD2_0
-        var visitedObjects = new ConcurrentDictionary<object, byte>();
+            visitedObjects = new ConcurrentDictionary<object, byte>();
 #else
-        var visitedObjects = new ConcurrentDictionary<object, byte>(ReferenceEqualityComparer.Instance);
+            visitedObjects = new ConcurrentDictionary<object, byte>(ReferenceEqualityComparer.Instance);
 #endif
-        return InjectPropertiesIntoObjectAsyncCore(instance, objectBag, methodMetadata, events, visitedObjects);
+        }
+
+        try
+        {
+            await InjectPropertiesIntoObjectAsyncCore(instance, objectBag, methodMetadata, events, visitedObjects);
+        }
+        finally
+        {
+            // Clear and return to pool (reject if too large to avoid memory bloat)
+            visitedObjects.Clear();
+            if (visitedObjects.Count == 0)
+            {
+                _visitedObjectsPool.Add(visitedObjects);
+            }
+        }
     }
 
     internal async Task InjectPropertiesIntoObjectAsyncCore(object instance, ConcurrentDictionary<string, object?> objectBag, MethodMetadata? methodMetadata, TestContextEvents events, ConcurrentDictionary<object, byte> visitedObjects)
@@ -101,22 +121,14 @@ internal sealed class PropertyInjectionService
 
         try
         {
-            var alreadyProcessed = PropertyInjectionCache.TryGetInjectionTask(instance, out var existingTask);
-
-            if (alreadyProcessed && existingTask != null)
+            // Use optimized single-lookup pattern with fast-path for already-injected instances
+            await PropertyInjectionCache.EnsureInjectedAsync(instance, async _ =>
             {
-                await existingTask;
-            }
-            else
-            {
-                await PropertyInjectionCache.GetOrAddInjectionTask(instance, async _ =>
-                {
-                    var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
+                var plan = PropertyInjectionCache.GetOrCreatePlan(instance.GetType());
 
-                    await _orchestrator.InitializeObjectWithPropertiesAsync(
-                        instance, plan, objectBag, methodMetadata, events, visitedObjects);
-                });
-            }
+                await _orchestrator.InitializeObjectWithPropertiesAsync(
+                    instance, plan, objectBag, methodMetadata, events, visitedObjects);
+            });
 
             await RecurseIntoNestedPropertiesAsync(instance, objectBag, methodMetadata, events, visitedObjects);
         }

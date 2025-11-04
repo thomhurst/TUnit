@@ -18,7 +18,7 @@ internal static class PropertyInjectionCache
 {
     private static readonly ThreadSafeDictionary<Type, PropertyInjectionPlan> _injectionPlans = new();
     private static readonly ThreadSafeDictionary<Type, bool> _shouldInjectCache = new();
-    private static readonly ThreadSafeDictionary<object, Task> _injectionTasks = new();
+    private static readonly ThreadSafeDictionary<object, TaskCompletionSource> _injectionTasks = new();
 
     /// <summary>
     /// Gets or creates an injection plan for the specified type.
@@ -43,18 +43,48 @@ internal static class PropertyInjectionCache
     }
 
     /// <summary>
-    /// Gets or adds an injection task for the specified instance.
+    /// Ensures properties are injected into the specified instance.
+    /// Optimized with fast-path for already-injected instances (zero allocation).
+    /// Uses TaskCompletionSource for lock-free coordination across threads.
     /// </summary>
-    public static async Task GetOrAddInjectionTask(object instance, Func<object, Task> taskFactory)
+    public static async ValueTask EnsureInjectedAsync(object instance, Func<object, ValueTask> injectionFactory)
     {
-        await _injectionTasks.GetOrAdd(instance, taskFactory);
-    }
+        // Fast path: Check if already injected (avoids Task allocation)
+        if (_injectionTasks.TryGetValue(instance, out var existingTcs) && existingTcs.Task.IsCompleted)
+        {
+            // Already injected - return synchronously without allocating a Task
+            if (existingTcs.Task.IsFaulted)
+            {
+                // Re-throw the original exception
+                await existingTcs.Task.ConfigureAwait(false);
+            }
 
-    /// <summary>
-    /// Checks if an injection task already exists for the instance.
-    /// </summary>
-    public static bool TryGetInjectionTask(object instance, out Task? existingTask)
-    {
-        return _injectionTasks.TryGetValue(instance, out existingTask);
+            return;
+        }
+
+        // Slow path: Need to inject or wait for injection
+        // Use TaskCompletionSource for lock-free, efficient injection coordination
+        var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        existingTcs = _injectionTasks.GetOrAdd(instance, _ => tcs);
+
+        if (existingTcs == tcs)
+        {
+            // We won the race - this thread is responsible for injection
+            try
+            {
+                await injectionFactory(instance).ConfigureAwait(false);
+                tcs.SetResult();
+            }
+            catch (Exception ex)
+            {
+                tcs.SetException(ex);
+                throw;
+            }
+        }
+        else
+        {
+            // Another thread is injecting or already injected - wait for it
+            await existingTcs.Task.ConfigureAwait(false);
+        }
     }
 }
