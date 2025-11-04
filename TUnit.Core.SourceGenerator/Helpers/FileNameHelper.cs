@@ -25,10 +25,26 @@ internal static class FileNameHelper
             sb.Append('_');
         }
 
-        // Add class name
-        sb.Append(SanitizeForFileName(typeSymbol.Name));
+        // Add all containing types (outer classes first, then inner classes)
+        var containingTypes = new List<string>();
+        var currentType = typeSymbol;
+        while (currentType != null)
+        {
+            containingTypes.Add(SanitizeForFileName(currentType.Name));
+            currentType = currentType.ContainingType;
+        }
 
-        // Add generic type arguments if any
+        // Reverse to get outer-to-inner order
+        containingTypes.Reverse();
+
+        // Append containing types from outer to inner
+        for (int i = 0; i < containingTypes.Count; i++)
+        {
+            if (i > 0) sb.Append('_');
+            sb.Append(containingTypes[i]);
+        }
+
+        // Add generic type arguments if any (for the innermost type)
         if (typeSymbol.TypeArguments.Length > 0)
         {
             sb.Append('_');
@@ -61,8 +77,26 @@ internal static class FileNameHelper
             sb.Append('_');
         }
 
-        // Add class name (with generic parameters if any)
-        sb.Append(SanitizeForFileName(typeSymbol.Name));
+        // Add all containing types (outer classes first, then inner classes)
+        var containingTypes = new List<string>();
+        var currentType = typeSymbol;
+        while (currentType != null)
+        {
+            containingTypes.Add(SanitizeForFileName(currentType.Name));
+            currentType = currentType.ContainingType;
+        }
+
+        // Reverse to get outer-to-inner order
+        containingTypes.Reverse();
+
+        // Append containing types from outer to inner
+        for (int i = 0; i < containingTypes.Count; i++)
+        {
+            if (i > 0) sb.Append('_');
+            sb.Append(containingTypes[i]);
+        }
+
+        // Add generic parameters if any (for the innermost type)
         if (typeSymbol.TypeArguments.Length > 0)
         {
             sb.Append('_');
