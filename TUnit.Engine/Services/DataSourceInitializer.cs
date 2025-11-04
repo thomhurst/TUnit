@@ -12,7 +12,7 @@ namespace TUnit.Engine.Services;
 /// </summary>
 internal sealed class DataSourceInitializer
 {
-    private readonly ConcurrentDictionary<object, TaskCompletionSource> _initializationTasks = new();
+    private readonly ConcurrentDictionary<object, TaskCompletionSource<bool>> _initializationTasks = new();
     private PropertyInjectionService? _propertyInjectionService;
 
     /// <summary>
@@ -55,17 +55,15 @@ internal sealed class DataSourceInitializer
         }
 
         // Slow path: Need to initialize or wait for initialization
-        // Use TaskCompletionSource for lock-free, efficient initialization coordination
-        var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         existingTcs = _initializationTasks.GetOrAdd(dataSource, tcs);
 
         if (existingTcs == tcs)
         {
-            // We won the race - this thread is responsible for initialization
             try
             {
                 await InitializeDataSourceAsync(dataSource, objectBag, methodMetadata, events, cancellationToken).ConfigureAwait(false);
-                tcs.SetResult();
+                tcs.SetResult(true);
             }
             catch (Exception ex)
             {

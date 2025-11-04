@@ -67,19 +67,13 @@ public class ThreadSafeDictionary<TKey,
     /// The value for the key. This will be either the existing value or a newly created value from the factory function.
     /// </returns>
     /// <remarks>
-    /// <para>
     /// This method is thread-safe. If multiple threads call this method simultaneously with the same key,
     /// the factory function will be executed only once, and all threads will receive the same instance.
-    /// </para>
-    /// <para>
-    /// The value is created lazily using <see cref="Lazy{T}"/> with <see cref="LazyThreadSafetyMode.ExecutionAndPublication"/>.
-    /// </para>
     /// </remarks>
     public TValue GetOrAdd(TKey key, Func<TKey, TValue> func)
     {
         var lazy = _innerDictionary.GetOrAdd(key,
             k => new Lazy<TValue>(() => func(k), LazyThreadSafetyMode.ExecutionAndPublication));
-
         return lazy.Value;
     }
 
