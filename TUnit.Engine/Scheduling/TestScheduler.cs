@@ -367,45 +367,38 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
     private async Task ExecuteWithGlobalLimitAsync(
         AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)
     {
 #if NET6_0_OR_GREATER
-        // Use Parallel.ForEachAsync with explicit MaxDegreeOfParallelism
-        // This eliminates unbounded Task.Run calls and leverages work-stealing for efficiency
-        await Parallel.ForEachAsync(
-            tests,
-            new ParallelOptions
-            {
-                MaxDegreeOfParallelism = _maxParallelism,
-                CancellationToken = cancellationToken
-            },
-            async (test, ct) =>
-            {
-                SemaphoreSlim? parallelLimiterSemaphore = null;
+        // PERFORMANCE OPTIMIZATION: Partition tests by whether they have parallel limiters
+        // Tests without limiters can run with unlimited parallelism (avoiding global semaphore overhead)
+        var testsWithLimiters = new List<AbstractExecutableTest>();
+        var testsWithoutLimiters = new List<AbstractExecutableTest>();
 
-                // Acquire parallel limiter semaphore if needed
-                if (test.Context.ParallelLimiter != null)
-                {
-                    parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter);
-                    await parallelLimiterSemaphore.WaitAsync(ct).ConfigureAwait(false);
-                }
-
-                try
-                {
-                    test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct);
-                    await test.ExecutionTask.ConfigureAwait(false);
-                }
-                finally
-                {
-                    parallelLimiterSemaphore?.Release();
-                }
+        foreach (var test in tests)
+        {
+            if (test.Context.ParallelLimiter != null)
+            {
+                testsWithLimiters.Add(test);
             }
-        ).ConfigureAwait(false);
+            else
+            {
+                testsWithoutLimiters.Add(test);
+            }
+        }
+
+        // Execute both groups concurrently
+        var limitedTask = testsWithLimiters.Count > 0
+            ? ExecuteWithLimitAsync(testsWithLimiters, cancellationToken)
+            : Task.CompletedTask;
+
+        var unlimitedTask = testsWithoutLimiters.Count > 0
+            ? ExecuteUnlimitedAsync(testsWithoutLimiters, cancellationToken)
+            : Task.CompletedTask;
+
+        await Task.WhenAll(limitedTask, unlimitedTask).ConfigureAwait(false);
 #else
         // Fallback for netstandard2.0: Manual bounded concurrency using existing semaphore
         var tasks = new Task[tests.Length];
@@ -444,6 +437,62 @@ internal sealed class TestScheduler : ITestScheduler
         await Task.WhenAll(tasks).ConfigureAwait(false);
 #endif
     }
+
+#if NET6_0_OR_GREATER
+    private async Task ExecuteWithLimitAsync(
+        List<AbstractExecutableTest> tests,
+        CancellationToken cancellationToken)
+    {
+        // Execute tests with parallel limiters using the global limit
+        await Parallel.ForEachAsync(
+            tests,
+            new ParallelOptions
+            {
+                MaxDegreeOfParallelism = _maxParallelism,
+                CancellationToken = cancellationToken
+            },
+            async (test, ct) =>
+            {
+                var parallelLimiterSemaphore = _parallelLimitLockProvider.GetLock(test.Context.ParallelLimiter!);
+                await parallelLimiterSemaphore.WaitAsync(ct).ConfigureAwait(false);
+
+                try
+                {
+#pragma warning disable IL2026 // ExecuteTestAsync uses reflection, but caller (ExecuteWithGlobalLimitAsync) is already marked with RequiresUnreferencedCode
+                    test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct);
+#pragma warning restore IL2026
+                    await test.ExecutionTask.ConfigureAwait(false);
+                }
+                finally
+                {
+                    parallelLimiterSemaphore.Release();
+                }
+            }
+        ).ConfigureAwait(false);
+    }
+
+    private async Task ExecuteUnlimitedAsync(
+        List<AbstractExecutableTest> tests,
+        CancellationToken cancellationToken)
+    {
+        // Execute tests without limiters with unlimited parallelism (no global semaphore overhead)
+        await Parallel.ForEachAsync(
+            tests,
+            new ParallelOptions
+            {
+                CancellationToken = cancellationToken
+                // No MaxDegreeOfParallelism = unlimited parallelism
+            },
+            async (test, ct) =>
+            {
+#pragma warning disable IL2026 // ExecuteTestAsync uses reflection, but caller (ExecuteWithGlobalLimitAsync) is already marked with RequiresUnreferencedCode
+                test.ExecutionTask ??= _testRunner.ExecuteTestAsync(test, ct);
+#pragma warning restore IL2026
+                await test.ExecutionTask.ConfigureAwait(false);
+            }
+        ).ConfigureAwait(false);
+    }
+#endif
 
     private async Task WaitForTasksWithFailFastHandling(IEnumerable<Task> tasks, CancellationToken cancellationToken)
     {

@@ -39,9 +39,6 @@ public sealed class TestRunner
     private readonly ThreadSafeDictionary<string, Task> _executingTests = new();
     private Exception? _firstFailFastException;
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
     public async Task ExecuteTestAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         // Prevent double execution with a simple lock
@@ -49,9 +46,6 @@ public sealed class TestRunner
         await executionTask.ConfigureAwait(false);
     }
 
-    #if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
     private async Task ExecuteTestInternalAsync(AbstractExecutableTest test, CancellationToken cancellationToken)
     {
         try
