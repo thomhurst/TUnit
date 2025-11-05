@@ -22,6 +22,8 @@ Every test should be completely independent. TUnit creates a new instance of you
 
 Isolated tests are reliable tests. You never get those mysterious failures where Test B only fails when Test A runs first. Everything is deterministic.
 
+But what about when tests really do need to depend on each other? Use `[DependsOn]` to enforce ordering. It ensures the dependency always runs first, and if it fails, the dependent test gets skipped instead of running with bad state. This reduces flakiness compared to hoping tests run in the right order by accident.
+
 ### Developer Experience
 
 Writing tests should be pleasant, not painful. TUnit has minimal boilerplate—just put `[Test]` on your methods, no class attributes needed. Assertions read naturally: `await Assert.That(value).IsEqualTo(expected)`. Error messages are clear and actionable. You can access test metadata through `TestContext` whenever you need it.
