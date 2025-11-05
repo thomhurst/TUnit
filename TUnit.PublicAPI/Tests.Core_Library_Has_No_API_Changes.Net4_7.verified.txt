@@ -1201,7 +1201,7 @@ namespace
         public TestBuilderContext() { }
         public .IDataSourceAttribute? DataSourceAttribute { get; set; }
         public .TestContextEvents Events { get; set; }
-        public  Id { get; }
+        public string Id { get; }
         public .<string, object?> ObjectBag { get; set; }
         public required .MethodMetadata TestMetadata { get; init; }
         public static .TestBuilderContext? Current { get; }
@@ -1233,7 +1233,7 @@ namespace
         public . Dependencies { get; }
         public . Events { get; }
         public . Execution { get; }
-        public  Id { get; }
+        public string Id { get; }
         public object Lock { get; }
         public . Metadata { get; }
         public . Output { get; }
@@ -1244,7 +1244,7 @@ namespace
         public static string? OutputDirectory { get; }
         public static .<string, .<string>> Parameters { get; }
         public static string WorkingDirectory { get; set; }
-        public static .TestContext? GetById( id) { }
+        public static .TestContext? GetById(string id) { }
     }
     public class TestContextEvents : .
     {
@@ -2314,7 +2314,7 @@ namespace .Interfaces
     {
         string DisplayName { get; set; }
         ? DisplayNameFormatter { get; set; }
-         Id { get; }
+        string Id { get; }
         .TestDetails TestDetails { get; }
         string TestName { get; }
     }

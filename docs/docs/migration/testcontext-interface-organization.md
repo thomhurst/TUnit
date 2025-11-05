@@ -329,7 +329,7 @@ public interface ITestMetadata
 }
 ```
 
-**Note:** `TestContext.Id` is available directly on `TestContext` as a public property, not through the `ITestMetadata` interface.
+**Note:** `Id` is available only through the `ITestMetadata` interface (accessed via `TestContext.Metadata.Id`), not as a direct property on `TestContext`.
 
 ### ITestEvents
 

@@ -9,7 +9,7 @@ public interface ITestMetadata
     /// <summary>
     /// Gets the unique identifier for this test instance.
     /// </summary>
-    Guid Id { get; }
+    string Id { get; }
 
     /// <summary>
     /// Gets the detailed metadata about this test, including class type, method info, and arguments.

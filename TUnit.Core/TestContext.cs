@@ -17,7 +17,7 @@ namespace TUnit.Core;
 public partial class TestContext : Context,
     ITestExecution, ITestParallelization, ITestOutput, ITestMetadata, ITestDependencies, ITestStateBag, ITestEvents
 {
-    private static readonly ConcurrentDictionary<Guid, TestContext> _testContextsById = new();
+    private static readonly ConcurrentDictionary<string, TestContext> _testContextsById = new();
     private readonly TestBuilderContext _testBuilderContext;
     private string? _cachedDisplayName;
 
@@ -28,10 +28,13 @@ public partial class TestContext : Context,
         ServiceProvider = serviceProvider;
         ClassContext = classContext;
 
-        _testContextsById[_testBuilderContext.Id] = this;
+        // Generate unique ID for this test instance
+        Id = Guid.NewGuid().ToString();
+
+        _testContextsById[Id] = this;
     }
 
-    public Guid Id => _testBuilderContext.Id;
+    public string Id { get; }
 
     // Zero-allocation interface properties for organized API access
     public ITestExecution Execution => this;
@@ -62,7 +65,7 @@ public partial class TestContext : Context,
         }
     }
 
-    public static TestContext? GetById(Guid id) => _testContextsById.GetValueOrDefault(id);
+    public static TestContext? GetById(string id) => _testContextsById.GetValueOrDefault(id);
 
     public static IReadOnlyDictionary<string, List<string>> Parameters => InternalParametersDictionary;
 
