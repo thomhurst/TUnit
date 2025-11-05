@@ -27,6 +27,15 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Guides',
+      items: [
+        'guides/philosophy',
+        'guides/best-practices',
+        'guides/cookbook',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Test Authoring',
       items: [
         'test-authoring/things-to-know',

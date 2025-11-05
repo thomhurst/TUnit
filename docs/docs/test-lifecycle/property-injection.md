@@ -324,7 +324,7 @@ When using nested property injection, the `Shared` parameter becomes crucial:
 
 ### Best Practices
 
-1. **Use Appropriate Sharing**: Share expensive resources like test containers using `PerTestSession` or `Globally`
+1. **Use Appropriate Sharing**: Share expensive resources like test containers using `PerTestSession`
 2. **Implement IAsyncInitializer**: For complex setup that requires async operations
 3. **Implement IAsyncDisposable**: Ensure proper cleanup of resources
 4. **Order Independence**: Don't rely on initialization order between sibling properties
