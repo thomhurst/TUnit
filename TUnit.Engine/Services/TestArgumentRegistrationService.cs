@@ -46,14 +46,14 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
             classArguments,
             testContext.StateBag.Items,
             testContext.Metadata.TestDetails.MethodMetadata,
-            testContext.Events);
+            testContext.InternalEvents);
 
         // Register method arguments (registration phase)
         await _objectRegistrationService.RegisterArgumentsAsync(
             methodArguments,
             testContext.StateBag.Items,
             testContext.Metadata.TestDetails.MethodMetadata,
-            testContext.Events);
+            testContext.InternalEvents);
 
         // Register properties that will be injected into the test class
         await RegisterPropertiesAsync(testContext);
@@ -95,7 +95,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
                     {
                         TestMetadata = testContext.Metadata.TestDetails.MethodMetadata,
                         DataSourceAttribute = dataSource,
-                        Events = testContext.Events,
+                        Events = testContext.InternalEvents,
                         ObjectBag = testContext.StateBag.Items
                     };
 
@@ -132,7 +132,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
                                     data,
                                     testContext.StateBag.Items,
                                     testContext.Metadata.TestDetails.MethodMetadata,
-                                    testContext.Events);
+                                    testContext.InternalEvents);
                             }
                         }
                         break; // Only take the first result for property injection

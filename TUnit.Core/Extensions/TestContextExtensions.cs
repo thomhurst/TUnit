@@ -6,11 +6,6 @@ namespace TUnit.Core.Extensions;
 
 public static class TestContextExtensions
 {
-    public static T? GetService<T>(this TestContext context) where T : class
-    {
-        return context.GetService<T>();
-    }
-
     public static string GetClassTypeName(this TestContext context)
     {
         var parameters = context.Metadata.TestDetails.MethodMetadata.Class.Parameters;
@@ -51,7 +46,7 @@ public static class TestContextExtensions
         | DynamicallyAccessedMemberTypes.PublicFields
         | DynamicallyAccessedMemberTypes.NonPublicFields)] T>(this TestContext context, DynamicTest<T> dynamicTest) where T : class
     {
-        await context.GetService<ITestRegistry>()!.AddDynamicTest(context, dynamicTest);;
+        await context.Services.GetService<ITestRegistry>()!.AddDynamicTest(context, dynamicTest);;
     }
 
     /// <summary>
@@ -75,6 +70,6 @@ public static class TestContextExtensions
         Enums.TestRelationship relationship = Enums.TestRelationship.Derived,
         string? displayName = null)
     {
-        await context.GetService<ITestRegistry>()!.CreateTestVariant(context, arguments, properties, relationship, displayName);
+        await context.Services.GetService<ITestRegistry>()!.CreateTestVariant(context, arguments, properties, relationship, displayName);
     }
 }

@@ -19,7 +19,7 @@ public record TestBuilderContext
         internal set => BuilderContexts.Value = value;
     }
 
-    public Guid Id { get; } = Guid.NewGuid();
+    public string DefinitionId { get; } = Guid.NewGuid().ToString();
     public ConcurrentDictionary<string, object?> ObjectBag { get; set; } = new();
     public TestContextEvents Events { get; set; } = new();
 
@@ -49,7 +49,7 @@ public record TestBuilderContext
     {
         return new TestBuilderContext
         {
-            Events = testContext.Events, TestMetadata = testContext.Metadata.TestDetails.MethodMetadata, DataSourceAttribute = dataSourceAttribute, ObjectBag = testContext.StateBag.Items,
+            Events = testContext.InternalEvents, TestMetadata = testContext.Metadata.TestDetails.MethodMetadata, DataSourceAttribute = dataSourceAttribute, ObjectBag = testContext.StateBag.Items,
         };
     }
 }

@@ -1,9 +1,11 @@
+using TUnit.Core.Interfaces;
+
 namespace TUnit.Core;
 
 /// <summary>
-/// Simplified test context events
+/// Test context events container
 /// </summary>
-public class TestContextEvents
+public class TestContextEvents : ITestEvents
 {
     public AsyncEvent<TestContext>? OnDispose { get; set; }
     public AsyncEvent<TestContext>? OnTestRegistered { get; set; }
@@ -11,5 +13,5 @@ public class TestContextEvents
     public AsyncEvent<TestContext>? OnTestStart { get; set; }
     public AsyncEvent<TestContext>? OnTestEnd { get; set; }
     public AsyncEvent<TestContext>? OnTestSkipped { get; set; }
-    public AsyncEvent<(TestContext, int RetryAttempt)>? OnTestRetry { get; set; }
+    public AsyncEvent<(TestContext TestContext, int RetryAttempt)>? OnTestRetry { get; set; }
 }

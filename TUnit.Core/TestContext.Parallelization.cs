@@ -24,9 +24,4 @@ public partial class TestContext
             _parallelConstraints.Add(constraint);
         }
     }
-
-    void ITestParallelization.SetLimiter(IParallelLimit parallelLimit)
-    {
-        ParallelLimiter = parallelLimit;
-    }
 }

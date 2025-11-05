@@ -51,14 +51,13 @@ public partial class TestContext
     string ITestOutput.GetStandardOutput() => GetOutput();
     string ITestOutput.GetErrorOutput() => GetErrorOutput();
 
-    // Internal methods for output capture (used by base Context class)
-    internal void WriteLine(string message)
+    void ITestOutput.WriteLine(string message)
     {
         _outputWriter ??= new StringWriter();
         _outputWriter.WriteLine(message);
     }
 
-    internal void WriteError(string message)
+    void ITestOutput.WriteError(string message)
     {
         _errorWriter ??= new StringWriter();
         _errorWriter.WriteLine(message);

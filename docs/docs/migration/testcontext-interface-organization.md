@@ -30,7 +30,8 @@ public partial class TestContext :
     public ITestDependencies Dependencies => this;
     public ITestStateBag StateBag => this;
     public ITestEvents Events => this;
-    public IServiceProvider Services => ServiceProvider;
+
+    // Note: Services property is internal - use dependency injection instead
 }
 ```
 
@@ -62,15 +63,24 @@ Several properties have been moved from the main `TestContext` class into their 
 - `DisplayNameFormatter` - Custom display name formatter type
 
 **Existing members:**
-- `Id` - Unique identifier for this test instance
 - `TestDetails` - Detailed metadata about the test
 - `TestName` - Base name of the test method
 - `DisplayName` - Display name for the test (get/set)
 
+**Note:** `Id` is now a public property directly on `TestContext`, not on `ITestMetadata`.
+
 #### `ITestEvents` - Test Event Integration
 
-**New interface** exposing:
-- `Events` - Event manager for test lifecycle integration
+**New interface** exposing nullable event properties for lazy initialization:
+- `OnDispose` - Event raised when test context is disposed
+- `OnTestRegistered` - Event raised when test is registered
+- `OnInitialize` - Event raised before test initialization
+- `OnTestStart` - Event raised before test method execution
+- `OnTestEnd` - Event raised after test method completion
+- `OnTestSkipped` - Event raised when test is skipped
+- `OnTestRetry` - Event raised before test retry
+
+All events are nullable (`AsyncEvent<T>?`) to avoid allocating unused event handlers.
 
 ## Migration Steps
 
@@ -114,16 +124,24 @@ TestContext.Current.Metadata.DisplayNameFormatter = typeof(MyFormatter);
 
 #### Event Access
 
+Events are now accessed directly through the `Events` interface property, and all events are nullable for lazy initialization:
+
 **Before:**
 ```csharp
-// ❌ Old - Direct access
+// ❌ Old - Accessing through a nested Events property
 TestContext.Current.Events.OnTestStart += handler;
 ```
 
 **After:**
 ```csharp
-// ✅ New - Through Events interface (note: access is still the same, but now properly exposed through interface)
+// ✅ New - Direct access to nullable event properties
 TestContext.Current.Events.OnTestStart += handler;
+
+// Events are nullable and lazily initialized
+if (TestContext.Current.Events.OnTestStart != null)
+{
+    await TestContext.Current.Events.OnTestStart.InvokeAsync(testContext, testContext);
+}
 ```
 
 ### Custom Hook Executors
@@ -304,7 +322,6 @@ Test metadata and identity:
 ```csharp
 public interface ITestMetadata
 {
-    Guid Id { get; }
     TestDetails TestDetails { get; }
     string TestName { get; }
     string DisplayName { get; set; }
@@ -312,16 +329,26 @@ public interface ITestMetadata
 }
 ```
 
+**Note:** `Id` is available only through the `ITestMetadata` interface (accessed via `TestContext.Metadata.Id`), not as a direct property on `TestContext`.
+
 ### ITestEvents
 
-Test event integration:
+Test event integration with nullable lazy-initialized event properties:
 
 ```csharp
 public interface ITestEvents
 {
-    TestContextEvents Events { get; }
+    AsyncEvent<TestContext>? OnDispose { get; }
+    AsyncEvent<TestContext>? OnTestRegistered { get; }
+    AsyncEvent<TestContext>? OnInitialize { get; }
+    AsyncEvent<TestContext>? OnTestStart { get; }
+    AsyncEvent<TestContext>? OnTestEnd { get; }
+    AsyncEvent<TestContext>? OnTestSkipped { get; }
+    AsyncEvent<(TestContext TestContext, int RetryAttempt)>? OnTestRetry { get; }
 }
 ```
+
+**Important:** All event properties are nullable to enable lazy initialization. Events are only allocated when subscribers are added, avoiding unnecessary allocations for unused events.
 
 ### Other Interfaces
 
@@ -344,7 +371,21 @@ public interface ITestOutput
 ```csharp
 public interface ITestParallelization
 {
-    // Parallelization configuration
+    IReadOnlyList<IParallelConstraint> Constraints { get; }
+    Priority ExecutionPriority { get; set; }
+    IParallelLimit? Limiter { get; }  // Read-only - use TestRegisteredContext to set
+    void AddConstraint(IParallelConstraint constraint);
+}
+```
+
+**Important:** The `Limiter` property is **read-only** on the public interface. To set the parallel limiter, use the phase-specific `TestRegisteredContext.SetParallelLimiter()` method during test registration:
+
+```csharp
+[TestRegistered]
+public static void OnTestRegistered(TestRegisteredContext context)
+{
+    // ✅ Correct - Use phase-specific context
+    context.SetParallelLimiter(new ParallelLimit3());
 }
 ```
 
@@ -353,20 +394,30 @@ public interface ITestParallelization
 ```csharp
 public interface ITestDependencies
 {
-    IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate);
-    List<TestContext> GetTests(string testName);
-    List<TestContext> GetTests(string testName, Type classType);
+    IReadOnlyList<TestContext> GetTests(Func<TestContext, bool> predicate);
+    IReadOnlyList<TestContext> GetTests(string testName);
+    IReadOnlyList<TestContext> GetTests(string testName, Type classType);
 }
 ```
+
+**Changed:** All `GetTests` methods now return `IReadOnlyList<TestContext>` for consistency and to better express the immutable nature of the returned collection.
 
 #### ITestStateBag
 
 ```csharp
 public interface ITestStateBag
 {
-    ConcurrentDictionary<string, object?> ObjectBag { get; }
+    ConcurrentDictionary<string, object?> Items { get; }
+    object? this[string key] { get; set; }
+    int Count { get; }
+    bool ContainsKey(string key);
+    T GetOrAdd<T>(string key, Func<string, T> valueFactory);
+    bool TryGetValue<T>(string key, out T value);
+    bool TryRemove(string key, out object? value);
 }
 ```
+
+The `StateBag` interface provides both direct dictionary access via `Items` and type-safe helper methods for common operations.
 
 ## Summary
 
