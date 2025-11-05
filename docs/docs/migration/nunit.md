@@ -1,10 +1,19 @@
 # Migrating from NUnit
 
-## Using TUnit's Code Fixers
+## Automated Migration with Code Fixers
 
-TUnit has code fixers to help automate the migration from NUnit to TUnit.
+TUnit includes code fixers that automate most of the migration work.
 
-These code fixers will handle most common scenarios, but you'll likely still need to do some manual adjustments. If you encounter issues or have suggestions for improvements, please raise an issue.
+**What gets converted:**
+- Tests to `async Task` with awaited assertions
+- Removes `[TestFixture]`, converts `[TestCase]` → `[Arguments]`
+- Both classic and constraint-based NUnit assertions to TUnit's fluent syntax
+- `[TestCaseSource]` → `[MethodDataSource]`
+- `[SetUp]`/`[TearDown]` → `[Before(Test)]`/`[After(Test)]`
+
+The code fixer handles most common patterns automatically (roughly 80-90% of typical test suites). You'll need to manually adjust complex cases like custom fixtures or intricate async patterns.
+
+If you find something that should be automated but isn't, please [open an issue](https://github.com/thomhurst/TUnit/issues).
 
 ### Steps
 
@@ -648,3 +657,181 @@ public static class AssemblyHooks
 6. **TestContext Injection**: Instead of a static `TestContext`, TUnit injects it as a parameter where needed.
 
 7. **Isolated Test Instances**: Each test runs in its own class instance (NUnit's default behavior can be different).
+
+## Code Coverage
+
+### Important: Coverlet is Not Compatible with TUnit
+
+If you're using **Coverlet** (`coverlet.collector` or `coverlet.msbuild`) for code coverage in your NUnit projects, you'll need to migrate to **Microsoft.Testing.Extensions.CodeCoverage**.
+
+**Why?** TUnit uses the modern `Microsoft.Testing.Platform` instead of VSTest, and Coverlet only works with the legacy VSTest platform.
+
+### Good News: Coverage is Built In! 🎉
+
+When you install the **TUnit** meta package, it automatically includes `Microsoft.Testing.Extensions.CodeCoverage` for you. You don't need to install it separately!
+
+### Migration Steps
+
+#### 1. Remove Coverlet Packages
+
+Remove any Coverlet packages from your project file:
+
+**Remove these lines from your `.csproj`:**
+```xml
+<!-- Remove these -->
+<PackageReference Include="coverlet.collector" Version="x.x.x" />
+<PackageReference Include="coverlet.msbuild" Version="x.x.x" />
+```
+
+#### 2. Verify TUnit Meta Package
+
+Ensure you're using the **TUnit** meta package (not just TUnit.Core):
+
+**Your `.csproj` should have:**
+```xml
+<PackageReference Include="TUnit" Version="0.x.x" />
+```
+
+This automatically brings in:
+- `Microsoft.Testing.Extensions.CodeCoverage` (coverage support)
+- `Microsoft.Testing.Extensions.TrxReport` (test result reports)
+
+#### 3. Update Your Coverage Commands
+
+Replace your old Coverlet commands with the new Microsoft coverage syntax:
+
+**Old (Coverlet with NUnit):**
+```bash
+# With coverlet.collector
+dotnet test --collect:"XPlat Code Coverage"
+
+# With coverlet.msbuild
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+```
+
+**New (TUnit with Microsoft Coverage):**
+```bash
+# Run tests with coverage
+dotnet run --configuration Release --coverage
+
+# Specify output location
+dotnet run --configuration Release --coverage --coverage-output ./coverage/
+
+# Specify coverage format (default is cobertura)
+dotnet run --configuration Release --coverage --coverage-output-format cobertura
+
+# Multiple formats
+dotnet run --configuration Release --coverage --coverage-output-format cobertura --coverage-output-format xml
+```
+
+#### 4. Update CI/CD Pipelines
+
+If you have CI/CD pipelines that reference Coverlet, update them to use the new commands:
+
+**GitHub Actions Example:**
+```yaml
+# Old (NUnit with Coverlet)
+- name: Run tests with coverage
+  run: dotnet test --collect:"XPlat Code Coverage"
+
+# New (TUnit with Microsoft Coverage)
+- name: Run tests with coverage
+  run: dotnet run --project ./tests/MyProject.Tests --configuration Release --coverage
+```
+
+**Azure Pipelines Example:**
+```yaml
+# Old (NUnit with Coverlet)
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'test'
+    arguments: '--collect:"XPlat Code Coverage"'
+
+# New (TUnit with Microsoft Coverage)
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'run'
+    arguments: '--configuration Release --coverage --coverage-output $(Agent.TempDirectory)/coverage/'
+```
+
+### Coverage Output Formats
+
+The Microsoft coverage tool supports multiple output formats:
+
+```bash
+# Cobertura (default, widely supported)
+dotnet run --configuration Release --coverage --coverage-output-format cobertura
+
+# XML (Visual Studio format)
+dotnet run --configuration Release --coverage --coverage-output-format xml
+
+# Cobertura + XML
+dotnet run --configuration Release --coverage \
+  --coverage-output-format cobertura \
+  --coverage-output-format xml
+```
+
+### Viewing Coverage Results
+
+Coverage files are generated in your test output directory:
+
+```
+TestResults/
+  ├── coverage.cobertura.xml
+  └── <guid>/
+      └── coverage.xml
+```
+
+You can view these with:
+- **Visual Studio** - Built-in coverage viewer
+- **VS Code** - Extensions like "Coverage Gutters"
+- **ReportGenerator** - Generate HTML reports: `reportgenerator -reports:coverage.cobertura.xml -targetdir:coveragereport`
+- **CI Tools** - Most CI systems can parse Cobertura format natively
+
+### Advanced Coverage Configuration
+
+You can customize coverage behavior with a `.runsettings` file:
+
+**coverage.runsettings:**
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="Code Coverage">
+        <Configuration>
+          <CodeCoverage>
+            <ModulePaths>
+              <Include>
+                <ModulePath>.*\.dll$</ModulePath>
+              </Include>
+              <Exclude>
+                <ModulePath>.*tests\.dll$</ModulePath>
+              </Exclude>
+            </ModulePaths>
+          </CodeCoverage>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
+```
+
+**Use it:**
+```bash
+dotnet run --configuration Release --coverage --coverage-settings coverage.runsettings
+```
+
+### Troubleshooting
+
+**Coverage files not generated?**
+- Ensure you're using the TUnit meta package, not just TUnit.Engine
+- Verify you're on .NET 8+ (required for Microsoft.Testing.Platform)
+
+**Missing coverage for some assemblies?**
+- Use a `.runsettings` file to explicitly include/exclude modules
+- See [Microsoft's documentation](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)
+
+**Need help?**
+- See [TUnit Code Coverage Documentation](../extensions/extensions.md#code-coverage)
+- Check [Microsoft's Code Coverage Guide](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)

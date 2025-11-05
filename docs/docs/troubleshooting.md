@@ -223,6 +223,185 @@ await Assert.That(0.1 + 0.2).IsEqualTo(0.3);
 await Assert.That(0.1 + 0.2).IsEqualTo(0.3).Within(0.0001);
 ```
 
+### Assertion Not Awaited (Test Passes Without Checking)
+
+**Symptoms:**
+- Test passes but assertion never executes
+- Compiler warning: "This async method lacks 'await' operators"
+- Test passes when it should fail
+
+**Root Cause:**
+
+Forgetting to `await` an assertion means it returns a `Task` that's never executed. The test completes immediately without checking anything.
+
+**Example:**
+
+```csharp
+[Test]
+public async Task BadTest()
+{
+    var result = Calculate(2, 2);
+
+    // Wrong - missing await
+    Assert.That(result).IsEqualTo(5);  // Returns Task, never awaited
+
+    // Test passes because assertion never runs
+}
+```
+
+**Solution:**
+
+Always await assertions:
+
+```csharp
+[Test]
+public async Task GoodTest()
+{
+    var result = Calculate(2, 2);
+    await Assert.That(result).IsEqualTo(4);
+}
+```
+
+**Prevention:**
+
+The compiler warns you about this (CS4014: "Because this call is not awaited..."). To catch these at build time, enable treating warnings as errors:
+
+```xml
+<PropertyGroup>
+  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+</PropertyGroup>
+```
+
+See also: [FAQ: Why do I have to await all assertions?](faq.md#why-do-i-have-to-await-all-assertions-can-i-use-synchronous-assertions)
+
+### Array and Collection Comparison Issues
+
+**Symptoms:**
+- "IsEqualTo doesn't work for arrays"
+- Arrays with same values fail equality check
+- Error messages about reference equality vs value equality
+
+**Root Cause:**
+
+Arrays use reference equality by default. You need to use collection-specific assertion methods.
+
+#### Comparing Arrays
+
+```csharp
+var expected = new[] { 1, 2, 3 };
+var actual = new[] { 1, 2, 3 };
+
+// Wrong - compares references, not values
+await Assert.That(actual).IsEqualTo(expected);  // Fails
+
+// Correct - use IsEquivalentTo for collections
+await Assert.That(actual).IsEquivalentTo(expected);  // Passes
+```
+
+Note that `IsEquivalentTo` ignores order. If order matters, assert on elements individually:
+
+```csharp
+await Assert.That(actual).HasCount().EqualTo(expected.Length);
+for (int i = 0; i < expected.Length; i++)
+{
+    await Assert.That(actual[i]).IsEqualTo(expected[i]);
+}
+```
+
+#### Arrays of Complex Types
+
+```csharp
+var expected = new[]
+{
+    new User { Id = 1, Name = "Alice" },
+    new User { Id = 2, Name = "Bob" }
+};
+
+// May not work without custom equality implementation
+await Assert.That(actual).IsEquivalentTo(expected);
+
+// More reliable - assert on properties
+await Assert.That(actual).HasCount().EqualTo(2);
+await Assert.That(actual[0].Name).IsEqualTo("Alice");
+await Assert.That(actual[1].Name).IsEqualTo("Bob");
+
+// Or compare projected values
+await Assert.That(actual.Select(u => u.Name))
+    .IsEquivalentTo(new[] { "Alice", "Bob" });
+```
+
+#### Arrays of Tuples (Known Limitation)
+
+```csharp
+var expected = new[] { (1, "a"), (2, "b") };
+var actual = new[] { (1, "a"), (2, "b") };
+
+// Current limitation - may not work as expected
+// await Assert.That(actual).IsEquivalentTo(expected);
+
+// Workaround - assert individual elements
+await Assert.That(actual).HasCount().EqualTo(2);
+await Assert.That(actual[0]).IsEqualTo((1, "a"));
+await Assert.That(actual[1]).IsEqualTo((2, "b"));
+```
+
+#### Lists and Other Collections
+
+```csharp
+var list = new List<int> { 1, 2, 3 };
+
+// Works for IEnumerable types
+await Assert.That(list).IsEquivalentTo(new[] { 1, 2, 3 });
+
+// Check specific properties
+await Assert.That(list).HasCount().EqualTo(3);
+await Assert.That(list).Contains(2);
+await Assert.That(list).DoesNotContain(5);
+```
+
+**General Approach:**
+- Use `IsEquivalentTo` for unordered collection comparison
+- Iterate and assert elements for ordered comparison
+- Assert on key properties for complex types
+- Consider implementing `IEquatable<T>` on your types for cleaner assertions
+
+### Assertion on Wrong Type
+
+**Symptoms:**
+- Compiler error: "Cannot convert from 'X' to 'Y'"
+- Assertion method not available for type
+- IntelliSense doesn't show expected assertions
+
+#### String vs Object Assertions
+
+```csharp
+object value = "hello";
+
+// Doesn't compile - object doesn't have string-specific assertions
+// await Assert.That(value).StartsWith("h");
+
+// Cast to the correct type
+await Assert.That((string)value).StartsWith("h");
+
+// Or check the type first
+await Assert.That(value).IsTypeOf<string>();
+await Assert.That((string)value).StartsWith("h");
+```
+
+#### Nullable Values
+
+```csharp
+int? nullableInt = 5;
+
+// Option 1: Check for null, then access value
+await Assert.That(nullableInt).IsNotNull();
+await Assert.That(nullableInt!.Value).IsEqualTo(5);
+
+// Option 2: Use HasValue pattern
+await Assert.That(nullableInt.HasValue).IsTrue();
+await Assert.That(nullableInt.GetValueOrDefault()).IsEqualTo(5);
+```
+
 ## Dependency Injection Issues
 
 ### Services Not Available
@@ -488,6 +667,243 @@ var expected = "Line1\r\nLine2";
 // ✅ Platform-agnostic
 var expected = $"Line1{Environment.NewLine}Line2";
 ```
+
+## Code Coverage Issues
+
+### Coverage Files Not Generated
+
+**Symptoms:**
+- No coverage files in TestResults folder
+- `--coverage` flag has no effect
+- Coverage reports empty or missing
+
+**Common Causes and Solutions:**
+
+#### 1. Using TUnit.Engine Without Extensions
+```xml
+<!-- ❌ Missing coverage extension -->
+<PackageReference Include="TUnit.Engine" Version="*" />
+
+<!-- ✅ Includes coverage automatically -->
+<PackageReference Include="TUnit" Version="*" />
+```
+
+**Fix:** Use the TUnit meta package, or manually add the coverage extension if using TUnit.Engine directly:
+```xml
+<PackageReference Include="TUnit.Engine" Version="*" />
+<PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="*" />
+```
+
+#### 2. Using .NET 7 or Earlier
+```bash
+# Check your .NET version
+dotnet --version
+```
+
+**Requirements:**
+- ✅ .NET 8 or later (required for Microsoft.Testing.Platform)
+- ❌ .NET 7 or earlier (not compatible)
+
+**Fix:** Upgrade to .NET 8 or later in your project file:
+```xml
+<TargetFramework>net8.0</TargetFramework>
+```
+
+#### 3. Configuration Not Set to Release
+```bash
+# It's generally better to run coverage in Release configuration
+dotnet test --configuration Release --coverage
+```
+
+### Coverlet Still Installed
+
+**Symptoms:**
+- Coverage stopped working after migrating to TUnit
+- Conflicts between coverage tools
+- "Could not load file or assembly" errors related to coverage
+
+**Root Cause:** Coverlet is **not compatible** with TUnit because:
+- Coverlet requires VSTest platform
+- TUnit uses Microsoft.Testing.Platform
+- These platforms are mutually exclusive
+
+**Solution:**
+
+1. **Remove Coverlet packages** from your `.csproj`:
+```xml
+<!-- Remove these lines -->
+<PackageReference Include="coverlet.collector" Version="*" />
+<PackageReference Include="coverlet.msbuild" Version="*" />
+```
+
+2. **Ensure TUnit meta package is installed**:
+```xml
+<PackageReference Include="TUnit" Version="*" />
+```
+
+3. **Update coverage commands**:
+```bash
+# Old (VSTest + Coverlet)
+dotnet test --collect:"XPlat Code Coverage"
+
+# New (TUnit + Microsoft Coverage)
+dotnet run --configuration Release --coverage
+```
+
+See the [Code Coverage FAQ](faq.md#does-tunit-work-with-coverlet-for-code-coverage) for more details.
+
+### Missing Coverage for Some Assemblies
+
+**Symptoms:**
+- Coverage reports show 0% for some projects
+- Some assemblies excluded from coverage
+- Unexpected gaps in coverage
+
+**Solutions:**
+
+#### 1. Create a `.runsettings` File
+```xml
+<!-- coverage.runsettings -->
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="Code Coverage">
+        <Configuration>
+          <CodeCoverage>
+            <ModulePaths>
+              <Include>
+                <ModulePath>.*\.dll$</ModulePath>
+                <ModulePath>.*MyProject\.dll$</ModulePath>
+              </Include>
+              <Exclude>
+                <ModulePath>.*tests?\.dll$</ModulePath>
+                <ModulePath>.*TestHelpers\.dll$</ModulePath>
+              </Exclude>
+            </ModulePaths>
+          </CodeCoverage>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
+```
+
+#### 2. Use the Settings File
+```bash
+dotnet run --configuration Release --coverage --coverage-settings coverage.runsettings
+```
+
+### Coverage Format Not Recognized by CI/CD
+
+**Symptoms:**
+- CI/CD doesn't display coverage results
+- Coverage upload fails
+- "Unsupported format" errors
+
+**Solutions:**
+
+#### 1. Check Output Format
+```bash
+# Default is Cobertura (widely supported)
+dotnet run --configuration Release --coverage --coverage-output-format cobertura
+
+# For Visual Studio
+dotnet run --configuration Release --coverage --coverage-output-format xml
+
+# Multiple formats
+dotnet run --configuration Release --coverage \
+  --coverage-output-format cobertura \
+  --coverage-output-format xml
+```
+
+#### 2. Verify Output Location
+```bash
+# Coverage files generated in TestResults by default
+ls TestResults/
+
+# Expected files:
+# - coverage.cobertura.xml
+# - <guid>/coverage.xml
+```
+
+#### 3. Common CI/CD Configurations
+
+**GitHub Actions:**
+```yaml
+- name: Run tests with coverage
+  run: dotnet run --project tests/MyProject.Tests --configuration Release --coverage
+
+- name: Upload coverage to Codecov
+  uses: codecov/codecov-action@v3
+  with:
+    files: ./tests/MyProject.Tests/TestResults/coverage.cobertura.xml
+```
+
+**Azure Pipelines:**
+```yaml
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'run'
+    projects: 'tests/**/*.csproj'
+    arguments: '--configuration Release --coverage --coverage-output $(Agent.TempDirectory)/coverage/'
+
+- task: PublishCodeCoverageResults@2
+  inputs:
+    summaryFileLocation: '$(Agent.TempDirectory)/coverage/**/coverage.cobertura.xml'
+```
+
+### Coverage Percentage Seems Wrong
+
+**Symptoms:**
+- Coverage percentage doesn't match expectations
+- Test code included in coverage
+- Dependencies inflating coverage numbers
+
+**Solutions:**
+
+#### 1. Exclude Test Projects
+```xml
+<!-- coverage.runsettings -->
+<ModulePaths>
+  <Exclude>
+    <ModulePath>.*tests?\.dll$</ModulePath>
+    <ModulePath>.*\.Tests\.dll$</ModulePath>
+  </Exclude>
+</ModulePaths>
+```
+
+#### 2. Exclude Generated Code
+```xml
+<ModulePaths>
+  <Exclude>
+    <ModulePath>.*\.g\.cs$</ModulePath>
+    <ModulePath>.*\.Designer\.cs$</ModulePath>
+  </Exclude>
+</ModulePaths>
+```
+
+#### 3. Include Only Production Code
+```xml
+<ModulePaths>
+  <Include>
+    <ModulePath>.*MyCompany\.MyProduct\..*\.dll$</ModulePath>
+  </Include>
+  <Exclude>
+    <ModulePath>.*tests?\.dll$</ModulePath>
+  </Exclude>
+</ModulePaths>
+```
+
+### Need More Help with Coverage?
+
+See also:
+- [Code Coverage FAQ](faq.md#does-tunit-work-with-coverlet-for-code-coverage)
+- [Code Coverage Documentation](extensions/extensions.md#code-coverage)
+- [xUnit Migration - Code Coverage](migration/xunit.md#code-coverage)
+- [NUnit Migration - Code Coverage](migration/nunit.md#code-coverage)
+- [MSTest Migration - Code Coverage](migration/mstest.md#code-coverage)
+- [Microsoft's Coverage Documentation](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)
 
 ## Debugging Tips
 

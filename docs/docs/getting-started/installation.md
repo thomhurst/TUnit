@@ -50,6 +50,40 @@ public class MyTests  // No [TestClass] needed!
 }
 ```
 
+### What's Included in the TUnit Package
+
+When you install the **TUnit** meta package, you automatically get several useful extensions without any additional installation:
+
+#### ✅ Built-In Extensions
+
+**Microsoft.Testing.Extensions.CodeCoverage**
+- 📊 Code coverage support via `--coverage` flag
+- 📈 Outputs Cobertura and XML formats
+- 🔄 Replacement for Coverlet (which is **not compatible** with TUnit)
+
+**Microsoft.Testing.Extensions.TrxReport**
+- 📝 TRX test report generation via `--report-trx` flag
+- 🤝 Compatible with Azure DevOps and other CI/CD systems
+
+This means you can run tests with coverage and reports right away:
+
+```bash
+# Run tests with code coverage
+dotnet run --configuration Release --coverage
+
+# Run tests with TRX report
+dotnet run --configuration Release --report-trx
+
+# Both coverage and report
+dotnet run --configuration Release --coverage --report-trx
+```
+
+**Important:** Do **not** install `coverlet.collector` or `coverlet.msbuild`. These packages are incompatible with TUnit because they require the VSTest platform, while TUnit uses the modern Microsoft.Testing.Platform.
+
+For more details, see:
+- [Code Coverage Documentation](../extensions/extensions.md#code-coverage)
+- [Extensions Overview](../extensions/extensions.md)
+
 That's it. We're ready to write our first test.
 
 Your `.csproj` should be as simple as something like:
