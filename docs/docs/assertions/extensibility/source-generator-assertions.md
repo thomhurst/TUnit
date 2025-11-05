@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Source Generator Assertions
 
-TUnit provides source generators to make creating custom assertions incredibly easy. Instead of manually writing assertion classes and extension methods, you can simply decorate your methods with attributes and let the generator do the work.
+TUnit provides source generators to simplify creating custom assertions. Instead of manually writing assertion classes and extension methods, you can decorate your methods with attributes and let the generator do the work.
 
 ## Overview
 

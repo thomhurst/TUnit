@@ -195,9 +195,9 @@ Use **Microsoft.Testing.Extensions.CodeCoverage**, which is:
    - The TUnit meta package includes the coverage extension automatically
    - If using TUnit.Engine directly, you must manually install `Microsoft.Testing.Extensions.CodeCoverage`
 
-2. **Using .NET 7 or earlier**
-   - Microsoft.Testing.Platform requires .NET 8+
-   - Upgrade to .NET 8 or later
+2. **Older .NET SDK versions**
+   - Ensure you have a recent .NET SDK installed
+   - The Microsoft.Testing.Platform and extensions support .NET Standard 2.0+
 
 See the [Code Coverage Troubleshooting](troubleshooting.md#code-coverage-issues) for more solutions.
 

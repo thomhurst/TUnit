@@ -14,7 +14,7 @@ Fast tests create faster feedback loops. When tests run quickly, developers actu
 
 TUnit embraces modern .NET without compromises. Everything is async by default. Assertions, hooks, all of it. It uses C# 12+ features like collection expressions and file-scoped namespaces. Native AOT and trimming work out of the box. It's built on Microsoft.Testing.Platform instead of the legacy VSTest infrastructure.
 
-Modern .NET applications deserve a modern testing framework. TUnit doesn't carry the baggage of .NET Framework support or patterns from a decade ago.
+Modern .NET applications deserve a modern testing framework. While TUnit supports .NET Standard 2.0 (including .NET Framework), it's designed around modern patterns and idioms, not legacy approaches from a decade ago.
 
 ### Test Isolation
 
@@ -83,7 +83,7 @@ The downside? Some older tools only work with VSTest. Coverlet is the most notab
 
 Most testing frameworks make you opt-in to parallelism. TUnit flips that around.
 
-Parallel tests are dramatically faster. Modern CPUs have many cores—TUnit uses them. And here's the thing: tests that are safe to run in parallel are usually well-isolated tests. Making parallelism the default pushes you toward better test design.
+Running tests in parallel can improve execution time. Modern CPUs have many cores—TUnit uses them by default. And here's the thing: tests that are safe to run in parallel are usually well-isolated tests. Making parallelism the default encourages better test design.
 
 When do you opt-out? Use `[NotInParallel]` for tests that modify shared files or databases, use global state, must run in a specific order, or access hardware like cameras or GPIO pins.
 
@@ -134,7 +134,7 @@ Source generators do add complexity and can make debugging trickier. But for mos
 
 ### Slow Test Suites
 
-Traditional frameworks run tests sequentially by default and use runtime reflection for discovery. TUnit runs tests in parallel and discovers them at compile time with source generators. The result? Test suites often run 5-10x faster.
+Traditional frameworks run tests sequentially by default and use runtime reflection for discovery. TUnit runs tests in parallel by default and discovers them at compile time with source generators. This can significantly reduce test suite execution time, especially for large test suites.
 
 ### Flaky Tests from State Leaks
 
@@ -166,9 +166,9 @@ For detailed comparisons, check out [Framework Differences](../comparison/framew
 
 ## When to Choose TUnit
 
-TUnit is a good fit when performance matters—you have large test suites that need to run fast. It's designed for modern .NET (8+), works great with Native AOT, and shines when you want parallel test execution. If you're starting a new project without legacy constraints, TUnit is worth considering.
+TUnit is a good fit when performance matters—you have large test suites that need to run fast. It supports .NET Standard 2.0, so it works with .NET Framework and all modern .NET versions. It works great with Native AOT, and shines when you want parallel test execution. If you're starting a new project without legacy constraints, TUnit is worth considering.
 
-When might you want alternatives? If you're on .NET Framework (TUnit requires .NET 8+), use NUnit or xUnit. If you have an existing huge test suite, migration costs might outweigh the benefits. If your team strongly prefers another framework's style, that's a legitimate reason to stick with what works for you. Or if you absolutely need a tool that only works with VSTest, you'll need to use something else.
+When might you want alternatives? If you have an existing huge test suite, migration costs might outweigh the benefits. If your team strongly prefers another framework's style, that's a legitimate reason to stick with what works for you. Or if you absolutely need a tool that only works with VSTest, you'll need to use something else.
 
 ## The Bottom Line
 

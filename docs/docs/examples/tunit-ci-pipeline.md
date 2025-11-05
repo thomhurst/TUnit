@@ -617,7 +617,7 @@ dotnet test -- --timeout 5m  # 5 minutes
 
 ### Coverage Files Not Generated
 
-Ensure you're using the TUnit meta package (not just TUnit.Engine) and running on .NET 8+:
+Ensure you're using the TUnit meta package (not just TUnit.Engine):
 
 ```xml
 <PackageReference Include="TUnit" Version="*" />

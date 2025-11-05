@@ -272,8 +272,8 @@ public class ApiTests(TestWebServer server)
 
 **Shared Type Options:**
 - `SharedType.PerTestSession`: One instance for entire test run, shared across assemblies (best for expensive resources)
-- `SharedType.PerClass`: One instance per test class (default)
-- `SharedType.None`: New instance per test
+- `SharedType.PerClass`: One instance per test class
+- `SharedType.None`: New instance per test (default)
 
 You can also use hooks, but they're less flexible:
 

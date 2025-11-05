@@ -11,8 +11,8 @@ Ideally don't manipulate the state of this object within your tests if your obje
 
 Options are:
 
-### Shared = SharedType.None
-The instance is not shared ever. A new one will be created for you.
+### Shared = SharedType.None (Default)
+The instance is not shared ever. A new one will be created for you. This is the default if `Shared` is not specified.
 
 ### Shared = SharedType.PerClass
 The instance is shared for every test in the same class as itself, that also has this setting.

@@ -701,10 +701,10 @@ dotnet --version
 ```
 
 **Requirements:**
-- ✅ .NET 8 or later (required for Microsoft.Testing.Platform)
-- ❌ .NET 7 or earlier (not compatible)
+- Ensure you have a recent .NET SDK installed
+- Microsoft.Testing.Platform supports .NET Standard 2.0+
 
-**Fix:** Upgrade to .NET 8 or later in your project file:
+**Tip:** Use a recent .NET SDK version for the best experience:
 ```xml
 <TargetFramework>net8.0</TargetFramework>
 ```

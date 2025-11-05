@@ -1118,7 +1118,7 @@ dotnet run --configuration Release --coverage --coverage-settings coverage.runse
 
 **Coverage files not generated?**
 - Ensure you're using the TUnit meta package, not just TUnit.Engine
-- Verify you're on .NET 8+ (required for Microsoft.Testing.Platform)
+- Verify you have a recent .NET SDK installed
 
 **Missing coverage for some assemblies?**
 - Use a `.runsettings` file to explicitly include/exclude modules

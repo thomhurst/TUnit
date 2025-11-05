@@ -320,7 +320,7 @@ When using nested property injection, the `Shared` parameter becomes crucial:
 - **`SharedType.PerAssembly`**: Single instance shared for every test in the same assembly as itself.
 - **`SharedType.PerClass`**: One instance per test class
 - **`SharedType.Keyed`**: Share instances based on a key value
-- **`SharedType.None`**: New instance for each injection point
+- **`SharedType.None`**: New instance for each injection point (default)
 
 ### Best Practices
 
