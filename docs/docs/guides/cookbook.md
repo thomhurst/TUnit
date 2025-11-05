@@ -789,4 +789,4 @@ These cookbook recipes cover the most common testing scenarios. You can adapt th
 - **Exception Testing**: Use TUnit's fluent exception assertions
 - **Integration Tests**: Test with real databases, containers, or file systems
 
-For more examples, check out the [examples directory](../examples/) in the documentation.
+For more examples, check out the [examples section](../examples/intro) in the documentation.

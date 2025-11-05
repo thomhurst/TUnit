@@ -1,5 +1,29 @@
 # Migrating from NUnit
 
+## Quick Reference
+
+| NUnit | TUnit |
+|-------|-------|
+| `[TestFixture]` | *(remove - not needed)* |
+| `[Test]` | `[Test]` |
+| `[TestCase(...)]` | `[Arguments(...)]` |
+| `[TestCaseSource(nameof(...))]` | `[MethodDataSource(nameof(...))]` |
+| `[Category("value")]` | `[Property("Category", "value")]` |
+| `[Ignore]` | `[Skip]` |
+| `[Explicit]` | `[Explicit]` |
+| `[SetUp]` | `[Before(Test)]` |
+| `[TearDown]` | `[After(Test)]` |
+| `[OneTimeSetUp]` | `[Before(Class)]` |
+| `[OneTimeTearDown]` | `[After(Class)]` |
+| `[SetUpFixture]` + `[OneTimeSetUp]` | `[Before(Assembly)]` on static method |
+| `[Values(...)]` on parameter | `[Matrix(...)]` on method |
+| `Assert.AreEqual(expected, actual)` | `await Assert.That(actual).IsEqualTo(expected)` |
+| `Assert.That(actual, Is.EqualTo(expected))` | `await Assert.That(actual).IsEqualTo(expected)` |
+| `Assert.Throws<T>(() => ...)` | `await Assert.ThrowsAsync<T>(() => ...)` |
+| `TestContext.WriteLine(...)` | `TestContext` parameter with `context.OutputWriter.WriteLine(...)` |
+| `CollectionAssert.AreEqual(expected, actual)` | `await Assert.That(actual).IsEquivalentTo(expected)` |
+| `StringAssert.Contains(substring, text)` | `await Assert.That(text).Contains(substring)` |
+
 ## Automated Migration with Code Fixers
 
 TUnit includes code fixers that automate most of the migration work.

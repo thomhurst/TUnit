@@ -1,5 +1,35 @@
 # Migrating from MSTest
 
+## Quick Reference
+
+| MSTest | TUnit |
+|--------|-------|
+| `[TestClass]` | *(remove - not needed)* |
+| `[TestMethod]` | `[Test]` |
+| `[DataRow(...)]` | `[Arguments(...)]` |
+| `[DynamicData(nameof(...), ...)]` | `[MethodDataSource(nameof(...))]` |
+| `[TestCategory("value")]` | `[Property("Category", "value")]` |
+| `[Ignore]` | `[Skip]` |
+| `[Priority(n)]` | `[Property("Priority", "n")]` |
+| `[Owner("value")]` | `[Property("Owner", "value")]` |
+| `[TestInitialize]` | `[Before(Test)]` |
+| `[TestCleanup]` | `[After(Test)]` |
+| `[ClassInitialize]` | `[Before(Class)]` *(remove TestContext parameter)* |
+| `[ClassCleanup]` | `[After(Class)]` |
+| `[AssemblyInitialize]` | `[Before(Assembly)]` *(remove TestContext parameter)* |
+| `[AssemblyCleanup]` | `[After(Assembly)]` |
+| `[Timeout(ms)]` | `[Timeout(ms)]` |
+| `[DataTestMethod]` | `[Test]` |
+| `public TestContext TestContext { get; set; }` | `TestContext` method parameter |
+| `Assert.AreEqual(expected, actual)` | `await Assert.That(actual).IsEqualTo(expected)` |
+| `Assert.IsTrue(condition)` | `await Assert.That(condition).IsTrue()` |
+| `Assert.IsNull(value)` | `await Assert.That(value).IsNull()` |
+| `Assert.ThrowsException<T>(() => ...)` | `await Assert.ThrowsAsync<T>(() => ...)` |
+| `Assert.Inconclusive("reason")` | `Skip.Test("reason")` |
+| `CollectionAssert.Contains(collection, item)` | `await Assert.That(collection).Contains(item)` |
+| `StringAssert.Contains(text, substring)` | `await Assert.That(text).Contains(substring)` |
+| `Assert.AreSame(expected, actual)` | `await Assert.That(actual).IsSameReference(expected)` |
+
 ## Automated Migration with Code Fixers
 
 TUnit includes code fixers that automate most of the migration work.

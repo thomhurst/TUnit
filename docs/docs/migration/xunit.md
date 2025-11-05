@@ -1,5 +1,24 @@
 # Migrating from xUnit.net
 
+## Quick Reference
+
+| xUnit | TUnit |
+|-------|-------|
+| `[Fact]` | `[Test]` |
+| `[Theory]` | `[Test]` |
+| `[InlineData(...)]` | `[Arguments(...)]` |
+| `[MemberData(nameof(...))]` | `[MethodDataSource(nameof(...))]` |
+| `[ClassData(typeof(...))]` | `[MethodDataSource(nameof(ClassName.Method))]` |
+| `[Trait("key", "value")]` | `[Property("key", "value")]` |
+| `IClassFixture<T>` | `[ClassDataSource<T>(Shared = SharedType.PerClass)]` |
+| `[Collection("name")]` | `[ClassDataSource<T>(Shared = SharedType.Keyed, Key = "name")]` |
+| Constructor | Constructor or `[Before(Test)]` |
+| `IDisposable` | `IDisposable` or `[After(Test)]` |
+| `IAsyncLifetime` | `[Before(Test)]` / `[After(Test)]` |
+| `ITestOutputHelper` | `TestContext` parameter |
+| `Assert.Equal(expected, actual)` | `await Assert.That(actual).IsEqualTo(expected)` |
+| `Assert.Throws<T>(() => ...)` | `await Assert.ThrowsAsync<T>(() => ...)` |
+
 ## Automated Migration with Code Fixers
 
 TUnit includes code fixers that automate most of the migration work.
@@ -1149,23 +1168,3 @@ dotnet run --configuration Release --coverage --coverage-settings coverage.runse
 **Need help?**
 - See [TUnit Code Coverage Documentation](../extensions/extensions.md#code-coverage)
 - Check [Microsoft's Code Coverage Guide](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)
-
-## Quick Reference
-
-| xUnit | TUnit |
-|-------|-------|
-| `[Fact]` | `[Test]` |
-| `[Theory]` | `[Test]` |
-| `[InlineData(...)]` | `[Arguments(...)]` |
-| `[MemberData(nameof(...))]` | `[MethodDataSource(nameof(...))]` |
-| `[ClassData(typeof(...))]` | `[MethodDataSource(nameof(ClassName.Method))]` |
-| `[Trait("key", "value")]` | `[Property("key", "value")]` |
-| `IClassFixture<T>` | `[ClassDataSource<T>(Shared = SharedType.PerClass)]` |
-| `[Collection("name")]` | `[ClassDataSource<T>(Shared = SharedType.Keyed, Key = "name")]` |
-| Constructor | Constructor or `[Before(Test)]` |
-| `IDisposable` | `IDisposable` or `[After(Test)]` |
-| `IAsyncLifetime` | `[Before(Test)]` / `[After(Test)]` |
-| `ITestOutputHelper` | `TestContext` parameter |
-| `Assert.Equal(expected, actual)` | `await Assert.That(actual).IsEqualTo(expected)` |
-| `Assert.Throws<T>(() => ...)` | `await Assert.ThrowsAsync<T>(() => ...)` |
-
