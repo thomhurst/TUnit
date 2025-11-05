@@ -71,9 +71,9 @@ dotnet format analyzers --severity info --diagnostics TUMS0001
 The code fixer converts test methods to async, adds await to assertions, and updates attribute names. It handles most common cases automatically, though you may need to adjust complex scenarios manually.
 
 See the migration guides for step-by-step instructions:
-- [xUnit migration](migration/xunit.md#using-tunits-code-fixers)
-- [NUnit migration](migration/nunit.md#using-tunits-code-fixers)
-- [MSTest migration](migration/mstest.md#using-tunits-code-fixers)
+- [xUnit migration](migration/xunit.md#automated-migration-with-code-fixers)
+- [NUnit migration](migration/nunit.md#automated-migration-with-code-fixers)
+- [MSTest migration](migration/mstest.md#automated-migration-with-code-fixers)
 
 **What you gain**
 
