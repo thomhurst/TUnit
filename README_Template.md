@@ -348,11 +348,6 @@ public async Task Modern_TUnit_Test(string value) { }
 
 📖 **Need help migrating?** Check our **[Migration Guides](https://tunit.dev/docs/migration/xunit)** for xUnit, NUnit, and MSTest.
 
-
-## Current Status
-
-The API is mostly stable, but may have some changes based on feedback before the v1.0 release.
-
 ---
 
 <div align="center">
