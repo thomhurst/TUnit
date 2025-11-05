@@ -3,7 +3,7 @@ namespace TUnit.Core.Extensions;
 /// <summary>
 /// Extension methods for <see cref="IServiceProvider"/>.
 /// </summary>
-public static class ServiceProviderExtensions
+internal static class ServiceProviderExtensions
 {
     /// <summary>
     /// Gets a service of the specified type from the service provider.

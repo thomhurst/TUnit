@@ -1834,11 +1834,6 @@ namespace .Extensions
         public static T[] GetCustomAttributesSafe<T>(this .ICustomAttributeProvider provider, bool inherit = true)
             where T :  { }
     }
-    public static class ServiceProviderExtensions
-    {
-        public static T? GetService<T>(this  serviceProvider)
-            where T :  class { }
-    }
     public static class TestContextExtensions
     {
         public static . AddDynamicTest<T>(this .TestContext context, .DynamicTest<T> dynamicTest)

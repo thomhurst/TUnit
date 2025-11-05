@@ -16,16 +16,16 @@ public class UniqueBuilderContextsOnEnumerableDataGeneratorTestsGenerator : Data
 {
     protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        var id1 = dataGeneratorMetadata.TestBuilderContext.Current.Id;
-        var id2 = dataGeneratorMetadata.TestBuilderContext.Current.Id;
+        var id1 = dataGeneratorMetadata.TestBuilderContext.Current.DefinitionId;
+        var id2 = dataGeneratorMetadata.TestBuilderContext.Current.DefinitionId;
 
         yield return () => 1;
 
-        var id3 = dataGeneratorMetadata.TestBuilderContext.Current.Id;
+        var id3 = dataGeneratorMetadata.TestBuilderContext.Current.DefinitionId;
 
         yield return () => 2;
 
-        var id4 = dataGeneratorMetadata.TestBuilderContext.Current.Id;
+        var id4 = dataGeneratorMetadata.TestBuilderContext.Current.DefinitionId;
 
         id1.ShouldBe(id2);
 
