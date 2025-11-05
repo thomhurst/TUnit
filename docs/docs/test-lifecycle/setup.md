@@ -7,6 +7,30 @@ E.g. pinging a service to wake it up in preparation for the tests.
 
 For this, we can declare a method with a `[Before(...)]` or a `[BeforeEvery(...)]` attribute.
 
+## Hook Method Signatures
+
+Hook methods can be either synchronous or asynchronous:
+
+```csharp
+[Before(Test)]
+public void SynchronousSetup()  // ✅ Valid - synchronous hook
+{
+    _value = 99;
+}
+
+[Before(Test)]
+public async Task AsyncSetup()  // ✅ Valid - asynchronous hook
+{
+    _response = await new HttpClient().GetAsync("https://localhost/ping");
+}
+```
+
+**Important Notes:**
+- Hooks can be `void` (synchronous) or `async Task` (asynchronous)
+- Use async hooks when you need to perform async operations (HTTP calls, database queries, etc.)
+- Use synchronous hooks for simple setup (setting fields, initializing values, etc.)
+- `async void` hooks are **not allowed** and will cause a compiler error
+
 ## [Before(HookType)]
 
 ### [Before(Test)]

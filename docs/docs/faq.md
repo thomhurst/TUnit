@@ -21,13 +21,16 @@ Currently, TUnit is best supported in Visual Studio 2022 (v17.9+) and JetBrains 
 
 All TUnit assertions must be awaited. There's no synchronous alternative.
 
+**Important:** Test methods themselves can be either synchronous (`void`) or asynchronous (`async Task`). However, if your test uses TUnit's assertion library (`Assert.That(...)`), the test method **must** be `async Task` because assertions return awaitable objects that must be awaited to execute. Tests without assertions can remain synchronous. See [Test Method Signatures](getting-started/writing-your-first-test.md#test-method-signatures) for examples.
+
 **Why this design?**
 
-TUnit's assertion library is built around async from the ground up. This means:
+TUnit's assertion library uses the awaitable pattern (custom objects with `GetAwaiter()` methods). This means:
+- Assertions don't execute until they're awaited - this is when the actual verification happens
 - All assertions work consistently, whether they're simple value checks or complex async operations
 - Custom assertions can perform async work (like database queries or HTTP calls)
 - No sync-over-async patterns that cause deadlocks
-- Assertions can be chained without blocking
+- Assertions can be chained fluently before execution
 
 **What this means when migrating:**
 
@@ -101,10 +104,10 @@ The most common mistake is forgetting `await`. The compiler warns you, but the t
 
 ```csharp
 // Wrong - test passes without checking anything
-Assert.That(result).IsEqualTo(5);  // Returns a Task that's ignored
+Assert.That(result).IsEqualTo(5);  // Returns an awaitable object that's never executed
 
 // Correct
-await Assert.That(result).IsEqualTo(5);
+await Assert.That(result).IsEqualTo(5);  // The await triggers the actual assertion execution
 ```
 
 ### Does TUnit work with Coverlet for code coverage?

@@ -8,7 +8,7 @@
 | `[Test]` | `[Test]` |
 | `[TestCase(...)]` | `[Arguments(...)]` |
 | `[TestCaseSource(nameof(...))]` | `[MethodDataSource(nameof(...))]` |
-| `[Category("value")]` | `[Property("Category", "value")]` |
+| `[Category("value")]` | `[Category("value")]` *(same)* or `[Property("Category", "value")]` |
 | `[Ignore]` | `[Skip]` |
 | `[Explicit]` | `[Explicit]` |
 | `[SetUp]` | `[Before(Test)]` |
@@ -16,7 +16,7 @@
 | `[OneTimeSetUp]` | `[Before(Class)]` |
 | `[OneTimeTearDown]` | `[After(Class)]` |
 | `[SetUpFixture]` + `[OneTimeSetUp]` | `[Before(Assembly)]` on static method |
-| `[Values(...)]` on parameter | `[Matrix(...)]` on method |
+| `[Values(...)]` on parameter | `[Matrix(...)]` on each parameter |
 | `Assert.AreEqual(expected, actual)` | `await Assert.That(actual).IsEqualTo(expected)` |
 | `Assert.That(actual, Is.EqualTo(expected))` | `await Assert.That(actual).IsEqualTo(expected)` |
 | `Assert.Throws<T>(() => ...)` | `await Assert.ThrowsAsync<T>(() => ...)` |
@@ -267,8 +267,9 @@ public class CombinationTests
 public class CombinationTests
 {
     [Test]
-    [Matrix([1, 2, 3], ["a", "b"])]
-    public async Task TestCombinations(int x, string y)
+    public async Task TestCombinations(
+        [Matrix(1, 2, 3)] int x,
+        [Matrix("a", "b")] string y)
     {
         await Assert.That(x).IsGreaterThan(0);
         await Assert.That(y).IsNotNull();
@@ -277,9 +278,9 @@ public class CombinationTests
 ```
 
 **Key Changes:**
-- `[Values(...)]` attributes on parameters → `[Matrix(...)]` attribute on method
-- All combinations are automatically generated
-- Cleaner syntax with collection expressions
+- `[Values(...)]` attributes on parameters → `[Matrix(...)]` attributes on parameters
+- All combinations are automatically generated (3 × 2 = 6 test cases)
+- Each parameter gets its own `[Matrix]` attribute with the values to test
 
 ### Test Fixture with Parameters
 

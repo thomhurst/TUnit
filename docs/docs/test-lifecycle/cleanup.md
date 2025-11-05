@@ -4,6 +4,30 @@ TUnit supports having your test class implement `IDisposable` or `IAsyncDisposab
 
 You can also declare a method with an `[After(...)]` or an `[AfterEvery(...)]` attribute.
 
+## Hook Method Signatures
+
+Hook methods can be either synchronous or asynchronous:
+
+```csharp
+[After(Test)]
+public void SynchronousCleanup()  // ✅ Valid - synchronous hook
+{
+    _resource?.Dispose();
+}
+
+[After(Test)]
+public async Task AsyncCleanup()  // ✅ Valid - asynchronous hook
+{
+    await new HttpClient().GetAsync("https://localhost/test-finished-notifier");
+}
+```
+
+**Important Notes:**
+- Hooks can be `void` (synchronous) or `async Task` (asynchronous)
+- Use async hooks when you need to perform async operations (HTTP calls, database queries, etc.)
+- Use synchronous hooks for simple cleanup (disposing objects, resetting state, etc.)
+- `async void` hooks are **not allowed** and will cause a compiler error
+
 ## [After(HookType)]
 
 ### [After(Test)]

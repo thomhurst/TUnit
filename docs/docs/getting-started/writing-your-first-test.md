@@ -66,6 +66,33 @@ We haven't actually made it do anything yet, but we should be able to build our 
 
 Tests will pass if they execute successfully without any exceptions.
 
+## Test Method Signatures
+
+Test methods can be either synchronous or asynchronous:
+
+```csharp
+[Test]
+public void SynchronousTest()  // ✅ Valid - synchronous test
+{
+    var result = Calculate(2, 3);
+    // Simple synchronous test without assertions
+}
+
+[Test]
+public async Task AsyncTestWithAssertions()  // ✅ Recommended - asynchronous test
+{
+    var result = Calculate(2, 3);
+    await Assert.That(result).IsEqualTo(5);  // Assertions must be awaited
+}
+```
+
+**Important Notes:**
+- If you use TUnit's assertion library (`Assert.That(...)`), your test **must** be `async Task` because assertions return awaitable objects that must be awaited to execute
+- Synchronous `void` tests are allowed but cannot use assertions
+- `async void` tests are **not allowed** and will cause a compiler error
+- **Best Practice**: Use `async Task` for all tests to enable TUnit's assertion library
+- **Technical Detail**: Assertions return custom assertion builder objects with a `GetAwaiter()` method, making them awaitable
+
 Let's add some code to show you how a test might look once finished:
 
 ```csharp
