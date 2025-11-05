@@ -348,4 +348,27 @@ public static class TypeExtensions
         innerType = null;
         return false;
     }
+
+    /// <summary>
+    /// Gets the nested class name with '+' separator (matching .NET Type.FullName convention).
+    /// For example: OuterClass+InnerClass
+    /// </summary>
+    public static string GetNestedClassName(this INamedTypeSymbol typeSymbol)
+    {
+        var typeHierarchy = new List<string>();
+        var currentType = typeSymbol;
+
+        // Walk up the containing type chain
+        while (currentType != null)
+        {
+            typeHierarchy.Add(currentType.Name);
+            currentType = currentType.ContainingType;
+        }
+
+        // Reverse to get outer-to-inner order
+        typeHierarchy.Reverse();
+
+        // Join with '+' separator (matching .NET Type.FullName convention for nested types)
+        return string.Join("+", typeHierarchy);
+    }
 }

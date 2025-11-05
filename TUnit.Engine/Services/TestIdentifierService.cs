@@ -199,12 +199,12 @@ internal static class TestIdentifierService
         // Reverse to get outer-to-inner order
         typeHierarchy.Reverse();
 
-        // Append all types with dot separator
+        // Append all types with + separator (matching .NET Type.FullName convention for nested types)
         for (var i = 0; i < typeHierarchy.Count; i++)
         {
             if (i > 0)
             {
-                sb.Append('.');
+                sb.Append('+');
             }
             sb.Append(typeHierarchy[i]);
         }
