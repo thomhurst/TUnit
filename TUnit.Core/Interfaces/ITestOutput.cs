@@ -58,4 +58,20 @@ public interface ITestOutput
     /// </summary>
     /// <returns>The accumulated error output</returns>
     string GetErrorOutput();
+
+    /// <summary>
+    /// Writes a line of text to standard output.
+    /// Convenience method for StandardOutput.WriteLine(message).
+    /// Thread-safe for concurrent calls.
+    /// </summary>
+    /// <param name="message">The message to write</param>
+    void WriteLine(string message);
+
+    /// <summary>
+    /// Writes a line of text to error output.
+    /// Convenience method for ErrorOutput.WriteLine(message).
+    /// Thread-safe for concurrent calls.
+    /// </summary>
+    /// <param name="message">The error message to write</param>
+    void WriteError(string message);
 }

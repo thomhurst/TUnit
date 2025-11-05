@@ -31,7 +31,7 @@ public partial class TestContext : Context,
         _testContextsById[_testBuilderContext.Id] = this;
     }
 
-    public Guid Id => _testBuilderContext.Id;
+    internal Guid Id => _testBuilderContext.Id;
 
     // Zero-allocation interface properties for organized API access
     public ITestExecution Execution => this;
@@ -40,7 +40,9 @@ public partial class TestContext : Context,
     public ITestMetadata Metadata => this;
     public ITestDependencies Dependencies => this;
     public ITestStateBag StateBag => this;
-    public IServiceProvider Services => ServiceProvider;
+    public ITestEvents Events => this;
+
+    internal IServiceProvider Services => ServiceProvider;
 
     private static readonly AsyncLocal<TestContext?> TestContexts = new();
 
@@ -121,12 +123,6 @@ public partial class TestContext : Context,
     internal IServiceProvider ServiceProvider
     {
         get;
-    }
-
-
-    public T? GetService<T>() where T : class
-    {
-        return ServiceProvider.GetService(typeof(T)) as T;
     }
 
     internal override void SetAsyncLocalContext()

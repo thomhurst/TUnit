@@ -1,9 +1,11 @@
+using TUnit.Core.Interfaces;
+
 namespace TUnit.Core;
 
 /// <summary>
 /// Simplified test context events
 /// </summary>
-public class TestContextEvents
+public class TestContextEvents : ITestEvents
 {
     public AsyncEvent<TestContext>? OnDispose { get; set; }
     public AsyncEvent<TestContext>? OnTestRegistered { get; set; }
