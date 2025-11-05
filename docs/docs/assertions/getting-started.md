@@ -214,7 +214,7 @@ await Assert.That(temperature).IsGreaterThanOrEqualTo(32);
 For floating-point comparisons:
 
 ```csharp
-await Assert.That(3.14159).IsEqualTo(Math.PI, tolerance: 0.001);
+await Assert.That(3.14159).IsEqualTo(Math.PI).Within(0.001);
 ```
 
 ### Testing Async Operations

@@ -31,6 +31,59 @@ public async Task AsyncSetup()  // ✅ Valid - asynchronous hook
 - Use synchronous hooks for simple setup (setting fields, initializing values, etc.)
 - `async void` hooks are **not allowed** and will cause a compiler error
 
+### Hook Parameters
+
+Hooks can optionally accept parameters for accessing context information and cancellation tokens:
+
+```csharp
+[Before(Test)]
+public async Task Setup(TestContext context, CancellationToken cancellationToken)
+{
+    // Access test information via context
+    Console.WriteLine($"Setting up test: {context.TestDetails.TestName}");
+
+    // Use cancellation token for timeout-aware operations
+    await SomeLongRunningOperation(cancellationToken);
+}
+
+[Before(Class)]
+public static async Task ClassSetup(ClassHookContext context, CancellationToken cancellationToken)
+{
+    // Both context and cancellation token available for class-level hooks
+    await InitializeResources(cancellationToken);
+}
+
+[Before(Test)]
+public async Task SetupWithToken(CancellationToken cancellationToken)
+{
+    // Can use CancellationToken without context
+    await Task.Delay(100, cancellationToken);
+}
+
+[Before(Test)]
+public async Task SetupWithContext(TestContext context)
+{
+    // Can use context without CancellationToken
+    Console.WriteLine(context.TestDetails.TestName);
+}
+```
+
+**Valid Parameter Combinations:**
+- No parameters: `public void Hook() { }`
+- Context only: `public void Hook(TestContext context) { }`
+- CancellationToken only: `public async Task Hook(CancellationToken ct) { }`
+- Both: `public async Task Hook(TestContext context, CancellationToken ct) { }`
+
+**Context Types by Hook Level:**
+
+| Hook Level | Context Type | Example |
+|------------|-------------|---------|
+| `[Before(Test)]` | `TestContext` | Access test details, output writer |
+| `[Before(Class)]` | `ClassHookContext` | Access class information |
+| `[Before(Assembly)]` | `AssemblyHookContext` | Access assembly information |
+| `[Before(TestSession)]` | `TestSessionContext` | Access test session information |
+| `[Before(TestDiscovery)]` | `BeforeTestDiscoveryContext` | Access discovery context |
+
 ## [Before(HookType)]
 
 ### [Before(Test)]

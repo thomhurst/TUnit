@@ -96,7 +96,7 @@ public class MyTestClass
     [MatrixDataSource]
     public async Task MyTest(
         [MatrixRange<int>(1, 10)] int value1,
-        [MatrixMethod(nameof(Numbers))] int value2
+        [MatrixMethod<MyTestClass>(nameof(Numbers))] int value2
         )
     {
         var result = Add(value1, value2);

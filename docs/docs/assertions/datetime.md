@@ -21,7 +21,7 @@ public async Task DateTime_With_Tolerance()
     // await Assert.That(almostNow).IsEqualTo(now);
 
     // With tolerance - passes
-    await Assert.That(almostNow).IsEqualTo(now, tolerance: TimeSpan.FromSeconds(1));
+    await Assert.That(almostNow).IsEqualTo(now).Within(TimeSpan.FromSeconds(1));
 }
 ```
 
@@ -35,15 +35,15 @@ public async Task Various_Tolerance_Values()
 
     // Millisecond tolerance
     var time1 = baseTime.AddMilliseconds(100);
-    await Assert.That(time1).IsEqualTo(baseTime, tolerance: TimeSpan.FromMilliseconds(500));
+    await Assert.That(time1).IsEqualTo(baseTime).Within(TimeSpan.FromMilliseconds(500));
 
     // Second tolerance
     var time2 = baseTime.AddSeconds(5);
-    await Assert.That(time2).IsEqualTo(baseTime, tolerance: TimeSpan.FromSeconds(10));
+    await Assert.That(time2).IsEqualTo(baseTime).Within(TimeSpan.FromSeconds(10));
 
     // Minute tolerance
     var time3 = baseTime.AddMinutes(2);
-    await Assert.That(time3).IsEqualTo(baseTime, tolerance: TimeSpan.FromMinutes(5));
+    await Assert.That(time3).IsEqualTo(baseTime).Within(TimeSpan.FromMinutes(5));
 }
 ```
 
@@ -190,7 +190,7 @@ public async Task DateTimeOffset_With_Tolerance()
     var now = DateTimeOffset.Now;
     var almostNow = now.AddSeconds(1);
 
-    await Assert.That(almostNow).IsEqualTo(now, tolerance: TimeSpan.FromSeconds(5));
+    await Assert.That(almostNow).IsEqualTo(now).Within(TimeSpan.FromSeconds(5));
 }
 ```
 
@@ -272,7 +272,7 @@ public async Task TimeOnly_With_Tolerance()
     var time1 = new TimeOnly(10, 30, 0);
     var time2 = new TimeOnly(10, 30, 5);
 
-    await Assert.That(time2).IsEqualTo(time1, tolerance: TimeSpan.FromSeconds(10));
+    await Assert.That(time2).IsEqualTo(time1).Within(TimeSpan.FromSeconds(10));
 }
 ```
 
@@ -428,7 +428,7 @@ public async Task Record_Created_Recently()
     var now = DateTime.UtcNow;
 
     // Created within last minute
-    await Assert.That(createdAt).IsEqualTo(now, tolerance: TimeSpan.FromMinutes(1));
+    await Assert.That(createdAt).IsEqualTo(now).Within(TimeSpan.FromMinutes(1));
     await Assert.That(createdAt).IsInPastUtc();
 }
 ```

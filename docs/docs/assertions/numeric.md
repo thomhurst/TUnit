@@ -119,7 +119,7 @@ public async Task Double_Tolerance()
     // await Assert.That(result).IsEqualTo(expected);
 
     // With tolerance - safe
-    await Assert.That(result).IsEqualTo(expected, tolerance: 0.001);
+    await Assert.That(result).IsEqualTo(expected).Within( 0.001);
 }
 ```
 
@@ -132,7 +132,7 @@ public async Task Float_Tolerance()
     float pi = 3.14159f;
     float approximation = 3.14f;
 
-    await Assert.That(pi).IsEqualTo(approximation, tolerance: 0.01f);
+    await Assert.That(pi).IsEqualTo(approximation).Within(0.01f);
 }
 ```
 
@@ -147,7 +147,7 @@ public async Task Decimal_Tolerance()
     decimal price = 19.995m;
     decimal rounded = 20.00m;
 
-    await Assert.That(price).IsEqualTo(rounded, tolerance: 0.01m);
+    await Assert.That(price).IsEqualTo(rounded).Within(0.01m);
 }
 ```
 
@@ -164,7 +164,7 @@ public async Task Long_Tolerance()
     long timestamp2 = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
     // Allow 100ms difference
-    await Assert.That(timestamp1).IsEqualTo(timestamp2, tolerance: 100L);
+    await Assert.That(timestamp1).IsEqualTo(timestamp2).Within(100L);
 }
 ```
 
@@ -185,7 +185,7 @@ public async Task Calculate_Total_Price()
 
     await Assert.That(total).IsPositive();
     await Assert.That(total).IsGreaterThan(subtotal);
-    await Assert.That(total).IsEqualTo(32.37m, tolerance: 0.01m);
+    await Assert.That(total).IsEqualTo(32.37m).Within(0.01m);
 }
 ```
 
@@ -198,7 +198,7 @@ public async Task Celsius_To_Fahrenheit()
     double celsius = 20.0;
     double fahrenheit = celsius * 9.0 / 5.0 + 32.0;
 
-    await Assert.That(fahrenheit).IsEqualTo(68.0, tolerance: 0.1);
+    await Assert.That(fahrenheit).IsEqualTo(68.0).Within(0.1);
     await Assert.That(fahrenheit).IsGreaterThan(celsius);
 }
 ```
@@ -215,7 +215,7 @@ public async Task Calculate_Percentage()
 
     await Assert.That(percentage).IsPositive();
     await Assert.That(percentage).IsBetween(0, 100);
-    await Assert.That(percentage).IsEqualTo(87.5, tolerance: 0.1);
+    await Assert.That(percentage).IsEqualTo(87.5).Within(0.1);
 }
 ```
 
@@ -228,7 +228,7 @@ public async Task Calculate_Average()
     var numbers = new[] { 10, 20, 30, 40, 50 };
     double average = numbers.Average();
 
-    await Assert.That(average).IsEqualTo(30.0, tolerance: 0.01);
+    await Assert.That(average).IsEqualTo(30.0).Within(0.01);
     await Assert.That(average).IsGreaterThan(numbers.Min());
     await Assert.That(average).IsLessThan(numbers.Max());
 }
@@ -327,7 +327,7 @@ public async Task Division()
 {
     double result = 10.0 / 4.0;
 
-    await Assert.That(result).IsEqualTo(2.5, tolerance: 0.001);
+    await Assert.That(result).IsEqualTo(2.5).Within(0.001);
     await Assert.That(result).IsPositive();
 }
 ```
@@ -357,7 +357,7 @@ public async Task Math_Round()
     double value = 3.7;
     double rounded = Math.Round(value);
 
-    await Assert.That(rounded).IsEqualTo(4.0, tolerance: 0.001);
+    await Assert.That(rounded).IsEqualTo(4.0).Within(0.001);
 }
 ```
 
@@ -398,10 +398,10 @@ public async Task Math_Abs()
 public async Task Math_Power_Sqrt()
 {
     double squared = Math.Pow(5, 2);
-    await Assert.That(squared).IsEqualTo(25.0, tolerance: 0.001);
+    await Assert.That(squared).IsEqualTo(25.0).Within(0.001);
 
     double root = Math.Sqrt(25);
-    await Assert.That(root).IsEqualTo(5.0, tolerance: 0.001);
+    await Assert.That(root).IsEqualTo(5.0).Within(0.001);
 }
 ```
 
@@ -414,7 +414,7 @@ public async Task Math_Trigonometry()
     double angle = Math.PI / 4; // 45 degrees
     double sine = Math.Sin(angle);
 
-    await Assert.That(sine).IsEqualTo(Math.Sqrt(2) / 2, tolerance: 0.0001);
+    await Assert.That(sine).IsEqualTo(Math.Sqrt(2) / 2).Within(0.0001);
     await Assert.That(sine).IsPositive();
     await Assert.That(sine).IsBetween(0, 1);
 }
@@ -556,7 +556,7 @@ public async Task Growth_Rate()
     decimal growthRate = (currentValue - previousValue) / previousValue * 100;
 
     await Assert.That(growthRate).IsPositive();
-    await Assert.That(growthRate).IsEqualTo(25m, tolerance: 0.1m);
+    await Assert.That(growthRate).IsEqualTo(25m).Within(0.1m);
 }
 ```
 

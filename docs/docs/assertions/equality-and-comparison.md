@@ -246,7 +246,7 @@ public async Task Double_With_Tolerance()
     // await Assert.That(actual).IsEqualTo(expected);
 
     // With tolerance - passes
-    await Assert.That(actual).IsEqualTo(expected, tolerance: 0.001);
+    await Assert.That(actual).IsEqualTo(expected).Within(0.001);
 }
 ```
 
@@ -259,7 +259,7 @@ public async Task Float_With_Tolerance()
     float actual = 3.14159f;
     float expected = 3.14f;
 
-    await Assert.That(actual).IsEqualTo(expected, tolerance: 0.01f);
+    await Assert.That(actual).IsEqualTo(expected).Within(0.01f);
 }
 ```
 
@@ -272,7 +272,7 @@ public async Task Decimal_With_Tolerance()
     decimal price = 19.995m;
     decimal expected = 20.00m;
 
-    await Assert.That(price).IsEqualTo(expected, tolerance: 0.01m);
+    await Assert.That(price).IsEqualTo(expected).Within(0.01m);
 }
 ```
 
@@ -286,7 +286,7 @@ public async Task Long_With_Tolerance()
     long expected = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
     // Allow 100ms difference
-    await Assert.That(timestamp).IsEqualTo(expected, tolerance: 100L);
+    await Assert.That(timestamp).IsEqualTo(expected).Within(100L);
 }
 ```
 
@@ -442,7 +442,7 @@ public async Task Mathematical_Constants()
 {
     var calculatedPi = CalculatePiUsingLeibniz(10000);
 
-    await Assert.That(calculatedPi).IsEqualTo(Math.PI, tolerance: 0.0001);
+    await Assert.That(calculatedPi).IsEqualTo(Math.PI).Within(0.0001);
 }
 ```
 

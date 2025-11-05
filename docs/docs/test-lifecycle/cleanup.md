@@ -28,6 +28,59 @@ public async Task AsyncCleanup()  // ✅ Valid - asynchronous hook
 - Use synchronous hooks for simple cleanup (disposing objects, resetting state, etc.)
 - `async void` hooks are **not allowed** and will cause a compiler error
 
+### Hook Parameters
+
+Hooks can optionally accept parameters for accessing context information and cancellation tokens:
+
+```csharp
+[After(Test)]
+public async Task Cleanup(TestContext context, CancellationToken cancellationToken)
+{
+    // Access test results via context
+    if (context.Result?.Status == TestStatus.Failed)
+    {
+        await CaptureScreenshot(cancellationToken);
+    }
+}
+
+[After(Class)]
+public static async Task ClassCleanup(ClassHookContext context, CancellationToken cancellationToken)
+{
+    // Use cancellation token for timeout-aware cleanup operations
+    await DisposeResources(cancellationToken);
+}
+
+[After(Test)]
+public async Task CleanupWithToken(CancellationToken cancellationToken)
+{
+    // Can use CancellationToken without context
+    await FlushBuffers(cancellationToken);
+}
+
+[After(Test)]
+public async Task CleanupWithContext(TestContext context)
+{
+    // Can use context without CancellationToken
+    Console.WriteLine($"Test {context.TestDetails.TestName} completed");
+}
+```
+
+**Valid Parameter Combinations:**
+- No parameters: `public void Hook() { }`
+- Context only: `public void Hook(TestContext context) { }`
+- CancellationToken only: `public async Task Hook(CancellationToken ct) { }`
+- Both: `public async Task Hook(TestContext context, CancellationToken ct) { }`
+
+**Context Types by Hook Level:**
+
+| Hook Level | Context Type | Example |
+|------------|-------------|---------|
+| `[After(Test)]` | `TestContext` | Access test results, output writer |
+| `[After(Class)]` | `ClassHookContext` | Access class information |
+| `[After(Assembly)]` | `AssemblyHookContext` | Access assembly information |
+| `[After(TestSession)]` | `TestSessionContext` | Access test session information |
+| `[After(TestDiscovery)]` | `TestDiscoveryContext` | Access discovery results |
+
 ## [After(HookType)]
 
 ### [After(Test)]

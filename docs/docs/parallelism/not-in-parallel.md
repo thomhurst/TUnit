@@ -30,10 +30,10 @@ public class MyTestClass
     }
 
     [Test]
-    [NotInParallel(DatabaseTest, RegistrationTest)]
+    [NotInParallel(new[] { DatabaseTest, RegistrationTest })]
     public async Task MyTest2()
     {
-        
+
     }
 
     [Test]

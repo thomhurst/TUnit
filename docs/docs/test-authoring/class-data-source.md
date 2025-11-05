@@ -63,6 +63,8 @@ public class MyTestClass
 
 If you are using an overload that supports injecting multiple classes at once (e.g. `ClassDataSource<T1, T2, T3>`) then you should specify multiple SharedTypes in an array and keys where applicable.
 
+**Important:** The `Keys` array is **positional** - each index corresponds to the type at that position in the generic parameters. Only types with `SharedType.Keyed` need keys; other positions can be empty strings or omitted.
+
 E.g.
 
 ```csharp
@@ -70,7 +72,12 @@ E.g.
     [ClassDataSource<Value1, Value2, Value3, Value4, Value5>
         (
         Shared = [SharedType.PerTestSession, SharedType.Keyed, SharedType.PerClass, SharedType.Keyed, SharedType.None],
-        Keys = [ "Value2Key", "Value4Key" ]
+        Keys = ["", "Value2Key", "", "Value4Key", ""]
+        // Index 0: Value1 (PerTestSession) - empty string (no key needed)
+        // Index 1: Value2 (Keyed) - "Value2Key"
+        // Index 2: Value3 (PerClass) - empty string (no key needed)
+        // Index 3: Value4 (Keyed) - "Value4Key"
+        // Index 4: Value5 (None) - empty string (no key needed)
         )]
     public class MyType(Value1 value1, Value2 value2, Value3 value3, Value4 value4, Value5 value5)
     {
