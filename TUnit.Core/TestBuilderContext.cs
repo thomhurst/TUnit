@@ -19,7 +19,7 @@ public record TestBuilderContext
         internal set => BuilderContexts.Value = value;
     }
 
-    public string Id { get; } = Guid.NewGuid().ToString();
+    public string DefinitionId { get; } = Guid.NewGuid().ToString();
     public ConcurrentDictionary<string, object?> ObjectBag { get; set; } = new();
     public TestContextEvents Events { get; set; } = new();
 

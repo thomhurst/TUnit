@@ -7,9 +7,10 @@ namespace TUnit.Core.Interfaces;
 public interface ITestMetadata
 {
     /// <summary>
-    /// Gets the unique identifier for this test instance.
+    /// Gets the unique identifier for the test definition (template/source) that generated this test.
+    /// This ID is shared across all instances of parameterized tests.
     /// </summary>
-    string Id { get; }
+    string DefinitionId { get; }
 
     /// <summary>
     /// Gets the detailed metadata about this test, including class type, method info, and arguments.

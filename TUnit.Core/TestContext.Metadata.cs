@@ -54,7 +54,7 @@ public partial class TestContext
         _cachedDisplayName = null;
     }
 
-    string ITestMetadata.Id => _testBuilderContext.Id;
+    string ITestMetadata.DefinitionId => _testBuilderContext.DefinitionId;
     TestDetails ITestMetadata.TestDetails
     {
         get => TestDetails;

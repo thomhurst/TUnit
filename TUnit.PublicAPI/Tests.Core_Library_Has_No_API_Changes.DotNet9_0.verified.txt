@@ -1245,8 +1245,8 @@ namespace
     {
         public TestBuilderContext() { }
         public .IDataSourceAttribute? DataSourceAttribute { get; set; }
+        public string DefinitionId { get; }
         public .TestContextEvents Events { get; set; }
-        public string Id { get; }
         public .<string, object?> ObjectBag { get; set; }
         public required .MethodMetadata TestMetadata { get; init; }
         public static .TestBuilderContext? Current { get; }
@@ -2381,9 +2381,9 @@ namespace .Interfaces
     }
     public interface ITestMetadata
     {
+        string DefinitionId { get; }
         string DisplayName { get; set; }
         ? DisplayNameFormatter { get; set; }
-        string Id { get; }
         .TestDetails TestDetails { get; }
         string TestName { get; }
     }
