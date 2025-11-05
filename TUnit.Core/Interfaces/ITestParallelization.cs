@@ -23,7 +23,6 @@ public interface ITestParallelization
 
     /// <summary>
     /// Gets the parallel limiter that controls how many tests can run concurrently.
-    /// Returns null if no limiter is configured.
     /// </summary>
     IParallelLimit? Limiter { get; }
 
@@ -33,10 +32,4 @@ public interface ITestParallelization
     /// </summary>
     /// <param name="constraint">The constraint to add</param>
     void AddConstraint(IParallelConstraint constraint);
-
-    /// <summary>
-    /// Sets the parallel limiter for this test.
-    /// </summary>
-    /// <param name="parallelLimit">The parallel limit to apply</param>
-    void SetLimiter(IParallelLimit parallelLimit);
 }

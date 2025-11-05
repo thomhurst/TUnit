@@ -31,7 +31,7 @@ public partial class TestContext : Context,
         _testContextsById[_testBuilderContext.Id] = this;
     }
 
-    internal Guid Id => _testBuilderContext.Id;
+    public Guid Id => _testBuilderContext.Id;
 
     // Zero-allocation interface properties for organized API access
     public ITestExecution Execution => this;
@@ -100,7 +100,7 @@ public partial class TestContext : Context,
 
     internal TestDetails TestDetails { get; set; } = null!;
 
-    internal IParallelLimit? ParallelLimiter { get; private set; }
+    internal IParallelLimit? ParallelLimiter { get; set; }
 
     internal Type? DisplayNameFormatter { get; set; }
 

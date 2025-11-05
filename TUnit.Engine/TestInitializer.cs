@@ -29,7 +29,7 @@ internal class TestInitializer
             testClassInstance,
             test.Context.StateBag.Items,
             test.Context.Metadata.TestDetails.MethodMetadata,
-            test.Context.Events);
+            test.Context.InternalEvents);
 
         _eventReceiverOrchestrator.RegisterReceivers(test.Context, cancellationToken);
 

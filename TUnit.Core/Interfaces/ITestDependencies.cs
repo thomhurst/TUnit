@@ -25,17 +25,24 @@ public interface ITestDependencies
     TestRelationship Relationship { get; }
 
     /// <summary>
-    /// Gets tests matching the specified predicate.
+    /// Gets all registered tests that match the specified predicate.
     /// </summary>
-    IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate);
+    /// <param name="predicate">The predicate to filter tests by.</param>
+    /// <returns>A read-only list of matching test contexts.</returns>
+    IReadOnlyList<TestContext> GetTests(Func<TestContext, bool> predicate);
 
     /// <summary>
-    /// Gets all tests with the specified name.
+    /// Gets all registered tests that match the specified test name.
     /// </summary>
-    List<TestContext> GetTests(string testName);
+    /// <param name="testName">The name of the test method.</param>
+    /// <returns>A read-only list of matching test contexts.</returns>
+    IReadOnlyList<TestContext> GetTests(string testName);
 
     /// <summary>
-    /// Gets all tests with the specified name and class type.
+    /// Gets all registered tests that match the specified test name and class type.
     /// </summary>
-    List<TestContext> GetTests(string testName, Type classType);
+    /// <param name="testName">The name of the test method.</param>
+    /// <param name="classType">The type of the test class.</param>
+    /// <returns>A read-only list of matching test contexts.</returns>
+    IReadOnlyList<TestContext> GetTests(string testName, Type classType);
 }

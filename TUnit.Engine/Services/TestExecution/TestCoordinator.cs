@@ -134,9 +134,10 @@ internal sealed class TestCoordinator : ITestCoordinator
                         {
                             // Dispose test instance and fire OnDispose after each attempt
                             // This ensures each retry gets a fresh instance
-                            if (test.Context.GetTestContextEvents().OnDispose?.InvocationList != null)
+                            var onDispose = test.Context.InternalEvents.OnDispose;
+                            if (onDispose?.InvocationList != null)
                             {
-                                foreach (var invocation in test.Context.GetTestContextEvents().OnDispose.InvocationList)
+                                foreach (var invocation in onDispose.InvocationList)
                                 {
                                     try
                                     {

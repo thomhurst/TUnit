@@ -7,47 +7,26 @@ public partial class TestContext
     /// <summary>
     /// For internal framework use only. External code should use the Events property which returns ITestEvents.
     /// </summary>
-    internal TestContextEvents GetTestContextEvents() => _testBuilderContext.Events;
+    internal TestContextEvents InternalEvents => _testBuilderContext.Events;
 
-    AsyncEvent<TestContext>? ITestEvents.OnDispose
-    {
-        get => _testBuilderContext.Events.OnDispose;
-        set => _testBuilderContext.Events.OnDispose = value;
-    }
+    /// <inheritdoc/>
+    AsyncEvent<TestContext>? ITestEvents.OnDispose => _testBuilderContext.Events.OnDispose;
 
-    AsyncEvent<TestContext>? ITestEvents.OnTestRegistered
-    {
-        get => _testBuilderContext.Events.OnTestRegistered;
-        set => _testBuilderContext.Events.OnTestRegistered = value;
-    }
+    /// <inheritdoc/>
+    AsyncEvent<TestContext>? ITestEvents.OnTestRegistered => _testBuilderContext.Events.OnTestRegistered;
 
-    AsyncEvent<TestContext>? ITestEvents.OnInitialize
-    {
-        get => _testBuilderContext.Events.OnInitialize;
-        set => _testBuilderContext.Events.OnInitialize = value;
-    }
+    /// <inheritdoc/>
+    AsyncEvent<TestContext>? ITestEvents.OnInitialize => _testBuilderContext.Events.OnInitialize;
 
-    AsyncEvent<TestContext>? ITestEvents.OnTestStart
-    {
-        get => _testBuilderContext.Events.OnTestStart;
-        set => _testBuilderContext.Events.OnTestStart = value;
-    }
+    /// <inheritdoc/>
+    AsyncEvent<TestContext>? ITestEvents.OnTestStart => _testBuilderContext.Events.OnTestStart;
 
-    AsyncEvent<TestContext>? ITestEvents.OnTestEnd
-    {
-        get => _testBuilderContext.Events.OnTestEnd;
-        set => _testBuilderContext.Events.OnTestEnd = value;
-    }
+    /// <inheritdoc/>
+    AsyncEvent<TestContext>? ITestEvents.OnTestEnd => _testBuilderContext.Events.OnTestEnd;
 
-    AsyncEvent<TestContext>? ITestEvents.OnTestSkipped
-    {
-        get => _testBuilderContext.Events.OnTestSkipped;
-        set => _testBuilderContext.Events.OnTestSkipped = value;
-    }
+    /// <inheritdoc/>
+    AsyncEvent<TestContext>? ITestEvents.OnTestSkipped => _testBuilderContext.Events.OnTestSkipped;
 
-    AsyncEvent<(TestContext, int RetryAttempt)>? ITestEvents.OnTestRetry
-    {
-        get => _testBuilderContext.Events.OnTestRetry;
-        set => _testBuilderContext.Events.OnTestRetry = value;
-    }
+    /// <inheritdoc/>
+    AsyncEvent<(TestContext TestContext, int RetryAttempt)>? ITestEvents.OnTestRetry => _testBuilderContext.Events.OnTestRetry;
 }

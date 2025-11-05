@@ -7,37 +7,37 @@ namespace TUnit.Core.Interfaces;
 public interface ITestEvents
 {
     /// <summary>
-    /// Event triggered when the test context is disposed.
+    /// Gets the event that is raised when the test context is disposed.
     /// </summary>
-    AsyncEvent<TestContext>? OnDispose { get; set; }
+    AsyncEvent<TestContext>? OnDispose { get; }
 
     /// <summary>
-    /// Event triggered when the test is registered in the test framework.
+    /// Gets the event that is raised when the test has been registered with the test runner.
     /// </summary>
-    AsyncEvent<TestContext>? OnTestRegistered { get; set; }
+    AsyncEvent<TestContext>? OnTestRegistered { get; }
 
     /// <summary>
-    /// Event triggered during test initialization, before test execution begins.
+    /// Gets the event that is raised before the test is initialized.
     /// </summary>
-    AsyncEvent<TestContext>? OnInitialize { get; set; }
+    AsyncEvent<TestContext>? OnInitialize { get; }
 
     /// <summary>
-    /// Event triggered when the test execution starts.
+    /// Gets the event that is raised before the test method is invoked.
     /// </summary>
-    AsyncEvent<TestContext>? OnTestStart { get; set; }
+    AsyncEvent<TestContext>? OnTestStart { get; }
 
     /// <summary>
-    /// Event triggered when the test execution completes.
+    /// Gets the event that is raised after the test method has completed.
     /// </summary>
-    AsyncEvent<TestContext>? OnTestEnd { get; set; }
+    AsyncEvent<TestContext>? OnTestEnd { get; }
 
     /// <summary>
-    /// Event triggered when the test is skipped.
+    /// Gets the event that is raised if the test was skipped.
     /// </summary>
-    AsyncEvent<TestContext>? OnTestSkipped { get; set; }
+    AsyncEvent<TestContext>? OnTestSkipped { get; }
 
     /// <summary>
-    /// Event triggered when the test is retried after a failure.
+    /// Gets the event that is raised before a test is retried.
     /// </summary>
-    AsyncEvent<(TestContext, int RetryAttempt)>? OnTestRetry { get; set; }
+    AsyncEvent<(TestContext TestContext, int RetryAttempt)>? OnTestRetry { get; }
 }

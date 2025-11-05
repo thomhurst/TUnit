@@ -1231,24 +1231,22 @@ namespace
         public TestContext(string testName,  serviceProvider, .ClassHookContext classContext, .TestBuilderContext testBuilderContext, .CancellationToken cancellationToken) { }
         public .ClassHookContext ClassContext { get; }
         public . Dependencies { get; }
+        public . Events { get; }
         public . Execution { get; }
         public  Id { get; }
         public object Lock { get; }
         public . Metadata { get; }
         public . Output { get; }
         public . Parallelism { get; }
-        public  Services { get; }
         public . StateBag { get; }
         public static . Configuration { get; }
         public new static .TestContext? Current { get; }
         public static string? OutputDirectory { get; }
         public static .<string, .<string>> Parameters { get; }
         public static string WorkingDirectory { get; set; }
-        public T? GetService<T>()
-            where T :  class { }
         public static .TestContext? GetById( id) { }
     }
-    public class TestContextEvents
+    public class TestContextEvents : .
     {
         public TestContextEvents() { }
         public .AsyncEvent<.TestContext>? OnDispose { get; set; }
@@ -1256,7 +1254,7 @@ namespace
         public .AsyncEvent<.TestContext>? OnTestEnd { get; set; }
         public .AsyncEvent<.TestContext>? OnTestRegistered { get; set; }
         [.(new string[] {
-                null,
+                "TestContext",
                 "RetryAttempt"})]
         public .AsyncEvent<<.TestContext, int>>? OnTestRetry { get; set; }
         public .AsyncEvent<.TestContext>? OnTestSkipped { get; set; }
@@ -1836,14 +1834,17 @@ namespace .Extensions
         public static T[] GetCustomAttributesSafe<T>(this .ICustomAttributeProvider provider, bool inherit = true)
             where T :  { }
     }
+    public static class ServiceProviderExtensions
+    {
+        public static T? GetService<T>(this  serviceProvider)
+            where T :  class { }
+    }
     public static class TestContextExtensions
     {
         public static . AddDynamicTest<T>(this .TestContext context, .DynamicTest<T> dynamicTest)
             where T :  class { }
         public static . CreateTestVariant(this .TestContext context, object?[]? arguments = null, .<string, object?>? properties = null, . relationship = 3, string? displayName = null) { }
         public static string GetClassTypeName(this .TestContext context) { }
-        public static T? GetService<T>(this .TestContext context)
-            where T :  class { }
     }
 }
 namespace .Helpers
@@ -2263,7 +2264,16 @@ namespace .Interfaces
     }
     public interface ITestEvents
     {
-        .TestContextEvents Events { get; }
+        .AsyncEvent<.TestContext>? OnDispose { get; }
+        .AsyncEvent<.TestContext>? OnInitialize { get; }
+        .AsyncEvent<.TestContext>? OnTestEnd { get; }
+        .AsyncEvent<.TestContext>? OnTestRegistered { get; }
+        [.(new string[] {
+                "TestContext",
+                "RetryAttempt"})]
+        .AsyncEvent<<.TestContext, int>>? OnTestRetry { get; }
+        .AsyncEvent<.TestContext>? OnTestSkipped { get; }
+        .AsyncEvent<.TestContext>? OnTestStart { get; }
     }
     public interface ITestExecution
     {
@@ -2331,6 +2341,8 @@ namespace .Interfaces
         string GetErrorOutput();
         string GetStandardOutput();
         void RecordTiming(.Timing timing);
+        void WriteError(string message);
+        void WriteLine(string message);
     }
     public interface ITestParallelization
     {
@@ -2338,7 +2350,6 @@ namespace .Interfaces
         . ExecutionPriority { get; set; }
         .? Limiter { get; }
         void AddConstraint(. constraint);
-        void SetLimiter(. parallelLimit);
     }
     public interface ITestRegisteredEventReceiver : .
     {
@@ -2364,7 +2375,13 @@ namespace .Interfaces
     }
     public interface ITestStateBag
     {
+        int Count { get; }
+        object? this[string key] { get; set; }
         .<string, object?> Items { get; }
+        bool ContainsKey(string key);
+        T GetOrAdd<T>(string key, <string, T> valueFactory);
+        bool TryGetValue<T>(string key, [.(false)] out T value);
+        bool TryRemove(string key, [.(false)] out object? value);
     }
     public interface ITypedTestMetadata
     {

@@ -14,11 +14,11 @@ public partial class TestContext
     string? ITestDependencies.ParentTestId => ParentTestId;
     TestRelationship ITestDependencies.Relationship => Relationship;
 
-    IEnumerable<TestContext> ITestDependencies.GetTests(Func<TestContext, bool> predicate) => GetTests(predicate);
-    List<TestContext> ITestDependencies.GetTests(string testName) => GetTests(testName);
-    List<TestContext> ITestDependencies.GetTests(string testName, Type classType) => GetTests(testName, classType);
+    IReadOnlyList<TestContext> ITestDependencies.GetTests(Func<TestContext, bool> predicate) => GetTests(predicate);
+    IReadOnlyList<TestContext> ITestDependencies.GetTests(string testName) => GetTests(testName);
+    IReadOnlyList<TestContext> ITestDependencies.GetTests(string testName, Type classType) => GetTests(testName, classType);
 
-    internal IEnumerable<TestContext> GetTests(Func<TestContext, bool> predicate)
+    internal List<TestContext> GetTests(Func<TestContext, bool> predicate)
     {
         var testFinder = ServiceProvider.GetService<ITestFinder>()!;
 
