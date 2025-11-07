@@ -123,3 +123,51 @@ jobs:
           path: |
             **/BenchmarkDotNet.Artifacts/**
 
+  aggregate-and-commit-results:
+    needs: [run-time-benchmarks, build-time-benchmarks]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download All Runtime Benchmark Artifacts
+        uses: actions/download-artifact@v6
+        with:
+          path: benchmark-results/runtime/
+          pattern: ubuntu_markdown_run_time_*
+          merge-multiple: true
+
+      - name: Download Build Time Benchmark Artifacts
+        uses: actions/download-artifact@v6
+        with:
+          path: benchmark-results/build/
+          pattern: ubuntu_markdown_build_time
+          merge-multiple: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Process Benchmark Results
+        run: |
+          node .github/scripts/process-benchmarks.js
+
+      - name: Commit Updated Benchmarks
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/docs/benchmarks/ docs/static/benchmarks/
+          if ! git diff --quiet --staged; then
+            git commit -m "chore: update benchmark results [skip ci]"
+            git push
+          else
+            echo "No benchmark changes to commit"
+          fi
+

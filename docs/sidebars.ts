@@ -166,6 +166,15 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Benchmarks',
+      items: [
+        'benchmarks/index',
+        'benchmarks/calculator',
+        'benchmarks/methodology',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Reference',
       items: [
         'comparison/framework-differences',
