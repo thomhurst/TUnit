@@ -36,7 +36,7 @@ internal sealed class TestBuilderPipeline
         {
             TestMetadata = metadata.MethodMetadata,
             Events = new TestContextEvents(),
-            ObjectBag = new ConcurrentDictionary<string, object?>()
+            StateBag = new ConcurrentDictionary<string, object?>()
         };
 
         // Check for ClassConstructor attribute and set it early if present

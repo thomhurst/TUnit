@@ -96,7 +96,7 @@ internal sealed class TestArgumentRegistrationService : ITestRegisteredEventRece
                         TestMetadata = testContext.Metadata.TestDetails.MethodMetadata,
                         DataSourceAttribute = dataSource,
                         Events = testContext.InternalEvents,
-                        ObjectBag = testContext.StateBag.Items
+                        StateBag = testContext.StateBag.Items
                     };
 
                     var dataGenMetadata = new DataGeneratorMetadata

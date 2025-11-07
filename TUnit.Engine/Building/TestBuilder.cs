@@ -167,7 +167,7 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 TestMetadata = metadata.MethodMetadata,
                 Events = new TestContextEvents(),
-                ObjectBag = new ConcurrentDictionary<string, object?>(),
+                StateBag = new ConcurrentDictionary<string, object?>(),
                 InitializedAttributes = attributes  // Store the initialized attributes
             };
 
@@ -283,7 +283,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 {
                                     TestMetadata = metadata.MethodMetadata,
                                     Events = new TestContextEvents(),
-                                    ObjectBag = new ConcurrentDictionary<string, object?>(),
+                                    StateBag = new ConcurrentDictionary<string, object?>(),
                                     DataSourceAttribute = methodDataSource
                                 };
 
@@ -393,7 +393,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 {
                                     TestMetadata = metadata.MethodMetadata,
                                     Events = new TestContextEvents(),
-                                    ObjectBag = new ConcurrentDictionary<string, object?>(),
+                                    StateBag = new ConcurrentDictionary<string, object?>(),
                                     ClassConstructor = testBuilderContext.ClassConstructor, // Copy the ClassConstructor from the template
                                     DataSourceAttribute = contextAccessor.Current.DataSourceAttribute, // Copy any data source attribute
                                     InitializedAttributes = attributes // Pass the initialized attributes
@@ -448,7 +448,7 @@ internal sealed class TestBuilder : ITestBuilder
                             {
                                 TestMetadata = metadata.MethodMetadata,
                                 Events = new TestContextEvents(),
-                                ObjectBag = new ConcurrentDictionary<string, object?>(),
+                                StateBag = new ConcurrentDictionary<string, object?>(),
                                 ClassConstructor = testBuilderContext.ClassConstructor,
                                 DataSourceAttribute = methodDataSource,
                                 InitializedAttributes = attributes
@@ -497,7 +497,7 @@ internal sealed class TestBuilder : ITestBuilder
                     {
                         TestMetadata = metadata.MethodMetadata,
                         Events = new TestContextEvents(),
-                        ObjectBag = new ConcurrentDictionary<string, object?>(),
+                        StateBag = new ConcurrentDictionary<string, object?>(),
                         ClassConstructor = testBuilderContext.ClassConstructor,
                         DataSourceAttribute = classDataSource,
                         InitializedAttributes = attributes
@@ -754,7 +754,7 @@ internal sealed class TestBuilder : ITestBuilder
         // This includes property injection and IAsyncInitializer.InitializeAsync
         var initializedDataSource = await _dataSourceInitializer.EnsureInitializedAsync(
             dataSource,
-            dataGeneratorMetadata.TestBuilderContext.Current.ObjectBag,
+            dataGeneratorMetadata.TestBuilderContext.Current.StateBag,
             dataGeneratorMetadata.TestInformation,
             dataGeneratorMetadata.TestBuilderContext.Current.Events);
 
@@ -1292,7 +1292,7 @@ internal sealed class TestBuilder : ITestBuilder
         {
             TestMetadata = metadata.MethodMetadata,
             Events = new TestContextEvents(),
-            ObjectBag = new ConcurrentDictionary<string, object?>(),
+            StateBag = new ConcurrentDictionary<string, object?>(),
             InitializedAttributes = attributes  // Store the initialized attributes
         };
 
@@ -1559,7 +1559,7 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 TestMetadata = metadata.MethodMetadata,
                 Events = new TestContextEvents(),
-                ObjectBag = new ConcurrentDictionary<string, object?>(),
+                StateBag = new ConcurrentDictionary<string, object?>(),
                 ClassConstructor = contextAccessor.Current.ClassConstructor, // Preserve ClassConstructor if it was set
                 DataSourceAttribute = contextAccessor.Current.DataSourceAttribute, // Preserve data source attribute
                 InitializedAttributes = attributes // Pass the initialized attributes

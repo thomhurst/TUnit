@@ -97,7 +97,7 @@ internal static class DataGeneratorMetadataCreator
             {
                 TestMetadata = null!, // Not available during discovery
                 Events = new TestContextEvents(),
-                ObjectBag = new ConcurrentDictionary<string, object?>()
+                StateBag = new ConcurrentDictionary<string, object?>()
             }),
             MembersToGenerate = membersToGenerate,
             TestInformation = methodMetadata,
@@ -152,7 +152,7 @@ internal static class DataGeneratorMetadataCreator
                 TestMetadata = discoveryMethodMetadata,
                 DataSourceAttribute = dataSource,
                 Events = new TestContextEvents(),
-                ObjectBag = new ConcurrentDictionary<string, object?>()
+                StateBag = new ConcurrentDictionary<string, object?>()
             }),
             MembersToGenerate = [dummyParameter],
             TestInformation = discoveryMethodMetadata,
@@ -183,7 +183,7 @@ internal static class DataGeneratorMetadataCreator
                     Events = events ?? new TestContextEvents(),
                     TestMetadata = methodMetadata,
                     DataSourceAttribute = dataSource,
-                    ObjectBag = objectBag ?? new ConcurrentDictionary<string, object?>()
+                    StateBag = objectBag ?? new ConcurrentDictionary<string, object?>()
                 }
                 : TestSessionContext.GlobalStaticPropertyContext;
 
