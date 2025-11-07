@@ -44,7 +44,7 @@ public class TestSessionContext : Context
             }
         },
         Events = new TestContextEvents(),
-        ObjectBag = new ConcurrentDictionary<string, object?>(),
+        StateBag = new ConcurrentDictionary<string, object?>(),
         DataSourceAttribute = null
     };
 
